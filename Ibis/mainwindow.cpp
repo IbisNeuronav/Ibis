@@ -1,0 +1,867 @@
+/*=========================================================================
+Ibis Neuronav
+Copyright (c) Simon Drouin, Anna Kochanowska, Louis Collins.
+All rights reserved.
+See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
+
+     This software is distributed WITHOUT ANY WARRANTY; without even
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+     PURPOSE.  See the above copyright notice for more information.
+=========================================================================*/
+#include "mainwindow.h"
+#include "application.h"
+#include "hardwaremodule.h"
+#include "hardwaresettings.h"
+#include "imageobject.h"
+#include "pointsobject.h"
+#include "scenemanager.h"
+#include "sceneinfodialog.h"
+#include "aboutbicigns.h"
+#include "quadviewwindow.h"
+#include "ignsmsg.h"
+#include "sceneinfo.h"
+#include "opendatafiledialog.h"
+#include "filereader.h"
+#include "worldobject.h"
+#include "triplecutplaneobject.h"
+#include "ignsconfig.h"
+#include "toolplugininterface.h"
+#include "objectplugininterface.h"
+
+#include <QApplication>
+#include <QAction>
+#include <QMenuBar>
+#include <QStatusBar>
+#include <QMessageBox>
+#include <QProgressDialog>
+#include <QSplitter>
+#include <QDockWidget>
+#include <QDir>
+#include <QLayout>
+#include <QFileInfo>
+#include <QCloseEvent>
+#include <QFileDialog>
+#include <QTimer>
+#include <QPluginLoader>
+#include <QScrollArea>
+#include <QMimeData>
+
+const QString MainWindow::m_appName( tr("Intraoperative Brain Imaging System") );
+
+MainWindow::MainWindow( QWidget * parent )
+    : QMainWindow( parent )
+    , m_fileLoadSceneAction(0)
+    , m_viewXPlaneAction(0)
+    , m_viewYPlaneAction(0)
+    , m_viewZPlaneAction(0)
+    , m_showAllPlanesAction(0)
+    , m_hideAllPlanesAction(0)
+    , m_pluginMenu(0)
+    , m_rightPanel(0)
+    , m_mainSplitter(0)
+    , m_leftPanelSize(150)
+    , m_rightPanelSize(150)
+    , m_leftFrame(0)
+    , m_leftLayout(0)
+    , m_objectSettingsScrollArea(0)
+    , m_leftEndSpacer(0)
+    , m_windowClosing( false )
+{
+    // Set main window title
+    setWindowTitle( m_appName );
+    setAcceptDrops(true);
+
+    bool viewerOnly = Application::GetInstance().IsViewerOnly();
+
+    // -----------------------------------------
+    // Creates a file menu
+    // -----------------------------------------
+    QMenu * fileMenu = menuBar()->addMenu( "&File" );
+    fileMenu->addAction( tr("&Open File"), this, SLOT( fileOpenFile() ), QKeySequence::Open );
+    QMenu *newFileMenu = fileMenu->addMenu("&New Object");
+    newFileMenu->addAction( tr("&New Point Set"), this, SLOT( NewPointSet() ));
+    this->CreateNewObjectPluginsUi(newFileMenu);
+    fileMenu->addAction( tr("E&xport"), this, SLOT( fileExportFile() ) );
+    QMenu * importFileMenu = fileMenu->addMenu("Import");
+    importFileMenu->addAction( tr("US Acquisition"), this, SLOT(fileImportUsAcquisition()) );
+    importFileMenu->addAction( tr("Camera"), this, SLOT(fileImportCamera()) );
+    fileMenu->addSeparator();
+    fileMenu->addAction( tr("Scene &Info"), this, SLOT(ShowSceneInfo()));
+    fileMenu->addAction( tr("Save S&cene"), this, SLOT( fileSaveScene() ), QKeySequence::Save );
+    fileMenu->addAction( tr("Save S&cene As..."), this, SLOT( fileSaveSceneAs() ) );
+    m_fileLoadSceneAction = fileMenu->addAction( tr("&Load Scene"), this, SLOT( fileLoadScene() ));
+    fileMenu->addSeparator();
+    fileMenu->addAction( tr("&Exit"), this, SLOT( close() ), QKeySequence::Quit );
+    connect( fileMenu, SIGNAL( aboutToShow() ), this, SLOT( ModifyFileMenu() ) );
+
+    if( !viewerOnly )
+    {
+        // -----------------------------------------
+        // Creates settings menu
+        // -----------------------------------------
+        QMenu * settingsMenu = menuBar()->addMenu( tr("&Settings") );
+        Application::GetHardwareModule()->AddSettingsMenuEntries( settingsMenu );
+        settingsMenu->addSeparator();
+        settingsMenu->addAction( tr("&Save Hardware Config"), this, SLOT( SaveHardwareConfig() ) );
+        settingsMenu->addAction( tr("&Save Hardware Config As"), this, SLOT( SaveHardwareConfigAs() ) );
+        settingsMenu->addAction( tr("Switch Hardware Config"), this, SLOT( SwitchHardwareConfig() ) );
+    }
+
+    // -----------------------------------------
+    // Creates a View menu
+    // -----------------------------------------
+    QMenu * viewMenu = menuBar()->addMenu(tr("Vie&w"));
+    m_viewXPlaneAction = AddToggleAction( viewMenu, tr("&X Plane"), SLOT( ViewXPlaneToggled(bool)), QKeySequence("Alt+x"), true );
+    m_viewYPlaneAction = AddToggleAction( viewMenu, tr("&Y Plane"), SLOT( ViewYPlaneToggled(bool)), QKeySequence("Alt+y"), true );
+    m_viewZPlaneAction = AddToggleAction( viewMenu, tr("&Z Plane"), SLOT( ViewZPlaneToggled(bool)), QKeySequence("Alt+z"), true );
+    m_showAllPlanesAction = viewMenu->addAction( tr("View All Planes"), this,  SLOT( ViewAllPlanes() ), QKeySequence("Alt+p") );
+    m_hideAllPlanesAction = viewMenu->addAction( tr("Hide All Planes"), this, SLOT( HideAllPlanes() ), QKeySequence("Shift+Alt+p") );
+    viewMenu->addSeparator();
+    viewMenu->addAction( tr("&Front"), this, SLOT(View3DFront()), QKeySequence("Shift+Alt+f") );
+    viewMenu->addAction( tr("&Left"), this, SLOT( View3DLeft() ), QKeySequence("Shift+Alt+l") );
+    viewMenu->addAction( tr("&Right"), this, SLOT( View3DRight() ), QKeySequence("Shift+Alt+r") );
+    viewMenu->addAction( tr("&Back"), this, SLOT( View3DBack() ), QKeySequence("Shift+Alt+b") );
+    viewMenu->addAction( tr("&Top"), this, SLOT( View3DTop() ), QKeySequence("Shift+Alt+t") );
+    viewMenu->addAction( tr("Botto&m"), this,  SLOT( View3DBottom() ), QKeySequence("Shift+Alt+m") );
+    viewMenu->addSeparator();
+    viewMenu->addAction( tr("Re&set Planes"), this,  SLOT( ViewResetPlanes() ), QKeySequence("Shift+Alt+s") );
+    viewMenu->addAction( "Fullscreen", this, SLOT( ViewFullscreen() ), Qt::CTRL + Qt::Key_F );
+    connect( viewMenu, SIGNAL( aboutToShow() ), this, SLOT( ModifyViewMenu() ) );
+    
+    // -----------------------------------------
+    // Create a Plugins menu
+    // -----------------------------------------
+    m_pluginMenu = menuBar()->addMenu( tr("Plugins") );
+
+    // -----------------------------------------
+    // Create a Help menu
+    // -----------------------------------------
+    menuBar()->addSeparator();
+    QMenu * helpMenu = menuBar()->addMenu( tr("&Help") );
+    helpMenu->addSeparator();
+    helpMenu->addAction( tr("&About"), this, SLOT(about()), QKeySequence("F1"));
+    helpMenu->addAction( tr("About&Qt"), this, SLOT(aboutQt()));
+    
+    // -----------------------------------------
+    // Create left panel
+    // -----------------------------------------
+    m_leftFrame = new QFrame(this);
+    m_leftFrame->setMinimumWidth( 320 );
+    m_leftLayout = new QVBoxLayout( m_leftFrame );
+    m_leftLayout->setContentsMargins( 0, 0, 0, 0 );
+
+    if( !viewerOnly )
+    {
+        QWidget * trackerStatus = Application::GetHardwareModule()->CreateTrackerStatusDialog( m_leftFrame );
+        trackerStatus->setMinimumWidth( 300 );
+        m_leftLayout->addWidget( trackerStatus );
+    }
+
+    QWidget * objectListWidget = Application::GetSceneManager()->CreateObjectTreeWidget( m_leftFrame );
+    m_leftLayout->addWidget( objectListWidget );
+    m_objectSettingsScrollArea = new QScrollArea( m_leftFrame );
+    m_objectSettingsScrollArea->setFrameShape( QFrame::NoFrame );
+    m_objectSettingsScrollArea->setHorizontalScrollBarPolicy( Qt::ScrollBarAlwaysOff );
+    m_objectSettingsScrollArea->setWidgetResizable( true );
+    m_leftLayout->addWidget( m_objectSettingsScrollArea );
+    connect( objectListWidget, SIGNAL( ObjectSettingsWidgetChanged(QWidget*)), this, SLOT(ObjectListWidgetChanged(QWidget*)) );
+
+    // -----------------------------------------
+    // Create main QuadView window
+    // -----------------------------------------
+    QuadViewWindow * dlg = (QuadViewWindow*)Application::GetSceneManager()->CreateQuadViewWindow( this );
+    Application::GetInstance().SetQuadViewWidget( dlg );
+
+    // -----------------------------------------
+    // Create right panel (1 tab per plugin)
+    // -----------------------------------------
+    m_rightPanel = new QTabWidget( this );
+    m_rightPanel->setTabsClosable( true );
+    connect( m_rightPanel, SIGNAL(tabCloseRequested(int)), this, SLOT(PluginTabClosed(int)) );
+
+    // -----------------------------------------
+    // Create main splitter
+    // -----------------------------------------
+    m_mainSplitter = new QSplitter(this);
+    m_mainSplitter->setContentsMargins( 5, 5, 5, 5 );
+    m_mainSplitter->addWidget( m_leftFrame );
+    m_mainSplitter->addWidget( dlg );
+    m_mainSplitter->addWidget( m_rightPanel );
+    setCentralWidget( m_mainSplitter );
+    connect( m_mainSplitter, SIGNAL(splitterMoved(int,int)), this, SLOT(MainSplitterMoved(int,int) ));
+
+    // -----------------------------------------
+    // Setup program icon
+    // -----------------------------------------
+    QPixmap icon;
+    bool validIcon = icon.load( ":/icons/ibis.png" );
+    if (validIcon)
+        setWindowIcon( icon );
+    
+    statusBar()->hide();
+
+    // -----------------------------------------
+    // Get window settings from the application
+    // -----------------------------------------
+    ApplicationSettings * settings = Application::GetInstance().GetSettings();
+    resize( settings->MainWindowSize );
+    move( settings->MainWindowPosition );
+    m_leftPanelSize = settings->MainWindowLeftPanelSize;
+    m_rightPanelSize = settings->MainWindowRightPanelSize;
+    Application::GetSceneManager()->UpdateBackgroundColor();
+
+    // -----------------------------------------
+    // Create UI elements from the plugins
+    // -----------------------------------------
+    CreatePluginsUi();
+
+    UpdateMainSplitter();
+    Application::GetInstance().SetMainWindow(this);
+
+    // Tell the qApp unique instance to send event to MainWindow::eventFilter before anyone else
+    // so that we can grab global keyboard shortcuts.
+    qApp->installEventFilter(this);
+}
+
+void MainWindow::OnStartMainLoop()
+{
+    // Open all files specified before init (command-line)
+    OpenFileParams params;
+    params.SetAllFileNames( Application::GetInstance().GetInitialDataFiles() );
+    OpenFiles( &params );
+
+    Application::GetInstance().OnStartMainLoop();
+}
+
+
+void MainWindow::CreatePluginsUi()
+{
+    // Add menu entries
+    foreach( QObject * plugin, QPluginLoader::staticInstances() )
+    {
+        ToolPluginInterface * toolPlugin = qobject_cast< ToolPluginInterface* >( plugin );
+        if( toolPlugin && toolPlugin->CanRun() )
+        {
+           QAction * action = new QAction( toolPlugin->GetMenuEntryString(), plugin );
+           action->setCheckable( true );
+           connect( action, SIGNAL(toggled(bool)), this, SLOT(ToolPluginsMenuActionToggled(bool)) );
+           m_pluginMenu->addAction(action);
+           m_pluginActions[ toolPlugin ] = action;
+           if( toolPlugin->GetSettings().active )
+               action->toggle();
+        }
+    } 
+    connect( &(Application::GetInstance()), SIGNAL(QueryActivatePluginSignal(ToolPluginInterface*,bool)), this, SLOT(ToggleToolPlugin(ToolPluginInterface*,bool)) );
+}
+
+void MainWindow::CreateNewObjectPluginsUi(QMenu *menu)
+{
+    foreach( QObject * plugin, QPluginLoader::staticInstances() )
+    {
+        ObjectPluginInterface * objectPlugin = qobject_cast< ObjectPluginInterface* >( plugin );
+        if( objectPlugin )
+        {
+           QAction * action = new QAction( objectPlugin->GetMenuEntryString(), plugin );
+           connect( action, SIGNAL(triggered()), this, SLOT(ObjectPluginsMenuActionTriggered()) );
+           menu->addAction(action);
+        }
+    }
+}
+
+QAction * MainWindow::AddToggleAction( QMenu * menu, const QString & title, const char * member, const QKeySequence & shortcut, bool checked )
+{
+    QAction * action = menu->addAction( title, this, member, shortcut );
+    action->setCheckable( true );
+    action->setChecked( checked );
+    return action;
+}
+
+MainWindow::~MainWindow()
+{
+}
+
+void MainWindow::about()
+{
+    AboutBICIgns *a = new AboutBICIgns(this, "AboutIbis");
+    a->setAttribute( Qt::WA_DeleteOnClose, true );
+    QString version = Application::GetInstance().GetFullVersionString();
+    QString buildDate;  // simtodo : figure out if we need this and implement it.
+    a->Initialize( "IBIS NeuroNav\nIntraoperative Brain Imaging System", version, buildDate );
+    a->show();   
+}
+
+
+void MainWindow::aboutQt()
+{
+    QMessageBox::aboutQt( this, m_appName );
+}
+
+void MainWindow::fileOpenFile()
+{
+    // Get filenames
+    QString lastVisitedDir = Application::GetInstance().GetSettings()->LastVisitedDirectory;
+    if(!QFile::exists(lastVisitedDir))
+    {
+        lastVisitedDir = QDir::homePath();
+    }
+    OpenFileParams params;
+    params.lastVisitedDir = lastVisitedDir;
+    params.defaultParent = Application::GetSceneManager()->GetSceneRoot();
+    OpenDataFileDialog * dialog = new OpenDataFileDialog( this, 0, Application::GetSceneManager(), &params );
+
+    int result = dialog->exec();
+
+    // Process filenames
+    if( result == QDialog::Accepted )
+    {
+        OpenFiles( &params );
+    }
+
+    delete dialog;
+}
+
+void MainWindow::OpenFiles( OpenFileParams * params )
+{
+    Application::GetInstance().OpenFiles( params );
+}
+
+void MainWindow::fileExportFile()
+{
+    SceneObject *obj = Application::GetSceneManager()->GetCurrentObject();
+    if (obj)
+        obj->Export();
+}
+
+void MainWindow::fileImportUsAcquisition()
+{
+    Application::GetInstance().ImportUsAcquisition();
+}
+
+void MainWindow::fileImportCamera()
+{
+    Application::GetInstance().ImportCamera();
+}
+
+void MainWindow::NewPointSet()
+{
+    SceneManager * manager = Application::GetSceneManager();
+    PointsObject *pointsObject = PointsObject::New();
+    pointsObject->SetName(tr("PointSetToRename"));
+    manager->AddObject(pointsObject);
+    pointsObject->SetPickable(true);
+    pointsObject->Delete();
+}
+
+// Check if the last config file is valid. Otherwise, ask user and if no path is provided, do nothing
+void MainWindow::SaveHardwareConfig()
+{
+    this->CommonSaveHardwareConfig( false );
+}
+
+void MainWindow::SaveHardwareConfigAs()
+{
+    this->CommonSaveHardwareConfig( true );
+}
+
+void MainWindow::SwitchHardwareConfig()
+{
+    QString initialChoice = Application::GetInstance().GetSettings()->LastConfigFile;
+    HardwareSettings * hwSettingsDlg = new HardwareSettings( initialChoice );
+    QString configFile = initialChoice;
+    if( hwSettingsDlg->exec() == QDialog::Accepted )
+        configFile = hwSettingsDlg->GetSelectedHardwareSettingsPath();
+
+    Application::GetInstance().InitHardware( configFile.toUtf8().data() );
+}
+
+void MainWindow::ViewXPlaneToggled(bool viewOn)
+{
+    SceneManager * manager = Application::GetSceneManager();
+    manager->GetMainImagePlanes()->SetViewPlane( 0, viewOn );
+}
+
+void MainWindow::ViewYPlaneToggled(bool viewOn)
+{
+    SceneManager * manager = Application::GetSceneManager();
+    manager->GetMainImagePlanes()->SetViewPlane( 1, viewOn );
+}
+
+void MainWindow::ViewZPlaneToggled(bool viewOn)
+{
+    SceneManager * manager = Application::GetSceneManager();
+    manager->GetMainImagePlanes()->SetViewPlane( 2, viewOn );
+}
+
+void MainWindow::ViewAllPlanes()
+{
+    SceneManager * manager = Application::GetSceneManager();
+    manager->GetMainImagePlanes()->SetViewAllPlanes( 1 );
+}
+
+void MainWindow::HideAllPlanes()
+{
+    SceneManager * manager = Application::GetSceneManager();
+    manager->GetMainImagePlanes()->SetViewAllPlanes( 0 );
+}
+
+void MainWindow::View3DFront( )
+{
+    SceneManager * manager = Application::GetSceneManager();
+    manager->SetStandardView(SV_FRONT);
+}
+
+void MainWindow::View3DLeft( )
+{
+    SceneManager * manager = Application::GetSceneManager();
+    manager->SetStandardView(SV_LEFT);
+}
+
+void MainWindow::View3DRight( )
+{
+    SceneManager * manager = Application::GetSceneManager();
+    manager->SetStandardView(SV_RIGHT);
+}
+
+void MainWindow::View3DBack( )
+{
+    SceneManager * manager = Application::GetSceneManager();
+    manager->SetStandardView(SV_BACK);
+}
+
+void MainWindow::View3DTop( )
+{
+    SceneManager * manager = Application::GetSceneManager();
+    manager->SetStandardView(SV_TOP);
+}
+
+void MainWindow::View3DBottom( )
+{
+    SceneManager * manager = Application::GetSceneManager();
+    manager->SetStandardView(SV_BOTTOM);
+}
+
+void MainWindow::ViewResetPlanes( )
+{
+    SceneManager * manager = Application::GetSceneManager();
+    manager->ResetCursorPosition();
+}
+
+void MainWindow::ViewFullscreen()
+{
+    if( isFullScreen() )
+    {
+        showNormal();
+    }
+    else
+    {
+        showFullScreen();
+    }
+}
+
+void MainWindow::ModifyFileMenu()
+{
+    QMenu * fileMenu = qobject_cast<QMenu *>(sender());
+    SceneObject *obj = Application::GetSceneManager()->GetCurrentObject();
+    QList <QAction*> a = fileMenu->actions();
+    for (int i = 0; i < a.count(); i++)
+    {
+        if (a[i]->text() == "E&xport")
+        {
+            if ( obj && (obj->IsExportable()) )
+            { // enable export
+                a[i]->setEnabled(true);
+            }
+            else // disable export
+            {
+                a[i]->setEnabled(false);
+            }
+        }
+    }
+}
+
+void MainWindow::ModifyViewMenu()
+{
+    SceneManager * manager = Application::GetSceneManager();
+    m_viewXPlaneAction->setChecked(manager->GetMainImagePlanes()->GetViewPlane(0));
+    m_viewYPlaneAction->setChecked(manager->GetMainImagePlanes()->GetViewPlane(1));
+    m_viewZPlaneAction->setChecked(manager->GetMainImagePlanes()->GetViewPlane(2));
+}
+
+void MainWindow::ShowSceneInfo()
+{
+    SceneManager * manager = Application::GetSceneManager();
+    SceneInfoDialog *dlg = new SceneInfoDialog;
+    SceneInfo *sceneinfo = manager->GetSceneInfo();
+    dlg->SetSceneInfo(sceneinfo);
+    dlg->setAttribute(Qt::WA_DeleteOnClose);
+    dlg->SetSceneDirectory(manager->GetSceneDirectory());
+    dlg->show();
+}
+
+void MainWindow::fileSaveScene()
+{
+    this->SaveScene(false);
+}
+
+void MainWindow::fileSaveSceneAs()
+{
+    this->SaveScene(true);
+}
+
+void MainWindow::SaveScene(bool asFile)
+{
+    SceneManager * manager = Application::GetSceneManager();
+    SceneInfo *sceneinfo = manager->GetSceneInfo();
+    QString sceneDir = sceneinfo->GetSceneDirectory();
+    QString fileName = sceneinfo->GetSessionFile();
+    if (asFile || !sceneinfo->GetDirectorySet())
+    {
+        QString initialFile = manager->GetSceneDirectory() + "/scene.xml";
+        fileName = Application::GetInstance().GetSaveFileName( tr("Save Scene"), initialFile, tr("xml file (*.xml)") );
+        if (!fileName.isEmpty())
+        {
+            QFileInfo info( fileName );
+            sceneDir = info.dir().absolutePath();
+            sceneinfo->SetSceneDirectory(sceneDir);
+            sceneinfo->SetDirectorySet(true);
+            Application::GetInstance().GetSettings()->WorkingDirectory = sceneDir;
+            sceneinfo->SetSessionFile( fileName );
+        }
+        else
+            return;
+    }
+    manager->SaveScene(fileName);
+}
+
+void MainWindow::fileLoadScene()
+{
+    SceneManager * manager = Application::GetSceneManager();
+    SceneInfo *sceneinfo = manager->GetSceneInfo();
+    bool sceneNotEmpty = manager->GetNumberOfUserObjects() > 0;
+    if( sceneNotEmpty )
+    {
+        int ret = QMessageBox::warning(this, "Load Scene",
+                                       tr("All the objects currently in the scene will be removed."),
+                                       QMessageBox::Yes | QMessageBox::Default,
+                                       QMessageBox::No | QMessageBox::Escape);
+        if (ret == QMessageBox::No)
+            return;
+    }
+
+    QString workingDir = manager->GetSceneDirectory();
+    if(!QFile::exists(workingDir))
+    {
+        workingDir = QDir::homePath();
+        workingDir.append(IGNS_WORKING_DIRECTORY);
+    }
+
+    QString fileName = Application::GetInstance().GetOpenFileName( tr("Load Scene"), workingDir, tr("Scene files (*.xml)") );
+
+    if( !fileName.isEmpty() )
+    {
+        QFileInfo info( fileName );
+        QString newDir = info.dir().absolutePath();
+        Application::GetInstance().GetSettings()->WorkingDirectory = newDir;
+        manager->LoadScene(fileName);
+    }
+}
+
+void MainWindow::ObjectListWidgetChanged( QWidget * newWidget )
+{
+    if( newWidget )
+    {
+        //m_leftLayout->addWidget( newWidget );
+        m_objectSettingsScrollArea->setWidget( newWidget );
+    }
+}
+
+void MainWindow::ToggleToolPlugin( ToolPluginInterface * toolPlugin, bool isOn )
+{
+    QAction * action = m_pluginActions[ toolPlugin ];
+    if( action->isChecked() != isOn )
+        action->toggle();
+}
+
+void MainWindow::ToolPluginsMenuActionToggled( bool isOn )
+{
+    QAction * action = qobject_cast<QAction *>(sender());
+    ToolPluginInterface * toolPlugin = qobject_cast<ToolPluginInterface *>( action->parent() );
+    Q_ASSERT_X( toolPlugin, "MainWindow::ToolPluginsMenuActionToggled()", "Plugin doesn't exist but should." );
+
+    if( isOn )
+    {
+        // try creating a tab first
+        QWidget * pluginWidget = toolPlugin->CreateTab();
+        if( pluginWidget )
+        {
+            pluginWidget->setAttribute( Qt::WA_DeleteOnClose );
+            m_pluginTabs[ action ] = pluginWidget;
+            m_rightPanel->addTab( pluginWidget, toolPlugin->GetMenuEntryString() );
+            if( m_pluginTabs.size() == 1 )
+            {
+                UpdateMainSplitter();
+            }
+            toolPlugin->GetSettings().active = true;
+        }
+        else
+        {
+            pluginWidget = toolPlugin->CreateFloatingWidget();
+            if( pluginWidget )
+            {
+                pluginWidget->setAttribute( Qt::WA_DeleteOnClose );
+                pluginWidget->setWindowFlags( Qt::WindowStaysOnTopHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint | Qt::CustomizeWindowHint );
+                pluginWidget->setWindowTitle( toolPlugin->GetMenuEntryString() );
+                connect( pluginWidget, SIGNAL(destroyed()), this, SLOT(FloatingPluginWidgetClosed()) );
+                m_pluginWidgets[ action ] = pluginWidget;
+                toolPlugin->GetSettings().active = true;
+                if( toolPlugin->GetSettings().winSize != QSize( -1, -1 ) )
+                {
+                    pluginWidget->resize( toolPlugin->GetSettings().winSize );
+                    pluginWidget->move( toolPlugin->GetSettings().winPos );
+                }
+                pluginWidget->show();
+            }
+        }
+    }
+    else
+    {
+        if( m_pluginTabs.contains( action ) )
+        {
+            QWidget * w = m_pluginTabs.value( action );
+            int tabIndex = m_rightPanel->indexOf( w );
+            ClosePluginTab( action, tabIndex );
+        }
+        else if( m_pluginWidgets.contains( action ) )
+        {
+            QWidget * w = m_pluginWidgets.value( action );
+            toolPlugin->GetSettings().winPos = w->pos();
+            toolPlugin->GetSettings().winSize = w->size();
+            toolPlugin->GetSettings().active = false;
+            w->close();
+        }
+    }
+}
+
+void MainWindow::FloatingPluginWidgetClosed()
+{
+    QWidget * closedWidget = qobject_cast<QWidget *>(sender());
+    Q_ASSERT_X( closedWidget, "MainWindow::FloatingPluginWidgetClosed()", "Widget closed is no longer valid." );
+
+    QAction * pluginAction = m_pluginWidgets.key( closedWidget );
+    Q_ASSERT_X( pluginAction, "MainWindow::FloatingPluginWidgetClosed()", "No action associated with closed widget." );
+
+    ToolPluginInterface * toolPlugin = qobject_cast<ToolPluginInterface *>( pluginAction->parent() );
+    Q_ASSERT_X( toolPlugin, "MainWindow::ClosePluginTab()", "Plugin doesn't exist but should." );
+
+    // give plugin a chance to survive
+    if( !toolPlugin->WidgetAboutToClose() )
+        return;
+
+    // remove the association between action and widget and uncheck action without generating a signal
+    m_pluginWidgets.remove( pluginAction );
+    pluginAction->blockSignals( true );
+    pluginAction->setChecked( false );
+    pluginAction->blockSignals( false );
+
+    // Tell the plugin it is not active anymore (for settings)
+    if( !m_windowClosing )
+        toolPlugin->GetSettings().active = false;
+    toolPlugin->GetSettings().winPos = closedWidget->pos();
+    toolPlugin->GetSettings().winSize = closedWidget->size();
+}
+
+void MainWindow::PluginTabClosed( int tabIndex )
+{
+    QWidget * w = m_rightPanel->widget( tabIndex );
+    Q_ASSERT_X( w, "MainWindow::PluginTabClosed( int tabIndex )", "Closed tab not part of the QTabWidget.");
+
+    QAction * pluginAction = m_pluginTabs.key( w );
+    Q_ASSERT_X( pluginAction, "MainWindow::PluginTabClosed( int tabIndex )", "No action associated with closed widget." );
+
+    // close the tab and cleanup
+    ClosePluginTab( pluginAction, tabIndex );
+
+    // reset the action without generating a signal
+    pluginAction->blockSignals( true );
+    pluginAction->setChecked( false );
+    pluginAction->blockSignals( false );
+}
+
+void MainWindow::ClosePluginTab( QAction * action, int index )
+{
+    // give plugin a chance to survive
+    ToolPluginInterface * toolPlugin = qobject_cast<ToolPluginInterface *>( action->parent() );
+    Q_ASSERT_X( toolPlugin, "MainWindow::ClosePluginTab()", "Plugin doesn't exist but should." );
+    if( !toolPlugin->WidgetAboutToClose() )
+        return;
+
+    // remove tab
+    QWidget * w = m_rightPanel->widget( index );
+    m_rightPanel->removeTab( index );
+
+    // close the widget to destroy it
+    w->close();
+
+    // remove action/widget association
+    m_pluginTabs.remove( action );
+
+    // hide panel if no more tabs are open
+    if( m_pluginTabs.size() == 0 )
+        UpdateMainSplitter();
+
+    // Tell the plugin it is not active anymore (for settings)
+    toolPlugin->GetSettings().active = false;
+}
+
+void MainWindow::ObjectPluginsMenuActionTriggered()
+{
+    QAction * action = qobject_cast<QAction *>(sender());
+    ObjectPluginInterface * objectPlugin = qobject_cast<ObjectPluginInterface *>( action->parent() );
+    objectPlugin->SetApplication( &Application::GetInstance() );
+    objectPlugin->CreateObject();
+}
+
+void MainWindow::MainSplitterMoved( int pos, int index )
+{
+    QList<int> sizes = m_mainSplitter->sizes();
+    m_leftPanelSize = sizes[0];
+    if( m_pluginTabs.size() )
+        m_rightPanelSize = sizes[2];
+}
+
+void MainWindow::UpdateMainSplitter()
+{
+    QList<int> sizes;
+    if( m_pluginTabs.size() == 0 )
+    {
+        sizes.push_back( m_leftPanelSize );
+        sizes.push_back( width() - m_leftPanelSize );
+        sizes.push_back( 0 );
+    }
+    else
+    {
+        sizes.push_back( m_leftPanelSize );
+        sizes.push_back( width() - m_leftPanelSize - m_rightPanelSize );
+        sizes.push_back( m_rightPanelSize );
+    }
+    m_mainSplitter->setSizes( sizes );
+}
+
+void MainWindow::CommonSaveHardwareConfig( bool alwaysAsk )
+{
+    if (Application::GetInstance().IsViewerOnly())
+        return;
+
+    QString defaultFilename = Application::GetInstance().GetSettings()->LastConfigFile;
+    if( defaultFilename.isEmpty() )
+        defaultFilename = QDir::homePath() + "/" + IGNS_CONFIGURATION_SUBDIRECTORY + "/ibis_default_hardware_config.xml";
+
+    QString filename = Application::GetInstance().GetSettings()->LastConfigFile;
+    if( filename.isEmpty() || alwaysAsk )
+    {
+        filename = Application::GetInstance().GetSaveFileName( tr("Save Hardware config"), defaultFilename, tr("Config File (*.xml)") );
+        Application::GetInstance().GetSettings()->LastConfigFile = filename;
+    }
+
+    if( !filename.isEmpty() )
+    {
+        Application::GetHardwareModule()->WriteHardwareConfig( filename.toUtf8().data(), m_windowClosing );
+    }
+}
+
+void MainWindow::closeEvent( QCloseEvent * event )
+{
+    m_windowClosing = true;
+
+    // Save hardware config if needed
+    if( !Application::GetInstance().IsViewerOnly() )
+        this->SaveHardwareConfig();
+
+    // backup window settings
+    ApplicationSettings * s = Application::GetInstance().GetSettings();
+    s->MainWindowPosition = pos();
+    s->MainWindowSize = size();
+
+    s->MainWindowLeftPanelSize = m_leftPanelSize;
+    s->MainWindowRightPanelSize = m_rightPanelSize;
+
+    // Tell all plugins their window/tab is about to close
+    foreach( QObject * plugin, QPluginLoader::staticInstances() )
+    {
+        ToolPluginInterface * toolPlugin = qobject_cast< ToolPluginInterface* >( plugin );
+        if( toolPlugin && toolPlugin->IsPluginActive() )
+        {
+            toolPlugin->WidgetAboutToClose();
+        }
+    }
+
+    // Close all open windows appart from the main window
+    foreach (QWidget *widget, QApplication::allWidgets())
+    {
+        if (widget != this)
+            widget->close();
+    }
+
+    event->accept();
+}
+
+void MainWindow::dragEnterEvent(QDragEnterEvent *event)
+ {
+     event->acceptProposedAction();
+ }
+
+ void MainWindow::dragMoveEvent(QDragMoveEvent *event)
+ {
+     event->acceptProposedAction();
+ }
+
+#include <QUrl>
+
+ void MainWindow::dropEvent( QDropEvent * e )
+ {
+     const QMimeData * mimeData = e->mimeData();
+     OpenFileParams params;
+     if( mimeData->hasUrls() )
+     {
+         QList<QUrl> urlList = mimeData->urls();
+         for (int i = 0; i < urlList.size(); ++i)
+         {
+             QString url = urlList.at(i).toLocalFile();
+             params.AddInputFile( url );
+         }
+     }
+     params.defaultParent = Application::GetSceneManager()->GetSceneRoot();
+     OpenFiles( &params );
+     e->acceptProposedAction();
+ }
+
+ void MainWindow::dragLeaveEvent(QDragLeaveEvent *event)
+ {
+     event->accept();
+ }
+
+// Capture OpenFile event sent to QApplication: mainly to support OpenWith functionality on OSX
+bool MainWindow::eventFilter( QObject * obj, QEvent * event )
+{
+    bool handled = false;
+    if( event->type() == QEvent::KeyPress )
+    {
+        QKeyEvent * keyEvent = static_cast<QKeyEvent *>(event);
+        handled = Application::GetInstance().GlobalKeyEvent( keyEvent );
+    }
+    else if( event->type() == QEvent::FileOpen )
+	{
+		QFileOpenEvent * foe = static_cast<QFileOpenEvent *> (event);
+		QString filename = foe->file();
+        OpenFileParams params;
+        params.AddInputFile( filename );
+        params.defaultParent = Application::GetSceneManager()->GetSceneRoot();
+		OpenFiles( &params );
+        handled = true;
+	}
+
+    if( !handled )
+		return QObject::eventFilter(obj, event);		
+
+    return true;
+}

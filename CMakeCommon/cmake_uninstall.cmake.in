@@ -1,0 +1,7 @@
+FILE(READ "@CMAKE_CURRENT_BINARY_DIR@/install_manifest.txt" files)
+STRING(REGEX REPLACE "\n" ";" files "${files}")
+FOREACH(file ${files})
+        # TEst comment
+	MESSAGE("Removing File: [${file}]")
+	EXEC_PROGRAM("@CMAKE_COMMAND@" ARGS "-E remove \"${file}\"")
+ENDFOREACH(file)

@@ -1,0 +1,1 @@
+This plugin was developed by Dante De Nigris at the Center for Intelligent Machines, McGill University, Canada.

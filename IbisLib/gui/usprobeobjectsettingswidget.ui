@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>UsProbeObjectSettingsWidget</class>
+ <widget class="QWidget" name="UsProbeObjectSettingsWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>225</width>
+    <height>409</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout_4">
+   <item>
+    <layout class="QVBoxLayout" name="verticalLayout">
+     <item>
+      <widget class="QLabel" name="probeStatusDescriptionLabel">
+       <property name="font">
+        <font>
+         <weight>75</weight>
+         <italic>false</italic>
+         <bold>true</bold>
+        </font>
+       </property>
+       <property name="text">
+        <string>Ultrasound Probe Status:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="probeStatusLabel">
+       <property name="minimumSize">
+        <size>
+         <width>170</width>
+         <height>40</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>status</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QCheckBox" name="useMaskCheckBox">
+     <property name="text">
+      <string>Use Mask</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="settingsLabel">
+     <property name="font">
+      <font>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
+      <string>Settings:</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QLabel" name="depthLabel">
+       <property name="text">
+        <string>Depth:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QComboBox" name="depthComboBox">
+       <property name="minimumSize">
+        <size>
+         <width>100</width>
+         <height>0</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="acquisitionTypeGroupBox">
+     <property name="minimumSize">
+      <size>
+       <width>170</width>
+       <height>0</height>
+      </size>
+     </property>
+     <property name="title">
+      <string>Acquisition Type:</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+     <property name="flat">
+      <bool>false</bool>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <item>
+       <widget class="QRadioButton" name="bModeRadioButton">
+        <property name="text">
+         <string>B-Mode</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QRadioButton" name="colorDopplerRadioButton">
+        <property name="text">
+         <string>Color Doppler</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QRadioButton" name="powerDopplerRadioButton">
+        <property name="text">
+         <string>Power Doppler</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="colorMapGroupBox">
+     <property name="title">
+      <string>Color map</string>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_3">
+      <item>
+       <widget class="QComboBox" name="colorMapComboBox"/>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>1</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>bModeRadioButton</sender>
+   <signal>clicked()</signal>
+   <receiver>UsProbeObjectSettingsWidget</receiver>
+   <slot>BModeRadioButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>102</x>
+     <y>201</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>98</x>
+     <y>154</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>colorDopplerRadioButton</sender>
+   <signal>clicked()</signal>
+   <receiver>UsProbeObjectSettingsWidget</receiver>
+   <slot>ColorDopplerRadioButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>102</x>
+     <y>229</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>98</x>
+     <y>154</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>powerDopplerRadioButton</sender>
+   <signal>clicked()</signal>
+   <receiver>UsProbeObjectSettingsWidget</receiver>
+   <slot>PowerDopplerRadioButtonClicked()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>102</x>
+     <y>257</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>98</x>
+     <y>154</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>depthComboBox</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>UsProbeObjectSettingsWidget</receiver>
+   <slot>DepthComboBoxSelectionChanged(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>136</x>
+     <y>145</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>98</x>
+     <y>154</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>ShowIn3DCheckBoxToggled(bool)</slot>
+  <slot>DepthComboBoxSelectionChanged(int)</slot>
+  <slot>BModeRadioButtonClicked()</slot>
+  <slot>ColorDopplerRadioButtonClicked()</slot>
+  <slot>PowerDopplerRadioButtonClicked()</slot>
+ </slots>
+</ui>

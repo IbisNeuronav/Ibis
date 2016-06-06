@@ -1,0 +1,1 @@
+DeclarePlugin( LandmarkRegistrationObject YES DESCRIPTION "This plugin is used to compute a registration transform based on 2 sets of homologous points. The object instanciated by the plugin contains the transform" )

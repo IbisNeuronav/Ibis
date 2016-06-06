@@ -1,0 +1,22 @@
+/*=========================================================================
+
+  Program:   Ibis 2.0
+  Module:    $RCSfile: version.h,v $
+  Language:  C++
+  Date:      $Date: 2010-05-27 15:54:35 $
+  Version:   $Revision: 1.52 $
+
+  Copyright (c) Anka, Simon, IPL, BIC, MNI, McGill 
+  All rights reserved.
+  
+=========================================================================*/ 
+#ifndef __version_h_
+#define __version_h_
+
+#define IBIS_MAJOR_VERSION ((int)${IBIS_MAJOR_VERSION})
+#define IBIS_MINOR_VERSION ((int)${IBIS_MINOR_VERSION})
+#define IBIS_PATCH_VERSION ((int)${IBIS_PATCH_VERSION})
+#define IBIS_VERSION_QUALIFIER ("${IBIS_VERSION_QUALIFIER}")  // Alpha, Beta, Dev or nothing
+#define IBIS_BUILD_QUALIFIER ("${IBIS_BUILD_QUALIFIER}")			// Debug
+
+#endif

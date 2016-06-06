@@ -1,0 +1,10 @@
+#!/bin/bash 
+
+# Absolute path to this script, e.g. /home/user/bin/IbisView
+this_script=`readlink -f $0`
+
+# Absolute path this script is in, thus /home/user/bin
+this_script_path=`dirname $this_script`
+
+LD_LIBRARY_PATH=$this_script_path $this_script_path/ibis $*
+

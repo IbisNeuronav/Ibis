@@ -1,0 +1,133 @@
+PROJECT ( IGNS_IBIS )
+
+# define sources
+SET( IGNS_IBIS_SRC main.cpp mainwindow.cpp commandlinearguments.cpp )
+SET( IGNS_IBIS_HDR commandlinearguments.h )
+SET( IGNS_IBIS_HDR_MOC mainwindow.h )
+set( IGNS_IBIS_RCC Ibis.qrc )
+set( exec_name ibis )
+
+# option to turn on vtk warnings
+OPTION( IGNS_ENABLE_VTK_WARNINGS "Enable vtk warnings in the terminal" OFF )
+if( NOT IGNS_ENABLE_VTK_WARNINGS )
+    add_definitions (-DVTK_NO_WARNINGS )
+endif()
+
+# moc Qt source file without a ui file
+qt5_wrap_cpp( IGNS_IBIS_MOC ${IGNS_IBIS_HDR_MOC} )
+
+# make rules to create c++ source from Qt resource files
+QT5_ADD_RESOURCES(IGNS_IBIS_RCC_SRC ${IGNS_IBIS_RCC})
+
+# Define include directories for other Igns libs
+include_directories( ${IGNS_VTK_QT_INCLUDE_DIR} )
+include_directories( ${VTK_TRACKER_INCLUDE_DIR} )
+include_directories( ${VTK_VIDEO_INCLUDE_DIR} )
+include_directories( ${VTK_EXTENSIONS_INCLUDE_DIR} )
+include_directories( ${VTK_MINC_INCLUDE_DIR} )
+include_directories( ${IGNS_IBISLIB_INCLUDE_DIR} )
+include_directories( ${IGNS_IBISLIB_INCLUDE_DIR}/gui )
+include_directories( ${IGNS_IBISLIB_BINARY_DIR} )    # include qt-generated headers 
+include_directories( ${IGNS_IBIS_BINARY_DIR} )     # needed to include qt-generated source files
+
+# Generate the file that is going to import the plugins
+set( ImportPluginsSourceFile ${CMAKE_CURRENT_BINARY_DIR}/importplugins.cpp )
+file( WRITE ${ImportPluginsSourceFile} "#include <QtPlugin>\n\n" )
+foreach( plugin ${PluginLibs} )
+    file( APPEND ${ImportPluginsSourceFile} "Q_IMPORT_PLUGIN(${plugin}PluginInterface);\n" )
+endforeach( plugin )
+
+# Add plugin def for the hardware module
+file( APPEND ${ImportPluginsSourceFile} "Q_IMPORT_PLUGIN(IbisHardwareModule);\n" )
+
+#================================
+# Define mac osx bundle
+#================================
+if(APPLE)
+    # set how it shows up in the Info.plist file
+    set( MACOSX_BUNDLE_INFO_STRING "Ibis" )
+    set( MACOSX_BUNDLE_ICON_FILE "ibis.icns" )
+    set( MACOSX_BUNDLE_VERSION ${IBIS_MAJOR_VERSION}.${IBIS_MINOR_VERSION}.${IBIS_PATCH_VERSION} )
+    set( MACOSX_BUNDLE_SHORT_VERSION_STRING ${IBIS_MAJOR_VERSION}.${IBIS_MINOR_VERSION}.${IBIS_PATCH_VERSION} )
+    set( MACOSX_BUNDLE_LONG_VERSION_STRING "${IBIS_MAJOR_VERSION}.${IBIS_MINOR_VERSION}.${IBIS_PATCH_VERSION} - ${IBIS_VERSION_QUALIFIER} rev. ${IBIS_GIT_HASH}" )
+    set( MACOSX_BUNDLE_COPYRIGHT "2002-2011 McConnell Brain Imaging Centre" )
+    # set where in the bundle to put the icns file
+    set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/icons/ibis.icns PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+    # include the icns file in the target
+    set( IGNS_IBIS_SRC_ICNS ${CMAKE_CURRENT_SOURCE_DIR}/icons/ibis.icns )
+    set( executable_flags MACOSX_BUNDLE )
+endif(APPLE)
+
+#================================
+# Define executable
+#================================
+SET( SOURCE ${IGNS_IBIS_HDR} ${IGNS_IBIS_HDR_MOC} ${IGNS_IBIS_SRC} ${ImportPluginsSourceFile} ${IGNS_IBIS_MOC} ${IGNS_IBIS_RCC_SRC} ${IGNS_IBIS_SRC_ICNS} )
+ADD_EXECUTABLE( ${exec_name} ${executable_flags} ${SOURCE} )
+
+set( itkLibsToUse ${ITK_LIBRARIES} )
+
+set( itkLibsToUse ${itkLibsToUse} itkRegistration )
+
+
+IF( OPENCL_FOUND )
+    set( itkLibsToUse ${itkLibsToUse} itkRegistrationOpenCL)
+    include_directories( ${ITK_REGISTRATION_OPENCL_INCLUDE_DIR} )
+    foreach(GPUKernel ${ITKGPUOrientationMatching_Kernels}) 
+        message(${ITK_REGISTRATION_OPENCL_INCLUDE_DIR}/${GPUKernel})
+        configure_file(${ITK_REGISTRATION_OPENCL_INCLUDE_DIR}/${GPUKernel}  ${CMAKE_BINARY_DIR}/${GPUKernel} COPYONLY)
+    endforeach(GPUKernel)    
+
+    set( itkLibsToUse ${itkLibsToUse} itkVolumeReconstructionOpenCL)
+    include_directories( ${ITK_VOLUME_RECONSTRUCTION_OPENCL_INCLUDE_DIR} )
+    
+    set( gpuLibs ${OPENCL_LIBRARIES})
+ENDIF()
+
+
+set( ignsLibsToUse IbisHardware IbisLib vtkVideo vtkQt vtkTracker vtkUltrasound vtkMNI vtkIbisVolumeRendering vtkExtensions )
+
+if( USE_POINT_GREY_CAMERA )
+    set( flycaptureLib flycapture )
+endif()
+
+TARGET_LINK_LIBRARIES( ${exec_name} ${PluginLibs} ${PluginExternalLibs} ${ignsLibsToUse} ${QT_LIBRARIES}
+                                    ${VTK_LIBRARIES} ${MINC4ITK_LIBRARIES}
+                                    ${itkLibsToUse} ${OpenCV_LIBS} ${flycaptureLib} svl ${gpuLibs} )
+qt5_use_modules( ${exec_name} Widgets Xml )
+
+#================================
+# Install
+#================================
+
+# install executable(s)
+install( TARGETS ${exec_name} DESTINATION . )
+
+# fixup the bundle under linux (copy qt libs in the install dir and strip rpaths) 
+# On mac, we need to run macdeployqt on the installed bundle (should eventually implement a better solution)
+if( NOT APPLE )
+	install( PROGRAMS IbisView DESTINATION . )
+	install( PROGRAMS IbisNav DESTINATION . )
+	
+	set( APPS \${CMAKE_INSTALL_PREFIX}/${exec_name} )
+	list( APPEND libSearchDirs ${QT_LIBRARY_DIR})
+	INSTALL(CODE "include(BundleUtilities)
+		fixup_bundle(\"${APPS}\" \"${additionalLib}\" \"${libSearchDirs}\")" COMPONENT Runtime)
+endif( NOT APPLE )
+
+#================================
+# Packaging
+#================================
+set( CPACK_PACKAGE_DESCRIPTION_SUMMARY "Ibis image-guided neurosurgery program and viewer")
+set( CPACK_PACKAGE_NAME ${exec_name} )
+set( CPACK_PACKAGE_CONTACT "Simon Drouin and Anka Kochanowska")
+set( CPACK_PACKAGE_VENDOR "Image Processing Lab - McConnell Brain Imaging Centre")
+set( CPACK_PACKAGE_VERSION_MAJOR ${IBIS_MAJOR_VERSION})
+set( CPACK_PACKAGE_VERSION_MINOR ${IBIS_MINOR_VERSION})
+set( CPACK_PACKAGE_VERSION_PATCH ${IBIS_PATCH_VERSION})
+if( APPLE )
+    set( CPACK_GENERATOR "DragNDrop" )
+else( APPLE )
+    set( CPACK_GENERATOR "TGZ")
+endif( APPLE )
+set( CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}-${IBIS_VERSION_QUALIFIER}-${IBIS_BUILD_QUALIFIER}-${IBIS_GIT_HASH_SHORT}-${CMAKE_SYSTEM_PROCESSOR}")
+include(CPack)

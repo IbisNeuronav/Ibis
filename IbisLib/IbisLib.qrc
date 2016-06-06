@@ -1,0 +1,32 @@
+<RCC>
+    <qresource prefix="/">
+        <file>Icons/zoom-in.png</file>
+        <file>Icons/zoom.png</file>
+        <file>Icons/zoom-fit.png</file>
+        <file>Icons/zoom-out.png</file>
+        <file>Icons/expand.svg</file>
+        <file>Icons/reset-planes.svg</file>
+        <file>Icons/left.svg</file>
+        <file>Icons/right.svg</file>
+        <file>Icons/back.svg</file>
+        <file>Icons/front.svg</file>
+        <file>Icons/bottom.svg</file>
+        <file>Icons/top.svg</file>
+        <file>Icons/add_child_transform.svg</file>
+        <file>Icons/add_parent_transform.svg</file>
+        <file>Icons/add_transform_all_children.svg</file>
+        <file>Icons/edit-clear.svg</file>
+        <file>Icons/add_child_transform.png</file>
+        <file>Icons/add_parent_transform.png</file>
+        <file>Icons/add_transform_all_children.png</file>
+        <file>Icons/back.png</file>
+        <file>Icons/bottom.png</file>
+        <file>Icons/edit-clear.png</file>
+        <file>Icons/expand.png</file>
+        <file>Icons/front.png</file>
+        <file>Icons/left.png</file>
+        <file>Icons/reset-planes-2.png</file>
+        <file>Icons/right.png</file>
+        <file>Icons/top.png</file>
+    </qresource>
+</RCC>
