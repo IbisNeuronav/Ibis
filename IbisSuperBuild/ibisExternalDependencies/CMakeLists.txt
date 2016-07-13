@@ -36,11 +36,11 @@ ExternalProject_Add( ${itk_name}
 set( itk_dir ${external_project_dir}/${itk_name}/install/lib/cmake/ITK-4.5 )
 
 # Get and build OpenCV
-set( opencv_name opencv-3.0.0 )
+set( opencv_name opencv-3.1.0 )
 ExternalProject_Add( ${opencv_name} 
     SOURCE_DIR ${external_project_dir}/${opencv_name}/src
-    GIT_REPOSITORY "https://github.com/Itseez/opencv.git"
-    GIT_TAG 3.0.0
+    GIT_REPOSITORY "https://github.com/opencv/opencv.git"
+    GIT_TAG 3.1.0
     BINARY_DIR ${external_project_dir}/${opencv_name}/build
     BUILD_COMMAND   make
     INSTALL_COMMAND make install 

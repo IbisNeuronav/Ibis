@@ -13,7 +13,7 @@ INCLUDE(ExternalProject)
 set( CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR}/Ibis-install )
 set( VTK_DIR ${CMAKE_CURRENT_BINARY_DIR}/ibisExternalDependencies/vtk-6.2/install/lib/cmake/vtk-6.2)
 set( ITK_DIR ${CMAKE_CURRENT_BINARY_DIR}/ibisExternalDependencies/itk-4.5.2/install/lib/cmake/ITK-4.5 )
-set( OpenCV_DIR ${CMAKE_CURRENT_BINARY_DIR}/ibisExternalDependencies/opencv-3.0.0/install/share/OpenCV )
+set( OpenCV_DIR ${CMAKE_CURRENT_BINARY_DIR}/ibisExternalDependencies/opencv-3.1.0/install/share/OpenCV )
 ExternalProject_Add( Ibis
 		SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../
 		BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/Ibis
