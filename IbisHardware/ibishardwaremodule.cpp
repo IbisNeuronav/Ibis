@@ -10,8 +10,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 #include "ibishardwaremodule.h"
 #include "application.h"
+#include "tracker.h"
 #include "trackedvideosource.h"
-#include "trackertoolsdisplaymanager.h"
 #include "scenemanager.h"
 #include "vtkTracker.h"
 #include "vtkTrackerTool.h"
@@ -19,23 +19,19 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "pointerobject.h"
 #include "usprobeobject.h"
 #include "cameraobject.h"
-#include "generictrackedobject.h"
 #include <QDir>
 #include <QMenu>
 #include <QVBoxLayout>
 
-//Q_EXPORT_STATIC_PLUGIN2( IbisHardware, IbisHardwareModule );
-
 IbisHardwareModule::IbisHardwareModule()
 {
     m_tracker = Tracker::New();
+    m_tracker->SetHardwareModule( this );
     m_trackedVideoSource = TrackedVideoSource::New();
-    m_toolDisplayManager = TrackerToolDisplayManager::New();
 }
 
 IbisHardwareModule::~IbisHardwareModule()
 {
-    m_toolDisplayManager->Delete();
     m_tracker->Delete();
     m_trackedVideoSource->Delete();
 }
@@ -46,15 +42,11 @@ void IbisHardwareModule::AddSettingsMenuEntries( QMenu * menu )
     menu->addAction( tr("&Tracker Settings"), this, SLOT( OpenTrackerSettingsDialog() ), QKeySequence("Ctrl+t"));
 }
 
-QWidget * IbisHardwareModule::CreateTrackerStatusDialog( QWidget * parent )
-{
-    return m_tracker->CreateStatusDialog( parent );
-}
-
 // Implementation of the HardwareModule interface
 bool IbisHardwareModule::Init( const char * configfilename )
 {
     // Create the tracker if it doesn't exist. Otherwise, make sure tracking is stopped
+    m_tracker->SetSceneManager( m_application->GetSceneManager() );
     m_tracker->StopTracking();
 
     // Read hardware configuration if we have a valid filename
@@ -67,14 +59,7 @@ bool IbisHardwareModule::Init( const char * configfilename )
     m_tracker->Initialize();
 
     // Init video
-    m_trackedVideoSource->SetTracker( m_tracker );
     m_trackedVideoSource->InitializeVideo();
-
-    // Init display manager
-    m_toolDisplayManager->Settracker( m_tracker );
-    m_toolDisplayManager->SetvideoSource( m_trackedVideoSource );
-    m_toolDisplayManager->SetSceneManager( m_application->GetSceneManager() );
-    m_toolDisplayManager->Initialize();
 
     // simtodo : don't always return true
     return true;
@@ -91,8 +76,6 @@ void IbisHardwareModule::Update()
 
 bool IbisHardwareModule::ShutDown()
 {
-    m_toolDisplayManager->ShutDown();
-
     m_trackedVideoSource->RemoveClient();
     m_tracker->StopTracking();
 
@@ -100,162 +83,62 @@ bool IbisHardwareModule::ShutDown()
     return true;
 }
 
-void IbisHardwareModule::AddObjectsToScene()
+vtkTransform * IbisHardwareModule::GetReferenceTransform()
 {
-    m_toolDisplayManager->AddAllObjectsToScene();
+    return m_tracker->GetReferenceTransform();
 }
 
-void IbisHardwareModule::RemoveObjectsFromScene()
+bool IbisHardwareModule::IsTransformFrozen( TrackedSceneObject * obj )
 {
-    m_toolDisplayManager->RemoveAllObjectsFromScene();
+    return m_tracker->GetVideoSource( obj )->IsTransformFrozen();
 }
 
-bool IbisHardwareModule::CanCaptureTrackedVideo()
+void IbisHardwareModule::FreezeTransform( TrackedSceneObject * obj, int nbSamples )
 {
-    if( !m_tracker )
-        return false;
-    if( !m_tracker->IsInitialized() )
-        return false;
-    return CanCaptureVideo();
+    return m_tracker->GetVideoSource( obj )->FreezeTransform( nbSamples );
 }
 
-bool IbisHardwareModule::CanCaptureVideo()
+void IbisHardwareModule::UnFreezeTransform( TrackedSceneObject * obj )
 {
-    if( !m_trackedVideoSource )
-        return false;
-    return true;
+    return m_tracker->GetVideoSource( obj )->UnFreezeTransform();
 }
 
-int IbisHardwareModule::GetNavigationPointerObjectID()
+void IbisHardwareModule::AddTrackedVideoClient( TrackedSceneObject * obj )
 {
-    if( !m_tracker )
-        return SceneObject::InvalidObjectId;
-    int navPointerIndex = m_tracker->GetNavigationPointerIndex();
-    if( navPointerIndex == -1 )
-        return SceneObject::InvalidObjectId;
-    return m_tracker->GetToolObjectId( navPointerIndex );
+    return m_tracker->GetVideoSource( obj )->AddClient();
 }
 
-vtkImageData * IbisHardwareModule::GetTrackedVideoOutput()
+void IbisHardwareModule::RemoveTrackedVideoClient( TrackedSceneObject * obj )
 {
-    return m_trackedVideoSource->GetVideoOutput();
+    return m_tracker->GetVideoSource( obj )->RemoveClient();
 }
 
-int IbisHardwareModule::GetVideoFrameWidth()
+void IbisHardwareModule::StartTipCalibration( PointerObject * p )
 {
-    return m_trackedVideoSource->GetFrameWidth();
-}
-
-int IbisHardwareModule::GetVideoFrameHeight()
-{
-    return m_trackedVideoSource->GetFrameHeight();
-}
-
-TrackerToolState IbisHardwareModule::GetVideoTrackerState()
-{
-    return m_trackedVideoSource->GetState();
-}
-
-vtkTransform * IbisHardwareModule::GetTrackedVideoTransform()
-{
-    return m_trackedVideoSource->GetTransform();
-}
-
-vtkTransform * IbisHardwareModule::GetTrackedVideoUncalibratedTransform()
-{
-    return m_trackedVideoSource->GetUncalibratedTransform();
-}
-
-vtkMatrix4x4 * IbisHardwareModule::GetVideoCalibrationMatrix()
-{
-    return m_trackedVideoSource->GetCurrentCalibrationMatrix();
-}
-
-void IbisHardwareModule::SetVideoCalibrationMatrix( vtkMatrix4x4 * mat )
-{
-    m_trackedVideoSource->SetCurrentCalibrationMatrix( mat );
-}
-
-int IbisHardwareModule::GetNumberOfVideoCalibrationMatrices()
-{
-    return m_trackedVideoSource->GetNumberOfCalibrationMatrices();
-}
-
-QString IbisHardwareModule::GetVideoCalibrationMatrixName( int index )
-{
-    return m_trackedVideoSource->GetCalibrationMatrixName( index );
-}
-
-void IbisHardwareModule::SetCurrentVideoCalibrationMatrixName( QString name )
-{
-    m_trackedVideoSource->SetCurrentCalibrationMatrixName( name );
-}
-
-QString IbisHardwareModule::GetCurrentVideoCalibrationMatrixName()
-{
-    return m_trackedVideoSource->GetCurrentCalibrationMatrixName();
-}
-
-bool IbisHardwareModule::IsVideoTransformFrozen()
-{
-    return m_trackedVideoSource->IsTransformFrozen();
-}
-
-void IbisHardwareModule::FreezeVideoTransform( int nbSamples )
-{
-    m_trackedVideoSource->FreezeTransform( nbSamples );
-}
-
-void IbisHardwareModule::UnFreezeVideoTransform()
-{
-    m_trackedVideoSource->UnFreezeTransform();
-}
-
-const CameraIntrinsicParams & IbisHardwareModule::GetCameraIntrinsicParams()
-{
-    return m_trackedVideoSource->GetCameraIntrinsicParams();
-}
-
-void IbisHardwareModule::SetCameraIntrinsicParams( CameraIntrinsicParams & p )
-{
-    m_trackedVideoSource->SetCameraIntrinsicParams( p );
-}
-
-void IbisHardwareModule::AddTrackedVideoClient()
-{
-    m_trackedVideoSource->AddClient();
-}
-
-void IbisHardwareModule::RemoveTrackedVideoClient()
-{
-    m_trackedVideoSource->RemoveClient();
-}
-
-int IbisHardwareModule::GetReferenceToolIndex()
-{
-    return m_tracker->GetReferenceToolIndex();
-}
-
-vtkTransform * IbisHardwareModule::GetTrackerToolTransform( int toolIndex )
-{
-    vtkTrackerTool * tool = m_tracker->GetTool( toolIndex );
+    vtkTrackerTool * tool = m_tracker->GetTool( p );
     Q_ASSERT( tool );
-    return tool->GetTransform();
+    tool->StartTipCalibration();
 }
 
-TrackerToolState IbisHardwareModule::GetTrackerToolState( int toolIndex )
+double IbisHardwareModule::DoTipCalibration( PointerObject * p, vtkMatrix4x4 * calibMat )
 {
-    Q_ASSERT( m_tracker );
-
-    vtkTrackerTool * tool = m_tracker->GetTool( toolIndex );
+    vtkTrackerTool * tool = m_tracker->GetTool( p );
     Q_ASSERT( tool );
+    return tool->DoToolTipCalibration( calibMat );
+}
 
-    int flags = tool->GetFlags();
-    if( flags & TR_MISSING ) return Missing;
-    if( flags & TR_OUT_OF_VIEW ) return OutOfView;
-    if( flags & TR_OUT_OF_VOLUME ) return OutOfVolume;
-    if( flags == -1 ) return Undefined;
-    return Ok;
+bool IbisHardwareModule::IsCalibratingTip( PointerObject * p )
+{
+    vtkTrackerTool * tool = m_tracker->GetTool( p );
+    Q_ASSERT( tool );
+    return tool->GetCalibrating() > 0 ? true : false;
+}
+
+void IbisHardwareModule::StopTipCalibration( PointerObject * p )
+{
+    vtkTrackerTool * tool = m_tracker->GetTool( p );
+    Q_ASSERT( tool );
+    tool->StopTipCalibration();
 }
 
 void IbisHardwareModule::OpenVideoSettingsDialog()
@@ -339,6 +222,16 @@ void IbisHardwareModule::WriteHardwareConfig(const char * filename , bool backup
     QString dateAndTime( QDateTime::currentDateTime().toString() );
     QString backupFileName = QString( "%1Rev-%2-%3-%4" ).arg( backupDir ).arg( Application::GetGitHashShort() ).arg( dateAndTime ).arg( info.fileName() );
     InternalWriteHardwareConfig( backupFileName );
+}
+
+void IbisHardwareModule::AddToolObjectsToScene()
+{
+    m_tracker->AddAllToolsToScene();
+}
+
+void IbisHardwareModule::RemoveToolObjectsFromScene()
+{
+    m_tracker->RemoveAllToolsFromScene();
 }
 
 void IbisHardwareModule::InternalWriteHardwareConfig( QString filename )

@@ -29,6 +29,7 @@ class SceneObject;
 class WorldObject;
 class CameraObject;
 class PointerObject;
+class IbisPlugin;
 class ToolPluginInterface;
 class ObjectPluginInterface;
 class OpenFileParams;
@@ -39,6 +40,8 @@ class QTimer;
 class QDialog;
 class vtkMatrix4x4;
 class QuadViewWindow;
+class ImageObject;
+class PointsObject;
 
 struct ApplicationSettings
 {
@@ -46,7 +49,6 @@ struct ApplicationSettings
     ~ApplicationSettings();
     void LoadSettings( QSettings & settings );
     void SaveSettings( QSettings & settings );
-    QString LastVisitedDirectory;
     QString LastConfigFile;
     QString WorkingDirectory;
     QSize MainWindowSize;
@@ -124,9 +126,15 @@ public:
 
     // Ibis Plugin management
     void LoadPlugins();
-    ToolPluginInterface * GetPluginByName( const char * name );
+    IbisPlugin * GetPluginByName( QString name );
     void ActivatePluginByName( const char * name, bool active );
-    ObjectPluginInterface *GetObjectPluginByClassName( const char * name );
+    ObjectPluginInterface *GetObjectPluginByName( QString className );
+    ToolPluginInterface * GetToolPluginByName( QString name );
+    SceneObject * GetGlobalObjectInstance( const QString & className );
+    void GetAllGlobalObjectInstances( QList<SceneObject*> & allInstances );
+    void GetAllPlugins( QList<IbisPlugin*> & allPlugins );
+    void GetAllToolPlugins( QList<ToolPluginInterface*> & allTools );
+    void GetAllObjectPlugins( QList<ObjectPluginInterface*> & allObjects );
 
     // Data file to load when the application starts up (typically specified on the command line)
     void SetInitialDataFiles( const QStringList & files ) { m_initialDataFiles = files; }
@@ -137,6 +145,10 @@ public:
     bool OpenTransformFile( const char * filename, vtkMatrix4x4 * mat );
     void ImportUsAcquisition();
     void ImportCamera();
+
+    // Getting data from files
+    bool GetImageDataFromVideoFrame(QString fileName, ImageObject *img );
+    bool GetPointsFromTagFile(QString fileName, PointsObject *pts1, PointsObject *pts2 );
 
     // Useful modal dialog
     QString GetOpenFileName( const QString & caption = QString(), const QString & dir = QString(), const QString & filter = QString() );
@@ -168,6 +180,10 @@ signals:
 
 private:
 
+    void Init( bool viewerOnly );
+    Application();
+    static Application  * m_uniqueInstance;
+
     // Update manager is the only one to call TickIbisClock which will
     // update the hardware module and tell the whole world (emit IbisClockTick())
     friend class UpdateManager;
@@ -179,10 +195,6 @@ private:
     FileReader * m_fileReader;
     QProgressDialog * m_fileOpenProgressDialog;
     QTimer * m_progressDialogUpdateTimer;
-
-    Application( bool viewerOnly );
-
-    static Application  * m_uniqueInstance;
 
     QWidget                     * m_mainWindow;
     QuadViewWindow              * m_quadView;

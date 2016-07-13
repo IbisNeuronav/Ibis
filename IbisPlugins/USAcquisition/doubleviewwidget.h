@@ -28,6 +28,7 @@ class vtkActor;
 class vtkImageActor;
 class vtkAlgorithmOutput;
 class vtkTransform;
+class vtkImageStack;
 
 class DoubleViewWidget : public QWidget
 {
@@ -52,8 +53,6 @@ private slots:
     void UpdateUi();
     void UpdateCurrentFrameUi();
     void UpdateViews();
-    void VolumeModified(); //  what is this referring to? -> the current volume change, may need to add one
-
 
     void on_blendCheckBox_toggled(bool checked);
     void on_opacitySlider_1_valueChanged(int value);
@@ -70,11 +69,9 @@ private slots:
     void on_m_exportButton_clicked();
     void UpdateStatus();
 
-    // added May 13, 2015 by Xiao **
     void on_checkBoxImage2_toggled(bool checked); // checkbox for whether blend two MRIs
     void on_imageObjectsComboBox_2_currentIndexChanged(int index); // image list for added volume
     void on_opacitySlider_2_valueChanged(int value);
-   // void AddedVolumeModified();
 
 private:
 
@@ -82,13 +79,16 @@ private:
 
     vtkImageResliceToColors * m_reslice;
     vtkImageResliceToColors * m_reslice2;
-    vtkImageBlend * m_blendedImage; //blended images
     vtkImageMask * m_imageMask;
+
+    vtkImageStack * m_mriActor;
+    vtkImageActor * m_vol1Slice;
+    vtkImageActor * m_vol2Slice;
+    vtkImageActor * m_usSlice;
+    vtkRenderer * m_mriRenderer;
 
     vtkRenderer * m_usRenderer;
     vtkImageActor * m_usActor;
-    vtkRenderer * m_mriRenderer;
-    vtkImageActor * m_mriActor;
 
     Ui::DoubleViewWidget *ui;
 

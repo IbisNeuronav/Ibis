@@ -158,7 +158,7 @@ void FiberObjectSettingsWidget::on_roiGroupBox_toggled( bool on )
 
 void FiberObjectSettingsWidget::on_loadMaximaButton_clicked()
 {
-    QString lastVisitedDir = Application::GetInstance().GetSettings()->LastVisitedDirectory;
+    QString lastVisitedDir = Application::GetInstance().GetSettings()->WorkingDirectory;
     QString filePath = QFileDialog::getOpenFileName(0, tr("Open File"), lastVisitedDir, tr("Files (*.nii)"));
 
     if(!filePath.length())
@@ -174,7 +174,7 @@ void FiberObjectSettingsWidget::on_loadMaximaButton_clicked()
 
 void FiberObjectSettingsWidget::on_loadFAButton_clicked()
 {
-    QString lastVisitedDir = Application::GetInstance().GetSettings()->LastVisitedDirectory;
+    QString lastVisitedDir = Application::GetInstance().GetSettings()->WorkingDirectory;
     QString filePath = QFileDialog::getOpenFileName(0, tr("Open File"), lastVisitedDir, tr("Files (*.nii)"));
 
     if(!filePath.length())

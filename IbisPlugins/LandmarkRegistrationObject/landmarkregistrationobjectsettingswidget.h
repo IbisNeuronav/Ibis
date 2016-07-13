@@ -45,6 +45,7 @@ private slots:
 
     void on_registerPushButton_toggled(bool checked);
     virtual void on_capturePushButton_clicked();
+    virtual void on_allowScalingCheckBox_toggled( bool on );
     virtual void on_importPushButton_clicked();
     virtual void on_detailsPushButton_clicked();
     virtual void on_pointsTreeView_clicked( QModelIndex idx );

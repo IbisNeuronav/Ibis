@@ -71,6 +71,25 @@ double LandmarkTransform::GetRMS(int index)
     return INVALID_NUMBER;
 }
 
+bool LandmarkTransform::IsScalingAllowed()
+{
+    return this->RegistrationTransform->GetMode() != VTK_LANDMARK_RIGIDBODY;
+}
+
+void LandmarkTransform::SetScalingAllowed( bool allow )
+{
+    if( allow )
+    {
+        this->RegistrationTransform->SetModeToAffine();
+        this->InternalTransform->SetModeToAffine();
+    }
+    else
+    {
+        this->RegistrationTransform->SetModeToRigidBody();
+        this->InternalTransform->SetModeToRigidBody();
+    }
+    UpdateRegistrationTransform();
+}
 
 void LandmarkTransform::Init()
 {

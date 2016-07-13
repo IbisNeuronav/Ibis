@@ -40,7 +40,4 @@ if( IGNS_BUILD_VTK_ULTRASOUND )
     add_subdirectory( vtkUltrasound )
 endif()
 
-if( IGNS_BUILD_VTKIBIS_VOLUME_RENDERING )
-    add_subdirectory( vtkIbisVolumeRendering )
-endif()
 

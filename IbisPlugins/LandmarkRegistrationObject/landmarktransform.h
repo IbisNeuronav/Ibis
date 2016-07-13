@@ -41,6 +41,9 @@ public:
     double GetRMS(int index);
     double GetFinalRMS() {return this->FinalRMS;}
 
+    bool IsScalingAllowed();
+    void SetScalingAllowed( bool allow );
+
     vtkGetObjectMacro( RegistrationTransform, vtkLandmarkTransform );
 
     // Description:

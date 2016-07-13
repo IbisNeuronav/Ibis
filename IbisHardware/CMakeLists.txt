@@ -19,15 +19,13 @@ include_directories( ${IGNS_IBISLIB_BINARY_DIR} )    # include qt-generated head
 
 
 # Define sources
-set( IbisHardwareSrc ibishardwaremodule.cpp trackertoolsdisplaymanager.cpp
+set( IbisHardwareSrc ibishardwaremodule.cpp
                      tracker.cpp trackersettingsdialog.cpp trackedvideosource.cpp
-                     videosettingsdialog.cpp trackerstatusdialog.cpp pointercalibrationdialog.cpp
-                     videoviewdialog.cpp )
+                     videosettingsdialog.cpp videoviewdialog.cpp )
 set( IbisHardwareHdr trackerflags.h )
-set( IbisHardwareHdrMoc ibishardwaremodule.h tracker.h trackertoolsdisplaymanager.h trackersettingsdialog.h
-                        trackedvideosource.h videosettingsdialog.h trackerstatusdialog.h pointercalibrationdialog.h
-                        videoviewdialog.h )
-set( IbisHardwareUi trackersettingsdialog.ui videosettingsdialog.ui pointercalibrationdialog.ui )
+set( IbisHardwareHdrMoc ibishardwaremodule.h tracker.h trackersettingsdialog.h
+                        trackedvideosource.h videosettingsdialog.h videoviewdialog.h )
+set( IbisHardwareUi trackersettingsdialog.ui videosettingsdialog.ui )
 
 # moc Qt source file without a ui file
 qt5_wrap_cpp( IbisHardwareMoc ${IbisHardwareHdrMoc} )

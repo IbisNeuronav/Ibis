@@ -1,15 +1,13 @@
 /*=========================================================================
+Ibis Neuronav
+Copyright (c) Simon Drouin, Anna Kochanowska, Louis Collins.
+All rights reserved.
+See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
-  Program:   Ibis 2.0
-  Module:    $RCSfile: version.h,v $
-  Language:  C++
-  Date:      $Date: 2010-05-27 15:54:35 $
-  Version:   $Revision: 1.52 $
-
-  Copyright (c) Anka, Simon, IPL, BIC, MNI, McGill 
-  All rights reserved.
-  
-=========================================================================*/ 
+     This software is distributed WITHOUT ANY WARRANTY; without even
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+     PURPOSE.  See the above copyright notice for more information.
+=========================================================================*/
 #ifndef __version_h_
 #define __version_h_
 

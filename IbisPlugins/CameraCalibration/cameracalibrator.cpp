@@ -287,18 +287,16 @@ void CameraCalibrator::Calibrate( bool computeCenter, bool computeDistortion, Ca
     m_cameraImages[0]->GetDimensions( dims );
     int imageWidth = dims[0];
     int imageHeight = dims[1];
-    params.m_imageSize[ 0 ] = imageWidth;
-    params.m_imageSize[ 1 ] = imageHeight;
 
     cv::Size imageSize( imageWidth, imageHeight );
     cv::Mat distCoeffs = cv::Mat::zeros(8, 1, CV_64F);
     std::vector< cv::Mat > rvecs;
     std::vector< cv::Mat > tvecs;
     cv::Mat cameraMatrix = cv::Mat::eye( 3, 3, CV_64F );
-    cameraMatrix.at<double>( 0, 0 ) = params.m_focal[0];
-    cameraMatrix.at<double>( 1, 1 ) = params.m_focal[1];
-    cameraMatrix.at<double>( 0, 2 ) = params.m_center[0];
-    cameraMatrix.at<double>( 1, 2 ) = params.m_center[1];
+    cameraMatrix.at<double>( 0, 0 ) = params.m_focal[0] * imageWidth;
+    cameraMatrix.at<double>( 1, 1 ) = params.m_focal[1] * imageHeight;
+    cameraMatrix.at<double>( 0, 2 ) = params.m_center[0] * imageWidth;
+    cameraMatrix.at<double>( 1, 2 ) = params.m_center[1] * imageHeight;
 
     // Collect points only for enabled views
     std::vector< std::vector<cv::Point3f> > objectPoints;
@@ -322,10 +320,10 @@ void CameraCalibrator::Calibrate( bool computeCenter, bool computeDistortion, Ca
     params.m_reprojectionError = cv::calibrateCamera( objectPoints, imagePoints, imageSize, cameraMatrix, distCoeffs, rvecs, tvecs, flags );
 
     // store results
-    params.m_focal[0] = cameraMatrix.at<double>( 0, 0 );
-    params.m_focal[1] = cameraMatrix.at<double>( 1, 1 );
-    params.m_center[0] = cameraMatrix.at<double>( 0, 2 );
-    params.m_center[1] = cameraMatrix.at<double>( 1, 2 );
+    params.m_focal[0] = cameraMatrix.at<double>( 0, 0 ) / imageWidth;
+    params.m_focal[1] = cameraMatrix.at<double>( 1, 1 ) / imageHeight;
+    params.m_center[0] = cameraMatrix.at<double>( 0, 2 ) / imageWidth;
+    params.m_center[1] = cameraMatrix.at<double>( 1, 2 ) / imageHeight;
     params.m_distorsionK1 = distCoeffs.at<double>( 0 );
 
     // Store cam to grid

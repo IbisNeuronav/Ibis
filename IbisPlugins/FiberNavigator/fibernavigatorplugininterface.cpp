@@ -108,7 +108,7 @@ QWidget * FiberNavigatorPluginInterface::CreateTab()
 
 bool FiberNavigatorPluginInterface::WidgetAboutToClose()
 {
-    SceneManager * manager = m_application->GetSceneManager();
+    SceneManager * manager = GetSceneManager();
     Q_ASSERT(manager);
     SceneObject * obj = manager->GetObjectByID(m_fiberObjectId);
     if(obj)
@@ -281,7 +281,7 @@ void FiberNavigatorPluginInterface::RoiModifiedSlot()
 
 void FiberNavigatorPluginInterface::CreateObject()
 {
-    SceneManager* manager = m_application->GetSceneManager();
+    SceneManager* manager = GetSceneManager();
     Q_ASSERT(manager);
     View * v = manager->GetView(THREED_VIEW_TYPE);
     v->GetOverlayRenderer()->InteractiveOff();
@@ -291,6 +291,7 @@ void FiberNavigatorPluginInterface::CreateObject()
     fobj->SetName("Fibers");
     UpdateFibers(fobj);
     manager->AddObject(fobj);
+    manager->SetCurrentObject(fobj);
     m_fiberObjectId = fobj->GetObjectID();
 }
 

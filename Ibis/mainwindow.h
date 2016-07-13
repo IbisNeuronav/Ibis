@@ -43,7 +43,7 @@ public slots:
 private slots:
 
     void about();
-    void aboutQt();
+    void AboutPlugins();
     void fileOpenFile(); 
     void fileExportFile();
     void fileImportUsAcquisition();
@@ -52,11 +52,11 @@ private slots:
     void fileSaveSceneAs();
     void fileLoadScene();
     void NewPointSet();
-    void ShowSceneInfo();
     void SaveHardwareConfig();
     void SaveHardwareConfigAs();
     void SwitchHardwareConfig();
     void ModifyFileMenu( );
+    void ModifyNewObjectFileMenu( );
     void ModifyViewMenu( );
     void ViewXPlaneToggled( bool );
     void ViewYPlaneToggled( bool );

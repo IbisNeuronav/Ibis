@@ -29,21 +29,19 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "imageobject.h"
 #include "polydataobject.h"
 #include "triplecutplaneobject.h"
-#include "volumerenderingobject.h"
+#include "trackedsceneobject.h"
 #include "worldobject.h"
-#include "ignsmsg.h"
 #include "pointsobject.h"
 #include "cameraobject.h"
 #include "usacquisitionobject.h"
 #include "pointerobject.h"
 #include "usprobeobject.h"
 #include "filereader.h"
-#include "sceneinfo.h"
-#include "ignsconfig.h"
 #include "application.h"
 #include "hardwaremodule.h"
 #include "objectplugininterface.h"
 #include "toolplugininterface.h"
+#include "trackerstatusdialog.h"
 
 #include <QDir>
 #include <QFile>
@@ -53,7 +51,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QProcess>
 #include <QProgressDialog>
 #include <QApplication>
-#include "octants.h"
 
 ObjectSerializationMacro( SceneManager );
 
@@ -69,12 +66,18 @@ SceneManager::SceneManager()
     this->SupportedSceneSaveVersion = IGNS_SCENE_SAVE_VERSION;
     this->NavigationPointerID = SceneObject::InvalidObjectId;
     this->IsNavigating = false;
+    this->LoadingScene = false;
+
+    m_referenceTransform = vtkTransform::New();
+    m_invReferenceTransform = vtkTransform::New();
 
     this->Init();
 }
 
 SceneManager::~SceneManager()
 {
+    m_referenceTransform->Delete();
+    m_invReferenceTransform->Delete();
 }
 
 // for debugging only
@@ -149,20 +152,16 @@ void SceneManager::Init()
     this->MainCutPlanes->SetHidable( false );
     this->MainCutPlanes->SetObjectDeletable(false);
     AddObject( this->MainCutPlanes, this->SceneRoot );
+    connect( this->MainCutPlanes, SIGNAL(StartPlaneMoved(int)), this, SLOT(OnStartCutPlaneInteraction()) );
+    connect( this->MainCutPlanes, SIGNAL(EndPlaneMove(int)), this, SLOT(OnEndCutPlaneInteraction()) );
     connect( this->MainCutPlanes, SIGNAL(PlaneMoved(int)), this, SLOT(OnCutPlanesPositionChanged()) );
+    connect( this, SIGNAL(ReferenceObjectChanged()), this->MainCutPlanes, SLOT(AdjustAllImages()) );
 
-    // Volume Renderer
-    this->MainVolumeRenderer = VolumeRenderingObject::New();
-    this->MainVolumeRenderer->SetCanChangeParent( false );
-    this->MainVolumeRenderer->SetName( "Volume Renderer" );
-    this->MainVolumeRenderer->SetNameChangeable( false );
-    this->MainVolumeRenderer->SetCanAppendChildren( false );
-    this->MainVolumeRenderer->SetCanEditTransformManually( false );
-    this->MainVolumeRenderer->SetHidden( true );
-    this->MainVolumeRenderer->SetObjectManagedBySystem( true );
-    this->MainVolumeRenderer->SetObjectDeletable(false);
-    AddObject( this->MainVolumeRenderer, this->SceneRoot );
-
+    // Add all global objects from plugins
+    QList<SceneObject*> globalObjects;
+    Application::GetInstance().GetAllGlobalObjectInstances( globalObjects );
+    for( int i = 0; i < globalObjects.size(); ++i )
+        AddObject( globalObjects[i], this->SceneRoot );
 
     // Axes
     vtkAxes * axesSource = vtkAxes::New();
@@ -189,9 +188,7 @@ void SceneManager::Init()
 
     this->SetCurrentObject( this->GetSceneRoot() );
 
-    this->OctantsOfInterest = Octants::New();
     this->InteractorStyle3D = InteractorStyleTrackball;
-    this->CurrentSceneInfo = SceneInfo::New();
     m_sceneLoadSaveProgressDialog = 0;
 }
 
@@ -210,10 +207,9 @@ void SceneManager::Clear()
     }
     TemporaryFiles.clear();
     disconnect( this->GetMainImagePlanes(), SIGNAL(PlaneMoved(int)), this, SLOT(OnCutPlanesPositionChanged()) );
+    disconnect( this, SIGNAL(ReferenceObjectChanged()), this->MainCutPlanes, SLOT(AdjustAllImages()) );
     this->RemoveAllSceneObjects();
     Q_ASSERT_X( AllObjects.size() == 0, "SceneManager::~SceneManager()", "Objects are left in the global list.");
-    this->OctantsOfInterest->Delete();
-    this->CurrentSceneInfo->Delete();
     this->SceneRoot->Delete();
 }
 
@@ -227,9 +223,7 @@ void SceneManager::ClearScene()
     QProgressDialog * progressDialog = Application::GetInstance().StartProgress(4, tr("Removing All Scene Objects..."));
 
     // Do the clear
-    Application::GetHardwareModule()->RemoveObjectsFromScene();
     InternalClearScene();
-    Application::GetHardwareModule()->AddObjectsToScene();
 
     // Make sure everything is updated
     Application::GetInstance().UpdateProgress(progressDialog, 4);
@@ -245,22 +239,18 @@ void SceneManager::ClearScene()
 
 void SceneManager::InternalClearScene()
 {
-    QString saveSceneDir(this->CurrentSceneInfo->GetSceneDirectory());
+    QString saveSceneDir(this->SceneDirectory);
+    Application::GetHardwareModule()->RemoveToolObjectsFromScene();
     this->Clear();
     this->Init();
+    Application::GetHardwareModule()->AddToolObjectsToScene();
     this->SetSceneDirectory(saveSceneDir);
 }
 
 void SceneManager::RemoveAllSceneObjects()
 {
     this->RemoveObject( this->SceneRoot );
-
-#ifdef USE_NEW_IMAGE_PLANES
-    this->MainImagePlanes = 0;
-#else
     this->MainCutPlanes = 0;
-#endif
-    this->MainVolumeRenderer = 0;
 }
 
 void SceneManager::RemoveAllChildrenObjects(SceneObject *obj)
@@ -276,17 +266,15 @@ void SceneManager::RemoveAllChildrenObjects(SceneObject *obj)
 
 void SceneManager::LoadScene( QString & fileName, bool interactive )
 {
-    SetRenderingEnabled( false );
+    this->SetRenderingEnabled( false );
 
+    this->LoadingScene = true;
     // Set scene directory
     QFileInfo info( fileName );
     QString newDir = info.dir().absolutePath();
-    SetSceneDirectory( newDir );
+    this->SetSceneDirectory( newDir );
 
     NotifyPluginsSceneAboutToLoad();
-
-    // Remove hardware module objects from scene before loading
-    Application::GetHardwareModule()->RemoveObjectsFromScene();
 
     // Clear the scene
     InternalClearScene();
@@ -306,12 +294,11 @@ void SceneManager::LoadScene( QString & fileName, bool interactive )
         QMessageBox::warning( 0, "Error", message, 1, 0 );
         return;
     }
-    else if( reader.FileVersionIsLowerThan( QString::number(5.0) ) )
+    else if( reader.FileVersionIsLowerThan( QString::number(6.0) ) )
     {
-        QString message = "This scene version is older than 5.0. This is not supported anymore. Scene may not be correctly restored.\n";
+        QString message = "This scene version is older than 6.0. This is not supported anymore. Scene may not be correctly restored.\n";
         QMessageBox::warning( 0, "Error", message, 1, 0 );
     }
-    ::Serialize( &reader, "SceneInfo", this->CurrentSceneInfo);
     int numberOfSceneObjects;
     ::Serialize( &reader, "NumberOfSceneObjects", numberOfSceneObjects );
     ::Serialize( &reader, "NextObjectID", this->NextObjectID);
@@ -337,8 +324,7 @@ void SceneManager::LoadScene( QString & fileName, bool interactive )
     this->SceneRoot->SetCursorVisible(cursorVisible);
     reader.EndSection();
     reader.Finish();
-    this->CurrentSceneInfo->SetDirectorySet(true);
-    this->CurrentSceneInfo->SetSessionFile(fileName);
+    this->SetSceneFile( fileName );
     if( interactive && !this->UpdateProgress(numberOfSceneObjects+3) )
         return;
 
@@ -350,14 +336,12 @@ void SceneManager::LoadScene( QString & fileName, bool interactive )
         Application::GetInstance().StopProgress(m_sceneLoadSaveProgressDialog);
     m_sceneLoadSaveProgressDialog = 0;
 
-    // Put back hardware module objects after loading
-    Application::GetHardwareModule()->AddObjectsToScene();
-
     // Tell plugins new scene finished loading
     NotifyPluginsSceneFinishedLoading();
 
     SetRenderingEnabled( true );
     this->SetCurrentObject( currentObject);
+    this->LoadingScene = false;
 }
 
 void SceneManager::CancelProgress()
@@ -386,9 +370,6 @@ void SceneManager::SaveScene(QString & fileName)
     SceneObject *currentObject = this->GetCurrentObject();
     NotifyPluginsSceneAboutToSave();
 
-    // Remove hardware module objects so that they don't get saved in the scene
-    Application::GetHardwareModule()->RemoveObjectsFromScene();
-
     QList< SceneObject* > listedObjects;
     this->GetAllListableNonTrackedObjects(listedObjects);
     int numberOfSceneObjects = listedObjects.count();
@@ -400,7 +381,6 @@ void SceneManager::SaveScene(QString & fileName)
     writer.BeginSection("SaveScene");
     QString version(IGNS_SCENE_SAVE_VERSION);
     ::Serialize( &writer, "Version", version);
-    ::Serialize( &writer, "SceneInfo", this->CurrentSceneInfo);
     ::Serialize( &writer, "NextObjectID", this->NextObjectID);
     this->UpdateProgress(1);
     this->ObjectWriter(&writer);
@@ -415,21 +395,8 @@ void SceneManager::SaveScene(QString & fileName)
     Application::GetInstance().StopProgress(m_sceneLoadSaveProgressDialog);
     m_sceneLoadSaveProgressDialog = 0;
 
-    // Put back hardware module objects after saving
-    Application::GetHardwareModule()->AddObjectsToScene();
-
     NotifyPluginsSceneFinishedSaving();
     this->SetCurrentObject( currentObject);
-}
-
-void SceneManager::SetSceneDirectory(const QString &wDir)
-{
-   this->CurrentSceneInfo->SetSceneDirectory(wDir);
-}
-
-const QString SceneManager::GetSceneDirectory()
-{
-    return this->CurrentSceneInfo->GetSceneDirectory();
 }
 
 void SceneManager::Serialize( Serializer * ser )
@@ -501,6 +468,14 @@ QWidget * SceneManager::CreateObjectTreeWidget( QWidget * parent )
     ObjectTreeWidget * res = new ObjectTreeWidget( parent );
     res->setObjectName( QString("Object list") );
     res->setAttribute(Qt::WA_DeleteOnClose);
+    res->SetSceneManager( this );
+    return res;
+}
+
+QWidget * SceneManager::CreateTrackedToolsStatusWidget( QWidget * parent )
+{
+    TrackerStatusDialog * res = new TrackerStatusDialog( parent );
+    res->setAttribute( Qt::WA_DeleteOnClose, true );
     res->SetSceneManager( this );
     return res;
 }
@@ -604,7 +579,7 @@ void SceneManager::AddObjectUsingID( SceneObject * object, SceneObject * attachT
     if( object )
     {
         // Register and add to the global list
-        object->Register( this );
+         object->Register( this );
         this->AllObjects.push_back( object );
 
         if( !attachTo )
@@ -612,7 +587,8 @@ void SceneManager::AddObjectUsingID( SceneObject * object, SceneObject * attachT
 
         // Notify clients we start adding an object
         int position = attachTo->GetNumberOfListableChildren();
-        emit StartAddingObject( attachTo, position );
+        if( object->IsListable() )
+            emit StartAddingObject( attachTo, position );
 
         // Setting object id and manager
         int id = objID;  // if we get a valid id, use it
@@ -640,8 +616,10 @@ void SceneManager::AddObjectUsingID( SceneObject * object, SceneObject * attachT
 
         // Notify clients the object has been added
         if( object->IsListable() )
-            this->SetCurrentObject(object);
-        emit FinishAddingObject();
+        {
+            emit FinishAddingObject();
+        }
+        ValidatePointerObject();
         emit ObjectAdded( id );
     }
 }
@@ -708,6 +686,7 @@ void SceneManager::RemoveObject( SceneObject * object , bool viewChange)
         this->ReferenceDataObject  = 0;
     if( object->IsListable() )
         emit FinishRemovingObject();
+    ValidatePointerObject();
     emit ObjectRemoved( objId );
 }
 
@@ -807,6 +786,26 @@ void SceneManager::GetAllUsProbeObjects( QList<UsProbeObject*> & all )
     }
 }
 
+void SceneManager::GetAllPointerObjects( QList<PointerObject*> & all )
+{
+    for( int i = 0; i < this->AllObjects.size(); ++i )
+    {
+        PointerObject * obj = PointerObject::SafeDownCast( this->AllObjects[i] );
+        if( obj )
+            all.push_back( obj );
+    }
+}
+
+void SceneManager::GetAllTrackedObjects( QList<TrackedSceneObject*> & all )
+{
+    for( int i = 0; i < this->AllObjects.size(); ++i )
+    {
+        TrackedSceneObject * obj = TrackedSceneObject::SafeDownCast( this->AllObjects[i] );
+        if( obj )
+            all.push_back( obj );
+    }
+}
+
 void SceneManager::GetAllObjectsOfType( const char * typeName, QList<SceneObject*> & all )
 {
     for( int i = 0; i < this->AllObjects.size(); ++i )
@@ -828,17 +827,10 @@ SceneObject * SceneManager::GetObjectByID( int id )
     return 0;
 }
 
-bool SceneManager::ObjectExists(SceneObject *obj)
-{
-    if (obj && this->GetObjectByID(obj->GetObjectID()))
-        return true;
-    return false;
-}
-
 void SceneManager::SetCurrentObject( SceneObject * obj )
 {
     // SetCurrentObject(0) is called to force refreshing of the object list in the left pane
-    if (obj)
+    if (obj && obj->IsListable() )
     {
         this->CurrentObject = obj;
     }
@@ -861,27 +853,17 @@ void SceneManager::SetReferenceDataObject( SceneObject *  refObject )
             disconnect( this->ReferenceDataObject, SIGNAL(WorldTransformChangedSignal()), this, SLOT(ReferenceTransformChangedSlot()));
         }
         this->ReferenceDataObject = referenceObject;
+        m_referenceTransform->Identity();
+        m_invReferenceTransform->Identity();
         if( this->ReferenceDataObject )
         {
+            m_referenceTransform->SetInput( this->ReferenceDataObject->GetWorldTransform() );
+            m_invReferenceTransform->SetInput( this->ReferenceDataObject->GetWorldTransform() );
+            m_invReferenceTransform->Inverse();
             connect( this->ReferenceDataObject, SIGNAL(WorldTransformChangedSignal()), this, SLOT(ReferenceTransformChangedSlot()));
-            this->ResetAllCameras();
+            emit ReferenceObjectChanged();
         }
         emit ReferenceTransformChanged();
-
-        // define octants of interest
-        double bounds[6];
-        double origin[3];
-        this->ReferenceDataObject->GetImage()->GetBounds(bounds);
-        this->GetMainImagePlanes()->GetPlanesPosition( origin );
-        this->OctantsOfInterest->SetBounds(bounds);
-        this->OctantsOfInterest->SetOrigin(origin);
-
-//        vtkMINCImageAttributes2 * attributes = this->ReferenceDataObject->GetAttributes();
-//        if (attributes)
-//        {
-//            this->CurrentSceneInfo->SetPatientName(attributes->GetAttributeValueAsString(MIpatient, MIfull_name));
-//            this->CurrentSceneInfo->SetPatientIdentification(attributes->GetAttributeValueAsString(MIpatient, MIidentification));
-//        }
     }
 }
         
@@ -893,6 +875,18 @@ ImageObject * SceneManager::GetReferenceDataObject( )
 bool SceneManager::CanBeReference( SceneObject * obj )
 {
     return obj->IsA("ImageObject");
+}
+
+void SceneManager::GetReferenceBounds( double bounds[6] )
+{
+    if( this->ReferenceDataObject )
+        this->ReferenceDataObject->GetImage()->GetBounds(bounds);
+    else
+    {
+        bounds[0] = 0.0; bounds[1] = 1.0;
+        bounds[2] = 0.0; bounds[3] = 1.0;
+        bounds[4] = 0.0; bounds[5] = 1.0;
+    }
 }
 
 SceneObject * SceneManager::GetSceneRoot()
@@ -948,7 +942,6 @@ void SceneManager::SetupAllObjects( View * v )
 void SceneManager::ReleaseAllObjects( View * v )
 {
     GetSceneRoot()->Release( v );
-    this->MainVolumeRenderer->Release( v );
 }
 
 void SceneManager::SetupOneObject( View * v, SceneObject * obj )
@@ -1141,6 +1134,11 @@ void SceneManager::GetCursorPosition( double pos[3] )
     this->GetMainImagePlanes()->GetPlanesPosition( pos );
 }
 
+bool SceneManager::IsInPlane( VIEWTYPES planeType, double pos[3] )
+{
+    return this->GetMainImagePlanes()->IsInPlane( planeType, pos );
+}
+
 void SceneManager::ResetCursorPosition()
 {
     this->GetMainImagePlanes()->ResetPlanes();
@@ -1156,9 +1154,19 @@ void SceneManager::SetCursorPosition( double * pos )
     this->GetMainImagePlanes()->SetPlanesPosition( pos );
 }
 
+void SceneManager::OnStartCutPlaneInteraction()
+{
+    emit StartCursorInteraction();
+}
+
 void SceneManager::OnCutPlanesPositionChanged()
 {
     emit CursorPositionChanged();
+}
+
+void SceneManager::OnEndCutPlaneInteraction()
+{
+    emit EndCursorInteraction();
 }
 
 void SceneManager::WorldToReference( double worldPoint[3], double referencePoint[3] )
@@ -1194,6 +1202,22 @@ void SceneManager::ReferenceToWorld( double referencePoint[3], double worldPoint
         worldPoint[1] = referencePoint[1];
         worldPoint[2] = referencePoint[2];
     }
+}
+
+void SceneManager::GetReferenceOrientation( vtkMatrix4x4 * mat )
+{
+    ImageObject * im = GetReferenceDataObject();
+    if( im )
+    {
+        double orient[4];
+        im->GetWorldTransform()->GetOrientationWXYZ( orient );
+        vtkTransform * t = vtkTransform::New();
+        t->RotateWXYZ( orient[0], orient[1], orient[2], orient[3] );
+        mat->DeepCopy( t->GetMatrix() );
+        t->Delete();
+    }
+    else
+        mat->Identity();
 }
 
 void SceneManager::GetChildrenUserObjects( SceneObject * obj, QList<SceneObject*> & list )
@@ -1258,13 +1282,7 @@ void SceneManager::ObjectReader( Serializer * ser, bool interactive )
     ::Serialize( ser, "NumberOfSceneObjects", numberOfSceneObjects );
     ser->BeginSection("ObjectList");
     SceneObject *parentObject;
-    bool sceneOlderThanVersion6_0 = ser->FileVersionIsLowerThan( QString::number(6.0) );
 
-    // needed for backward compatibility:
-    int preopId = SceneObject::InvalidObjectId;
-    int intraopId = SceneObject::InvalidObjectId;
-    int oldPreopId = SceneObject::InvalidObjectId;
-    int oldIntraopId = SceneObject::InvalidObjectId;
     for (i = 0; i < numberOfSceneObjects; i++)
     {
         QString objectName;
@@ -1274,48 +1292,10 @@ void SceneManager::ObjectReader( Serializer * ser, bool interactive )
         ::Serialize( ser, "FullFileName", filePath );
         ::Serialize( ser, "ObjectID", oldId );
         ::Serialize( ser, "ParentID", oldParentId );
-        if( sceneOlderThanVersion6_0  && oldId < 0)
-        {
-            ::Serialize( ser, "ObjectName", objectName );
-            if( ( objectName == QString(PREOP_ROOT_OBJECT_NAME) ) ||
-                ( objectName == QString(INTRAOP_ROOT_OBJECT_NAME) ) )
-            {
-                SceneObject *obj = SceneObject::New();
-                obj->Serialize(ser);
-                this->AddObjectUsingID(obj, this->GetSceneRoot(), this->NextObjectID);
-                obj->SetObjectDeletable( true );
-                obj->SetObjectManagedBySystem( false );
-                if( objectName == QString(PREOP_ROOT_OBJECT_NAME) )
-                {
-                    preopId = obj->GetObjectID();
-                    oldPreopId = oldId;
-                }
-                else
-                {
-                    intraopId = obj->GetObjectID();
-                    oldIntraopId = oldId;
-                }
-                obj->Delete();
-            }
-        }
         parentObject = 0;
-        if (oldParentId != SceneObject::InvalidObjectId) // only World does not have parent
+        if( oldParentId != SceneObject::InvalidObjectId ) // only World does not have parent
         {
-            if( sceneOlderThanVersion6_0 )
-            {
-                if( oldParentId == oldPreopId )
-                {
-                    parentObject = this->GetObjectByID(preopId);
-                }
-                else if( oldParentId == oldIntraopId )
-                {
-                    parentObject = this->GetObjectByID(intraopId);
-                }
-                else
-                    parentObject = this->GetObjectByID(oldParentId);
-            }
-            else
-                parentObject = this->GetObjectByID(oldParentId);
+            parentObject = this->GetObjectByID(oldParentId);
             if (!parentObject)
             {
                 parentObject = this->GetSceneRoot();
@@ -1331,7 +1311,19 @@ void SceneManager::ObjectReader( Serializer * ser, bool interactive )
         {
             fileToOpen.append(filePath);
             FileReader *fileReader = new FileReader;
-            fileReader->SetFileNames( fileToOpen );
+            bool labelImage = false;
+            if( className == "ImageObject")
+            {
+                ::Serialize( ser, "LabelImage", labelImage );
+            }
+            OpenFileParams params;
+            params.AddInputFile(filePath);
+            params.defaultParent = parentObject;
+            if( labelImage )
+            {
+                params.filesParams[0].isLabel = true;
+            }
+            fileReader->SetParams( &params );
             fileReader->start();
             fileReader->wait();
             QList<SceneObject*> loadedObject;
@@ -1342,8 +1334,6 @@ void SceneManager::ObjectReader( Serializer * ser, bool interactive )
                 SceneObject *obj = loadedObject.at(0);
                 obj->Serialize(ser);
                 this->AddObjectUsingID(obj, parentObject, oldId);
-//                QString oldName(obj->GetName());
-//                emit ObjectNameChanged(oldName, obj->GetName());
                 if( filePath != obj->GetFullFileName() )
                     TemporaryFiles.push_back( obj->GetFullFileName() );
             }
@@ -1378,8 +1368,6 @@ void SceneManager::ObjectReader( Serializer * ser, bool interactive )
                 PointsObject *pt = PointsObject::New();
                 pt->Serialize(ser);
                 this->AddObjectUsingID(pt, parentObject, oldId);
-                // pt->SetObjectDeletable(true);  todo : check if this is needed - yes, in old scenes
-
                 pt->Delete();
             }
             else if (QString::compare(className, QString("USAcquisitionObject"), Qt::CaseSensitive) == 0)
@@ -1387,13 +1375,8 @@ void SceneManager::ObjectReader( Serializer * ser, bool interactive )
                 USAcquisitionObject *usObj = USAcquisitionObject::New();
                 usObj->ObjectID = oldId;  // serialization needs the id
                 usObj->Serialize(ser);
-                //usObj->SetObjectDeletable(true);  todo : check if this is needed - yes, in old scenes
                 this->AddObjectUsingID(usObj, parentObject, oldId);
                 usObj->Delete();
-            }
-            else if (QString::compare(className, QString("VolumeRenderingObject"), Qt::CaseSensitive) == 0) // one and only
-            {
-                this->GetMainVolumeRenderer()->Serialize(ser);
             }
             else if( className == QString("CameraObject") )
             {
@@ -1413,32 +1396,42 @@ void SceneManager::ObjectReader( Serializer * ser, bool interactive )
                 QMessageBox::warning( 0, "Error",msg , 1, 0 );
                 obj->Delete();
             }
-            else if (QString::compare(className, QString("SceneObject"), Qt::CaseSensitive) == 0)// PreopRoot, IntraopRoot, Transform object or whatever scene object
+            else if (QString::compare(className, QString("SceneObject"), Qt::CaseSensitive) == 0) // Transform object or whatever scene object
             {
-                if( !(sceneOlderThanVersion6_0 && oldId < 0) )
+                if( oldId >= 0 )
                 {
                     SceneObject *obj = SceneObject::New();
                     obj->Serialize(ser);
-                    // obj->SetObjectDeletable(true); todo : check if this is needed
                     this->AddObjectUsingID(obj, parentObject, oldId);
                     obj->Delete();
                 }
             }
             else
             {
-                foreach( QObject * plugin, QPluginLoader::staticInstances() )
+                // Read object class from an ObjectPlugin
+                bool found = false;
+                ObjectPluginInterface * p = Application::GetInstance().GetObjectPluginByName( className );
+                if( p )
                 {
-                    ObjectPluginInterface * objectPlugin = qobject_cast< ObjectPluginInterface* >( plugin );
-                    if( objectPlugin )
+                    SceneObject *obj = p->CreateObject();
+                    if( obj )
                     {
-                       QString name = objectPlugin->GetObjectClassName();
-                       if ( QString::compare(name, className) == 0 )
-                       {
-                           objectPlugin->CreateObject();
-                           this->GetCurrentObject()->Serialize(ser);
-                           // ignore the id given by SceneManager
-                           this->GetCurrentObject()->SetObjectID(oldId);
-                       }
+                        obj->Serialize(ser);
+                        // ignore the id given by SceneManager
+                        obj->SetObjectID(oldId);
+                        found = true;
+                    }
+                }
+
+                // Try global object plugins
+                if( !found )
+                {
+                    QList<SceneObject*> globObj;
+                    Application::GetInstance().GetAllGlobalObjectInstances( globObj );
+                    for( int go = 0; go < globObj.size(); ++go )
+                    {
+                        if( globObj[go]->GetClassName() == className )
+                            globObj[go]->Serialize( ser );
                     }
                 }
             }
@@ -1449,64 +1442,20 @@ void SceneManager::ObjectReader( Serializer * ser, bool interactive )
     }
     ser->EndSection();
     ser->BeginSection("Plugins");
-    foreach( QObject * plugin, QPluginLoader::staticInstances() )
+    QList<ToolPluginInterface*> allTools;
+    Application::GetInstance().GetAllToolPlugins( allTools );
+    for( int i = 0; i < allTools.size(); ++i )
     {
-        ToolPluginInterface * toolModule = qobject_cast< ToolPluginInterface* >( plugin );
-        if( toolModule )
-        {
-            bool sectionFound = ser->BeginSection( toolModule->GetPluginName().toUtf8().data() );
-            toolModule->Serialize(ser);
-            if( sectionFound )
-                ser->EndSection();
-            if( interactive && !this->UpdateProgress(++i) )
-                return;
-        }
+        ToolPluginInterface * toolModule = allTools[i];
+        bool sectionFound = ser->BeginSection( toolModule->GetPluginName().toUtf8().data() );
+        toolModule->Serialize(ser);
+        if( sectionFound )
+            ser->EndSection();
+        // simtodo : THIS IS WEIRD!! (Anka: yes, it is, interactive is always true in current version, it is prepared for some background scene loading, maybe should be discarded?)
+        if( interactive && !this->UpdateProgress(++i) )
+            return;
     }
     ser->EndSection();
-    if( sceneOlderThanVersion6_0 )
-    {
-        if( ser->BeginSection("LandmarkRegistration"))
-        {
-            int registered;
-            int sourcePointsID = SceneObject::InvalidObjectId;
-            int targetPointsID = SceneObject::InvalidObjectId;
-            int targetObjectID = SceneObject::InvalidObjectId;
-            ::Serialize( ser, "Registered", registered );
-            ::Serialize( ser, "SourcePointsObjectId", sourcePointsID );
-            ::Serialize( ser, "TargetPointsObjectId", targetPointsID );
-            ser->EndSection();
-            if( registered == 1 )
-            {
-                 QMessageBox::warning( 0, "Error", "Loaded scene version 5.0 or earlier - registration cannot be changed" , 1, 0 );
-            }
-            else
-            {
-                if( ( sourcePointsID != SceneObject::InvalidObjectId ) && ( targetPointsID != SceneObject::InvalidObjectId ))
-                {
-                    foreach( QObject * plugin, QPluginLoader::staticInstances() )
-                    {
-                        ObjectPluginInterface * objectPlugin = qobject_cast< ObjectPluginInterface* >( plugin );
-                        if( objectPlugin )
-                        {
-                           QString name = objectPlugin->GetObjectClassName();
-                           if ( name == "LandmarkRegistrationObject" )
-                           {
-                               int ret = QMessageBox::warning(0, "Load Scene",
-                                                              tr("Loaded scene version 5.0 or earlier.\nWould you like to create LandmarkRegistrationObject using PointsObjects from loaded scene?"),
-                                                              QMessageBox::Yes | QMessageBox::Default,
-                                                              QMessageBox::No | QMessageBox::Escape);
-                               if (ret == QMessageBox::Yes)
-                               {
-                                   objectPlugin->CreateObject();
-                                   this->GetCurrentObject()->Serialize(ser);
-                               }
-                           }
-                        }
-                    }
-                }
-            }
-        }
-    }
 }
 
 void SceneManager::ObjectWriter( Serializer * ser )
@@ -1586,62 +1535,65 @@ void SceneManager::ObjectWriter( Serializer * ser )
         this->UpdateProgress(i+1);
     }
     ser->EndSection();
+
     ser->BeginSection("Plugins");
-    foreach( QObject * plugin, QPluginLoader::staticInstances() )
+    QList<ToolPluginInterface*> allTools;
+    Application::GetInstance().GetAllToolPlugins( allTools );
+    for( int i = 0; i < allTools.size(); ++i )
     {
-        ToolPluginInterface * toolModule = qobject_cast< ToolPluginInterface* >( plugin );
-        if( toolModule )
-        {
-            ser->BeginSection( toolModule->GetPluginName().toUtf8().data() );
-            toolModule->Serialize(ser);
-            ser->EndSection();
-            this->UpdateProgress(++i);
-        }
+        ToolPluginInterface * toolModule = allTools[i];
+        ser->BeginSection( toolModule->GetPluginName().toUtf8().data() );
+        toolModule->Serialize(ser);
+        ser->EndSection();
+        this->UpdateProgress(++i);
     }
     ser->EndSection();
 }
 
 void SceneManager::NotifyPluginsSceneAboutToLoad()
 {
-    // Tell plugins new scene is about to load
-    foreach( QObject * plugin, QPluginLoader::staticInstances() )
+    QList<ToolPluginInterface*> allTools;
+    Application::GetInstance().GetAllToolPlugins( allTools );
+    for( int i = 0; i < allTools.size(); ++i )
     {
-        ToolPluginInterface * toolModule = qobject_cast< ToolPluginInterface* >( plugin );
-        if( toolModule )
-            toolModule->SceneAboutToLoad();
+        ToolPluginInterface * toolModule = allTools[i];
+        toolModule->SceneAboutToLoad();
     }
 }
 
 void SceneManager::NotifyPluginsSceneFinishedLoading()
 {
     // Tell plugins new scene finished loading
-    foreach( QObject * plugin, QPluginLoader::staticInstances() )
+    QList<ToolPluginInterface*> allTools;
+    Application::GetInstance().GetAllToolPlugins( allTools );
+    for( int i = 0; i < allTools.size(); ++i )
     {
-        ToolPluginInterface * toolModule = qobject_cast< ToolPluginInterface* >( plugin );
-        if( toolModule )
-            toolModule->SceneFinishedLoading();
+        ToolPluginInterface * toolModule = allTools[i];
+        toolModule->SceneFinishedLoading();
     }
 }
 
 void SceneManager::NotifyPluginsSceneAboutToSave()
 {
     // Tell plugins new scene finished loading
-    foreach( QObject * plugin, QPluginLoader::staticInstances() )
+    QList<ToolPluginInterface*> allTools;
+    Application::GetInstance().GetAllToolPlugins( allTools );
+    for( int i = 0; i < allTools.size(); ++i )
     {
-        ToolPluginInterface * toolModule = qobject_cast< ToolPluginInterface* >( plugin );
-        if( toolModule )
-            toolModule->SceneAboutToSave();
+        ToolPluginInterface * toolModule = allTools[i];
+        toolModule->SceneAboutToSave();
     }
 }
 
 void SceneManager::NotifyPluginsSceneFinishedSaving()
 {
     // Tell plugins new scene finished loading
-    foreach( QObject * plugin, QPluginLoader::staticInstances() )
+    QList<ToolPluginInterface*> allTools;
+    Application::GetInstance().GetAllToolPlugins( allTools );
+    for( int i = 0; i < allTools.size(); ++i )
     {
-        ToolPluginInterface * toolModule = qobject_cast< ToolPluginInterface* >( plugin );
-        if( toolModule )
-            toolModule->SceneFinishedSaving();
+        ToolPluginInterface * toolModule = allTools[i];
+        toolModule->SceneFinishedSaving();
     }
 }
 
@@ -1676,6 +1628,7 @@ void SceneManager::EnablePointerNavigation( bool on )
 void SceneManager::SetNavigationPointerID( int id )
 {
     this->NavigationPointerID = id;
+    emit NavigationPointerChanged();
 }
 
 PointerObject *SceneManager::GetNavigationPointerObject( )
@@ -1690,3 +1643,19 @@ PointerObject *SceneManager::GetNavigationPointerObject( )
     return 0;
 }
 
+void SceneManager::ValidatePointerObject()
+{
+    int pointerId = this->NavigationPointerID;
+    if( pointerId != SceneObject::InvalidObjectId )
+        if( !GetObjectByID( pointerId ) )
+            pointerId = SceneObject::InvalidObjectId;
+    if( pointerId == SceneObject::InvalidObjectId )
+    {
+        QList<PointerObject*> allPointers;
+        GetAllPointerObjects( allPointers );
+        if( allPointers.size() > 0 )
+            pointerId = allPointers[0]->GetObjectID();
+    }
+    if( pointerId != this->NavigationPointerID )
+        SetNavigationPointerID( pointerId );
+}

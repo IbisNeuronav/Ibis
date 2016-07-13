@@ -13,7 +13,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 // .NAME vtkV4L2VideoSource2 - Video for linux 2 frame grabber for vtk
 // .SECTION Description
 // .SECTION See Also
-// vtkVideoSource
+// vtkVideoSource/
 
 #ifndef __vtkV4L2VideoSource2_h
 #define __vtkV4L2VideoSource2_h

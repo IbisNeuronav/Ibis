@@ -68,14 +68,22 @@ void vtkPiecewiseFunctionLookupTable::ForceBuild()
 void vtkPiecewiseFunctionLookupTable::AddColorPoint( float value, float r, float g, float b )
 {
     this->ColorFunction->AddRGBPoint( value, r, g, b );
+    Modified();
 }
 
 
 void vtkPiecewiseFunctionLookupTable::AddAlphaPoint( float value, float alpha )
 {
     this->AlphaFunction->AddPoint( value, alpha );
+    Modified();
 }
 
+void vtkPiecewiseFunctionLookupTable::RemoveAllPoints()
+{
+    this->ColorFunction->RemoveAllPoints();
+    this->AlphaFunction->RemoveAllPoints();
+    Modified();
+}
 
 void vtkPiecewiseFunctionLookupTable::PrintSelf(ostream& os, vtkIndent indent)
 {

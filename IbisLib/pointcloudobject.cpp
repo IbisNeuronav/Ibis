@@ -23,8 +23,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "scenemanager.h"
 #include "triplecutplaneobject.h"
 #include "imageobject.h"
-#include "surfacecuttingplane.h"
-#include "polydataclipper.h"
 #include "vtkProbeFilter.h"
 
 vtkCxxSetObjectMacro(PointCloudObject, Property, vtkProperty);

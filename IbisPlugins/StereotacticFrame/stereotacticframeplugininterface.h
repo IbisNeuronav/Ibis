@@ -29,7 +29,7 @@ class StereotacticFramePluginInterface : public QObject, public ToolPluginInterf
 {
 
     Q_OBJECT
-    Q_INTERFACES(ToolPluginInterface)
+    Q_INTERFACES(IbisPlugin)
     Q_PLUGIN_METADATA(IID "Ibis.StereotacticFramePluginInterface" )
 
 public:

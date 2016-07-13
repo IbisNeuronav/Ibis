@@ -223,7 +223,7 @@ void USManualCalibrationWidget::UpdateManipulators()
     UsProbeObject * probe = m_pluginInterface->GetCurrentUsProbe();
     if( probe )
     {
-        probe->GetTransform()->GetMatrix( probeMat );
+        probe->GetWorldTransform()->GetMatrix( probeMat );
     }
     probeMat->Invert();
 

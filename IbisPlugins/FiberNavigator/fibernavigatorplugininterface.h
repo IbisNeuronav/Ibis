@@ -63,7 +63,7 @@ class FiberNavigatorPluginInterface : public QObject, public ToolPluginInterface
 {
 
     Q_OBJECT
-    Q_INTERFACES(ToolPluginInterface)
+    Q_INTERFACES(IbisPlugin)
 	Q_PLUGIN_METADATA(IID "Ibis.FiberNavigatorPluginInterface" )
 
 public:

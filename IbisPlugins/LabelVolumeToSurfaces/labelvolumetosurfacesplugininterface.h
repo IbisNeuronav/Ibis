@@ -21,16 +21,21 @@ class LabelVolumeToSurfacesPluginInterface : public QObject, public ObjectPlugin
 {
 
     Q_OBJECT
-    Q_INTERFACES(ObjectPluginInterface)
+    Q_INTERFACES(IbisPlugin)
     Q_PLUGIN_METADATA(IID "Ibis.LabelVolumeToSurfacesPluginInterface" )
 
 public:
 
     LabelVolumeToSurfacesPluginInterface();
     ~LabelVolumeToSurfacesPluginInterface();
+
+    // IbisPlugin interface
+    QString GetPluginName() { return "LabelVolumeToSurfaces"; }
+
+    // ObjectPluginInterface
     QString GetMenuEntryString() { return QString("Label volume to surfaces"); }
-    void CreateObject();
-    QString GetObjectClassName() { return "PolyDataObject"; }
+    SceneObject * CreateObject();
+
 };
 
 #endif

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>275</width>
-    <height>660</height>
+    <height>706</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -19,7 +19,7 @@
   <property name="windowTitle">
    <string>PolyDataObjectSettingsDialogBase</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_3">
+  <layout class="QVBoxLayout" name="verticalLayout_6">
    <item>
     <layout class="QHBoxLayout" name="_2">
      <property name="spacing">
@@ -273,50 +273,109 @@ border-radius: 7;</string>
     </widget>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_3">
-     <item>
-      <widget class="QCheckBox" name="removeOctantCheckBox">
-       <property name="minimumSize">
-        <size>
-         <width>172</width>
-         <height>0</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>Remove from Octant</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <spacer name="horizontalSpacer">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>24</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item>
-      <widget class="QSpinBox" name="octantSpinBox">
-       <property name="alignment">
-        <set>Qt::AlignCenter</set>
-       </property>
-       <property name="keyboardTracking">
-        <bool>false</bool>
-       </property>
-       <property name="minimum">
-        <number>1</number>
-       </property>
-       <property name="maximum">
-        <number>8</number>
-       </property>
-      </widget>
-     </item>
-    </layout>
+    <widget class="QGroupBox" name="clippingGroupBox">
+     <property name="title">
+      <string>Clipping</string>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_3">
+      <item>
+       <layout class="QVBoxLayout" name="verticalLayout_3">
+        <item>
+         <widget class="QLabel" name="label_3">
+          <property name="text">
+           <string>X</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="xpRadioButton">
+          <property name="text">
+           <string>+</string>
+          </property>
+          <attribute name="buttonGroup">
+           <string notr="true">clipXButtonGroup</string>
+          </attribute>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="xmRadioButton">
+          <property name="text">
+           <string>-</string>
+          </property>
+          <attribute name="buttonGroup">
+           <string notr="true">clipXButtonGroup</string>
+          </attribute>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QVBoxLayout" name="verticalLayout_4">
+        <item>
+         <widget class="QLabel" name="label_4">
+          <property name="text">
+           <string>Y</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="ypRadioButton">
+          <property name="text">
+           <string>+</string>
+          </property>
+          <attribute name="buttonGroup">
+           <string notr="true">clipYButtonGroup</string>
+          </attribute>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="ymRadioButton">
+          <property name="text">
+           <string>-</string>
+          </property>
+          <attribute name="buttonGroup">
+           <string notr="true">clipYButtonGroup</string>
+          </attribute>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QVBoxLayout" name="verticalLayout_5">
+        <item>
+         <widget class="QLabel" name="label_5">
+          <property name="text">
+           <string>Z</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="zpRadioButton">
+          <property name="text">
+           <string>+</string>
+          </property>
+          <attribute name="buttonGroup">
+           <string notr="true">clipZButtonGroup</string>
+          </attribute>
+         </widget>
+        </item>
+        <item>
+         <widget class="QRadioButton" name="zmRadioButton">
+          <property name="text">
+           <string>-</string>
+          </property>
+          <attribute name="buttonGroup">
+           <string notr="true">clipZButtonGroup</string>
+          </attribute>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
    </item>
    <item>
     <widget class="QCheckBox" name="showTextureCheckBox">
@@ -387,4 +446,9 @@ border-radius: 7;</string>
  <layoutdefault spacing="6" margin="11"/>
  <resources/>
  <connections/>
+ <buttongroups>
+  <buttongroup name="clipXButtonGroup"/>
+  <buttongroup name="clipYButtonGroup"/>
+  <buttongroup name="clipZButtonGroup"/>
+ </buttongroups>
 </ui>

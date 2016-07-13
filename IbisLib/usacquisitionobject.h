@@ -26,20 +26,32 @@ class TrackedVideoBuffer;
 class vtkImageData;
 class vtkActor;
 class vtkImageActor;
-//class vtkImageSlice;
 class vtkImageMapToColors;
 class vtkImageProperty;
 class vtkAlgorithmOutput;
 class vtkImageStencil;
 class vtkImageMapToColors;
 class vtkImageToImageStencil;
+class vtkPiecewiseFunctionLookupTable;
 class USMask;
-class vtkImageConstantPad; //added Mar 2, 2016, by Xiao
+class vtkImageConstantPad;
+class vtkPassThrough;
 
 typedef itk::Image<float,3> IbisItk3DImageType;
 
-#define ACQ_COLOR_RGB "RGB"
-#define ACQ_COLOR_GRAYSCALE "Grayscale"
+#define ACQ_COLOR_RGB           "RGB"
+#define ACQ_COLOR_GRAYSCALE     "Grayscale"
+#define ACQ_BASE_DIR            "acquisitions"
+#define ACQ_ACQUISITION_PREFIX  "acq"
+
+struct ExportParams
+{
+    ExportParams() : outputDir(""), masked(false), useCalibratedTransform(false), relativeToID(SceneObject::InvalidObjectId) {}
+    QString outputDir;
+    bool masked;
+    bool useCalibratedTransform ;
+    int relativeToID;
+};
 
 class USAcquisitionObject : public SceneObject
 {
@@ -58,9 +70,10 @@ public:
     virtual void Export();
     virtual bool IsExportable()  { return true; }
 
+    bool Import();
     void    SetBaseDirectory(QString dir) {m_baseDirectory = dir;}
     QString GetBaseDirectory() {return m_baseDirectory;}
-    bool    ExportTrackedVideoBuffer( int & numberOfFramesExported, QString dir = "");
+    void    ExportTrackedVideoBuffer(QString destDir = "", bool masked = false , bool useCalibratedTransform = false, int relativeToID = SceneObject::InvalidObjectId );
     bool    LoadFramesFromMINCFile( QStringList & allMINCFiles );
     bool    LoadFramesFromMINCFile( Serializer * ser );
 
@@ -71,7 +84,6 @@ public:
 
     bool IsUsingMask() { return m_isMaskOn; }
     void SetUseMask( bool useMask );
-    //added Mar 1, 2016, Xiao
     bool IsUsingDoppler() { return m_isDopplerOn; }
     void SetUseDoppler( bool useDoppler );
 
@@ -83,7 +95,7 @@ public:
 
     // Return itk image of a given frame
     bool GetItkImage(IbisItk3DImageType::Pointer itkOutputImage, int frameNo, vtkMatrix4x4* sliceMatrix);
-    void GetItkRGBImage(IbisRGBImageType::Pointer itkOutputImage, int frameNo);
+    void GetItkRGBImage(IbisRGBImageType::Pointer itkOutputImage, int frameNo, bool masked, bool useCalibratedTransform = false, vtkMatrix4x4 *relativeMatrix = 0 );
 
     // Display of current slice
     int GetSliceWidth();
@@ -120,7 +132,10 @@ public:
     QString GetAcquisitionTypeAsString();
     QString GetAcquisitionColor();
     QString GetUsDepth() { return m_usDepth; }
-    //void InitialSetMask( USMask *mask ); //added Mar 2, 2016, xiao
+
+    // Outputs
+    vtkAlgorithmOutput * GetMaskedOutputPort();
+    vtkAlgorithmOutput * GetUnmaskedOutputPort();
 
 private slots:
 
@@ -139,15 +154,16 @@ protected:
     // Acquisition properties
     QString m_usDepth;
     UsProbeObject::ACQ_TYPE m_acquisitionType;
+    int m_usProbeObjectId;  // probe we record from
 
     // Images and matrices
+    static int m_defaultImageSize[2];
     TrackedVideoBuffer * m_videoBuffer;
 
     // 3D viewing data
     struct PerViewElements
     {
         PerViewElements() : imageSlice(0) {}
-//        vtkImageSlice * imageSlice;
         vtkImageActor * imageSlice;
         std::vector<vtkImageActor*> staticSlices;
     };
@@ -162,12 +178,17 @@ protected:
     int                       m_sliceLutIndex;
     vtkImageProperty        * m_sliceProperties;
     bool                      m_isMaskOn;
-    bool                      m_isDopplerOn; // added Mar 1, 2016, Xiao
+    bool                      m_isDopplerOn;
     vtkImageToImageStencil  * m_imageStencilSource;
     vtkImageStencil         * m_sliceStencil;
-    vtkImageStencil         * m_sliceStencilDoppler; //added Mar 3, 2016, Xiao
+    vtkImageStencil         * m_sliceStencilDoppler;
     vtkImageMapToColors     * m_mapToColors;
-    vtkImageConstantPad     * m_constantPad; // added Mar 2, 2016, Xiao
+    vtkPiecewiseFunctionLookupTable * m_lut;
+    vtkImageConstantPad     * m_constantPad;
+
+    // Outputs
+    vtkPassThrough * m_maskedImageOutput;
+    vtkPassThrough * m_unmaskedImageOutput;
 
     // Static slices properties
     void SetupAllStaticSlicesInAllViews();
@@ -197,8 +218,8 @@ protected:
 
     std::vector< IbisRGBImageType::Pointer > m_itkRGBImages;
 
-    void Save( int & numberOfFramesSaved );
-    void ConvertVtkImagesToItkRGBImages();
+    void Save( );
+    void ConvertVtkImagesToItkRGBImages(bool masked = false, bool useCalibratedTransform = false, int relativeToID = SceneObject::InvalidObjectId );
 };
 
 ObjectSerializationHeaderMacro( USAcquisitionObject );

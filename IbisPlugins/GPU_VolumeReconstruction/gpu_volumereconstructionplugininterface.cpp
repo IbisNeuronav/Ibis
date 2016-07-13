@@ -35,7 +35,7 @@ bool GPU_VolumeReconstructionPluginInterface::CanRun()
 QWidget * GPU_VolumeReconstructionPluginInterface::CreateFloatingWidget()
 {
     GPU_VolumeReconstructionWidget * widget = new GPU_VolumeReconstructionWidget;
-    widget->SetApplication( m_application );
+    widget->SetApplication( GetApplication() );
     return widget;
 }
 

@@ -44,9 +44,10 @@ void SurfaceSettingsWidget::SetGeneratedSurface( GeneratedSurface * surface )
     m_surface = surface;
     if (m_surface)
     {
-       m_surface->Register( 0 );
-       m_reductionPercent = m_surface->GetReduction();
-       this->SetupHistogramWidget();
+        m_surface->Register( 0 );
+        m_reductionPercent = m_surface->GetReduction();
+        if( m_surface->IsValid() )
+            this->SetupHistogramWidget();
     }
 }
 

@@ -24,7 +24,7 @@ class USManualCalibrationPluginInterface : public QObject, public ToolPluginInte
 {
 
     Q_OBJECT
-    Q_INTERFACES(ToolPluginInterface)
+    Q_INTERFACES(IbisPlugin)
     Q_PLUGIN_METADATA(IID "Ibis.USManualCalibrationPluginInterface" )
 
 public:

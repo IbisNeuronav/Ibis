@@ -20,6 +20,8 @@ class SceneManager;
 class SceneObject;
 class vtkEventQtSlotConnect;
 class vtkObject;
+class ImageObject;
+class PointsObject;
 
 class OpenFileParams
 {
@@ -28,12 +30,11 @@ public:
 
     struct SingleFileParam
     {
-        SingleFileParam() : isReference(false), isLabel(false), isVideoFrame(false), isMINC1(false), loadedObject(0), secondaryObject(0), parent(0) {}
+        SingleFileParam() : isReference(false), isLabel(false), isMINC1(false), loadedObject(0), secondaryObject(0), parent(0) {}
         QString fileName;
         QString objectName;
         bool isReference;
         bool isLabel;  // load image as label image instead of floats.
-        bool isVideoFrame;  // load 2D color frame
         bool isMINC1;
         SceneObject * loadedObject;
         SceneObject * secondaryObject;  // This is a hack to attach the second point object that can be found in PointsObjects
@@ -79,6 +80,10 @@ public:
 
     void PrintMetadata(itk::MetaDataDictionary &dict);
     bool FindMincConverter();
+    bool IsMINC1( QString fileName );
+    bool ConvertMINC1toMINC2(QString &inputileName, QString &outputileName , bool isVideoFrame = false );
+    bool GetFrameDataFromMINCFile(QString filename, ImageObject *img);
+    bool GetPointsDataFromTagFile( QString filename, PointsObject *pts1, PointsObject *pts2 );
 
 private slots:
 
@@ -90,10 +95,9 @@ protected:
 
     void run();
 
-    bool OpenFile        ( QList<SceneObject*> & readObjects, QString filename, const QString & dataObjectName = "", bool isLabel = false, bool isVideoFrame = false, bool isMINC1 = false );
+    bool OpenFile        (QList<SceneObject*> & readObjects, QString filename, const QString & dataObjectName = "", bool isLabel = false, bool isMINC1 = false );
     bool OpenItkFile     ( QList<SceneObject*> & readObjects, QString filename, const QString & dataObjectName = "" );
     bool OpenItkLabelFile( QList<SceneObject*> & readObjects, QString filename, const QString & dataObjectName = "" );
-    bool OpenItkVideoFrameFile( QList<SceneObject*> & readObjects, QString filename, const QString & dataObjectName = "" );
     bool OpenObjFile     ( QList<SceneObject*> & readObjects, QString filename, const QString & dataObjectName = "" );
     bool OpenWavObjFile  ( QList<SceneObject*> & readObjects, QString filename, const QString & dataObjectName = "" );
     bool OpenVTKFile     ( QList<SceneObject*> & readObjects, QString filename, const QString & dataObjectName = "" );
@@ -103,7 +107,6 @@ protected:
     void SetObjectName( SceneObject * obj, QString objName, QString filename );
     void ReportWarning( QString warning );
 
-//    void GetImageAttributes(itk::MetaDataDictionary &, vtkMINCImageAttributes2 *);
     // Progress report
     int m_currentFileIndex;
     double m_progress;
@@ -120,6 +123,7 @@ protected:
 
     // Path to mincconvert
     QString m_mincconvert;
+    QString m_minccalc;
 };
 
 #endif

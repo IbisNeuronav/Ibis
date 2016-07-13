@@ -296,9 +296,9 @@ LabelVolumeToSurfacesPluginInterface::~LabelVolumeToSurfacesPluginInterface()
 {
 }
 
-void LabelVolumeToSurfacesPluginInterface::CreateObject()
+SceneObject *LabelVolumeToSurfacesPluginInterface::CreateObject()
 {
-    SceneManager  *manager = m_application->GetSceneManager();
+    SceneManager  *manager = GetSceneManager();
     Q_ASSERT( manager );
     ImageObject * image = ImageObject::SafeDownCast( manager->GetCurrentObject() );
     if( image && image->IsLabelImage() )
@@ -341,7 +341,7 @@ void LabelVolumeToSurfacesPluginInterface::CreateObject()
         smoother->NonManifoldSmoothingOn();
         smoother->NormalizeCoordinatesOn();
 
-        QProgressDialog * pd = m_application->StartProgress( 100, "Extracting surfaces..." );
+        QProgressDialog * pd = GetApplication()->StartProgress( 100, "Extracting surfaces..." );
         QApplication::processEvents();
 
         for( int i = minLabel; i <= maxLabel; ++i )
@@ -372,11 +372,11 @@ void LabelVolumeToSurfacesPluginInterface::CreateObject()
             polyDataObj->Delete();
 
             int progress = (int)( 100 * i / (double) numberOfLabels );
-            m_application->UpdateProgress( pd, progress );
+            GetApplication()->UpdateProgress( pd, progress );
             QApplication::processEvents();
         }
 
-        m_application->StopProgress( pd );
+        GetApplication()->StopProgress( pd );
 
         // Cleanup
         contourExtractor->Delete();
@@ -386,7 +386,6 @@ void LabelVolumeToSurfacesPluginInterface::CreateObject()
         histogram->Delete();
     }
     else
-    {
         QMessageBox::warning( 0, "Error!", "Current object should be a label volume" );
-    }
+    return NULL;
 }

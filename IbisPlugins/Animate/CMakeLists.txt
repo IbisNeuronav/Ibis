@@ -1,6 +1,7 @@
 project( ${PluginName} )
 
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
+include_directories( ${VolumeRenderingObjectIncludeDir} )
 
 # define sources
 set( PluginSrc animateplugininterface.cpp animatewidget.cpp timelinewidget.cpp

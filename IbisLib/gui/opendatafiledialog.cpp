@@ -8,13 +8,11 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
-
 #include "opendatafiledialog.h"
 #include "ui_opendatafiledialog.h"
 #include <QFileDialog>
 #include "vtkTransform.h"
 #include "sceneobject.h"
-#include "ignsconfig.h"
 #include "filereader.h"
 #include "scenemanager.h"
     

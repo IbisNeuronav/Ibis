@@ -8,15 +8,23 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
-
 #include "hardwaresettings.h"
 #include <QDir>
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QEvent>
 #include "ignsconfig.h"
-#include "ignsmsg.h"
 #include "application.h"
+
+#define IGNS_MSG_ERROR                   tr("Error")
+#define IGNS_MSG_INFO                    tr("Info")
+#define IGNS_MSG_LOAD_DEFAULT_CFG        tr("Loading default hardware configuration.")
+#define IGNS_MSG_LOAD_USER_CFG           tr("Loading user hardware configuration.")
+#define IGNS_MSG_NO_CONFIG_FILE          tr("Settings file not found. Select User Settings.")
+#define IGNS_MSG_MAKE_CONFIG             tr("Settings file not provided. Configure the application manually.")
+#define IGNS_MSG_OPEN_CFG_FILE           tr("Open cofiguration file")
+#define IGNS_MSG_RESTORE_DEFAULT         tr(". Restoring default settings.")
+#define IGNS_MSG_FILE_NOT_EXISTS         tr("File does not exist:\n")
 
 HardwareSettings::HardwareSettings( QString defaultCfg, QWidget * parent )
     : QDialog(parent)

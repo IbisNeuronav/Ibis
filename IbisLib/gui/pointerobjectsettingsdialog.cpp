@@ -13,6 +13,9 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "pointerobject.h"
 #include "pointsobject.h"
 #include "scenemanager.h"
+#include "pointercalibrationdialog.h"
+#include "vtkQtMatrixDialog.h"
+#include "vtkTransform.h"
 
 PointerObjectSettingsDialog::PointerObjectSettingsDialog(QWidget *parent) :
     QWidget(parent),
@@ -21,12 +24,21 @@ PointerObjectSettingsDialog::PointerObjectSettingsDialog(QWidget *parent) :
     ui->setupUi(this);
     m_pointer = 0;
     m_pointerPickedPointsObject = 0;
+    m_tipCalibrationWidget = 0;
+    m_matrixDialog = 0;
 }
 
 PointerObjectSettingsDialog::~PointerObjectSettingsDialog()
 {
     if (m_pointer)
         m_pointer->UnRegister(0);
+    if( m_tipCalibrationWidget )
+        m_tipCalibrationWidget->close();
+    if( m_matrixDialog )
+    {
+        m_matrixDialog->close();
+        m_matrixDialog = 0;
+    }
 }
 
 void PointerObjectSettingsDialog::SetPointer(PointerObject *ptr)
@@ -42,9 +54,6 @@ void PointerObjectSettingsDialog::SetPointer(PointerObject *ptr)
     if (m_pointer)
     {
         m_pointer->Register(0);
-        ui->navigationCheckBox->blockSignals(true);
-        ui->navigationCheckBox->setChecked(m_pointer->GetManager()->GetNavigationState());
-        ui->navigationCheckBox->blockSignals(false);
         this->UpdatePointSetsComboBox();
     }
 }
@@ -63,7 +72,7 @@ void PointerObjectSettingsDialog::SetPointerPickedPointsObject(PointsObject *pts
         m_pointerPickedPointsObject->Register(0);
 }
 
-void PointerObjectSettingsDialog::SaveTipPosition()
+void PointerObjectSettingsDialog::on_savePositionPushButton_clicked()
 {
     bool delayAddObject = false;
     if (!m_pointerPickedPointsObject)
@@ -82,13 +91,7 @@ void PointerObjectSettingsDialog::SaveTipPosition()
     }
 }
 
-void PointerObjectSettingsDialog::EnableNavigation(bool yes)
-{
-    Q_ASSERT(m_pointer);
-    m_pointer->GetManager()->EnablePointerNavigation( yes );
-}
-
-void PointerObjectSettingsDialog::NewPointsObject()
+void PointerObjectSettingsDialog::on_newPointsObjectPushButton_clicked()
 {
     Q_ASSERT(m_pointer);
     m_pointer->CreatePointerPickedPointsObject();
@@ -99,13 +102,10 @@ void PointerObjectSettingsDialog::NewPointsObject()
 void PointerObjectSettingsDialog::UpdateSettings()
 {
     Q_ASSERT(m_pointer);
-    ui->navigationCheckBox->blockSignals(true);
-    ui->navigationCheckBox->setChecked(m_pointer->GetManager()->GetNavigationState());
-    ui->navigationCheckBox->blockSignals(false);
     this->UpdatePointSetsComboBox();
 }
 
-void PointerObjectSettingsDialog::PointSetsComboBoxActivated(int index)
+void PointerObjectSettingsDialog::on_pointSetsComboBox_activated( int index )
 {
     Q_ASSERT(m_pointer);
     QList <PointsObject*> PointerPickedPointsObjectList = m_pointer->GetPointerPickedPointsObjects();
@@ -133,4 +133,63 @@ void PointerObjectSettingsDialog::UpdatePointSetsComboBox()
         ui->pointSetsComboBox->setCurrentIndex(currentIndex);
         ui->pointSetsComboBox->blockSignals(false);
     }
+}
+
+void PointerObjectSettingsDialog::OnTipCalibrationDialogClosed()
+{
+    m_tipCalibrationWidget = 0;
+    ui->calibrateTipButton->blockSignals( true );
+    ui->calibrateTipButton->setChecked( false );
+    ui->calibrateTipButton->blockSignals( false );
+}
+
+void PointerObjectSettingsDialog::on_calibrateTipButton_toggled( bool on )
+{
+    if( on )
+    {
+        Q_ASSERT( !m_tipCalibrationWidget );
+        m_tipCalibrationWidget = new PointerCalibrationDialog;
+        m_tipCalibrationWidget->setAttribute( Qt::WA_DeleteOnClose, true );
+        connect( m_tipCalibrationWidget, SIGNAL( destroyed() ), SLOT( OnTipCalibrationDialogClosed() ) );
+        m_tipCalibrationWidget->SetPointer( m_pointer );
+        m_tipCalibrationWidget->show();
+    }
+    else
+    {
+        Q_ASSERT( m_tipCalibrationWidget );
+        m_tipCalibrationWidget->close();
+    }
+}
+
+void PointerObjectSettingsDialog::on_calibrationMatrixPushButton_toggled( bool on )
+{
+    if( on )
+    {
+        Q_ASSERT_X( m_pointer, "TransformEditWidget::on_calibrationMatrixPushButton_toggled", "Can't call this function without setting PointerObject." );
+        Q_ASSERT( !m_matrixDialog );
+
+        QString dialogTitle = m_pointer->GetName();
+        dialogTitle += ": Pointer Calibration Matrix";
+
+        m_matrixDialog = new vtkQtMatrixDialog( true, 0 );
+        m_matrixDialog->setWindowTitle( dialogTitle );
+        m_matrixDialog->setAttribute( Qt::WA_DeleteOnClose );
+        m_matrixDialog->SetTransform( m_pointer->GetCalibrationTransform() );
+        m_matrixDialog->show();
+        connect( m_matrixDialog, SIGNAL(destroyed()), this, SLOT(OnCalibrationMatrixDialogClosed()) );
+    }
+    else
+    {
+        if( m_matrixDialog )
+        {
+            m_matrixDialog->close();
+            m_matrixDialog = 0;
+        }
+    }
+}
+
+void PointerObjectSettingsDialog::OnCalibrationMatrixDialogClosed()
+{
+    m_matrixDialog = 0;
+    ui->calibrationMatrixPushButton->setChecked( false );
 }

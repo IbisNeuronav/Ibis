@@ -12,31 +12,27 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #define OBJECTPLUGININTERFACE_h_
 
 #include <QString>
+#include "ibisplugin.h"
 
-class Application;
 class SceneObject;
 class Serializer;
 
-class ObjectPluginInterface
+class ObjectPluginInterface : public IbisPlugin
 {
 
 public:
+
+    vtkTypeMacro( ObjectPluginInterface, IbisPlugin );
     
-    ObjectPluginInterface() : m_application(0) {}
+    ObjectPluginInterface() {}
     virtual ~ObjectPluginInterface() {}
+
+    // Implementation of IbisPlugin interface
+    IbisPluginTypes GetPluginType() { return IbisPluginTypeObject; }
     
-    void SetApplication( Application * app ) { m_application = app; }
-    Application * GetApplication() { return m_application; }
     virtual QString GetMenuEntryString() = 0;
-    virtual void CreateObject() = 0;
-    virtual QString GetObjectClassName() = 0;
-
-protected:
-
-    Application * m_application;
-
+    virtual SceneObject * CreateObject() = 0;
+    virtual bool CanBeActivated() { return true; }
 };
 
-Q_DECLARE_INTERFACE( ObjectPluginInterface, "ca.mcgill.mni.bic.Ibis.ObjectPluginInterface/1.0" );
-
-#endif //OBJECTPLUGININTERFACE_h_
+#endif

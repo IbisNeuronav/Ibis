@@ -520,6 +520,39 @@ template< class T > bool Serialize( Serializer * serial, const char * attrName, 
 }
 
 // Description:
+// Specialization function to serialize QList of generic objects
+template< class T > bool Serialize( Serializer * serial, const char * attrName, QList<T> & value )
+{
+    if( serial->BeginSection( attrName ) )
+    {
+        int numberOfElements = value.size();
+        Serialize( serial, "NumberOfElements", numberOfElements );
+        if( serial->IsReader() )
+        {
+            value.reserve( numberOfElements );
+            for( int i = 0; i < numberOfElements; ++i )
+            {
+                T t;
+                value.push_back( t );
+            }
+        }
+
+        typename QList<T>::iterator it = value.begin();
+        int i = 0;
+        while( it != value.end() )
+        {
+            QString elemName = QString( "Element_%1" ).arg(i);
+            Serialize( serial, elemName.toUtf8().data(), *(it) );
+            ++i;
+            ++it;
+        }
+        serial->EndSection();
+        return true;
+    }
+    return false;
+}
+
+// Description:
 // Specialization function to serialize QList of pointers containers
 template< class T > bool Serialize( Serializer * serial, const char * attrName, QList<T*> & value )
 {
@@ -552,7 +585,17 @@ template< class T > bool Serialize( Serializer * serial, const char * attrName, 
     return false;
 }
 
-
+template< class T, class R > bool Serialize( Serializer * serial, const char * attrName, QPair<T,R> & value )
+{
+    if( serial->BeginSection( attrName ) )
+    {
+        Serialize( serial, "First", value.first );
+        Serialize( serial, "Second", value.second );
+        serial->EndSection();
+        return true;
+    }
+    return false;
+}
 
 template< class T, class R > bool Serialize( Serializer * serial, const char * attrName, std::pair<T,R> & value )
 {

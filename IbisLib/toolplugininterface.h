@@ -14,21 +14,25 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QString>
 #include <QPoint>
 #include <QSize>
-#include <QtPlugin>
 #include "serializer.h"
+#include "ibisplugin.h"
 
-class Application;
 class SceneManager;
 class QSettings;
 class QWidget;
 
-class ToolPluginInterface
+class ToolPluginInterface : public IbisPlugin
 {
 
 public:
+
+    vtkTypeMacro( ToolPluginInterface, IbisPlugin );
     
-    ToolPluginInterface() : m_application(0) {}
+    ToolPluginInterface() {}
     virtual ~ToolPluginInterface() {}
+
+    // Implementation of IbisPlugin interface
+    IbisPluginTypes GetPluginType() { return IbisPluginTypeTool; }
 
     virtual void Serialize( Serializer * serializer );
 
@@ -41,12 +45,8 @@ public:
         bool active;
     };
     
-    void BaseLoadSettings( QSettings & s );
-    void BaseSaveSettings( QSettings & s );
     Settings & GetSettings() { return m_settings; }
-    void SetApplication( Application * app ) { m_application = app; }
-    Application * GetApplication() { return m_application; }  
-    SceneManager * GetSceneManager();
+
     bool IsPluginActive() { return m_settings.active; }
 
     // Give a chance to plugin to initialize things right after construction
@@ -54,7 +54,6 @@ public:
     virtual void InitPlugin() {}
 
     // Functions that should be overriden in plugins
-    virtual QString GetPluginName() = 0;
     virtual bool CanRun() = 0;
     virtual QString GetMenuEntryString() = 0;
 
@@ -74,16 +73,12 @@ public:
     
 protected:
 
-    // Override this function to save settings for your plugin
-    virtual void LoadSettings( QSettings & s ) {}
-    virtual void SaveSettings( QSettings & s ) {}
+    virtual void PluginTypeLoadSettings( QSettings & s );
+    virtual void PluginTypeSaveSettings( QSettings & s );
 
-    Application * m_application;
     Settings m_settings;
 
 };
-
-Q_DECLARE_INTERFACE( ToolPluginInterface, "ca.mcgill.mni.bic.Ibis.ToolPluginInterface/1.0" );
 
 ObjectSerializationHeaderMacro( ToolPluginInterface );
 

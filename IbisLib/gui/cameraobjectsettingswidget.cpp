@@ -49,7 +49,7 @@ void CameraObjectSettingsWidget::UpdateUI()
     ui->trackCameraPushButton->setChecked( m_camera->GetTrackCamera() );
     ui->trackCameraPushButton->blockSignals( false );
 
-    if( m_camera->IsCameraTrackable() )
+    if( m_camera->IsDrivenByHardware() )
     {    
         ui->freezeButton->blockSignals( true );
         ui->freezeButton->setHidden( false );
@@ -104,12 +104,15 @@ void CameraObjectSettingsWidget::UpdateUI()
     ui->xFocalLineEdit->setText( QString::number( m_camera->GetIntrinsicParams().m_focal[0], 'f', 2 ) );
     ui->yFocalLineEdit->setText( QString::number( m_camera->GetIntrinsicParams().m_focal[1], 'f', 2 ) );
 
+    double center[2] = { 0.0, 0.0 };
+    m_camera->GetImageCenterPix( center[0], center[1] );
+
     ui->xImageCenterSpinBox->blockSignals( true );
-    ui->xImageCenterSpinBox->setValue( m_camera->GetImageCenter()[0] );
+    ui->xImageCenterSpinBox->setValue( center[0] );
     ui->xImageCenterSpinBox->blockSignals( false );
 
     ui->yImageCenterSpinBox->blockSignals( true );
-    ui->yImageCenterSpinBox->setValue( m_camera->GetImageCenter()[1] );
+    ui->yImageCenterSpinBox->setValue( center[1] );
     ui->yImageCenterSpinBox->blockSignals( false );
 
     ui->distortionSpinBox->blockSignals( true );
@@ -334,7 +337,7 @@ void CameraObjectSettingsWidget::on_xImageCenterSpinBox_valueChanged(double arg1
     Q_ASSERT( m_camera );
     double x = ui->xImageCenterSpinBox->value();
     double y = ui->yImageCenterSpinBox->value();
-    m_camera->SetImageCenter( x, y );
+    m_camera->SetImageCenterPix( x, y );
 }
 
 void CameraObjectSettingsWidget::on_yImageCenterSpinBox_valueChanged(double arg1)
@@ -342,7 +345,7 @@ void CameraObjectSettingsWidget::on_yImageCenterSpinBox_valueChanged(double arg1
     Q_ASSERT( m_camera );
     double x = ui->xImageCenterSpinBox->value();
     double y = ui->yImageCenterSpinBox->value();
-    m_camera->SetImageCenter( x, y );
+    m_camera->SetImageCenterPix( x, y );
 }
 
 void CameraObjectSettingsWidget::on_distortionSpinBox_valueChanged(double arg1)

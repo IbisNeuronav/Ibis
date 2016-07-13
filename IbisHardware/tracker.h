@@ -14,16 +14,19 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <vector>
 #include "serializer.h"
 #include "vtkObject.h"
-#include <qobject.h>
+#include <QObject>
 #include <qstring.h>
 #include "trackerflags.h"
 #include "hardwaremodule.h"
+#include "trackedsceneobject.h"
 
 class vtkPOLARISTracker;
 class vtkTrackerTool;
 class QWidget;
 class vtkMatrix4x4;
 class SceneManager;
+class TrackedVideoSource;
+class IbisHardwareModule;
 
 #define BR9600    9600
 #define BR14400  14400
@@ -39,16 +42,17 @@ struct ToolDescription
     ToolDescription();
     ToolDescription( const ToolDescription & orig );
     virtual void Serialize( Serializer * serializer );
+    void InstanciateSceneObject();
+    void ClearSceneObject();
     ToolType type;           // Passive = 1, Active = 0
     ToolUse use;             // What is this tool used for.
     int active;              // wether the tool has been activated
     int toolPort;            // if active == 1, the tool port, otherwise, -1
-    int toolObjectId;        // id given by SceneManager to the object representing the tool in order to avoid access by name
+    int videoSourceIndex;
     QString name;            // tool name. just for the ui.
     QString romFileName;
-    vtkMatrix4x4 * cachedCalibrationMatrix;
-    double cachedCalibrationRMS;
     QString cachedSerialNumber;   // serial number used to recognize active tools when plugged in
+    TrackedSceneObject * sceneObject;  // Object in the scene if active or holding state if inactive
 };
 
 ObjectSerializationHeaderMacro( ToolDescription );
@@ -83,6 +87,9 @@ public:
     
     Tracker();
     ~Tracker();
+
+    void SetHardwareModule( IbisHardwareModule * hw ) { m_hardwareModule = hw; }
+    void SetSceneManager( SceneManager * man ) { m_sceneManager = man; }
         
     // Description:
     // Initialize the tracking system. If IsInitialized() == 1, system is already tracking
@@ -100,15 +107,12 @@ public:
     QString GetTrackerVersion();
     vtkTrackerTool * GetTool( int toolIndex );
     vtkTrackerTool * GetTool( QString & toolName );
-    
-    // Description:
-    // There may be only one in the current version - 2007-06-04
-    int GetUSProbeToolIndex( );
+    vtkTrackerTool * GetTool( TrackedSceneObject * obj );
+    TrackedVideoSource * GetVideoSource( TrackedSceneObject * obj );
 
+    vtkTransform * GetReferenceTransform() { return m_referenceTransform; }
     int GetReferenceToolIndex();
-    int SetReferenceToolIndex( int toolIndex );
-    int GetNavigationPointerIndex();
-    int SetNavigationPointerIndex( int toolIndex );
+    void SetReferenceToolIndex( int toolIndex );
     int GetCurrentToolIndex();
     void SetCurrentToolIndex( int toolIndex );
     
@@ -122,20 +126,9 @@ public:
     void SetToolObjectId(int toolIndex, int id);
 
     int GetToolIndex( QString toolName );
-    
-    void GetActiveToolTypeAndRom(ToolUse use, QString &type, QString &romFile);
-    
-    // Description:
-    // To calibrate the tip of a pointer, Call StartToolTipCalibration(toolIndex).
-    // Every update will calibrate the tool. You can get the calibration vector
-    // by getting the last row of the calibration matrix and you can get the 
-    // rms on the calibration by calling GetToolLastCalibrationRMS(tool). When
-    // calibration is ok, call StopToopTipCalibration(tool).
-    void StartToolTipCalibration( int toolIndex );
-    double GetToolLastCalibrationRMS( int toolIndex );
-    void SetToolLastCalibrationRMS( int toolIndex, double rms );
-    void StopToolTipCalibration( int toolIndex );
-    int IsToolCalibrating( int toolIndex );
+    int GetToolIndex( TrackedSceneObject * obj );
+
+    bool ToolHasVideo( int toolIndex );
     
     // Description:
     // Return the type of tool at index toolIndex. 0 -> passive, 1 -> active
@@ -182,25 +175,12 @@ public:
     
     // Description:
     // Get the state of the tool at index toolIndex. The state is the one computed on last Tracker update.
-    TrackerToolState GetCurrentToolState( int toolIndex );
-    
-    // Description:
-    // Get the calibration matrix for tool at index toolIndex. If the tool is active, you get
-    // the real tool calibration matrix in vtkTrackerTool, otherwise, you get the cached matrix
-    vtkMatrix4x4 * GetToolCalibrationMatrix( int toolIndex );
+    TrackerToolState GetToolState( int toolIndex );
     
     void SetToolRomFile( int toolIndex, QString & romFile );
     QString GetToolRomFile( int toolIndex );
     
-    // Description:
-    // Get the calibration matrix that is pre-multiplied with all transformation returned by
-    // the tracking system. This matrix is useful to change axes orientation or if you have
-    // a reference system different from the one given by the tracking system.
-    vtkMatrix4x4 * GetWorldCalibrationMatrix();
-    
-    
     QWidget * CreateSettingsDialog( QWidget * parent );
-    QWidget * CreateStatusDialog( QWidget * parent );
     
     virtual void Serialize( Serializer * serializer );
 
@@ -209,67 +189,61 @@ public:
     void SetBaudRate(int);
     int GetBaudRate();
 
-    // Description:
-    // Give more/less power to the user
-    void WriteActivePointerCalibrationMatrix(QString & filename);
+    QString GetTrackerError() { return m_trackerError; }
+    void ClearTrackerError() { m_trackerError.clear(); }
 
-    int FindFirstActivePointer();
-
-    // Description
-    // check if there is a valid, active reference tool
-    bool ValidateReference();
+    void AddAllToolsToScene();
+    void RemoveAllToolsFromScene();
 
 public slots:
+
     void RenameTool(QString, QString);
 
 signals:
 
-
+    void ToolListChanged();
     void Updated();
-    void ToolActivated( int );
-    void ToolDeactivated( int );
-    void ToolUseChanged( int );
-    void ToolNameChanged( int, QString );
-    void ToolRemoved( int );
-    void TrackerInitialized();
-    void TrackerStopped();
-    void ReferenceToolChanged(bool);
-    void NavigationPointerChangedSignal();
     
 private:
 
-    void ActivateAllPassiveTools();
+    TrackedVideoSource * GetVideoSource( int sourceIndex );
+
+    void PushTrackerStateToSceneObjects();
+    bool ActivateAllPassiveTools();
     void DeactivateAllPassiveTools();
     
     // Functions that act on subclasses of vtkTracker. Might eventually be put 
     // in subclasses of class Tracker.
-    void ReallyActivatePassiveTool( int toolIndex );
+    bool ReallyActivatePassiveTool( int toolIndex );
     void ReallyDeactivatePassiveTool( int toolIndex );
     
-    // Description:
-    // Backs-up the calibration matrix of active tools so that
-    // when this class is serialized, we save the correct calibration matrix
-    void BackupCalibrationMatrices();
-    
+    void AddToolToScene( int toolIndex );
+    void RemoveToolFromScene( int toolIndex );
+
     // Description:
     // This function look if some new active tools have
     // been plugged into the tracking system.
     void LookForNewActiveTools();
     void LookForDeactivatedActiveTools();
+
+    // Stable transform between the reference and tracking system origin (e.g.: Polaris Camera)
+    vtkTransform * m_referenceTransform;
     
     // The object that does the real tracking job
-    vtkPOLARISTracker                     * m_tracker;
-    QString                             m_trackerVersion;
+    vtkPOLARISTracker   * m_tracker;
+    QString               m_trackerVersion;
+
+    SceneManager * m_sceneManager;
+    IbisHardwareModule * m_hardwareModule;
     
     // Meta information for every tool that is not contained in vtkTracker
     typedef std::vector<ToolDescription> ToolDescriptionVec;
     ToolDescriptionVec     m_toolVec;
     
-    int                    m_currentTool;
-    int                    m_referenceTool;
-    int                    m_navigationPointer; // pointer selected to navigate through the volume, cut planes will be moved to its tip position
-    vtkMatrix4x4         * m_cachedWorldCalibrationMatrix;
-    int                    m_baudRate;
+    QString         m_trackerError;
+    int             m_currentTool;
+    int             m_referenceTool;
+    int             m_baudRate;
 };
 
 ObjectSerializationHeaderMacro( Tracker );

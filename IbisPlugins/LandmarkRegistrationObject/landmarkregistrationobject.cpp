@@ -13,9 +13,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "landmarkregistrationobjectsettingswidget.h"
 #include "landmarktransform.h"
 #include "scenemanager.h"
-#include "filereader.h"
 #include "ignsconfig.h"
-#include "ignsmsg.h"
 #include "application.h"
 #include "view.h"
 #include "vtkPoints.h"
@@ -54,9 +52,11 @@ LandmarkRegistrationObject::~LandmarkRegistrationObject()
 {
     m_registrationTransform->Delete();
     m_backUpTransform->Delete();
-    m_sourcePoints->UnRegister( this );
+    if( m_sourcePoints )
+        m_sourcePoints->UnRegister( this );
     m_activeSourcePoints->Delete();
-    m_targetPoints->UnRegister( this );
+    if( m_targetPoints )
+        m_targetPoints->UnRegister( this );
     m_activeTargetPoints->Delete();
 }
 
@@ -70,37 +70,19 @@ void LandmarkRegistrationObject::CreateSettingsWidgets( QWidget * parent, QVecto
     if( m_sourcePoints )
     {
         connect( m_sourcePoints, SIGNAL(Modified()), props, SLOT(UpdateUI()) );
-        m_sourcePoints->SetPickable( m_sourcePoints->GetEnabled() );
     }
     connect( this, SIGNAL(Modified()), props, SLOT(UpdateUI()) );
     widgets->append(props);
-    if( !this->IsHidden() && !this->IsRegistered() )
-        this->EnablePicking(true);
     if( !this->IsRegistered() )
         m_backUpTransform->DeepCopy(this->LocalTransform);
 }
 
 void LandmarkRegistrationObject::Serialize( Serializer * ser )
 {
-    bool oldScene = ser->FileVersionOlderThanSupported();
 
     int sourceId = SceneObject::InvalidObjectId;
     int targetId = SceneObject::InvalidObjectId;
     m_registerRequested = this->IsRegistered();
-    if( oldScene && ser->IsReader() )
-    {
-        if( ser->BeginSection("LandmarkRegistration"))
-        {
-            ::Serialize( ser, "Registered", m_registerRequested );
-            ::Serialize( ser, "SourcePointsObjectId", sourceId );
-            ::Serialize( ser, "TargetPointsObjectId", targetId );
-            ::Serialize( ser, "RegistrationTargetObjectId", m_targetObjectID );
-            ser->EndSection();
-        }
-        m_sourcePointsID = sourceId;
-        m_targetPointsID = targetId;
-        return;
-    }
     SceneObject::Serialize(ser);
     sourceId = m_sourcePoints->GetObjectID();
     targetId = m_targetPoints->GetObjectID();
@@ -123,6 +105,13 @@ void LandmarkRegistrationObject::Serialize( Serializer * ser )
                 enabledPoints[i] = m_pointEnabledStatus.at(i);
         ::Serialize( ser, "PointsEnabledStatus", enabledPoints, numberOfPoints );
     }
+
+    // Scaling allowed?
+    bool scalingAllowed = m_registrationTransform->IsScalingAllowed();
+    ::Serialize( ser, "ScalingAllowed", scalingAllowed );
+    if( ser->IsReader() )
+        m_registrationTransform->SetScalingAllowed( scalingAllowed );
+
     if( ser->IsReader() )
     {
         m_sourcePointsID = sourceId;
@@ -144,38 +133,55 @@ void LandmarkRegistrationObject::Serialize( Serializer * ser )
 
 void LandmarkRegistrationObject::PostSceneRead()
 {
+    this->InternalPostSceneRead();
+    for( int i = 0; i < Children.size(); ++i )
+        Children[i]->PostSceneRead();
+    this->SelectPoint( m_sourcePoints->GetSelectedPointIndex() );
+}
+
+void LandmarkRegistrationObject::CurrentObjectChanged()
+{
+    if( GetManager()->GetCurrentObject() == this )
+    {
+        EnablePicking( true );
+    }
+    else
+        EnablePicking( false );
+}
+
+void LandmarkRegistrationObject::InternalPostSceneRead()
+{
     Q_ASSERT( GetManager() );
 
     PointsObject *source = PointsObject::SafeDownCast( this->GetManager()->GetObjectByID(m_sourcePointsID) );
     PointsObject *target = PointsObject::SafeDownCast( this->GetManager()->GetObjectByID(m_targetPointsID) );
-    if( source && target )
+
+    Q_ASSERT( source && target );
+
+    this->SetSourcePoints( source );
+    this->SetTargetPoints( target );
+    this->SetTargetObjectID( m_targetObjectID );
+    for( int i = 0; i < m_pointEnabledStatus.count(); i++ )
+        this->SetPointEnabledStatus( i, m_pointEnabledStatus.at(i) );
+    this->UpdateLandmarkTransform();
+    if( m_registerRequested )
     {
-        source->SetPickable( false );
-        target->SetPickable( false );
-        this->SetSourcePoints( source );
-        this->SetTargetPoints( target );
-        this->SetTargetObjectID( m_targetObjectID );
-        for( int i = 0; i < m_pointEnabledStatus.count(); i++ )
-            this->SetPointEnabledStatus( i, m_pointEnabledStatus.at(i) );
-        this->UpdateLandmarkTransform();
-        if( m_registerRequested )
-        {
-            this->RegisterObject( true );
-        }
-        m_sourcePoints->SetHidden( this->IsHidden() );
-        m_targetPoints->SetHidden( this->IsHidden() );
-        if( !this->IsHidden() )
-        {
-            m_targetPoints->RotatePointsInScene( );
-        }
+        this->RegisterObject( true );
     }
+    m_sourcePoints->SetHidden( this->IsHidden() );
+    m_targetPoints->SetHidden( this->IsHidden() );
+
     m_loadingPointStatus = false;
-    this->EnablePicking( false );
 }
 
-void LandmarkRegistrationObject::OnCloseSettingsWidget()
+void LandmarkRegistrationObject::ObjectAddedToScene()
 {
-    this->EnablePicking( false );
+    connect( GetManager(), SIGNAL(CurrentObjectChanged()), this, SLOT(CurrentObjectChanged()));
+}
+
+void LandmarkRegistrationObject::ObjectAboutToBeRemovedFromScene()
+{
+    disconnect( GetManager(), SIGNAL(CurrentObjectChanged()), this, SLOT(CurrentObjectChanged()));
 }
 
 void LandmarkRegistrationObject::Export()
@@ -183,9 +189,9 @@ void LandmarkRegistrationObject::Export()
     Q_ASSERT( GetManager() );
 
     bool saveEnabledOnly = false;
-    QString question = QString("Save disabled points?");
+    QString question = QString(tr("Save disabled points?"));
     QMessageBox::StandardButton reply;
-    reply = (QMessageBox::StandardButton)QMessageBox::question( 0, QString("Export"), question, QMessageBox::Yes, QMessageBox::No );
+    reply = (QMessageBox::StandardButton)QMessageBox::question( 0, QString(tr("Export")), question, QMessageBox::Yes, QMessageBox::No );
     if( reply == QMessageBox::No )
     {
             saveEnabledOnly = true;
@@ -204,8 +210,8 @@ void LandmarkRegistrationObject::Export()
         QFileInfo info1( dirPath );
         if (!info1.isWritable())
         {
-            QString accessError = IGNS_MSG_NO_WRITE + dirPath;
-            QMessageBox::warning( 0, "Error: ", accessError, 1, 0 );
+            QString accessError = tr("No write permission:\n") + dirPath;
+            QMessageBox::warning( 0, tr("Error: "), accessError, 1, 0 );
             return;
         }
         QString filename1(filename);
@@ -290,24 +296,16 @@ void LandmarkRegistrationObject::WriteXFMFile( const QString & filename )
 
 void LandmarkRegistrationObject::Hide()
 {
-    m_sourcePoints->SetHidden( this->IsHidden() );
-    m_targetPoints->SetHidden( this->IsHidden() );
-    this->EnablePicking( false );
+    m_sourcePoints->SetHidden( true );
+    m_targetPoints->SetHidden( true );
 }
 
 void LandmarkRegistrationObject::Show()
 {
-    m_sourcePoints->SetHidden( this->IsHidden() );
-    m_targetPoints->SetHidden( this->IsHidden() );
-    if( this == this->GetManager()->GetCurrentObject() && !this->IsRegistered() )
-        this->EnablePicking( true );
-    else
-        this->EnablePicking( false );
-    if( m_sourcePoints->GetNumberOfPoints() > 0 )
-    {
-        this->SelectPoint( m_sourcePoints->GetNumberOfPoints()-1 );
-        emit Modified();
-    }
+    m_sourcePoints->SetHidden( false );
+    m_targetPoints->SetHidden( false );
+    m_sourcePoints->UpdatePointsVisibility();
+    m_targetPoints->UpdatePointsVisibility();
 }
 
 void LandmarkRegistrationObject::SetSourcePoints(PointsObject *pts)
@@ -320,7 +318,6 @@ void LandmarkRegistrationObject::SetSourcePoints(PointsObject *pts)
     {
         m_sourcePoints->disconnect( this );
         m_sourcePoints->UnRegister( this );
-        m_sourcePoints->SetEnabled( false );
         double selectedColor[3], enabledColor[3], disabledColor[3];
         m_sourcePoints->GetSelectedColor( selectedColor );
         pts->SetSelectedColor( selectedColor );
@@ -328,6 +325,8 @@ void LandmarkRegistrationObject::SetSourcePoints(PointsObject *pts)
         pts->SetEnabledColor( enabledColor );
         m_sourcePoints->GetDisabledColor( disabledColor );
         pts->SetDisabledColor( disabledColor );
+        m_sourcePoints->SetPickable( false );
+        m_sourcePoints->SetPickabilityLocked( false );
         this->GetManager()->RemoveObject( m_sourcePoints );
     }
     m_sourcePoints = pts;
@@ -345,9 +344,10 @@ void LandmarkRegistrationObject::SetSourcePoints(PointsObject *pts)
                 m_pointEnabledStatus.push_back( 1 );
         }
         m_sourcePoints->Register( this );
-        m_sourcePoints->UpdatePoints();
-        m_sourcePoints->SetEnabled( true );
         m_sourcePoints->SetHidden( this->IsHidden() );
+        m_sourcePoints->SetPickabilityLocked( true );
+        if( this->GetManager()->GetCurrentObject() == this )
+            m_sourcePoints->SetPickable( true );
         m_activeSourcePoints->Reset();
         m_activeSourcePoints->DeepCopy( m_sourcePoints->GetPoints() );
         connect( m_sourcePoints, SIGNAL(PointAdded()), this, SLOT(PointAdded()) );
@@ -384,8 +384,6 @@ void LandmarkRegistrationObject::SetTargetPoints(PointsObject *pts)
         else if( m_targetPoints->GetParent() != this->GetManager()->GetObjectByID( m_targetObjectID ) )
             this->GetManager()->ChangeParent( m_sourcePoints, this->GetManager()->GetObjectByID( m_targetObjectID ), 0);
         m_targetPoints->Register( this );
-        m_targetPoints->UpdatePoints();
-        m_targetPoints->SetPickable( false );
         m_targetPoints->SetHidden( this->IsHidden() );
         m_activeTargetPoints->Reset();
         m_activeTargetPoints->DeepCopy( m_targetPoints->GetPoints() );
@@ -417,16 +415,6 @@ void LandmarkRegistrationObject::SetPointEnabledStatus (int index, int stat )
     Q_ASSERT( index >= 0 && index < m_pointEnabledStatus.size() );
     m_sourcePoints->EnableDisablePoint( index, (stat==1)?true:false);
     m_pointEnabledStatus[index] = stat;
-    if( !stat )
-    {
-        if(m_sourcePoints->GetSelectedPointIndex() == index )
-        {
-            if( index != 0 )
-                this->SelectPoint( 0 );
-            else
-                this->SelectPoint( m_pointEnabledStatus.size()-1 );
-        }
-    }
     this->UpdateLandmarkTransform();
 }
 
@@ -456,8 +444,8 @@ void LandmarkRegistrationObject::DeletePoint( int index )
 void LandmarkRegistrationObject::SelectPoint( int index )
 {
     m_sourcePoints->SetSelectedPoint( index );
-    m_targetPoints->SetSelectedPoint( index, false );
-    m_targetPoints->RotatePointsInScene( );
+    m_sourcePoints->MoveCursorToPoint( index );
+    m_targetPoints->SetSelectedPoint( index );
 }
 
 void LandmarkRegistrationObject::SetPointLabel( int index, const QString & label )
@@ -470,7 +458,6 @@ void LandmarkRegistrationObject::SetTargetPointCoordinates( int index, double co
 {
     m_targetPoints->SetPointCoordinates( index, coords );
     m_activeTargetPoints->SetPoint( index, coords );
-    m_targetPoints->RotatePointsInScene( );
     this->UpdateLandmarkTransform();
 }
 
@@ -494,7 +481,7 @@ void LandmarkRegistrationObject::PointAdded( )
     if( m_targetPoints->GetNumberOfPoints() < m_sourcePoints->GetNumberOfPoints() )
     {
         double coords[3] = {0.0,0.0,0.0};
-        m_targetPoints->AddPoint( QString::number(m_targetPoints->GetNumberOfPoints()+1), coords, true);
+        m_targetPoints->AddPoint( QString::number(m_targetPoints->GetNumberOfPoints()+1), coords );
         m_activeTargetPoints->InsertNextPoint(m_targetPoints->GetPointCoordinates( m_targetPoints->GetNumberOfPoints()-1));
     }
     emit Modified();
@@ -527,6 +514,8 @@ void LandmarkRegistrationObject::PointRemoved( int index )
 
 void LandmarkRegistrationObject::EnablePicking( bool enable )
 {
+    // simtodo : should do Q_ASSERT( m_sourcePoints ); instead, but during scene reading, object is
+    // set as current object before points are read (which is useless)
     if( m_sourcePoints )
         m_sourcePoints->SetPickable(enable);
 }
@@ -586,7 +575,8 @@ void LandmarkRegistrationObject::UpdateLandmarkTransform( )
 void LandmarkRegistrationObject::Update()
 {
     this->UpdateLandmarkTransform();
-    m_targetPoints->RotatePointsInScene( );
+    m_targetPoints->SetSelectedPoint( m_sourcePoints->GetSelectedPointIndex() );
+
     emit Modified();
 }
 
@@ -597,15 +587,11 @@ void LandmarkRegistrationObject::RegisterObject( bool on )
     {
         m_registrationTransform->UpdateRegistrationTransform();
         this->SetLocalTransform(m_registrationTransform->GetRegistrationTransform());
-        this->EnablePicking( false );
     }
     else
     {
         this->SetLocalTransform(m_backUpTransform);
-        this->EnablePicking( true );
     }
-    m_sourcePoints->UpdatePoints();
-    m_targetPoints->RotatePointsInScene( );
 }
 
 bool LandmarkRegistrationObject::IsRegistered()
@@ -613,6 +599,16 @@ bool LandmarkRegistrationObject::IsRegistered()
     if( m_registrationTransform->GetRegistrationTransform() == this->GetLocalTransform() )
         return true;
     return false;
+}
+
+void LandmarkRegistrationObject::SetAllowScaling( bool on )
+{
+    m_registrationTransform->SetScalingAllowed( on );
+}
+
+bool LandmarkRegistrationObject::IsScalingAllowed()
+{
+    return m_registrationTransform->IsScalingAllowed();
 }
 
 void LandmarkRegistrationObject::SetTargetObjectID( int id )
@@ -647,54 +643,41 @@ bool LandmarkRegistrationObject::ReadTagFile( )
         QFileInfo fi(filename);
         if (!fi.exists())
         {
-            QString accessError = IGNS_MSG_FILE_NOT_EXISTS + filename;
-            QMessageBox::warning( 0, "Error: ", accessError, 1, 0 );
+            QString accessError = tr("File does not exist:\n") + filename;
+            QMessageBox::warning( 0, tr("Error: "), accessError, 1, 0 );
             return false;
         }
         if (!fi.isReadable())
         {
-            QString accessError = IGNS_MSG_NO_READ + filename;
-            QMessageBox::warning( 0, "Error: ", accessError, 1, 0 );
+            QString accessError = tr("No read permission:\n") + filename;
+            QMessageBox::warning( 0, tr("Error: "), accessError, 1, 0 );
             return false;
         }
     }
     if (filename.isNull() || filename.isEmpty())
         return false;
-    QStringList fileToOpen;
-    fileToOpen.clear();
-    fileToOpen.append(filename);
-    FileReader *fileReader = new FileReader;
-    fileReader->SetFileNames( fileToOpen );
-    fileReader->start();
-    fileReader->wait();
-    QList<SceneObject*> loadedObject;
-    fileReader->GetReadObjects( loadedObject );
-    delete fileReader;
-    SceneObject *obj = loadedObject.at(0);
-    PointsObject *pt = PointsObject::SafeDownCast( obj );
-    if( pt->GetNumberOfPoints() == 0)
+    PointsObject *src = PointsObject::New();
+    PointsObject *trgt = PointsObject::New();
+    bool ok = Application::GetInstance().GetPointsFromTagFile( filename, src, trgt );
+    if( ! ok )
+        return false;
+    if( src->GetNumberOfPoints() == 0)
     {
-        QString accessError = "File " + filename + " contains no points.";
-        QMessageBox::critical( 0, "Error: ", accessError, 1, 0 );
+        QString accessError = tr("File ") + filename + tr(" contains no points.");
+        QMessageBox::critical( 0, tr("Error: "), accessError, 1, 0 );
         return false;
     }
-    this->SetSourcePoints( pt );
-    obj->Delete();
-    obj = 0;
-    if (loadedObject.count() > 1)
+    this->SetSourcePoints( src );
+    src->Delete();
+    if( trgt->GetNumberOfPoints() > 0 )
     {
-        obj = loadedObject.at(1);
-    }
-    if (obj)
-    {
-        pt = PointsObject::SafeDownCast( obj );
-        this->SetTargetPoints( pt );
-        obj->Delete();
+        this->SetTargetPoints( trgt);
     }
     else
     {
         this->UpdateTargetPoints();
     }
+    trgt->Delete();
     this->SelectPoint( 0 );
     this->UpdateLandmarkTransform();
     return true;

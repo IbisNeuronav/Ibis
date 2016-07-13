@@ -22,7 +22,7 @@ class GPU_VolumeReconstructionPluginInterface : public QObject, public ToolPlugi
 {
 
     Q_OBJECT
-    Q_INTERFACES(ToolPluginInterface)
+    Q_INTERFACES(IbisPlugin)
     Q_PLUGIN_METADATA(IID "Ibis.GPU_VolumeReconstructionPluginInterface" )
 
 public:

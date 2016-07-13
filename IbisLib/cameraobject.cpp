@@ -28,16 +28,16 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "vtkIbisImagePlaneMapper.h"
 #include "vtkXFMWriter.h"
 #include "vtkXFMReader.h"
+#include "vtkPassThrough.h"
 #include "application.h"
 #include "hardwaremodule.h"
 #include "scenemanager.h"
 #include "pointerobject.h"
-#include "vtkmatrix4x4utilities.h"
+#include "trackedvideobuffer.h"
 #include <QMessageBox>
 
 ObjectSerializationMacro( CameraObject );
 
-static int DefaultImageSize[2] = { 640, 480 };
 
 //---------------------------------------------------------------------------------------
 // CameraIntrinsicParams class implementation
@@ -47,13 +47,11 @@ ObjectSerializationMacro( CameraIntrinsicParams );
 
 CameraIntrinsicParams::CameraIntrinsicParams()
 {
-    m_center[0] = 319;
-    m_center[1] = 239;
-    m_focal[0] = 1000;
-    m_focal[1] = 1000;
+    m_center[0] = 0.5;
+    m_center[1] = 0.5;
+    m_focal[0] = 1.85;
+    m_focal[1] = 1.85;
     m_distorsionK1 = 0.0;
-    m_imageSize[0] = 640;
-    m_imageSize[1] = 480;
     m_reprojectionError = 0.0;
 }
 
@@ -64,8 +62,6 @@ CameraIntrinsicParams & CameraIntrinsicParams::operator=( const CameraIntrinsicP
     m_focal[0] = other.m_focal[0];
     m_focal[1] = other.m_focal[1];
     m_distorsionK1 = other.m_distorsionK1;
-    m_imageSize[0] = other.m_imageSize[0];
-    m_imageSize[1] = other.m_imageSize[1];
     m_reprojectionError = other.m_reprojectionError;
 }
 
@@ -74,7 +70,6 @@ void CameraIntrinsicParams::Serialize( Serializer * ser )
     ::Serialize( ser, "Center", m_center, 2 );
     ::Serialize( ser, "Focal", m_focal, 2 );
     ::Serialize( ser, "DistortionK1", m_distorsionK1 );
-    ::Serialize( ser, "ImageSize", m_imageSize, 2 );
     ::Serialize( ser, "CalibrationReprojectionError", m_reprojectionError );
 }
 
@@ -93,12 +88,14 @@ void CameraIntrinsicParams::SetVerticalAngleDegrees( double angle )
 
 double CameraIntrinsicParams::GetVerticalAngleRad() const
 {
-    return 2 * atan( .5 * m_imageSize[1] / m_focal[1] );
+    // vertical focal distance (m_focal[1]) is represented as a percentage of image height
+    return 2 * atan( .5 / m_focal[1] );
 }
 
 void CameraIntrinsicParams::SetVerticalAngleRad( double angle )
 {
-    double focal = 0.5 * m_imageSize[1] / tan( 0.5 * angle );
+    // simtodo : can't have same focal for horizontal and vertical. Or at least make it obvious in the interface
+    double focal = 0.5 / tan( 0.5 * angle );
     m_focal[0] = focal;
     m_focal[1] = focal;
 }
@@ -107,26 +104,27 @@ void CameraIntrinsicParams::SetVerticalAngleRad( double angle )
 // CameraObject class implementation
 //---------------------------------------------------------------------------------------
 
+static int DefaultImageSize[2] = { 640, 480 };
+
 CameraObject::CameraObject()
 {
-    m_uncalibratedWorldTransform = vtkTransform::New();
-    m_uncalibratedWorldTransform->Identity();
+    m_videoBuffer = new TrackedVideoBuffer( DefaultImageSize[0], DefaultImageSize[1] );
+    SetInputTransform( m_videoBuffer->GetOutputTransform() );
 
-    m_currentFrame = 0;
-    m_uncalibratedTransform = vtkTransform::New();
-    m_calibrationTransform = vtkTransform::New();
+    m_videoInputSwitch = vtkPassThrough::New();
+    m_videoInputSwitch->SetInputConnection( m_videoBuffer->GetVideoOutputPort() ); // by default, get input from internal buffer
 
-    m_trackable = false;
-    m_trackingCamera = false;
-    m_intrinsicEditable = false;
-    m_extrinsicEditable = false;
-    m_camera = vtkCamera::New();
     m_lensDisplacementTransform = vtkTransform::New();
     m_opticalCenterTransform = vtkTransform::New();
     m_opticalCenterTransform->Concatenate( this->GetWorldTransform() );
     m_opticalCenterTransform->Concatenate( m_lensDisplacementTransform );
     m_imageTransform = vtkTransform::New();
     m_imageTransform->SetInput( m_opticalCenterTransform );
+
+    m_trackingCamera = false;
+    m_intrinsicEditable = false;
+    m_extrinsicEditable = false;
+    m_camera = vtkCamera::New();
     m_imageDistance = 100.0;
     m_globalOpacity = 0.7;
     m_saturation = 1.0;
@@ -135,10 +133,10 @@ CameraObject::CameraObject()
     m_useGradient = true;
     m_showMask = false;
     m_trackedTransparencyCenter = false;
-    m_transparencyCenter[0] = (double)DefaultImageSize[0] * 0.5;
-    m_transparencyCenter[1] = (double)DefaultImageSize[1] * 0.5;
-    m_transparencyRadius[0] = 0.03 * DefaultImageSize[0];
-    m_transparencyRadius[1] = 0.3 * DefaultImageSize[0];
+    m_transparencyCenter[0] = 0.5;
+    m_transparencyCenter[1] = 0.5;
+    m_transparencyRadius[0] = 0.03;
+    m_transparencyRadius[1] = 0.3;
     CreateCameraRepresentation();
 
     m_recordingCamera = 0;
@@ -148,72 +146,40 @@ CameraObject::CameraObject()
 
 CameraObject::~CameraObject()
 {
-    m_uncalibratedWorldTransform->Delete();
-
-    for( unsigned i = 0; i < m_capturedFrames.size(); ++i )
-    {
-        m_capturedFrames[i]->Delete();
-        m_uncalibratedMatrices[i]->Delete();
-    }
-    m_uncalibratedMatrices.clear();
-    m_capturedFrames.clear();
-    m_uncalibratedTransform->Delete();
-    m_calibrationTransform->Delete();
     m_lensDisplacementTransform->Delete();
     m_opticalCenterTransform->Delete();
+    m_imageTransform->Delete();
 
     m_camera->Delete();
-    m_imageTransform->Delete();
     m_cameraPolyData->Delete();
 
     if( m_recordingCamera )
         m_recordingCamera->Delete();
+
+    delete m_videoBuffer;
 }
 
 #include <QDir>
 
 void CameraObject::Serialize( Serializer * ser )
 {
-    SceneObject::Serialize(ser);
-
-    ::Serialize( ser, "IntrinsicParams", m_intrinsicParams );
-    ::Serialize( ser, "ImageDistance", m_imageDistance );
-    ::Serialize( ser, "UseTransparency", m_useTransparency );
-    ::Serialize( ser, "TransparencyCenter", m_transparencyCenter, 2 );
-    ::Serialize( ser, "TransparencyRadius", m_transparencyRadius, 2 );
-
-    vtkMatrix4x4 * calibrationMat = vtkMatrix4x4::New();
-    m_calibrationTransform->GetMatrix( calibrationMat );
-    ::Serialize( ser, "CalibrationMatrix", calibrationMat );
-
-    ::Serialize( ser, "CurrentFrame", m_currentFrame );
-    int numberOfImages = m_capturedFrames.size();
-    ::Serialize( ser, "NumberOfImages", numberOfImages );
-
-    // save tracking matrix for each frame
-    if( ser->IsReader() )
-    {
-        m_uncalibratedMatrices.resize( numberOfImages );
-        for( int i = 0; i < numberOfImages; ++i )
-            m_uncalibratedMatrices[i] = vtkMatrix4x4::New();
-    }
-    ::Serialize( ser, "UncalibratedMatrices", m_uncalibratedMatrices, false );
+    TrackedSceneObject::Serialize( ser );
+    SerializeLocalParams( ser );
 
     QString dataDirName = GetSceneDataDirectoryForThisObject( ser->GetCurrentDirectory() );
-    if( !ser->IsReader() )
-        WriteImages( dataDirName );
-    else
-        ReadImages( numberOfImages, dataDirName );
+    m_videoBuffer->Serialize( ser, dataDirName );
 
     if (ser->IsReader())
     {
-        m_calibrationTransform->SetMatrix( calibrationMat );
-        SetCurrentFrame( m_currentFrame );
         SetIntrinsicParams( m_intrinsicParams );
         emit Modified();
     }
+}
 
-    calibrationMat->Delete();
+void CameraObject::SerializeTracked( Serializer * ser )
+{
+    TrackedSceneObject::SerializeTracked( ser );
+    SerializeLocalParams( ser );
 }
 
 void CameraObject::Export()
@@ -226,15 +192,11 @@ void CameraObject::Export()
 
     QProgressDialog * progressDlg = Application::GetInstance().StartProgress( 100, "Exporting Camera..." );
 
-    // Write images
-    WriteImages( dirName.toUtf8().data(), progressDlg );
-
-    // Write matrix for every frame
-    WriteMatrices( m_uncalibratedMatrices, dirName );
+    m_videoBuffer->Export( dirName, progressDlg );
 
     // Write calibration matrix
     QString calMatrixFilename = QString("%1/calibMat.xfm").arg( dirName );
-    WriteMatrix( GetCalibrationMatrix(), calMatrixFilename );
+    TrackedVideoBuffer::WriteMatrix( GetCalibrationMatrix(), calMatrixFilename );
 
     // Write intrinsic params
     SerializerWriter writer;
@@ -282,28 +244,12 @@ void CameraObject::Export()
      if( !calMatrixInfo.exists() || !calMatrixInfo.isReadable() )
          Application::GetInstance().Warning( "Camera import", "Calibration matrix file (calibMat.xfm) is missing or unreadable. Calibration matrix will be identity." );
      else
-        ReadMatrix( calMatrixFilename, calMatrix );
+        TrackedVideoBuffer::ReadMatrix( calMatrixFilename, calMatrix );
      SetCalibrationMatrix( calMatrix );
      calMatrix->Delete();
 
-     // read uncal matrices
-     ReadMatrices( m_uncalibratedMatrices, directory );
-
-     // read video frames
-     ReadImages( m_uncalibratedMatrices.size(), directory, progressDlg );
-
-     if( m_uncalibratedMatrices.size() < 1 || m_capturedFrames.size() < 1 )
-     {
-         Application::GetInstance().Warning( "Import Camera", "Need at least one frame and corresponding matrix. Make sure directory contains at least uncalMat_0000.xfm and frame_0000.png." );
-         success = false;
-     }
-     else if( m_uncalibratedMatrices.size() != m_capturedFrames.size() )
-     {
-         Application::GetInstance().Warning( "Import Camera", "Number of images is different than the number of tracking matrices. Make sure each uncalMat_xxxx.xfm has corresponding frame_xxxx.png." );
-         success = false;
-     }
-     else
-        SetCurrentFrame( 0 );
+     m_videoBuffer->Import( directory, progressDlg );
+    SetCurrentFrame( 0 );
 
      // Update representation in view
      UpdateGeometricRepresentation();
@@ -311,90 +257,41 @@ void CameraObject::Export()
      return success;
  }
 
+void CameraObject::SetVideoInputConnection( vtkAlgorithmOutput * port )
+{
+    m_videoInputSwitch->SetInputConnection( port );
+}
+
+void CameraObject::SetVideoInputData( vtkImageData * image )
+{
+    m_videoInputSwitch->SetInputData( image );
+}
+
 vtkImageData * CameraObject::GetVideoOutput()
 {   
-    if( m_trackable )
-        return Application::GetHardwareModule()->GetTrackedVideoOutput();
-    else
-    {
-        Q_ASSERT( m_capturedFrames.size() > 0 && m_currentFrame >= 0 && m_currentFrame < m_capturedFrames.size() );
-        return m_capturedFrames[ m_currentFrame ];
-    }
+    return vtkImageData::SafeDownCast( m_videoInputSwitch->GetOutput() );
 }
 
 int CameraObject::GetImageWidth()
 {
-    if( m_trackable )
-        return Application::GetHardwareModule()->GetVideoFrameWidth();
-    if( m_capturedFrames.size() > 0 )
-        return m_capturedFrames[ 0 ]->GetDimensions()[0];
-    return DefaultImageSize[0];
+    return GetVideoOutput()->GetDimensions()[0];
 }
 
 int CameraObject::GetImageHeight()
 {
-    if( m_trackable )
-        return Application::GetHardwareModule()->GetVideoFrameHeight();
-    if( m_capturedFrames.size() > 0 )
-        return m_capturedFrames[ 0 ]->GetDimensions()[1];
-    return DefaultImageSize[1];
-}
-
-TrackerToolState CameraObject::GetState()
-{
-    if( m_trackable )
-        return Application::GetHardwareModule()->GetVideoTrackerState();
-    return Missing;
-}
-
-vtkTransform * CameraObject::GetUncalibratedTransform()
-{
-    if( m_trackable )
-        return Application::GetHardwareModule()->GetTrackedVideoUncalibratedTransform();
-    return m_uncalibratedTransform;
-}
-
-void CameraObject::SetCalibrationMatrix( vtkMatrix4x4 * mat )
-{
-    if( m_trackable )
-        Application::GetHardwareModule()->SetVideoCalibrationMatrix( mat );
-    else
-        m_calibrationTransform->SetMatrix( mat );
-    emit Modified();
-}
-
-vtkMatrix4x4 * CameraObject::GetCalibrationMatrix()
-{
-    if( m_trackable )
-        return Application::GetHardwareModule()->GetVideoCalibrationMatrix();
-    return m_calibrationTransform->GetMatrix();
+    return GetVideoOutput()->GetDimensions()[1];
 }
 
 void CameraObject::AddClient()
 {
-    if( m_trackable )
-        Application::GetHardwareModule()->AddTrackedVideoClient();
+    if( IsDrivenByHardware() )
+        Application::GetHardwareModule()->AddTrackedVideoClient( this );
 }
 
 void CameraObject::RemoveClient()
 {
-    if( m_trackable )
-        Application::GetHardwareModule()->RemoveTrackedVideoClient();
-}
-
-void CameraObject::SetMatrices( vtkMatrix4x4 * uncalibratedMatrix, vtkMatrix4x4 * calibrationMatrix )
-{
-    m_uncalibratedTransform->SetMatrix( uncalibratedMatrix );
-    m_calibrationTransform->SetMatrix( calibrationMatrix );
-    vtkTransform * localTransform = vtkTransform::New();
-    localTransform->Concatenate( m_uncalibratedTransform );
-    localTransform->Concatenate( m_calibrationTransform );
-    SetLocalTransform( localTransform );
-    localTransform->Delete();
-    vtkTransform * uncalTrans = vtkTransform::New();
-    uncalTrans->SetMatrix( uncalibratedMatrix );
-    SetLocalUncalibratedTransform( uncalTrans );
-    uncalTrans->Delete();
+    if( IsDrivenByHardware() )
+        Application::GetHardwareModule()->RemoveTrackedVideoClient( this );
 }
 
 bool CameraObject::Setup( View * view )
@@ -432,18 +329,15 @@ bool CameraObject::Setup( View * view )
 
         perView.cameraImageMapper = vtkIbisImagePlaneMapper::New();
         perView.cameraImageMapper->SetGlobalOpacity( m_globalOpacity );
-        perView.cameraImageMapper->SetImageCenter( m_intrinsicParams.m_center[0], m_intrinsicParams.m_center[1] );
+        perView.cameraImageMapper->SetImageCenter( m_intrinsicParams.m_center[0] * GetImageWidth(), m_intrinsicParams.m_center[1] * GetImageHeight() );
         perView.cameraImageMapper->SetLensDistortion( m_intrinsicParams.m_distorsionK1 );
         perView.cameraImageMapper->SetUseTransparency( m_useTransparency );
         perView.cameraImageMapper->SetUseGradient( m_useGradient );
         perView.cameraImageMapper->SetShowMask( m_showMask );
-        perView.cameraImageMapper->SetTransparencyPosition( m_transparencyCenter[0], m_transparencyCenter[1] );
-        perView.cameraImageMapper->SetTransparencyRadius( m_transparencyRadius[0], m_transparencyRadius[1] );
+        perView.cameraImageMapper->SetTransparencyPosition( m_transparencyCenter[0] * GetImageWidth(), m_transparencyCenter[1] * GetImageHeight() );
+        perView.cameraImageMapper->SetTransparencyRadius( m_transparencyRadius[0] * GetImageWidth(), m_transparencyRadius[1] * GetImageWidth() );
         perView.cameraImageActor->SetMapper( perView.cameraImageMapper );
-        if( m_trackable )
-            perView.cameraImageMapper->SetInputDataObject( GetVideoOutput() );
-        else if( m_capturedFrames.size() > 0 )
-            perView.cameraImageMapper->SetInputDataObject( m_capturedFrames[m_currentFrame] );
+        perView.cameraImageMapper->SetInputConnection( m_videoInputSwitch->GetOutputPort() );
         view->GetRenderer()->AddViewProp( perView.cameraImageActor );
 
         this->m_perViewElements[ view ] = perView;
@@ -566,11 +460,23 @@ void CameraObject::SetGlobalOpacity( double opacity )
     emit Modified();
 }
 
-void CameraObject::SetImageCenter( double x, double y )
+void CameraObject::SetImageCenterPix( double x, double y )
 {
-    m_intrinsicParams.m_center[0] = x;
-    m_intrinsicParams.m_center[1] = y;
+    m_intrinsicParams.m_center[0] = x / GetImageWidth();
+    m_intrinsicParams.m_center[1] = y / GetImageHeight();
     UpdateGeometricRepresentation();
+}
+
+void CameraObject::GetImageCenterPix( double & x, double & y )
+{
+    x = m_intrinsicParams.m_center[0] * GetImageWidth();
+    y = m_intrinsicParams.m_center[1] * GetImageHeight();
+}
+
+void CameraObject::GetFocalPix( double & x, double & y )
+{
+    x = m_intrinsicParams.m_focal[0] * GetImageWidth();
+    x = m_intrinsicParams.m_focal[1] * GetImageHeight();
 }
 
 void CameraObject::SetLensDistortion( double dist )
@@ -690,19 +596,6 @@ void CameraObject::SetTransparencyRadius( double min, double max )
     emit Modified();
 }
 
-void CameraObject::SetCameraTrackable( bool t )
-{
-    m_trackable = t;
-    if( m_trackable )
-    {
-        HardwareModule * hw = Application::GetHardwareModule();
-        this->SetLocalTransform( hw->GetTrackedVideoTransform() );
-        this->SetLocalUncalibratedTransform( hw->GetTrackedVideoUncalibratedTransform() );
-        m_intrinsicParams = hw->GetCameraIntrinsicParams();
-        UpdateGeometricRepresentation();
-    }
-}
-
 void CameraObject::SetTrackCamera( bool t )
 {
     if( t == m_trackingCamera )
@@ -757,28 +650,28 @@ bool CameraObject::GetTrackCamera()
 
 bool CameraObject::IsTransformFrozen()
 {
-    if( m_trackable )
-        return Application::GetHardwareModule()->IsVideoTransformFrozen();
+    if( IsDrivenByHardware() )
+        return m_hardwareModule->IsTransformFrozen( this );
     return false;
 }
 
 void CameraObject::FreezeTransform()
 {
-    if( m_trackable )
-        Application::GetHardwareModule()->FreezeVideoTransform( 10 );
+    if( IsDrivenByHardware() )
+        m_hardwareModule->FreezeTransform( this, 10 );
     emit Modified();
 }
 
 void CameraObject::UnFreezeTransform()
 {
-    if( m_trackable )
-        Application::GetHardwareModule()->UnFreezeVideoTransform();
+    if( IsDrivenByHardware() )
+        m_hardwareModule->UnFreezeTransform( this );
     emit Modified();
 }
 
 void CameraObject::TakeSnapshot()
 {
-    Q_ASSERT( m_trackable );
+    Q_ASSERT( IsDrivenByHardware() );
 
     CameraObject * newCam = CameraObject::New();
     newCam->SetName( FindNextSnapshotName() );
@@ -792,13 +685,14 @@ void CameraObject::TakeSnapshot()
     newCam->SetCanEditTransformManually( false );
 
     Application::GetInstance().GetSceneManager()->AddObject( newCam );
+    Application::GetInstance().GetSceneManager()->SetCurrentObject( newCam );
 
     newCam->Delete();
 }
 
 void CameraObject::ToggleRecording()
 {
-    Q_ASSERT( m_trackable );
+    Q_ASSERT( IsDrivenByHardware() );
 
     if( !m_recordingCamera )
     {
@@ -813,6 +707,7 @@ void CameraObject::ToggleRecording()
     else
     {
         this->GetManager()->AddObject( m_recordingCamera );
+        this->GetManager()->SetCurrentObject( m_recordingCamera );
         m_recordingCamera->Delete();
         m_recordingCamera = 0;
     }
@@ -823,35 +718,27 @@ bool CameraObject::IsRecording()
     return m_recordingCamera != 0;
 }
 
+int CameraObject::GetNumberOfFrames()
+{
+    return m_videoBuffer->GetNumberOfFrames();
+}
+
 void CameraObject::AddFrame( vtkImageData * image, vtkMatrix4x4 * uncalMat )
 {
-    vtkImageData * im = vtkImageData::New();
-    im->DeepCopy( image );
-    m_capturedFrames.push_back( im );
-    vtkMatrix4x4 * mat = vtkMatrix4x4::New();
-    mat->DeepCopy( uncalMat );
-    m_uncalibratedMatrices.push_back( mat );
-    SetCurrentFrame( m_capturedFrames.size() - 1 );
-    if( m_capturedFrames.size() == 1 )
+    m_videoBuffer->AddFrame( image, uncalMat );
+    if( m_videoBuffer->GetNumberOfFrames() == 1 )
         UpdateGeometricRepresentation();
 }
 
 void CameraObject::SetCurrentFrame( int frame )
 {
-    Q_ASSERT( frame < m_capturedFrames.size() && frame >= 0 );
-    m_currentFrame = frame;
-
-    PerViewElementCont::iterator it = m_perViewElements.begin();
-    while( it != m_perViewElements.end() )
-    {
-        PerViewElements & elem = (*it).second;
-        elem.cameraImageMapper->SetInputDataObject( m_capturedFrames[ frame ] );
-        ++it;
-    }
-
-    SetMatrices( m_uncalibratedMatrices[frame], GetCalibrationMatrix() );
-
+    m_videoBuffer->SetCurrentFrame( frame );
     emit Modified();
+}
+
+int CameraObject::GetCurrentFrame()
+{
+    return m_videoBuffer->GetCurrentFrame();
 }
 
 void CameraObject::ReleaseControl( View * triggeredView )
@@ -897,7 +784,6 @@ void CameraObject::WorldToImage( double * worldPos, double & xIm, double & yIm )
     p4[2] = worldPos[2];
     p4[3] = 1.0;
 
-    // todo: project the 3D position to the 2D image space coordinate
     vtkMatrix4x4 * mat = vtkMatrix4x4::New();
     mat->DeepCopy( m_opticalCenterTransform->GetMatrix() );
     mat->Invert();
@@ -905,10 +791,15 @@ void CameraObject::WorldToImage( double * worldPos, double & xIm, double & yIm )
     mat->MultiplyPoint( p4, pCam );
     mat->Delete();
 
-    xIm = m_intrinsicParams.m_center[0] + pCam[0] / pCam[2] * m_intrinsicParams.m_focal[0];
-    yIm = m_intrinsicParams.m_center[1] + pCam[1] / pCam[2] * m_intrinsicParams.m_focal[1];
-    xIm = m_intrinsicParams.m_imageSize[0] - xIm - 1.0;
-    yIm = m_intrinsicParams.m_imageSize[1] - yIm - 1.0;
+    double centerPix[2] = { 0.0, 0.0 };
+    GetImageCenterPix( centerPix[0], centerPix[1] );
+    double focalPix[2] = { 0.0, 0.0 };
+    GetFocalPix( focalPix[0], focalPix[1] );
+
+    xIm = centerPix[0] + pCam[0] / pCam[2] * focalPix[0];
+    yIm = centerPix[1] + pCam[1] / pCam[2] * focalPix[1];
+    xIm = GetImageWidth() - xIm - 1.0;
+    yIm = GetImageHeight() - yIm - 1.0;
 }
 
 #include "simplepropcreator.h"
@@ -1007,7 +898,7 @@ void CameraObject::ClearDrawing()
 
 void CameraObject::VideoUpdatedSlot()
 {
-    Q_ASSERT( m_trackable );
+    Q_ASSERT( IsDrivenByHardware() );
 
     if( IsRecording() && GetState() == Ok )
     {
@@ -1015,8 +906,7 @@ void CameraObject::VideoUpdatedSlot()
     }
 
     // Update representation if image size changed
-    HardwareModule * hw = Application::GetHardwareModule();
-    if( hw->GetVideoFrameWidth() != m_cachedImageSize[0] || hw->GetVideoFrameHeight() != m_cachedImageSize[1] )
+    if( GetImageWidth() != m_cachedImageSize[0] || GetImageHeight() != m_cachedImageSize[1] )
         UpdateGeometricRepresentation();
 
     // Get the position of the transparency center from projection of the tracked pointer
@@ -1044,13 +934,13 @@ void CameraObject::VideoUpdatedSlot()
 
 void CameraObject::ObjectAddedToScene()
 {
-    if( m_trackable )
+    if( IsDrivenByHardware() )
         connect( &Application::GetInstance(), SIGNAL(IbisClockTick()), this, SLOT(VideoUpdatedSlot()) );
 }
 
 void CameraObject::ObjectAboutToBeRemovedFromScene()
 {
-    if( m_trackable )
+    if( IsDrivenByHardware() )
         disconnect( &Application::GetInstance(), SIGNAL(IbisClockTick()), this, SLOT(VideoUpdatedSlot()) );
     if( m_trackingCamera )
         SetTrackCamera( false );
@@ -1064,34 +954,25 @@ void CameraObject::InternalWorldTransformChanged()
 void CameraObject::InternalSetIntrinsicParams()
 {
     UpdateGeometricRepresentation();
-    if( m_trackable )
-        Application::GetHardwareModule()->SetCameraIntrinsicParams( m_intrinsicParams );
 }
 
 void CameraObject::UpdateGeometricRepresentation()
 {
-    PerViewElementCont::iterator it = m_perViewElements.begin();
-    while( it != m_perViewElements.end() )
-    {
-        PerViewElements & elem = (*it).second;
-        elem.cameraImageMapper->SetImageCenter( m_intrinsicParams.m_center[0] , m_intrinsicParams.m_center[1] );
-        elem.cameraImageMapper->SetLensDistortion( m_intrinsicParams.m_distorsionK1 );
-        ++it;
-    }
-    m_camera->SetViewAngle( m_intrinsicParams.GetVerticalAngleDegrees() );
-
     // Determine image size
     int width = GetImageWidth();
     int height = GetImageHeight();
 
-    // Update transparency position and radius if image size has changed
-    if( width != m_cachedImageSize[0] || height != m_cachedImageSize[1] )
+    PerViewElementCont::iterator it = m_perViewElements.begin();
+    while( it != m_perViewElements.end() )
     {
-        m_transparencyCenter[0] = m_transparencyCenter[0] / m_cachedImageSize[0] * width;
-        m_transparencyCenter[1] = m_transparencyCenter[1] / m_cachedImageSize[1] * height;
-        m_transparencyRadius[0] = m_transparencyRadius[0] / m_cachedImageSize[0] * width;
-        m_transparencyRadius[1] = m_transparencyRadius[1] / m_cachedImageSize[0] * width;
+        PerViewElements & elem = (*it).second;
+        elem.cameraImageMapper->SetImageCenter( m_intrinsicParams.m_center[0] * GetImageWidth(), m_intrinsicParams.m_center[1] * GetImageHeight() );
+        elem.cameraImageMapper->SetLensDistortion( m_intrinsicParams.m_distorsionK1 );
+        elem.cameraImageMapper->SetTransparencyPosition( m_transparencyCenter[0] * width, m_transparencyCenter[1] * height );
+        elem.cameraImageMapper->SetTransparencyRadius( m_transparencyRadius[0] * width, m_transparencyRadius[1] * width );
+        ++it;
     }
+    m_camera->SetViewAngle( m_intrinsicParams.GetVerticalAngleDegrees() );
 
     double angleRad = 0.5 * m_intrinsicParams.GetVerticalAngleRad();
     double offsetY = m_imageDistance * tan( angleRad );
@@ -1115,38 +996,6 @@ void CameraObject::UpdateGeometricRepresentation()
     emit Modified();
 }
 
-void CameraObject::SetLocalUncalibratedTransform( vtkTransform * t )
-{
-    if( m_uncalibratedTransform )
-        m_uncalibratedTransform->UnRegister( this );
-
-    m_uncalibratedTransform = t;
-
-    if( m_uncalibratedTransform )
-        m_uncalibratedTransform->Register( this );
-
-
-    // reset the list of concatenated transforms
-    this->m_uncalibratedWorldTransform->Identity();
-    if( Parent )
-        this->m_uncalibratedWorldTransform->Concatenate( Parent->GetWorldTransform() );
-    if( m_uncalibratedTransform )
-        this->m_uncalibratedWorldTransform->Concatenate( m_uncalibratedTransform );
-}
-
-void CameraObject::UpdateWorldTransform()
-{
-    // call the parent class
-    SceneObject::UpdateWorldTransform();
-
-    // Also update uncal world transform
-    this->m_uncalibratedWorldTransform->Identity();
-    if( Parent )
-        this->m_uncalibratedWorldTransform->Concatenate( Parent->GetWorldTransform() );
-    if( m_uncalibratedTransform )
-        this->m_uncalibratedWorldTransform->Concatenate( m_uncalibratedTransform );
-}
-
 void CameraObject::UpdateVtkCamera()
 {
     m_camera->SetPosition( 0.0, 0.0, 0.0 );
@@ -1163,6 +1012,15 @@ vtkRenderer * CameraObject::GetCurrentRenderer( View * v )
         return v->GetOverlayRenderer();
     else
         return v->GetRenderer();
+}
+
+void CameraObject::SerializeLocalParams( Serializer * ser )
+{
+    ::Serialize( ser, "IntrinsicParams", m_intrinsicParams );
+    ::Serialize( ser, "ImageDistance", m_imageDistance );
+    ::Serialize( ser, "UseTransparency", m_useTransparency );
+    ::Serialize( ser, "TransparencyCenter", m_transparencyCenter, 2 );
+    ::Serialize( ser, "TransparencyRadius", m_transparencyRadius, 2 );
 }
 
 void CameraObject::CreateCameraRepresentation()
@@ -1207,90 +1065,6 @@ QString CameraObject::FindNextSnapshotName()
             return newName;
         ++index;
     }
-}
-
-void CameraObject::ReadMatrix( QString filename, vtkMatrix4x4 * mat )
-{
-    vtkXFMReader * reader = vtkXFMReader::New();
-    reader->SetFileName( filename.toUtf8().data() );
-    reader->SetMatrix( mat );
-    reader->Update();
-    reader->Delete();
-}
-
-void CameraObject::ReadMatrices( std::vector< vtkMatrix4x4 * > & matrices, QString dirName )
-{
-    int index = 0;
-    bool done = false;
-    while( !done )
-    {
-        QString uncalMatrixFilename = QString("%1/uncalMat_%2.xfm").arg( dirName ).arg( index, 4, 10, QLatin1Char('0') );
-        QFileInfo uncalMatInfo( uncalMatrixFilename );
-        if( uncalMatInfo.exists() )
-        {
-            vtkMatrix4x4 * uncalMat = vtkMatrix4x4::New();
-            ReadMatrix( uncalMatrixFilename, uncalMat );
-            matrices.push_back( uncalMat );
-        }
-        else
-            done = true;
-        ++index;
-    }
-}
-
-void CameraObject::WriteMatrix( vtkMatrix4x4 * mat, QString filename )
-{
-    vtkXFMWriter * writer = vtkXFMWriter::New();
-    writer->SetFileName( filename.toUtf8().data() );
-    writer->SetMatrix( mat );
-    writer->Write();
-}
-
-void CameraObject::WriteMatrices( std::vector< vtkMatrix4x4 * > & matrices, QString dirName )
-{
-    for( int i = 0; i < matrices.size(); ++i )
-    {
-        QString uncalMatrixFilename = dirName + QString("/uncalMat_%1.xfm").arg( i, 4, 10, QLatin1Char('0') );
-        WriteMatrix( m_uncalibratedMatrices[i], uncalMatrixFilename );
-    }
-}
-
-#include "vtkPNGWriter.h"
-
-void CameraObject::WriteImages( QString dirName, QProgressDialog * progressDlg )
-{
-    vtkPNGWriter * writer = vtkPNGWriter::New();
-    for( int i = 0; i < m_capturedFrames.size(); ++i )
-    {
-        QString filename = dirName + QString("/frame_%1").arg( i, 4, 10, QLatin1Char('0') );
-        writer->SetFileName( filename.toUtf8().data() );
-        writer->SetInputData( m_capturedFrames[i] );
-        writer->Write();
-
-        if( progressDlg )
-            Application::GetInstance().UpdateProgress( progressDlg, (int)round( (float)i / m_capturedFrames.size() * 100.0 ) );
-    }
-    writer->Delete();
-}
-
-#include "vtkPNGReader.h"
-
-void CameraObject::ReadImages( int nbImages, QString dirName, QProgressDialog * progressDlg )
-{
-    vtkPNGReader * reader = vtkPNGReader::New();
-    for( int i = 0; i < nbImages; ++i )
-    {
-        QString filename = dirName + QString("/frame_%1").arg( i, 4, 10, QLatin1Char('0') );
-        reader->SetFileName( filename.toUtf8().data() );
-        reader->Update();
-        vtkImageData * image = vtkImageData::New();
-        image->DeepCopy( reader->GetOutput() );
-        m_capturedFrames.push_back( image );
-
-        if( progressDlg )
-            Application::GetInstance().UpdateProgress( progressDlg, (int)round( (float)i / nbImages * 100.0 ) );
-    }
-    reader->Delete();
 }
 
 void CameraObject::ClearDrawingOneView( View * v, PerViewElements & elem )

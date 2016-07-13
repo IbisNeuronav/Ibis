@@ -4,43 +4,41 @@ PROJECT( IGNS_VTK_EXTENSIONS )
 # Define sources
 #================================
 SET( IGNS_VTK_EXTENSIONS_SRC
+    vtkIbisImagePlaneMapper.cxx
     vtkNShapeCalibrationWidget.cxx
     vtkCircleWithCrossSource.cxx
-    vtkCylinderWithPlanesSource.cxx
     vtkMultiInteractorObserver.cxx
     vtkMulti3DWidget.cxx
     vtkMultiImagePlaneWidget.cxx
     vtkMultiTextureMapToPlane.cxx
-    vtkPlaneAndAxisActor.cxx
     vtkPiecewiseFunctionLookupTable.cxx
-    vtkOctant.cxx
     vtkInteractorStyleImage2.cxx
-    vtkImageResliceMapper2.cpp
     vtkOBJReader2.cxx
     vtkSimpleMapper3D.cxx
     vtkSimpleProp3D.cxx
     stringtools.cpp
-    vtkMatrix4x4Operators.cxx )
+    vtkMatrix4x4Operators.cxx
+    GlslShader.cpp
+    DrawableTexture.cpp )
 
 SET( IGNS_VTK_EXTENSIONS_HDR
+    vtkIbisImagePlaneMapper.h
     vtkNShapeCalibrationWidget.h
     vtkCircleWithCrossSource.h
-    vtkCylinderWithPlanesSource.h
     vtkMultiInteractorObserver.h
     vtkMulti3DWidget.h
     vtkMultiImagePlaneWidget.h
     vtkMultiTextureMapToPlane.h
-    vtkPlaneAndAxisActor.h
     vtkPiecewiseFunctionLookupTable.h
-    vtkOctant.h
     vtkInteractorStyleImage2.h
-    vtkImageResliceMapper2.h
     vtkOBJReader2.h 
     vtkSimpleMapper3D.h
     vtkSimpleProp3D.h
     vtkGenericParam.h
     stringtools.h
-    vtkMatrix4x4Operators.h )
+    vtkMatrix4x4Operators.h
+    GlslShader.h
+    DrawableTexture.h )
 
 include_directories( ${IGNS_VTK_INCLUDE_DIR} )            # This is for Igns/vtk general include files
 

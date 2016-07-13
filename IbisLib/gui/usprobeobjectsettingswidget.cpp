@@ -11,6 +11,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "usprobeobjectsettingswidget.h"
 #include "ui_usprobeobjectsettingswidget.h"
 #include "usprobeobject.h"
+#include "vtkQtMatrixDialog.h"
+#include "vtkTransform.h"
 
 #include <QPushButton>
 #include <QLabel>
@@ -32,47 +34,35 @@ UsProbeObjectSettingsWidget::UsProbeObjectSettingsWidget(QWidget *parent) :
     ui->probeStatusLabel->setText("");
 
     m_usProbeObject = 0;
+    m_matrixDialog = 0;
 }
 
 UsProbeObjectSettingsWidget::~UsProbeObjectSettingsWidget()
 {
     delete ui;
-    SetUsProbeObject( 0 );
+    if( m_matrixDialog )
+    {
+        m_matrixDialog->close();
+        m_matrixDialog = 0;
+    }
 }
 
 void UsProbeObjectSettingsWidget::SetUsProbeObject( UsProbeObject * probeObject )
 {
-    if( m_usProbeObject == probeObject )
-    {
-        return;
-    }
-
-    if( m_usProbeObject )
-    {
-        m_usProbeObject->disconnect( this );
-        m_usProbeObject->UnRegister( 0 );
-    }
-
+    Q_ASSERT( probeObject );
     m_usProbeObject = probeObject;
 
-    if( m_usProbeObject )
-    {
-        m_usProbeObject->Register( 0 );
-        // simtodo : verify if this is needed and if it is the right type of connection
-        connect( m_usProbeObject, SIGNAL( Modified() ), this, SLOT( UpdateToolStatus() ) );
+    connect( m_usProbeObject, SIGNAL( Modified() ), this, SLOT( UpdateToolStatus() ) );
 
-        this->UpdateToolStatus();
-        this->UpdateDepth();
-        this->UpdateUI();
-    }
+    this->UpdateToolStatus();
+    this->UpdateDepth();
+    this->UpdateUI();
 }
-
 
 void UsProbeObjectSettingsWidget::DepthComboBoxSelectionChanged( int newSelection )
 {
     Q_ASSERT( m_usProbeObject );
-    QString selName = ui->depthComboBox->itemText( newSelection );
-    m_usProbeObject->SetCurrentCalibrationMatrixName( selName );
+    m_usProbeObject->SetCurrentCalibrationMatrixIndex( newSelection );
 }
 
 void UsProbeObjectSettingsWidget::UpdateToolStatus()
@@ -195,4 +185,37 @@ void UsProbeObjectSettingsWidget::on_useMaskCheckBox_toggled( bool checked )
 void UsProbeObjectSettingsWidget::on_colorMapComboBox_currentIndexChanged(int index)
 {
     m_usProbeObject->SetCurrentLUTIndex( index );
+}
+
+void UsProbeObjectSettingsWidget::on_calibrationMatrixPushButton_toggled( bool on )
+{
+    if( on )
+    {
+        Q_ASSERT_X( m_usProbeObject, "TransformEditWidget::on_calibrationMatrixPushButton_toggled", "Can't call this function without setting UsProbeObject." );
+        Q_ASSERT( !m_matrixDialog );
+
+        QString dialogTitle = m_usProbeObject->GetName();
+        dialogTitle += ": US Probe Calibration Matrix";
+
+        m_matrixDialog = new vtkQtMatrixDialog( true, 0 );
+        m_matrixDialog->setWindowTitle( dialogTitle );
+        m_matrixDialog->setAttribute( Qt::WA_DeleteOnClose );
+        m_matrixDialog->SetTransform( m_usProbeObject->GetCalibrationTransform() );
+        m_matrixDialog->show();
+        connect( m_matrixDialog, SIGNAL(destroyed()), this, SLOT(OnCalibrationMatrixDialogClosed()) );
+    }
+    else
+    {
+        if( m_matrixDialog )
+        {
+            m_matrixDialog->close();
+            m_matrixDialog = 0;
+        }
+    }
+}
+
+void UsProbeObjectSettingsWidget::OnCalibrationMatrixDialogClosed()
+{
+    m_matrixDialog = 0;
+    ui->calibrationMatrixPushButton->setChecked( false );
 }

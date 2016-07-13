@@ -12,11 +12,12 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #define TRIPLECUTPLANEOBJECT_H
 
 #include <vector>
+#include "ibistypes.h"
 #include "serializer.h"
 #include "sceneobject.h"
+//#include "view.h"
 #include <QColor>
 
-class View;
 class ImageObject;
 class QWidget;
 class vtkMultiImagePlaneWidget;
@@ -67,7 +68,6 @@ public:
     void SetCursorColor( const QColor & c );
     QColor GetCursorColor();
 
-
     // Manage data interpolation for reslice and display
     void SetResliceInterpolationType( int type );
     int GetResliceInterpolationType() { return m_resliceInterpolationType; }
@@ -92,15 +92,24 @@ public:
 
     void GetPlanesPosition( double pos[3] );
 
+    // Description:
+    // Determine whether the pos is in one of the 3 planes identified by planeType. Point is
+    // in the plane if it is closer than .5 * voxel size of the reference volume.
+    bool IsInPlane( VIEWTYPES planeType, double pos[3] );
+
 public slots:
 
     void SetPlanesPosition( double * );
     void SetWorldPlanesPosition( double * pos );
+    void PlaneStartInteractionEvent( vtkObject * caller, unsigned long event );
     void PlaneInteractionEvent( vtkObject * caller, unsigned long event );
     void PlaneEndInteractionEvent( vtkObject * caller, unsigned long event );
+    // Adjust planes
+    void AdjustAllImages(  );
     virtual void MarkModified();
 
 signals:
+    void StartPlaneMoved(int);
     void PlaneMoved(int);
     void EndPlaneMove(int);
 

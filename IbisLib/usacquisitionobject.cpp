@@ -10,14 +10,13 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 #include "usacquisitionobject.h"
 #include "trackedvideobuffer.h"
+#include "serializerhelper.h"
 #include "application.h"
-#include "filereader.h"
 #include "ignsconfig.h"
 #include "scenemanager.h"
 #include "usacquisitionsettingswidget.h"
 #include "usmasksettingswidget.h"
 #include "imageobject.h"
-#include "ignsmsg.h"
 #include "usmask.h"
 #include <QDir>
 #include <QMessageBox>
@@ -30,11 +29,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "vtkMatrix4x4.h"
 #include "vtkMath.h"
 #include "vtkTransform.h"
-#include "vtkmatrix4x4utilities.h"
 #include "vtkImageStencil.h"
 #include "vtkImageToImageStencil.h"
-//#include "vtkImageStack.h"
-//#include "vtkImageSliceCollection.h"
 #include "vtkEventQtSlotConnect.h"
 #include "vtkImageConstantPad.h" // added Mar 2, 2016, Xiao
 #include "vtkPolyDataMapper.h"
@@ -49,15 +45,24 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "view.h"
 #include "imageobject.h"
 #include "lookuptablemanager.h"
+#include "vtkSmartPointer.h"
+#include "exportacquisitiondialog.h"
+#include "vtkXFMReader.h"
+#include "vtkXFMWriter.h"
+#include "vtkPassThrough.h"
 
 ObjectSerializationMacro( USAcquisitionObject );
 
+int USAcquisitionObject::m_defaultImageSize[2] = { 640, 480 };
+
 USAcquisitionObject::USAcquisitionObject()
 {
-    m_videoBuffer = new TrackedVideoBuffer;
+    m_usProbeObjectId = SceneObject::InvalidObjectId;
+
+    m_videoBuffer = new TrackedVideoBuffer( m_defaultImageSize[0], m_defaultImageSize[1] );
 
     m_isRecording = false;
-    m_baseDirectory = QDir::homePath() + "/" + IGNS_CONFIGURATION_SUBDIRECTORY + "/" + IGNS_ACQUISITION_BASE_DIR;
+    m_baseDirectory = QDir::homePath() + "/" + IGNS_CONFIGURATION_SUBDIRECTORY + "/" + ACQ_BASE_DIR;
 
     m_usDepth = "9cm";
     m_acquisitionType = UsProbeObject::ACQ_B_MODE;
@@ -71,8 +76,12 @@ USAcquisitionObject::USAcquisitionObject()
     m_sliceTransform->Concatenate( m_calibrationTransform );
     m_sliceProperties = vtkImageProperty::New();
     m_sliceLutIndex = 1;         // default to hot metal
+    m_lut = vtkPiecewiseFunctionLookupTable::New();
+    m_lut->SetIntensityFactor( 1.0 );
     m_mapToColors = vtkImageMapToColors::New();
+    m_mapToColors->SetLookupTable( m_lut );
     m_mapToColors->SetOutputFormatToRGBA();
+    m_mapToColors->SetInputConnection( m_videoBuffer->GetVideoOutputPort() );
 
     m_mask = USMask::New(); // default mask
 
@@ -88,10 +97,10 @@ USAcquisitionObject::USAcquisitionObject()
 
     m_isMaskOn = true;
 
-
-    m_constantPad = vtkImageConstantPad::New(); // added Mar 2,2016, by Xiao
+    m_constantPad = vtkImageConstantPad::New();
     m_constantPad->SetConstant(255);
     m_constantPad->SetOutputNumberOfScalarComponents(4);
+    m_constantPad->SetInputConnection( m_videoBuffer->GetVideoOutputPort() );
     m_isDopplerOn = false; // default state is B-mode
 
     m_sliceStencilDoppler = vtkImageStencil::New();
@@ -99,7 +108,11 @@ USAcquisitionObject::USAcquisitionObject()
     m_sliceStencilDoppler->SetInputConnection( m_constantPad->GetOutputPort() );
     m_sliceStencilDoppler->SetBackgroundColor( 1.0, 1.0, 1.0, 0.0 );
 
-
+    // Outputs
+    m_maskedImageOutput = vtkPassThrough::New();
+    m_maskedImageOutput->SetInputConnection( m_sliceStencil->GetOutputPort() );
+    m_unmaskedImageOutput = vtkPassThrough::New();
+    m_unmaskedImageOutput->SetInputConnection( m_mapToColors->GetOutputPort() );
 
     // static slices
     m_staticSlicesEnabled = false;
@@ -118,10 +131,10 @@ USAcquisitionObject::~USAcquisitionObject()
     m_staticSlicesProperties->Delete();
 
     m_sliceStencil->Delete();
-    m_sliceStencilDoppler->Delete();//added
+    m_sliceStencilDoppler->Delete();
     m_mapToColors->Delete();
     m_mask->Delete();
-    m_constantPad->Delete(); // added Mar 2, 2016, Xiao
+    m_constantPad->Delete();
     ClearStaticSlicesData();
 
     delete m_videoBuffer;
@@ -139,7 +152,8 @@ void USAcquisitionObject::SetUsProbe( UsProbeObject * probe )
     m_acquisitionType = probe->GetAcquisitionType();
     m_usDepth = probe->GetCurrentCalibrationMatrixName();
     SetCalibrationMatrix( probe->GetCurrentCalibrationMatrix() );
-    m_mask->operator =( *(probe->GetMask()) );
+    *m_mask = *(probe->GetMask());
+    m_usProbeObjectId = probe->GetObjectID();
 }
 
 bool USAcquisitionObject::Setup( View * view )
@@ -158,7 +172,6 @@ bool USAcquisitionObject::Setup( View * view )
         else
             elem.imageSlice->GetMapper()->SetInputConnection( m_mapToColors->GetOutputPort() );
 
-
         view->GetRenderer()->AddActor( elem.imageSlice );
 
         SetupAllStaticSlices( view, elem );
@@ -171,7 +184,9 @@ bool USAcquisitionObject::Setup( View * view )
 
 bool USAcquisitionObject::Release( View * view )
 {
-    this->SceneObject::Release(view);
+    bool success = SceneObject::Release( view );
+    if( !success )
+        return false;
 
     PerViewContainer::iterator it = m_perViews.begin();
     while( it != m_perViews.end() )
@@ -221,37 +236,6 @@ void USAcquisitionObject::Show()
     }
 }
 
-/*void USAcquisitionObject::SetUseMask( bool use )
-{
-    if( m_isMaskOn == use )
-        return;
-    m_isMaskOn = use;
-
-    PerViewContainer::iterator it = m_perViews.begin();
-    while( it != m_perViews.end() )
-    {
-        PerViewElements & perView = (*it).second;
-        if( m_isMaskOn )
-            perView.imageSlice->GetMapper()->SetInputConnection( m_sliceStencil->GetOutputPort() );
-        else
-            perView.imageSlice->GetMapper()->SetInputConnection( m_mapToColors->GetOutputPort() );
-
-        for( unsigned i = 0; i < perView.staticSlices.size(); ++i )
-        {
-            vtkImageActor * staticActor = perView.staticSlices[i];
-            if( m_isMaskOn )
-                staticActor->GetMapper()->SetInputConnection( m_staticSlicesData[i].imageStencil->GetOutputPort() );
-            else
-                staticActor->GetMapper()->SetInputConnection( m_staticSlicesData[i].mapToColors->GetOutputPort() );
-        }
-
-        ++it;
-    }
-
-    emit Modified();
-}*/
-
-// here are the major changes - Mar, , 2016, by Xiao
 void USAcquisitionObject::SetUseMask( bool useMask )
 {
     m_isMaskOn = useMask;
@@ -268,40 +252,43 @@ void USAcquisitionObject::SetUseDoppler( bool useDoppler )
 
 void USAcquisitionObject::UpdatePipeline()
 {
-  PerViewContainer::iterator it = m_perViews.begin();
-  while( it != m_perViews.end() )
-  {
-      PerViewElements & perView = (*it).second;
-      if( m_isMaskOn && !m_isDopplerOn)
-          perView.imageSlice->GetMapper()->SetInputConnection( m_sliceStencil->GetOutputPort() );
-      else if (!m_isMaskOn && !m_isDopplerOn)
-          perView.imageSlice->GetMapper()->SetInputConnection( m_mapToColors->GetOutputPort() );
-      else if (m_isMaskOn && m_isDopplerOn){
+    if( !m_isDopplerOn )
+    {
+        m_maskedImageOutput->SetInputConnection( m_sliceStencil->GetOutputPort() );
+        m_unmaskedImageOutput->SetInputConnection( m_mapToColors->GetOutputPort() );
+    }
+    else
+    {
+        m_maskedImageOutput->SetInputConnection( m_sliceStencilDoppler->GetOutputPort() );
+        m_unmaskedImageOutput->SetInputConnection( m_constantPad->GetOutputPort() );
+    }
 
+    PerViewContainer::iterator it = m_perViews.begin();
+    while( it != m_perViews.end() )
+    {
+        PerViewElements & perView = (*it).second;
+        if( m_isMaskOn && !m_isDopplerOn)
+            perView.imageSlice->GetMapper()->SetInputConnection( m_sliceStencil->GetOutputPort() );
+        else if (!m_isMaskOn && !m_isDopplerOn)
+            perView.imageSlice->GetMapper()->SetInputConnection( m_mapToColors->GetOutputPort() );
+        else if (m_isMaskOn && m_isDopplerOn)
+            perView.imageSlice->GetMapper()->SetInputConnection( m_sliceStencilDoppler->GetOutputPort() );
+        else // !m_isMaskOn && m_isDopplerOn
+            perView.imageSlice->GetMapper()->SetInputConnection( m_constantPad->GetOutputPort());
 
-          //m_sliceStencil->SetInputConnection( m_constantPad->GetOutputPort() );
-          perView.imageSlice->GetMapper()->SetInputConnection( m_sliceStencilDoppler->GetOutputPort() );
-      }
-      else // !m_isMaskOn && m_isDopplerOn
-          perView.imageSlice->GetMapper()->SetInputConnection( m_constantPad->GetOutputPort());
+        for( unsigned i = 0; i < perView.staticSlices.size(); ++i ) // don't touch the static for now
+        {
+            vtkImageActor * staticActor = perView.staticSlices[i];
+            if( m_isMaskOn )
+                staticActor->GetMapper()->SetInputConnection( m_staticSlicesData[i].imageStencil->GetOutputPort() );//
+            else
+                staticActor->GetMapper()->SetInputConnection( m_staticSlicesData[i].mapToColors->GetOutputPort() );
+        }
+        ++it;
+    }
 
-
-      for( unsigned i = 0; i < perView.staticSlices.size(); ++i ) // don't touch the static for now
-      {
-          vtkImageActor * staticActor = perView.staticSlices[i];
-          if( m_isMaskOn )
-              staticActor->GetMapper()->SetInputConnection( m_staticSlicesData[i].imageStencil->GetOutputPort() );//
-          else
-              staticActor->GetMapper()->SetInputConnection( m_staticSlicesData[i].mapToColors->GetOutputPort() );
-      }
-
-      ++it;
-  }
-
-  emit Modified();
-
+    emit Modified();
 }
-// here is where things end.
 
 void USAcquisitionObject::HideStaticSlices( PerViewElements & perView )
 {
@@ -333,9 +320,10 @@ void USAcquisitionObject::Record()
     m_isRecording = true;
 
     // Add the frame that was last captured by the system
-    HardwareModule * hw = Application::GetHardwareModule();
-    if( hw->GetVideoTrackerState() == Ok )
-        m_videoBuffer->AddFrame( hw->GetTrackedVideoOutput(), hw->GetTrackedVideoUncalibratedTransform()->GetMatrix() );
+    UsProbeObject * probe = UsProbeObject::SafeDownCast( GetManager()->GetObjectByID( m_usProbeObjectId ) );
+    Q_ASSERT( probe );
+    if( probe->IsOk() )
+        m_videoBuffer->AddFrame( probe->GetVideoOutput(), probe->GetUncalibratedWorldTransform()->GetMatrix() );
 
     // Start watching the clock for updates
     connect( &Application::GetInstance(), SIGNAL(IbisClockTick()), this, SLOT(Updated()));
@@ -350,10 +338,11 @@ void USAcquisitionObject::Updated()
 {
     if( m_isRecording )
     {
-        HardwareModule * hw = Application::GetHardwareModule();
-        if( hw->GetVideoTrackerState() == Ok )
+        UsProbeObject * probe = UsProbeObject::SafeDownCast( GetManager()->GetObjectByID( m_usProbeObjectId ) );
+        Q_ASSERT( probe );
+        if( probe->IsOk() )
         {
-            m_videoBuffer->AddFrame( hw->GetTrackedVideoOutput(), hw->GetTrackedVideoUncalibratedTransform()->GetMatrix() );
+            m_videoBuffer->AddFrame( probe->GetVideoOutput(), probe->GetUncalibratedWorldTransform()->GetMatrix() );
             emit Modified();
         }
     }
@@ -367,7 +356,7 @@ void USAcquisitionObject::UpdateMask()
     this->SetCurrentFrame( 0 );
     m_imageStencilSource->Update();
     m_mapToColors->Update();
-    m_constantPad->Update(); // added Mar 3, 2016, Xiao
+    m_constantPad->Update();
     this->SetNumberOfStaticSlices( m_numberOfStaticSlices );
     this->SetCurrentFrame( currentFrameIndex );
 }
@@ -384,8 +373,6 @@ void USAcquisitionObject::Stop()
 void USAcquisitionObject::SetCurrentFrame( int frameIndex )
 {
     m_videoBuffer->SetCurrentFrame( frameIndex );
-    m_mapToColors->SetInputData( m_videoBuffer->GetCurrentImage() );
-    m_constantPad->SetInputData( m_videoBuffer->GetCurrentImage() ); // added Mar , 2016, Xiao
     m_currentImageTransform->SetMatrix( m_videoBuffer->GetCurrentMatrix() );
     m_sliceTransform->Update();
     emit Modified();
@@ -431,6 +418,16 @@ QString USAcquisitionObject::GetAcquisitionColor()
     return ret;
 }
 
+vtkAlgorithmOutput * USAcquisitionObject::GetMaskedOutputPort()
+{
+    return m_maskedImageOutput->GetOutputPort();
+}
+
+vtkAlgorithmOutput * USAcquisitionObject::GetUnmaskedOutputPort()
+{
+    return m_unmaskedImageOutput->GetOutputPort();
+}
+
 void USAcquisitionObject::SetCalibrationMatrix( vtkMatrix4x4 * mat )
 {
     vtkMatrix4x4 * matCopy = vtkMatrix4x4::New();
@@ -453,18 +450,6 @@ vtkImageData * USAcquisitionObject::GetVideoOutput()
 vtkTransform * USAcquisitionObject::GetTransform()
 {
     return m_sliceTransform;
-}
-
-void USAcquisitionObject::Export()
-{
-    QString directoryName(this->GetBaseDirectory());
-    QString saveDir = Application::GetInstance().GetExistingDirectory(tr("Export Acquisition"), directoryName);
-    if (!saveDir.isEmpty())
-    {
-        int numberOfFramesExported = 0;
-        this->ExportTrackedVideoBuffer( numberOfFramesExported, saveDir );
-        this->SetBaseDirectory(directoryName);
-    }
 }
 
 void USAcquisitionObject::SetupAllStaticSlicesInAllViews()
@@ -596,120 +581,64 @@ void USAcquisitionObject::ClearStaticSlicesData()
 }
 
 
-void USAcquisitionObject::Save( int & numberOfFramesSaved )
+void USAcquisitionObject::Save()
 {
-    if (this->ExportTrackedVideoBuffer( numberOfFramesSaved ) )
-    {
-        QString relPath("./");
-        relPath.append(m_baseDirectory.section('/',-1));
-        this->SetBaseDirectory(relPath);
-    }
+    this->ExportTrackedVideoBuffer( );
 }
 
 bool USAcquisitionObject::LoadFramesFromMINCFile( QStringList & allMINCFiles )
 {
-    OpenFileParams params;
-    bool frameOK = true;
-    m_itkRGBImages.clear();
-    FileReader *fileReader = new FileReader;
-    // First check if it is MINC 1 format
-    FILE *fp = fopen(allMINCFiles.at(0).toUtf8().data(), "rb");
-    if (fp)
-    {
-        char first4[4];
-        size_t count = fread(first4, 4, 1, fp);
-        fclose(fp);
-
-        if (count == 1 &&
-        first4[0] == 'C' &&
-        first4[1] == 'D' &&
-        first4[2] == 'F' &&
-        first4[3] == '\001')
-        {
-            QFileInfo fi( allMINCFiles.at(0) );
-            QString tmp("Acquired files in directory: ");
-            tmp.append( fi.absolutePath() + " are of MINC1 type. You have to convert them to MINC2 format.\n" +
-                        "Please convert using command: \nmincconvert -2 <input> <output>\n" +
-                        "or using ConvertMINC1toMINC2 plugin");
-            QMessageBox::warning( 0, "Error", tmp );
-            return false;
-        }
-    }
-    for( int i = 0; i < allMINCFiles.count() && frameOK; ++i )
+    bool processOK = true;
+    QProgressDialog * progress = new QProgressDialog("Importing frames", "Cancel", 0, allMINCFiles.count() );
+    progress->setAttribute(Qt::WA_DeleteOnClose, true);
+    progress->show();
+    ImageObject *img = ImageObject::New();
+    for( int i = 0; i < allMINCFiles.count() && processOK; ++i )
     {
         QFileInfo fi( allMINCFiles.at(i) );
         if( !(fi.isReadable()) )
         {
-            QString message( "No read permission on file: " );
+            QString message( tr("No read permission on file: ") );
             message.append( allMINCFiles.at(i) );
             QMessageBox::critical( 0, "Error", message, 1, 0 );
-            frameOK = false;
+            processOK = false;
             break;
         }
-        params.AddInputFile(allMINCFiles.at(i));
-        params.defaultParent = this->Parent;
-        params.filesParams[0].isVideoFrame = true;
-        fileReader->SetParams( &params );
-        fileReader->start();
-        fileReader->wait();
-        QList<SceneObject*> loadedObject;
-        fileReader->GetReadObjects( loadedObject );
-        if( !loadedObject.isEmpty() )
+        if ( Application::GetInstance().GetImageDataFromVideoFrame( allMINCFiles.at(i), img ) )
         {
-            ImageObject *img = ImageObject::SafeDownCast( loadedObject.at(0) );
-            if( img )
+            // create full transform and reset image step and origin in order to avoid
+            // double translation and scaling and display slices correctly in double view
+            double start[3], step[3];
+            vtkImageData *frame = vtkImageData::New();
+            frame->DeepCopy( img->GetImage() );
+            frame->GetOrigin(start);
+            frame->GetSpacing(step);
+            vtkTransform *localTransform = vtkTransform::New();
+            localTransform->SetMatrix(img->GetLocalTransform()->GetMatrix());
+            localTransform->Translate(start);
+            localTransform->Scale(step);
+            frame->SetOrigin(0,0,0);
+            frame->SetSpacing(1,1,1);
+
+            m_videoBuffer->AddFrame( frame, localTransform->GetMatrix() );
+            frame->Delete();
+
+            localTransform->Delete();
+
+            progress->setValue(i);
+            qApp->processEvents();
+            if ( progress->wasCanceled() )
             {
-                // create full transform and reset image step and origin in order to avoid
-                // double translation and scaling and display slices correctly in double view
-                double start[3], step[3];
-                img->GetImage()->GetOrigin(start);
-                img->GetImage()->GetSpacing(step);
-                vtkMatrix4x4 *sliceMatrix = img->GetLocalTransform()->GetMatrix();
-                vtkTransform *t = vtkTransform::New();
-                t->SetMatrix(img->GetLocalTransform()->GetMatrix());
-                t->Translate(start);
-                t->Scale(step);
-                img->SetLocalTransform(t);
-                t->Delete();
-                img->GetImage()->SetOrigin(0,0,0);
-                img->GetImage()->SetSpacing(1,1,1);
-
-                img->GetImage()->GetOrigin(start);
-                img->GetImage()->GetSpacing(step);
-                sliceMatrix = img->GetLocalTransform()->GetMatrix();
-                m_videoBuffer->AddFrame( img->GetImage(), img->GetLocalTransform()->GetMatrix() );
-
-                if( img->GetItkRGBImage() )
-                    m_itkRGBImages.push_back(img->GetItkRGBImage());
-                IbisRGBImageType::Pointer itkImage = img->GetItkRGBImage();
-                float origin[3];
-                for( int i = 0; i < 3; i++ )
-                    origin[i] = itkImage->GetOrigin()[i];
-                itk::Matrix< double, 3, 3 > dir_cos = itkImage->GetDirection();
-                float spacing[3];
-                for ( int i = 0; i < 3; i++ )
-                {
-                    spacing[i] = itkImage->GetSpacing()[i];
-                }
+                QMessageBox::information(0, "Importing frames", "Process cancelled", 1, 0);
+                processOK = false;
             }
-            params.filesParams.pop_back();
         }
         else // if first file was not read in, the others won't neither
-            frameOK = false;
+            processOK = false;
     }
-    const QStringList & warnings = fileReader->GetWarnings();
-    if( warnings.size() )
-    {
-        QString message("");
-        for( int i = 0; i < warnings.size(); ++i )
-        {
-            message += warnings[i];
-            message += QString("\n");
-        }
-        QMessageBox::warning( 0, "Error", message );
-    }
-    delete fileReader;
-    return frameOK;
+    img->Delete();
+    progress->close();
+    return processOK;
 }
 
 bool USAcquisitionObject::LoadFramesFromMINCFile( Serializer * ser )
@@ -725,16 +654,16 @@ bool USAcquisitionObject::LoadFramesFromMINCFile( Serializer * ser )
     subDirName = baseDirName + "/" + baseFileName;
     if (!QFile::exists(subDirName))
     {
-        QString  accessError = "Directory not found - " + subDirName;
-        QMessageBox::warning(0, "Error: ", accessError, 1, 0);
+        QString  accessError = tr("Directory not found - ") + subDirName;
+        QMessageBox::warning(0, tr("Error: "), accessError, 1, 0);
         return false;
     }
     QDir dir(subDirName);
     QStringList allMINCFiles = dir.entryList(QStringList("*.mnc"), QDir::Files, QDir::Name);
     if (allMINCFiles.isEmpty())
     {
-        QString  accessError = "No acquisition found in  " + subDirName;
-        QMessageBox::warning(0, "Error: ", accessError, 1, 0);
+        QString  accessError = tr("No acquisition found in  ") + subDirName;
+        QMessageBox::warning(0, tr("Error: "), accessError, 1, 0);
         return false;
     }
 
@@ -760,14 +689,13 @@ void USAcquisitionObject::Serialize( Serializer * ser )
     int acquisitionType = (int)m_acquisitionType;
     if (!ser->IsReader())
     {
-        int numberOfFrames = m_videoBuffer->GetNumberOfFrames();
         currentSlice = this->GetCurrentSlice();
         currentSliceOpacity = m_sliceProperties->GetOpacity();
         staticSlicesOpacity = m_staticSlicesProperties->GetOpacity();
         QString relPath("./");
         relPath.append(m_baseDirectory.section('/',-1));
         this->SetBaseDirectory(relPath);
-        this->Save( numberOfFrames );
+        this->Save( );
     }
 
     ::Serialize( ser, "BaseDirectory", m_baseDirectory );
@@ -777,8 +705,8 @@ void USAcquisitionObject::Serialize( Serializer * ser )
             m_baseDirectory.replace(0, 1, ser->GetCurrentDirectory() );
         if (!QDir(m_baseDirectory).exists())
         {
-            QString  accessError = "Cannot find acquisition directory: " + m_baseDirectory;
-            QMessageBox::warning( 0, "Error: ", accessError, 1, 0 );
+            QString  accessError = tr("Cannot find acquisition directory: ") + m_baseDirectory;
+            QMessageBox::warning( 0, tr("Error: "), accessError, 1, 0 );
             return;
         }
 
@@ -827,6 +755,26 @@ void USAcquisitionObject::CreateSettingsWidgets( QWidget * parent, QVector <QWid
     w1->SetMask( m_mask );
     w1->DisableSetASDefault();
     widgets->append( w1 );
+}
+
+int USAcquisitionObject::GetSliceWidth()
+{
+    return m_videoBuffer->GetFrameWidth();
+}
+
+int USAcquisitionObject::GetSliceHeight()
+{
+    return m_videoBuffer->GetFrameHeight();
+}
+
+int USAcquisitionObject::GetNumberOfSlices()
+{
+    return m_videoBuffer->GetNumberOfFrames();
+}
+
+vtkImageData * USAcquisitionObject::GetMask()
+{
+    return m_mask->GetMask();
 }
 
 // GetItkImage in release 2.3.1 is used only in GPU Volume Reconstruction and is not meant for general application
@@ -928,13 +876,34 @@ bool USAcquisitionObject::GetItkImage(IbisItk3DImageType::Pointer itkOutputImage
 
 // GetItkRGBImage is used only to convert captured video frames to itk images that will be then exported using itk image writer
 // we export only uncalibrated matrices
-void USAcquisitionObject::GetItkRGBImage(IbisRGBImageType::Pointer itkOutputImage, int frameNo )
+void USAcquisitionObject:: GetItkRGBImage(IbisRGBImageType::Pointer itkOutputImage, int frameNo, bool masked , bool useCalibratedTransform, vtkMatrix4x4* relativeMatrix )
 {
     Q_ASSERT_X(itkOutputImage, "USAcquisitionObject::GetItkImage()", "itkOutputImage must be allocated before this call");
 
     vtkImageData * image = m_videoBuffer->GetImage( frameNo );
-    vtkMatrix4x4 * uncalibratedMatrix = vtkMatrix4x4::New();
-    uncalibratedMatrix->DeepCopy( m_videoBuffer->GetMatrix( frameNo ) );
+    vtkSmartPointer<vtkMatrix4x4> frameMatrix = vtkSmartPointer<vtkMatrix4x4>::New();
+    frameMatrix->Identity();
+    vtkSmartPointer<vtkMatrix4x4> calibratedFrameMatrix = vtkSmartPointer<vtkMatrix4x4>::New();
+    calibratedFrameMatrix->Identity();
+    vtkMatrix4x4::Multiply4x4( m_videoBuffer->GetMatrix( frameNo ), m_calibrationTransform->GetMatrix(), calibratedFrameMatrix );
+    if( relativeMatrix )
+    {
+        if( useCalibratedTransform )
+        {
+            vtkMatrix4x4::Multiply4x4( relativeMatrix, calibratedFrameMatrix, frameMatrix );
+        }
+        else
+            vtkMatrix4x4::Multiply4x4( relativeMatrix, m_videoBuffer->GetMatrix( frameNo ), frameMatrix );
+    }
+    else
+    {
+        if( useCalibratedTransform )
+        {
+            frameMatrix->DeepCopy( calibratedFrameMatrix );
+        }
+        else
+            frameMatrix->DeepCopy( m_videoBuffer->GetMatrix( frameNo ) );
+    }
 
     int numberOfScalarComponents = image->GetNumberOfScalarComponents();
 
@@ -958,7 +927,7 @@ void USAcquisitionObject::GetItkRGBImage(IbisRGBImageType::Pointer itkOutputImag
     itk::Vector< double, 3 > itkOrigin;
     // set direction cosines
     vtkMatrix4x4 * tmpMat = vtkMatrix4x4::New();
-    vtkMatrix4x4::Transpose( uncalibratedMatrix, tmpMat );
+    vtkMatrix4x4::Transpose( frameMatrix, tmpMat );
     double step[3], mincStartPoint[3], dirCos[3][3];
     for( int i = 0; i < 3; i++ )
     {
@@ -984,45 +953,52 @@ void USAcquisitionObject::GetItkRGBImage(IbisRGBImageType::Pointer itkOutputImag
 
     itkOutputImage->Allocate();
     RGBPixelType *itkImageBuffer = itkOutputImage->GetBufferPointer();
-    memcpy(itkImageBuffer, image->GetScalarPointer(), numberOfPixels*sizeof(RGBPixelType));
-    uncalibratedMatrix->Delete();
-}
-
-int USAcquisitionObject::GetSliceWidth()
-{
-    return m_videoBuffer->GetFrameWidth();
-}
-
-int USAcquisitionObject::GetSliceHeight()
-{
-    return m_videoBuffer->GetFrameHeight();
-}
-
-int USAcquisitionObject::GetNumberOfSlices()
-{
-    return m_videoBuffer->GetNumberOfFrames();
-}
-
-vtkImageData * USAcquisitionObject::GetMask()
-{
-    return m_mask->GetMask();
+    if( masked )
+    {
+        vtkSmartPointer<vtkImageStencil> sliceStencil = vtkSmartPointer<vtkImageStencil>::New();
+        sliceStencil->SetStencilData( m_imageStencilSource->GetOutput() );
+        sliceStencil->SetInputData( image );
+        sliceStencil->SetBackgroundColor( 1.0, 1.0, 1.0, 0.0 );
+        sliceStencil->Update();
+        memcpy(itkImageBuffer, sliceStencil->GetOutput()->GetScalarPointer(), numberOfPixels*sizeof(RGBPixelType));
+    }
+    else
+        memcpy(itkImageBuffer, image->GetScalarPointer(), numberOfPixels*sizeof(RGBPixelType));
 }
 
 #include <itkImageFileWriter.h>
 
-void USAcquisitionObject::ConvertVtkImagesToItkRGBImages()
+void USAcquisitionObject::ConvertVtkImagesToItkRGBImages(bool masked, bool useCalibratedTransform, int relativeToID )
 {
     m_itkRGBImages.clear();
     int numberOfFrames = m_videoBuffer->GetNumberOfFrames();
     for( int i = 0; i < numberOfFrames; i++ )
     {
         IbisRGBImageType::Pointer itkOutputImage = IbisRGBImageType::New();
-        this->GetItkRGBImage( itkOutputImage, i );
+        if( relativeToID  != SceneObject::InvalidObjectId )
+        {
+            SceneObject *relativeTo = this->GetManager()->GetObjectByID( relativeToID );
+            Q_ASSERT( relativeTo );
+            this->GetItkRGBImage( itkOutputImage, i, masked, useCalibratedTransform, relativeTo->GetWorldTransform()->GetLinearInverse()->GetMatrix() );
+        }
+        else
+            this->GetItkRGBImage( itkOutputImage, i, masked, useCalibratedTransform );
         m_itkRGBImages.push_back( itkOutputImage );
     }
 }
 
-bool USAcquisitionObject::ExportTrackedVideoBuffer( int & numberOfFramesExported, QString dir )
+void USAcquisitionObject::Export()
+{
+    ExportParams params;
+    ExportAcquisitionDialog *dialog = new ExportAcquisitionDialog( 0, Qt::WindowStaysOnTopHint );
+    dialog->setAttribute( Qt::WA_DeleteOnClose, true );
+    dialog->SetUSAcquisitionObject( this );
+    dialog->SetExportParams( &params );
+    if (dialog->exec() == QDialog::Accepted)
+        this->ExportTrackedVideoBuffer( params.outputDir, params.masked, params.useCalibratedTransform, params.relativeToID );
+}
+
+void USAcquisitionObject::ExportTrackedVideoBuffer(QString destDir , bool masked, bool useCalibratedTransform, int relativeToID )
 {
     Q_ASSERT( GetManager() );
 
@@ -1031,7 +1007,7 @@ bool USAcquisitionObject::ExportTrackedVideoBuffer( int & numberOfFramesExported
     // we have to take copy of current settings and change base directory
     QString partFileName;
     QString baseFileName;
-    QString baseDirName(dir);
+    QString baseDirName( destDir );
     if (baseDirName.isEmpty())
     {
         baseDirName = this->GetManager()->GetSceneDirectory();
@@ -1049,9 +1025,9 @@ bool USAcquisitionObject::ExportTrackedVideoBuffer( int & numberOfFramesExported
         dirMade = baseDir.mkpath(baseDirName);
         if (!dirMade)
         {
-            QString  accessError = IGNS_MSG_CANT_MAKE_DIR + baseDirName;
-            QMessageBox::warning(0, "Error: ", accessError, 1, 0);
-            return false;
+            QString  accessError = tr("Can't create directory:\n") + baseDirName;
+            QMessageBox::warning(0, tr("Error: "), accessError, 1, 0);
+            return;
         }
     }
     if (QFile::exists(subDirName))
@@ -1065,18 +1041,18 @@ bool USAcquisitionObject::ExportTrackedVideoBuffer( int & numberOfFramesExported
         }
         if (!tmp.rmdir(subDirName))
         {
-            QString  accessError = IGNS_MSG_ACQ_EXIST + subDirName;
-            QMessageBox::warning(0, "Error: ", accessError, 1, 0);
-            return false;
+            QString  accessError = tr("Please select different directory.\nAcquisition data already saved in: ") + subDirName;
+            QMessageBox::warning(0, tr("Error: "), accessError, 1, 0);
+            return;
         }
     }
     QDir subDir;
     dirMade = subDir.mkdir(subDirName);
     if (!dirMade)
     {
-        QString  accessError = IGNS_MSG_CANT_MAKE_DIR + subDirName;
-        QMessageBox::warning( 0, "Error: ", accessError, 1, 0 );
-        return false;
+        QString  accessError = tr("Can't create directory:\n") + subDirName;
+        QMessageBox::warning( 0, tr("Error: "), accessError, 1, 0 );
+        return;
     }
     bool processOK = false;
     QProgressDialog * progress = new QProgressDialog("Exporting frames", "Cancel", 0, numberOfFrames);
@@ -1084,14 +1060,11 @@ bool USAcquisitionObject::ExportTrackedVideoBuffer( int & numberOfFramesExported
     if( numberOfFrames > 0)
     {
         int backupCurrentFrame = this->GetCurrentSlice();
-        progress = new QProgressDialog("Exporting frames", "Cancel", 0, numberOfFrames);
         progress->show();
         processOK = true;
 
-        numberOfFramesExported = 0;
         int sequenceNumber = 0; // make sure to number output files sequentially
-        if( m_itkRGBImages.size() == 0 )
-            this->ConvertVtkImagesToItkRGBImages();
+        this->ConvertVtkImagesToItkRGBImages( masked, useCalibratedTransform, relativeToID );
         itk::ImageFileWriter< IbisRGBImageType >::Pointer mincWriter = itk::ImageFileWriter<IbisRGBImageType>::New();
         for( int i = 0; i < numberOfFrames && processOK; i++ )
         {
@@ -1125,15 +1098,60 @@ bool USAcquisitionObject::ExportTrackedVideoBuffer( int & numberOfFramesExported
             qApp->processEvents();
             if ( progress->wasCanceled() )
             {
-                QMessageBox::information(0, "Exporting frames", "Process cancelled", 1, 0);
+                QMessageBox::information(0, tr("Exporting frames"), tr("Process cancelled"), 1, 0);
                 processOK = false;
             }
-            numberOfFramesExported++;
         }
         progress->close();
-        return processOK;
     }
-    return false;
+    if( !useCalibratedTransform ) // export calibration transform
+    {
+        QString calibrationTransformFileName( subDirName );
+        calibrationTransformFileName.append( "/calibrationTransform.xfm" );
+        vtkXFMWriter * writer = vtkXFMWriter::New();
+        writer->SetFileName( calibrationTransformFileName.toUtf8().data() );
+        writer->SetMatrix( m_calibrationTransform->GetMatrix() );
+        writer->Write();
+        writer->Delete();
+    }
+    if( !processOK )
+        QMessageBox::warning( 0, "Error: ", "Exporting frames failed.", 1, 0 );
+}
+
+bool USAcquisitionObject::Import()
+{
+    QStringList filenames;
+    QString extension( ".mnc" );
+    QString initialPath( Application::GetInstance().GetSettings()->WorkingDirectory );
+    bool success = Application::GetInstance().GetOpenFileSequence( filenames, extension, "Select first file of acquisition", initialPath, "Minc file (*.mnc)" );
+    if( success )
+    {
+        if( this->LoadFramesFromMINCFile( filenames ) )
+        {
+            this->SetName( "Acquisition" );
+            this->SetCurrentFrame(0);
+            // look for calibration transform
+            m_calibrationTransform->Identity();
+            QFileInfo fi( filenames.at(0) );
+            QString calibrationTransformFileName( fi.absolutePath() );
+            calibrationTransformFileName.append( "/calibrationTransform.xfm" );
+            if( QFile::exists( calibrationTransformFileName ) )
+            {
+                vtkXFMReader *reader = vtkXFMReader::New();
+                if( reader->CanReadFile( calibrationTransformFileName.toUtf8() ) )
+                {
+                    vtkMatrix4x4 * mat = vtkMatrix4x4::New();
+                    reader->SetFileName( calibrationTransformFileName.toUtf8() );
+                    reader->SetMatrix( mat );
+                    reader->Update();
+                    m_calibrationTransform->SetMatrix( mat );
+                    m_calibrationTransform->Update();
+                }
+                reader->Delete();
+            }
+        }
+    }
+    return success;
 }
 
 int USAcquisitionObject::GetCurrentSlice()
@@ -1157,11 +1175,7 @@ void USAcquisitionObject::SetSliceLutIndex( int index )
     m_sliceLutIndex = index;
     double range[2] = { 0.0, 255.0 };
     QString slicesLutName = Application::GetLookupTableManager()->GetTemplateLookupTableName( m_sliceLutIndex );
-    vtkPiecewiseFunctionLookupTable * lut = vtkPiecewiseFunctionLookupTable::New();
-    lut->SetIntensityFactor( 1.0 );
-    Application::GetLookupTableManager()->CreateLookupTable( slicesLutName, range, lut );
-    m_mapToColors->SetLookupTable( lut );
-    lut->Delete();
+    Application::GetLookupTableManager()->CreateLookupTable( slicesLutName, range, m_lut );
     emit Modified();
 }
 

@@ -48,8 +48,6 @@ public:
     virtual void Export();
     virtual bool IsExportable() { return false; }
 
-    virtual void ShallowCopy(SceneObject*);
-
     static const int InvalidObjectId;
     vtkSetMacro( ObjectID, int );
     vtkGetMacro( ObjectID, int );

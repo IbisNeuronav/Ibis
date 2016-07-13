@@ -36,9 +36,6 @@ public slots:
     virtual void OpacitySliderValueChanged(int);
     virtual void OpacityEditTextChanged( const QString & );
     virtual void CrossSectionCheckBoxToggled(bool);
-    virtual void RemoveOctantCheckBoxToggled(bool);
-    virtual void OctantNumberChanged(int);
-
     virtual void UpdateSettings();
 
 protected:
@@ -59,6 +56,10 @@ private slots:
     void on_sampleVolumeComboBox_currentIndexChanged(int index);
     void on_vertexColorGroupBox_toggled(bool arg1);
     void on_lutComboBox_currentIndexChanged(int index);
+    void on_xpRadioButton_toggled(bool checked);
+    void on_ypRadioButton_toggled(bool checked);
+    void on_zpRadioButton_toggled(bool checked);
+    void on_clippingGroupBox_toggled(bool arg1);
 };
 
 #endif

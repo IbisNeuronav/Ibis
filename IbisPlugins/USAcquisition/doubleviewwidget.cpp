@@ -16,6 +16,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "usacquisitionobject.h"
 #include "usprobeobject.h"
 #include "hardwaremodule.h"
+#include "guiutilities.h"
 
 #include <QMessageBox>
 #include "QVTKWidget.h"
@@ -31,6 +32,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "vtkImageMask.h"
 #include "vtkTrackedVideoBuffer.h"
 #include "vtkImageData.h"
+#include "vtkImageStack.h"
+#include "vtkImageProperty.h"
 
 DoubleViewWidget::DoubleViewWidget( QWidget * parent, Qt::WindowFlags f ) :
     QWidget(parent,f),
@@ -44,40 +47,53 @@ DoubleViewWidget::DoubleViewWidget( QWidget * parent, Qt::WindowFlags f ) :
     usInteractor->SetInteractorStyle( style );
     style->Delete();
 
-    vtkRenderWindowInteractor * mriInteractor = ui->mriImageWindow->GetInteractor();
-    vtkInteractorStyleImage2 * style2 = vtkInteractorStyleImage2::New();
-    mriInteractor->SetInteractorStyle( style2 );
-    style2->Delete();
-
     m_usRenderer= vtkRenderer::New();
     ui->usImageWindow->GetRenderWindow()->AddRenderer( m_usRenderer );
-    m_mriRenderer= vtkRenderer::New();
-    ui->mriImageWindow->GetRenderWindow()->AddRenderer( m_mriRenderer ); // is this for one MRI or for two?
 
     m_usActor = vtkImageActor::New();
     m_usActor->InterpolateOff();
     m_usActor->VisibilityOff();   // invisible until there is a valid input
     m_usRenderer->AddActor( m_usActor );
-    m_mriActor = vtkImageActor::New();
-    m_mriActor->InterpolateOff();
-    m_mriActor->VisibilityOff();  // invisible until there is a valid input
-    m_mriRenderer->AddActor( m_mriActor );
 
     m_reslice = vtkImageResliceToColors::New();  // set up the reslice
     m_reslice->SetInterpolationModeToLinear( );
     m_reslice->SetOutputExtent(0, 639, 0, 479, 0, 1);
-    m_reslice->SetOutputOrigin(0, 0, 0);
+    m_reslice->SetOutputSpacing( 1.0, 1.0, 1.0 );
+    m_reslice->SetOutputOrigin( 0.0, 0.0, 0.0 );
 
-    // put one more for the second MRI, May 14, 2015 by Xiao
+    // put one more for the second MRI
     m_reslice2 = vtkImageResliceToColors::New();  // set up the reslice2
     m_reslice2->SetInterpolationModeToLinear( );
     m_reslice2->SetOutputExtent(0, 639, 0, 479, 0, 1);
-    m_reslice2->SetOutputOrigin(0, 0, 0);
+    m_reslice2->SetOutputSpacing( 1.0, 1.0, 1.0 );
+    m_reslice2->SetOutputOrigin( 0.0, 0.0, 0.0 );
 
-
-    m_blendedImage = vtkImageBlend::New(); // modify to allow one additional image
     m_imageMask = vtkImageMask::New();
     m_imageMask->SetInputConnection( m_reslice->GetOutputPort() );
+
+    m_vol1Slice = vtkImageActor::New();
+    m_vol1Slice->GetMapper()->SetInputConnection( m_reslice->GetOutputPort() );
+    m_vol1Slice->GetProperty()->SetLayerNumber( 0 );
+    m_vol2Slice = vtkImageActor::New();
+    m_vol2Slice->GetMapper()->SetInputConnection( m_reslice2->GetOutputPort() );
+    m_vol2Slice->GetProperty()->SetLayerNumber( 1 );
+    m_vol2Slice->VisibilityOff();
+    m_usSlice = vtkImageActor::New();
+    m_usSlice->GetProperty()->SetLayerNumber( 2 );
+    m_usSlice->VisibilityOff();
+    m_mriActor = vtkImageStack::New();
+    m_mriActor->AddImage( m_vol1Slice );
+    m_mriActor->AddImage( m_vol2Slice );
+    m_mriActor->AddImage( m_usSlice );
+
+    m_mriRenderer = vtkRenderer::New();
+    ui->mriImageWindow->GetRenderWindow()->AddRenderer( m_mriRenderer ); // is this for one MRI or for two?
+    m_mriRenderer->AddActor( m_mriActor );
+
+    vtkRenderWindowInteractor * mriInteractor = ui->mriImageWindow->GetInteractor();
+    vtkInteractorStyleImage2 * style2 = vtkInteractorStyleImage2::New();
+    mriInteractor->SetInteractorStyle( style2 );
+    style2->Delete();
 
     this->MakeCrossLinesToShowProbeIsOutOfView();
 }
@@ -88,10 +104,14 @@ DoubleViewWidget::~DoubleViewWidget()
     m_mriRenderer->Delete();
     m_reslice->Delete();
     m_reslice2->Delete();
-    m_mriActor->Delete();
     m_usActor->Delete();
-    m_blendedImage->Delete();
     m_imageMask->Delete();
+
+    m_mriActor->Delete();
+    m_vol1Slice->Delete();
+    m_vol2Slice->Delete();
+    m_usSlice->Delete();
+
     m_usLine1Actor->Delete();
     m_usLine2Actor->Delete();
     m_mriLine1Actor->Delete();
@@ -106,11 +126,7 @@ void DoubleViewWidget::SetPluginInterface( USAcquisitionPluginInterface * interf
 
     // watch changes in objects that are used by the window (volume, acquisition and probe)
     connect( m_pluginInterface, SIGNAL(ObjectsChanged()), this, SLOT(UpdateInputs()) );
-
-    // Watch scene manager for certain events
-    SceneManager * man = m_pluginInterface->GetSceneManager();
-    connect( man, SIGNAL(ObjectAdded(int)), this, SLOT(UpdateUi()) );
-    connect( man, SIGNAL(ObjectRemoved(int)), this, SLOT(UpdateUi()) );
+    connect( m_pluginInterface, SIGNAL(ImageChanged()), this, SLOT(UpdateViews()) );
 
     this->UpdatePipelineConnections();   // make sure vtk pipeline is connected in a way that reflects current state
     this->UpdateInputs();                // make sure input volume and US image are valid
@@ -124,8 +140,6 @@ void DoubleViewWidget::UpdateUi()
     bool hasAcquisition =  acq != 0;
     bool isNotEmptyAcquisition = hasAcquisition && acq->GetNumberOfSlices() > 0;
     bool isRecording = hasAcquisition ? acq->IsRecording() : false;
-
-    // here alter stop to "pause" for recording May 13, 2015. This should be changed in the later text
 
     if( isRecording )
         ui->m_recordButton->setText("Stop");
@@ -190,7 +204,7 @@ void DoubleViewWidget::UpdateUi()
     ui->opacityStepLineEdit_1->setEnabled( blending );
     ui->opacityStepLineEdit_1->setText( QString::number( blendingPercent ) );
 
-    // new content added for updating blending controls of two MRIs, May 13, 2015 by Xiao ***
+    // blending controls of two MRIs
     bool blendingVolumes = m_pluginInterface->IsBlendingVolumes();  // add correspondance in interface.cpp
     // add control statement for enable secondary MRI
     bool blendingVolumesControl = blending && blendingVolumes;
@@ -223,55 +237,22 @@ void DoubleViewWidget::UpdateUi()
     ui->maskAlphaLineEdit->setEnabled( maskingControls );
     ui->maskAlphaLineEdit->setText( QString::number( maskingPercent ) );
 
-    // Update acquisitions combo
+    // Update acquisition combo
     QList<USAcquisitionObject*> acquisitions;
-    SceneManager * man = m_pluginInterface->GetSceneManager();
-    man->GetAllUSAcquisitionObjects( acquisitions );
-    ui->acquisitionsComboBox->blockSignals( true );
-    ui->acquisitionsComboBox->clear();
-    for( int i = 0; i < acquisitions.size(); ++i )
-    {
-        ui->acquisitionsComboBox->addItem( acquisitions[i]->GetName(), QVariant( acquisitions[i]->GetObjectID() ) );
-        if( acquisitions[i]->GetObjectID() == m_pluginInterface->GetCurrentAcquisitionObjectId() )
-            ui->acquisitionsComboBox->setCurrentIndex( i );
-    }
-    ui->acquisitionsComboBox->blockSignals( false );
+    m_pluginInterface->GetSceneManager()->GetAllUSAcquisitionObjects( acquisitions );
+    GuiUtilities::UpdateSceneObjectComboBox( ui->acquisitionsComboBox, acquisitions, m_pluginInterface->GetCurrentAcquisitionObjectId());
 
-    // update combo box volume of interest. This section needs changing for accomodating two sets of MRI volumes
-    // modified May 13, 2015 by Xiao **
+    // Update volume combo
     QList<ImageObject*> images;
-    man->GetAllImageObjects( images );
+    m_pluginInterface->GetSceneManager()->GetAllImageObjects( images );
+    GuiUtilities::UpdateSceneObjectComboBox( ui->imageObjectsComboBox_1, images, m_pluginInterface->GetCurrentVolumeObjectId());
 
-    ui->imageObjectsComboBox_1->blockSignals( true );
-    ui->imageObjectsComboBox_1->clear();
-
-    for( int i = 0; i < images.size(); ++i )
-    {
-        ui->imageObjectsComboBox_1->addItem( images[i]->GetName(), QVariant( images[i]->GetObjectID() ) );
-        if( images[i]->GetObjectID() == m_pluginInterface->GetCurrentVolumeObjectId() )
-            ui->imageObjectsComboBox_1->setCurrentIndex( i );
-    }
-    ui->imageObjectsComboBox_1->blockSignals( false );
-
-    // added section for the second MRI volume - Xiao
-    ui->imageObjectsComboBox_2->blockSignals( true );
-    ui->imageObjectsComboBox_2->clear();
-
-    for( int i = 0; i < images.size(); ++i ) // is this violating the scope?
-    {
-        ui->imageObjectsComboBox_2->addItem( images[i]->GetName(), QVariant( images[i]->GetObjectID() ) );
-        if( images[i]->GetObjectID() == m_pluginInterface->GetAddedVolumeObjectId() )
-            ui->imageObjectsComboBox_2->setCurrentIndex( i );
-    }
-    ui->imageObjectsComboBox_2->blockSignals( false );
-
-
+    // Update added volume combo
+    GuiUtilities::UpdateSceneObjectComboBox( ui->imageObjectsComboBox_2, images, m_pluginInterface->GetAddedVolumeObjectId());
 
     // Render graphic windows
     this->UpdateViews();
 }
-
-
 
 void DoubleViewWidget::UpdateCurrentFrameUi()
 {
@@ -302,26 +283,6 @@ void DoubleViewWidget::UpdateViews()
     UpdateStatus();
 }
 
-
-// modified May 14, 2015 by Xiao
-void DoubleViewWidget::VolumeModified()
-{
-    ImageObject * volume = m_pluginInterface->GetCurrentVolume();
-    if( volume )
-        m_reslice->SetLookupTable( volume->GetLut() );
-
-    // added updates for the second MRI
-    ImageObject * volume2 = m_pluginInterface->GetAddedVolume();
-    if( volume2 )
-        m_reslice2->SetLookupTable( volume2->GetLut() );
-
-    UpdateViews();
-}
-
-
-
-
-// needs modification May 13, 2015 Xiao, this part needs large modifications -- need to add if statement?
 void DoubleViewWidget::UpdateInputs()
 {
     Q_ASSERT( m_pluginInterface );
@@ -339,35 +300,27 @@ void DoubleViewWidget::UpdateInputs()
         m_mriActor->VisibilityOff();
     }
 
-
-// put information for the second volume, May 14, 2015 by Xiao
     ImageObject * im2 = m_pluginInterface->GetAddedVolume();
     if( im2 )
     {
         m_reslice2->SetInputData( im2->GetImage() );
         m_reslice2->SetLookupTable( im2->GetLut() );
-       // m_mriActor->VisibilityOn(); // need to change this?
     }
     else
     {
         m_reslice2->SetInputData( 0 );
-      //  m_mriActor->VisibilityOff();
     }
-
-
-
 
     // validate us acquisition
     USAcquisitionObject * acq = m_pluginInterface->GetCurrentAcquisition();
     if( acq )
     {
         m_imageMask->SetMaskInputData( acq->GetMask() ); // ok so this about using mask function?
-        m_reslice->SetOutputExtent(0, acq->GetSliceWidth(), 0, acq->GetSliceHeight(), 0, 1); // why is this?
+        m_reslice->SetOutputExtent(0, acq->GetSliceWidth(), 0, acq->GetSliceHeight(), 0, 1);
         acq->disconnect( this, SLOT(UpdateViews()) );
     }
 
     // Validate live video source
-    vtkImageData * usSource = 0;
     vtkTransform * usTransform = 0; // probe transform concatenated with calibration transform
 
      // choose which source to use for display: live or acquisition
@@ -379,97 +332,69 @@ void DoubleViewWidget::UpdateInputs()
     {
         Q_ASSERT( probe );
         connect( probe, SIGNAL(Modified()), this, SLOT(UpdateViews()) );
-        usSource = probe->GetVideoOutput();
-        usTransform = probe->GetTransform();
-        m_usActor->SetVisibility( usSource ? 1 : 0 );
+        usTransform = probe->GetWorldTransform();
+        m_usActor->VisibilityOn();
+        m_usActor->GetMapper()->SetInputConnection( probe->GetVideoOutputPort() );
+        m_usSlice->GetMapper()->SetInputConnection( probe->GetVideoOutputPort() );
     }
     else if( acq )
     {
         connect( acq, SIGNAL( Modified() ), SLOT( UpdateViews() ) );
-        usSource = acq->GetVideoOutput();
         usTransform = acq->GetTransform();
         m_usActor->SetVisibility( acq->GetNumberOfSlices()>0 ? 1 : 0 );
+        m_usActor->GetMapper()->SetInputConnection( acq->GetUnmaskedOutputPort() );
+        m_usSlice->GetMapper()->SetInputConnection( acq->GetUnmaskedOutputPort() );
     }
-
-    m_usActor->GetMapper()->SetInputData( usSource );
-
-    m_blendedImage->RemoveAllInputs();
-    m_blendedImage->AddInputConnection( m_reslice->GetOutputPort() );
-    //need another one of these for the second MRI, May 14, 2015 by Xiao
-    m_blendedImage->AddInputConnection( m_reslice2->GetOutputPort() );
-    if( usSource )
-        m_blendedImage->AddInputData( usSource );
-
-
 
     // Compute slicing transform
     vtkTransform * concat = vtkTransform::New();
     concat->Identity();
     if( im )
         concat->SetInput( im->GetWorldTransform()->GetLinearInverse() );
-    if( usSource && usTransform)
+    if( usTransform )
     {
         concat->Concatenate( usTransform );
     }
     m_reslice->SetResliceTransform( concat );
     concat->Delete();
 
-
-    // Compute slice transform for the second MRI, May 14, 2014 by Xiao
+    // Compute slice transform for the second MRI
     vtkTransform * concat2 = vtkTransform::New();
     concat2->Identity();
     if( im2 )
         concat2->SetInput( im2->GetWorldTransform()->GetLinearInverse() );
-    if( usSource && usTransform)
+    if( usTransform)
     {
         concat2->Concatenate( usTransform );
     }
     m_reslice2->SetResliceTransform( concat2 );
     concat2->Delete();
 
-
-
     this->SetDefaultViews();
     this->UpdateUi();
     UpdateCurrentFrameUi();
 }
 
-
-// modified May 13, 2015 by Xiao
 void DoubleViewWidget::UpdatePipelineConnections()
 {
     m_imageMask->SetMaskAlpha( m_pluginInterface->GetMaskingPercent() );
-    double blendPercent = m_pluginInterface->GetBlendingPercent();
-    double blendVolumePercent = m_pluginInterface->GetBlendingVolumesPercent(); // added
 
-    if( !m_pluginInterface->IsBlending() )
-    {
-        if( m_pluginInterface->IsMasking() )
-            m_mriActor->GetMapper()->SetInputConnection( m_imageMask->GetOutputPort() );
-        else
-            m_mriActor->GetMapper()->SetInputConnection( m_reslice->GetOutputPort() ); // what is in m_reslice ?
-    }
+    if( m_pluginInterface->IsMasking() )
+        m_vol1Slice->GetMapper()->SetInputConnection( m_imageMask->GetOutputPort() );
     else
-    {
-        if( m_pluginInterface->IsBlendingVolumes() )
-        {
-            m_blendedImage->SetOpacity( 0, (1 - blendPercent) * blendVolumePercent ); // this is the MRI
-            m_blendedImage->SetOpacity( 2, blendPercent );  // this is the US
-            m_blendedImage->SetOpacity( 1, (1 - blendPercent) * (1 - blendVolumePercent) ); // secondary MRI
-            m_mriActor->GetMapper()->SetInputConnection( m_blendedImage->GetOutputPort() ); // what is in m_blendedImage?
-        }
-        else
-        {
-            m_blendedImage->SetOpacity( 0, 1 - blendPercent ); // first MRI
-            m_blendedImage->SetOpacity( 2, blendPercent ); // US
-            m_blendedImage->SetOpacity( 1, 0 ); // not blending volumes, the the second image is invisible
-            m_mriActor->GetMapper()->SetInputConnection( m_blendedImage->GetOutputPort() ); // what is in m_blendedImage?
-        }
+        m_vol1Slice->GetMapper()->SetInputConnection( m_reslice->GetOutputPort() );
 
-
-    }
-
-
+    if( m_pluginInterface->GetCurrentVolume() )
+        m_vol1Slice->VisibilityOn();
+    else
+        m_vol1Slice->VisibilityOff();
+    if( m_pluginInterface->IsBlendingVolumes() && m_pluginInterface->GetAddedVolume() )
+        m_vol2Slice->VisibilityOn();
+    else
+        m_vol2Slice->VisibilityOff();
+    m_vol2Slice->GetProperty()->SetOpacity( m_pluginInterface->GetBlendingVolumesPercent() );
+    m_usSlice->SetVisibility( m_pluginInterface->IsBlending() ? 1 : 0 );
+    m_usSlice->GetProperty()->SetOpacity( m_pluginInterface->GetBlendingPercent() );
 }
 
 #include "vtkSmartPointer.h"
@@ -567,92 +492,36 @@ void DoubleViewWidget::on_blendCheckBox_toggled( bool checked )
     m_pluginInterface->SetBlending( checked );
     UpdatePipelineConnections();
     UpdateUi();
-    UpdateViews();
 }
 
-// added by Xiao May 13, 2015
-// on checked, enable window for image list & blend image 1&2
 void DoubleViewWidget::on_checkBoxImage2_toggled(bool checked)
 {
     m_pluginInterface->SetBlendingVolumes( checked );
     UpdatePipelineConnections();
     UpdateUi();
-    UpdateViews();
 }
 
-
-
-// this part modified May 14, 2015 -Xiao
 void DoubleViewWidget::on_opacitySlider_1_valueChanged( int value )
 {
     double blendPercent = value / 100.0;
-    double blendVolumePercent = m_pluginInterface->GetBlendingVolumesPercent(); // added
     m_pluginInterface->SetBlendingPercent( blendPercent );
-
-    if( m_pluginInterface->IsBlendingVolumes() )
-    {
-        m_blendedImage->SetOpacity( 0, (1 - blendPercent) * blendVolumePercent ); // this is the MRI
-        m_blendedImage->SetOpacity( 2, blendPercent );  // this is the US
-        m_blendedImage->SetOpacity( 1, (1 - blendPercent) * (1 - blendVolumePercent) ); // secondary MRI
-
-    }
-    else
-    {
-        m_blendedImage->SetOpacity( 0, 1 - blendPercent ); // first MRI
-        m_blendedImage->SetOpacity( 2, blendPercent ); // US
-        m_blendedImage->SetOpacity( 1, 0 ); // not blending volumes, the the second image is invisible
-
-    }
-
-
-    //m_blendedImage->SetOpacity( 0, 1.0 - blendPercent );
-    //m_blendedImage->SetOpacity( 1, blendPercent );
-
-
+    m_usSlice->GetProperty()->SetOpacity( blendPercent );
     UpdateUi();
-    UpdateViews();
 }
 
-// this part modified May 14, 2015 -Xiao
 void DoubleViewWidget::on_opacitySlider_2_valueChanged( int value )
 {
-    double blendPercent = m_pluginInterface->GetBlendingPercent();
     double blendVolumePercent = value / 100.0;
     m_pluginInterface->SetBlendingVolumesPercent( blendVolumePercent );
-
-    if( m_pluginInterface->IsBlendingVolumes() )
-    {
-        m_blendedImage->SetOpacity( 0, (1 - blendPercent) * blendVolumePercent ); // this is the MRI
-        m_blendedImage->SetOpacity( 2, blendPercent );  // this is the US
-        m_blendedImage->SetOpacity( 1, (1 - blendPercent) * (1 - blendVolumePercent) ); // secondary MRI
-
-    }
-    else
-    {
-        m_blendedImage->SetOpacity( 0, 1 - blendPercent ); // first MRI
-        m_blendedImage->SetOpacity( 2, blendPercent ); // US
-        m_blendedImage->SetOpacity( 1, 0 ); // not blending volumes, the the second image is invisible
-
-    }
-
-    //m_blendedImage->SetOpacity( 0, 1.0 - blendPercent );
-    //m_blendedImage->SetOpacity( 1, blendPercent );
-
+    m_vol2Slice->GetProperty()->SetOpacity( blendVolumePercent );
     UpdateUi();
-    UpdateViews();
 }
-
-
-
-
-
 
 void DoubleViewWidget::on_maskCheckBox_toggled( bool checked )
 {
     m_pluginInterface->SetMasking( checked );
     UpdatePipelineConnections();
     UpdateUi();
-    UpdateViews();
 }
 
 void DoubleViewWidget::on_maskAlphaSlider_valueChanged( int value )
@@ -661,12 +530,11 @@ void DoubleViewWidget::on_maskAlphaSlider_valueChanged( int value )
     m_pluginInterface->SetMaskingPercent( maskPercent );
     m_imageMask->SetMaskAlpha( maskPercent );
     UpdateUi();
-    UpdateViews();
 }
 
 #include "vtkCamera.h"
 
-void SetDefaultView( vtkImageActor * actor, vtkRenderer * renderer )
+void SetDefaultView( vtkImageSlice * actor, vtkRenderer * renderer )
 {
     actor->Update();
     double *bounds = actor->GetBounds();
@@ -699,10 +567,7 @@ void DoubleViewWidget::on_restoreViewsPushButton_clicked()
 
 void DoubleViewWidget::on_acquisitionsComboBox_currentIndexChanged( int index )
 {
-    QVariant v = ui->acquisitionsComboBox->itemData( index );
-    bool ok = false;
-    int objectId = v.toInt( &ok );
-    Q_ASSERT( ok );
+    int objectId = GuiUtilities::ObjectIdFromSceneObjectComboBox( ui->acquisitionsComboBox, index );
     m_pluginInterface->SetCurrentAcquisitionObjectId( objectId );
     this->UpdateInputs();
     this->UpdateViews();
@@ -710,30 +575,19 @@ void DoubleViewWidget::on_acquisitionsComboBox_currentIndexChanged( int index )
 
 void DoubleViewWidget::on_imageObjectsComboBox_1_currentIndexChanged( int index )
 {
-    QVariant v = ui->imageObjectsComboBox_1->itemData( index );
-    bool ok = false;
-    int objectId = v.toInt( &ok );
-    Q_ASSERT( ok );
+    int objectId = GuiUtilities::ObjectIdFromSceneObjectComboBox( ui->imageObjectsComboBox_1, index );
     m_pluginInterface->SetCurrentVolumeObjectId( objectId );
     this->UpdateInputs();
     this->UpdateViews();
 }
 
-
-
-//added May 13, 2015 by Xiao for second MRI volume
-
 void DoubleViewWidget::on_imageObjectsComboBox_2_currentIndexChanged( int index )
 {
-    QVariant v = ui->imageObjectsComboBox_2->itemData( index );
-    bool ok = false;
-    int objectId = v.toInt( &ok );
-    Q_ASSERT( ok );
+    int objectId = GuiUtilities::ObjectIdFromSceneObjectComboBox( ui->imageObjectsComboBox_2, index );
     m_pluginInterface->SetAddedVolumeObjectId( objectId );
     this->UpdateInputs();
     this->UpdateViews();
 }
-
 
 void DoubleViewWidget::on_m_rewindButton_clicked()
 {
@@ -798,5 +652,3 @@ void DoubleViewWidget::on_m_exportButton_clicked()
     acq->Export();
     this->setEnabled( true );
 }
-
-

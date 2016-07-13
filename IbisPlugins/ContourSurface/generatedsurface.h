@@ -22,6 +22,7 @@ class vtkImageData;
 class vtkScalarsToColors;
 class vtkImageAccumulate;
 class SurfaceSettingsWidget;
+class ContourSurfacePluginInterface;
 
 
 
@@ -42,6 +43,8 @@ public:
     virtual void CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets);
     SurfaceSettingsWidget * CreateSurfaceSettingsWidget(QWidget * parent);
     void UpdateSettingsWidget();
+    void SetPluginInterface( ContourSurfacePluginInterface * interf );
+    bool IsValid() { return m_imageObject != 0; }
 
     void SetImageObject(ImageObject *obj);
     double GetContourValue() {return m_contourValue;}
@@ -63,6 +66,7 @@ public:
     void SetStandardDeviation(double deviation){m_standardDeviation = deviation;}
 
 protected:
+    ContourSurfacePluginInterface * m_pluginInterface;
     ImageObject *m_imageObject;
     double m_contourValue;
 

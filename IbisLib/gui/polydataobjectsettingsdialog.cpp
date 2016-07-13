@@ -14,6 +14,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QtGui>
 #include <QFileDialog>
 #include <QDir>
+#include <QRadioButton>
 #include "polydataobject.h"
 #include "imageobject.h"
 #include "vtkProperty.h"
@@ -39,8 +40,6 @@ PolyDataObjectSettingsDialog::PolyDataObjectSettingsDialog( QWidget* parent, Qt:
     QObject::connect(this->opacitySlider, SIGNAL(valueChanged(int)), this, SLOT(OpacitySliderValueChanged(int)));
     QObject::connect(this->opacityEdit, SIGNAL(textChanged(QString)), this, SLOT(OpacityEditTextChanged(QString)));
     QObject::connect(this->crossSectionCheckBox, SIGNAL(toggled(bool)), this, SLOT(CrossSectionCheckBoxToggled(bool)));
-    QObject::connect(this->removeOctantCheckBox, SIGNAL(toggled(bool)), this, SLOT(RemoveOctantCheckBoxToggled(bool)));
-    QObject::connect(this->octantSpinBox, SIGNAL(valueChanged(int)), this, SLOT(OctantNumberChanged(int)));
 }
 
 PolyDataObjectSettingsDialog::~PolyDataObjectSettingsDialog()
@@ -50,6 +49,8 @@ PolyDataObjectSettingsDialog::~PolyDataObjectSettingsDialog()
         m_object->UnRegister( 0 );
     }
 }
+
+#include <QGroupBox>
 
 void PolyDataObjectSettingsDialog::SetPolyDataObject( PolyDataObject * object )
 {
@@ -70,27 +71,6 @@ void PolyDataObjectSettingsDialog::SetPolyDataObject( PolyDataObject * object )
     {
         connect( m_object, SIGNAL(Modified()), this, SLOT(UpdateSettings()) );
         m_object->Register( 0 );
-
-        if ( m_object->GetCrossSectionVisible() )
-        {
-            this->crossSectionCheckBox->blockSignals(true);
-            this->crossSectionCheckBox->setChecked(true);
-            this->crossSectionCheckBox->blockSignals(false);
-        }
-        this->removeOctantCheckBox->blockSignals(true);
-        this->octantSpinBox->blockSignals(true);
-        if (m_object->GetSurfaceRemovedOctantNumber() > -1)
-        {
-            this->removeOctantCheckBox->setChecked(true);
-            this->octantSpinBox->setValue(m_object->GetSurfaceRemovedOctantNumber()+1);
-        }
-        else
-        {
-            this->removeOctantCheckBox->setChecked(false);
-            this->octantSpinBox->setValue(1);
-        }
-        this->removeOctantCheckBox->blockSignals(false);
-        this->octantSpinBox->blockSignals(false);
     }
     
     this->UpdateUI();
@@ -125,7 +105,7 @@ void PolyDataObjectSettingsDialog::UpdateSettings()
 void PolyDataObjectSettingsDialog::UpdateUI()
 {
     // Update color ui
-    double * color = m_object->GetProperty()->GetColor();
+    double * color = m_object->GetColor();
     QString styleColor = QString("background-color: rgb(%1,%2,%3);").arg( (int)(color[0] * 255) ).arg( (int)(color[1] * 255) ).arg( (int)(color[2] * 255) );
     QString style = QString("border-width: 2px; border-style: solid; border-radius: 7;" );
     styleColor += style;
@@ -189,6 +169,32 @@ void PolyDataObjectSettingsDialog::UpdateUI()
     this->crossSectionCheckBox->blockSignals(true);
     this->crossSectionCheckBox->setChecked(m_object->GetCrossSectionVisible());
     this->crossSectionCheckBox->blockSignals(false);
+
+    clippingGroupBox->blockSignals( true );
+    clippingGroupBox->setChecked( m_object->IsClippingEnabled() );
+    clippingGroupBox->blockSignals( false );
+
+    xpRadioButton->blockSignals( true );
+    xmRadioButton->blockSignals( true );
+    xpRadioButton->setChecked( m_object->GetClippingPlanesOrientation(0) );
+    xmRadioButton->setChecked( !m_object->GetClippingPlanesOrientation(0) );
+    xmRadioButton->blockSignals( false );
+    xpRadioButton->blockSignals( false );
+
+    ypRadioButton->blockSignals( true );
+    ymRadioButton->blockSignals( true );
+    ypRadioButton->setChecked( m_object->GetClippingPlanesOrientation(1) );
+    ymRadioButton->setChecked( !m_object->GetClippingPlanesOrientation(1) );
+    ymRadioButton->blockSignals( false );
+    ypRadioButton->blockSignals( false );
+
+    zpRadioButton->blockSignals( true );
+    zmRadioButton->blockSignals( true );
+    zpRadioButton->setChecked( m_object->GetClippingPlanesOrientation(2) );
+    zmRadioButton->setChecked( !m_object->GetClippingPlanesOrientation(2) );
+    zmRadioButton->blockSignals( false );
+    zpRadioButton->blockSignals( false );
+
     this->showTextureCheckBox->blockSignals( true );
     this->showTextureCheckBox->setChecked( m_object->GetShowTexture() );
     this->showTextureCheckBox->blockSignals( false );
@@ -211,7 +217,7 @@ void PolyDataObjectSettingsDialog::UpdateOpacityUI()
 
 void PolyDataObjectSettingsDialog::ColorSwatchClicked()
 {
-    double * oldColor = m_object->GetProperty()->GetColor();
+    double * oldColor = m_object->GetColor();
     QColor initial( (int)(oldColor[0] * 255), (int)(oldColor[1] * 255), (int)(oldColor[2] * 255) );
     QColor newColor = QColorDialog::getColor( initial );
     if( newColor.isValid() )
@@ -236,20 +242,6 @@ void PolyDataObjectSettingsDialog::CrossSectionCheckBoxToggled(bool showCrossSec
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
     m_object->SetCrossSectionVisible(showCrossSection);
     QApplication::restoreOverrideCursor();
-}
-
-void PolyDataObjectSettingsDialog::RemoveOctantCheckBoxToggled(bool removeOctant)
-{
-    int octantNumber = this->octantSpinBox->value() - 1;
-    QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-    m_object->RemoveSurfaceFromOctant(octantNumber, removeOctant);
-    QApplication::restoreOverrideCursor();
-}
-
-void PolyDataObjectSettingsDialog::OctantNumberChanged(int octantNo)
-{
-    if (this->removeOctantCheckBox->isChecked())
-        m_object->RemoveSurfaceFromOctant(octantNo-1, true);
 }
 
 void PolyDataObjectSettingsDialog::on_showTextureCheckBox_toggled(bool checked)
@@ -299,4 +291,24 @@ void PolyDataObjectSettingsDialog::on_vertexColorGroupBox_toggled( bool checked 
 void PolyDataObjectSettingsDialog::on_lutComboBox_currentIndexChanged( int index )
 {
     m_object->SetLutIndex( index );
+}
+
+void PolyDataObjectSettingsDialog::on_xpRadioButton_toggled(bool checked)
+{
+    m_object->SetClippingPlanesOrientation( 0, xpRadioButton->isChecked() );
+}
+
+void PolyDataObjectSettingsDialog::on_ypRadioButton_toggled(bool checked)
+{
+    m_object->SetClippingPlanesOrientation( 1, ypRadioButton->isChecked() );
+}
+
+void PolyDataObjectSettingsDialog::on_zpRadioButton_toggled(bool checked)
+{
+    m_object->SetClippingPlanesOrientation( 2, zpRadioButton->isChecked() );
+}
+
+void PolyDataObjectSettingsDialog::on_clippingGroupBox_toggled(bool arg1)
+{
+    m_object->SetClippingEnabled( arg1 );
 }

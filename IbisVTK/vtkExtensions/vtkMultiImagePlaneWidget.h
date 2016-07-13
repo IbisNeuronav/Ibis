@@ -199,6 +199,10 @@ public:
     void MoveNSlices( int nbSlices );
 
     // Description:
+    // Get the distance between the point passed and the plane. Point is in world coords
+    double DistanceToPlane( double position[3] );
+
+    // Description:
     // Manage cursor
     void ActivateCursor(int active);
     virtual void SetCursorProperty(vtkProperty*);
@@ -398,6 +402,7 @@ protected:
     void DisableForOneRenderer( int rendererIndex );
 
     void ClearActors();
+    void SetActorsTransforms();
 
     void EnforceRestrictPlaneToVolume();
 

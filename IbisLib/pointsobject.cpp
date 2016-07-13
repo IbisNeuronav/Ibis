@@ -12,30 +12,24 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "pointpropertieswidget.h"
 #include "pointcolorwidget.h"
 #include "pointrepresentation.h"
-#include "pickerobject.h"
 #include "pointerobject.h"
 #include "polydataobject.h"
 #include "scenemanager.h"
 #include "application.h"
 #include "view.h"
 #include "ignsconfig.h"
-#include "ignsmsg.h"
-#include <QStringList>
-#include <QDir>
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QDateTime>
 #include "vtkTransform.h"
 #include "vtkTagWriter.h"
-#include "vtkActor.h"
-#include "vtkMatrix4x4.h"
 #include <vtkMath.h>
 #include <vtkCellArray.h>
+#include <vtkCellPicker.h>
 #include <vtkPolyData.h>
 #include <vtkPoints.h>
 #include <vtkProperty.h>
 #include <vtkSmartPointer.h>
-
 
 ObjectSerializationMacro( PointsObject );
 
@@ -47,42 +41,34 @@ PointsObject::PointsObject() : SceneObject()
     m_selectedPointIndex = InvalidPointIndex;
     m_pointRadius3D = 2.0;
     m_pointRadius2D = 20.0;
-    m_hotSpotSize = 0.25 * m_pointRadius2D;
     m_labelSize = 8.0;
-    m_enabledColor[0] = 1.0;
-    m_enabledColor[1] = 0.7;
-    m_enabledColor[2] = 0.0;
-    m_disabledColor[0] = 0.7;
-    m_disabledColor[1] = 0.7;
-    m_disabledColor[2] = 0.6;
+    m_activeColor[0] = 1.0;
+    m_activeColor[1] = 0.7;
+    m_activeColor[2] = 0.0;
+    m_inactiveColor[0] = 0.7;
+    m_inactiveColor[1] = 0.7;
+    m_inactiveColor[2] = 0.6;
     m_selectedColor[0] = 0.0;
     m_selectedColor[1] = 1.0;
     m_selectedColor[2] = 0.0;
     m_opacity = 1.0;
-    m_mousePicker = 0;
+    m_movingPointIndex = PointsObject::InvalidPointIndex;
+    m_picker = vtkCellPicker::New();
     m_pickable = false;
-    m_enabled = false;
+    m_pickabilityLocked = false;
     m_showLabels = true;
-    m_maxNumberOfPoints = 1000;
-    m_minNumberOfPoints = 0;
     m_computeDistance = false;
     m_lineToPointerTip = 0;
     m_lineToPointerProperty = vtkProperty::New();
     for ( int i = 0; i < 3; i++ )
         m_lineToPointerColor[i] = 1.0;
     m_lineToPointerProperty->SetColor( m_lineToPointerColor[0], m_lineToPointerColor[1], m_lineToPointerColor[2] );
-    connect( this, SIGNAL(WorldTransformChangedSignal()), this, SLOT(UpdatePoints()) );
 }
 
 PointsObject::~PointsObject()
 {
-    this->DeleteAllPointsFromScene();
+    m_picker->Delete();
     m_pointCoordinates->Delete();
-    if( m_mousePicker != 0 )
-    {
-        m_mousePicker->ConnectObservers(false);
-        m_mousePicker->Delete();
-    }
     if( m_lineToPointerTip )
         m_lineToPointerTip->Delete();
     m_lineToPointerProperty->Delete();
@@ -91,15 +77,12 @@ PointsObject::~PointsObject()
 void PointsObject::Serialize( Serializer * ser )
 {
     SceneObject::Serialize(ser);
-    bool hidden = this->ObjectHidden;
-    this->ObjectHidden = true; // set true in order not to display points while reading all object data is not finished yet
 
-    ::Serialize( ser, "PointsPickable", m_enabled );
     ::Serialize( ser, "PointRadius3D", m_pointRadius3D );
     ::Serialize( ser, "PointRadius2D", m_pointRadius2D );
     ::Serialize( ser, "LabelSize", m_labelSize );
-    ::Serialize( ser, "EnabledColor", m_enabledColor, 3 );
-    ::Serialize( ser, "DisabledColor", m_disabledColor, 3 );
+    ::Serialize( ser, "EnabledColor", m_activeColor, 3 );
+    ::Serialize( ser, "DisabledColor", m_inactiveColor, 3 );
     ::Serialize( ser, "SelectededColor", m_selectedColor, 3 );
     ::Serialize( ser, "LineToPointerColor", m_lineToPointerColor, 3 );
     ::Serialize( ser, "Opacity", m_opacity );
@@ -140,24 +123,12 @@ void PointsObject::Serialize( Serializer * ser )
                 ::Serialize( ser, "PointCoordinates", coords, 3 );
                 ::Serialize( ser, "PointTimeStamp", timeStamp );
                 ser->EndSection();
-                m_pointNames.push_back(pointName);
-                m_timeStamps.push_back(timeStamp);
-                m_pointCoordinates->InsertNextPoint(coords);
+                this->AddPointLocal( coords, pointName, timeStamp );
             }
-            m_pickable = m_enabled;
             m_lineToPointerProperty->SetColor( m_lineToPointerColor[0], m_lineToPointerColor[1], m_lineToPointerColor[2] );
+            this->SetSelectedPoint( m_selectedPointIndex );
         }
     }
-    this->ObjectHidden = hidden;
-}
-
-void PointsObject::PostSceneRead()
-{
-    if( this->ObjectHidden )
-        this->Hide();
-    else
-        this->Show();
-    UpdatePickability();
 }
 
 void PointsObject::Export()
@@ -191,7 +162,7 @@ void PointsObject::Export()
             QFileInfo info1( dirPath );
             if (!info1.isWritable())
             {
-                QString accessError = IGNS_MSG_NO_WRITE + dirPath;
+                QString accessError = tr("No write permission:\n") + dirPath;
                 QMessageBox::warning( 0, "Error: ", accessError, 1, 0 );
                 return;
             }
@@ -219,53 +190,44 @@ void PointsObject::Export()
         writer->Delete();
     }
     else
-        QMessageBox::warning( 0, "Error: ", "There are no points to save.", 1, 0 );
+        QMessageBox::warning( 0, tr("Error: "), tr("There are no points to save."), 1, 0 );
+}
+
+bool PointsObject::Setup( View * view )
+{
+    // register to receive mouse interaction event from this view
+    view->AddInteractionObject( this, 0.5 );
+
+    return SceneObject::Setup( view );
 }
 
 bool PointsObject::Release( View * view)
 {
-    this->DeleteAllPointsFromScene();
-    this->SetPickable( false  );
-    return SceneObject::Release( view );
+    view->RemoveInteractionObject( this );
+    bool success = SceneObject::Release( view );
+    if( !success )
+        return false;
 }
 
 void PointsObject::Hide()
 {
-    this->DeleteAllPointsFromScene();
-    this->UpdatePickability();
+    PointList::iterator it = m_pointList.begin();
+    for(; it != m_pointList.end(); ++it)
+    {
+        (*it)->SetHidden( true );
+    }
+    emit Modified();
 }
 
 void PointsObject::Show()
 {
-    if( m_pointList.isEmpty() )
-        this->SetPointsInScene();
-    if( this->GetManager()->GetCurrentObject() == this )
-        this->UpdatePickability();
-}
-
-void PointsObject::ShallowCopy(SceneObject *source)
-{
-    if (this == source)
-        return;
-    PointsObject *pObj = PointsObject::SafeDownCast(source);
-    m_pointRadius3D = pObj->Get3DRadius();
-    m_pointRadius2D = pObj->Get2DRadius();
-    m_labelSize = pObj->GetLabelSize();
-    m_pickable = pObj->GetPickable();
-    m_enabled = pObj->GetEnabled();
-    pObj->GetEnabledColor(m_enabledColor);
-    pObj->GetDisabledColor(m_disabledColor);
-    pObj->GetSelectedColor(m_selectedColor);
-    m_opacity = pObj->GetOpacity();
-    m_hotSpotSize = pObj->GetHotSpotSize();
-    m_pointNames.clear();
-    for (int i = 0; i < pObj->GetPointsNames()->count(); i++)
-        m_pointNames.push_back(pObj->GetPointsNames()->value(i));
-    m_timeStamps.clear();
-    for (int i = 0; i < pObj->GetTimeStamps()->count(); i++)
-        m_timeStamps.push_back(pObj->GetTimeStamps()->value(i));
-    m_pointCoordinates->Reset();
-    m_pointCoordinates->DeepCopy(pObj->GetPoints());
+    PointList::iterator it = m_pointList.begin();
+    for(; it != m_pointList.end(); ++it)
+    {
+        (*it)->SetHidden( false );
+    }
+    this->UpdatePointsVisibility();
+    emit Modified();
 }
 
 void PointsObject::CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets)
@@ -280,141 +242,209 @@ void PointsObject::CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *
     color->SetPointsObject( this );
     color->setObjectName( "Color" );
     widgets->append( color );
-    m_pickable = m_enabled;
-    if( !this->IsHidden() )
-    {
-        this->Show();
-        this->SetPickable(m_pickable);
-    }
 }
 
-// actions on the object
-void PointsObject::SetPoints( vtkPoints *pt )
+void PointsObject::AddPoint( const QString &name, double coords[3] )
 {
-    m_pointCoordinates->Reset();
-    if ( pt )
-        m_pointCoordinates->DeepCopy( pt );
-    // if this is not hidden, the caller will have to call Show() as we may not know point names yet
-}
-
-void PointsObject::SetPointsNames( QStringList & names )
-{
-    m_pointNames.clear();
-    QStringList::Iterator it;
-    for ( it = names.begin(); it != names.end(); ++it )
-        m_pointNames.push_back( *it );
-}
-
-void PointsObject::AddPoint( const QString &name, double coords[3], bool show )
-{
-    //transform coords to local
+    // transform coords to local
     double localCoords[3];
     this->WorldToLocal( coords, localCoords );
-    if( this->GetNumberOfPoints() == m_maxNumberOfPoints )
-        return;
-    m_pointNames.append(name);
-    m_pointCoordinates->InsertNextPoint( localCoords );
-    m_timeStamps.append("n/a");
-    if (!this->IsHidden() && show)
+
+    AddPointLocal( localCoords, name );
+}
+
+vtkActor * PointsObject::DoPicking( int x, int y, vtkRenderer * ren, double pickedPoint[3] )
+{
+    int validPickedPoint = m_picker->Pick( x, y, 0, ren );
+    double pickPosition[4];
+    m_picker->GetPickPosition( pickPosition );
+    pickPosition[3] = 1;
+
+    // Transform the point in the space of its parent PointsObject
+    // Apply inverse of points object world transform to worldPoint
+    // World transform may have multiple concatenations
+    // For some reason when we try to GetLinearInverse() of the WorldTransform with 2 or more concatenations,
+    // we get wron invewrse e.g world is concatenation of: identity, t1, t2 - we get inverse of t1
+    // while if we go for the inverse matrix, it is correct
+    vtkMatrix4x4 *inverseMat = vtkMatrix4x4::New();
+    this->GetWorldTransform()->GetInverse(inverseMat);
+
+    double transformedPoint[4];
+    inverseMat->MultiplyPoint(pickPosition, transformedPoint);
+
+    pickedPoint[0] = transformedPoint[0];
+    pickedPoint[1] = transformedPoint[1];
+    pickedPoint[2] = transformedPoint[2];
+
+    if( validPickedPoint )
+        return m_picker->GetActor();
+    return 0;
+}
+
+bool PointsObject::OnLeftButtonPressed( View * v, int x, int y, unsigned modifiers )
+{
+    // Make sure object is pickable first and shift button is pressed
+    bool shift = ( modifiers & ShiftModifier ) != 0;
+    if( !m_pickable || !shift || this->IsHidden() )
+        return false;
+
+    double realPosition[3];
+    vtkActor * picked = DoPicking( x, y, v->GetRenderer(), realPosition );
+    if( picked )
     {
-        this->AddPointToScene( name, localCoords );
-        emit PointAdded();
-    }
-}
+        // Find point clicked
+        int pointIndex = FindPoint( picked, realPosition );
 
-void PointsObject::SetPickable( bool pickable )
-{
-    m_pickable = pickable;
-    if( GetManager() )
-        UpdatePickability();
-}
-
-void PointsObject::SetEnabled( bool enabled )
-{
-    m_enabled = enabled;
-    m_pickable = m_enabled;
-    if( GetManager() )
-        UpdatePickability();
-}
-
-void PointsObject::SetPointsInScene()
-{
-    int n = this->GetNumberOfPoints();
-    if( n > 0 )
-    {
-        for (int i = 0; i < n; i++)
+        // No point is close to where we clicked -> add point
+        if( pointIndex == PointsObject::InvalidPointIndex )
         {
-            this->AddPointToScene( m_pointNames.at( i ), m_pointCoordinates->GetPoint(i) );
+            this->AddPointLocal( realPosition );
+            SetSelectedPoint( GetNumberOfPoints() - 1 );
+            MoveCursorToPoint( GetNumberOfPoints() - 1 );
         }
-        if ( m_selectedPointIndex != InvalidPointIndex )
-            this->SetSelectedPoint( m_selectedPointIndex );
-        emit Modified();
+        else
+        {
+            SetSelectedPoint( pointIndex );
+            m_movingPointIndex = pointIndex;
+            MoveCursorToPoint( m_movingPointIndex );
+        }
     }
+
+    return true;
 }
 
-void PointsObject::AddPointToScene( const QString & label, double * coords )
+bool PointsObject::OnLeftButtonReleased( View * v, int x, int y, unsigned modifiers )
 {
-    Q_ASSERT( this->GetManager() );
+    if( m_movingPointIndex == PointsObject::InvalidPointIndex )
+        return false;
 
-    PointRepresentation *newPoint = PointRepresentation::New(); // this is not a SceneObject, so it needs WorldTransform, not Local transform
-    newPoint->SetSceneManager(this->GetManager());
-    newPoint->SetWorldTransform(this->GetWorldTransform());
-    if (m_enabled)
-        newPoint->SetPropertyColor(m_enabledColor);
-    else
-        newPoint->SetPropertyColor(m_disabledColor);
-    newPoint->CreatePointRepresentation(m_pointRadius2D, m_pointRadius3D);
-    newPoint->SetPosition(coords);
-    int index = m_pointList.count();
-    newPoint->SetPointIndex( index );
-    m_pointList.append(newPoint);
-    newPoint->SetLabel(label.toUtf8().data());
-    newPoint->SetPickable(m_pickable);
-    newPoint->ShowLabel( m_showLabels );
-    newPoint->Update();
+    double realPosition[3];
+    vtkActor * picked = DoPicking( x, y, v->GetRenderer(), realPosition );
+    if( picked )
+        SetPointCoordinates( m_movingPointIndex, realPosition );
+
+    MoveCursorToPoint( m_movingPointIndex );
+    UpdatePointsVisibility();
+    m_movingPointIndex = PointsObject::InvalidPointIndex;
+
+    return true;
 }
 
-void PointsObject::DeleteAllPointsFromScene()
+bool PointsObject::OnRightButtonPressed( View * v, int x, int y, unsigned modifiers )
 {
-    if( m_pointList.isEmpty() )
-        return;
-    PointList::iterator it = m_pointList.begin();
-    for(; it != m_pointList.end(); ++it)
+    bool shift = ( modifiers & ShiftModifier ) != 0;
+    if( !m_pickable || !shift || this->IsHidden() )
+        return false;
+
+    double realPosition[3];
+    vtkActor * picked = DoPicking( x, y, v->GetRenderer(), realPosition );
+    if( picked )
     {
-        (*it)->Delete();
+        int pickedPointIndex = this->FindPoint( picked, realPosition );
+        if( pickedPointIndex > PointsObject::InvalidPointIndex )
+            this->RemovePoint( pickedPointIndex );
     }
-    m_pointList.clear();
-    emit Modified();
+
+    return true;
+}
+
+bool PointsObject::OnMouseMoved( View * v, int x, int y, unsigned modifiers )
+{
+    if( m_movingPointIndex == PointsObject::InvalidPointIndex )
+        return false;
+
+    double realPosition[3];
+    vtkActor * picked = DoPicking( x, y, v->GetRenderer(), realPosition );
+    if( picked )
+        SetPointCoordinates( m_movingPointIndex, realPosition );
+
+    return true;
+}
+
+void PointsObject::AddPointLocal( double coords[3], QString name, QString timestamp )
+{
+    if( name.isEmpty() )
+        name = QString::number( GetNumberOfPoints()+1 );
+
+    if( timestamp.isEmpty() )
+        timestamp = QDateTime::currentDateTime().toString(Qt::ISODate);
+
+    // Set properties
+    m_pointNames.append(name);
+    m_pointCoordinates->InsertNextPoint( coords );
+    m_timeStamps.append( timestamp );
+
+    // Create point representation
+    PointRepresentation * pr = PointRepresentation::New();
+    pr->SetListable( false );
+    pr->SetName( name );
+    int index = m_pointList.count();
+    pr->SetPointIndex( index );
+    pr->SetPosition(coords);
+    pr->SetLabel( name.toUtf8().data() );
+    pr->SetActive( true );
+    pr->ShowLabel( m_showLabels );
+    pr->SetHidden( this->IsHidden() );
+
+    m_pointList.append( pr );
+
+    // Add PointRepresentation to scene if PointsObject is already in Scene
+    if( GetManager() )
+        this->GetManager()->AddObject( pr, this );
+
+    emit PointAdded();
+
+    // simtodo : this needs to be done after PointAdded signal to make sure GUI doesn't
+    // get updated until LandmarkRegistration object is notified.
+    UpdatePointProperties( index );
 }
 
 void PointsObject::Reset()
-{
-    this->DeleteAllPointsFromScene();
+{   
+    PointList::iterator it = m_pointList.begin();
+    for(; it != m_pointList.end(); ++it)
+    {
+        this->GetManager()->RemoveObject( (*it ) );
+        (*it)->Delete();
+    }
+    m_pointList.clear();
+
+
     m_pointCoordinates->Reset();
     m_pointNames.clear();
     m_timeStamps.clear();
+
+    emit Modified();
 }
 
-void PointsObject::SetSelectedPoint( int index, bool movePlanes )
+void PointsObject::SetSelectedPoint( int index )
 {
-    if( this->IsHidden() )
-        return;
-    int n = m_pointCoordinates->GetNumberOfPoints();
+    // Set selected point
     Q_ASSERT( index != InvalidPointIndex && index < m_pointCoordinates->GetNumberOfPoints() );
-    if( index != InvalidPointIndex )
+    m_selectedPointIndex = index;
+
+    // Update points colors
+    UpdatePoints();
+
+    emit PointsChanged();
+    emit Modified();
+}
+
+void PointsObject::MoveCursorToPoint( int index )
+{
+    Q_ASSERT( index != InvalidPointIndex && index < m_pointCoordinates->GetNumberOfPoints() );
+
+    // Move cursor to selected point
+    if( !this->IsHidden() )
     {
-        int previouslySelectedPointIndex = m_selectedPointIndex;
-        m_selectedPointIndex = index;
-        if( previouslySelectedPointIndex == m_pointCoordinates->GetNumberOfPoints() )
-            previouslySelectedPointIndex--; // point has been removed
-        if( previouslySelectedPointIndex != InvalidPointIndex )
-            this->UpdatePointInScene( previouslySelectedPointIndex, false );
-        this->UpdatePointInScene( m_selectedPointIndex, movePlanes );
-        emit Modified();
+        double * pos = m_pointCoordinates->GetPoint( index ); //in PointsObject space
+        double worldPos[3];
+        this->WorldTransform->TransformPoint( pos, worldPos );
+        this->GetManager()->SetCursorWorldPosition(worldPos);
     }
 }
 
-int PointsObject::FindPoint(vtkActor **actor, double *pos)
+int PointsObject::FindPoint(vtkActor *actor, double *pos)
 {
     Q_ASSERT( this->GetManager() );
 
@@ -422,15 +452,14 @@ int PointsObject::FindPoint(vtkActor **actor, double *pos)
         return InvalidPointIndex;
 
     int n = m_pointList.count();
-    int pointIndex = InvalidPointIndex;
     double pointPosition[3];
     PointRepresentation *point;
     // first check if 3D actor was picked
     int i = 0;
-    while(pointIndex == InvalidPointIndex && i < n)
+    while(i < n)
     {
         point = m_pointList.value(i);
-        if (*actor == point->GetPointActor(3))
+        if( point->HasActor( actor ) )
         {
             return i;
         }
@@ -439,87 +468,44 @@ int PointsObject::FindPoint(vtkActor **actor, double *pos)
 
     // Now see if any of 2D actors are picked
     int viewType = this->GetManager()->GetCurrentView();
-    for (int i = 0; i < n; i++)
+    if( viewType != THREED_VIEW_TYPE )
     {
-        point = m_pointList.value(i);
-        point->GetPosition(pointPosition);
-        switch (viewType)
+        vtkTransform * wt = this->GetWorldTransform();
+        double worldPicked[3], worldPt[3];
+        wt->TransformPoint( pos, worldPicked );
+        for (int i = 0; i < n; i++)
         {
-        case SAGITTAL_VIEW_TYPE: //x fixed
-            if (fabs(pointPosition[0] - pos[0]) < m_hotSpotSize)
-            {
-                if (fabs(pos[1]-pointPosition[1]) < m_hotSpotSize &&
-                    fabs(pos[2]-pointPosition[2]) < m_hotSpotSize)
-                {
-                    *actor = point->GetPointActor(SAGITTAL_VIEW_TYPE);
-                    return i;
-                }
-            }
-            break;
-        case CORONAL_VIEW_TYPE: // y fixed
-            if (fabs(pointPosition[1]- pos[1]) < m_hotSpotSize)
-            {
-                if (fabs(pos[0]-pointPosition[0]) < m_hotSpotSize &&
-                    fabs(pos[2]-pointPosition[2]) < m_hotSpotSize)
-                {
-                    *actor = point->GetPointActor(CORONAL_VIEW_TYPE);
-                    return i;
-                }
-            }
-            break;
-        case TRANSVERSE_VIEW_TYPE: // z fixed
-            if (fabs(pointPosition[2] - pos[2]) < m_hotSpotSize)
-            {
-                if (fabs(pos[1]-pointPosition[1]) < m_hotSpotSize &&
-                    fabs(pos[0]-pointPosition[0]) < m_hotSpotSize)
-                {
-                    return i;
-                 }
-            }
-            break;
-        case THREED_VIEW_TYPE:
-        default:
-            break;
+            point = m_pointList.value(i);
+            point->GetPosition(pointPosition);
+            wt->TransformPoint( pointPosition, worldPt );
+            if( this->GetManager()->IsInPlane( (VIEWTYPES)viewType, worldPt ) &&
+                sqrt( vtkMath::Distance2BetweenPoints( worldPicked, worldPt ) < m_pointRadius2D ))
+                return i;
         }
     }
     return InvalidPointIndex;
 }
 
-void PointsObject::RotatePointsInScene( )
+void PointsObject::UpdatePointsVisibility()
 {
-    Q_ASSERT( this->GetManager() );
-    SceneObject *refObj = (SceneObject*)this->GetManager()->GetReferenceDataObject();
-    if( refObj && m_pointList.count() > 0 )
+    for( int i = 0; i < m_pointList.size(); ++i )
     {
-        for( int i = 0; i < m_pointList.count(); i++ )
-        {
-            m_pointList.at(i)->SetCuttingPlaneTransform( refObj->GetWorldTransform() );
-            m_pointList.at(i)->SetCylindersTransform( refObj->GetWorldTransform()->GetMatrix() );
-        }
-        emit Modified();
+        m_pointList[i]->UpdateVisibility();
     }
 }
 
-void PointsObject::UpdatePoints()
+void PointsObject::OnCurrentObjectChanged()
 {
-    if( m_pointList.count() > 0 )
+    if( !m_pickabilityLocked )
     {
-        for( int i = 0; i < m_pointList.count(); i++ )
+        if( GetManager()->GetCurrentObject() == this )
         {
-            this->UpdatePointInScene( i );
+            m_pickable = true;
+            this->UpdatePointsVisibility();
         }
-        if( m_selectedPointIndex != InvalidPointIndex && m_selectedPointIndex < this->GetNumberOfPoints() )
-            this->SetSelectedPoint( m_selectedPointIndex );
         else
-            this->SetSelectedPoint( 0 );
-        emit Modified();
+            m_pickable = false;
     }
-    m_pointCoordinates->Modified();
-}
-
-void PointsObject::UpdateSettingsWidget()
-{
-
 }
 
 // properties
@@ -540,7 +526,6 @@ void PointsObject::Set2DRadius( double r )
     if( m_pointRadius2D == r )
         return;
     m_pointRadius2D = r;
-    m_hotSpotSize = 0.25 * m_pointRadius2D;
     this->UpdatePoints();
 }
 
@@ -558,44 +543,35 @@ void PointsObject::SetLabelSize( double s )
 
 void PointsObject::SetEnabledColor( double color[3] )
 {
-    if( !( (m_enabledColor[0] == color[0]) && (m_enabledColor[1] == color[1]) && (m_enabledColor[2] == color[2]) ) )
-    {
-        for ( int i = 0; i < 3; i++ )
-            m_enabledColor[i] = color[i];
-        this->UpdatePoints();
-    }
+    for ( int i = 0; i < 3; i++ )
+        m_activeColor[i] = color[i];
+    this->UpdatePoints();
 }
 
 void PointsObject::GetEnabledColor(double color[3])
 {
     for (int i = 0; i < 3; i++)
-        color[i] = m_enabledColor[i];
+        color[i] = m_activeColor[i];
 }
 
 void PointsObject::SetDisabledColor( double color[3] )
 {
-    if( !( (m_disabledColor[0] == color[0]) && (m_disabledColor[1] == color[1]) && (m_disabledColor[2] == color[2]) ) )
-    {
-        for ( int i = 0; i < 3; i++ )
-            m_disabledColor[i] = color[i];
-        this->UpdatePoints();
-    }
+    for ( int i = 0; i < 3; i++ )
+        m_inactiveColor[i] = color[i];
+    this->UpdatePoints();
 }
 
 void PointsObject::GetDisabledColor(double color[3])
 {
     for (int i = 0; i < 3; i++)
-        color[i] = m_disabledColor[i];
+        color[i] = m_inactiveColor[i];
 }
 
 void PointsObject::SetSelectedColor( double color[3] )
 {
-    if( !( (m_selectedColor[0] == color[0]) && (m_selectedColor[1] == color[1]) && (m_selectedColor[2] == color[2]) ) )
-    {
-        for ( int i = 0; i < 3; i++ )
-            m_selectedColor[i] = color[i];
-        this->UpdatePoints();
-    }
+    for ( int i = 0; i < 3; i++ )
+        m_selectedColor[i] = color[i];
+    this->UpdatePoints();
 }
 
 void PointsObject::GetSelectedColor(double color[3])
@@ -606,8 +582,7 @@ void PointsObject::GetSelectedColor(double color[3])
 
 void PointsObject::SetOpacity( double opacity )
 {
-    if (m_opacity != opacity)
-        m_opacity = opacity;
+    m_opacity = opacity;
     this->UpdatePoints();
 }
 
@@ -620,87 +595,78 @@ void PointsObject::ShowLabels( bool on )
 // access to individual points
 void PointsObject::RemovePoint(int index)
 {
-    if( this->GetNumberOfPoints() == m_minNumberOfPoints )
-        return;
     Q_ASSERT( index >= 0 && index < m_pointCoordinates->GetNumberOfPoints() );
+
+    // Clear local data about the point
     vtkPoints *tmpPoints = vtkPoints::New();
-    tmpPoints->DeepCopy(m_pointCoordinates);
-    int i, n = m_pointCoordinates->GetNumberOfPoints();
+    tmpPoints->DeepCopy( m_pointCoordinates );
     m_pointCoordinates->Reset();
-    for( i = 0; i < index; i++ )
-    {
-        m_pointCoordinates->InsertNextPoint( tmpPoints->GetPoint(i) );
-    }
-    for( i = index; i < n-1; i++ )
-    {
-        m_pointCoordinates->InsertNextPoint( tmpPoints->GetPoint(i+1) );
-    }
+    for( int i = 0; i < tmpPoints->GetNumberOfPoints(); ++i )
+        if( i != index )
+            m_pointCoordinates->InsertNextPoint( tmpPoints->GetPoint(i) );
     tmpPoints->Delete();
     m_pointNames.erase(m_pointNames.begin()+index);
     m_timeStamps.erase(m_timeStamps.begin()+index);
-    if( !this->IsHidden() )
-    {
-        PointList::iterator it = m_pointList.begin();
-        for( i = 0; it != m_pointList.end(); ++it, i++ )
-        {
-            if( i == index )
-            {
-                PointRepresentation *pt = (PointRepresentation*)(*it);
-                pt->Delete();
-                m_pointList.erase(it);
-                break;
-            }
-        }
-    }
-    if( m_selectedPointIndex == index )
-        m_selectedPointIndex = InvalidPointIndex;
+
+    // Update point representations
+    if( GetManager() )
+        GetManager()->RemoveObject( m_pointList[index] );
+    m_pointList[index]->Delete();
+    m_pointList.removeAt( index );
+    for( int i = 0; i < m_pointList.size(); ++i )
+        m_pointList[i]->SetPointIndex( i );
+
+    // Update selected point index
+    if( m_selectedPointIndex >= GetNumberOfPoints() )
+        if( GetNumberOfPoints() > 0 )
+            m_selectedPointIndex = GetNumberOfPoints() - 1;
+        else
+            m_selectedPointIndex = InvalidPointIndex;
+
     this->UpdatePoints();
     emit PointRemoved( index );
 }
 
 void PointsObject::EnableDisablePoint( int index, bool enable )
 {
-    if( this->IsHidden() )
-        return;
     Q_ASSERT( index >= 0 && index < m_pointList.count() );
-    PointRepresentation *pt = m_pointList.at( index );
-    pt->SetPickable( enable );
+    PointRepresentation * pt = m_pointList.at( index );
+    pt->SetActive( enable );
+    this->UpdatePointProperties( index );
 }
 
-void PointsObject::UpdatePointInScene( int index, bool movePlanes )
+void PointsObject::UpdatePointProperties( int index )
 {
-    Q_ASSERT( this->GetManager() );
-    if( this->IsHidden() || m_pointList.count() == 0 )
-        return;
     Q_ASSERT( index >= 0 && index < m_pointList.count() );
-    PointRepresentation *pt = m_pointList.at( index );
+    PointRepresentation * pt = m_pointList.at( index );
     pt->SetLabel( m_pointNames.at(index).toUtf8().data() );
     pt->SetPosition( m_pointCoordinates->GetPoint( index ) );
     pt->SetPointSizeIn3D( m_pointRadius3D );
     pt->SetPointSizeIn2D( m_pointRadius2D );
     pt->SetLabelScale( m_labelSize );
     pt->SetOpacity( m_opacity );
-    pt->UpdateLabelPosition();
     pt->ShowLabel( m_showLabels );
-    if( index == m_selectedPointIndex )
+    if( index == m_selectedPointIndex  && pt->GetActive() )
         pt->SetPropertyColor( m_selectedColor );
-    else if( pt->GetPickable() )
-        pt->SetPropertyColor( m_enabledColor );
+    else if( pt->GetActive() && !m_pickabilityLocked )
+        pt->SetPropertyColor( m_activeColor );
     else
-        pt->SetPropertyColor( m_disabledColor );
-    double worldPos[3];
-    double *pos = m_pointCoordinates->GetPoint( index );
-    this->WorldTransform->TransformPoint( pos, worldPos );
-    if( movePlanes )
-        this->GetManager()->SetCursorWorldPosition(worldPos);
+        pt->SetPropertyColor( m_inactiveColor );
     emit Modified();
+}
+
+void PointsObject::UpdatePoints()
+{
+    for( int i = 0; i < m_pointList.count(); i++ )
+    {
+        this->UpdatePointProperties( i );
+    }
 }
 
 void PointsObject::SetPointLabel( int index, const QString &label )
 {
     m_pointNames.replace(index, label);
-    if( !this->IsHidden() )
-        this->UpdatePointInScene( index );
+    this->UpdatePointProperties( index );
     emit Modified();
 }
 
@@ -723,12 +689,7 @@ void PointsObject::SetPointCoordinates( int index, double coords[3] )
 {
     Q_ASSERT( index >= 0 && index < m_pointCoordinates->GetNumberOfPoints() );
     m_pointCoordinates->SetPoint( index, coords );
-    if( m_pointList.count() > 0 )
-    {
-        m_pointList.at( index )->SetPosition( m_pointCoordinates->GetPoint( index ) );
-        if( !this->IsHidden() )
-            this->UpdatePointInScene( index );
-    }
+    m_pointList.at( index )->SetPosition( m_pointCoordinates->GetPoint( index ) );
     emit PointsChanged();
     emit Modified();
 }
@@ -739,44 +700,36 @@ void PointsObject::SetPointTimeStamp( int index, const QString & stamp)
         m_timeStamps.replace(index, stamp);
 }
 
-void PointsObject::UpdatePickability()
+void PointsObject::ObjectAddedToScene()
 {
-    if( m_pickable && !this->IsHidden() )
+    Q_ASSERT( GetManager() );
+
+    // add all point representations to scene
+    for( int i = 0; i < m_pointList.size(); ++i )
     {
-        // we may have only one pickable set of points at all times
-        QList< PointsObject* > all;
-        this->GetManager()->GetAllPointsObjects( all );
-        if (all.count() > 0)
-        {
-            for (int i = 0; i < all.count(); i++)
-            {
-                PointsObject *obj = all.at(i);
-                if (obj != this)
-                    obj->SetPickable(false);
-            }
-        }
-        if( m_mousePicker == 0 )
-        {
-            m_mousePicker = PickerObject::New();
-            m_mousePicker->SetManager(this->GetManager());
-            m_mousePicker->SetSelectedPoints(this);
-            m_mousePicker->ConnectObservers(true);
-        }
+        GetManager()->AddObject( m_pointList[i], this );
     }
-    else
-    {
-        if( m_mousePicker != 0 )
-        {
-            m_mousePicker->ConnectObservers(false);
-            m_mousePicker->Delete();
-            m_mousePicker = 0;
-        }
-    }
+
+    connect( this->GetManager(), SIGNAL(CurrentObjectChanged()), this, SLOT(OnCurrentObjectChanged()) );
+    connect( this, SIGNAL(WorldTransformChangedSignal()), this, SLOT(UpdatePointsVisibility()) );
+    connect( this->GetManager(), SIGNAL(CursorPositionChanged()), this, SLOT(UpdatePointsVisibility()) );
+    connect( this->GetManager(), SIGNAL(ReferenceTransformChanged()), this, SLOT(UpdatePointsVisibility()) );
 }
 
-void PointsObject::OnCloseSettingsWidget()
+void PointsObject::ObjectAboutToBeRemovedFromScene()
 {
-    this->SetPickable( false );
+    Q_ASSERT( GetManager() );
+
+    // remove all point representations to scene
+    for( int i = 0; i < m_pointList.size(); ++i )
+    {
+        GetManager()->RemoveObject( m_pointList[i] );
+    }
+
+    disconnect( this->GetManager(), SIGNAL(CurrentObjectChanged()), this, SLOT(OnCurrentObjectChanged()) );
+    disconnect( this, SIGNAL(WorldTransformChangedSignal()), this, SLOT(UpdatePointsVisibility()) );
+    disconnect( this->GetManager(), SIGNAL(CursorPositionChanged()), this, SLOT(UpdatePointsVisibility()) );
+    disconnect( this->GetManager(), SIGNAL(ReferenceTransformChanged()), this, SLOT(UpdatePointsVisibility()) );
 }
 
 // Distance will be properly computed for points picked on unregistered objects
@@ -834,7 +787,7 @@ void PointsObject::EnableComputeDistance( bool enable )
         m_lineToPointerTip->SetListable( false );
         m_lineToPointerTip->SetCanEditTransformManually( false );
         m_lineToPointerTip->SetObjectManagedByTracker( true );
-        m_lineToPointerTip->SetProperty( m_lineToPointerProperty );
+        //m_lineToPointerTip->SetProperty( m_lineToPointerProperty ); // simtodo : replace this
         double pointPos[3];
         this->GetPointCoordinates( m_selectedPointIndex, pointPos );
         double worldCoords[3];

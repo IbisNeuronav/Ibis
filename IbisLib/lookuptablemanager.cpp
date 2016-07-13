@@ -20,6 +20,7 @@ void LookupTableManager::CreateLookupTable(const QString tableName, double range
 {
     ct->SetScaleToLinear();
     ct->SetRange( range );
+    ct->RemoveAllPoints();
 
     if ( tableName == "Hot Metal" )
     {

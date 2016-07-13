@@ -22,52 +22,46 @@ class IbisHardwareModule : public QObject, public HardwareModule
 {
     
     Q_OBJECT
-    Q_INTERFACES( HardwareModule )
+    Q_INTERFACES( IbisPlugin )
     Q_PLUGIN_METADATA(IID "Ibis.IbisHardwareModule" )
     
 public:
+
+    vtkTypeMacro( IbisHardwareModule, HardwareModule );
 
     static IbisHardwareModule * New() { return new IbisHardwareModule; }
     IbisHardwareModule();
     ~IbisHardwareModule();
 
+    // Implementation of IbisPlugin interface
+    virtual QString GetPluginName() { return QString("IbisHardwareModule"); }
+
     // Implementation of the HardwareModule interface
     virtual void AddSettingsMenuEntries( QMenu * menu );
-    virtual QWidget * CreateTrackerStatusDialog( QWidget * parent );
     virtual bool Init( const char * filename = 0 );
     virtual void Update();
     virtual bool ShutDown();
     virtual void WriteHardwareConfig( const char * filename, bool backupOnly = false );
 
-    virtual void AddObjectsToScene();
-    virtual void RemoveObjectsFromScene();
+    virtual void AddToolObjectsToScene();
+    virtual void RemoveToolObjectsFromScene();
 
-    // Legacy methods : should be eliminated as we properly separate IbisLib and IbisHardware
-    virtual bool CanCaptureTrackedVideo();
-    virtual bool CanCaptureVideo();
-    virtual int GetNavigationPointerObjectID();
-    virtual vtkImageData * GetTrackedVideoOutput();
-    virtual int GetVideoFrameWidth();
-    virtual int GetVideoFrameHeight();
-    virtual TrackerToolState GetVideoTrackerState();
-    virtual vtkTransform * GetTrackedVideoTransform();
-    virtual vtkTransform * GetTrackedVideoUncalibratedTransform();
-    virtual vtkMatrix4x4 * GetVideoCalibrationMatrix();
-    virtual void SetVideoCalibrationMatrix( vtkMatrix4x4 * mat );
-    virtual int GetNumberOfVideoCalibrationMatrices();
-    virtual QString GetVideoCalibrationMatrixName( int index );
-    virtual void SetCurrentVideoCalibrationMatrixName( QString name );
-    virtual QString GetCurrentVideoCalibrationMatrixName();
-    virtual bool IsVideoTransformFrozen();
-    virtual void FreezeVideoTransform( int nbSamples );
-    virtual void UnFreezeVideoTransform();
-    virtual const CameraIntrinsicParams & GetCameraIntrinsicParams();
-    virtual void SetCameraIntrinsicParams( CameraIntrinsicParams & p );
-    virtual void AddTrackedVideoClient();
-    virtual void RemoveTrackedVideoClient();
-    virtual int GetReferenceToolIndex();
-    virtual vtkTransform * GetTrackerToolTransform( int toolIndex );
-    virtual TrackerToolState GetTrackerToolState( int toolIndex );
+    virtual vtkTransform * GetReferenceTransform();
+
+    virtual bool IsTransformFrozen( TrackedSceneObject * obj );
+    virtual void FreezeTransform( TrackedSceneObject * obj, int nbSamples );
+    virtual void UnFreezeTransform( TrackedSceneObject * obj );
+
+    virtual void AddTrackedVideoClient( TrackedSceneObject * obj );
+    virtual void RemoveTrackedVideoClient( TrackedSceneObject * obj);
+
+    virtual void StartTipCalibration( PointerObject * p );
+    virtual double DoTipCalibration( PointerObject * p, vtkMatrix4x4 * calibMat );
+    virtual bool IsCalibratingTip( PointerObject * p );
+    virtual void StopTipCalibration( PointerObject * p );
+
+    // Local methods
+    TrackedVideoSource * GetVideoSource( int index ) { return m_trackedVideoSource; } // simtodo : allow more than one source
 
 private slots:
 
@@ -81,8 +75,6 @@ protected:
 
     TrackedVideoSource          * m_trackedVideoSource;
     Tracker                     * m_tracker;
-    TrackerToolDisplayManager   * m_toolDisplayManager;
-
 };
 
 #endif

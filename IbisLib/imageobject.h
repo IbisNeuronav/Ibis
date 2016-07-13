@@ -18,7 +18,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QVector>
 
 #include "itkVTKImageExport.h"
-//#include "minc_helpers.h"
 #include <itkImageRegionIterator.h>
 #include <itkImage.h>
 #include "itkRGBPixel.h"
@@ -31,7 +30,6 @@ class vtkOutlineFilter;
 class vtkActor;
 class vtkTransform;
 class vtkImageAccumulate;
-//class vtkMINCImageAttributes2;
 class vtkGPUVolumeRayCastMapper;
 class vtkIbisGLSLVolumeRaycastMapper;
 class vtkVolume;
@@ -85,8 +83,7 @@ public:
     
     vtkGetObjectMacro( Image, vtkImageData );
     void SetItkImage( IbisItk3DImageType::Pointer image );  // for all others
-    void SetItkImage( IbisRGBImageType::Pointer image );  // for RGB images others
-    void SetItkRGBImage( IbisRGBImageType::Pointer image );  // for RGB images
+    void SetItkImage( IbisRGBImageType::Pointer image );  // for RGB images
     void SetItkLabelImage( IbisItk3DLabelType::Pointer image );  // for labels
     IbisItk3DImageType::Pointer GetItkImage() { return this->ItkImage; }
     IbisRGBImageType::Pointer GetItkRGBImage() { return this->ItkRGBImage; }
@@ -111,17 +108,18 @@ public:
     int ChooseColorTable(int index);
     int GetLutIndex() {return lutIndex;}
     vtkScalarsToColors * GetLut() { return Lut; }
+    double * GetLutRange();
+    void SetLutRange( double r[2] );
     void GetImageScalarRange(double *range);
     int GetNumberOfScalarComponents();
     void GetBounds( double bounds[6] );
     void GetCenter( double center[3] );
+    double * GetSpacing();
     void SetIntensityFactor( double factor );
     double GetIntensityFactor();
-            
-//    vtkGetObjectMacro( Attributes, vtkMINCImageAttributes2 );
-//    void SetMINCImageAttributes(vtkMINCImageAttributes2 *att);
-    void GetMINCHeaderString(QString & header);
-    
+
+    virtual void ShowMincInfo( );
+
     vtkImageAccumulate * GetHistogramComputer() { return HistogramComputer; }
 
     // vtk volume rendering
@@ -141,8 +139,7 @@ public:
 
 signals:
 
-    void HidePlane(int viewType, int show);
-    void UpdateSettings();
+    void LutChanged();
     
 protected:
     
@@ -174,7 +171,6 @@ protected:
     vtkImageImport * ItkToVtkImporter;
 
     vtkImageData * Image;
-//    vtkMINCImageAttributes2 *Attributes;
     vtkScalarsToColors * Lut;
     vtkOutlineFilter * OutlineFilter;
     static const int NumberOfBinsInHistogram;

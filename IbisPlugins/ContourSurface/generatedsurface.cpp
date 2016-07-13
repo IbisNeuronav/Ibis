@@ -25,6 +25,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "scenemanager.h"
 #include "imageobject.h"
 #include "polydataobjectsettingsdialog.h"
+#include "contoursurfaceplugininterface.h"
 
 
 ObjectSerializationMacro( GeneratedSurface );
@@ -59,7 +60,15 @@ void GeneratedSurface::Serialize( Serializer * ser )
     ::Serialize( ser, "Radius", m_radius );
     ::Serialize( ser, "StandardDeviation", m_standardDeviation );
     if( ser->IsReader() )
-        this->GenerateSurface(); // at this point m_imageObject was set, we have to regenerate surface with restored params
+    {
+        ImageObject *img = ImageObject::SafeDownCast(m_pluginInterface->GetSceneManager()->GetObjectByID( imageId ) );
+        if ( img )
+        {
+            this->SetImageObject( img );
+            this->GenerateSurface();
+            m_pluginInterface->GetSceneManager()->ChangeParent( this, img, img->GetNumberOfChildren() );
+        }
+    }
 }
 
 void GeneratedSurface::SetImageObject(ImageObject *obj)
@@ -172,3 +181,7 @@ void GeneratedSurface::UpdateSettingsWidget()
     emit ObjectViewChanged();
 }
 
+void GeneratedSurface::SetPluginInterface( ContourSurfacePluginInterface * interf )
+{
+    m_pluginInterface = interf;
+}

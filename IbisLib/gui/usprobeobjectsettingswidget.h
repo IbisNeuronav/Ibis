@@ -14,6 +14,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QWidget>
 
 class UsProbeObject;
+class vtkQtMatrixDialog;
 
 namespace Ui {
 class UsProbeObjectSettingsWidget;
@@ -46,11 +47,13 @@ protected:
 private slots:
 
     void on_useMaskCheckBox_toggled( bool checked );
-
     void on_colorMapComboBox_currentIndexChanged(int index);
+    void on_calibrationMatrixPushButton_toggled( bool on );
+    void OnCalibrationMatrixDialogClosed();
 
 private:
 
+    vtkQtMatrixDialog * m_matrixDialog;
     Ui::UsProbeObjectSettingsWidget * ui;
 };
 

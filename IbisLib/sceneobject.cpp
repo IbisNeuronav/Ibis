@@ -10,6 +10,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 #include "sceneobject.h"
 #include "view.h"
+#include "serializerhelper.h"
 #include "vtkLandmarkTransform.h"
 #include "vtkTransform.h"
 #include "vtkLinearTransform.h"
@@ -17,7 +18,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "vtkAssembly.h"
 #include "vtkRenderer.h"
 #include "scenemanager.h"
-#include "vtkmatrix4x4utilities.h"
 #include "transformeditwidget.h"
 #include "vtkEventQtSlotConnect.h"
 #include <QVBoxLayout>
@@ -132,22 +132,6 @@ void SceneObject::PostSceneRead()
 
 void SceneObject::Export()
 {
-}
-
-void SceneObject::ShallowCopy(SceneObject* obj)
-{
-    if (this == obj)
-        return;
-    this->AllowChildren = obj->CanAppendChildren();
-    this->AllowChangeParent = obj->CanChangeParent();
-    this->ObjectManagedBySystem = obj->IsManagedBySystem();
-    this->ObjectHidden = obj->IsHidden();
-    this->AllowHiding = obj->IsHidable();
-    this->ObjectDeletable = obj->IsObjectDeletable();
-    this->NameChangeable = obj->CanChangeName();
-    this->ObjectListable = obj->IsListable();
-    this->AllowManualTransformEdit = obj->CanEditTransformManually();
-    this->SetLocalTransform(obj->GetLocalTransform());
 }
 
 void SceneObject::SetName( QString name ) 

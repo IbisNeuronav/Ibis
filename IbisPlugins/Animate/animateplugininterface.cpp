@@ -106,6 +106,11 @@ bool AnimatePluginInterface::WidgetAboutToClose()
     return true;
 }
 
+VolumeRenderingObject * AnimatePluginInterface::GetVolumeRenderer()
+{
+    VolumeRenderingObject * vr = VolumeRenderingObject::SafeDownCast( GetApplication()->GetGlobalObjectInstance("VolumeRenderingObject") );
+    return vr;
+}
 
 void AnimatePluginInterface::SetRenderDome( bool r )
 {
@@ -113,12 +118,12 @@ void AnimatePluginInterface::SetRenderDome( bool r )
     if( r )
     {
         GetSceneManager()->GetMain3DView()->GetRenderer()->SetDelegate( m_domeRenderDelegate );
-        GetSceneManager()->GetMainVolumeRenderer()->SetRenderState( m_renderState );
+        GetVolumeRenderer()->SetRenderState( m_renderState );
     }
     else
     {
         GetSceneManager()->GetMain3DView()->GetRenderer()->SetDelegate( 0 );
-        GetSceneManager()->GetMainVolumeRenderer()->SetRenderState( 0 );
+        GetVolumeRenderer()->SetRenderState( 0 );
     }
     GetSceneManager()->GetMain3DView()->NotifyNeedRender();
 }
@@ -181,7 +186,7 @@ void AnimatePluginInterface::SetCurrentFrame( int f )
     m_cameraAnim->ComputeFrame( f, cam );
 
     // Adjust transfer function
-    vtkVolumeProperty * prop = GetSceneManager()->GetMainVolumeRenderer()->GetVolumeProperty( 0 );
+    vtkVolumeProperty * prop = GetVolumeRenderer()->GetVolumeProperty( 0 );
     vtkColorTransferFunction * color = prop->GetRGBTransferFunction();
     vtkPiecewiseFunction * opacity = prop->GetScalarOpacity();
     TransferFunctionKey key;
@@ -223,7 +228,7 @@ static const char * shaderInitCode = "float d = length( rayStart - cameraPosTSpa
 
 void AnimatePluginInterface::UpdateVolumeInitShader()
 {
-    VolumeRenderingObject * vr = GetSceneManager()->GetMainVolumeRenderer();
+    VolumeRenderingObject * vr = GetVolumeRenderer();
     if( m_useMinCamDistance )
     {
         if( !vr->DoesRayInitShaderExist(shaderInitName) )
@@ -271,7 +276,7 @@ void AnimatePluginInterface::SetTFKey( bool set )
 
     if( set )
     {
-        vtkVolumeProperty * prop = GetSceneManager()->GetMainVolumeRenderer()->GetVolumeProperty( 0 );
+        vtkVolumeProperty * prop = GetVolumeRenderer()->GetVolumeProperty( 0 );
         vtkColorTransferFunction * color = prop->GetRGBTransferFunction();
         vtkPiecewiseFunction * opacity = prop->GetScalarOpacity();
         TransferFunctionKey tfKey;

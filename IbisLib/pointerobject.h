@@ -12,7 +12,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #define __PointerObject_h_
 
 #include <QList>
-#include "sceneobject.h"
+#include "trackedsceneobject.h"
 #include "hardwaremodule.h"
 #include <map>
 #include <QVector>
@@ -23,7 +23,7 @@ class vtkActor;
 class PointsObject;
 class Tracker;
 
-class PointerObject : public SceneObject
+class PointerObject : public TrackedSceneObject
 {
     
 Q_OBJECT
@@ -31,14 +31,10 @@ Q_OBJECT
 public:
         
     static PointerObject * New() { return new PointerObject; }
-     vtkTypeMacro(PointerObject,SceneObject);
+    vtkTypeMacro( PointerObject, TrackedSceneObject );
     
     PointerObject();
     virtual ~PointerObject();
-    
-    vtkGetObjectMacro( CalibrationMatrix, vtkMatrix4x4 );
-    void SetCalibrationMatrix( vtkMatrix4x4 * calMatrix );
-    void SetTrackerToolIndex( int index ) { m_trackerToolIndex = index; }
     
     // Implementation of parent virtual method
 	virtual bool Setup( View * view );
@@ -47,20 +43,24 @@ public:
     virtual void CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets);
 
     double * GetTipPosition();
-    double * GetMainAxisPosition();
-    TrackerToolState GetState();
-    bool IsMissing();
-    bool IsOutOfView();
-    bool IsOutOfVolume();
-    bool IsOk();
+    void GetMainAxisPosition( double pos[3] );
+
+    // Tip calibration
+    void StartTipCalibration();
+    bool IsCalibratingTip();
+    double GetTipCalibrationRMSError();
+    void CancelTipCalibration();
+    void StopTipCalibration();
 
     void CreatePointerPickedPointsObject();
     void ManagerAddPointerPickedPointsObject();
-    PointsObject *GetCurrentPointerPickedPointsObject() {return this->CurrentPointerPickedPointsObject;}
+    PointsObject * GetCurrentPointerPickedPointsObject() {return this->CurrentPointerPickedPointsObject;}
     void SetCurrentPointerPickedPointsObject(PointsObject *obj){this->CurrentPointerPickedPointsObject = obj;}
     const QList<PointsObject*> & GetPointerPickedPointsObjects() { return PointerPickedPointsObjectList; }
 
 public slots:
+
+    void UpdateTipCalibration();
     void RemovePointerPickedPointsObject(int objID);
     void UpdateSettings();
 
@@ -77,8 +77,10 @@ protected:
     void ObjectAddedToScene();
     void ObjectRemovedFromScene();
 
-    int m_trackerToolIndex;
-    vtkMatrix4x4 * CalibrationMatrix;
+    double m_lastTipCalibrationRMS;
+    double m_backupCalibrationRMS;
+    vtkMatrix4x4 * m_backupCalibrationMatrix;
+
     PointsObject * CurrentPointerPickedPointsObject;
 
     double m_pointerAxis[3];

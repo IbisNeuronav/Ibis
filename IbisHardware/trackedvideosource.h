@@ -13,14 +13,11 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include <stdio.h>
 #include "vtkObject.h"
-#include <qobject.h>
+#include <QObject>
 #include "serializer.h"
-#include <string>
-#include "tracker.h"
-#include <QVector>
 #include "vtkGenericParam.h"
 #include "vtkObjectCallback.h"
-#include "cameraobject.h"
+#include "ibistypes.h"
 
 class Tracker;
 class vtkMatrix4x4;
@@ -29,8 +26,7 @@ class vtkImageData;
 class vtkTrackedVideoBuffer;
 class vtkVideoSource2;
 class vtkVideoSource2Factory;
-class USMask;
-
+class vtkTrackerTool;
 
 struct VideoSourceSettings
 {
@@ -65,19 +61,10 @@ public:
     
     virtual bool Serialize( Serializer * serializer );
 
-    // Description:
-    // Set the tracker tool to synchronize to video source. This must be done
-    // before calling Initialize.
-    void SetTracker( Tracker * track );
-    Tracker *GetTracker() { return Track; }
+    void SetSyncedTrackerTool( vtkTrackerTool * t );
 
     void InitializeVideo();
     void ClearVideo();
-
-    // Description:
-    // Get the name of the tracker tool that is attached to the us probe
-    QString GetTrackerToolName() { return this->TrackerToolName; }
-    void SetTrackerToolName( QString name );
 
     // Description:
     // Set/Get the TimeShift. TimeShift is the difference in timestamp of
@@ -86,32 +73,10 @@ public:
     // the video timestamp, you have to do: VideoTimeStamp - TimeShift.
     void SetTimeShift( double shift );
     double GetTimeShift();
-    
-    // Description:
-    // Modify, Get and Set the scale factors that can be applied
-    // to the calibration matrix of the ultrasound probe. 
-    void AddCalibrationMatrix( QString name );
-    void RemoveCalibrationMatrix( QString name );
-    int GetNumberOfCalibrationMatrices();
-    QString GetCalibrationMatrixName( int index );
-    vtkMatrix4x4 * GetCalibrationMatrix( int index );
-    int GetCalibrationMatrixIndex( QString name );
-    
-    // Description:
-    // Set/Get the scale factor that is currently being used by the
-    // assigned tool.
-    void SetCurrentCalibrationMatrixName( QString factorName );
-    QString GetCurrentCalibrationMatrixName();
-    vtkMatrix4x4 * GetCurrentCalibrationMatrix();
-    void SetCurrentCalibrationMatrix( vtkMatrix4x4 * mat );
-
-    void SetCameraIntrinsicParams( const CameraIntrinsicParams & params ) { m_cameraIntrinsicParams = params; }
-    const CameraIntrinsicParams & GetCameraIntrinsicParams() { return m_cameraIntrinsicParams; }
 
     // Description:
     // Get the transformation of the US image and the image itself 
     vtkTransform * GetTransform();
-    vtkTransform * GetUncalibratedTransform();
     TrackerToolState GetState();
     vtkImageData * GetVideoOutput();
     vtkVideoSource2 * GetSource() { return m_source; }
@@ -130,19 +95,6 @@ public:
 
     void Update();
 
-    struct ScaleFactorInfo
-    {
-        ScaleFactorInfo();
-        ScaleFactorInfo( const ScaleFactorInfo & other );
-        ~ScaleFactorInfo();
-        bool Serialize( Serializer * ser );
-        QString name;
-        vtkMatrix4x4 * matrix;
-    };
-
-
-    // mask
-    USMask *GetDefaultMask() {return m_defaultMask;}
 
     //-------------------------------------------------------------------------------------
     // VideoSource settings
@@ -173,12 +125,7 @@ public:
 
 signals:
 
-    void AssignedToolChanged();
     void OutputUpdatedSignal();
-    
-public slots:
-    
-    void ToolUseChanged( int );
 
 private slots:
 
@@ -189,17 +136,9 @@ protected:
     bool SerializeWrite( Serializer * Serializer );
     bool SerializeRead( Serializer * Serializer );
 
-    int FindValidTrackerTool();
-    void AssignTool();
-    void CheckCalibrationValidity();
     void BackupSourceTypeSpecificSettings();
     vtkTrackedVideoBuffer * GetCurrentBuffer();
     
-    // Description:
-    // Compute the real calibration matrices of the ultrasound
-    // probe by using the scale factor and scale center. This is to support legacy settings
-    void ComputeScaleCalibrationMatrices( std::vector< std::pair<QString,double> > & scaleFactors, vtkMatrix4x4 * unscaledCalibrationMatrix, double scaleCenter[2] );
-
     int m_numberOfClients;
     VideoSourceSettings m_videoSettings;
     QString VideoDeviceTypeName;
@@ -208,26 +147,12 @@ protected:
     vtkObjectCallback<TrackedVideoSource> * m_newFrameCallback;
 
     vtkTrackedVideoBuffer * m_liveVideoBuffer;     // Buffer where we capture when there is no acquisition (just a couple of frames)
-    Tracker * Track;
-    QString TrackerToolName;
-
-    // Calibration matrices for different scale factors of the probe
-    typedef std::vector< ScaleFactorInfo > ScaleFactorMatricesContainer;
-    ScaleFactorMatricesContainer m_calibrationMatrices;
-    QString m_currentCalibrationMatrixName;
-
-    // camera intrinsic parameters (not used for US)
-    CameraIntrinsicParams m_cameraIntrinsicParams;
 
     // shift between tracker and video timestamps
     double m_timeShift;
-
-    // default mask used for this video source
-    USMask *m_defaultMask;
 };
 
 ObjectSerializationHeaderMacro( TrackedVideoSource );
-ObjectSerializationHeaderMacro( TrackedVideoSource::ScaleFactorInfo );
 ObjectSerializationHeaderMacro( VideoSourceSettings );
 
 #endif

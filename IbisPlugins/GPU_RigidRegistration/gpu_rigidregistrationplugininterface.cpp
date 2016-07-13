@@ -34,7 +34,7 @@ bool GPU_RigidRegistrationPluginInterface::CanRun()
 QWidget * GPU_RigidRegistrationPluginInterface::CreateFloatingWidget()
 {
     GPU_RigidRegistrationWidget * widget = new GPU_RigidRegistrationWidget;
-    widget->SetApplication( m_application );
+    widget->SetApplication( GetApplication() );
     return widget;
 }
 

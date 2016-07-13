@@ -14,19 +14,22 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QWidget>
 #include <QList>
 
+class vtkQtMatrixDialog;
+
 namespace Ui {
     class PointerObjectSettingsDialog;
 }
 
 class PointerObject;
 class PointsObject;
+class PointerCalibrationDialog;
 
 class PointerObjectSettingsDialog : public QWidget
 {
     Q_OBJECT
 public:
     PointerObjectSettingsDialog(QWidget *parent = 0);
-    ~PointerObjectSettingsDialog();
+    virtual ~PointerObjectSettingsDialog();
 
     void SetPointer(PointerObject *);
     void SetPointerPickedPointsObject(PointsObject *);
@@ -43,13 +46,22 @@ protected:
     void UpdatePointSetsComboBox();
 
 private slots:
-    virtual void SaveTipPosition();
-    virtual void EnableNavigation(bool);
-    virtual void NewPointsObject();
-    virtual void PointSetsComboBoxActivated(int);
+
+    virtual void on_savePositionPushButton_clicked();
+    virtual void on_newPointsObjectPushButton_clicked();
+    virtual void on_pointSetsComboBox_activated(int);
+    virtual void on_calibrateTipButton_toggled(bool checked);
+    virtual void on_calibrationMatrixPushButton_toggled( bool on );
+    virtual void OnTipCalibrationDialogClosed();
+    void OnCalibrationMatrixDialogClosed();
 
 private:
+
+    vtkQtMatrixDialog * m_matrixDialog;
+
     Ui::PointerObjectSettingsDialog *ui;
+
+    PointerCalibrationDialog *  m_tipCalibrationWidget;
 
 };
 

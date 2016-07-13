@@ -18,7 +18,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QMessageBox>
 #include "application.h"
 #include "mainwindow.h"
-#include "ignsconfig.h"
 #include "commandlinearguments.h"
 #include "hardwaresettings.h"
 #include "vtkObject.h"

@@ -26,10 +26,12 @@ class USAcquisitionPluginInterface : public QObject, public ToolPluginInterface
 {
 
     Q_OBJECT
-    Q_INTERFACES(ToolPluginInterface)
+    Q_INTERFACES(IbisPlugin)
     Q_PLUGIN_METADATA(IID "Ibis.USAcquisitionPluginInterface" )
 
 public:
+
+    vtkTypeMacro( USAcquisitionPluginInterface, ToolPluginInterface );
 
     USAcquisitionPluginInterface();
     ~USAcquisitionPluginInterface();
@@ -40,18 +42,10 @@ public:
     virtual bool WidgetAboutToClose();
 
     UsProbeObject * GetCurrentUsProbe();
-    void ValidateCurrentUsProbe();
-
     USAcquisitionObject * GetCurrentAcquisition();
-    void ValidateCurrentAcquisition();
     void NewAcquisition();
-
     ImageObject * GetCurrentVolume();
-    void ValidateCurrentVolume();
-
-    // added May 14, 2015
     ImageObject * GetAddedVolume();
-    void ValidateAddedVolume();
 
     bool CanCaptureTrackedVideo();
     bool IsTrackerlessCaptureAllowed() { return m_allowTrackerlessCapture; }
@@ -66,28 +60,40 @@ public:
     void SetMasking( bool m ) { m_isMasking = m; }
     double GetMaskingPercent() { return m_maskingPercent; }
     void SetMaskingPercent( double p ) { m_maskingPercent = p; }
-    int GetCurrentAcquisitionObjectId() { return m_currentAcquisitionObjectId; }
-    void SetCurrentAcquisitionObjectId( int id ) { m_currentAcquisitionObjectId = id; }
-    int GetCurrentVolumeObjectId() { return m_currentVolumeObjectId; }
-    void SetCurrentVolumeObjectId( int id ) { m_currentVolumeObjectId = id; }
 
-    //added content May 13, 2015 by Xiao
+    int GetCurrentAcquisitionObjectId() { return m_currentAcquisitionObjectId; }
+    void SetCurrentAcquisitionObjectId( int id );
+
+    int GetCurrentVolumeObjectId() { return m_currentVolumeObjectId; }
+    void SetCurrentVolumeObjectId( int id );
+
     bool IsBlendingVolumes() { return m_isBlendingVolumes; }
     void SetBlendingVolumes( bool b ) { m_isBlendingVolumes = b; }
+
     double GetBlendingVolumesPercent() { return m_blendingVolumesPercent; }
     void SetBlendingVolumesPercent( double p ) { m_blendingVolumesPercent = p; }
+
     int GetAddedVolumeObjectId() { return m_addedVolumeObjectId; }
-    void SetAddedVolumeObjectId( int id ) { m_addedVolumeObjectId = id; }
+    void SetAddedVolumeObjectId( int id );
 
 signals:
 
     void ObjectsChanged();
+    void ImageChanged();
 
 private slots:
 
     void SceneContentChanged();
+    void LutChanged();
+    void OnImageChanged();
 
 protected:
+
+    void ValidateAllSceneObjects();
+    void ValidateCurrentUsProbe();
+    void ValidateCurrentAcquisition();
+    void ValidateCurrentVolume();
+    void ValidateAddedVolume();
 
     DoubleViewWidget * m_interfaceWidget;
 

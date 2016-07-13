@@ -25,12 +25,12 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include "sceneobject.h"
 #include "serializer.h"
+#include "view.h"
 
-class View;
 class QWidget;
 class QStringList;
 class TripleCutPlaneObject;
-class VolumeRenderingObject;
+class TrackedSceneObject;
 class WorldObject;
 class ImageObject;
 class PolyDataObject;
@@ -40,14 +40,10 @@ class PointsObject;
 class USAcquisitionObject;
 class UsProbeObject;
 class PointerObject;
-class Octants;
-class SceneInfo;
 class vtkInteractor;
 
-//#define USE_NEW_IMAGE_PLANES
-
 // Scene file format version
-#define IGNS_SCENE_SAVE_VERSION "6.0"
+#define IGNS_SCENE_SAVE_VERSION "7.0"
 
 #define PREOP_ROOT_OBJECT_NAME "Pre-operative"
 #define INTRAOP_ROOT_OBJECT_NAME "Intra-operative"
@@ -84,6 +80,7 @@ public:
     // Create different view windows and/or window layouts
     QWidget * CreateQuadViewWindow( QWidget * parent );
     QWidget * CreateObjectTreeWidget( QWidget * parent );
+    QWidget * CreateTrackedToolsStatusWidget( QWidget * parent );
 
     // Description:
     // The three next functions are used to get a pointer to
@@ -121,12 +118,18 @@ public:
     // world space coordinate systems.
     void WorldToReference( double worldPoint[3], double referencePoint[3] );
     void ReferenceToWorld( double referencePoint[3], double worldPoint[3] );
+    void GetReferenceOrientation( vtkMatrix4x4 * mat );
 
     // Description:
     // Manipulate the global cursor. The cursor is a general concept that
     // can be used by any module as a 3D reference point. Amongst other things,
     // its position is used to place the Triple Cut planes.
     void GetCursorPosition( double pos[3] );
+
+    // Description:
+    // Determine whether the pos is in one of the 3 planes identified by planeType. Point is
+    // in the plane if it is closer than .5 * voxel size of the reference volume.
+    bool IsInPlane( VIEWTYPES planeType, double pos[3] );
 
     void EmitShowGenericLabel( bool );
     void EmitShowGenericLabelText();
@@ -135,23 +138,27 @@ public:
 
 
 public slots:
+
     void ResetCursorPosition();
     void SetCursorPosition( double * );
     void SetCursorWorldPosition( double * );
     void ClockTick();
 
 private slots:
+
+    void OnStartCutPlaneInteraction();
     void OnCutPlanesPositionChanged();
+    void OnEndCutPlaneInteraction();
+
 signals:
+
     void CursorPositionChanged();
+    void StartCursorInteraction();
+    void EndCursorInteraction();
     void ShowGenericLabel( bool );
     void ShowGenericLabelText( );
 
 public:
-
-    // Description:
-    // Main volume renderer (there is only one object managing all volume redering)
-    vtkGetObjectMacro( MainVolumeRenderer, VolumeRenderingObject );
 
     // Manage Objects
     void AddObject( SceneObject * object, SceneObject * attachTo = 0 );
@@ -167,14 +174,13 @@ public:
     void GetAllCameraObjects( QList<CameraObject*> & all );
     void GetAllUSAcquisitionObjects( QList<USAcquisitionObject*> & all );
     void GetAllUsProbeObjects( QList<UsProbeObject*> & all );
+    void GetAllPointerObjects( QList<PointerObject*> & all );
+    void GetAllTrackedObjects( QList<TrackedSceneObject*> & all );
     void GetAllObjectsOfType( const char * typeName, QList<SceneObject*> & all );
 
     // Description:
     // Get object by ID
     SceneObject * GetObjectByID( int id );
-
-    // Find if the object exists
-    bool ObjectExists(SceneObject *);
 
     // Current object
     SceneObject * GetCurrentObject( ) { return CurrentObject; }
@@ -184,6 +190,9 @@ public:
     ImageObject * GetReferenceDataObject( );
     void SetReferenceDataObject( SceneObject * );
     bool CanBeReference( SceneObject * );
+    void GetReferenceBounds( double bounds[6] );
+    vtkTransform * GetReferenceTransform() { return m_referenceTransform; }
+    vtkTransform * GetInverseReferenceTransform() { return m_invReferenceTransform; }
 
     // Special root objects
     SceneObject * GetSceneRoot();
@@ -222,8 +231,10 @@ public:
 
     //Description
     // Set working directory
-    void SetSceneDirectory(const QString &wDir);
-    const QString GetSceneDirectory();
+    void SetSceneDirectory( const QString &directory ) { SceneDirectory = directory; }
+    const QString GetSceneDirectory() { return SceneDirectory; }
+    void SetSceneFile( const QString &fileName ) { SceneFile = fileName; }
+    const QString GetSceneFile() { return SceneFile; }
 
     //Description
     //Remove all children added to system objects: world, preop and intraop, also all tools
@@ -249,14 +260,6 @@ public:
     void GetAllListableNonTrackedObjects(QList<SceneObject*> &);
     void GetChildrenListableNonTrackedObjects( SceneObject * obj, QList<SceneObject*> & );
 
-    //Description
-    // Get octants of interest
-    Octants *GetOctantsOfInterest() {return OctantsOfInterest;}
-
-    //Description
-    // Get session info
-    SceneInfo *GetSceneInfo() {return CurrentSceneInfo;}
-
     // Description
     // Manages interaction style of 3D views
     void Set3DInteractorStyle( InteractorStyle style );
@@ -271,9 +274,10 @@ public:
     // navigation
     void EnablePointerNavigation( bool on);
     void SetNavigationPointerID( int id );
+    int GetNavigationPointerObjectId() { return NavigationPointerID; }
     bool GetNavigationState() {return this->IsNavigating; }
     PointerObject *GetNavigationPointerObject( );
-
+    bool IsLoadingScene() { return LoadingScene; }
 public slots:
 
     void EmitSignalObjectRenamed(QString, QString);
@@ -293,12 +297,16 @@ signals:
     void ObjectAdded( int );
     void ObjectRemoved( int );
     void ObjectNameChanged(QString, QString);
+    void NavigationPointerChanged();
     void CurrentObjectChanged();
     void ReferenceTransformChanged();
+    void ReferenceObjectChanged();
 
     void ExpandView();
 
 protected:
+
+    void ValidatePointerObject();
 
     void InternalClearScene();
     void Init();
@@ -311,10 +319,10 @@ protected:
     int NextObjectID;
     int NextSystemObjectID;
     SceneObject * CurrentObject;
-    ImageObject *ReferenceDataObject;
+    ImageObject * ReferenceDataObject;
+    vtkTransform * m_referenceTransform;
+    vtkTransform * m_invReferenceTransform;
     WorldObject * SceneRoot;
-    Octants      *OctantsOfInterest;
-    SceneInfo  *CurrentSceneInfo;
     InteractorStyle InteractorStyle3D;
 
     // Description:
@@ -343,9 +351,6 @@ protected:
 
     TripleCutPlaneObject * MainCutPlanes;
 
-    // Special global object that manages all volume rendering
-    VolumeRenderingObject * MainVolumeRenderer;
-
     // Objects
     ObjectList AllObjects;
 
@@ -363,11 +368,15 @@ protected:
 
     // navigation
     int NavigationPointerID;
-    int IsNavigating;
+    bool IsNavigating;
+
+    bool LoadingScene;
 
     QString GenericText;
 private:
 
+    QString SceneDirectory;
+    QString SceneFile;
     // We declare these to make sure no one is registering or unregistering SceneManager
     // since SceneManager should have only one instance and be deleted at the end
     // by the unique instance of Application.

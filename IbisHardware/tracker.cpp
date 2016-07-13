@@ -9,13 +9,23 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
 #include "tracker.h"
+#include "ibishardwaremodule.h"
+#include "trackedvideosource.h"
 #include "vtkPOLARISTracker.h"
 #include "vtkTrackerTool.h"
 #include "trackersettingsdialog.h"
 #include "trackerstatusdialog.h"
 #include "vtkMatrix4x4.h"
-#include "vtkmatrix4x4utilities.h"
 #include "vtkXFMWriter.h"
+#include "vtkTransform.h"
+#include "vtkVideoSource2.h"
+#include "serializerhelper.h"
+
+#include "scenemanager.h"
+#include "trackedsceneobject.h"
+#include "pointerobject.h"
+#include "usprobeobject.h"
+#include "cameraobject.h"
 
 #include <QList>
 #include <QFileInfo>
@@ -24,14 +34,11 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 ObjectSerializationMacro( Tracker );
 ObjectSerializationMacro( ToolDescription );
 
-
-ToolDescription::ToolDescription() : type( Passive ), use( NoUse ), active(0), toolPort(-1), name(""), romFileName("")
+ToolDescription::ToolDescription() : type( Passive ), use( Generic ), active(0), toolPort(-1), name(""), romFileName("")
 {
-    this->cachedCalibrationMatrix = vtkMatrix4x4::New();
-    this->cachedCalibrationMatrix->Identity();
-    this->cachedCalibrationRMS = 0.0;
+    this->videoSourceIndex = 0;
     this->cachedSerialNumber = "";
-    this->toolObjectId = -1;
+    this->sceneObject = 0;
 }
 
 ToolDescription::ToolDescription( const ToolDescription & orig )
@@ -42,11 +49,8 @@ ToolDescription::ToolDescription( const ToolDescription & orig )
     this->toolPort = orig.toolPort;
     this->name = orig.name;
     this->romFileName = orig.romFileName;
-    this->cachedCalibrationMatrix = vtkMatrix4x4::New();
-    this->cachedCalibrationMatrix->DeepCopy( orig.cachedCalibrationMatrix );
-    this->cachedCalibrationRMS = orig.cachedCalibrationRMS;
     this->cachedSerialNumber = orig.cachedSerialNumber;
-    this->toolObjectId = orig.toolObjectId;
+    this->sceneObject = orig.sceneObject;
 }
 
 void ToolDescription::Serialize( Serializer * serial )
@@ -56,9 +60,15 @@ void ToolDescription::Serialize( Serializer * serial )
     ::Serialize( serial, "Use", (int&)use );
     ::Serialize( serial, "Active", active );
     ::Serialize( serial, "RomFileName", romFileName );
-    ::Serialize( serial, "CachedCalibrationMatrix", cachedCalibrationMatrix );
-    ::Serialize( serial, "CachedCalibrationRMS", cachedCalibrationRMS );
     ::Serialize( serial, "CachedSerialNumber", cachedSerialNumber );
+
+    // Serialize sceneObject
+    if( serial->IsReader() )
+        InstanciateSceneObject();
+    serial->BeginSection( "ToolSceneObject" );
+    sceneObject->SerializeTracked( serial );
+    serial->EndSection();
+
     if( serial->IsReader() )
     {
         if( this->type == Active )
@@ -68,31 +78,61 @@ void ToolDescription::Serialize( Serializer * serial )
     }
 }
 
+void ToolDescription::InstanciateSceneObject()
+{
+    Q_ASSERT( !sceneObject );
+    if( use == Generic )
+        sceneObject = TrackedSceneObject::New();
+    else if( use == Pointer )
+        sceneObject = PointerObject::New();
+    else if( use == UsProbe )
+        sceneObject = UsProbeObject::New();
+    else
+        sceneObject = CameraObject::New();
+    sceneObject->SetName( this->name );
+    sceneObject->SetObjectManagedBySystem( true );
+    sceneObject->SetCanAppendChildren( false );
+    sceneObject->SetObjectManagedByTracker(true);
+    sceneObject->SetCanChangeParent( false );
+    sceneObject->SetCanEditTransformManually( false );
+}
+
+void ToolDescription::ClearSceneObject()
+{
+    if( sceneObject )
+    {
+        sceneObject->Delete();
+        sceneObject = 0;
+    }
+}
+
 Tracker::Tracker()
 {
+    m_hardwareModule = 0;
+    m_sceneManager = 0;
     m_tracker = vtkPOLARISTracker::New();
     m_currentTool = -1;
     m_referenceTool = -1;
-    m_navigationPointer = -1;
-    m_cachedWorldCalibrationMatrix = vtkMatrix4x4::New();
-    m_cachedWorldCalibrationMatrix->Identity();
     m_baudRate = DEFAULT_BAUD_RATE;
+    m_referenceTransform = vtkTransform::New();
 }
 
 Tracker::~Tracker()
 {
-    m_cachedWorldCalibrationMatrix->Delete();
     m_tracker->Destroy();
 }
 
 void Tracker::Initialize()
 {
+    Q_ASSERT( m_hardwareModule );
+    Q_ASSERT( m_sceneManager );
+
     if( !this->IsInitialized() )
     {        
         m_tracker->SetBaudRate( m_baudRate );
         if( m_tracker->Probe() )
         {
-            if (m_tracker->GetVersion())// patch for errors when getting version in vtkPolarisTracker::InternalStartTracking
+            if (m_tracker->GetVersion())// patch for errors when getting version in vtkNDITracker::InternalStartTracking
                 m_trackerVersion = m_tracker->GetVersion(); 
 
             this->ActivateAllPassiveTools();
@@ -100,9 +140,7 @@ void Tracker::Initialize()
             m_tracker->StartTracking();
             if(m_trackerVersion.isEmpty() && m_tracker->GetVersion()) // patch for errors when getting version in vtkPOLARISTracker::InternalStartTracking
                 m_trackerVersion = m_tracker->GetVersion(); 
-            m_navigationPointer = this->FindFirstActivePointer();
             m_tracker->Update();
-            emit TrackerInitialized();
         }
     }
 }
@@ -113,7 +151,6 @@ void Tracker::StopTracking()
     {
         this->DeactivateAllPassiveTools();
         m_tracker->StopTracking();
-        emit TrackerStopped();
     }
 }
 
@@ -144,29 +181,23 @@ void Tracker::Update()
         m_tracker->Update();
         this->LookForNewActiveTools();
         this->LookForDeactivatedActiveTools();
+        this->PushTrackerStateToSceneObjects();
         emit Updated();
     }
 }
-
 
 double Tracker::GetUpdateRate()
 {
     return m_tracker->GetInternalUpdateRate();
 }
 
-
 vtkTrackerTool * Tracker::GetTool( int toolIndex )
 {
-    if( toolIndex >= 0 && toolIndex < (int)m_toolVec.size() )
-    {
-        if( m_toolVec[ toolIndex ].toolPort != -1 )
-        {
-            return m_tracker->GetTool( m_toolVec[ toolIndex ].toolPort );
-        }
-    }
+    Q_ASSERT( toolIndex >= 0 && toolIndex < (int)m_toolVec.size() );
+    if( m_toolVec[ toolIndex ].toolPort != -1 )
+        return m_tracker->GetTool( m_toolVec[ toolIndex ].toolPort );
     return 0;
 }
-
 
 vtkTrackerTool * Tracker::GetTool( QString & toolName )
 {
@@ -174,19 +205,22 @@ vtkTrackerTool * Tracker::GetTool( QString & toolName )
     return this->GetTool( index );    
 }
 
-int Tracker::GetUSProbeToolIndex( )
-{ // There may be only one in the current version - 2007-06-04
-    ToolDescriptionVec::iterator it = m_toolVec.begin();
-    int index = 0;
-    for( ; it != m_toolVec.end(); ++it )
+vtkTrackerTool * Tracker::GetTool( TrackedSceneObject * obj )
+{
+    for( int i = 0; i < m_toolVec.size(); ++i )
     {
-        if( (*it).use == UsProbe )
-        {
-            return index;
-        }
-        index++;
+        if( m_toolVec[i].sceneObject == obj )
+            return GetTool( i );
     }
-    return -1;
+    return 0;
+}
+
+TrackedVideoSource * Tracker::GetVideoSource( TrackedSceneObject * obj )
+{
+    int index = GetToolIndex( obj );
+    Q_ASSERT( index != -1 );
+    Q_ASSERT( m_toolVec[index].use == UsProbe || m_toolVec[index].use == Camera );
+    return GetVideoSource( m_toolVec[index].videoSourceIndex );
 }
 
 QString Tracker::GetToolDescription( int toolIndex )
@@ -208,7 +242,6 @@ QString Tracker::GetToolDescription( int toolIndex )
     return ret;        
 }
 
-
 int Tracker::ToolNameExists( QString toolName )
 {
     ToolDescriptionVec::iterator it = m_toolVec.begin();
@@ -222,70 +255,25 @@ int Tracker::ToolNameExists( QString toolName )
     return 0;
 }
 
-
 int Tracker::GetReferenceToolIndex()
 {
     return m_referenceTool;
 }
 
-
-int Tracker::SetReferenceToolIndex( int toolIndex )
+void Tracker::SetReferenceToolIndex( int toolIndex )
 {
-    if( m_referenceTool != toolIndex )
+    if( m_referenceTool == toolIndex )
+        return;
+
+    Q_ASSERT( toolIndex >= -1 && toolIndex < GetNumberOfTools() );
+    Q_ASSERT( this->IsToolActive( toolIndex ) );  // interface should not let user set an inactive tool as reference
+
+    if( m_toolVec[ toolIndex ].toolPort != -1 )
     {
-        int numberOfTools = m_toolVec.size();
-        if( toolIndex >= -1 && toolIndex < numberOfTools )
-        {
-            if (this->GetToolUse(toolIndex) != Reference)
-            {
-                QMessageBox::warning( 0, "Warning!", "Selected tool is not a reference tool: " + this->GetToolName(toolIndex), 1, 0 );
-                return 0;
-            }
-            else if (!this->IsToolActive(m_referenceTool))
-            {
-                QMessageBox::warning( 0, "Warning!", "Selected reference tool is not active: " + this->GetToolName(m_referenceTool), 1, 0 );
-            }
-            if( m_toolVec[ toolIndex ].active )
-            {
-                m_tracker->SetReferenceTool( m_toolVec[ toolIndex ].toolPort );
-            }
-            m_referenceTool = toolIndex;
-        }
+        m_tracker->SetReferenceTool( m_toolVec[ toolIndex ].toolPort );
+        m_referenceTransform->SetInput( GetTool(toolIndex)->GetTransform() );
     }
-    if (this->GetToolUse(m_referenceTool) == Reference && this->IsToolActive(m_referenceTool))
-        emit ReferenceToolChanged(true); 
-    else
-        emit ReferenceToolChanged(false); 
-    return 1;
-}
-
-int Tracker::GetNavigationPointerIndex()
-{
-    return m_navigationPointer;
-}
-
-int Tracker::SetNavigationPointerIndex( int toolIndex )
-{
-    if( m_navigationPointer != toolIndex )
-    {
-        int numberOfTools = m_toolVec.size();
-        if( toolIndex >= -1 && toolIndex < numberOfTools )
-        {
-            if (this->GetToolUse(toolIndex) != Pointer)
-            {
-                QMessageBox::warning( 0, "Warning!", "Selected tool is not a pointer: " + this->GetToolName(toolIndex), 1, 0 );
-                return 0;
-            }
-            else if (!this->IsToolActive(toolIndex))
-            {
-                QMessageBox::warning( 0, "Warning!", "Selected pointer is not active: " + this->GetToolName(toolIndex), 1, 0 );
-                return 0;
-            }
-        }
-    }
-    m_navigationPointer = toolIndex;
-    emit NavigationPointerChangedSignal();
-    return 1;
+    m_referenceTool = toolIndex;
 }
 
 int Tracker::GetCurrentToolIndex()
@@ -293,19 +281,16 @@ int Tracker::GetCurrentToolIndex()
     return m_currentTool;
 }
 
-
 void Tracker::SetCurrentToolIndex( int toolIndex )
 {
-    if( toolIndex >= 0 && toolIndex < (int)m_toolVec.size() )
-        m_currentTool = toolIndex;
+    Q_ASSERT( toolIndex >= 0 && toolIndex < (int)m_toolVec.size() );
+    m_currentTool = toolIndex;
 }
-
 
 int Tracker::GetNumberOfTools()
 {
     return m_toolVec.size();    
 }
-
 
 int Tracker::GetNumberOfActiveTools()
 {
@@ -319,44 +304,21 @@ int Tracker::GetNumberOfActiveTools()
     return count;
 }
 
-
 QString Tracker::GetToolName( int toolIndex )
 {
-    if( toolIndex >= 0 && toolIndex < (int)m_toolVec.size() )
-    {
-        return m_toolVec[ toolIndex ].name;
-    }
-    else
-    {
-        return QString("");
-    }           
+    Q_ASSERT( toolIndex >= 0 && toolIndex < GetNumberOfTools() );
+    return m_toolVec[ toolIndex ].name;
 }
-
 
 void Tracker::SetToolName( int toolIndex, QString toolName )
 {
-    if( toolIndex >= 0 && toolIndex < (int)m_toolVec.size() )
+    Q_ASSERT( toolIndex >= 0 && toolIndex < GetNumberOfTools() );
+    if( !this->ToolNameExists( toolName ) )
     {
-        if( !this->ToolNameExists( toolName ) )
-        {
-            QString prevName = m_toolVec[ toolIndex ].name;
-            m_toolVec[ toolIndex ].name = toolName;
-            emit ToolNameChanged( toolIndex, prevName );
-        }
+        QString prevName = m_toolVec[ toolIndex ].name;
+        m_toolVec[ toolIndex ].name = toolName;
+        m_toolVec[ toolIndex ].sceneObject->SetName( toolName );
     }
-}
-
-int Tracker::GetToolObjectId(int toolIndex)
-{
-    if( toolIndex >= 0 && toolIndex < (int)m_toolVec.size() )
-        return m_toolVec[ toolIndex ].toolObjectId;
-    else
-        return -1;
-}
-
-void Tracker::SetToolObjectId(int toolIndex, int id)
-{
-    m_toolVec[ toolIndex ].toolObjectId = id;
 }
 
 int Tracker::GetToolIndex( QString toolName )
@@ -375,122 +337,63 @@ int Tracker::GetToolIndex( QString toolName )
     return -1;
 }
 
-void Tracker::GetActiveToolTypeAndRom(ToolUse use, QString &type, QString &romFile)
+int Tracker::GetToolIndex( TrackedSceneObject * obj )
 {
-    int index = 0;
-    std::vector< ToolDescription >::iterator it = m_toolVec.begin();
-    while( it != m_toolVec.end() )
-    {
-        if( (*it).active && (*it).use == use)
+    for( int i = 0; i < m_toolVec.size(); ++i )
+        if( m_toolVec[i].sceneObject == obj )
         {
-            type = this->GetToolDescription(index);
-            QFileInfo info( (*it).romFileName );
-            romFile = info.fileName();
+            return i;
         }
-        ++it;
-        ++index;
-    }
+    return -1;
 }
 
-void Tracker::StartToolTipCalibration( int toolIndex )
+bool Tracker::ToolHasVideo( int toolIndex )
 {
-    vtkTrackerTool * tool = this->GetTool( toolIndex );
-    if( tool )
-    {
-        tool->StartTipCalibration();
-    }
+    Q_ASSERT( toolIndex >= 0 && toolIndex < GetNumberOfTools() );
+    if( m_toolVec[ toolIndex ].use == UsProbe || m_toolVec[ toolIndex ].use == Camera )
+        return true;
+    return false;
 }
-
-
-double Tracker::GetToolLastCalibrationRMS( int toolIndex )
-{
-    vtkTrackerTool * tool = this->GetTool( toolIndex );
-    if( tool )
-    {
-        return tool->GetLastCalibrationRMS();
-    }
-    return 0;
-}
-
-
-void Tracker::SetToolLastCalibrationRMS( int toolIndex, double rms )
-{
-    vtkTrackerTool * tool = this->GetTool( toolIndex );
-    if( tool )
-    {
-        tool->SetLastCalibrationRMS( rms );
-    }
-}
-
-
-void Tracker::StopToolTipCalibration( int toolIndex )
-{
-    vtkTrackerTool * tool = this->GetTool( toolIndex );
-    if( tool )
-    {
-        tool->StopTipCalibration();
-    }   
-}
-
-
-int Tracker::IsToolCalibrating( int toolIndex )
-{
-    vtkTrackerTool * tool = this->GetTool( toolIndex );
-    if( tool )
-    {
-        return tool->GetCalibrating();
-    }   
-    return 0;
-}
-
 
 ToolType Tracker::GetToolType( int toolIndex )
 {
-    if( toolIndex >= 0 && toolIndex < (int)m_toolVec.size() )
-    {
-        return m_toolVec[ toolIndex ].type;
-    }
-    return None;
+    Q_ASSERT( toolIndex >= 0 && toolIndex < GetNumberOfTools() );
+    return m_toolVec[ toolIndex ].type;
 }
 
 void Tracker::SetToolUse( int toolIndex, ToolUse use )
 {
-    if( toolIndex >= 0 && toolIndex < (int)m_toolVec.size() )
+    Q_ASSERT( toolIndex >= 0 && toolIndex < GetNumberOfTools() );
+    if( m_toolVec[ toolIndex ].use != use )
     {
         m_toolVec[ toolIndex ].use = use;
-        emit ToolUseChanged( toolIndex );
+        if( m_toolVec[ toolIndex ].sceneObject &&  m_sceneManager )
+            m_sceneManager->RemoveObject( m_toolVec[ toolIndex ].sceneObject );
+        m_toolVec[ toolIndex ].ClearSceneObject();
+        m_toolVec[ toolIndex ].InstanciateSceneObject();
+        if( m_sceneManager && m_toolVec[ toolIndex ].toolPort != -1 )
+            m_sceneManager->AddObject( m_toolVec[ toolIndex ].sceneObject );
     }
 }
-
 
 ToolUse Tracker::GetToolUse( int toolIndex )
 {
-    if( toolIndex >= 0 && toolIndex < (int)m_toolVec.size() )
-    {
-        return m_toolVec[ toolIndex ].use;
-    }
-    return NoUse;
+    Q_ASSERT( toolIndex >= 0 && toolIndex < GetNumberOfTools() );
+    return m_toolVec[ toolIndex ].use;
 }
-
 
 QString Tracker::GetRomFileName( int toolIndex )
 {
-    if( toolIndex >= 0 && toolIndex < (int)m_toolVec.size() )
-    {
-        return m_toolVec[ toolIndex ].romFileName;
-    }
-    return "";
+    Q_ASSERT( toolIndex >= 0 && toolIndex < GetNumberOfTools() );
+    return m_toolVec[ toolIndex ].romFileName;
 }
-
 
 void Tracker::SetRomFileName( int toolIndex, QString & name )
 {
-    if( toolIndex >= 0 && toolIndex < (int)m_toolVec.size() )
-    {
-        m_toolVec[ toolIndex ].romFileName = name;
-    }
+    Q_ASSERT( toolIndex >= 0 && toolIndex < GetNumberOfTools() );
+    Q_ASSERT( m_toolVec[ toolIndex ].toolPort == -1 );  // make sure tool is not active
+    m_toolVec[ toolIndex ].romFileName = name;
 }
-
 
 int Tracker::AddNewTool( ToolType type, QString & name )
 {
@@ -501,79 +404,73 @@ int Tracker::AddNewTool( ToolType type, QString & name )
         desc.active = 0;
         desc.name = name;
         desc.romFileName = "";
+        desc.InstanciateSceneObject();
         m_toolVec.push_back( desc );
-        return m_toolVec.size() - 1;
+        m_currentTool = m_toolVec.size() - 1;
+        return m_currentTool;
     }
     return -1;
 }
-    
 
 void Tracker::RemoveTool( int toolIndex )
 {
-    if( toolIndex >= 0 && toolIndex < (int)m_toolVec.size() )
+    Q_ASSERT( toolIndex >= 0 && toolIndex < GetNumberOfTools() );
+
+    // Deal with current tool
+    if( m_currentTool == toolIndex )
     {
-        if( m_toolVec.size() == 1 )
-        {
-            m_currentTool = -1;
-        }
+        if( GetNumberOfTools() > 1 )
+            SetCurrentToolIndex( 0 );
         else
-        {
-            m_currentTool--;
-        }
-        if( m_toolVec[ toolIndex ].active )
-        {
-            this->ActivateTool( toolIndex, 0 );
-        }
-        else
-        {
-            emit ToolDeactivated( toolIndex );           
-        }
-
-        m_toolVec.erase( m_toolVec.begin() + toolIndex );
-        
-        if( m_referenceTool == toolIndex )
-        {
-            m_referenceTool = -1;
-        }
-        else if( m_referenceTool > toolIndex )
-        {
-            m_referenceTool--;
-        }
-        emit ToolRemoved ( toolIndex );
+            SetCurrentToolIndex( -1 );
     }
-}
+    else if( m_currentTool > toolIndex )
+        SetCurrentToolIndex( m_currentTool - 1 );
 
+    // Deal with reference tool
+    if( m_referenceTool == toolIndex )
+    {
+        if( GetNumberOfTools() > 1 )
+            SetReferenceToolIndex( 0 );
+        else
+            SetReferenceToolIndex( -1 );
+    }
+    else if( m_referenceTool > toolIndex )
+        SetReferenceToolIndex( m_referenceTool - 1 );
+
+    // Deactivate tool
+    if( m_toolVec[ toolIndex ].active )
+        this->ActivateTool( toolIndex, 0 );
+
+    m_toolVec.erase( m_toolVec.begin() + toolIndex );
+}
 
 void Tracker::ActivateTool( int toolIndex, int activate )
 {
-    if( toolIndex >= 0 && toolIndex < (int)m_toolVec.size() )
+    Q_ASSERT( toolIndex >= 0 && toolIndex < GetNumberOfTools() );
+
+    if( this->IsInitialized() )
     {
-        if( this->IsInitialized() )
-        {
-            if( activate )
-                this->ReallyActivatePassiveTool( toolIndex );
-            else
-                this->ReallyDeactivatePassiveTool( toolIndex );
-        }
+        if( activate )
+            this->ReallyActivatePassiveTool( toolIndex );
         else
-        {
-            m_toolVec[ toolIndex ].active = activate;
-        }
+            this->ReallyDeactivatePassiveTool( toolIndex );
+    }
+    else
+    {
+        m_toolVec[ toolIndex ].active = activate;
     }
 }
 
-
+// This is returning whether the tool is marked as active, but it might
+// not be tracking if tracker is not running.
 int Tracker::IsToolActive( int toolIndex )
 {
-    if( this->IsInitialized() && toolIndex >= 0 && toolIndex < (int)m_toolVec.size() )
-    {
-        return m_toolVec[ toolIndex ].active;
-    }
-    return 0;
+    Q_ASSERT( toolIndex >= 0 && toolIndex < GetNumberOfTools() );
+    return m_toolVec[ toolIndex ].active;
 }
 
-
-TrackerToolState Tracker::GetCurrentToolState( int toolIndex )
+TrackerToolState Tracker::GetToolState( int toolIndex )
 {
     if( !this->IsInitialized() )
     {
@@ -594,36 +491,7 @@ TrackerToolState Tracker::GetCurrentToolState( int toolIndex )
     else
         state = Missing;
     return state;
-}
-
-
-vtkMatrix4x4 * Tracker::GetToolCalibrationMatrix( int toolIndex )
-{
-    if( toolIndex >= 0 && toolIndex < (int)m_toolVec.size() )
-    {
-        vtkTrackerTool * tool = this->GetTool( toolIndex );
-        if( tool )
-        {
-            return tool->GetCalibrationMatrix();
-        }
-        else
-        {
-            return m_toolVec[ toolIndex ].cachedCalibrationMatrix;
-        }               
-    }
-    return 0;
-}
-
-
-vtkMatrix4x4 * Tracker::GetWorldCalibrationMatrix()
-{
-    if( this->IsInitialized() )
-    {
-        return m_tracker->GetWorldCalibrationMatrix();
-    }
-    return m_cachedWorldCalibrationMatrix;
-}
-    
+}   
 
 QWidget * Tracker::CreateSettingsDialog( QWidget * parent )
 {
@@ -637,32 +505,16 @@ QWidget * Tracker::CreateSettingsDialog( QWidget * parent )
     return res;
 }
 
-
-QWidget * Tracker::CreateStatusDialog( QWidget * parent )
-{
-    TrackerStatusDialog * res = new TrackerStatusDialog( parent );
-	res->setAttribute( Qt::WA_DeleteOnClose, true );
-    res->SetTracker( this );
-    connect( this, SIGNAL( NavigationPointerChangedSignal() ), res, SLOT( UpdateToolList() ) );
-    return res;
-}
-
-
 void Tracker::Serialize( Serializer * serial )
 {
     bool wasTracking = this->IsInitialized();
-    if( !serial->IsReader() )
-    {
-        this->BackupCalibrationMatrices();
-    }
-    else
-    {
+
+    if( serial->IsReader() )
         this->StopTracking();
-    }
+
     ::Serialize( serial, "TrackerBaudeRate", m_baudRate );
     ::Serialize( serial, "CurrentTool", m_currentTool );
     ::Serialize( serial, "ReferenceTool", m_referenceTool );
-    ::Serialize( serial, "CachedWorldCalibrationMatrix", m_cachedWorldCalibrationMatrix );
     ::Serialize( serial, "Tools", m_toolVec );
 
     if( serial->IsReader() )
@@ -672,145 +524,143 @@ void Tracker::Serialize( Serializer * serial )
     }
 }
 
-void Tracker::ActivateAllPassiveTools()
+void Tracker::AddAllToolsToScene()
 {
-    QList <QString> filesNotFound;
+    for( int i = 0; i < m_toolVec.size(); ++i )
+        if( m_toolVec[i].toolPort != -1 )
+            AddToolToScene( i );
+}
 
+void Tracker::RemoveAllToolsFromScene()
+{
+    for( int i = 0; i < m_toolVec.size(); ++i )
+        if( m_toolVec[i].toolPort == -1 )
+            RemoveToolFromScene( i );
+}
+
+TrackedVideoSource * Tracker::GetVideoSource( int sourceIndex )
+{
+    return m_hardwareModule->GetVideoSource( sourceIndex );
+}
+
+bool Tracker::ActivateAllPassiveTools()
+{
+    bool success = true;
     for( unsigned int i = 0; i < m_toolVec.size(); i++ )
     {
         if( m_toolVec[i].type == Passive && m_toolVec[i].active)
-        {
-            if( !m_toolVec[i].romFileName.isEmpty() )
-            {
-                if (QFile::exists(m_toolVec[i].romFileName))
-                    this->ReallyActivatePassiveTool( i );
-                else
-                {
-                    filesNotFound.append(m_toolVec[i].romFileName);
-                    m_toolVec[i].active = 0;
-                }
-            }
-            else
-            {
-                QString use("undefined usage");
-                if (m_toolVec[i].use == 0)
-                    use = "reference";
-                else if (m_toolVec[i].use == 1)
-                        use = "pointer";
-                else if (m_toolVec[i].use == 2)
-                        use = "USprobe";
-                else if (m_toolVec[i].use == 3)
-                        use = "camera";
-                QString  accessError = "Missing ROM file for \"" + m_toolVec[i].name + "\" used as " + use +".";
-                QMessageBox::warning(0, "Error: ", accessError, 1, 0);
-                m_toolVec[i].active = 0;
-            }
-        }
+            success |= this->ReallyActivatePassiveTool( i );
     }
-    if (!filesNotFound.isEmpty())
-    {
-        QString  accessError("ROM Files not found\n");
-        accessError.append(filesNotFound.at(0));
-        for (int i = 1; i < filesNotFound.count(); i++)
-        {
-            accessError.append(",\n");
-            accessError.append(filesNotFound.at(i));
-        }
-        QMessageBox::warning(0, "Error: ", accessError, 1, 0);
-    }
+    return success;
 }
 
 void Tracker::DeactivateAllPassiveTools()
 {
-    vtkPOLARISTracker * polaris = vtkPOLARISTracker::SafeDownCast( m_tracker );
     for( unsigned int i = 0; i < m_toolVec.size(); i++ )
     {
-        if( m_toolVec[i].type == Passive )
-        {
+        if( m_toolVec[i].type == Passive && m_toolVec[i].toolPort != -1 )
             this->ReallyDeactivatePassiveTool( i );
-        }
     }
 }
 
-
-void Tracker::ReallyActivatePassiveTool( int toolIndex )
+bool Tracker::ReallyActivatePassiveTool( int toolIndex )
 {
-    Q_ASSERT( toolIndex >= 0 && toolIndex < (int)m_toolVec.size()  );  // index is within range
-    if (m_toolVec[toolIndex].toolPort == -1 )                  // if port has not been assigned already, the code below will assign it
+    Q_ASSERT( toolIndex >= 0 && toolIndex < (int)m_toolVec.size()  );
+    Q_ASSERT( m_toolVec[toolIndex].toolPort == -1 );
+    vtkPOLARISTracker * polaris = vtkPOLARISTracker::SafeDownCast( m_tracker );
+    Q_ASSERT( polaris );
+
+    // Find a tool port available
+    int toolPort = polaris->GetAvailablePassivePort();
+    if( toolPort == -1 )
     {
-        vtkPOLARISTracker * polaris = vtkPOLARISTracker::SafeDownCast( m_tracker );
-        if( polaris )
-        {
-            // Find a tool port available
-            int toolPort = polaris->GetAvailablePassivePort();
-
-            if( toolPort != -1 )
-            {
-                if( QFile::exists( m_toolVec[ toolIndex ].romFileName ) )
-                {
-                    polaris->LoadVirtualSROM( toolPort, m_toolVec[ toolIndex ].romFileName.toUtf8().data() );
-                    // TODO: implement a mechanism to make sure that if the calibration matrix is modified
-                    // by someone else than the Tracker class, the cached matrix is updated before the application
-                    // is closed.
-                    polaris->GetTool( toolPort )->SetCalibrationMatrix( m_toolVec[ toolIndex ].cachedCalibrationMatrix );
-                    if( m_referenceTool == toolIndex )
-                    {
-                        polaris->SetReferenceTool( toolPort );
-                        emit ReferenceToolChanged(true);
-                    }
-                    m_toolVec[ toolIndex ].toolPort = toolPort;
-                    m_toolVec[ toolIndex ].active = 1;
-
-                    emit ToolActivated( toolIndex );
-                }
-            }
-        }
+        m_trackerError += QString("Cannot activate tool %1. No more passive tool port available.\n").arg( m_toolVec[toolIndex].name );
+        m_toolVec[toolIndex].active = 0;
+        return false;
     }
+
+    // Make sure the rom file exists
+    if( !QFile::exists( m_toolVec[ toolIndex ].romFileName ) )
+    {
+        m_trackerError += QString("Cannot activate tool %1. Rom file %2 not found.").arg( m_toolVec[toolIndex].name ).arg( m_toolVec[toolIndex].romFileName );
+        m_toolVec[toolIndex].active = 0;
+        return false;
+    }
+
+    polaris->LoadVirtualSROM( toolPort, m_toolVec[ toolIndex ].romFileName.toUtf8().data() );
+    if( m_referenceTool == toolIndex )
+    {
+        polaris->SetReferenceTool( toolPort );
+    }
+    m_toolVec[ toolIndex ].toolPort = toolPort;
+    m_toolVec[ toolIndex ].active = 1;
+
+    // Assign tool to proper video source for camera and usprobe.
+    if( ToolHasVideo( toolIndex ) )
+    {
+        TrackedVideoSource * v = GetVideoSource( m_toolVec[ toolIndex ].videoSourceIndex );
+        v->SetSyncedTrackerTool( GetTool( toolIndex ) );
+    }
+
+    AddToolToScene( toolIndex );
+
+    return true;
 }
 
 void Tracker::ReallyDeactivatePassiveTool( int toolIndex )
 {
     Q_ASSERT( toolIndex >= 0 && toolIndex < (int)m_toolVec.size() );
-    if( m_toolVec[toolIndex].toolPort == -1 )
-        return;
+    Q_ASSERT( m_toolVec[toolIndex].toolPort != -1 );
 
     vtkPOLARISTracker * polaris = vtkPOLARISTracker::SafeDownCast( m_tracker );
-    if( polaris )
+    Q_ASSERT( polaris );
+
+    polaris->ClearVirtualSROM( m_toolVec[ toolIndex ].toolPort );
+    if( m_referenceTool == toolIndex )
     {
-        // backup calibration matrix for the tool
-        vtkTrackerTool * tool = this->GetTool( toolIndex );
-        if( tool )
-        {
-            m_toolVec[ toolIndex ].cachedCalibrationMatrix->DeepCopy( tool->GetCalibrationMatrix() );
-        }
-
-        polaris->ClearVirtualSROM( m_toolVec[ toolIndex ].toolPort );
-        if( m_referenceTool == toolIndex )
-        {
-            polaris->SetReferenceTool( -1 );
-            emit ReferenceToolChanged( false );
-        }
-        m_toolVec[ toolIndex ].toolPort = -1;
-        m_toolVec[ toolIndex ].active = 0;
-
-        emit ToolDeactivated( toolIndex );
+        polaris->SetReferenceTool( -1 );
     }
+    m_toolVec[ toolIndex ].toolPort = -1;
+    m_toolVec[ toolIndex ].active = 0;
+
+    RemoveToolFromScene( toolIndex );
 }
 
-
-void Tracker::BackupCalibrationMatrices()
+void Tracker::AddToolToScene( int toolIndex )
 {
-    for( unsigned int toolIndex = 0; toolIndex < m_toolVec.size(); toolIndex++ )
+    Q_ASSERT( toolIndex >= 0 && toolIndex < (int)m_toolVec.size() );
+    Q_ASSERT( m_toolVec[toolIndex].toolPort != -1 );
+
+    if( m_toolVec[toolIndex].use == Camera )
     {
-        vtkTrackerTool * tool = this->GetTool( toolIndex );
-        if( tool )
-        {
-            m_toolVec[ toolIndex ].cachedCalibrationMatrix->DeepCopy( tool->GetCalibrationMatrix() );
-            m_toolVec[ toolIndex ].cachedCalibrationRMS = tool->GetLastCalibrationRMS();
-        }
+        CameraObject * cam = CameraObject::SafeDownCast( m_toolVec[toolIndex].sceneObject );
+        TrackedVideoSource * videoSource = GetVideoSource( m_toolVec[toolIndex].videoSourceIndex );
+        cam->SetInputTransform( videoSource->GetTransform() );
+        cam->SetVideoInputData( videoSource->GetVideoOutput() );
     }
+    else if( m_toolVec[toolIndex].use == UsProbe )
+    {
+        UsProbeObject * probe = UsProbeObject::SafeDownCast( m_toolVec[toolIndex].sceneObject );
+        TrackedVideoSource * videoSource = GetVideoSource( m_toolVec[toolIndex].videoSourceIndex );
+        probe->SetInputTransform( videoSource->GetTransform() );
+        probe->SetVideoInputData( videoSource->GetVideoOutput() );
+    }
+    else
+    {
+        m_toolVec[toolIndex].sceneObject->SetInputTransform( GetTool(toolIndex)->GetTransform() );
+    }
+
+    m_toolVec[toolIndex].sceneObject->SetHardwareModule( m_hardwareModule );
+    m_sceneManager->AddObject( m_toolVec[toolIndex].sceneObject );
 }
 
+void Tracker::RemoveToolFromScene( int toolIndex )
+{
+    Q_ASSERT( toolIndex >= 0 && toolIndex < (int)m_toolVec.size() );
+    Q_ASSERT( m_toolVec[toolIndex].toolPort == -1 );
+
+    m_sceneManager->RemoveObject( m_toolVec[ toolIndex ].sceneObject );
+}
 
 void Tracker::LookForNewActiveTools()
 {
@@ -859,18 +709,30 @@ void Tracker::LookForNewActiveTools()
                 m_toolVec[ toolIndex ].toolPort = i;
                 m_toolVec[ toolIndex ].active = 1;
                 m_toolVec[ toolIndex ].cachedSerialNumber = toolSerial;
-                tool->SetCalibrationMatrix( m_toolVec[ toolIndex ].cachedCalibrationMatrix );
-                tool->SetLastCalibrationRMS( m_toolVec[ toolIndex ].cachedCalibrationRMS );
-                if( m_referenceTool == toolIndex )
-                {
-                    emit ReferenceToolChanged(true);
-                }
-                emit ToolActivated( toolIndex );
+                AddToolToScene( toolIndex );
+
+                emit ToolListChanged();
             }
         }
     }
 }
 
+void Tracker::PushTrackerStateToSceneObjects()
+{
+    for( int i = 0; i < m_toolVec.size(); ++i )
+    {
+        if( m_toolVec[i].toolPort != -1 )
+        {
+            if( m_toolVec[i].use == UsProbe || m_toolVec[i].use == Camera )
+            {
+                TrackedVideoSource * source = GetVideoSource( m_toolVec[i].videoSourceIndex );
+                m_toolVec[i].sceneObject->SetState( source->GetState() );
+            }
+            else
+                m_toolVec[i].sceneObject->SetState( GetToolState( i ) );
+        }
+    }
+}
 
 void Tracker::LookForDeactivatedActiveTools()
 {
@@ -889,13 +751,8 @@ void Tracker::LookForDeactivatedActiveTools()
                 {
                     (*it).toolPort = -1;
                     (*it).active = 0;
-                    (*it).cachedCalibrationMatrix->DeepCopy( tool->GetCalibrationMatrix() );
-                    (*it).cachedCalibrationRMS = tool->GetLastCalibrationRMS();
-                    emit ToolDeactivated( toolIndex );
-                    if( m_referenceTool == toolIndex )
-                    {
-                       emit ReferenceToolChanged( false );
-                    } 
+                    RemoveToolFromScene( toolIndex );
+                    emit ToolListChanged();
                     break;
                 }
                 ++it;
@@ -916,44 +773,10 @@ int Tracker::GetBaudRate()
     return m_tracker->GetBaudRate();
 }
 
-void Tracker::WriteActivePointerCalibrationMatrix(QString & filename)
-{
-    if (m_navigationPointer > -1)
-    {
-        vtkMatrix4x4 *calibrationMatrix = this->GetToolCalibrationMatrix(m_navigationPointer);
-        vtkXFMWriter *writer = vtkXFMWriter::New();
-        writer->SetFileName( filename.toUtf8().data() );
-        writer->SetMatrix(calibrationMatrix);
-        writer->Write();
-        writer->Delete();
-    }
-}
-
-int Tracker::FindFirstActivePointer()
-{
-    for (int i = 0; i < this->GetNumberOfTools(); i++)
-    {
-        if (this->GetToolUse(i) == Pointer && this->IsToolActive(i))
-            return i;
-    }
-    return -1;
-}
-
 void Tracker::RenameTool(QString oldName, QString newName)
 {
     int index = this->GetToolIndex(oldName);
     if (index >= 0)
-        this->SetToolName(index, newName);
+        this->SetToolName( index, newName );
 }
 
-bool Tracker::ValidateReference()
-{
-    if (m_referenceTool >= 0 && this->IsToolActive(m_referenceTool))
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}

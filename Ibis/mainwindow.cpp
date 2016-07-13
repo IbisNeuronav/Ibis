@@ -15,11 +15,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "imageobject.h"
 #include "pointsobject.h"
 #include "scenemanager.h"
-#include "sceneinfodialog.h"
 #include "aboutbicigns.h"
 #include "quadviewwindow.h"
-#include "ignsmsg.h"
-#include "sceneinfo.h"
 #include "opendatafiledialog.h"
 #include "filereader.h"
 #include "worldobject.h"
@@ -27,6 +24,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "ignsconfig.h"
 #include "toolplugininterface.h"
 #include "objectplugininterface.h"
+#include "aboutpluginswidget.h"
 
 #include <QApplication>
 #include <QAction>
@@ -78,21 +76,21 @@ MainWindow::MainWindow( QWidget * parent )
     // -----------------------------------------
     QMenu * fileMenu = menuBar()->addMenu( "&File" );
     fileMenu->addAction( tr("&Open File"), this, SLOT( fileOpenFile() ), QKeySequence::Open );
-    QMenu *newFileMenu = fileMenu->addMenu("&New Object");
-    newFileMenu->addAction( tr("&New Point Set"), this, SLOT( NewPointSet() ));
-    this->CreateNewObjectPluginsUi(newFileMenu);
+    QMenu *newObjectFileMenu = fileMenu->addMenu("&New Object");
+    newObjectFileMenu->addAction( tr("&Point Set"), this, SLOT( NewPointSet() ));
+    this->CreateNewObjectPluginsUi(newObjectFileMenu);
     fileMenu->addAction( tr("E&xport"), this, SLOT( fileExportFile() ) );
     QMenu * importFileMenu = fileMenu->addMenu("Import");
     importFileMenu->addAction( tr("US Acquisition"), this, SLOT(fileImportUsAcquisition()) );
     importFileMenu->addAction( tr("Camera"), this, SLOT(fileImportCamera()) );
     fileMenu->addSeparator();
-    fileMenu->addAction( tr("Scene &Info"), this, SLOT(ShowSceneInfo()));
     fileMenu->addAction( tr("Save S&cene"), this, SLOT( fileSaveScene() ), QKeySequence::Save );
     fileMenu->addAction( tr("Save S&cene As..."), this, SLOT( fileSaveSceneAs() ) );
     m_fileLoadSceneAction = fileMenu->addAction( tr("&Load Scene"), this, SLOT( fileLoadScene() ));
     fileMenu->addSeparator();
     fileMenu->addAction( tr("&Exit"), this, SLOT( close() ), QKeySequence::Quit );
     connect( fileMenu, SIGNAL( aboutToShow() ), this, SLOT( ModifyFileMenu() ) );
+    connect( newObjectFileMenu, SIGNAL( aboutToShow() ), this, SLOT( ModifyNewObjectFileMenu() ) );
 
     if( !viewerOnly )
     {
@@ -139,8 +137,9 @@ MainWindow::MainWindow( QWidget * parent )
     menuBar()->addSeparator();
     QMenu * helpMenu = menuBar()->addMenu( tr("&Help") );
     helpMenu->addSeparator();
-    helpMenu->addAction( tr("&About"), this, SLOT(about()), QKeySequence("F1"));
-    helpMenu->addAction( tr("About&Qt"), this, SLOT(aboutQt()));
+    helpMenu->addAction( tr("About..."), this, SLOT(about()) );
+    QAction * aboutPluginAction = helpMenu->addAction( tr("About plugins..."), this, SLOT(AboutPlugins()) );
+    aboutPluginAction->setMenuRole( QAction::ApplicationSpecificRole );
     
     // -----------------------------------------
     // Create left panel
@@ -152,7 +151,7 @@ MainWindow::MainWindow( QWidget * parent )
 
     if( !viewerOnly )
     {
-        QWidget * trackerStatus = Application::GetHardwareModule()->CreateTrackerStatusDialog( m_leftFrame );
+        QWidget * trackerStatus = Application::GetSceneManager()->CreateTrackedToolsStatusWidget( m_leftFrame );
         trackerStatus->setMinimumWidth( 300 );
         m_leftLayout->addWidget( trackerStatus );
     }
@@ -237,34 +236,39 @@ void MainWindow::OnStartMainLoop()
 void MainWindow::CreatePluginsUi()
 {
     // Add menu entries
-    foreach( QObject * plugin, QPluginLoader::staticInstances() )
+    QList<ToolPluginInterface*> allTools;
+    Application::GetInstance().GetAllToolPlugins( allTools );
+    for( int i = 0; i < allTools.size(); ++i )
     {
-        ToolPluginInterface * toolPlugin = qobject_cast< ToolPluginInterface* >( plugin );
-        if( toolPlugin && toolPlugin->CanRun() )
+        ToolPluginInterface * toolPlugin = allTools[i];
+        if( toolPlugin->CanRun() )
         {
-           QAction * action = new QAction( toolPlugin->GetMenuEntryString(), plugin );
-           action->setCheckable( true );
-           connect( action, SIGNAL(toggled(bool)), this, SLOT(ToolPluginsMenuActionToggled(bool)) );
-           m_pluginMenu->addAction(action);
-           m_pluginActions[ toolPlugin ] = action;
-           if( toolPlugin->GetSettings().active )
+            QString menuEntry = toolPlugin->GetMenuEntryString();
+            QAction * action = new QAction( menuEntry, this );
+            action->setData( QVariant(toolPlugin->GetPluginName()) );
+            action->setCheckable( true );
+            connect( action, SIGNAL(toggled(bool)), this, SLOT(ToolPluginsMenuActionToggled(bool)) );
+            m_pluginMenu->addAction(action);
+            m_pluginActions[ toolPlugin ] = action;
+            if( toolPlugin->GetSettings().active )
                action->toggle();
         }
-    } 
+    }
     connect( &(Application::GetInstance()), SIGNAL(QueryActivatePluginSignal(ToolPluginInterface*,bool)), this, SLOT(ToggleToolPlugin(ToolPluginInterface*,bool)) );
 }
 
 void MainWindow::CreateNewObjectPluginsUi(QMenu *menu)
 {
-    foreach( QObject * plugin, QPluginLoader::staticInstances() )
+    QList<ObjectPluginInterface*> allObjectPlugins;
+    Application::GetInstance().GetAllObjectPlugins( allObjectPlugins );
+    for( int i = 0; i < allObjectPlugins.size(); ++i )
     {
-        ObjectPluginInterface * objectPlugin = qobject_cast< ObjectPluginInterface* >( plugin );
-        if( objectPlugin )
-        {
-           QAction * action = new QAction( objectPlugin->GetMenuEntryString(), plugin );
-           connect( action, SIGNAL(triggered()), this, SLOT(ObjectPluginsMenuActionTriggered()) );
-           menu->addAction(action);
-        }
+        ObjectPluginInterface * objectPlugin = allObjectPlugins[i];
+        QString menuEntry = objectPlugin->GetMenuEntryString();
+        QAction * action = new QAction( menuEntry, this );
+        action->setData( QVariant(objectPlugin->GetPluginName()) );
+        connect( action, SIGNAL(triggered()), this, SLOT(ObjectPluginsMenuActionTriggered()) );
+        menu->addAction(action);
     }
 }
 
@@ -290,16 +294,18 @@ void MainWindow::about()
     a->show();   
 }
 
-
-void MainWindow::aboutQt()
+void MainWindow::AboutPlugins()
 {
-    QMessageBox::aboutQt( this, m_appName );
+    AboutPluginsWidget * w = new AboutPluginsWidget;
+    w->setAttribute( Qt::WA_DeleteOnClose, true );
+    w->setWindowFlags( Qt::WindowStaysOnTopHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint | Qt::CustomizeWindowHint );
+    w->show();
 }
 
 void MainWindow::fileOpenFile()
 {
     // Get filenames
-    QString lastVisitedDir = Application::GetInstance().GetSettings()->LastVisitedDirectory;
+    QString lastVisitedDir = Application::GetInstance().GetSettings()->WorkingDirectory;
     if(!QFile::exists(lastVisitedDir))
     {
         lastVisitedDir = QDir::homePath();
@@ -346,9 +352,9 @@ void MainWindow::NewPointSet()
 {
     SceneManager * manager = Application::GetSceneManager();
     PointsObject *pointsObject = PointsObject::New();
-    pointsObject->SetName(tr("PointSetToRename"));
-    manager->AddObject(pointsObject);
-    pointsObject->SetPickable(true);
+    pointsObject->SetName( tr("PointSetToRename") );
+    manager->AddObject( pointsObject );
+    manager->SetCurrentObject( pointsObject );
     pointsObject->Delete();
 }
 
@@ -479,23 +485,33 @@ void MainWindow::ModifyFileMenu()
     }
 }
 
+void MainWindow::ModifyNewObjectFileMenu()
+{
+    QMenu * fileMenu = qobject_cast<QMenu *>(sender());
+    fileMenu->clear();
+    fileMenu->addAction( tr("&Point Set"), this, SLOT( NewPointSet() ));
+    QList<ObjectPluginInterface*> allObjectPlugins;
+    Application::GetInstance().GetAllObjectPlugins( allObjectPlugins );
+    for( int i = 0; i < allObjectPlugins.size(); ++i )
+    {
+        ObjectPluginInterface * objectPlugin = allObjectPlugins[i];
+        if( objectPlugin->CanBeActivated() )
+        {
+            QString menuEntry = objectPlugin->GetMenuEntryString();
+            QAction * action = new QAction( menuEntry, this );
+            action->setData( QVariant(objectPlugin->GetPluginName()) );
+            connect( action, SIGNAL(triggered()), this, SLOT(ObjectPluginsMenuActionTriggered()) );
+            fileMenu->addAction(action);
+        }
+    }
+}
+
 void MainWindow::ModifyViewMenu()
 {
     SceneManager * manager = Application::GetSceneManager();
     m_viewXPlaneAction->setChecked(manager->GetMainImagePlanes()->GetViewPlane(0));
     m_viewYPlaneAction->setChecked(manager->GetMainImagePlanes()->GetViewPlane(1));
     m_viewZPlaneAction->setChecked(manager->GetMainImagePlanes()->GetViewPlane(2));
-}
-
-void MainWindow::ShowSceneInfo()
-{
-    SceneManager * manager = Application::GetSceneManager();
-    SceneInfoDialog *dlg = new SceneInfoDialog;
-    SceneInfo *sceneinfo = manager->GetSceneInfo();
-    dlg->SetSceneInfo(sceneinfo);
-    dlg->setAttribute(Qt::WA_DeleteOnClose);
-    dlg->SetSceneDirectory(manager->GetSceneDirectory());
-    dlg->show();
 }
 
 void MainWindow::fileSaveScene()
@@ -511,10 +527,9 @@ void MainWindow::fileSaveSceneAs()
 void MainWindow::SaveScene(bool asFile)
 {
     SceneManager * manager = Application::GetSceneManager();
-    SceneInfo *sceneinfo = manager->GetSceneInfo();
-    QString sceneDir = sceneinfo->GetSceneDirectory();
-    QString fileName = sceneinfo->GetSessionFile();
-    if (asFile || !sceneinfo->GetDirectorySet())
+    QString sceneDir = manager->GetSceneDirectory();
+    QString fileName = manager->GetSceneFile();
+    if (asFile || sceneDir.isEmpty() )
     {
         QString initialFile = manager->GetSceneDirectory() + "/scene.xml";
         fileName = Application::GetInstance().GetSaveFileName( tr("Save Scene"), initialFile, tr("xml file (*.xml)") );
@@ -522,10 +537,9 @@ void MainWindow::SaveScene(bool asFile)
         {
             QFileInfo info( fileName );
             sceneDir = info.dir().absolutePath();
-            sceneinfo->SetSceneDirectory(sceneDir);
-            sceneinfo->SetDirectorySet(true);
+            manager->SetSceneDirectory( sceneDir );
+            manager->SetSceneFile( fileName );
             Application::GetInstance().GetSettings()->WorkingDirectory = sceneDir;
-            sceneinfo->SetSessionFile( fileName );
         }
         else
             return;
@@ -536,7 +550,6 @@ void MainWindow::SaveScene(bool asFile)
 void MainWindow::fileLoadScene()
 {
     SceneManager * manager = Application::GetSceneManager();
-    SceneInfo *sceneinfo = manager->GetSceneInfo();
     bool sceneNotEmpty = manager->GetNumberOfUserObjects() > 0;
     if( sceneNotEmpty )
     {
@@ -548,7 +561,7 @@ void MainWindow::fileLoadScene()
             return;
     }
 
-    QString workingDir = manager->GetSceneDirectory();
+    QString workingDir = Application::GetInstance().GetSettings()->WorkingDirectory;
     if(!QFile::exists(workingDir))
     {
         workingDir = QDir::homePath();
@@ -570,7 +583,6 @@ void MainWindow::ObjectListWidgetChanged( QWidget * newWidget )
 {
     if( newWidget )
     {
-        //m_leftLayout->addWidget( newWidget );
         m_objectSettingsScrollArea->setWidget( newWidget );
     }
 }
@@ -585,7 +597,7 @@ void MainWindow::ToggleToolPlugin( ToolPluginInterface * toolPlugin, bool isOn )
 void MainWindow::ToolPluginsMenuActionToggled( bool isOn )
 {
     QAction * action = qobject_cast<QAction *>(sender());
-    ToolPluginInterface * toolPlugin = qobject_cast<ToolPluginInterface *>( action->parent() );
+    ToolPluginInterface * toolPlugin = Application::GetInstance().GetToolPluginByName( action->data().toString() );
     Q_ASSERT_X( toolPlugin, "MainWindow::ToolPluginsMenuActionToggled()", "Plugin doesn't exist but should." );
 
     if( isOn )
@@ -650,7 +662,8 @@ void MainWindow::FloatingPluginWidgetClosed()
     QAction * pluginAction = m_pluginWidgets.key( closedWidget );
     Q_ASSERT_X( pluginAction, "MainWindow::FloatingPluginWidgetClosed()", "No action associated with closed widget." );
 
-    ToolPluginInterface * toolPlugin = qobject_cast<ToolPluginInterface *>( pluginAction->parent() );
+    QString pluginName = pluginAction->data().toString();
+    ToolPluginInterface * toolPlugin = Application::GetInstance().GetToolPluginByName( pluginName );
     Q_ASSERT_X( toolPlugin, "MainWindow::ClosePluginTab()", "Plugin doesn't exist but should." );
 
     // give plugin a chance to survive
@@ -690,7 +703,8 @@ void MainWindow::PluginTabClosed( int tabIndex )
 void MainWindow::ClosePluginTab( QAction * action, int index )
 {
     // give plugin a chance to survive
-    ToolPluginInterface * toolPlugin = qobject_cast<ToolPluginInterface *>( action->parent() );
+    QString pluginName = action->data().toString();
+    ToolPluginInterface * toolPlugin = Application::GetInstance().GetToolPluginByName( pluginName );
     Q_ASSERT_X( toolPlugin, "MainWindow::ClosePluginTab()", "Plugin doesn't exist but should." );
     if( !toolPlugin->WidgetAboutToClose() )
         return;
@@ -716,9 +730,12 @@ void MainWindow::ClosePluginTab( QAction * action, int index )
 void MainWindow::ObjectPluginsMenuActionTriggered()
 {
     QAction * action = qobject_cast<QAction *>(sender());
-    ObjectPluginInterface * objectPlugin = qobject_cast<ObjectPluginInterface *>( action->parent() );
-    objectPlugin->SetApplication( &Application::GetInstance() );
-    objectPlugin->CreateObject();
+    QString pluginName = action->data().toString();
+    ObjectPluginInterface * p = Application::GetInstance().GetObjectPluginByName( pluginName );
+    Q_ASSERT( p );
+    SceneObject *obj = p->CreateObject();
+    if( obj )
+        Application::GetSceneManager()->SetCurrentObject( obj );
 }
 
 void MainWindow::MainSplitterMoved( int pos, int index )
@@ -786,13 +803,12 @@ void MainWindow::closeEvent( QCloseEvent * event )
     s->MainWindowRightPanelSize = m_rightPanelSize;
 
     // Tell all plugins their window/tab is about to close
-    foreach( QObject * plugin, QPluginLoader::staticInstances() )
+    QList<ToolPluginInterface*> allTools;
+    Application::GetInstance().GetAllToolPlugins( allTools );
+    foreach( ToolPluginInterface * toolPlugin, allTools )
     {
-        ToolPluginInterface * toolPlugin = qobject_cast< ToolPluginInterface* >( plugin );
-        if( toolPlugin && toolPlugin->IsPluginActive() )
-        {
+        if( toolPlugin->IsPluginActive() )
             toolPlugin->WidgetAboutToClose();
-        }
     }
 
     // Close all open windows appart from the main window

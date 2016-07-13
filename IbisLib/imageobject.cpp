@@ -17,12 +17,10 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "vtkImageData.h"
 #include "view.h"
 #include "vtkTransform.h"
-//#include "vtkMINCImageAttributes2.h"
 #include "vtkImageAccumulate.h"
 
 #include "vtkSmartVolumeMapper.h"
 #include "vtkGPUVolumeRayCastMapper.h"
-#include "vtkIbisGLSLVolumeRaycastMapper.h"
 #include "vtkVolume.h"
 #include "vtkVolumeProperty.h"
 #include "vtkPiecewiseFunction.h"
@@ -35,7 +33,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "imageobjectvolumesettingswidget.h"
 #include "scenemanager.h"
 #include "triplecutplaneobject.h"
-#include "volumerenderingobject.h"
 #include "lookuptablemanager.h"
 #include <QMessageBox>
 
@@ -88,11 +85,6 @@ ImageObject::PerViewElements::~PerViewElements()
 
 ImageObject::ImageObject()
 {
-    this->ItkToVtkExporter = 0;
-    this->ItkRGBImageToVtkExporter = 0;
-    this->ItkToVtkLabelExporter = 0;
-    this->ItkToVtkImporter = 0;
-
     this->ItkImage = 0;
     this->ItkRGBImage = 0;
     this->ItkLabelImage = 0;
@@ -106,7 +98,6 @@ ImageObject::ImageObject()
     this->lutRange[0] = 0.0;
     this->lutRange[1] = 0.0;
     this->intensityFactor = 1.0;
-//    this->Attributes = 0;
     this->HistogramComputer = vtkImageAccumulate::New();
 
     // setup default volume properties for vtk volume rendering
@@ -153,20 +144,9 @@ ImageObject::~ImageObject()
     {
         this->Lut->Delete();
     }
-//    if( this->Attributes )
-//    {
-//        this->Attributes->Delete();
-//    }
+
     this->OutlineFilter->Delete();
     this->HistogramComputer->Delete();
-    if( this->ItkToVtkExporter )
-        this->ItkToVtkExporter->Delete();
-    if( this->ItkRGBImageToVtkExporter )
-        this->ItkRGBImageToVtkExporter->Delete();
-    if( this->ItkToVtkLabelExporter )
-        this->ItkToVtkLabelExporter->Delete();
-    if( this->ItkToVtkImporter )
-        this->ItkToVtkImporter->Delete();
 
     m_volumeProperty->Delete();
     m_volumePropertyWatcher->Delete();
@@ -177,6 +157,12 @@ ImageObject::~ImageObject()
 void ImageObject::Serialize( Serializer * ser )
 {
     SceneObject::Serialize(ser);
+    bool labelImage = false;
+    if( !ser->IsReader() )
+    {
+        labelImage = this->IsLabelImage();
+    }
+    ::Serialize( ser, "LabelImage", labelImage );
     ::Serialize( ser, "ViewOutline", this->viewOutline );
     ::Serialize( ser, "LutIndex", this->lutIndex );
     ::Serialize( ser, "LutRange", this->lutRange, 2 );
@@ -189,6 +175,7 @@ void ImageObject::Serialize( Serializer * ser )
     double specular = .2;
     double specularPower = 10.0;
     bool enableGradientOpacity = true;
+
     if( !ser->IsReader() )
     {
         enableShading = m_volumeProperty->GetShade() == 1 ? true : false;
@@ -309,31 +296,6 @@ void ImageObject::SetItkImage( IbisRGBImageType::Pointer image )
     }
 }
 
-void ImageObject::SetItkRGBImage( IbisRGBImageType::Pointer image )
-{
-    if( !this->ItkRGBImageToVtkExporter )
-        BuildItkRGBImageToVtkExport();
-    this->ItkRGBImage = image;
-    if( this->ItkRGBImage )
-    {
-        this->ItkRGBImageToVtkExporter->SetInput( this->ItkRGBImage );
-        this->ItkToVtkImporter->Update();
-        this->SetImage( this->ItkToVtkImporter->GetOutput() );
-
-        // Use itk image's dir cosines as the local transform for this image
-        itk::Matrix< double, 3, 3 > dirCosines = this->ItkRGBImage->GetDirection();
-        vtkMatrix4x4 * rotMat = vtkMatrix4x4::New();
-        for( unsigned i = 0; i < 3; ++i )
-            for( unsigned j = 0; j < 3; ++j )
-                rotMat->SetElement( i, j, dirCosines( i, j ) );
-        vtkTransform * rotTrans = vtkTransform::New();
-        rotTrans->SetMatrix( rotMat );
-        this->SetLocalTransform( rotTrans );
-        rotMat->Delete();
-        rotTrans->Delete();
-    }
-}
-
 
 void ImageObject::SetItkLabelImage( IbisItk3DLabelType::Pointer image )
 {
@@ -377,6 +339,8 @@ void ImageObject::SetImage(vtkImageData * image)
         this->Image->Register( this );
     }
 
+    double range[2];
+    this->Image->GetScalarRange( range );
     this->HistogramComputer->SetInputData( this->Image );
     SetupHistogramComputer();
     this->OutlineFilter->SetInputData( this->Image );
@@ -505,7 +469,6 @@ void ImageObject::CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *w
     res->setAttribute(Qt::WA_DeleteOnClose);
     res->SetImageObject( this );
     res->setObjectName("Properties");
-    connect( this, SIGNAL( UpdateSettings() ), res, SLOT(UpdateUI()) );
     widgets->append(res);
 
     ImageObjectVolumeSettingsWidget * volWidget = new ImageObjectVolumeSettingsWidget( parent );
@@ -514,11 +477,6 @@ void ImageObject::CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *w
     volWidget->setObjectName("Volume");
     widgets->append( volWidget );
 }
-
-//void ImageObject::UpdateSettingsWidget()
-//{
-//    emit UpdateSettings();
-//}
 
 void ImageObject::SetVtkVolumeRenderingEnabled( bool on )
 {
@@ -773,6 +731,7 @@ void ImageObject::SetLut(vtkScalarsToColors *lut)
             this->Lut->Register(0);
         }
     }
+    emit LutChanged();
     emit Modified();
 }
 
@@ -817,6 +776,19 @@ int ImageObject::ChooseColorTable(int index)
     return 1;
 }
 
+double * ImageObject::GetLutRange()
+{
+    return this->lutRange;
+}
+
+void ImageObject::SetLutRange( double r[2] )
+{
+    this->lutRange[0] = r[0];
+    this->lutRange[1] = r[1];
+    this->Lut->SetRange( r );
+    emit Modified();
+}
+
 void ImageObject::GetImageScalarRange(double *range)
 {
     this->Image->GetScalarRange( range );
@@ -838,6 +810,11 @@ void ImageObject::GetBounds( double bounds[6] )
 void ImageObject::GetCenter( double center[3] )
 {
     this->Image->GetCenter( center );
+}
+
+double * ImageObject::GetSpacing()
+{
+    return this->Image->GetSpacing();
 }
 
 void ImageObject::SetIntensityFactor( double factor )
@@ -880,27 +857,14 @@ void ImageObject::Show()
     emit Modified();
 }
 
-//void ImageObject::SetMINCImageAttributes(vtkMINCImageAttributes2 *att)
-//{
-//    if (!this->Attributes)
-//    {
-//        this->Attributes = vtkMINCImageAttributes2::New();
-//    }
-//    this->Attributes->ShallowCopy(att);
-//}
-
-void ImageObject::GetMINCHeaderString(QString & header)
+#include "mincinfowidget.h"
+void ImageObject::ShowMincInfo()
 {
-//    if (!this->Attributes)
-//    {
-//        header = "No info available.\n";
-//    }
-//    else
-//    {
-//        std::ostringstream info;
-//        this->Attributes->PrintFileHeader(info);
-//        header = QString( info.str().c_str() );
-//    }
+    MincInfoWidget * w = new MincInfoWidget( );
+    w->setAttribute(Qt::WA_DeleteOnClose);
+    w->SetImageObject( this );
+    w->move( 0, 0 );
+    w->show();
 }
 
 void ImageObject::BuildItkToVtkExport()

@@ -12,7 +12,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "ui_usacquisitionsettingswidget.h"
 
 #include "usacquisitionobject.h"
-#include "sceneinfo.h"
 #include "vtkQtMatrixDialog.h"
 #include "vtkTransform.h"
 #include "application.h"

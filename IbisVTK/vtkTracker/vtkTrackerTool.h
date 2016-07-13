@@ -97,20 +97,15 @@ public:
 
   // Description:
   // Perform a calibration of the position of the tool tip.  To accomplish
-  // this, first call InitializeCalibration(), then repeatedly call
-  // GetTracker()->Update() and InsertNextCalibrationPoint() with the
-  // tracked object in different orientations but with one point on the
-  // object fixed.  This point will become the origin of the tool when
-  // you call CalibrateToolTip().  The value returned by CalibrateToolTip()
+  // this, first call StartTipCalibration() to start accumulating points
+  // then call DoToolTipCalibration to compute calib matrix with points
+  // already accumulated. The value returned by DoToolTipCalibration()
   // is the uncertainty (one standard deviation) in the position of the
   // origin for any particular measurement.
-  void InitializeToolTipCalibration();
   void StartTipCalibration();
   int InsertNextCalibrationPoint();
-  double DoToolTipCalibration();
+  double DoToolTipCalibration( vtkMatrix4x4 * calibMat );
   void StopTipCalibration();
-  vtkGetMacro(LastCalibrationRMS,double);
-  vtkSetMacro(LastCalibrationRMS,double);
   vtkGetMacro(Calibrating,int);
 
   // Description:
@@ -200,7 +195,6 @@ protected:
   vtkCriticalSection * CalibrationMutex;
   vtkAmoebaMinimizer *Minimizer;
   vtkDoubleArray *CalibrationArray;
-  double LastCalibrationRMS;
 
   int Flags;
 

@@ -79,14 +79,12 @@ void LandmarkRegistrationObjectSettingsWidget::SetLandmarkRegistrationObject(Lan
         return;
     if (m_registrationObject)
     {
-        disconnect( this, SIGNAL(destroyed()), m_registrationObject, SLOT(OnCloseSettingsWidget()) );
         m_registrationObject->UnRegister(0);
     }
     m_registrationObject = obj;
     if (m_registrationObject)
     {
         m_registrationObject->Register(0);
-        connect( this, SIGNAL(destroyed()), m_registrationObject, SLOT(OnCloseSettingsWidget()) );
     }
     this->UpdateUI();
 }
@@ -119,6 +117,12 @@ void LandmarkRegistrationObjectSettingsWidget::on_capturePushButton_clicked()
         m_registrationObject->SetTargetPointTimeStamp( index, timeStamp.toString(Qt::ISODate) );
         m_registrationObject->SetTargetPointCoordinates( index, pos );
     }
+}
+
+void LandmarkRegistrationObjectSettingsWidget::on_allowScalingCheckBox_toggled( bool on )
+{
+    Q_ASSERT( m_registrationObject );
+    m_registrationObject->SetAllowScaling( on );
 }
 
 void LandmarkRegistrationObjectSettingsWidget::on_importPushButton_clicked()
@@ -245,6 +249,11 @@ void LandmarkRegistrationObjectSettingsWidget::DeletePoint()
 void LandmarkRegistrationObjectSettingsWidget::UpdateUI()
 {
     Q_ASSERT(m_registrationObject);
+
+    ui->allowScalingCheckBox->blockSignals( true );
+    ui->allowScalingCheckBox->setChecked( m_registrationObject->IsScalingAllowed() );
+    ui->allowScalingCheckBox->blockSignals( false );
+
     ui->targetComboBox->blockSignals(true);
     ui->targetComboBox->clear();
     QList<SceneObject*> allObjects;

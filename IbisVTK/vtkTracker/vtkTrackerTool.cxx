@@ -78,7 +78,6 @@ vtkTrackerTool::vtkTrackerTool()
     this->Minimizer = vtkAmoebaMinimizer::New();
     this->CalibrationArray = vtkDoubleArray::New();
     this->CalibrationArray->SetNumberOfComponents(16);
-    this->LastCalibrationRMS = 0.0;
 
     this->LED1 = 0;
     this->LED2 = 0;
@@ -191,21 +190,10 @@ void vtkTrackerTool::Update()
     this->TimeStamp = this->Buffer->GetTimeStamp(0);
 
     this->Buffer->Unlock();
-    
-    if( this->Calibrating && this->CalibrationArray->GetNumberOfTuples() > 20 )
-    {
-        this->LastCalibrationRMS = this->DoToolTipCalibration();
-    }
-}
-
-//----------------------------------------------------------------------------
-void vtkTrackerTool::InitializeToolTipCalibration()
-{
-  this->CalibrationArray->SetNumberOfTuples(0);
 }
 
 
-void    vtkTrackerTool::NewMatrixAvailable()
+void vtkTrackerTool::NewMatrixAvailable()
 {
     if( this->Calibrating )
     {
@@ -300,7 +288,7 @@ void vtkTrackerToolCalibrationFunction(void *userData)
 }
 
 //----------------------------------------------------------------------------
-double vtkTrackerTool::DoToolTipCalibration()
+double vtkTrackerTool::DoToolTipCalibration( vtkMatrix4x4 * calibMat )
 {
     this->Minimizer->Initialize();
     this->Minimizer->SetFunction(vtkTrackerToolCalibrationFunction,this);
@@ -321,10 +309,9 @@ double vtkTrackerTool::DoToolTipCalibration()
     double y = this->Minimizer->GetParameterValue("y");
     double z = this->Minimizer->GetParameterValue("z");
 
-    this->CalibrationMatrix->SetElement(0,3,x);
-    this->CalibrationMatrix->SetElement(1,3,y);
-    this->CalibrationMatrix->SetElement(2,3,z);
-    this->Modified();
+    calibMat->SetElement(0,3,x);
+    calibMat->SetElement(1,3,y);
+    calibMat->SetElement(2,3,z);
 
     return minimum;
 }
@@ -333,7 +320,6 @@ double vtkTrackerTool::DoToolTipCalibration()
 void vtkTrackerTool::StopTipCalibration()
 {
     this->Calibrating = 0;
-    this->LastCalibrationRMS = this->DoToolTipCalibration();
 }
 
 

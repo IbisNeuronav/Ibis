@@ -82,7 +82,7 @@ vtkMultiImagePlaneWidget::vtkMultiImagePlaneWidget() : vtkMulti3DWidget()
     this->CurrentImageValue        = VTK_FLOAT_MAX;
     this->MarginSelectMode         = 8;
     this->BoundingImage            = 0;
-    this->BoundingTransform        = 0;
+    this->BoundingTransform        = vtkTransform::New();
 
     // Represent the plane's outline geometry
     //
@@ -209,6 +209,18 @@ void vtkMultiImagePlaneWidget::ClearActors()
     ClearVec( this->MarginMappers );
     ClearVec( this->MarginActors );
     ClearVec( this->PlanePickers );
+}
+
+void vtkMultiImagePlaneWidget::SetActorsTransforms()
+{
+    for( int i = 0; i < this->PlaneOutlineActors.size(); ++i )
+        this->PlaneOutlineActors[i]->SetUserTransform( this->BoundingTransform );
+    for( int i = 0; i < this->TexturePlaneActors.size(); ++i )
+        this->TexturePlaneActors[i]->SetUserTransform( this->BoundingTransform );
+    for( int i = 0; i < this->CursorActors.size(); ++i )
+        this->CursorActors[i]->SetUserTransform( this->BoundingTransform );
+    for( int i = 0; i < this->MarginActors.size(); ++i )
+        this->MarginActors[i]->SetUserTransform( this->BoundingTransform );
 }
 
 void vtkMultiImagePlaneWidget::GetTextureCoordName( std::string & name, int index )
@@ -1275,6 +1287,7 @@ void vtkMultiImagePlaneWidget::SetBoundingVolume( vtkImageData * boundingImage, 
         actor->SetUserTransform( boundingTransform );
     }
 
+    SetActorsTransforms();
     // If bounding image is changing, we want to reset the cursor and plane position
     this->PlaceWidget();
 
@@ -1810,6 +1823,25 @@ void vtkMultiImagePlaneWidget::MoveNSlices( int nbSlices )
     this->UpdateNormal();
     this->UpdateMargins();
     this->UpdateCursor();
+}
+
+#include "vtkPlane.h"
+
+double vtkMultiImagePlaneWidget::DistanceToPlane( double position[3] )
+{
+    // Transform point to bounding volume
+    vtkMatrix4x4 * invBoundingTrans = vtkMatrix4x4::New();
+    this->BoundingTransform->GetInverse( invBoundingTrans );
+    double transformedPosition[4];
+    transformedPosition[0] = position[0];
+    transformedPosition[1] = position[1];
+    transformedPosition[2] = position[2];
+    transformedPosition[3] = 1.0;
+    invBoundingTrans->MultiplyPoint( transformedPosition, transformedPosition );
+    invBoundingTrans->Delete();
+
+    // Find distance with plane
+    return vtkPlane::DistanceToPlane( transformedPosition, PlaneSource->GetNormal(), PlaneSource->GetOrigin() );
 }
 
 void vtkMultiImagePlaneWidget::ActivateCursor( int i )

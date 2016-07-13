@@ -242,7 +242,9 @@ void TripleCutPlaneObject::RemoveImage( int imageID )
             m_sliceMixMode.erase(m_sliceMixMode.begin()+i);
             ImageObject * im = ImageObject::SafeDownCast( this->GetManager()->GetObjectByID( imageID ) );
             if(im )
+            {
                 im->UnRegister( 0 );
+            }
             break;
         }
     }
@@ -251,25 +253,56 @@ void TripleCutPlaneObject::RemoveImage( int imageID )
             return;
 
     Images.erase( it );
-    ImageObject * im = ImageObject::SafeDownCast( this->GetManager()->GetObjectByID( imageID ) );
-    if( im )
-        im->UnRegister( 0 );
-    for( int p = 0; p < 3; ++p )
+    if( this->GetManager()->GetReferenceDataObject()->GetObjectID() == imageID && Images.size() != 0 )
     {
-        // remove all inputs and re-add remaining images.
-        // (seems stupid, but it is better like that for texture unit consistency)
-        this->Planes[p]->ClearAllInputs();
-        for( uint i = 0; i < Images.size(); ++i )
-        {
-            ImageObject * im = ImageObject::SafeDownCast( this->GetManager()->GetObjectByID( Images[i] ) );
-            bool canInterpolate = im->IsLabelImage();
-            this->Planes[p]->AddInput( im->GetImage(), im->GetLut(), im->GetWorldTransform(), canInterpolate );
-            this->Planes[p]->SetImageHidden( im->GetImage(), im->IsHidden() );
-        }
+        this->GetManager()->SetReferenceDataObject( this->GetManager()->GetObjectByID( Images[0] )); // emits callback that will execute AdjustAllImages()
     }
+    else
+        this->AdjustAllImages();
 
     if( Images.size() == 0 )
         ReleaseAllViews();
+}
+
+void TripleCutPlaneObject::AdjustAllImages()
+{
+    ImageObject *referenceObject = this->GetManager()->GetReferenceDataObject();
+    if( referenceObject && Images.size() > 0 )
+    {
+        int refID = referenceObject->GetObjectID();
+        for( int j = 0; j < 3; ++j )
+        {
+            // remove all inputs and re-add images.
+            // (seems stupid, but it is better like that for texture unit consistency)
+            this->Planes[j]->ClearAllInputs();
+            // first add reference object
+            bool canInterpolate = !referenceObject->IsLabelImage();
+            this->Planes[j]->SetBoundingVolume( referenceObject->GetImage(), referenceObject->GetWorldTransform() );
+            this->Planes[j]->AddInput( referenceObject->GetImage(), referenceObject->GetLut(), referenceObject->GetWorldTransform(), canInterpolate );
+            this->Planes[j]->SetImageHidden( referenceObject->GetImage(), referenceObject->IsHidden() );
+            ImageContainer::iterator it = Images.begin();
+            for(int l = 0 ; it != Images.end(); it++, l++)
+            {
+                if ((*it) == refID)
+                {
+                    this->Planes[j]->SetBlendingMode( 0, BlendingModes[ m_blendingModeIndices[ l ] ].mode );
+                }
+            }
+            if( it == Images.end() )
+
+            for( uint i = 0; i < Images.size(); ++i )
+            {
+                ImageObject * im = ImageObject::SafeDownCast( this->GetManager()->GetObjectByID( Images[i] ) );
+                if( im->GetObjectID() != refID )
+                {
+                    bool canInterpolate = im->IsLabelImage();
+                    this->Planes[j]->AddInput( im->GetImage(), im->GetLut(), im->GetWorldTransform(), canInterpolate );
+                    this->Planes[j]->SetImageHidden( im->GetImage(), im->IsHidden() );
+                }
+            }
+        }
+        this->GetManager()->ResetAllCameras();
+    }
 }
 
 void TripleCutPlaneObject::UpdateLut(int imageID )
@@ -473,6 +506,18 @@ void TripleCutPlaneObject::GetPlanesPosition( double pos[3] )
     this->Planes[0]->GetPosition( pos );
 }
 
+bool TripleCutPlaneObject::IsInPlane( VIEWTYPES planeType, double pos[3] )
+{
+    double dist = this->Planes[ planeType ]->DistanceToPlane( pos );
+    ImageObject *ref = this->GetManager()->GetReferenceDataObject();
+    if( ref )
+    {
+        double * spacing = ref->GetSpacing();
+        return dist < spacing[planeType] * 0.5;
+    }
+    return dist < 0.5; // no ref volume, assume voxel spacing = 1mm
+}
+
 void TripleCutPlaneObject::SetPlanesPosition( double * pos )
 {
     for( int i = 0; i < 3; ++i )
@@ -483,13 +528,20 @@ void TripleCutPlaneObject::SetPlanesPosition( double * pos )
     emit Modified();
 }
 
+void TripleCutPlaneObject::PlaneStartInteractionEvent( vtkObject * caller, unsigned long event )
+{
+    Q_ASSERT( this->GetManager() );
+    int whichPlane = GetPlaneIndex( caller );
+    Q_ASSERT( whichPlane != -1 );
+    emit StartPlaneMoved( whichPlane );
+    UpdateOtherPlanesPosition( whichPlane );
+}
+
 void TripleCutPlaneObject::PlaneInteractionEvent( vtkObject * caller, unsigned long /*event*/ )
 {
     int whichPlane = GetPlaneIndex( caller );
-    if( whichPlane != -1 )
-    {
-        UpdateOtherPlanesPosition( whichPlane );
-    }
+    Q_ASSERT( whichPlane != -1 );
+    UpdateOtherPlanesPosition( whichPlane );
     emit Modified();
 }
 
@@ -499,23 +551,22 @@ void TripleCutPlaneObject::PlaneEndInteractionEvent( vtkObject * caller, unsigne
 
     // Find which plane generated the event
     int whichPlane = GetPlaneIndex( caller );
+    Q_ASSERT( whichPlane != -1 );
 
-    if( whichPlane != -1 )
+    this->UpdateOtherPlanesPosition( whichPlane );
+
+    if (this->GetManager()->GetCurrentView() == THREED_VIEW_TYPE)
+        emit EndPlaneMove(whichPlane);
+    else
     {
-        this->UpdateOtherPlanesPosition( whichPlane );
-
-        if (this->GetManager()->GetCurrentView() == THREED_VIEW_TYPE)
-            emit EndPlaneMove(whichPlane);
-        else
+        // if we use left mouse button, then only the "whichPlane" moves, if it is a right button, 2 other planes move
+        // at this point, we do not know which button was pressed, so we adjust all planes
+        for( int i = 0; i < 3; ++i )
         {
-            // if we use left mouse button, then only the "whichPlane" moves, if it is a right button, 2 other planes move
-            // at this point, we do not know which button was pressed, so we adjust all planes
-            for( int i = 0; i < 3; ++i )
-            {
-                emit EndPlaneMove(i);
-            }
+            emit EndPlaneMove(i);
         }
     }
+
     emit Modified();
 }
 
@@ -596,7 +647,7 @@ void TripleCutPlaneObject::CreatePlane( int viewType )
         this->Planes[viewType]->SetResliceInterpolate( m_resliceInterpolationType );
         this->Planes[viewType]->SetTextureInterpolate( m_displayInterpolationType );
 
-        this->PlaneInteractionSlotConnect->Connect( this->Planes[viewType], vtkCommand::StartInteractionEvent, this, SLOT(PlaneInteractionEvent( vtkObject*, unsigned long) ) );
+        this->PlaneInteractionSlotConnect->Connect( this->Planes[viewType], vtkCommand::StartInteractionEvent, this, SLOT(PlaneStartInteractionEvent( vtkObject*, unsigned long) ) );
         this->PlaneInteractionSlotConnect->Connect( this->Planes[viewType], vtkCommand::InteractionEvent, this, SLOT(PlaneInteractionEvent( vtkObject*, unsigned long) ) );
         this->PlaneInteractionSlotConnect->Connect( this->Planes[viewType], vtkCommand::PlaceWidgetEvent, this, SLOT(PlaneInteractionEvent( vtkObject*, unsigned long) ) );
         this->PlaneEndInteractionSlotConnect->Connect( this->Planes[viewType], vtkCommand::EndInteractionEvent, this, SLOT(PlaneEndInteractionEvent( vtkObject*, unsigned long) ) );

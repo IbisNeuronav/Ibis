@@ -20,8 +20,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QMessageBox>
 #include <QMainWindow>
 
-//Q_EXPORT_STATIC_PLUGIN2( LandmarkRegistrationObject, LandmarkRegistrationObjectPluginInterface );
-
 
 LandmarkRegistrationObjectPluginInterface::LandmarkRegistrationObjectPluginInterface()
 {
@@ -34,15 +32,14 @@ LandmarkRegistrationObjectPluginInterface::~LandmarkRegistrationObjectPluginInte
         m_landmarkRegistrationObject->Delete();
 }
 
-void LandmarkRegistrationObjectPluginInterface::CreateObject()
+SceneObject *LandmarkRegistrationObjectPluginInterface::CreateObject()
 {
-    SceneManager *manager = m_application->GetSceneManager();
+    SceneManager *manager = GetSceneManager();
     Q_ASSERT(manager);
     PointsObject *sourcePoints = PointsObject::New();
     sourcePoints->SetName( "RegistrationSourcePoints" );
     sourcePoints->SetListable( false );
     sourcePoints->SetCanChangeParent( false );
-    sourcePoints->SetEnabled( true );
     double color[3] = {0.0, 1.0, 0.0};
     sourcePoints->SetSelectedColor(color);
     PointsObject *targetPoints = PointsObject::New();
@@ -51,6 +48,8 @@ void LandmarkRegistrationObjectPluginInterface::CreateObject()
     targetPoints->SetCanChangeParent( true );
     double color1[3] = {1.0, 0.1, 0.1};
     targetPoints->SetSelectedColor(color1);
+    double color2[3] = {0.3, 0.3, 1.0};
+    targetPoints->SetDisabledColor(color2);
     m_landmarkRegistrationObject = LandmarkRegistrationObject::New();
     m_landmarkRegistrationObject->SetName( "Landmark Registration" );
     manager->AddObject( m_landmarkRegistrationObject );
@@ -61,4 +60,5 @@ void LandmarkRegistrationObjectPluginInterface::CreateObject()
     m_landmarkRegistrationObject->SetTargetPoints( targetPoints );
     sourcePoints->Delete();
     targetPoints->Delete();
+    return m_landmarkRegistrationObject;
 }

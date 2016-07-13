@@ -60,6 +60,11 @@ CameraCalibrationPluginInterface::~CameraCalibrationPluginInterface()
     m_calibrationGridObject->Delete();
 }
 
+QString CameraCalibrationPluginInterface::GetPluginDescription()
+{
+    return QString("<html><h1>Camera Calibration plugin</h1><p>Author: Simon Drouin</p><p>Description</p><p>This plugin is used to calibrate a tracked camera to produce an augmented reality image</p></html>");
+}
+
 bool CameraCalibrationPluginInterface::CanRun()
 {
     return true;
@@ -148,10 +153,10 @@ void CameraCalibrationPluginInterface::GetAllValidCamerasFromScene( QList<Camera
     QList<CameraObject*> allCams;
     GetSceneManager()->GetAllCameraObjects( allCams );
     int nbValidCams = 0;
-    bool needTrackableCamera = !m_application->IsViewerOnly();
+    bool needTrackableCamera = !GetApplication()->IsViewerOnly();
     for( int i = 0; i < allCams.size(); ++i )
     {
-        if( !needTrackableCamera || allCams[i]->IsCameraTrackable() )
+        if( !needTrackableCamera || allCams[i]->IsDrivenByHardware() )
             all.push_back( allCams[i] );
     }
 }
@@ -173,7 +178,7 @@ bool CameraCalibrationPluginInterface::HasValidCamera()
 
 CameraObject * CameraCalibrationPluginInterface::GetCurrentCameraObject()
 {
-    return CameraObject::SafeDownCast( m_application->GetSceneManager()->GetObjectByID( m_currentCameraObjectId ) );
+    return CameraObject::SafeDownCast( GetSceneManager()->GetObjectByID( m_currentCameraObjectId ) );
 }
 
 void CameraCalibrationPluginInterface::SetComputeCenter( bool c )
@@ -322,7 +327,7 @@ void CameraCalibrationPluginInterface::UpdateCameraViewsObjects()
                 calibMat->Delete();
                 newCam->AddFrame( m_cameraCalibrator->GetCameraImage( i ), m_cameraCalibrator->GetIntrinsicCameraToGridMatrix( i ) );
 
-                m_application->GetSceneManager()->AddObject( newCam, m_calibrationGridObject );
+                GetSceneManager()->AddObject( newCam, m_calibrationGridObject );
                 m_cameraViewsObjectIds.push_back( newCam->GetObjectID() );
                 newCam->Delete();
 
@@ -405,15 +410,15 @@ bool CameraCalibrationPluginInterface::IsShowingGrid()
 
 void CameraCalibrationPluginInterface::ValidateCurrentCamera()
 {
-    bool needTrackableCamera = !m_application->IsViewerOnly();
+    bool needTrackableCamera = !GetApplication()->IsViewerOnly();
 
     // if we have an id, check object is still valid
     int newCameraId = m_currentCameraObjectId;
     if( m_currentCameraObjectId != SceneObject::InvalidObjectId )
     {
-        SceneObject * obj = m_application->GetSceneManager()->GetObjectByID( m_currentCameraObjectId );
+        SceneObject * obj = GetSceneManager()->GetObjectByID( m_currentCameraObjectId );
         CameraObject * camObj = CameraObject::SafeDownCast( obj );
-        if( !camObj || ( needTrackableCamera && !camObj->IsCameraTrackable() ) )
+        if( !camObj || ( needTrackableCamera && !camObj->IsDrivenByHardware() ) )
             newCameraId = SceneObject::InvalidObjectId;
     }
 
@@ -421,10 +426,10 @@ void CameraCalibrationPluginInterface::ValidateCurrentCamera()
     if( newCameraId == SceneObject::InvalidObjectId )
     {
         QList< CameraObject* > cams;
-        m_application->GetSceneManager()->GetAllCameraObjects( cams );
+        GetSceneManager()->GetAllCameraObjects( cams );
         for( int i = 0; i < cams.size(); ++i )
         {
-            if( !needTrackableCamera || cams[i]->IsCameraTrackable() )
+            if( !needTrackableCamera || cams[i]->IsDrivenByHardware() )
             {
                 newCameraId = cams[i]->GetObjectID();
                 break;
@@ -525,7 +530,7 @@ void CameraCalibrationPluginInterface::ClearCameraViews()
     // Clear all camera views objects
     for( unsigned i = 0; i < m_cameraViewsObjectIds.size(); ++i )
     {
-        SceneObject * cam = m_application->GetSceneManager()->GetObjectByID( m_cameraViewsObjectIds[i] );
+        SceneObject * cam = GetSceneManager()->GetObjectByID( m_cameraViewsObjectIds[i] );
         if( cam )
             man->RemoveObject( cam );
     }
@@ -534,9 +539,9 @@ void CameraCalibrationPluginInterface::ClearCameraViews()
     // Clear all calibrated camera views objects
     for( unsigned i = 0; i < m_cameraCalibratedViewsObjectIds.size(); ++i )
     {
-        SceneObject * cam = m_application->GetSceneManager()->GetObjectByID( m_cameraCalibratedViewsObjectIds[i] );
+        SceneObject * cam = GetSceneManager()->GetObjectByID( m_cameraCalibratedViewsObjectIds[i] );
         if( cam )
-            m_application->GetSceneManager()->RemoveObject( cam );
+            GetSceneManager()->RemoveObject( cam );
     }
     m_cameraCalibratedViewsObjectIds.clear();
 }

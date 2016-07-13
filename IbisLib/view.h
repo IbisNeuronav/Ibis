@@ -29,8 +29,6 @@ class SceneObject;
 template< class T > class vtkObjectCallback;
 class vtkQtRenderWindow;
 
-enum VIEWTYPES {SAGITTAL_VIEW_TYPE, CORONAL_VIEW_TYPE, TRANSVERSE_VIEW_TYPE, THREED_VIEW_TYPE};
-
 #define CtrlModifier (unsigned(1))
 #define ShiftModifier (unsigned(2))
 #define AltModifier (unsigned(4))

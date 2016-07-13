@@ -14,9 +14,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <vtkSphereSource.h>
 #include <vtkActor.h>
 #include <vtkTransform.h>
-#include <vtkLinearTransform.h>
-#include <vtkPlane.h>
-#include <vtkCutter.h>
 #include <vtkRenderer.h>
 #include <vtkFollower.h>
 #include <vtkVectorText.h>
@@ -24,107 +21,214 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "vtkSmartPointer.h"
 
 #include "pointrepresentation.h"
+#include "pointsobject.h"
 #include "scenemanager.h"
-#include "triplecutplaneobject.h"
 #include "view.h"
-#include "vtkCylinderWithPlanesSource.h"
-#include "vtkMultiImagePlaneWidget.h"
+#include "vtkCircleWithCrossSource.h"
 
 ObjectSerializationMacro( PointRepresentation );
 
+PointRepresentation::PerViewElements::PerViewElements()
+{
+    pointRepresentationActor = 0;
+    labelActor = 0;
+}
+
+PointRepresentation::PerViewElements::~PerViewElements()
+{
+    if( pointRepresentationActor )
+        pointRepresentationActor->Delete();
+    if( labelActor )
+        labelActor->Delete();
+}
+
 PointRepresentation::PointRepresentation()
 {
-    m_sizeIn3D = 2.0;
-    m_sizeIn2D = 20.0;
     m_property = vtkProperty::New();
     m_property->SetColor(1.0,0.0,0.0);
     m_property->SetAmbient(1);
     m_property->SetLineWidth(1);
-    m_worldTransform = 0;
-    m_manager = 0;
     m_sphere = vtkSphereSource::New();
-    int i;
-    for (i = 0; i < 3; i++)
-    {
-        m_position[i] = 0.0;
-        m_cylinder[i] = vtkCylinderWithPlanesSource::New();
-        m_cutter[i] = vtkCutter::New();
-        m_cuttingPlane[i] = vtkPlane::New();
-    }
-    for (i = 0; i < 4; i++)
-        m_pointRepresentationActor[i] = vtkActor::New();
+    m_circle = vtkCircleWithCrossSource::New();
     m_pointIndex = -1;
+    m_active = true;
+
     //label
     m_label = vtkVectorText::New();
     m_label->SetText(" ");
-    m_labelActor = vtkFollower::New();
-    m_labelMapper = vtkPolyDataMapper::New();
-    m_labelMapper->SetInputConnection(m_label->GetOutputPort());
-    m_labelActor->SetMapper(m_labelMapper);
-    m_labelActor->SetScale( INITIAL_TAG_LABEL_SCALE, INITIAL_TAG_LABEL_SCALE, INITIAL_TAG_LABEL_SCALE );
-    m_labelActor->VisibilityOff();
-    m_representedInAllViews = false;
-    m_active = true;
-    m_pickable = true;
+    m_labelScale = INITIAL_TAG_LABEL_SCALE;
+    m_labelVisible = true;
+
+    m_invWorldRotTransform = vtkTransform::New();
+
+    m_posTransform = vtkTransform::New();
+
+    m_point2DTransform = vtkTransform::New();
+    m_point2DTransform->Concatenate( this->GetWorldTransform() );
+    m_point2DTransform->Concatenate( m_posTransform );
+    m_point2DTransform->Concatenate( m_invWorldRotTransform );
+
+    m_point3DTransform = vtkTransform::New();
+    m_point3DTransform->Concatenate( this->GetWorldTransform() );
+    m_point3DTransform->Concatenate( m_posTransform );
+
+    m_labelOffset = vtkTransform::New();
+
+    m_labelTransform = vtkTransform::New();
+    m_labelTransform->Concatenate( m_point2DTransform );
+    m_labelTransform->Concatenate( m_labelOffset );
 }
 
 PointRepresentation::~PointRepresentation()
 {
-    int i;
     m_property->Delete();
     m_sphere->Delete();
-    for (i = 0; i < 3; i++)
-    {
-        m_cylinder[i]->Delete();
-        m_cutter[i]->Delete();
-        m_cuttingPlane[i]->Delete();
-    }
-    for (i = 0; i < 3; i++)
-    {
-        if (m_manager)
-            m_manager->GetView(i)->GetOverlayRenderer()->RemoveActor(m_pointRepresentationActor[i]);
-        m_pointRepresentationActor[i]->Delete();
-    }
-    m_pointRepresentationActor[THREED_VIEW_TYPE]->Delete();
-    if (m_manager)
-    {
-        m_manager->GetView(THREED_VIEW_TYPE)->GetRenderer()->RemoveActor(m_pointRepresentationActor[THREED_VIEW_TYPE]);
-        m_manager->GetView(THREED_VIEW_TYPE)->GetRenderer()->RemoveActor(m_labelActor);
-    }
-    if(m_worldTransform)
-    {
-        m_worldTransform->UnRegister(this);
-    }
+    m_circle->Delete();
+
     m_label->Delete();
-    m_labelActor->Delete();
-    m_labelMapper->Delete();
+
+    m_point2DTransform->Delete();
+    m_point3DTransform->Delete();
+    m_invWorldRotTransform->Delete();
+    m_posTransform->Delete();
+    m_labelOffset->Delete();
+    m_labelTransform->Delete();
 }
 
-void PointRepresentation::Serialize( Serializer * ser )
+void PointRepresentation::Hide()
 {
-    QString label;
-    int active;
-    if(!ser->IsReader())
+    PerViewContainer::iterator it = m_perViewContainer.begin();
+    while( it != m_perViewContainer.end() )
     {
-        label = m_label->GetText();
-        active = m_active? 1 : 0;
-    }
-    ::Serialize( ser, "PointName", label );
-    ::Serialize( ser, "PointCoordinates", m_position, 3 );
-    ::Serialize( ser, "Active", active );
-    if (ser->IsReader())
-    {
-        this->SetLabel(label.toStdString());
-        this->SetPointActive(active == 1);
-        this->SetPosition(m_position);
+        PerViewElements * perView = (*it).second;
+        perView->pointRepresentationActor->VisibilityOff();
+        if( perView->labelActor )
+            perView->labelActor->VisibilityOff();
+         ++it;
     }
 }
 
-void PointRepresentation::SetSceneManager( SceneManager *manager )
+void PointRepresentation::Show()
 {
-    m_manager = manager;
-    if( m_manager && m_manager->GetReferenceDataObject() )
-        m_representedInAllViews = true;
+    PerViewContainer::iterator it = m_perViewContainer.begin();
+    while( it != m_perViewContainer.end() )
+    {
+        PerViewElements * perView = (*it).second;
+        perView->pointRepresentationActor->VisibilityOn();
+        if( perView->labelActor )
+            perView->labelActor->SetVisibility( m_labelVisible ? 1 : 0 );
+         ++it;
+    }
+}
+
+bool PointRepresentation::Setup( View * view )
+{
+    PointsObject *parent = PointsObject::SafeDownCast( this->GetParent() );
+
+    double size3D =  parent->Get3DRadius();
+    double size2D = parent->Get2DRadius();
+    bool visible = !parent->IsHidden();
+
+    vtkSmartPointer<vtkPolyDataMapper> mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+    vtkActor *pointActor = 0;
+    vtkFollower * labelActor = 0;
+
+    // 3D view (THREED_VIEW_TYPE)
+    if( view->GetType() == THREED_VIEW_TYPE )
+    {
+        pointActor = vtkActor::New();
+        m_sphere->SetRadius( size3D );
+        mapper->SetInputConnection( m_sphere->GetOutputPort() );
+        pointActor->SetUserTransform( m_point3DTransform );
+        view->GetRenderer()->AddActor( pointActor );
+
+        labelActor = vtkFollower::New();
+        vtkSmartPointer<vtkPolyDataMapper> labelMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+        labelMapper->SetInputConnection( m_label->GetOutputPort() );
+        labelActor->SetMapper( labelMapper );
+        labelActor->SetScale( m_labelScale, m_labelScale, m_labelScale );
+        labelActor->SetCamera( view->GetRenderer()->GetActiveCamera() );
+        labelActor->SetUserTransform( m_labelTransform );
+        labelActor->SetProperty(m_property);
+        labelActor->SetVisibility( visible && m_labelVisible ? 1 : 0 );
+        view->GetRenderer()->AddActor(labelActor);
+     }
+    else //2D views
+    {
+        vtkFollower * f = vtkFollower::New();
+        pointActor = f;
+        m_circle->SetRadius( size2D );
+        m_circle->SetResolution( 3 );
+        mapper->SetInputConnection( m_circle->GetOutputPort() );
+        f->SetCamera( view->GetRenderer()->GetActiveCamera() );
+        f->SetUserTransform( m_point2DTransform );
+        view->GetOverlayRenderer()->AddActor(pointActor);
+    }
+    pointActor->SetProperty(m_property);
+    pointActor->SetPickable( m_active ? 1 : 0 );
+    pointActor->DragableOn();
+    if( visible )
+        pointActor->VisibilityOn();
+    else
+        pointActor->VisibilityOff();
+    pointActor->SetMapper( mapper );
+    PerViewElements * perView = new PerViewElements;
+    perView->pointRepresentationActor = pointActor;
+    perView->labelActor = labelActor;
+    m_perViewContainer[view] = perView;
+    connect( this, SIGNAL(Modified()), view, SLOT(NotifyNeedRender()) );
+    return true;
+}
+
+bool PointRepresentation::Release( View * view )
+{
+    disconnect( this, SIGNAL(Modified()), view, SLOT(NotifyNeedRender()) );
+    PerViewContainer::iterator it = m_perViewContainer.find( view );
+    if( it != m_perViewContainer.end() )
+    {
+        PerViewElements * perView = (*it).second;
+        if( view->GetType() == THREED_VIEW_TYPE )
+        {
+            view->GetRenderer()->RemoveActor( perView->pointRepresentationActor );
+            view->GetRenderer()->RemoveActor( perView->labelActor );
+        }
+        else
+            view->GetOverlayRenderer()->RemoveActor( perView->pointRepresentationActor );
+        delete perView;
+        this->m_perViewContainer.erase( it );
+    }
+    return true;
+}
+
+void PointRepresentation::UpdateVisibility()
+{
+    if( IsHidden() )
+        return;
+
+    // Compute point position in world space
+    vtkTransform * wt = this->GetWorldTransform();
+    PointsObject * parent = PointsObject::SafeDownCast( this->GetParent() );
+    double local[3];
+    parent->GetPointCoordinates( m_pointIndex, local );
+    double world[3];
+    wt->TransformPoint( local, world );
+
+    // update its visibility in each of the 2d views
+    PerViewContainer::iterator it = m_perViewContainer.begin( );
+    while( it != m_perViewContainer.end() )
+    {
+        View * view = (*it).first;
+        if( view->GetType() != THREED_VIEW_TYPE )
+        {
+            bool isInPlane = this->GetManager()->IsInPlane( (VIEWTYPES)view->GetType(), world );
+            PerViewElements * perView = (*it).second;
+            if( isInPlane )
+                perView->pointRepresentationActor->VisibilityOn();
+            else
+                perView->pointRepresentationActor->VisibilityOff();
+        }
+        ++it;
+    }
 }
 
 void PointRepresentation::SetPropertyColor(double color[3])
@@ -137,132 +241,6 @@ void PointRepresentation::SetOpacity(double opacity)
     m_property->SetOpacity(opacity);
 }
 
-void PointRepresentation::CreatePointRepresentation(double size2D, double size3D)
-{
-    int i;
-    m_sizeIn3D = size3D;
-    m_sizeIn2D = size2D;
-    vtkPolyDataMapper *mapper[4];
-    Q_ASSERT_X(m_manager,"PointRepresentation::CreatePointRepresentation()","SceneManager not set.");
-    Q_ASSERT_X(m_worldTransform,"PointRepresentation::CreatePointRepresentation()","Missing world transform.");
-
-    for (i =0; i < 4; i++)
-    {
-        mapper[i] = vtkPolyDataMapper::New();
-        m_pointRepresentationActor[i]->SetProperty(m_property);
-        m_pointRepresentationActor[i]->PickableOff();
-        m_pointRepresentationActor[i]->SetOrientation(0,0,0);
-        m_pointRepresentationActor[i]->SetOrigin(0,0,0);
-        m_pointRepresentationActor[i]->SetPosition(0,0,0);
-        m_pointRepresentationActor[i]->DragableOn();
-        m_pointRepresentationActor[i]->VisibilityOn();
-    }
-    // 3D view (THREED_VIEW_TYPE)
-    m_sphere->SetCenter(0,0,0);
-    m_sphere->SetRadius(m_sizeIn3D);
-    mapper[THREED_VIEW_TYPE]->SetInputConnection(m_sphere->GetOutputPort());
-
-    //2D views
-    // World transform may have multiple concatenations
-    // For some reason when we try to GetInverse() of the WorldTransform with 2 or more concatenations,
-    // we get wrong invewrse e.g world is concatenation of: identity, t1, t2 - we get inverse of t1
-    // while if we go for the inverse matrix, it is correct
-    vtkSmartPointer<vtkTransform> inversedWorldTransform = vtkSmartPointer<vtkTransform>::New();
-    vtkMatrix4x4 *inverseMat = vtkMatrix4x4::New();
-    m_worldTransform->GetInverse(inverseMat);
-    inversedWorldTransform->SetMatrix(inverseMat);
-    inverseMat->Delete();
-    for (i = 0; i < 3; i++)
-    {
-        m_cylinder[i]->SetRadius(m_sizeIn2D);
-        m_cylinder[i]->SetHeight(2.0);
-        connect(m_manager->GetMainImagePlanes(), SIGNAL(PlaneMoved(int)), this, SLOT(UpdateCuttingPlane(int)));
-#ifdef USE_NEW_IMAGE_PLANES
-        m_manager->GetMainImagePlanes()->GetPlane( i )->GetPlaneParams( m_cuttingPlane[i] );
-#else
-        TripleCutPlaneObject * mainPlanes = m_manager->GetMainImagePlanes();
-        vtkMultiImagePlaneWidget *plane = mainPlanes->GetPlane(i);
-        Q_ASSERT_X(plane,"PointRepresentation::CreatePointRepresentation()","Missing cut plane.");
-        m_cuttingPlane[i]->SetNormal(plane->GetNormal());
-        m_cuttingPlane[i]->SetOrigin(plane->GetCenter());
-#endif
-        m_cuttingPlane[i]->SetTransform(inversedWorldTransform);
-        m_cutter[i]->SetCutFunction(m_cuttingPlane[i]);
-        m_cutter[i]->SetInputData(m_cylinder[i]->GetOutput());
-        m_cutter[i]->Update();
-        mapper[i]->SetInputConnection(m_cutter[i]->GetOutputPort());
-        if (!m_representedInAllViews)
-            m_pointRepresentationActor[i]->VisibilityOff();
-    }
-    m_cylinder[SAGITTAL_VIEW_TYPE]->SetOrientation(2);
-    m_cylinder[TRANSVERSE_VIEW_TYPE]->SetOrientation(1);
-
-    for (i = 0; i < 4; i++)
-    {
-        m_pointRepresentationActor[i]->SetMapper(mapper[i]);
-        mapper[i]->Delete();
-        if (m_manager)
-        {
-            View *view = m_manager->GetView(i);
-            if (view->GetType() == THREED_VIEW_TYPE)
-            {
-                view->GetRenderer()->AddActor(m_pointRepresentationActor[i]);
-                m_labelActor->SetCamera( view->GetRenderer()->GetActiveCamera() );
-                view->GetRenderer()->AddActor(m_labelActor);
-                this->ShowLabel(true);
-            }
-            else
-                view->GetOverlayRenderer()->AddActor(m_pointRepresentationActor[i]);
-        }
-    }
-    m_pointRepresentationActor[THREED_VIEW_TYPE]->SetUserTransform(m_worldTransform);
-}
-
-void PointRepresentation::SetWorldTransform(vtkTransform *tr)
-{
-    if (m_worldTransform != tr)
-    {
-        if(m_worldTransform)
-        {
-            m_worldTransform->UnRegister(this);
-        }
-        m_worldTransform = tr;
-        if (m_worldTransform)
-        {
-            m_worldTransform->Register(this);
-            if (m_pointRepresentationActor[THREED_VIEW_TYPE])
-                m_pointRepresentationActor[THREED_VIEW_TYPE]->SetUserTransform(m_worldTransform);
-            for (int i = 0; i < 3; i++)
-            {
-                if (m_cylinder[i])
-                    m_cylinder[i]->SetWorldTransform(m_worldTransform);
-            }
-        }
-    }
-}
-
-
-void PointRepresentation::UpdateCuttingPlane(int index)
-{
-    Q_ASSERT( m_manager );
-
-    vtkMatrix4x4 * inverseMat = vtkMatrix4x4::New();
-    m_worldTransform->GetInverse(inverseMat);
-    vtkSmartPointer<vtkTransform> inversedWorldTransform = vtkSmartPointer<vtkTransform>::New();
-    inversedWorldTransform->SetMatrix(inverseMat);
-    inverseMat->Delete();
-#ifdef USE_NEW_IMAGE_PLANES
-    m_manager->GetMainImagePlanes()->GetPlane( index )->GetPlaneParams( m_cuttingPlane[index] );
-#else
-    TripleCutPlaneObject * mainPlanes = m_manager->GetMainImagePlanes();
-    vtkMultiImagePlaneWidget *plane = mainPlanes->GetPlane(index);
-    m_cuttingPlane[index]->SetNormal(plane->GetNormal());
-    m_cuttingPlane[index]->SetOrigin(plane->GetCenter());
-#endif
-    m_cuttingPlane[index]->SetTransform(inversedWorldTransform);
-    m_cutter[index]->Update();
-}
-
 void PointRepresentation::SetPosition(double p[3])
 {
     this->SetPosition(p[0], p[1], p[2]);
@@ -270,79 +248,77 @@ void PointRepresentation::SetPosition(double p[3])
 
 void PointRepresentation::SetPosition(double x, double y, double z)
 {
-    m_sphere->SetCenter(x, y, z);
-    for (int i = 0; i < 3; i++)
-    {
-        m_cylinder[i]->SetPosition(x, y, z);
-    }
-    m_position[0] = x;
-    m_position[1] = y;
-    m_position[2] = z;
-    this->UpdateLabelPosition();
+    m_posTransform->Identity();
+    m_posTransform->Translate( x, y, z );
+
+    // simtodo : why is this needed? it shouldn't since transform pipeline is self-updating
+    UpdateAllTransforms();
+}
+
+void PointRepresentation::GetPosition(double p[3])
+{
+    vtkMatrix4x4 * m = m_posTransform->GetMatrix();
+    p[0] = m->GetElement( 0, 3 );
+    p[1] = m->GetElement( 1, 3 );
+    p[2] = m->GetElement( 2, 3 );
 }
 
 void PointRepresentation::SetPointSizeIn3D(double r)
 {
     m_sphere->SetRadius(r);
-    m_sizeIn3D = r;
 }
 
 void PointRepresentation::SetPointSizeIn2D(double r)
 {
-    for (int i = 0; i < 3; i++)
-        m_cylinder[i]->SetRadius(r);
-    m_sizeIn2D = r;
+    m_circle->SetRadius( r );
 }
 
-void PointRepresentation::SetPickable(bool yes)
+void PointRepresentation::SetActive(bool yes)
 {
-    for (int i = 0; i < 4; i++)
+    m_active = yes;
+    PerViewContainer::iterator it = m_perViewContainer.begin();
+    while( it != m_perViewContainer.end() )
     {
-        if (yes)
-            m_pointRepresentationActor[i]->PickableOn();
+        PerViewElements *perView = (*it).second;
+        if( yes )
+            perView->pointRepresentationActor->PickableOn( );
         else
-            m_pointRepresentationActor[i]->PickableOff();
+            perView->pointRepresentationActor->PickableOff( );
+        ++it;
     }
-    m_pickable = yes;
 }
 
-vtkActor *PointRepresentation::GetPointActor(int index)
+bool PointRepresentation::HasActor( vtkActor * actor )
 {
-    if (index >= 0 && index < 4)
-        return m_pointRepresentationActor[index];
-    return 0;
+    PerViewContainer::iterator it = m_perViewContainer.begin();
+    while( it != m_perViewContainer.end() )
+    {
+        PerViewElements * perView = (*it).second;
+        if( perView->pointRepresentationActor == actor )
+            return true;
+        ++it;
+    }
+    return false;
 }
 
 void PointRepresentation::SetLabelScale(double s)
 {
-    if (s <= 0)
-        s = 1.0;
-    m_labelActor->SetScale( s, s, s );
-}
-
-double *PointRepresentation::GetLabelScale()
-{
-    return m_labelActor->GetScale();
-}
-
-void PointRepresentation::UpdateLabelPosition()
-{
-    double pos[3];
-    m_sphere->GetCenter(pos);
-    double newPos[3];
-    for (int i = 0; i < 3; i++)
-        newPos[i] = pos[i];
-    if (m_worldTransform)
-        m_worldTransform->TransformPoint(pos, newPos);
-    m_labelActor->SetPosition(newPos[0]+m_sizeIn3D+2, newPos[1]+m_sizeIn3D+2, newPos[2]+m_sizeIn3D+2);
+    m_labelScale = s;
+    if( m_labelScale <= 0 )
+        m_labelScale = 1.0;
+    PerViewContainer::iterator it = m_perViewContainer.begin();
+    while( it != m_perViewContainer.end() )
+    {
+        PerViewElements *perView = (*it).second;
+        if( perView->labelActor )
+            perView->labelActor->SetScale( m_labelScale, m_labelScale, m_labelScale );
+        ++it;
+    }
 }
 
 void PointRepresentation::SetLabel( const std::string & text )
 {
     m_label->SetText(text.c_str());
-    m_labelMapper->SetInputConnection( m_label->GetOutputPort() );
-    m_labelActor->SetProperty(m_property);
-    this->UpdateLabelPosition();
 }
 
 const char* PointRepresentation::GetLabel()
@@ -350,82 +326,41 @@ const char* PointRepresentation::GetLabel()
     return m_label->GetText();
 }
 
-void PointRepresentation::SetNumericLabel(int n)
-{
-    char num[8];
-    sprintf(num, "%i", n);
-    this->SetLabel(num);
-}
-
 void PointRepresentation::ShowLabel( bool show)
 {
-    if (show)
+    m_labelVisible = show;
+    bool showNow = m_labelVisible && !this->IsHidden();
+    PerViewContainer::iterator it = m_perViewContainer.begin();
+    while( it != m_perViewContainer.end() )
     {
-        m_labelActor->VisibilityOn();
-    }
-    else
-    {
-        this->m_labelActor->VisibilityOff();
-    }
-}
-
-void PointRepresentation::Enable(bool show)
-{
-    if (m_manager)
-    {
-        this->Update();
-        for (int i = 0; i < 3; i++)
-        {
-            if (m_pointRepresentationActor[i])
-            {
-                if (show)
-                    m_manager->GetView(i)->GetOverlayRenderer()->AddActor(m_pointRepresentationActor[i]);
-                else
-                    m_manager->GetView(i)->GetOverlayRenderer()->RemoveActor(m_pointRepresentationActor[i]);
-            }
-        }
-        if (show)
-        {
-            m_manager->GetView(THREED_VIEW_TYPE)->GetRenderer()->AddActor(m_pointRepresentationActor[THREED_VIEW_TYPE]);
-            m_manager->GetView(THREED_VIEW_TYPE)->GetRenderer()->AddActor(m_labelActor);
-        }
-        else
-        {
-            m_manager->GetView(THREED_VIEW_TYPE)->GetRenderer()->RemoveActor(m_pointRepresentationActor[THREED_VIEW_TYPE]);
-            m_manager->GetView(THREED_VIEW_TYPE)->GetRenderer()->RemoveActor(m_labelActor);
-        }
+        PerViewElements *perView = (*it).second;
+        if( perView->labelActor )
+            perView->labelActor->SetVisibility( showNow ? 1 : 0 );
+        ++it;
     }
 }
 
-void PointRepresentation::SetCylindersTransform(vtkMatrix4x4 *mat)
+void PointRepresentation::InternalWorldTransformChanged()
 {
-    for (int i = 0; i < 3; i++)
-        m_cylinder[i]->SetRotation(mat);
+    vtkMatrix4x4 * invRot = vtkMatrix4x4::New();
+    invRot->DeepCopy( this->GetWorldTransform()->GetMatrix() );
+    invRot->SetElement( 0, 3, 0.0 );
+    invRot->SetElement( 1, 3, 0.0 );
+    invRot->SetElement( 2, 3, 0.0 );
+    invRot->Invert();
+    m_invWorldRotTransform->SetMatrix( invRot );
+    invRot->Delete();
+
+    // simtodo : why is this needed? it shouldn't since transform pipeline is self-updating
+    UpdateAllTransforms();
 }
 
-void PointRepresentation::SetCuttingPlaneTransform(vtkTransform *tr)
+void PointRepresentation::UpdateAllTransforms()
 {
-    for (int i = 0; i < 3; i++)
-        m_cuttingPlane[i]->SetTransform(tr->GetInverse());
-}
-
-void PointRepresentation::ShallowCopy(PointRepresentation *source)
-{
-    if (this == source)
-        return;
-    source->GetPosition(m_position);
-    m_pointIndex = source->GetPointIndex();
-    m_active = source->GetPointActive();
-    m_pickable = source->GetPickable();
-    this->SetLabel(source->GetLabel());
-    double *scale = source->GetLabelScale();
-    this->SetLabelScale(*scale);
-}
-
-void PointRepresentation::Update()
-{
-    m_sphere->Update();
-    m_label->Update();
-    for (int i = 0; i < 3; i++)
-        m_cylinder[i]->Update();
+    m_invWorldRotTransform->Update();
+    m_posTransform->Update();
+    m_labelOffset->Update();
+    m_point2DTransform->Update();
+    m_point3DTransform->Update();
+    m_labelTransform->Update();
 }

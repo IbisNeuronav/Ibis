@@ -144,6 +144,7 @@ void GPU_VolumeReconstructionWidget::slot_finished()
     //reconstructedImage->SetLocalTransform( selectedUSAcquisitionObject->GetLocalTransform() );
 
     sm->AddObject(reconstructedImage, selectedUSAcquisitionObject->GetParent()->GetParent() );
+    sm->SetCurrentObject( reconstructedImage );
 
 #ifdef DEBUG
     std::cerr << "Done..." << std::endl;

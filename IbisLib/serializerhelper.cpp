@@ -13,6 +13,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "vtkGenericParam.h"
 #include "vtkColorTransferFunction.h"
 #include "vtkPiecewiseFunction.h"
+#include "vtkMatrix4x4.h"
 #include "SVL.h"
 
 bool Serialize( Serializer * serial, const char * attrName, vtkGenericParamValues & value )
@@ -86,4 +87,10 @@ bool Serialize( Serializer * serial, const char * attrName, vtkPiecewiseFunction
 bool Serialize( Serializer * serial, const char * attrName, Vec3 & v )
 {
     serial->Serialize( attrName, v.Ref(), 3 );
+}
+
+bool Serialize( Serializer * serial, const char * attrName, vtkMatrix4x4 * mat )
+{
+    double * elem = (double*)mat->Element;
+    return Serialize( serial, attrName, elem, 16 );
 }

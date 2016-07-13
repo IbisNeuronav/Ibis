@@ -222,8 +222,12 @@ void ObjectTreeWidget::contextMenuEvent( QContextMenuEvent * event )
                 contextMenu.addAction( tr("Delete"), this, SLOT(DeleteSelectedObject()) );
             if( currentObj->IsHidable() && currentObj->GetNumberOfChildren() > 0 )
                 contextMenu.addAction( tr("Hide/Show with Children"), this, SLOT(HideWithChildren()) );
-            if( m_sceneManager->CanBeReference( currentObj ) && currentObj != m_sceneManager->GetReferenceDataObject())
-                contextMenu.addAction( tr("Set as Reference"), this, SLOT(MarkAsReferenceObject()) );
+            if( m_sceneManager->CanBeReference( currentObj ) && currentObj != m_sceneManager->GetReferenceDataObject() )
+            {
+                    contextMenu.addAction( tr("Set as Reference"), this, SLOT(MarkAsReferenceObject()) );
+            }
+            if( currentObj->IsA( "ImageObject") )
+                contextMenu.addAction( tr("Show MINC Info"), this, SLOT(ShowMincInfo()) );
             contextMenu.exec( event->globalPos() );
         }
     }
@@ -261,6 +265,7 @@ void ObjectTreeWidget::AddTransformButtonClicked()
         SceneObject * newChild = SceneObject::New();
         newChild->SetName( "Transform" );
         m_sceneManager->AddObject( newChild, obj );
+        m_sceneManager->SetCurrentObject( newChild );
     }
 }
 
@@ -272,6 +277,7 @@ void ObjectTreeWidget::AddTransformAllChildrenButtonClicked()
         SceneObject * newChild = SceneObject::New();
         newChild->SetName( "Transform" );
         m_sceneManager->AddObject( newChild, obj );
+        m_sceneManager->SetCurrentObject( newChild );
 
         // attach all prev children to the new transform
         while( obj->GetNumberOfChildren() > 1 )
@@ -290,6 +296,7 @@ void ObjectTreeWidget::AddParentTransformButtonClicked()
         SceneObject * newTransform = SceneObject::New();
         newTransform->SetName( "Transform" );
         m_sceneManager->AddObject( newTransform, parent );
+        m_sceneManager->SetCurrentObject( newTransform );
         m_sceneManager->ChangeParent( obj, newTransform, 0 );
     }
 }
@@ -299,7 +306,13 @@ void ObjectTreeWidget::MarkAsReferenceObject( )
     SceneObject * currentObj = m_sceneManager->GetCurrentObject();
     if( m_sceneManager->CanBeReference( currentObj ) )
     {
-        ImageObject * imObj = ImageObject::SafeDownCast( currentObj );
-        m_sceneManager->SetReferenceDataObject( imObj );
+        m_sceneManager->SetReferenceDataObject( currentObj );
     }
+}
+
+void ObjectTreeWidget::ShowMincInfo( )
+{
+    ImageObject *img = ImageObject::SafeDownCast( m_sceneManager->GetCurrentObject() );
+    if( img )
+        img->ShowMincInfo();
 }

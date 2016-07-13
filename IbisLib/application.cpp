@@ -22,12 +22,13 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "cameraobject.h"
 #include "pointerobject.h"
 #include "polydataobject.h"
+#include "pointsobject.h"
 #include "ignsconfig.h"
-#include "sceneinfo.h"
+#include "ibisplugin.h"
 #include "objectplugininterface.h"
 #include "toolplugininterface.h"
+#include "globalobjectplugininterface.h"
 #include "triplecutplaneobject.h"
-#include "volumerenderingobject.h"
 #include "filereader.h"
 #include "imageobject.h"
 #include "lookuptablemanager.h"
@@ -42,7 +43,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QMessageBox>
 #include <QPushButton>
 #include <QApplication>
-
 
 Application * Application::m_uniqueInstance = NULL;
 const QString Application::m_appName("ibis");
@@ -63,7 +63,6 @@ void ApplicationSettings::LoadSettings( QSettings & settings )
     MainWindowSize = settings.value( "MainWindow_size", mainWindowRect.size() ).toSize();
     MainWindowLeftPanelSize = settings.value( "MainWindowLeftPanelSize", 150 ).toInt();
     MainWindowRightPanelSize = settings.value( "MainWindowRightPanelSize", 150 ).toInt();
-    LastVisitedDirectory = settings.value( "LastVisitedDirectory", QDir::homePath() ).toString();
     LastConfigFile = settings.value( "LastConfigFile", QString("") ).toString();
     QString workDir(QDir::homePath());
     workDir.append(IGNS_WORKING_DIRECTORY);
@@ -102,7 +101,6 @@ void ApplicationSettings::SaveSettings( QSettings & settings )
     settings.setValue( "MainWindow_size", MainWindowSize );
     settings.setValue( "MainWindowLeftPanelSize", MainWindowLeftPanelSize );
     settings.setValue( "MainWindowRightPanelSize", MainWindowRightPanelSize );
-    settings.setValue( "LastVisitedDirectory", LastVisitedDirectory );
     settings.setValue( "LastConfigFile", LastConfigFile );
     settings.setValue( "WorkingDirectory", WorkingDirectory );
 
@@ -125,21 +123,29 @@ void ApplicationSettings::SaveSettings( QSettings & settings )
     settings.setValue( "ShowZPlane", ShowZPlane );
     settings.setValue( "TripleCutPlaneResliceInterpolationType", TripleCutPlaneResliceInterpolationType );
     settings.setValue( "TripleCutPlaneDisplayInterpolationType", TripleCutPlaneDisplayInterpolationType );
-    settings.setValue( "VolumeRendererEnabled", VolumeRendererEnabled );
     settings.setValue( "ShowMINCConversionWarning", ShowMINCConversionWarning );
     settings.setValue( "UpdateFrequency", UpdateFrequency );
     settings.setValue( "NumberOfImageProcessingThreads", NumberOfImageProcessingThreads );
 }
 
-Application::Application( bool viewerOnly )
+Application::Application( )
 {
     m_mainWindow = 0;
     m_quadView = 0;
     m_sceneManager = 0;
-    m_viewerOnly = viewerOnly;
+    m_viewerOnly = false;
     m_fileReader = 0;
     m_fileOpenProgressDialog = 0;
     m_progressDialogUpdateTimer = 0;
+    m_sceneManager = 0;
+    m_updateManager = 0;
+    m_lookupTableManager = 0;
+    m_hardwareModule = 0;
+}
+
+void Application::Init( bool viewerOnly )
+{
+    m_viewerOnly = viewerOnly;
 
     // Load application settings
     QSettings settings( m_appOrganisation, m_appName );
@@ -148,7 +154,7 @@ Application::Application( bool viewerOnly )
     // Create the object that will manage the 3D scene in the visualizer
     // and add axes at its origin
     m_sceneManager = SceneManager::New();
-    m_sceneManager->SetSceneDirectory(m_settings.WorkingDirectory);
+//    m_sceneManager->SetSceneDirectory(m_settings.WorkingDirectory);
     double bgColor[3];
     m_settings.ViewBackgroundColor.getRgbF( &bgColor[0], &bgColor[1], &bgColor[2] );
     m_sceneManager->SetViewBackgroundColor( bgColor );
@@ -170,10 +176,6 @@ Application::Application( bool viewerOnly )
     m_sceneManager->GetMainImagePlanes()->SetDisplayInterpolationType( m_settings.TripleCutPlaneDisplayInterpolationType );
     m_sceneManager->GetMainImagePlanes()->SetResliceInterpolationType( m_settings.TripleCutPlaneResliceInterpolationType );
 
-    m_sceneManager->GetMainVolumeRenderer()->SetHidden( !m_settings.VolumeRendererEnabled );
-
-    SceneInfo *sceneinfo = m_sceneManager->GetSceneInfo();
-    sceneinfo->SetApplicationVersion( this->GetFullVersionString() );
     m_sceneManager->GetAxesObject()->SetHidden( !m_settings.ShowAxes );
 
     m_updateManager = UpdateManager::New();
@@ -184,7 +186,8 @@ Application::Application( bool viewerOnly )
     m_hardwareModule = 0;
     foreach( QObject * plugin, QPluginLoader::staticInstances() )
     {
-        HardwareModule * mod = qobject_cast< HardwareModule* >( plugin );
+        IbisPlugin * p = qobject_cast< IbisPlugin* >( plugin );
+        HardwareModule * mod = HardwareModule::SafeDownCast( p );
         if( mod )
         {
             m_hardwareModule = mod;
@@ -192,7 +195,6 @@ Application::Application( bool viewerOnly )
         }
     }
 }
-
 
 Application::~Application()
 {
@@ -212,9 +214,6 @@ Application::~Application()
     m_settings.ShowZPlane = m_sceneManager->GetMainImagePlanes()->GetViewPlane( 2 );
     m_settings.TripleCutPlaneDisplayInterpolationType = m_sceneManager->GetMainImagePlanes()->GetDisplayInterpolationType();
     m_settings.TripleCutPlaneResliceInterpolationType = m_sceneManager->GetMainImagePlanes()->GetResliceInterpolationType();
-    m_settings.VolumeRendererEnabled = !(m_sceneManager->GetMainVolumeRenderer()->IsHidden());
-    m_sceneManager->GetMainVolumeRenderer()->SaveCustomShaderContribs();
-    m_sceneManager->GetMainVolumeRenderer()->SaveCustomRayInitShaders();
 
     if( !m_viewerOnly )
     {
@@ -236,15 +235,16 @@ Application::~Application()
     // Save settings
     QSettings settings( m_appOrganisation, m_appName );
     m_settings.SaveSettings( settings );
+
+    // Save plugins settings
     settings.beginGroup("Plugins");
-    foreach( QObject * plugin, QPluginLoader::staticInstances() )
+    QList<IbisPlugin*> allPlugins;
+    this->GetAllPlugins( allPlugins );
+    for( int i = 0; i < allPlugins.size(); ++i )
     {
-        ToolPluginInterface * toolModule = qobject_cast< ToolPluginInterface* >( plugin );
-        if( toolModule )
-            toolModule->BaseSaveSettings( settings );
+        allPlugins[i]->BaseSaveSettings( settings );
     }
     settings.endGroup();
-
 }
 
 void Application::CreateInstance( bool viewerOnly )
@@ -252,7 +252,8 @@ void Application::CreateInstance( bool viewerOnly )
     // Make sure the application hasn't been created yet
     Q_ASSERT( !m_uniqueInstance );
 
-    m_uniqueInstance = new Application( viewerOnly );
+    m_uniqueInstance = new Application;
+    m_uniqueInstance->Init( viewerOnly );
 }
 
 void Application::DeleteInstance()
@@ -349,6 +350,9 @@ void Application::OpenFiles( OpenFileParams * params, bool addToScene )
     if( params->filesParams.size() == 0 )
         return;
 
+    // Create Reader that reads files in another thread
+    m_fileReader = new FileReader;
+    m_fileReader->SetParams( params );
     bool minc1found = false;
     for( int i = 0; i < params->filesParams.size(); ++i )
     {
@@ -361,31 +365,16 @@ void Application::OpenFiles( OpenFileParams * params, bool addToScene )
             QMessageBox::critical( 0, "Error", message, 1, 0 );
             return;
         }
-        FILE *fp = fopen( cur.fileName.toUtf8().data(), "rb" );
-        if( fp )
+        if( m_fileReader->IsMINC1( cur.fileName.toUtf8().data() ) )
         {
-            char first4[4];
-            size_t count = fread( first4, 4, 1, fp );
-            fclose( fp );
-
-            if( count == 1 &&
-                first4[0] == 'C' &&
-                first4[1] == 'D' &&
-                first4[2] == 'F' &&
-                first4[3] == '\001' )
-            {
-                cur.isMINC1 = true;
-                minc1found = true;
-            }
+            minc1found = true;
+            cur.isMINC1 = true;
         }
     }
 
     // See if it is the first batch of objects loaded/created
     int initialNumberOfUserObjects = GetSceneManager()->GetNumberOfUserObjects();
 
-    // Create Reader that reads files in another thread
-    m_fileReader = new FileReader;
-    m_fileReader->SetParams( params );
     if( minc1found )
     {
         if( m_fileReader->FindMincConverter() )
@@ -447,9 +436,16 @@ void Application::OpenFiles( OpenFileParams * params, bool addToScene )
                 if( !parent && !m_viewerOnly )
                     parent = Application::GetSceneManager()->GetSceneRoot();
                 if( cur.loadedObject )
+                {
                     Application::GetSceneManager()->AddObject( cur.loadedObject, parent );
+                    if( !cur.secondaryObject )
+                        Application::GetSceneManager()->SetCurrentObject( cur.loadedObject );
+                }
                 if( cur.secondaryObject )
+                {
                     Application::GetSceneManager()->AddObject( cur.secondaryObject, parent );
+                    Application::GetSceneManager()->SetCurrentObject( cur.loadedObject );
+                }
             }
 
             if( initialNumberOfUserObjects == 0 )
@@ -462,7 +458,7 @@ void Application::OpenFiles( OpenFileParams * params, bool addToScene )
         {
             QFileInfo info( params->filesParams[0].fileName );
             QString newDirVisited = info.dir().absolutePath();
-            Application::GetInstance().GetSettings()->LastVisitedDirectory = newDirVisited;
+            Application::GetInstance().GetSettings()->WorkingDirectory = newDirVisited;
         }
     }
 
@@ -472,6 +468,41 @@ void Application::OpenFiles( OpenFileParams * params, bool addToScene )
     m_fileReader = 0;
     delete m_progressDialogUpdateTimer;
     m_progressDialogUpdateTimer = 0;
+}
+
+bool Application::GetImageDataFromVideoFrame(QString fileName, ImageObject *img )
+{
+    Q_ASSERT(img);
+    m_fileReader = new FileReader;
+    QFileInfo fi( fileName );
+    if( !(fi.isReadable()) )
+    {
+        QString message( "No read permission on file: " );
+        message.append( fileName );
+        QMessageBox::critical( 0, "Error", message, 1, 0 );
+        return false;
+    }
+    bool ok = m_fileReader->GetFrameDataFromMINCFile( fileName, img );
+    delete m_fileReader;
+    return ok;
+}
+
+bool Application::GetPointsFromTagFile( QString fileName, PointsObject *pts1, PointsObject *pts2 )
+{
+    Q_ASSERT(pts1);
+    Q_ASSERT(pts2);
+    m_fileReader = new FileReader;
+    QFileInfo fi( fileName );
+    if( !(fi.isReadable()) )
+    {
+        QString message( "No read permission on file: " );
+        message.append( fileName );
+        QMessageBox::critical( 0, "Error", message, 1, 0 );
+        return false;
+    }
+    bool ok = m_fileReader->GetPointsDataFromTagFile( fileName, pts1, pts2 );
+    delete m_fileReader;
+    return ok;
 }
 
 #include "vtkXFMReader.h"
@@ -511,21 +542,17 @@ bool Application::OpenTransformFile( const char * filename, vtkMatrix4x4 * mat )
 
 void Application::ImportUsAcquisition()
 {
-    QStringList filenames;
-    QString extension( ".mnc" );
-    bool success = Application::GetInstance().GetOpenFileSequence( filenames, extension, "Select first file of acquisition", QDir::homePath(), "Minc file (*.mnc)" );
-    if( success )
+    USAcquisitionObject * acq = USAcquisitionObject::New();
+    if( acq->Import() )
     {
-        USAcquisitionObject * acq = USAcquisitionObject::New();
-        if( acq->LoadFramesFromMINCFile( filenames ) )
-        {
-            acq->SetName( "Acquisition" );
-            acq->SetCurrentFrame(0);
-            m_sceneManager->AddObject( acq );
-        }
+        m_sceneManager->AddObject( acq );
+        m_sceneManager->SetCurrentObject( acq );
     }
     else
+    {
         QMessageBox::warning( m_mainWindow, "ERROR", "Couldn't read image sequence" );
+    }
+    acq->Delete();
 }
 
 void Application::ImportCamera()
@@ -550,7 +577,10 @@ void Application::ImportCamera()
         CameraObject * cam = CameraObject::New();
         bool imported = cam->Import( directory, progressDlg );
         if( imported )
+        {
             m_sceneManager->AddObject( cam );
+            m_sceneManager->SetCurrentObject( cam );
+        }
         cam->Delete();
         StopProgress( progressDlg );
     }
@@ -608,7 +638,7 @@ QString Application::GetExistingDirectory( const QString & caption, const QStrin
 bool Application::GetOpenFileSequence( QStringList & filenames, QString extension, const QString & caption, const QString & dir, const QString & filter )
 {
     // Get Base directory and file pattern
-    QString firstFilename = Application::GetInstance().GetOpenFileName( "Select first file of acquisition", QDir::homePath(), "Minc file (*.mnc)" );
+    QString firstFilename = Application::GetInstance().GetOpenFileName( "Select first file of acquisition", dir, "Minc file (*.mnc)" );
     if( firstFilename.isEmpty() )
         return false;
 
@@ -734,26 +764,30 @@ void Application::LoadPlugins()
     settings.beginGroup("Plugins");
     foreach( QObject * plugin, QPluginLoader::staticInstances() )
     {
-        ToolPluginInterface * toolModule = qobject_cast< ToolPluginInterface* >( plugin );
-        if( toolModule )
+        IbisPlugin * p = qobject_cast< IbisPlugin* >( plugin );
+        if( p )
         {
-            toolModule->BaseLoadSettings( settings );
-            toolModule->SetApplication( this );
-            toolModule->InitPlugin();
+            p->SetApplication( this );
+            p->BaseLoadSettings( settings );
+            if( p->GetPluginType() == IbisPluginTypeTool )
+            {
+                ToolPluginInterface * t = ToolPluginInterface::SafeDownCast( p );
+                t->InitPlugin();
+            }
         }
     }
     settings.endGroup();
 }
 
-ToolPluginInterface * Application::GetPluginByName( const char * name )
+IbisPlugin * Application::GetPluginByName( QString name )
 {
-    ToolPluginInterface * ret = 0;
+    IbisPlugin * ret = 0;
     foreach( QObject * plugin, QPluginLoader::staticInstances() )
     {
-        ToolPluginInterface * toolModule = qobject_cast< ToolPluginInterface* >( plugin );
-        if( toolModule && toolModule->GetPluginName() == name )
+        IbisPlugin * p = qobject_cast< IbisPlugin* >( plugin );
+        if( p && p->GetPluginName() == name )
         {
-            ret = toolModule;
+            ret = p;
             break;
         }
     }
@@ -762,24 +796,100 @@ ToolPluginInterface * Application::GetPluginByName( const char * name )
 
 void Application::ActivatePluginByName( const char * name, bool active )
 {
-    ToolPluginInterface * tool = GetPluginByName( name );
-    if( tool )
+    IbisPlugin * p = GetPluginByName( name );
+    if( p && p->GetPluginType() == IbisPluginTypeTool )
+    {
+        ToolPluginInterface * tool = ToolPluginInterface::SafeDownCast( p );
         emit QueryActivatePluginSignal( tool, active );
+    }
 }
 
-ObjectPluginInterface * Application::GetObjectPluginByClassName( const char * name )
+ObjectPluginInterface * Application::GetObjectPluginByName( QString name )
 {
-    ObjectPluginInterface *ret = 0;
+    IbisPlugin * p = GetPluginByName( name );
+    if( p && p->GetPluginType() == IbisPluginTypeObject )
+        return ObjectPluginInterface::SafeDownCast( p );
+    return 0;
+}
+
+ToolPluginInterface * Application::GetToolPluginByName( QString name )
+{
+    IbisPlugin * p = GetPluginByName( name );
+    if( p && p->GetPluginType() == IbisPluginTypeTool )
+        return ToolPluginInterface::SafeDownCast( p );
+    return 0;
+}
+
+SceneObject * Application::GetGlobalObjectInstance( const QString & className )
+{
+    SceneObject * ret = 0;
     foreach( QObject * plugin, QPluginLoader::staticInstances() )
     {
-        ObjectPluginInterface * objectPlugin = qobject_cast< ObjectPluginInterface* >( plugin );
-        if( objectPlugin  && objectPlugin->GetObjectClassName() == name )
+        IbisPlugin * p = qobject_cast< IbisPlugin* >( plugin );
+        if( p && p->GetPluginType() == IbisPluginTypeGlobalObject )
         {
-            ret = objectPlugin;
-            break;
+            GlobalObjectPluginInterface * objectPlugin = GlobalObjectPluginInterface::SafeDownCast( p );
+            SceneObject * globalObj = objectPlugin->GetGlobalObjectInstance();
+            if( globalObj->IsA( className.toUtf8().data() ) )
+            {
+                ret = globalObj;
+                break;
+            }
         }
     }
     return ret;
+}
+
+void Application::GetAllGlobalObjectInstances( QList<SceneObject*> & allInstances )
+{
+    foreach( QObject * plugin, QPluginLoader::staticInstances() )
+    {
+        IbisPlugin * p = qobject_cast< IbisPlugin* >( plugin );
+        if( p && p->GetPluginType() == IbisPluginTypeGlobalObject )
+        {
+            GlobalObjectPluginInterface * objectPlugin = GlobalObjectPluginInterface::SafeDownCast( p );
+            allInstances.push_back( objectPlugin->GetGlobalObjectInstance() );
+        }
+    }
+}
+
+void Application::GetAllPlugins( QList<IbisPlugin*> & allPlugins )
+{
+    allPlugins.clear();
+    foreach( QObject * plugin, QPluginLoader::staticInstances() )
+    {
+        IbisPlugin * p = qobject_cast< IbisPlugin* >( plugin );
+        if( p )
+            allPlugins.push_back( p );
+    }
+}
+
+void Application::GetAllToolPlugins( QList<ToolPluginInterface*> & allTools )
+{
+    allTools.clear();
+    foreach( QObject * plugin, QPluginLoader::staticInstances() )
+    {
+        IbisPlugin * p = qobject_cast< IbisPlugin* >( plugin );
+        if( p && p->GetPluginType() == IbisPluginTypeTool )
+        {
+            ToolPluginInterface * t = ToolPluginInterface::SafeDownCast( p );
+            allTools.push_back( t );
+        }
+    }
+}
+
+void Application::GetAllObjectPlugins( QList<ObjectPluginInterface*> & allObjects )
+{
+    allObjects.clear();
+    foreach( QObject * plugin, QPluginLoader::staticInstances() )
+    {
+        IbisPlugin * p = qobject_cast< IbisPlugin* >( plugin );
+        if( p && p->GetPluginType() == IbisPluginTypeObject )
+        {
+            ObjectPluginInterface * o = ObjectPluginInterface::SafeDownCast( p );
+            allObjects.push_back( o );
+        }
+    }
 }
 
 QProgressDialog * Application::StartProgress( int max, const QString &caption )

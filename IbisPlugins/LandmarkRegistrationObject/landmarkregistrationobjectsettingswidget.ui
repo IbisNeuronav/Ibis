@@ -56,6 +56,13 @@ ON</string>
     </layout>
    </item>
    <item>
+    <widget class="QCheckBox" name="allowScalingCheckBox">
+     <property name="text">
+      <string>Allow Scaling</string>
+     </property>
+    </widget>
+   </item>
+   <item>
     <widget class="QLabel" name="label">
      <property name="text">
       <string>Target Object:</string>

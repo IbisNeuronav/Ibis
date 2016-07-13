@@ -21,7 +21,7 @@ class GPU_RigidRegistrationPluginInterface : public QObject, public ToolPluginIn
 {
 
     Q_OBJECT
-    Q_INTERFACES(ToolPluginInterface)
+    Q_INTERFACES(IbisPlugin)
     Q_PLUGIN_METADATA(IID "Ibis.GPU_RigidRegistrationPluginInterface" )
 
 public:

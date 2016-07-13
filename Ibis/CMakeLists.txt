@@ -84,7 +84,7 @@ IF( OPENCL_FOUND )
 ENDIF()
 
 
-set( ignsLibsToUse IbisHardware IbisLib vtkVideo vtkQt vtkTracker vtkUltrasound vtkMNI vtkIbisVolumeRendering vtkExtensions )
+set( ignsLibsToUse IbisHardware IbisLib vtkVideo vtkQt vtkTracker vtkUltrasound vtkMNI vtkExtensions )
 
 if( USE_POINT_GREY_CAMERA )
     set( flycaptureLib flycapture )

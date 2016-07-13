@@ -15,19 +15,22 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "serializer.h"
 #include <map>
 #include <QVector>
+#include "vtkProperty.h"
 
 class vtkPolyData;
 class vtkTransform;
 class vtkActor;
-class vtkProperty;
 class vtkTubeFilter;
 class vtkDataSetAlgorithm;
 class vtkImageData;
 class vtkProbeFilter;
 class vtkScalarsToColors;
-class SurfaceCuttingPlane;
-class PolyDataClipper;
 class ImageObject;
+class vtkClipPolyData;
+class vtkPassThrough;
+class vtkCutter;
+class vtkPlane;
+class vtkPlanes;
 
 enum RenderingMode{ Solid = 0, Wireframe = 1, Both = 2 };
 
@@ -50,8 +53,6 @@ public:
 
     vtkGetObjectMacro( PolyData, vtkPolyData );
     void SetPolyData( vtkPolyData * data );
-    void SetProperty( vtkProperty * property );
-    vtkGetObjectMacro( Property, vtkProperty );
     
     // Implementation of parent virtual method
 	virtual bool Setup( View * view );
@@ -67,16 +68,19 @@ public:
     void SetLutIndex( int index );
     int GetVertexColorMode() { return VertexColorMode; }
     void SetVertexColorMode( int mode );
-    double GetOpacity() { return this->opacity; }
+    double GetOpacity() { return this->Property->GetOpacity(); }
     void SetOpacity( double opacity );
-    void SetColor(double color[3]);
+    void SetColor(double r, double g, double b );
+    void SetColor(double color[3]) { SetColor( color[0], color[1], color[2] ); }
+    double * GetColor();
     void SetLineWidth( double w );
     void UpdateSettingsWidget();
-    void ShowCrossSection(bool);
     bool GetCrossSectionVisible() {return CrossSectionVisible;}
     void SetCrossSectionVisible( bool );
-    void RemoveSurfaceFromOctant(int, bool);
-    int GetSurfaceRemovedOctantNumber() {return SurfaceRemovedOctantNumber;}
+    void SetClippingEnabled( bool e );
+    bool IsClippingEnabled() { return m_clippingOn; }
+    void SetClippingPlanesOrientation( int plane, bool positive );
+    bool GetClippingPlanesOrientation( int plane );
     void SetTexture( vtkImageData * texImage );
     bool GetShowTexture() { return showTexture; }
     void SetShowTexture( bool show );
@@ -90,7 +94,10 @@ public:
      
 public slots:
 
-    void UpdateOctant(int);
+    void OnStartCursorInteraction();
+    void OnEndCursorInteraction();
+    void OnCursorPositionChanged();
+    void OnReferenceChanged();
     void OnScalarSourceDeleted();
     void OnScalarSourceModified();
 
@@ -100,13 +107,23 @@ signals:
     
 protected:
 
+    // SceneObject overrides
     virtual void Hide();
     virtual void Show();
-    void UpdateMapperPipeline();
-    vtkScalarsToColors * GetCurrentLut();
+    virtual void ObjectAddedToScene();
+    virtual void ObjectAboutToBeRemovedFromScene();
     virtual void InternalPostSceneRead();
+
+    void UpdateClippingPlanes();
+    void UpdateCuttingPlane();
+    void UpdatePipeline();
+    vtkScalarsToColors * GetCurrentLut();
+    void InitializeClippingPlanes();
         
     vtkPolyData * PolyData;
+    vtkPassThrough * m_clippingSwitch;
+    vtkPassThrough * m_colorSwitch;
+
     int LutIndex;
     vtkScalarsToColors * CurrentLut;
     vtkImageData * Texture;
@@ -115,6 +132,7 @@ protected:
     vtkScalarsToColors * LutBackup;
     vtkProbeFilter * ProbeFilter;
     vtkProperty * Property;
+    vtkProperty * m_2dProperty;
     
     typedef std::map<View*,vtkActor*> PolyDataObjectViewAssociation;
     PolyDataObjectViewAssociation polydataObjectInstances;
@@ -122,16 +140,21 @@ protected:
     int       renderingMode;  // one of VTK_POINTS, VTK_WIREFRAME or VTK_SURFACE
     int       ScalarsVisible;  // Whether scalars in the PolyData are used to color the object or not.
     int       VertexColorMode;   // 0 : use scalars in data, 1 : get scalars from object ScalarSourceObjectId
-    double    opacity;        // between 0 and 1
-    double    objectColor[3];
     bool      showTexture;
     QString   textureFileName;
     int       ScalarSourceObjectId;
 
-    SurfaceCuttingPlane *SurfaceCutter;
+    // Cross section in 2d views
+    vtkCutter * m_cutter[3];
+    vtkPlane * m_cuttingPlane[3];
     bool CrossSectionVisible;
-    PolyDataClipper *Clipper;
-    int SurfaceRemovedOctantNumber;
+
+    // Clipping an octant from surface
+    vtkClipPolyData * m_clipper;
+    vtkTransform * m_referenceToPolyTransform;
+    vtkPlanes * m_clippingPlanes;
+    bool m_clippingOn;
+    bool m_interacting;
 
     static vtkImageData * checkerBoardTexture;
 };

@@ -17,6 +17,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "toolplugininterface.h"
 #include "vtkIbisGLSLVolumeRaycastMapper.h"
 
+class VolumeRenderingObject;
 class DomeRenderer;
 class TimelineWidget;
 class CameraAnimation;
@@ -40,7 +41,7 @@ class AnimatePluginInterface : public QObject, public ToolPluginInterface
 {
 
     Q_OBJECT
-    Q_INTERFACES(ToolPluginInterface)
+    Q_INTERFACES(IbisPlugin)
     Q_PLUGIN_METADATA(IID "Ibis.AnimatePluginInterface" )
 
 public:
@@ -55,6 +56,8 @@ public:
 
     virtual QWidget * CreateTab();
     virtual bool WidgetAboutToClose();
+
+    VolumeRenderingObject * GetVolumeRenderer();
 
     void SetRenderDome( bool r );
     bool GetRenderDome();

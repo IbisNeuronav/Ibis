@@ -11,13 +11,11 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "usacquisitionplugininterface.h"
 #include "application.h"
 #include "sceneobject.h"
-#include "sceneinfo.h"
 #include "usacquisitionobject.h"
 #include "usprobeobject.h"
 #include "imageobject.h"
 #include "doubleviewwidget.h"
 #include "scenemanager.h"
-#include "ignsconfig.h"
 #include <QtPlugin>
 #include <QString>
 #include <QtGui>
@@ -58,30 +56,15 @@ QWidget *USAcquisitionPluginInterface::CreateFloatingWidget()
 {
     m_baseDir = GetSceneManager()->GetSceneDirectory();
     m_baseDir.append("/");
-    m_baseDir.append(IGNS_ACQUISITION_BASE_DIR);
+    m_baseDir.append(ACQ_BASE_DIR);
 
     // Watch for objects added and removed from the scene
     SceneManager * man = GetSceneManager();
     Q_ASSERT(man);
-
-    // initialize m_currentVolumeObjectId
-    if( m_currentVolumeObjectId == SceneObject::InvalidObjectId &&  man->GetReferenceDataObject() )
-        m_currentVolumeObjectId = man->GetReferenceDataObject()->GetObjectID();
     connect( man, SIGNAL(ObjectAdded(int)), this, SLOT(SceneContentChanged()) );
     connect( man, SIGNAL(ObjectRemoved(int)), this, SLOT(SceneContentChanged()) );
 
-    // initialize m_addedVolumeObjectId, added May 13, 2015 by Xiao ***
-    if( m_addedVolumeObjectId == SceneObject::InvalidObjectId &&  man->GetReferenceDataObject() )
-        m_addedVolumeObjectId = man->GetReferenceDataObject()->GetObjectID();
-    connect( man, SIGNAL(ObjectAdded(int)), this, SLOT(SceneContentChanged()) );
-    connect( man, SIGNAL(ObjectRemoved(int)), this, SLOT(SceneContentChanged()) );
-
-
-    // Check if we have a valid probe
-    ValidateCurrentUsProbe();
-
-    // check to see if there is already an acquisition available and if not, create one
-    this->ValidateCurrentAcquisition();
+    ValidateAllSceneObjects();
 
     // Start the window
     m_interfaceWidget = new DoubleViewWidget( 0, Qt::WindowStaysOnTopHint );
@@ -95,6 +78,9 @@ QWidget *USAcquisitionPluginInterface::CreateFloatingWidget()
 bool USAcquisitionPluginInterface::WidgetAboutToClose()
 {
     SceneManager * man = GetSceneManager();
+    disconnect( man, SIGNAL(ObjectAdded(int)), this, SLOT(SceneContentChanged()) );
+    disconnect( man, SIGNAL(ObjectRemoved(int)), this, SLOT(SceneContentChanged()) );
+
     USAcquisitionObject * acq = GetCurrentAcquisition();
     if( acq )
         acq->Stop();
@@ -117,6 +103,14 @@ UsProbeObject * USAcquisitionPluginInterface::GetCurrentUsProbe()
 USAcquisitionObject * USAcquisitionPluginInterface::GetCurrentAcquisition()
 {
     return USAcquisitionObject::SafeDownCast( GetSceneManager()->GetObjectByID( m_currentAcquisitionObjectId ) );
+}
+
+void USAcquisitionPluginInterface::ValidateAllSceneObjects()
+{
+    ValidateCurrentAcquisition();
+    ValidateCurrentUsProbe();
+    ValidateCurrentVolume();
+    ValidateAddedVolume();
 }
 
 void USAcquisitionPluginInterface::ValidateCurrentAcquisition()
@@ -160,59 +154,65 @@ ImageObject * USAcquisitionPluginInterface::GetCurrentVolume()
     return ImageObject::SafeDownCast( GetSceneManager()->GetObjectByID( m_currentVolumeObjectId ) );
 }
 
-// added May 13, 2015 by Xiao function for GetAddedVolume() ***
-
 ImageObject * USAcquisitionPluginInterface::GetAddedVolume()
 {
     return ImageObject::SafeDownCast( GetSceneManager()->GetObjectByID( m_addedVolumeObjectId ) );
 }
 
-
 void USAcquisitionPluginInterface::ValidateCurrentVolume()
 {
     int initialVolumeId = m_currentVolumeObjectId;
+    int newVolumeId = m_currentVolumeObjectId;
     SceneManager * man = GetSceneManager();
 
     if( !man->GetObjectByID( m_currentVolumeObjectId ) )
-        m_currentVolumeObjectId = SceneObject::InvalidObjectId;
-    if( m_currentVolumeObjectId == SceneObject::InvalidObjectId )
+        newVolumeId = SceneObject::InvalidObjectId;
+    if( newVolumeId == SceneObject::InvalidObjectId )
     {
         QList<ImageObject*> images;
         man->GetAllImageObjects( images );
         if( images.size() > 0 )
-            m_currentVolumeObjectId = images[0]->GetObjectID();
+            newVolumeId = images[0]->GetObjectID();
     }
 
-    if( initialVolumeId != m_currentVolumeObjectId )
+    if( initialVolumeId != newVolumeId )
+    {
+        SetCurrentVolumeObjectId( newVolumeId );
         emit ObjectsChanged();
+    }
 }
-
-// added May 13, 2015 by Xiao function for ValidateAddedVolume() ***
 
 void USAcquisitionPluginInterface::ValidateAddedVolume()
 {
     int initialVolumeId = m_addedVolumeObjectId;
+    int newVolumeId = m_addedVolumeObjectId;
     SceneManager * man = GetSceneManager();
 
-    if( !man->GetObjectByID( m_addedVolumeObjectId ) )
-        m_addedVolumeObjectId = SceneObject::InvalidObjectId;
-    if( m_addedVolumeObjectId == SceneObject::InvalidObjectId )
+    if( !man->GetObjectByID( newVolumeId ) )
+        newVolumeId = SceneObject::InvalidObjectId;
+
+    if( newVolumeId == SceneObject::InvalidObjectId )
     {
         QList<ImageObject*> images;
         man->GetAllImageObjects( images );
-        if( images.size() > 0 )
-            m_addedVolumeObjectId = images[0]->GetObjectID();
+        if( images.size() > 1 )
+            newVolumeId = images[1]->GetObjectID();
+        else if( images.size() > 0 )
+            newVolumeId = images[0]->GetObjectID();
+        else
+            newVolumeId = SceneObject::InvalidObjectId;
     }
 
-    if( initialVolumeId != m_addedVolumeObjectId )
+    if( initialVolumeId != newVolumeId )
+    {
+        SetAddedVolumeObjectId( newVolumeId );
         emit ObjectsChanged();
+    }
 }
-
-
 
 void USAcquisitionPluginInterface::NewAcquisition()
 {
-    SceneManager * manager = m_application->GetSceneManager();
+    SceneManager * manager = GetSceneManager();
     USAcquisitionObject *newAcquisition = USAcquisitionObject::New();
     newAcquisition->SetCanAppendChildren(true);
     newAcquisition->SetNameChangeable( true );
@@ -227,12 +227,12 @@ void USAcquisitionPluginInterface::NewAcquisition()
     newAcquisition->SetUsProbe( GetCurrentUsProbe() );
     newAcquisition->SetHidden( true );
     manager->AddObject(newAcquisition);
+    manager->SetCurrentObject(newAcquisition);
     m_currentAcquisitionObjectId = newAcquisition->GetObjectID();
     newAcquisition->Delete();
 
     emit ObjectsChanged();
 }
-
 
 bool USAcquisitionPluginInterface::CanCaptureTrackedVideo()
 {
@@ -250,23 +250,67 @@ void USAcquisitionPluginInterface::SetLive( bool l )
         p->RemoveClient();
 }
 
+void USAcquisitionPluginInterface::SetCurrentAcquisitionObjectId( int id )
+{
+    m_currentAcquisitionObjectId = id;
+}
+
+void USAcquisitionPluginInterface::SetCurrentVolumeObjectId( int id )
+{
+    ImageObject * prev = ImageObject::SafeDownCast( GetSceneManager()->GetObjectByID( m_currentVolumeObjectId ) );
+    if( prev )
+    {
+        disconnect( prev, SIGNAL(LutChanged()), this, SLOT(LutChanged()) );
+        disconnect( prev, SIGNAL(Modified()), this, SLOT(OnImageChanged()));
+    }
+    m_currentVolumeObjectId = id;
+    ImageObject * im = ImageObject::SafeDownCast( GetSceneManager()->GetObjectByID( id ) );
+    if( im )
+    {
+        connect( im, SIGNAL(LutChanged()), this, SLOT(LutChanged()) );
+        connect( im, SIGNAL(Modified()), this, SLOT(OnImageChanged()));
+    }
+}
+
+void USAcquisitionPluginInterface::SetAddedVolumeObjectId( int id )
+{
+    ImageObject * prev = ImageObject::SafeDownCast( GetSceneManager()->GetObjectByID( m_addedVolumeObjectId ) );
+    if( prev )
+    {
+        disconnect( prev, SIGNAL(LutChanged()), this, SLOT(LutChanged()) );
+        disconnect( prev, SIGNAL(Modified()), this, SLOT(OnImageChanged()));
+    }
+    m_addedVolumeObjectId = id;
+    ImageObject * im = ImageObject::SafeDownCast( GetSceneManager()->GetObjectByID( id ) );
+    if( im )
+    {
+        connect( im, SIGNAL(LutChanged()), this, SLOT(LutChanged()) );
+        connect( im, SIGNAL(Modified()), this, SLOT(OnImageChanged()));
+    }
+}
+
 void USAcquisitionPluginInterface::SceneContentChanged()
 {
-    ValidateCurrentAcquisition();
-    ValidateCurrentUsProbe();
-    ValidateCurrentVolume();
+    ValidateAllSceneObjects();
+}
 
-    //added May 13, 2015 by Xiao
-    ValidateAddedVolume();
+void USAcquisitionPluginInterface::LutChanged()
+{
+    emit ObjectsChanged();
+}
+
+void USAcquisitionPluginInterface::OnImageChanged()
+{
+    emit ImageChanged();
 }
 
 void USAcquisitionPluginInterface::MakeAcquisitionName(QString & name)
 {
-    SceneManager *manager = m_application->GetSceneManager();
+    SceneManager *manager = GetSceneManager();
     QList< USAcquisitionObject* > acquisitions;
     manager->GetAllUSAcquisitionObjects(acquisitions);
     int index = acquisitions.count();
-    QString namePrefix(IGNS_ACQUISITION_PREFIX);
+    QString namePrefix(ACQ_ACQUISITION_PREFIX);
     name = namePrefix;
     name.append(QString::number(index));
     //check if there is an acuisition with that name

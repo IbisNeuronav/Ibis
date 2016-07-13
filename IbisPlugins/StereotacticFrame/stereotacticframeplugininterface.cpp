@@ -293,7 +293,7 @@ void StereotacticFramePluginInterface::UpdateManipulators()
 
 void StereotacticFramePluginInterface::Enable3DFrame()
 {
-    ImageObject * ref = m_application->GetSceneManager()->GetReferenceDataObject();
+    ImageObject * ref = GetSceneManager()->GetReferenceDataObject();
 
     vtkPoints * pts = vtkPoints::New();
 
@@ -327,12 +327,12 @@ void StereotacticFramePluginInterface::Enable3DFrame()
     m_frameRepresentation->SetCanEditTransformManually( false );
     m_frameRepresentation->SetLocalTransform( m_frameTransform );
 
-    m_application->GetSceneManager()->AddObject( m_frameRepresentation, ref );
+    GetSceneManager()->AddObject( m_frameRepresentation, ref );
 }
 
 void StereotacticFramePluginInterface::Disable3DFrame()
 {
-    m_application->GetSceneManager()->RemoveObject( m_frameRepresentation );
+    GetSceneManager()->RemoveObject( m_frameRepresentation );
     m_frameRepresentation->Delete();
     m_frameRepresentation = 0;
 }
@@ -356,7 +356,7 @@ void StereotacticFramePluginInterface::ComputeInitialTransform()
     alignmentTransform->SetMatrix( alignmentMat );
 
     // Now, we compute a translation that centers bounding boxes of image and frame
-    ImageObject * ref = m_application->GetSceneManager()->GetReferenceDataObject();
+    ImageObject * ref = GetSceneManager()->GetReferenceDataObject();
     if( !ref )
         return;
     double imageCenter[3] = { 0.0, 0.0, 0.0 };

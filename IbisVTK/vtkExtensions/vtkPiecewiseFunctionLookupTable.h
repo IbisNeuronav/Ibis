@@ -49,6 +49,7 @@ public:
 
   void AddColorPoint( float value, float r, float g, float b );
   void AddAlphaPoint( float value, float alpha );
+  void RemoveAllPoints();
 
   vtkColorTransferFunction * GetColorFunction() { return ColorFunction; }
   vtkPiecewiseFunction * GetAlphaFunction() { return AlphaFunction; }

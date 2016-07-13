@@ -8,16 +8,17 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
-#ifndef CAMERAOBJECT_H
-#define CAMERAOBJECT_H
+#ifndef __CameraObject_h_
+#define __CameraObject_h_
 
-#include "sceneobject.h"
+#include "trackedsceneobject.h"
 #include "hardwaremodule.h"
 #include "view.h"
 #include <map>
 #include <QVector>
 #include "SVL.h"
 
+class TrackedVideoBuffer;
 class vtkCamera;
 class vtkActor;
 class vtkSimpleProp3D;
@@ -25,6 +26,8 @@ class vtkIbisImagePlaneMapper;
 class vtkAxesActor;
 class vtkPolyData;
 class vtkImageData;
+class vtkPassThrough;
+class vtkAlgorithmOutput;
 class QProgressDialog;
 
 class CameraIntrinsicParams
@@ -38,17 +41,18 @@ public:
     double GetVerticalAngleRad() const;
     void SetVerticalAngleRad( double angle );
 
+    // Internal representation is independent of the image resolution
+    // center and focal length are expressed as a percentage of the image width and height
     double m_center[2];
     double m_focal[2];
     double m_distorsionK1;
-    int m_imageSize[2];
-    double m_reprojectionError;
+    double m_reprojectionError;  // cached reprojection error of last calibration
 };
 
 ObjectSerializationHeaderMacro( CameraIntrinsicParams );
 
 
-class CameraObject : public SceneObject, ViewController
+class CameraObject : public TrackedSceneObject, ViewController
 {
 
     Q_OBJECT
@@ -56,28 +60,25 @@ class CameraObject : public SceneObject, ViewController
 public:
 
     static CameraObject * New() { return new CameraObject; }
-    vtkTypeMacro( CameraObject, SceneObject );
+    vtkTypeMacro( CameraObject, TrackedSceneObject );
 
     CameraObject();
     ~CameraObject();
 
     virtual void Serialize( Serializer * ser );
+    virtual void SerializeTracked( Serializer * ser );
     virtual void Export();
     bool Import( QString & directory, QProgressDialog * progressDlg=0 );
     virtual bool IsExportable()  { return true; }
 
     // Replacing direct interface to tracked video source
+    void SetVideoInputConnection( vtkAlgorithmOutput * port );
+    void SetVideoInputData( vtkImageData * image );
     vtkImageData * GetVideoOutput();
     int GetImageWidth();
     int GetImageHeight();
-    TrackerToolState GetState();
-    vtkTransform * GetUncalibratedTransform();
-    void SetCalibrationMatrix( vtkMatrix4x4 * mat );
-    vtkMatrix4x4 * GetCalibrationMatrix();
     void AddClient();
     void RemoveClient();
-
-    void SetMatrices( vtkMatrix4x4 * uncalibratedMatrix, vtkMatrix4x4 * calibrationMatrix );
 
     virtual bool Setup( View * view );
     virtual bool Release( View * view );
@@ -95,8 +96,9 @@ public:
     double GetImageDistance() { return m_imageDistance; }
     double GetGlobalOpacity() { return m_globalOpacity; }
     void SetGlobalOpacity( double opacity );
-    void SetImageCenter( double x, double y );
-    double * GetImageCenter() { return m_intrinsicParams.m_center; }
+    void SetImageCenterPix( double x, double y );
+    void GetImageCenterPix( double & x, double & y );
+    void GetFocalPix( double & x, double & y );
     double GetLensDistortion() { return m_intrinsicParams.m_distorsionK1; }
     void SetLensDistortion( double x );
     double GetLensDisplacement();
@@ -117,8 +119,6 @@ public:
     double * GetTransparencyCenter() { return m_transparencyCenter; }
     void SetTransparencyRadius( double min, double max );
     double * GetTransparencyRadius() { return m_transparencyRadius; }
-    bool IsCameraTrackable() { return m_trackable; }
-    void SetCameraTrackable( bool t );
     void AlignSceneCameraWithThis();
     void SetTrackCamera( bool t );
     bool GetTrackCamera();
@@ -128,10 +128,10 @@ public:
     void TakeSnapshot();
     void ToggleRecording();
     bool IsRecording();
-    int GetNumberOfFrames() { return m_capturedFrames.size(); }
+    int GetNumberOfFrames();
     void AddFrame( vtkImageData * image, vtkMatrix4x4 * uncalMat );
     void SetCurrentFrame( int frame );
-    int GetCurrentFrame() { return m_currentFrame; }
+    int GetCurrentFrame();
 
     // ViewController implementation
     void ReleaseControl( View * v );
@@ -165,20 +165,12 @@ protected:
     virtual void InternalWorldTransformChanged();
     void InternalSetIntrinsicParams();
     void UpdateGeometricRepresentation();
-    void SetLocalUncalibratedTransform( vtkTransform * t );
-    virtual void UpdateWorldTransform();
     void UpdateVtkCamera();
     vtkRenderer * GetCurrentRenderer( View * v );
+    void SerializeLocalParams( Serializer * ser );
 
     void CreateCameraRepresentation();
     QString FindNextSnapshotName();
-
-    void WriteMatrix( vtkMatrix4x4 * mat, QString filename );
-    void WriteMatrices( std::vector< vtkMatrix4x4 * > & matrices, QString dirName );
-    void ReadMatrix( QString filename, vtkMatrix4x4 * mat );
-    void ReadMatrices( std::vector< vtkMatrix4x4 * > & matrices, QString dirName );
-    void WriteImages( QString dirName, QProgressDialog * progressDlg = 0 );
-    void ReadImages( int nbImages, QString dirName, QProgressDialog * progressDlg = 0 );
 
     struct PerViewElements
     {
@@ -212,21 +204,17 @@ protected:
     bool m_trackedTransparencyCenter;
     double m_transparencyCenter[2];
     double m_transparencyRadius[2];
-    vtkTransform * m_uncalibratedWorldTransform;
+
+    vtkPassThrough * m_videoInputSwitch;
 
     // alternative to m_trackedVideoSource in case we want to show a static image and its transforms
-    int m_currentFrame;
-    QList<vtkImageData *> m_capturedFrames;
-    std::vector< vtkMatrix4x4 * > m_uncalibratedMatrices;
-    vtkTransform * m_uncalibratedTransform;
-    vtkTransform * m_calibrationTransform;
+    TrackedVideoBuffer * m_videoBuffer;
     vtkTransform * m_lensDisplacementTransform;
     vtkTransform * m_opticalCenterTransform;
 
     // Hold data used for recording
     CameraObject * m_recordingCamera;
 
-    bool m_trackable;
     bool m_trackingCamera;
     int m_cachedImageSize[2];  // used to determine when image size is changed
 

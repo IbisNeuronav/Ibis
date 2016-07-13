@@ -8,23 +8,27 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
-
 #ifndef MINCINFOWIDGET_H
 #define MINCINFOWIDGET_H
 
-#include "ui_mincinfowidget.h"
-#include <QString>
+#include <QWidget>
 
-class MincInfoWidget : public QWidget, public Ui::MincInfoWidget
+class ImageObject;
+
+class MincInfoWidget : public QWidget
 {
     Q_OBJECT
 
 public:
-    MincInfoWidget( QWidget* parent = 0, const char* name = 0 );
+    explicit MincInfoWidget(QWidget *parent = 0);
     ~MincInfoWidget();
 
-    void SetInfoText(QString info);
+    void SetImageObject( ImageObject *img );
 
+private:
+    void UpdateUI();
+
+    ImageObject *m_imageObj;
 };
 
 #endif // MINCINFOWIDGET_H

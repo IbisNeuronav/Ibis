@@ -33,7 +33,7 @@ class CameraCalibrationPluginInterface : public QObject, public ToolPluginInterf
 {
 
     Q_OBJECT
-    Q_INTERFACES(ToolPluginInterface)
+    Q_INTERFACES(IbisPlugin)
     Q_PLUGIN_METADATA(IID "Ibis.CameraCalibrationPluginInterface" )
 
 public:
@@ -41,6 +41,7 @@ public:
     CameraCalibrationPluginInterface();
     ~CameraCalibrationPluginInterface();
     virtual QString GetPluginName() { return QString("CameraCalibration"); }
+    virtual QString GetPluginDescription();
     bool CanRun();
     QString GetMenuEntryString() { return QString("Camera Calibration"); }
 

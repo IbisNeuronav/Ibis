@@ -8,7 +8,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
-
 #ifndef __ObjectTreeWidget_h_
 #define __ObjectTreeWidget_h_
 
@@ -45,6 +44,7 @@ private slots:
     virtual void AddTransformAllChildrenButtonClicked();
     virtual void AddParentTransformButtonClicked();
     virtual void MarkAsReferenceObject( );
+    virtual void ShowMincInfo( );
     virtual void ExportObject( );
     virtual void HideWithChildren( );
 

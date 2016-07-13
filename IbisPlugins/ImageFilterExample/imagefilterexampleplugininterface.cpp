@@ -31,7 +31,7 @@ bool ImageFilterExamplePluginInterface::CanRun()
 QWidget * ImageFilterExamplePluginInterface::CreateFloatingWidget()
 {
     ImageFilterExampleWidget * widget = new ImageFilterExampleWidget;
-    widget->SetApplication( m_application );
+    widget->SetApplication( GetApplication() );
     return widget;
 }
 

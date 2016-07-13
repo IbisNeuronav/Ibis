@@ -11,7 +11,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef __UsProbeObject_h_
 #define __UsProbeObject_h_
 
-#include "sceneobject.h"
+#include "trackedsceneobject.h"
 #include <map>
 #include "hardwaremodule.h"
 
@@ -21,9 +21,12 @@ class vtkImageProperty;
 class vtkImageMapToColors;
 class vtkImageToImageStencil;
 class vtkImageStencil;
+class vtkImageConstantPad;
+class vtkPassThrough;
+class vtkAlgorithmOutput;
 class USMask;
 
-class UsProbeObject : public SceneObject
+class UsProbeObject : public TrackedSceneObject
 {
 
 Q_OBJECT
@@ -31,10 +34,12 @@ Q_OBJECT
 public:
         
     static UsProbeObject * New() { return new UsProbeObject; }
-    vtkTypeMacro( UsProbeObject, SceneObject );
+    vtkTypeMacro( UsProbeObject, TrackedSceneObject );
     
     UsProbeObject();
     virtual ~UsProbeObject();
+
+    virtual void SerializeTracked( Serializer * ser );
 
     void AddClient();
     void RemoveClient();
@@ -48,16 +53,17 @@ public:
     virtual bool Release( View * view );
     virtual void CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets);
 
+    void SetVideoInputConnection( vtkAlgorithmOutput * port );
+    void SetVideoInputData( vtkImageData * image );
 
-    TrackerToolState GetState();
     int GetVideoImageWidth();
     int GetVideoImageHeight();
     int GetVideoImageNumberOfComponents();
     vtkImageData * GetVideoOutput();
-    vtkTransform * GetTransform();
-    vtkTransform * GetUncalibratedTransform();
+    vtkAlgorithmOutput * GetVideoOutputPort();
 
     int GetNumberOfCalibrationMatrices();
+    void SetCurrentCalibrationMatrixIndex( int index );
     QString GetCalibrationMatrixName( int index );
     void SetCurrentCalibrationMatrixName( QString name );
     QString GetCurrentCalibrationMatrixName();
@@ -68,12 +74,20 @@ public:
     void SetAcquisitionType(ACQ_TYPE type);
     ACQ_TYPE GetAcquisitionType() { return m_acquisitionType; }    
 
-    void InitialSetMask( USMask *mask );
-
     int GetNumberOfAvailableLUT();
     QString GetLUTName( int index );
     void SetCurrentLUTIndex( int index );
     int GetCurrentLUTIndex() { return m_lutIndex; }
+
+    struct CalibrationMatrixInfo
+    {
+        CalibrationMatrixInfo();
+        CalibrationMatrixInfo( const CalibrationMatrixInfo & other );
+        ~CalibrationMatrixInfo();
+        bool Serialize( Serializer * ser );
+        QString name;
+        vtkMatrix4x4 * matrix;
+    };
 
 private slots:
 
@@ -89,13 +103,21 @@ protected:
 
     bool m_maskOn;
     int m_lutIndex;
+    vtkPassThrough         * m_videoInput;
+    vtkPassThrough         * m_actorInput;
     USMask                 * m_mask;
     USMask                 * m_defaultMask;
     vtkImageProperty       * m_sliceProperties;
     vtkImageMapToColors    * m_mapToColors;
     vtkImageToImageStencil * m_imageStencilSource;
     vtkImageStencil        * m_sliceStencil;
-    vtkTransform           * m_toolTransform;
+    vtkImageConstantPad    * m_constantPad;
+
+    vtkTransform           * m_imageTransform;
+
+    // Calibration matrices for different scale levels
+    int m_currentCalibrationMatrix;
+    QList< CalibrationMatrixInfo > m_calibrationMatrices;
 
     struct PerViewElements
     {
@@ -106,10 +128,12 @@ protected:
     PerViewContainer m_perViews;
 
     void UpdatePipeline();
-    void UpdatePipelineOneView( PerViewElements & pv );
 
     ACQ_TYPE m_acquisitionType;
 
 };
+
+ObjectSerializationHeaderMacro( UsProbeObject );
+ObjectSerializationHeaderMacro( UsProbeObject::CalibrationMatrixInfo );
 
 #endif

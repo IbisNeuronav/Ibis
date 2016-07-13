@@ -12,5 +12,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #define __IbisTypes_h_
 
 enum InteractorStyle { InteractorStyleTerrain = 0, InteractorStyleTrackball = 1, InteractorStyleJoystick = 2 };
+enum VIEWTYPES {SAGITTAL_VIEW_TYPE = 0, CORONAL_VIEW_TYPE = 1, TRANSVERSE_VIEW_TYPE = 2, THREED_VIEW_TYPE = 3};
+enum TrackerToolState{ Ok, Missing, OutOfVolume, OutOfView, Undefined };
+enum IbisPluginTypes{ IbisPluginTypeTool = 0, IbisPluginTypeObject = 1, IbisPluginTypeGlobalObject = 2, IbisPluginTypeImportExport = 3, IbisPluginTypeHardwareModule = 4 };
 
 #endif

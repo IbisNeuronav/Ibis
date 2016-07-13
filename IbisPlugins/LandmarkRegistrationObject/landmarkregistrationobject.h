@@ -15,7 +15,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "sceneobject.h"
 #include "pointsobject.h"
 
-class Application;
 class LandmarkTransform;
 class vtkPoints;
 class SceneManager;
@@ -50,6 +49,8 @@ public:
     void UpdateLandmarkTransform();
     void RegisterObject( bool on );
     bool IsRegistered();
+    void SetAllowScaling( bool on );
+    bool IsScalingAllowed();
     int  GetTargetObjectID() { return m_targetObjectID; }
     void SetTargetObjectID( int id );
     int  GetPointEnabledStatus( int index );
@@ -57,7 +58,6 @@ public:
     void DeleteAllPoints();
     void DeletePoint( int index );
     void SelectPoint( int index );
-    void EnablePicking( bool enable ); 
     void SetPointLabel( int index, const QString & label );
     void SetTargetPointCoordinates( int index, double coords[3] );
     void SetTargetPointTimeStamp( int index, const QString &stamp );
@@ -67,15 +67,27 @@ public slots:
     void PointAdded( );
     void PointRemoved( int );
     void Update();
-    void OnCloseSettingsWidget();
+
+protected slots:
+
+    void CurrentObjectChanged();
 
 protected:
+
+    // SceneObject protected overloads
+    virtual void ObjectAddedToScene();
+    virtual void ObjectAboutToBeRemovedFromScene();
+
+    virtual void InternalPostSceneRead();
     virtual void Hide();
     virtual void Show();
+
     void WriteTagFile( const QString & filename, bool saveEnabledOnly = false );
     void WriteXFMFile( const QString & filename );
     void UpdateActivePoints();
     void UpdateTargetPoints();
+
+    void EnablePicking( bool e );
 
     LandmarkTransform *m_registrationTransform;
     vtkTransform * m_backUpTransform;

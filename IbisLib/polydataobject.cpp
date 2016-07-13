@@ -18,10 +18,11 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "view.h"
 #include "vtkTransform.h"
 #include "vtkAssembly.h"
-#include "vtkProperty.h"
 #include "vtkPolyDataWriter.h"
 #include "vtkImageData.h"
 #include "vtkPNGReader.h"
+#include "vtkDoubleArray.h"
+#include "vtkPoints.h"
 
 #include "vtkTextureMapToPlane.h"
 #include "vtkTextureMapToSphere.h"
@@ -32,13 +33,14 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "scenemanager.h"
 #include "triplecutplaneobject.h"
 #include "imageobject.h"
-#include "surfacecuttingplane.h"
-#include "polydataclipper.h"
 #include "vtkProbeFilter.h"
-#include "octants.h"
+#include "vtkClipPolyData.h"
+#include "vtkPassThrough.h"
+#include "vtkCutter.h"
+#include "vtkPlane.h"
+#include "vtkPlanes.h"
 #include "lookuptablemanager.h"
 
-vtkCxxSetObjectMacro(PolyDataObject, Property, vtkProperty);
 ObjectSerializationMacro( PolyDataObject );
 
 vtkImageData * PolyDataObject::checkerBoardTexture = 0;
@@ -46,51 +48,83 @@ vtkImageData * PolyDataObject::checkerBoardTexture = 0;
 PolyDataObject::PolyDataObject()
 {
     this->PolyData = 0;
+    m_clippingSwitch = vtkPassThrough::New();
+    m_colorSwitch = vtkPassThrough::New();
+
+    m_referenceToPolyTransform = vtkTransform::New();
+
+    // Clip octant from polydata
+    m_clippingOn = false;
+    m_interacting = false;
+    m_clippingPlanes = vtkPlanes::New();
+    m_clippingPlanes->SetTransform( m_referenceToPolyTransform );
+    InitializeClippingPlanes();
+    m_clipper = vtkClipPolyData::New();
+    m_clipper->SetClipFunction( m_clippingPlanes );
+
+    // Cross section in 2d views
+    for( int i = 0; i < 3; ++i )
+    {
+        m_cuttingPlane[i] = vtkPlane::New();
+        m_cuttingPlane[i]->SetTransform( m_referenceToPolyTransform );
+        m_cutter[i] = vtkCutter::New();
+        m_cutter[i]->SetInputConnection( m_colorSwitch->GetOutputPort() );
+        m_cutter[i]->SetCutFunction( m_cuttingPlane[i]);
+    }
+    m_cuttingPlane[0]->SetNormal( 1.0, 0.0, 0.0 );
+    m_cuttingPlane[1]->SetNormal( 0.0, 1.0, 0.0 );
+    m_cuttingPlane[2]->SetNormal( 0.0, 0.0, 1.0 );
+
     this->LutIndex = 0;
     this->CurrentLut = 0;
     this->renderingMode = VTK_SURFACE;
     this->ScalarsVisible = 0;
     this->VertexColorMode = 0;
     this->ScalarSourceObjectId = SceneObject::InvalidObjectId;
-    this->opacity = 1.0;
     this->Property = vtkProperty::New();
-    for (int i = 0; i< 3; i++)
-       objectColor[i] = 1.0;
-    this->SurfaceCutter = 0;
     this->CrossSectionVisible = false;
-    this->Clipper = 0;
-    this->SurfaceRemovedOctantNumber = -1;
     this->showTexture = false;
     this->Texture = 0;
+
+    m_2dProperty = vtkProperty::New();
+    m_2dProperty->SetAmbient( 1.0 );
+    m_2dProperty->LightingOff();
 
     // Texture map filter
     vtkTextureMapToSphere * map = vtkTextureMapToSphere::New();
     map->AutomaticSphereGenerationOn();
     map->PreventSeamOn();
+    map->SetInputConnection( m_clippingSwitch->GetOutputPort() );
     this->TextureMap = map;
 
     // Probe filter ( used to sample scalars from other dataset )
     this->ScalarSource = 0;
     this->LutBackup = 0;
     this->ProbeFilter = vtkProbeFilter::New();
-    this->ProbeFilter->SetInputConnection( map->GetOutputPort() );
+    this->ProbeFilter->SetInputConnection( m_clippingSwitch->GetOutputPort() );
 }
 
 PolyDataObject::~PolyDataObject()
 {
+    m_clipper->Delete();
+    m_colorSwitch->Delete();
+    m_clippingSwitch->Delete();
+    m_clippingPlanes->Delete();
+    m_referenceToPolyTransform->Delete();
+
+    // Cross section in 2d views
+    for( int i = 0; i < 3; ++i )
+    {
+        m_cutter[i]->Delete();
+        m_cuttingPlane[i]->Delete();
+    }
+
     if( this->PolyData )
     {
         this->PolyData->UnRegister( this );
     }
     this->Property->Delete();
-    if (this->SurfaceCutter)
-        this->SurfaceCutter->Delete();
-    if (this->Clipper)
-    {
-        disconnect(this->GetManager()->GetMainImagePlanes(), SIGNAL(EndPlaneMove(int)), this, SLOT(UpdateOctant(int)));
-        this->Clipper->RemoveClipActor();
-        this->Clipper->Delete();
-    }
+    m_2dProperty->Delete();
     if( this->Texture )
         this->Texture->UnRegister( this );
     this->TextureMap->Delete();
@@ -109,21 +143,26 @@ void PolyDataObject::SetPolyData( vtkPolyData * poly )
     {
         this->PolyData->Register( this );
     }
-    this->TextureMap->SetInputData( this->PolyData );
 
-    UpdateMapperPipeline();
+    UpdatePipeline();
 
     this->Modified();
 }
 
 void PolyDataObject::Serialize( Serializer * ser )
 {
+    double opacity = this->GetOpacity();
+    double *objectColor = this->GetColor();
+    int clippingPlaneOrientation[3] = { 1, 1, 1 };
     if(!ser->IsReader())
     {
         if( this->ScalarSource )
             this->ScalarSourceObjectId = this->ScalarSource->GetObjectID();
         else
             this->ScalarSourceObjectId = SceneObject::InvalidObjectId;
+        clippingPlaneOrientation[0] = GetClippingPlanesOrientation( 0 ) ? 1 : 0;
+        clippingPlaneOrientation[1] = GetClippingPlanesOrientation( 1 ) ? 1 : 0;
+        clippingPlaneOrientation[2] = GetClippingPlanesOrientation( 2 ) ? 1 : 0;
     }
     SceneObject::Serialize(ser);
     ::Serialize( ser, "RenderingMode", this->renderingMode );
@@ -131,11 +170,24 @@ void PolyDataObject::Serialize( Serializer * ser )
     ::Serialize( ser, "ScalarsVisible", this->ScalarsVisible );
     ::Serialize( ser, "VertexColorMode", this->VertexColorMode );
     ::Serialize( ser, "ScalarSourceObjectId", this->ScalarSourceObjectId );
-    ::Serialize( ser, "Opacity", this->opacity );
-    ::Serialize( ser, "ObjectColor", this->objectColor, 3 );
+    ::Serialize( ser, "Opacity", opacity );
+    ::Serialize( ser, "ObjectColor", objectColor, 3 );
     ::Serialize( ser, "CrossSectionVisible", this->CrossSectionVisible );
-    ::Serialize( ser, "SurfaceRemovedOctantNumber", this->SurfaceRemovedOctantNumber );
+    ::Serialize( ser, "ClippingEnabled", m_clippingOn );
+    ::Serialize( ser, "ClippingPlanesOrientation", clippingPlaneOrientation, 3 );
     ::Serialize( ser, "ShowTexture", this->showTexture );
+    ::Serialize( ser, "TextureFileName", this->textureFileName );
+    if( ser->IsReader() )
+    {
+        SetClippingPlanesOrientation( 0, clippingPlaneOrientation[0] == 1 ? true : false );
+        SetClippingPlanesOrientation( 1, clippingPlaneOrientation[1] == 1 ? true : false );
+        SetClippingPlanesOrientation( 2, clippingPlaneOrientation[2] == 1 ? true : false );
+        this->SetOpacity( opacity );
+        this->SetColor( objectColor );
+        this->SetCrossSectionVisible( this->CrossSectionVisible );
+        this->SetRenderingMode( this->renderingMode );
+        this->SetShowTexture( this->showTexture );
+    }
 }
 
 void PolyDataObject::Export()
@@ -173,94 +225,72 @@ bool PolyDataObject::Setup( View * view )
 	if( !success )
 		return false;
 
-    this->SetRenderingMode(this->renderingMode);
-    this->SetColor(this->objectColor);
-    this->SetScalarsVisible(this->ScalarsVisible);
-    this->SetOpacity(this->opacity);
-    this->SetShowTexture(this->showTexture);
-    if (this->SurfaceRemovedOctantNumber > -1)
-        this->RemoveSurfaceFromOctant(this->SurfaceRemovedOctantNumber, true);
-    this->UpdateSettingsWidget();
+    vtkPolyDataMapper * mapper = vtkPolyDataMapper::New();
+    mapper->SetScalarVisibility( this->ScalarsVisible );
+    mapper->UseLookupTableScalarRangeOn();  // make sure mapper doesn't try to modify our color table
+
+    vtkActor * actor = vtkActor::New();
+    actor->SetMapper( mapper );
+    actor->SetUserTransform( this->WorldTransform );
+    this->polydataObjectInstances[ view ] = actor;
+
     if( view->GetType() == THREED_VIEW_TYPE )
     {   
-        vtkPolyDataMapper * mapper = vtkPolyDataMapper::New();
-        mapper->SetScalarVisibility( this->ScalarsVisible );
-        mapper->UseLookupTableScalarRangeOn();  // make sure mapper doesn't try to modify our color table
-
-		vtkActor * actor = vtkActor::New();
-        actor->SetMapper( mapper );
-		actor->SetProperty( this->Property );
-		actor->SetUserTransform( this->WorldTransform );
+        actor->SetProperty( this->Property );
+        mapper->SetInputConnection( m_colorSwitch->GetOutputPort() );
         actor->SetVisibility( this->ObjectHidden ? 0 : 1 );
-
         view->GetRenderer( this->RenderLayer )->AddActor( actor );
-        this->polydataObjectInstances[ view ] = actor;
-
-		mapper->Delete();
-
-        UpdateMapperPipeline();
-        
-        connect( this, SIGNAL( Modified() ), view, SLOT( NotifyNeedRender() ) );
-        this->GetProperty()->GetColor(this->objectColor);
     }
     else
     {
-        this->ShowCrossSection( this->CrossSectionVisible );
+        actor->SetProperty( m_2dProperty );
+        int plane = (int)(view->GetType());
+        mapper->SetInputConnection( m_cutter[plane]->GetOutputPort() );
+        actor->SetVisibility( ( IsHidden() && GetCrossSectionVisible() ) ? 1 : 0 );
+        view->GetOverlayRenderer()->AddActor( actor );
     }
+    mapper->Delete();
 
 	return true;
 }
 
-void PolyDataObject::SetColor(double color[3])
+bool PolyDataObject::Release( View * view )
 {
-    for (int i = 0; i < 3; i++)
-        this->objectColor[i] = color[i];
-    this->Property->SetColor(this->objectColor);
-    if (this->SurfaceCutter)
-        this->SurfaceCutter->SetPropertyColor(this->objectColor);
+    bool success = SceneObject::Release( view );
+    if( !success )
+        return false;
+
+    PolyDataObjectViewAssociation::iterator itAssociations = this->polydataObjectInstances.find( view );
+    if( itAssociations != this->polydataObjectInstances.end() )
+    {
+        vtkActor * actor = (*itAssociations).second;
+        if( view->GetType() == THREED_VIEW_TYPE )
+            view->GetRenderer( this->RenderLayer )->RemoveViewProp( actor );
+        else
+            view->GetOverlayRenderer()->RemoveViewProp( actor );
+        actor->Delete();
+        this->polydataObjectInstances.erase( itAssociations );
+    }
+    return true;
+}
+
+void PolyDataObject::SetColor( double r, double g, double b )
+{
+    this->Property->SetColor( r, g, b );
+    m_2dProperty->SetColor( r, g, b );
     emit Modified();
+}
+
+double * PolyDataObject::GetColor()
+{
+    return this->Property->GetColor();
 }
 
 void PolyDataObject::SetLineWidth( double w )
 {
     this->Property->SetLineWidth( w );
+    m_2dProperty->SetLineWidth( w );
     emit Modified();
-}
-
-bool PolyDataObject::Release( View * view )
-{
-	bool success = SceneObject::Release( view );
-	if( !success )
-		return false;
-
-    if( view->GetType() == THREED_VIEW_TYPE )
-    {
-        this->disconnect( view );
-        
-        PolyDataObjectViewAssociation::iterator itAssociations = this->polydataObjectInstances.find( view );
-    
-        if( itAssociations != this->polydataObjectInstances.end() )
-        {
-            vtkActor * actor = (*itAssociations).second;
-            view->GetRenderer( this->RenderLayer )->RemoveViewProp( actor );
-            actor->Delete();
-            this->polydataObjectInstances.erase( itAssociations );
-			disconnect( view, SLOT(NotifyNeedRender()) );
-        }
-        if (this->Clipper)
-        {
-            disconnect(this->GetManager()->GetMainImagePlanes(), SIGNAL(EndPlaneMove(int)), this, SLOT(UpdateOctant(int)));
-            this->Clipper->RemoveClipActor();
-            this->Clipper->Delete();
-            this->Clipper = 0;
-        }
-        if (this->SurfaceCutter)
-        {
-            this->SurfaceCutter->Delete();
-            this->SurfaceCutter = 0;
-        }
-    }
-        return true;
 }
 
 void PolyDataObject::CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets)
@@ -275,24 +305,16 @@ void PolyDataObject::CreateSettingsWidgets( QWidget * parent, QVector <QWidget*>
 
 void PolyDataObject::SetRenderingMode( int renderingMode )
 {
-    if( renderingMode != this->renderingMode )
-    {
-        this->renderingMode = renderingMode;
-        this->Property->SetRepresentation( this->renderingMode );
-        emit Modified();
-    }
+    this->renderingMode = renderingMode;
+    this->Property->SetRepresentation( this->renderingMode );
+    m_2dProperty->SetRepresentation( this->renderingMode );
+    emit Modified();
 }
 
 void PolyDataObject::SetScalarsVisible( int use )
 {
     this->ScalarsVisible = use;
-        
-    PolyDataObjectViewAssociation::iterator it = this->polydataObjectInstances.begin();
-    for( ; it != this->polydataObjectInstances.end(); ++it )
-    {
-        (*it).second->GetMapper()->SetScalarVisibility( use );
-    }
-
+    this->UpdatePipeline();
     emit Modified();
 }
 
@@ -304,75 +326,22 @@ void PolyDataObject::SetLutIndex( int index )
         this->CurrentLut->Delete();
         this->CurrentLut = 0;
     }
-    UpdateMapperPipeline();
+    UpdatePipeline();
     emit Modified();
 }
 
 void PolyDataObject::SetVertexColorMode( int mode )
 {
     this->VertexColorMode = mode;
-    UpdateMapperPipeline();
+    UpdatePipeline();
     emit Modified();
 }
 
 void PolyDataObject::SetOpacity( double opacity )
 {
-    if( opacity > 1 )
-        this->opacity = 1;
-    else if( opacity < 0 )
-        this->opacity = 0;
-    else
-        this->opacity = opacity;
-
-    this->Property->SetOpacity( this->opacity );
-
+    Q_ASSERT( opacity >= 0.0 && opacity <= 1.0 );
+    this->Property->SetOpacity( opacity );
     emit Modified();
-}
-
-void PolyDataObject::Hide()
-{
-    View * view = 0;
-    PolyDataObjectViewAssociation::iterator it = this->polydataObjectInstances.begin();
-    for( ; it != this->polydataObjectInstances.end(); ++it )
-    {
-        view = (*it).first;
-        if (view->GetType() == THREED_VIEW_TYPE)
-        {
-            vtkActor * actor = (*it).second;
-            actor->VisibilityOff();
-            if (this->CrossSectionVisible)
-            {
-                this->ShowCrossSection(false);
-            }
-            if (this->SurfaceRemovedOctantNumber > -1)
-                this->Clipper->HideClipActor();
-            emit Modified();
-        }
-    }
-}
-
-void PolyDataObject::Show()
-{
-    View * view = 0;
-    PolyDataObjectViewAssociation::iterator it = this->polydataObjectInstances.begin();
-    for( ; it != this->polydataObjectInstances.end(); ++it )
-    {
-        view = (*it).first;
-        if (view->GetType() == THREED_VIEW_TYPE)
-        {
-            vtkActor * actor = (*it).second;
-            if (this->CrossSectionVisible)
-                this->ShowCrossSection(true);
-            if (this->SurfaceRemovedOctantNumber > -1)
-            {
-                this->Clipper->ShowClipActor();
-                actor->VisibilityOff();
-            }
-            else
-                actor->VisibilityOn();
-            emit Modified();
-        }
-    }
 }
 
 void PolyDataObject::UpdateSettingsWidget()
@@ -383,85 +352,44 @@ void PolyDataObject::UpdateSettingsWidget()
 void PolyDataObject::SetCrossSectionVisible( bool showCrossSection )
 {
     this->CrossSectionVisible = showCrossSection;
-    this->ShowCrossSection( showCrossSection );
-}
-
-void PolyDataObject::ShowCrossSection(bool showCrossSection)
-{
-    if( !this->GetManager() ) // too early to set cross section, obect is not added to the scene yet
+    if( IsHidden() )
         return;
-    if (showCrossSection  && !this->ObjectHidden)
-    {
-        if (!this->SurfaceCutter)
-        {
-            this->SurfaceCutter = SurfaceCuttingPlane::New();
-            this->SurfaceCutter->SetManager(this->GetManager());
-            this->SurfaceCutter->SetInput(this->PolyData);
-            this->SurfaceCutter->SetWorldTransform(this->WorldTransform);
-        }
-        this->SurfaceCutter->SetPropertyColor(this->Property->GetColor());
-        this->SurfaceCutter->UpdateCuttingPlane(0);
-        this->SurfaceCutter->UpdateCuttingPlane(1);
-        this->SurfaceCutter->UpdateCuttingPlane(2);
 
-    }
-    else
-    {
-        if (this->SurfaceCutter)
-        {
-            this->SurfaceCutter->Delete();
-            this->SurfaceCutter = 0;
-        }
-    }
-    emit Modified();
-}
-
-void PolyDataObject::RemoveSurfaceFromOctant(int octantNo, bool remove)
-{
-    Q_ASSERT(this->GetManager());
-    View * view = 0;
-    vtkActor * actor = 0;
     PolyDataObjectViewAssociation::iterator it = this->polydataObjectInstances.begin();
     for( ; it != this->polydataObjectInstances.end(); ++it )
     {
-        view = (*it).first;
-        if (view->GetType() == THREED_VIEW_TYPE)
-        {
-            actor = (*it).second;
-            break;
-        }
-    }
-    if (remove)
-    {
-        // we have to remove the original PolyDataObject actor from view
-        actor->VisibilityOff();
-        Octants *octant = this->GetManager()->GetOctantsOfInterest();
-        octant->SetOctantNumber(octantNo);
-        if (!this->Clipper)
-        {
-            this->Clipper = PolyDataClipper::New();
-            this->Clipper->SetManager(this->GetManager());
-            this->Clipper->SetWorldTransform(this->WorldTransform);
-            this->Clipper->SetInput(this->PolyData);
-            this->Clipper->SetActorProperty(this->Property);
-            this->Clipper->SetScalarsVisible(this->ScalarsVisible);
-            this->Clipper->SetClipFunction(octant->GetOctantOfInterest());
-            connect(this->GetManager()->GetMainImagePlanes(), SIGNAL(EndPlaneMove(int)), this, SLOT(UpdateOctant(int)));
-        }
-        this->SurfaceRemovedOctantNumber = octantNo;
-        for (int i = 0; i < 3; i++)
-            this->UpdateOctant(i);
-    }
-    else
-    {
-        actor->VisibilityOn();
-        disconnect(this->GetManager()->GetMainImagePlanes(), SIGNAL(EndPlaneMove(int)), this, SLOT(UpdateOctant(int)));
-        this->Clipper->RemoveClipActor();
-        this->Clipper->Delete();
-        this->Clipper = 0;
-        this->SurfaceRemovedOctantNumber = -1;
+        View * v = (*it).first;
+        vtkActor * actor = (*it).second;
+        if( v->GetType() != THREED_VIEW_TYPE )
+            actor->SetVisibility( showCrossSection ? 1 : 0 );
     }
     emit Modified();
+}
+
+void PolyDataObject::SetClippingEnabled( bool e )
+{
+    m_clippingOn = e;
+    this->UpdatePipeline();
+    emit Modified();
+}
+
+void PolyDataObject::SetClippingPlanesOrientation( int plane, bool positive )
+{
+    Q_ASSERT( plane >= 0 && plane < 3 );
+    vtkDoubleArray * normals = vtkDoubleArray::SafeDownCast( m_clippingPlanes->GetNormals() );
+    double tuple[3] = { 0.0, 0.0, 0.0 };
+    tuple[ plane ] = positive ? -1.0 : 1.0;
+    normals->SetTuple( plane, tuple );
+    m_clippingPlanes->Modified();
+    emit Modified();
+}
+
+bool PolyDataObject::GetClippingPlanesOrientation( int plane )
+{
+    Q_ASSERT( plane >= 0 && plane < 3 );
+    vtkDoubleArray * normals = vtkDoubleArray::SafeDownCast( m_clippingPlanes->GetNormals() );
+    double * tuple = normals->GetTuple3( plane );
+    return tuple[plane] > 0.0 ? false : true;
 }
 
 void PolyDataObject::SetTexture( vtkImageData * texImage )
@@ -497,9 +425,6 @@ void PolyDataObject::SetTexture( vtkImageData * texImage )
 
 void PolyDataObject::SetShowTexture( bool show )
 {
-    if( showTexture == show )
-        return;
-
     this->showTexture = show;
 
     if( show )
@@ -612,17 +537,31 @@ void PolyDataObject::SetScalarSource( ImageObject * im )
     {
         this->ProbeFilter->SetSourceData( 0 );
     }
-    UpdateMapperPipeline();
+    UpdatePipeline();
     emit Modified();
 }
 
-void PolyDataObject::UpdateOctant(int planeNo)
+void PolyDataObject::OnStartCursorInteraction()
 {
-    Q_ASSERT( this->GetManager() );
+    m_interacting = true;
+}
 
-    double pos[3];
-    this->GetManager()->GetMainImagePlanes()->GetPlanesPosition( pos );
-    this->GetManager()->GetOctantsOfInterest()->UpdateOctantOfInterest( pos[planeNo], planeNo );
+void PolyDataObject::OnEndCursorInteraction()
+{
+    m_interacting = false;
+    this->UpdateClippingPlanes();
+}
+
+void PolyDataObject::OnCursorPositionChanged()
+{
+    this->UpdateCuttingPlane();
+    if( !m_interacting )
+        this->UpdateClippingPlanes();
+}
+
+void PolyDataObject::OnReferenceChanged()
+{
+    this->UpdateClippingPlanes();
 }
 
 void PolyDataObject::OnScalarSourceDeleted()
@@ -636,33 +575,129 @@ void PolyDataObject::OnScalarSourceModified()
     if( this->LutBackup != newLut )
     {
         this->LutBackup = newLut;
-        UpdateMapperPipeline();
+        UpdatePipeline();
     }
     emit Modified();
 }
 
-void PolyDataObject::UpdateMapperPipeline()
+void PolyDataObject::Hide()
 {
+    PolyDataObjectViewAssociation::iterator it = this->polydataObjectInstances.begin();
+    for( ; it != this->polydataObjectInstances.end(); ++it )
+    {
+        vtkActor * actor = (*it).second;
+        actor->VisibilityOff();
+    }
+    emit Modified();
+}
+
+void PolyDataObject::Show()
+{
+    PolyDataObjectViewAssociation::iterator it = this->polydataObjectInstances.begin();
+    for( ; it != this->polydataObjectInstances.end(); ++it )
+    {
+        View * v = (*it).first;
+        vtkActor * actor = (*it).second;
+        if( v->GetType() == THREED_VIEW_TYPE || GetCrossSectionVisible() )
+            actor->VisibilityOn();
+    }
+    emit Modified();
+}
+
+void PolyDataObject::ObjectAddedToScene()
+{
+    connect( GetManager(), SIGNAL(ReferenceObjectChanged()), this, SLOT(OnReferenceChanged()) );
+    connect( GetManager(), SIGNAL(ReferenceTransformChanged()), this, SLOT(OnReferenceChanged()) );
+    connect( GetManager(), SIGNAL(CursorPositionChanged()), this, SLOT(OnCursorPositionChanged()) );
+    connect( GetManager(), SIGNAL(StartCursorInteraction()), this, SLOT(OnStartCursorInteraction()) );
+    connect( GetManager(), SIGNAL(EndCursorInteraction()), this, SLOT(OnEndCursorInteraction()) );
+    m_referenceToPolyTransform->Identity();
+    m_referenceToPolyTransform->Concatenate( GetWorldTransform() );
+    m_referenceToPolyTransform->Concatenate( GetManager()->GetInverseReferenceTransform() );
+    UpdateCuttingPlane();
+    UpdateClippingPlanes();
+}
+
+void PolyDataObject::ObjectAboutToBeRemovedFromScene()
+{
+    m_referenceToPolyTransform->Identity();
+    disconnect( GetManager(), SIGNAL(ReferenceObjectChanged()), this, SLOT(OnReferenceChanged()) );
+    disconnect( GetManager(), SIGNAL(ReferenceTransformChanged()), this, SLOT(OnReferenceChanged()) );
+    disconnect( GetManager(), SIGNAL(CursorPositionChanged()), this, SLOT(OnCursorPositionChanged()) );
+    disconnect( GetManager(), SIGNAL(StartCursorInteraction()), this, SLOT(OnStartCursorInteraction()) );
+    disconnect( GetManager(), SIGNAL(EndCursorInteraction()), this, SLOT(OnEndCursorInteraction()) );
+}
+
+void PolyDataObject::InternalPostSceneRead()
+{
+    Q_ASSERT( this->GetManager() );
+
+    // reconnect to the image object from which scalars are computed
+    if( this->ScalarSourceObjectId != SceneObject::InvalidObjectId )
+    {
+        SceneObject * scalarObj = this->GetManager()->GetObjectByID( this->ScalarSourceObjectId );
+        ImageObject * scalarImageObj = ImageObject::SafeDownCast( scalarObj );
+        this->SetScalarSource( scalarImageObj );
+    }
+    emit ObjectViewChanged();
+}
+
+void PolyDataObject::UpdateClippingPlanes()
+{
+    double pos[3] = { 0.0, 0.0, 0.0 };
+    GetManager()->GetCursorPosition( pos );
+    vtkPoints * origins = m_clippingPlanes->GetPoints();
+    origins->SetPoint( 0, pos[0], 0.0, 0.0 );
+    origins->SetPoint( 1, 0.0, pos[1], 0.0 );
+    origins->SetPoint( 2, 0.0, 0.0, pos[2] );
+    m_clippingPlanes->Modified();
+    emit Modified();
+}
+
+void PolyDataObject::UpdateCuttingPlane()
+{
+    double cursorPos[3] = { 0.0, 0.0, 0.0 };
+    GetManager()->GetCursorPosition( cursorPos );
+    m_cuttingPlane[0]->SetOrigin( cursorPos[0], 0.0, 0.0 );
+    m_cuttingPlane[1]->SetOrigin( 0.0, cursorPos[1], 0.0 );
+    m_cuttingPlane[2]->SetOrigin( 0.0, 0.0, cursorPos[2] );
+    emit Modified();
+}
+
+void PolyDataObject::UpdatePipeline()
+{
+    if( !this->PolyData )
+        return;
+
+    m_clipper->SetInputData( this->PolyData );
+    if( IsClippingEnabled() )
+        m_clippingSwitch->SetInputConnection( m_clipper->GetOutputPort() );
+    else
+        m_clippingSwitch->SetInputData( this->PolyData );
+
+    this->ProbeFilter->SetInputConnection( m_clippingSwitch->GetOutputPort() );
+    this->TextureMap->SetInputConnection( m_clippingSwitch->GetOutputPort() );
+
+    m_colorSwitch->SetInputConnection( m_clippingSwitch->GetOutputPort() );
+    if( this->ScalarsVisible )
+    {
+        if( this->VertexColorMode == 1 && this->ScalarSource )
+            m_colorSwitch->SetInputConnection( this->ProbeFilter->GetOutputPort() );
+        else if( this->showTexture )
+            m_colorSwitch->SetInputConnection( this->TextureMap->GetOutputPort() );
+    }
+
+    // Update mappers
     PolyDataObjectViewAssociation::iterator it = this->polydataObjectInstances.begin();
     while( it != this->polydataObjectInstances.end() )
     {
         vtkActor * actor = (*it).second;
         vtkMapper * mapper = actor->GetMapper();
+        mapper->SetScalarVisibility( this->ScalarsVisible );
         if( this->VertexColorMode == 1 && this->ScalarSource )
-        {
-            mapper->SetInputConnection( this->ProbeFilter->GetOutputPort() );
             mapper->SetLookupTable( this->ScalarSource->GetLut() );
-        }
-        else if( this->showTexture )
-        {
-            mapper->SetInputConnection( this->TextureMap->GetOutputPort() );
-        }
-        else
-        {
-            mapper->SetInputDataObject( this->PolyData );
-            if( this->CurrentLut )
-                mapper->SetLookupTable( this->CurrentLut );
-        }
+        else if ( this->CurrentLut )
+            mapper->SetLookupTable( this->CurrentLut );
         ++it;
     }
 }
@@ -690,16 +725,22 @@ vtkScalarsToColors * PolyDataObject::GetCurrentLut()
     return this->CurrentLut;
 }
 
-void PolyDataObject::InternalPostSceneRead()
+void PolyDataObject::InitializeClippingPlanes()
 {
-    Q_ASSERT( this->GetManager() );
+    vtkDoubleArray * clipPlaneNormals = vtkDoubleArray::New();
+    clipPlaneNormals->SetNumberOfComponents( 3 );
+    clipPlaneNormals->SetNumberOfTuples(3);
+    clipPlaneNormals->SetTuple3( 0, -1.0, 0.0, 0.0 );
+    clipPlaneNormals->SetTuple3( 1, 0.0, -1.0, 0.0 );
+    clipPlaneNormals->SetTuple3( 2, 0.0, 0.0, -1.0 );
+    m_clippingPlanes->SetNormals( clipPlaneNormals );
+    clipPlaneNormals->Delete();
 
-    // reconnect to the image object from which scalars are computed
-    if( this->ScalarSourceObjectId != SceneObject::InvalidObjectId )
-    {
-        SceneObject * scalarObj = this->GetManager()->GetObjectByID( this->ScalarSourceObjectId );
-        ImageObject * scalarImageObj = ImageObject::SafeDownCast( scalarObj );
-        this->SetScalarSource( scalarImageObj );
-    }
-    emit ObjectViewChanged();
+    vtkPoints * p = vtkPoints::New();
+    p->SetNumberOfPoints( 3 );
+    p->SetPoint( 0, 0.0, 0.0, 0.0 );
+    p->SetPoint( 1, 0.0, 0.0, 0.0 );
+    p->SetPoint( 2, 0.0, 0.0, 0.0 );
+    m_clippingPlanes->SetPoints( p );
+    p->Delete();
 }

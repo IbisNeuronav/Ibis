@@ -14,23 +14,15 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "vtkActor.h"
 #include "view.h"
 #include "vtkTransform.h"
-#include "vtkAssembly.h"
-#include "vtkMatrixToLinearTransform.h"
 #include "vtkAxes.h"
 #include "vtkMath.h"
-#include "vtkTransformPolyDataFilter.h"
-#include "vtkPolyDataNormals.h"
-#include "vtkSphereSource.h"     
 #include <vtkProperty.h>
 #include "scenemanager.h"
 #include "pointerobjectsettingsdialog.h"
 #include "pointsobject.h"
-#include "vtkTrackerTool.h"
 
 #include "application.h"
 #include "hardwaremodule.h"
-
-vtkCxxSetObjectMacro( PointerObject, CalibrationMatrix, vtkMatrix4x4 );
 
 PointerObject::PerViewElements::PerViewElements() 
 { 
@@ -44,6 +36,10 @@ PointerObject::PerViewElements::~PerViewElements()
 
 PointerObject::PointerObject()
 {
+    m_lastTipCalibrationRMS = 0.0;
+    m_backupCalibrationRMS = 0.0;
+    m_backupCalibrationMatrix = vtkMatrix4x4::New();
+
     m_pointerAxis[0] = 0.0;
     m_pointerAxis[1] = 0.0;
     m_pointerAxis[2] = 1.0;
@@ -53,16 +49,12 @@ PointerObject::PointerObject()
 
     m_tipLength = 5.0;
 
-    m_trackerToolIndex = -1;
-    this->CalibrationMatrix = 0;
     this->CurrentPointerPickedPointsObject = 0;
     this->AllowChangeParent = false;
 }
 
 PointerObject::~PointerObject()
 {
-    if( this->CalibrationMatrix )
-        this->CalibrationMatrix->UnRegister( this );
 }
 
 bool PointerObject::Setup( View * view )
@@ -142,42 +134,48 @@ double * PointerObject::GetTipPosition()
     return this->GetWorldTransform()->GetPosition();
 }
 
-double * PointerObject::GetMainAxisPosition()
+void PointerObject::GetMainAxisPosition( double pos[3] )
 {
-    Q_ASSERT( m_trackerToolIndex != -1 );
     double localPos[3] = { 0.0, 0.0, 140.0 };   // simtodo : this is hardcoded for fs613 : implement way to set this
-    return Application::GetHardwareModule()->GetTrackerToolTransform( m_trackerToolIndex )->TransformPoint( localPos[0], localPos[1], localPos[2] );
+    GetWorldTransform()->TransformPoint( localPos, pos );
 }
 
-TrackerToolState PointerObject::GetState()
+void PointerObject::StartTipCalibration()
 {
-    Q_ASSERT( m_trackerToolIndex != -1 );
-    return Application::GetHardwareModule()->GetTrackerToolState( m_trackerToolIndex );
+    m_backupCalibrationRMS = m_lastTipCalibrationRMS;
+    m_backupCalibrationMatrix->DeepCopy( GetCalibrationMatrix() );
+    GetHardwareModule()->StartTipCalibration( this );
+    connect( &Application::GetInstance(), SIGNAL(IbisClockTick()), this, SLOT(UpdateTipCalibration()) );
 }
 
-bool PointerObject::IsMissing()
+void PointerObject::UpdateTipCalibration()
 {
-    Q_ASSERT( m_trackerToolIndex != -1 );
-    return Application::GetHardwareModule()->GetTrackerToolState( m_trackerToolIndex ) == Missing;
+    vtkMatrix4x4 * mat = vtkMatrix4x4::New();
+    m_lastTipCalibrationRMS = GetHardwareModule()->DoTipCalibration( this, mat );
+    SetCalibrationMatrix( mat );
+    emit Modified();
 }
 
-bool PointerObject::IsOutOfView()
+bool PointerObject::IsCalibratingTip()
 {
-    Q_ASSERT( m_trackerToolIndex != -1 );
-    return Application::GetHardwareModule()->GetTrackerToolState( m_trackerToolIndex ) == OutOfView;
+    return GetHardwareModule()->IsCalibratingTip( this );
 }
 
-bool PointerObject::IsOutOfVolume()
+double PointerObject::GetTipCalibrationRMSError()
 {
-    Q_ASSERT( m_trackerToolIndex != -1 );
-    return Application::GetHardwareModule()->GetTrackerToolState( m_trackerToolIndex ) == OutOfVolume;
+    return m_lastTipCalibrationRMS;
 }
 
-bool PointerObject::IsOk()
+void PointerObject::CancelTipCalibration()
 {
-    Q_ASSERT( m_trackerToolIndex != -1 );
-    TrackerToolState state = Application::GetHardwareModule()->GetTrackerToolState( m_trackerToolIndex );
-    return( state != Missing && state != OutOfView && state != OutOfVolume );
+    GetHardwareModule()->StopTipCalibration( this );
+    m_lastTipCalibrationRMS = m_backupCalibrationRMS;
+    SetCalibrationMatrix( m_backupCalibrationMatrix );
+}
+
+void PointerObject::StopTipCalibration()
+{
+    GetHardwareModule()->StopTipCalibration( this );
 }
 
 void PointerObject::CreatePointerPickedPointsObject()
@@ -198,6 +196,7 @@ void PointerObject::ManagerAddPointerPickedPointsObject()
 {
     Q_ASSERT(this->GetManager());
     this->GetManager()->AddObject( this->CurrentPointerPickedPointsObject );
+    this->GetManager()->SetCurrentObject( this->CurrentPointerPickedPointsObject );
 }
 
 void PointerObject::CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets )
@@ -272,6 +271,7 @@ void PointerObject::UpdateSettings()
     emit SettingsChanged();
 }
 
+// simtodo : this should not be needed
 void PointerObject::UpdateTip()
 {
     if( this->ObjectHidden )
