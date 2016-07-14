@@ -53,7 +53,6 @@ endforeach()
 
 # 2 - Validate the plugin dependencies and make sure there are no cycles.
 macro( CheckPlugin pluginName neededBy stack )
-  message("Checking plugin ${pluginName} needed by ${neededBy}. Is plugin declared: ${${pluginName}Declared}")
   if( NOT DEFINED ${pluginName}Declared )
     message( FATAL_ERROR "Plugin ${neededBy} depends on plugin ${pluginName} which is not available." )
   elseif( NOT ${${pluginName}Option} )
