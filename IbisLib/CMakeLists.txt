@@ -36,7 +36,6 @@ SET( IGNS_IBISLIB_SRC
                      gui/aboutbicigns.cpp
                      gui/aboutpluginswidget.cpp
                      gui/trackerstatusdialog.cpp
-                     gui/hardwaresettings.cpp
                      gui/quadviewwindow.cpp
                      gui/objecttreewidget.cpp
                      gui/objecttreemodel.cpp
@@ -101,7 +100,6 @@ SET( IGNS_IBISLIB_HDR_MOC
                          gui/aboutbicigns.h
                          gui/aboutpluginswidget.h
                          gui/trackerstatusdialog.h
-                         gui/hardwaresettings.h
                          gui/quadviewwindow.h
                          gui/objecttreewidget.h
                          gui/objecttreemodel.h
@@ -130,7 +128,6 @@ SET( IGNS_IBISLIB_HDR_MOC
 set( IGNS_IBISLIB_UI
             gui/aboutbicigns.ui
             gui/aboutpluginswidget.ui
-            gui/hardwaresettings.ui
             gui/imageobjectsettingsdialog.ui
             gui/imageobjectvolumesettingswidget.ui
             gui/usacquisitionsettingswidget.ui

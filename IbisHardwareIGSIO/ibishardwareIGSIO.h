@@ -8,33 +8,34 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
-#ifndef __IbisHardwareModule_h_
-#define __IbisHardwareModule_h_
+#ifndef __IbisHardwareIGSIO_h_
+#define __IbisHardwareIGSIO_h_
 
 #include "hardwaremodule.h"
+#include "vtkIGTLIODevice.h"
 
-class Tracker;
-class TrackedVideoSource;
-class TrackerToolDisplayManager;
 class QMenu;
+class qIGTLIOLogicController;
+class qIGTLIOClientWidget;
+class vtkIGTLIOLogic;
 
-class IbisHardwareModule : public QObject, public HardwareModule
+class IbisHardwareIGSIO : public QObject, public HardwareModule
 {
     
     Q_OBJECT
     Q_INTERFACES( IbisPlugin )
-    Q_PLUGIN_METADATA(IID "Ibis.IbisHardwareModule" )
+    Q_PLUGIN_METADATA(IID "Ibis.IbisHardwareIGSIO" )
     
 public:
 
-    vtkTypeMacro( IbisHardwareModule, HardwareModule );
+    vtkTypeMacro( IbisHardwareIGSIO, HardwareModule );
 
-    static IbisHardwareModule * New() { return new IbisHardwareModule; }
-    IbisHardwareModule();
-    ~IbisHardwareModule();
+    static IbisHardwareIGSIO * New() { return new IbisHardwareIGSIO; }
+    IbisHardwareIGSIO();
+    ~IbisHardwareIGSIO();
 
     // Implementation of IbisPlugin interface
-    virtual QString GetPluginName() { return QString("IbisHardwareModule"); }
+    virtual QString GetPluginName() { return QString("IbisHardwareIGSIO"); }
 
     // Implementation of the HardwareModule interface
     virtual void AddSettingsMenuEntries( QMenu * menu );
@@ -59,23 +60,30 @@ public:
     virtual bool IsCalibratingTip( PointerObject * p );
     virtual void StopTipCalibration( PointerObject * p );
 
-    // Local methods
-    TrackedVideoSource * GetVideoSource( int index ) { return m_trackedVideoSource; } // simtodo : allow more than one source
-
 private slots:
 
-    void OpenVideoSettingsDialog();
-    void OpenTrackerSettingsDialog();
-    void OnWriteHardwareSettingsMenuActivated();
+    void OpenSettingsWidget();
 
 protected:
 
-    void ReadHardwareConfig();
-    void WriteHardwareConfig();
-    void InternalWriteHardwareConfig( QString filename );
+    void FindNewTools();
+    void FindRemovedTools();
+    int FindToolByName( QString name );
+    bool IoHasDevice( vtkIGTLIODevicePointer device );
+    bool ModuleHasDevice( vtkIGTLIODevicePointer device );
+    TrackedSceneObject * InstanciateSceneObjectFromDevice( vtkIGTLIODevicePointer device );
 
-    TrackedVideoSource          * m_trackedVideoSource;
-    Tracker                     * m_tracker;
+    struct Tool
+    {
+        TrackedSceneObject * sceneObject;
+        vtkIGTLIODevicePointer ioDevice;
+    };
+    typedef QList< Tool* > toolList;
+    toolList m_tools;
+
+    vtkSmartPointer<vtkIGTLIOLogic> m_logic;
+    qIGTLIOLogicController * m_logicController;
+    qIGTLIOClientWidget * m_clientWidget;
 };
 
 #endif

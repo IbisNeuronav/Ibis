@@ -33,6 +33,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "lookuptablemanager.h"
 #include "vtkImageConstantPad.h"
 #include "vtkPassThrough.h"
+#include "vtkPiecewiseFunctionLookupTable.h"
 
 ObjectSerializationMacro( UsProbeObject );
 ObjectSerializationMacro( UsProbeObject::CalibrationMatrixInfo );
@@ -365,6 +366,13 @@ void UsProbeObject::SetCurrentLUTIndex( int index )
 
 void UsProbeObject::OnUpdate()
 {
+    //std::cout << "image size: ( " << GetVideoImageWidth() << ", " << GetVideoImageHeight() << " ) - num comp: " << GetVideoImageNumberOfComponents() << std::endl;
+
+    //vtkImageData * videoImage = GetVideoOutput();
+    //double * orig = videoImage->GetOrigin();
+    //std::cout << "origin: ( " << orig[0] << ", " << orig[1] << ", " << orig[2] << " )" << std::endl;
+    //double * spacing = videoImage->GetSpacing();
+    //std::cout << "spacing: ( " << spacing[0] << ", " << spacing[1] << ", " << spacing[2] << " )" << std::endl;
     emit Modified();
 }
 

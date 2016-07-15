@@ -39,6 +39,7 @@ public:
     bool IsOutOfVolume() { return m_state == OutOfVolume; }
     bool IsOk() { return m_state == Ok; }
 
+    void SetInputMatrix( vtkMatrix4x4 * m );
     void SetInputTransform( vtkTransform * t );
     vtkTransform * GetUncalibratedTransform() { return m_transform; }
     void SetCalibrationMatrix( vtkMatrix4x4 * mat );

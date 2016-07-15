@@ -11,7 +11,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "mainwindow.h"
 #include "application.h"
 #include "hardwaremodule.h"
-#include "hardwaresettings.h"
 #include "imageobject.h"
 #include "pointsobject.h"
 #include "scenemanager.h"
@@ -98,11 +97,7 @@ MainWindow::MainWindow( QWidget * parent )
         // Creates settings menu
         // -----------------------------------------
         QMenu * settingsMenu = menuBar()->addMenu( tr("&Settings") );
-        Application::GetHardwareModule()->AddSettingsMenuEntries( settingsMenu );
-        settingsMenu->addSeparator();
-        settingsMenu->addAction( tr("&Save Hardware Config"), this, SLOT( SaveHardwareConfig() ) );
-        settingsMenu->addAction( tr("&Save Hardware Config As"), this, SLOT( SaveHardwareConfigAs() ) );
-        settingsMenu->addAction( tr("Switch Hardware Config"), this, SLOT( SwitchHardwareConfig() ) );
+        Application::GetInstance().AddHardwareSettingsMenuEntries( settingsMenu );
     }
 
     // -----------------------------------------
@@ -356,28 +351,6 @@ void MainWindow::NewPointSet()
     manager->AddObject( pointsObject );
     manager->SetCurrentObject( pointsObject );
     pointsObject->Delete();
-}
-
-// Check if the last config file is valid. Otherwise, ask user and if no path is provided, do nothing
-void MainWindow::SaveHardwareConfig()
-{
-    this->CommonSaveHardwareConfig( false );
-}
-
-void MainWindow::SaveHardwareConfigAs()
-{
-    this->CommonSaveHardwareConfig( true );
-}
-
-void MainWindow::SwitchHardwareConfig()
-{
-    QString initialChoice = Application::GetInstance().GetSettings()->LastConfigFile;
-    HardwareSettings * hwSettingsDlg = new HardwareSettings( initialChoice );
-    QString configFile = initialChoice;
-    if( hwSettingsDlg->exec() == QDialog::Accepted )
-        configFile = hwSettingsDlg->GetSelectedHardwareSettingsPath();
-
-    Application::GetInstance().InitHardware( configFile.toUtf8().data() );
 }
 
 void MainWindow::ViewXPlaneToggled(bool viewOn)
@@ -764,35 +737,9 @@ void MainWindow::UpdateMainSplitter()
     m_mainSplitter->setSizes( sizes );
 }
 
-void MainWindow::CommonSaveHardwareConfig( bool alwaysAsk )
-{
-    if (Application::GetInstance().IsViewerOnly())
-        return;
-
-    QString defaultFilename = Application::GetInstance().GetSettings()->LastConfigFile;
-    if( defaultFilename.isEmpty() )
-        defaultFilename = QDir::homePath() + "/" + IGNS_CONFIGURATION_SUBDIRECTORY + "/ibis_default_hardware_config.xml";
-
-    QString filename = Application::GetInstance().GetSettings()->LastConfigFile;
-    if( filename.isEmpty() || alwaysAsk )
-    {
-        filename = Application::GetInstance().GetSaveFileName( tr("Save Hardware config"), defaultFilename, tr("Config File (*.xml)") );
-        Application::GetInstance().GetSettings()->LastConfigFile = filename;
-    }
-
-    if( !filename.isEmpty() )
-    {
-        Application::GetHardwareModule()->WriteHardwareConfig( filename.toUtf8().data(), m_windowClosing );
-    }
-}
-
 void MainWindow::closeEvent( QCloseEvent * event )
 {
     m_windowClosing = true;
-
-    // Save hardware config if needed
-    if( !Application::GetInstance().IsViewerOnly() )
-        this->SaveHardwareConfig();
 
     // backup window settings
     ApplicationSettings * s = Application::GetInstance().GetSettings();

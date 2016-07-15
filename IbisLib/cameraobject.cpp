@@ -285,13 +285,13 @@ int CameraObject::GetImageHeight()
 void CameraObject::AddClient()
 {
     if( IsDrivenByHardware() )
-        Application::GetHardwareModule()->AddTrackedVideoClient( this );
+        GetHardwareModule()->AddTrackedVideoClient( this );
 }
 
 void CameraObject::RemoveClient()
 {
     if( IsDrivenByHardware() )
-        Application::GetHardwareModule()->RemoveTrackedVideoClient( this );
+        GetHardwareModule()->RemoveTrackedVideoClient( this );
 }
 
 bool CameraObject::Setup( View * view )

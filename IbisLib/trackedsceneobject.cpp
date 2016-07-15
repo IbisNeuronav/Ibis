@@ -127,6 +127,12 @@ void TrackedSceneObject::SetState( TrackerToolState state )
     emit Modified();
 }
 
+void TrackedSceneObject::SetInputMatrix( vtkMatrix4x4 * m )
+{
+    m_transform->SetMatrix( m );
+    emit Modified();
+}
+
 void TrackedSceneObject::SetInputTransform( vtkTransform * t )
 {
     m_transform->SetInput( t );

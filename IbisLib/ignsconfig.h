@@ -13,7 +13,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #define TAG_CONFIGURATION_H
 
 #define IGNS_CONFIGURATION_SUBDIRECTORY  ".ibis"
-#define IGNS_IBIS_CONFIG                 "ibis_config.xml"
 #define IGNS_WORKING_DIRECTORY           "/.ibisscene"
 
 #endif //TAG_CONFIGURATION_H

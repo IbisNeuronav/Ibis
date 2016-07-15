@@ -42,6 +42,7 @@ class vtkMatrix4x4;
 class QuadViewWindow;
 class ImageObject;
 class PointsObject;
+class QMenu;
 
 struct ApplicationSettings
 {
@@ -49,7 +50,6 @@ struct ApplicationSettings
     ~ApplicationSettings();
     void LoadSettings( QSettings & settings );
     void SaveSettings( QSettings & settings );
-    QString LastConfigFile;
     QString WorkingDirectory;
     QSize MainWindowSize;
     QPoint MainWindowPosition;
@@ -104,7 +104,12 @@ public:
     void AddGlobalEventHandler( GlobalEventHandler * h );
     void RemoveGlobalEventHandler( GlobalEventHandler * h );
     bool GlobalKeyEvent( QKeyEvent * e );
-    void InitHardware( const char * filename = 0 );
+    
+    void InitHardware();
+    
+    void AddHardwareSettingsMenuEntries( QMenu * menu );
+    void AddToolObjectsToScene();
+    void RemoveToolObjectsFromScene();
 
     bool IsViewerOnly() { return m_viewerOnly; }
 
@@ -114,7 +119,6 @@ public:
     static QString GetGitHashShort();
 
     static SceneManager * GetSceneManager();
-    static HardwareModule * GetHardwareModule();
     static LookupTableManager * GetLookupTableManager();
 
     // Application Settings (saved automatically at each run )
@@ -200,7 +204,7 @@ private:
     QuadViewWindow              * m_quadView;
     SceneManager                * m_sceneManager;
     UpdateManager               * m_updateManager;
-    HardwareModule              * m_hardwareModule;
+    QList<HardwareModule*>        m_hardwareModules;
     LookupTableManager          * m_lookupTableManager;
     QList<GlobalEventHandler*>    m_globalEventHandlers;
 

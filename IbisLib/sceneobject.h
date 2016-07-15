@@ -122,6 +122,8 @@ public:
     virtual void SetObjectDeletable( bool d ) { ObjectDeletable = d; }
     bool IsObjectDeletable() { return ObjectDeletable; }
 
+    bool IsObjectInScene() { return this->Manager != 0; }
+
     vtkGetObjectMacro( Manager, SceneManager );
 
     // For interactive objects. To get callback from the view in subclasses, you need to reimplement

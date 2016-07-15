@@ -8,22 +8,15 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
-#include <iostream>
 #include <QApplication>
 #include <QTimer>
-#include <QtPlugin>
-#include <QFileInfo>
 #include <QFile>
 #include <QDir>
 #include <QMessageBox>
 #include "application.h"
 #include "mainwindow.h"
 #include "commandlinearguments.h"
-#include "hardwaresettings.h"
 #include "vtkObject.h"
-
-QString GetHardwareConfigFile( CommandLineArguments & cmdArgs );
-QString GetSystemTypeString();
 
 int main( int argc, char** argv )
 {
@@ -41,35 +34,22 @@ int main( int argc, char** argv )
         QMessageBox::warning( 0, "WARNING!", QString("The Ibis platform is not approved for clinical use.") );
 	
 	// On Mac, we always do Viewer-mode only without command-line params for now
-	if( GetSystemTypeString() == "Mac" )
-		Application::CreateInstance( true );
-	else 
-	{
-		// Parse command-line arguments
-		CommandLineArguments cmdArgs;
-		QStringList args = a.arguments();
-		cmdArgs.ParseArguments( args );
+    // Parse command-line arguments
+    CommandLineArguments cmdArgs;
+    QStringList args = a.arguments();
+    cmdArgs.ParseArguments( args );
 
-		// Create unique instance of application
-		Application::CreateInstance( cmdArgs.GetViewerOnly() );
+    // Create unique instance of application
+    Application::CreateInstance( cmdArgs.GetViewerOnly() );
 
-		// Tell the application to load files specified on the command line immediately after startup
-		Application::GetInstance().SetInitialDataFiles( cmdArgs.GetDataFilesToLoad() );
+    // Tell the application to load files specified on the command line immediately after startup
+    Application::GetInstance().SetInitialDataFiles( cmdArgs.GetDataFilesToLoad() );
 
-		// Initialize Hardware if not in viewer-only mode
-		if( !cmdArgs.GetViewerOnly() )
-		{
-			if( cmdArgs.GetLoadDefaultConfig() )
-				Application::GetInstance().InitHardware();
-			else
-			{
-				QString configFile = GetHardwareConfigFile( cmdArgs );
-				if( configFile.isEmpty() )
-					exit(0);
-                Application::GetInstance().InitHardware( configFile.toUtf8().data() );
-			}
-		}
-	}
+    // Initialize Hardware if not in viewer-only mode
+    if( !cmdArgs.GetViewerOnly() )
+    {
+        Application::GetInstance().InitHardware();
+    }
 
     // Application is initialized properly. Now we can load plugins
     Application::GetInstance().LoadPlugins();
@@ -91,39 +71,3 @@ int main( int argc, char** argv )
     Application::DeleteInstance();
     return ret;
 }
-
-
-QString GetHardwareConfigFile( CommandLineArguments & cmdArgs )
-{
-    QString configFile;
-    if( cmdArgs.GetLoadPrevConfig() )
-        configFile = Application::GetInstance().GetSettings()->LastConfigFile;
-    else if( cmdArgs.GetLoadConfigFile() )
-        configFile = cmdArgs.GetConfigFile();
-    QFileInfo info( configFile );
-    if( !info.exists() || !info.isReadable() )
-    {
-        QString initialChoice = Application::GetInstance().GetSettings()->LastConfigFile;
-        HardwareSettings * hwSettingsDlg = new HardwareSettings( initialChoice );
-        if( hwSettingsDlg->exec() == QDialog::Accepted )
-            configFile = hwSettingsDlg->GetSelectedHardwareSettingsPath();
-        delete hwSettingsDlg;
-    }
-    return configFile;
-}
-
-#include <QtGlobal>
-
-QString GetSystemTypeString()
-{
-#ifdef Q_OS_LINUX
-    return QString("Linux");
-#endif
-	
-#ifdef Q_OS_OSX
-    return QString("Mac");
-#endif
-	
-    return QString("Unsupported");
-}
-

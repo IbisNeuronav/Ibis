@@ -38,7 +38,12 @@ foreach( plugin ${PluginLibs} )
 endforeach( plugin )
 
 # Add plugin def for the hardware module
-file( APPEND ${ImportPluginsSourceFile} "Q_IMPORT_PLUGIN(IbisHardwareModule);\n" )
+if( IBIS_BUILD_DEFAULT_HARDWARE_MODULE )
+    file( APPEND ${ImportPluginsSourceFile} "Q_IMPORT_PLUGIN(IbisHardwareModule);\n" )
+endif()
+if( IBIS_BUILD_IGSIO_HARDWARE_MODULE )
+    file( APPEND ${ImportPluginsSourceFile} "Q_IMPORT_PLUGIN(IbisHardwareIGSIO);\n" )
+endif()
 
 #================================
 # Define mac osx bundle
@@ -84,13 +89,13 @@ IF( OPENCL_FOUND )
 ENDIF()
 
 
-set( ignsLibsToUse IbisHardware IbisLib vtkVideo vtkQt vtkTracker vtkUltrasound vtkMNI vtkExtensions )
+set( ignsLibsToUse IbisLib vtkVideo vtkQt vtkTracker vtkUltrasound vtkMNI vtkExtensions )
 
 if( USE_POINT_GREY_CAMERA )
     set( flycaptureLib flycapture )
 endif()
 
-TARGET_LINK_LIBRARIES( ${exec_name} ${PluginLibs} ${PluginExternalLibs} ${ignsLibsToUse} ${QT_LIBRARIES}
+TARGET_LINK_LIBRARIES( ${exec_name} ${PluginLibs} ${PluginExternalLibs} ${HardwareModulesLibs} ${ignsLibsToUse} ${QT_LIBRARIES}
                                     ${VTK_LIBRARIES} ${MINC4ITK_LIBRARIES}
                                     ${itkLibsToUse} ${OpenCV_LIBS} ${flycaptureLib} svl ${gpuLibs} )
 qt5_use_modules( ${exec_name} Widgets Xml )

@@ -52,9 +52,6 @@ private slots:
     void fileSaveSceneAs();
     void fileLoadScene();
     void NewPointSet();
-    void SaveHardwareConfig();
-    void SaveHardwareConfigAs();
-    void SwitchHardwareConfig();
     void ModifyFileMenu( );
     void ModifyNewObjectFileMenu( );
     void ModifyViewMenu( );
@@ -89,7 +86,6 @@ protected:
     void closeEvent( QCloseEvent * event );
     void ClosePluginTab( QAction * action, int index );
     void UpdateMainSplitter();
-    void CommonSaveHardwareConfig( bool alwaysAsk );
 
     // Handling of Drag and Drop
     void dragEnterEvent(QDragEnterEvent *event);

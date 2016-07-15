@@ -41,6 +41,9 @@ include_directories( ${CMAKE_CURRENT_BINARY_DIR} )           # for files generat
 set( IbisHardwareSrcAll ${IbisHardwareSrc} ${IbisHardwareHdr} ${IbisHardwareHdrMoc} ${IbisHardwareMoc} ${IbisHardwareUiHdr} )
 add_library( IbisHardware ${IbisHardwareSrcAll} )
 
+# append necessary libraries to the list for ibis to link
+set( HardwareModulesLibs ${HardwareModulesLibs} IbisHardware PARENT_SCOPE )
+
 IF( CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64" )
   SET_TARGET_PROPERTIES( IbisHardware PROPERTIES COMPILE_FLAGS "-fPIC")
 ENDIF( CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64" )
