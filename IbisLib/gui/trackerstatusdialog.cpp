@@ -91,8 +91,8 @@ void ToolUI::UpdateUI()
         this->ToolStateLabel->setStyleSheet("background-color: red");
         break;
     case Undefined:
-        this->ToolStateLabel->setText( "Tracker not initialized" );
-        this->ToolStateLabel->setStyleSheet("background-color: red");
+        this->ToolStateLabel->setText( "Undefined" );
+        this->ToolStateLabel->setStyleSheet("background-color: grey");
         break;
     }
 }

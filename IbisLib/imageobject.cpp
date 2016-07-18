@@ -24,6 +24,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "vtkVolume.h"
 #include "vtkVolumeProperty.h"
 #include "vtkPiecewiseFunction.h"
+#include "vtkPiecewiseFunctionLookupTable.h"
 #include "vtkColorTransferFunction.h"
 #include "vtkImageImport.h"
 #include "vtkEventQtSlotConnect.h"

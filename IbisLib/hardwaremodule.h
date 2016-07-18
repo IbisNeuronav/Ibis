@@ -37,10 +37,9 @@ public:
     virtual IbisPluginTypes GetPluginType() { return IbisPluginTypeHardwareModule; }
 
     virtual void AddSettingsMenuEntries( QMenu * menu ) {}
-    virtual bool Init( const char * filename = 0 ) = 0;
+    virtual bool Init() = 0;
     virtual void Update() = 0;
     virtual bool ShutDown() = 0;
-    virtual void WriteHardwareConfig( const char * filename, bool backupOnly ) = 0;
 
     virtual void AddToolObjectsToScene() = 0;
     virtual void RemoveToolObjectsFromScene() = 0;

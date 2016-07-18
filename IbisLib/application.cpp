@@ -43,6 +43,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QMessageBox>
 #include <QPushButton>
 #include <QApplication>
+#include <QMenu>
 
 Application * Application::m_uniqueInstance = NULL;
 const QString Application::m_appName("ibis");
@@ -63,7 +64,6 @@ void ApplicationSettings::LoadSettings( QSettings & settings )
     MainWindowSize = settings.value( "MainWindow_size", mainWindowRect.size() ).toSize();
     MainWindowLeftPanelSize = settings.value( "MainWindowLeftPanelSize", 150 ).toInt();
     MainWindowRightPanelSize = settings.value( "MainWindowRightPanelSize", 150 ).toInt();
-    LastConfigFile = settings.value( "LastConfigFile", QString("") ).toString();
     QString workDir(QDir::homePath());
     workDir.append(IGNS_WORKING_DIRECTORY);
     WorkingDirectory = settings.value( "WorkingDirectory", workDir).toString();
@@ -101,7 +101,6 @@ void ApplicationSettings::SaveSettings( QSettings & settings )
     settings.setValue( "MainWindow_size", MainWindowSize );
     settings.setValue( "MainWindowLeftPanelSize", MainWindowLeftPanelSize );
     settings.setValue( "MainWindowRightPanelSize", MainWindowRightPanelSize );
-    settings.setValue( "LastConfigFile", LastConfigFile );
     settings.setValue( "WorkingDirectory", WorkingDirectory );
 
     // Should be able to load and save a QColor directly, but doesn't work well on linux: to check: anything to do with the fact that destructor can be called after QApplication's destructor?
@@ -140,7 +139,6 @@ Application::Application( )
     m_sceneManager = 0;
     m_updateManager = 0;
     m_lookupTableManager = 0;
-    m_hardwareModule = 0;
 }
 
 void Application::Init( bool viewerOnly )
@@ -183,16 +181,12 @@ void Application::Init( bool viewerOnly )
     m_lookupTableManager = new LookupTableManager;
 
     // Get instance of the hardware module
-    m_hardwareModule = 0;
     foreach( QObject * plugin, QPluginLoader::staticInstances() )
     {
         IbisPlugin * p = qobject_cast< IbisPlugin* >( plugin );
         HardwareModule * mod = HardwareModule::SafeDownCast( p );
         if( mod )
-        {
-            m_hardwareModule = mod;
-            break;
-        }
+            m_hardwareModules.push_back( mod );
     }
 }
 
@@ -218,15 +212,14 @@ Application::~Application()
     if( !m_viewerOnly )
     {
         // Stop everybody to make sure the order of deletion of objects doesn't matter
-         m_hardwareModule->ShutDown();
+        foreach( HardwareModule * module, m_hardwareModules )
+            module->ShutDown();
          m_updateManager->Stop();
      }
 
     // Cleanup
     if( m_updateManager )
         m_updateManager->Delete();
-    if( m_hardwareModule )
-        delete m_hardwareModule;
 
     m_sceneManager->Destroy();
 
@@ -307,21 +300,46 @@ bool Application::GlobalKeyEvent( QKeyEvent * e )
     return false;
 }
 
-void Application::InitHardware( const char * filename )
+void Application::InitHardware()
 {
     // Make sure the clock is stopped
     m_updateManager->Stop();
 
     // Init hardware
-    bool success = m_hardwareModule->Init( filename );
+    bool success = false;
+    foreach( HardwareModule * module, m_hardwareModules )
+        success |= module->Init();
 
     // Restart the clock if hardware running
     if( success )
     {
         m_updateManager->SetUpdatePeriod( (int)( 1000.0 / m_settings.UpdateFrequency )  );
         m_updateManager->Start();
-        m_settings.LastConfigFile = filename;
     }
+}
+
+void Application::AddHardwareSettingsMenuEntries( QMenu * menu )
+{
+    int index = 0;
+    foreach( HardwareModule * module, m_hardwareModules )
+    {
+        if( index > 0 )
+            menu->addSeparator();
+        module->AddSettingsMenuEntries( menu );
+        ++index;
+    }
+}
+
+void Application::AddToolObjectsToScene()
+{
+    foreach( HardwareModule * module, m_hardwareModules )
+        module->AddToolObjectsToScene();
+}
+
+void Application::RemoveToolObjectsFromScene()
+{
+    foreach( HardwareModule * module, m_hardwareModules )
+        module->RemoveToolObjectsFromScene();
 }
 
 QString Application::GetFullVersionString()
@@ -723,18 +741,14 @@ void Application::OpenFilesProgress()
 
 void Application::TickIbisClock()
 {
-    m_hardwareModule->Update();
+    foreach( HardwareModule * module, m_hardwareModules )
+        module->Update();
     emit IbisClockTick();
 }
 
 SceneManager * Application::GetSceneManager()
 {
     return GetInstance().m_sceneManager;
-}
-
-HardwareModule * Application::GetHardwareModule()
-{
-    return GetInstance().m_hardwareModule;
 }
 
 LookupTableManager * Application::GetLookupTableManager()

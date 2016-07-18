@@ -12,7 +12,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #define TAG_SCENEMANAGER_H
 
 #include "vtkObject.h"
-#include "vtkPiecewiseFunctionLookupTable.h"
 #include "ibistypes.h"
 #include <QObject>
 #include <QString>

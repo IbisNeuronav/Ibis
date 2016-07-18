@@ -239,11 +239,11 @@ void SceneManager::ClearScene()
 
 void SceneManager::InternalClearScene()
 {
+    Application::GetInstance().RemoveToolObjectsFromScene();
     QString saveSceneDir(this->SceneDirectory);
-    Application::GetHardwareModule()->RemoveToolObjectsFromScene();
     this->Clear();
     this->Init();
-    Application::GetHardwareModule()->AddToolObjectsToScene();
+    Application::GetInstance().AddToolObjectsToScene();
     this->SetSceneDirectory(saveSceneDir);
 }
 

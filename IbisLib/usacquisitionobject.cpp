@@ -50,6 +50,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "vtkXFMReader.h"
 #include "vtkXFMWriter.h"
 #include "vtkPassThrough.h"
+#include "vtkPiecewiseFunctionLookupTable.h"
 
 ObjectSerializationMacro( USAcquisitionObject );
 

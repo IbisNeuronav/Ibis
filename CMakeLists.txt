@@ -26,7 +26,7 @@ set( IBIS_EXTERNAL_DEPENDENCIES_DIR ${CMAKE_CURRENT_BINARY_DIR}/../ibisExternalD
 #==================================================================
 # Look for QT5 (required)
 #==================================================================
-find_package( Qt5 COMPONENTS Widgets Xml REQUIRED )
+find_package( Qt5 COMPONENTS Widgets OpenGL Xml REQUIRED )
 include_directories( ${Qt5Widgets_INCLUDE_DIRS} )
 include_directories( ${Qt5Xml_INCLUDE_DIRS} )
 
@@ -34,14 +34,11 @@ include_directories( ${Qt5Xml_INCLUDE_DIRS} )
 # Look for VTK (required)
 #==================================================================
 set( AutoVtkPath ${IBIS_EXTERNAL_DEPENDENCIES_DIR}/vtk-6.2/install/lib/cmake/vtk-6.2 )
-find_package(VTK 6.2 REQUIRED PATHS ${AutoVtkPath} )
-# packages needed: vtkCommon vtkHybrid vtkWidgets QVTK vtkRenderingOpenGL vtkInteractionStyle vtkRenderingVolumeOpenGL
-#if(NOT VTK_USE_RENDERING)
-#  message(FATAL_ERROR "${PROJECT_NAME} requires VTK_USE_RENDERING.")
-#endif(NOT VTK_USE_RENDERING)
-#if( NOT VTK_USE_QT )
-#  message( FATAL_ERROR "${PROJECT_NAME} requires vtk to be build with qt support. Make sure #VTK_USE_QT is ON when building VTK" )
-#endif( NOT VTK_USE_QT )
+find_package(VTK 6.2 COMPONENTS vtkGUISupportQt vtkRenderingOpenGL vtkRenderingVolumeOpenGL vtkRenderingImage
+    vtkRenderingAnnotation vtkImagingStencil vtkImagingStatistics vtkFiltersTexture
+    vtkInteractionStyle vtkInteractionWidgets
+    vtkIOXML vtkIOLegacy NO_MODULE
+    PATHS ${AutoVtkPath} )
 include(${VTK_USE_FILE})
 
 #==================================================================
@@ -66,19 +63,12 @@ include_directories(/usr/src/linux/include)
 #==================================================================
 # Create options to build or not the different dependent projects.
 #==================================================================
-OPTION( IGNS_BUILD_VTK_TRACKER "Build lib vtkTracker" ON )
-OPTION( IGNS_BUILD_VTK_EXTENSIONS "Build lib vtkExtensions" ON )
-OPTION( IGNS_BUILD_VTKIBIS_VOLUME_RENDERING "Build lib vtkIbisVolumeRendering" ON )
-OPTION( IGNS_BUILD_VTK_VIDEO "Build lib vtkVideo" ON )
-OPTION( IGNS_BUILD_VTK_QT "Build lib vtkQt" ON )
-OPTION( IGNS_BUILD_VTK_ULTRASOUND "Build lib vtkUltrasound" ON )
-OPTION( IGNS_INSTALL_LIBS_AND_HEADERS "make install will install all libraries and headers if this option is ON. Otherwise, only executables are installed." OFF )
+OPTION( IBIS_BUILD_DEFAULT_HARDWARE_MODULE "Build default hardware module on Linux." ON )
+OPTION( IBIS_BUILD_IGSIO_HARDWARE_MODULE "Build hardware module that allows connection to OpenIGTLinkServers" OFF )
+OPTION( IBIS_INSTALL_LIBS_AND_HEADERS "make install will install all libraries and headers if this option is ON. Otherwise, only executables are installed." OFF )
 
 find_package ( OpenCL QUIET )
 include(${CMAKE_COMMON_DIR}/OpenCLMacros.cmake)
-
-CMAKE_DEPENDENT_OPTION( IGNS_BUILD_IBIS "Build ibis application" ON "IGNS_BUILD_IBISLIB" ON )
-CMAKE_DEPENDENT_OPTION( IGNS_BUILD_IBIS_PLUGINS "Build Ibis plugins" ON "IGNS_BUILD_IBIS" ON )
 
 set( VTK_ENCODESTRING_EXE ${VTK_INSTALL_PREFIX}/bin/vtkEncodeString-${VTK_MAJOR_VERSION}.${VTK_MINOR_VERSION} )
 
@@ -121,11 +111,16 @@ set_source_files_properties(${CMAKE_CURRENT_BINARY_DIR}/githash.h
 configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/version.h.in ${CMAKE_CURRENT_BINARY_DIR}/version.h )
 
 # needed for projects to include version.h
-include_directories( ${IGNS_BINARY_DIR} )
-
+include_directories( ${Ibis_BINARY_DIR} )
 
 add_subdirectory( IbisLib )
-add_subdirectory( IbisHardware )
+set( HardwareModulesLibs "" )
+if( IBIS_BUILD_DEFAULT_HARDWARE_MODULE )
+    add_subdirectory( IbisHardware )
+endif()
+if( IBIS_BUILD_IGSIO_HARDWARE_MODULE )
+    add_subdirectory( IbisHardwareIGSIO )
+endif()
 add_subdirectory( IbisPlugins )
 add_subdirectory( Ibis )
 
