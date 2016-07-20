@@ -6,7 +6,7 @@ project( ${PluginName} )
 # C string literal in a header
 # file.
 #================================
-set( LibGlsl vtkIbisGLSLVolumeRaycast_FS )
+set( LibGlsl vtkPRISMVolumeRaycast_FS )
 
 foreach( file ${LibGlsl} )
   set( shader_src ${CMAKE_CURRENT_SOURCE_DIR}/${file}.glsl )
@@ -28,10 +28,10 @@ set( PluginSrc  volumerenderingobjectplugininterface.cpp
                 volumerenderingobjectsettingswidget.cpp
                 volumerenderingsinglevolumesettingswidget.cpp
                 volumeshadereditorwidget.cpp
-                vtkIbisGLSLVolumeRaycastMapper.cxx
+                vtkPRISMVolumeMapper.cxx
                 ${LibGlslSrc} )
 
-set( PluginHdr vtkIbisImagePlaneMapper.h )
+set( PluginHdr vtkPRISMVolumeMapper.h )
 
 set( PluginHdrMoc   volumerenderingobjectplugininterface.h
                     volumerenderingobject.h

@@ -21,7 +21,7 @@ class View;
 class vtkVolume;
 class vtkVolumeProperty;
 class vtkImageShiftScale;
-class vtkIbisGLSLVolumeRaycastMapper;
+class vtkPRISMVolumeMapper;
 class vtkPiecewiseFunction;
 class vtkEventQtSlotConnect;
 class vtkHandleWidget;
@@ -196,7 +196,7 @@ protected:
 
     struct PerView
     {
-        vtkIbisGLSLVolumeRaycastMapper * volumeMapper;
+        vtkPRISMVolumeMapper * volumeMapper;
         vtkVolume * volumeActor;
         vtkHandleWidget * sphereWidget;
         vtkLineWidget2 * lineWidget;
