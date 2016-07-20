@@ -286,7 +286,6 @@ static double labelColors[256][3] = {{0,0,0},
                                         {0.54902,0,0},
                                         {0,0,0}};
 
-//Q_EXPORT_STATIC_PLUGIN2( LabelVolumeToSurfaces, LabelVolumeToSurfacesPluginInterface );
 
 LabelVolumeToSurfacesPluginInterface::LabelVolumeToSurfacesPluginInterface()
 {
@@ -296,7 +295,17 @@ LabelVolumeToSurfacesPluginInterface::~LabelVolumeToSurfacesPluginInterface()
 {
 }
 
-SceneObject *LabelVolumeToSurfacesPluginInterface::CreateObject()
+bool LabelVolumeToSurfacesPluginInterface::CanRun()
+{
+    SceneManager  *manager = GetSceneManager();
+    Q_ASSERT( manager );
+    ImageObject * image = ImageObject::SafeDownCast( manager->GetCurrentObject() );
+    if( image && image->IsLabelImage() )
+        return true;
+    return false;
+}
+
+void LabelVolumeToSurfacesPluginInterface::Run()
 {
     SceneManager  *manager = GetSceneManager();
     Q_ASSERT( manager );
@@ -387,5 +396,4 @@ SceneObject *LabelVolumeToSurfacesPluginInterface::CreateObject()
     }
     else
         QMessageBox::warning( 0, "Error!", "Current object should be a label volume" );
-    return NULL;
 }

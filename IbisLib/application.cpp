@@ -28,6 +28,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "objectplugininterface.h"
 #include "toolplugininterface.h"
 #include "globalobjectplugininterface.h"
+#include "generatorplugininterface.h"
 #include "triplecutplaneobject.h"
 #include "filereader.h"
 #include "imageobject.h"
@@ -834,6 +835,14 @@ ToolPluginInterface * Application::GetToolPluginByName( QString name )
     return 0;
 }
 
+GeneratorPluginInterface * Application::GetGeneratorPluginByName( QString name )
+{
+    IbisPlugin * p = GetPluginByName( name );
+    if( p && p->GetPluginType() == IbisPluginTypeGenerator )
+        return GeneratorPluginInterface::SafeDownCast( p );
+    return 0;
+}
+
 SceneObject * Application::GetGlobalObjectInstance( const QString & className )
 {
     SceneObject * ret = 0;
@@ -906,6 +915,20 @@ void Application::GetAllObjectPlugins( QList<ObjectPluginInterface*> & allObject
     }
 }
 
+void Application::GetAllGeneratorPlugins( QList<GeneratorPluginInterface*> & allObjects )
+{
+    allObjects.clear();
+    foreach( QObject * plugin, QPluginLoader::staticInstances() )
+    {
+        IbisPlugin * p = qobject_cast< IbisPlugin* >( plugin );
+        if( p && p->GetPluginType() == IbisPluginTypeGenerator )
+        {
+            GeneratorPluginInterface * o = GeneratorPluginInterface::SafeDownCast( p );
+            allObjects.push_back( o );
+        }
+    }
+}
+
 QProgressDialog * Application::StartProgress( int max, const QString &caption )
 {
     QProgressDialog *progressDialog =  new QProgressDialog( caption, tr("Cancel"), 0, max );
@@ -931,8 +954,6 @@ void Application::UpdateProgress( QProgressDialog * progressDialog, int current 
         progressDialog->setValue( current );
     QApplication::processEvents();
 }
-
-
 
 void Application::ShowMinc1Warning( bool cando)
 {

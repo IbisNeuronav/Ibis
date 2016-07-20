@@ -54,6 +54,7 @@ private slots:
     void NewPointSet();
     void ModifyFileMenu( );
     void ModifyNewObjectFileMenu( );
+    void FileGenerateMenuAboutToShow();
     void ModifyViewMenu( );
     void ViewXPlaneToggled( bool );
     void ViewYPlaneToggled( bool );
@@ -74,6 +75,7 @@ private slots:
     void FloatingPluginWidgetClosed();
     void PluginTabClosed( int tabIndex );
     void ObjectPluginsMenuActionTriggered();
+    void GeneratePluginsMenuActionTriggered();
     void MainSplitterMoved( int pos, int index );
     void SaveScene(bool);
 

@@ -32,6 +32,7 @@ class PointerObject;
 class IbisPlugin;
 class ToolPluginInterface;
 class ObjectPluginInterface;
+class GeneratorPluginInterface;
 class OpenFileParams;
 class FileReader;
 class LookupTableManager;
@@ -134,11 +135,13 @@ public:
     void ActivatePluginByName( const char * name, bool active );
     ObjectPluginInterface *GetObjectPluginByName( QString className );
     ToolPluginInterface * GetToolPluginByName( QString name );
+    GeneratorPluginInterface * GetGeneratorPluginByName( QString name );
     SceneObject * GetGlobalObjectInstance( const QString & className );
     void GetAllGlobalObjectInstances( QList<SceneObject*> & allInstances );
     void GetAllPlugins( QList<IbisPlugin*> & allPlugins );
     void GetAllToolPlugins( QList<ToolPluginInterface*> & allTools );
     void GetAllObjectPlugins( QList<ObjectPluginInterface*> & allObjects );
+    void GetAllGeneratorPlugins( QList<GeneratorPluginInterface*> & allObjects );
 
     // Data file to load when the application starts up (typically specified on the command line)
     void SetInitialDataFiles( const QStringList & files ) { m_initialDataFiles = files; }
