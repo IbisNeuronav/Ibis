@@ -71,6 +71,7 @@ SET( IGNS_IBISLIB_HDR
                      toolplugininterface.h
                      objectplugininterface.h
                      globalobjectplugininterface.h
+                     generatorplugininterface.h
                      vtkopencvbridge.h
                      linesfactory.h
                      simplepropcreator.h

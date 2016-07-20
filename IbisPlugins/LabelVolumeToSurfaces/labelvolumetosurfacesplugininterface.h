@@ -14,10 +14,10 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #define __LabelVolumeToSurfacesPluginInterface_h_
 
 #include <QObject>
-#include "objectplugininterface.h"
+#include "generatorplugininterface.h"
 #include "serializer.h"
 
-class LabelVolumeToSurfacesPluginInterface : public QObject, public ObjectPluginInterface
+class LabelVolumeToSurfacesPluginInterface : public QObject, public GeneratorPluginInterface
 {
 
     Q_OBJECT
@@ -33,8 +33,9 @@ public:
     QString GetPluginName() { return "LabelVolumeToSurfaces"; }
 
     // ObjectPluginInterface
-    QString GetMenuEntryString() { return QString("Label volume to surfaces"); }
-    SceneObject * CreateObject();
+    QString GetMenuEntryString() { return QString("Extract surfaces from label volume"); }
+    bool CanRun();
+    void Run();
 
 };
 

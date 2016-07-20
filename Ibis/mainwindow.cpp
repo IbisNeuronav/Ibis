@@ -23,6 +23,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "ignsconfig.h"
 #include "toolplugininterface.h"
 #include "objectplugininterface.h"
+#include "generatorplugininterface.h"
 #include "aboutpluginswidget.h"
 
 #include <QApplication>
@@ -78,6 +79,7 @@ MainWindow::MainWindow( QWidget * parent )
     QMenu *newObjectFileMenu = fileMenu->addMenu("&New Object");
     newObjectFileMenu->addAction( tr("&Point Set"), this, SLOT( NewPointSet() ));
     this->CreateNewObjectPluginsUi(newObjectFileMenu);
+    QMenu * fileGenerateMenu = fileMenu->addMenu( tr("Generate") );
     fileMenu->addAction( tr("E&xport"), this, SLOT( fileExportFile() ) );
     QMenu * importFileMenu = fileMenu->addMenu("Import");
     importFileMenu->addAction( tr("US Acquisition"), this, SLOT(fileImportUsAcquisition()) );
@@ -90,6 +92,7 @@ MainWindow::MainWindow( QWidget * parent )
     fileMenu->addAction( tr("&Exit"), this, SLOT( close() ), QKeySequence::Quit );
     connect( fileMenu, SIGNAL( aboutToShow() ), this, SLOT( ModifyFileMenu() ) );
     connect( newObjectFileMenu, SIGNAL( aboutToShow() ), this, SLOT( ModifyNewObjectFileMenu() ) );
+    connect( fileGenerateMenu, SIGNAL(aboutToShow()), this, SLOT(FileGenerateMenuAboutToShow()) );
 
     if( !viewerOnly )
     {
@@ -479,6 +482,22 @@ void MainWindow::ModifyNewObjectFileMenu()
     }
 }
 
+void MainWindow::FileGenerateMenuAboutToShow()
+{
+    QMenu * generateMenu = qobject_cast<QMenu *>(sender());
+    generateMenu->clear();
+    QList<GeneratorPluginInterface*> allGeneratePlugins;
+    Application::GetInstance().GetAllGeneratorPlugins( allGeneratePlugins );
+    foreach( GeneratorPluginInterface * plugin, allGeneratePlugins )
+    {
+        QAction * action = new QAction( plugin->GetMenuEntryString(), this );
+        action->setData( QVariant(plugin->GetPluginName()) );
+        action->setEnabled( plugin->CanRun() );
+        connect( action, SIGNAL(triggered()), this, SLOT(GeneratePluginsMenuActionTriggered()) );
+        generateMenu->addAction(action);
+    }
+}
+
 void MainWindow::ModifyViewMenu()
 {
     SceneManager * manager = Application::GetSceneManager();
@@ -709,6 +728,15 @@ void MainWindow::ObjectPluginsMenuActionTriggered()
     SceneObject *obj = p->CreateObject();
     if( obj )
         Application::GetSceneManager()->SetCurrentObject( obj );
+}
+
+void MainWindow::GeneratePluginsMenuActionTriggered()
+{
+    QAction * action = qobject_cast<QAction *>(sender());
+    QString pluginName = action->data().toString();
+    GeneratorPluginInterface * p = Application::GetInstance().GetGeneratorPluginByName( pluginName );
+    Q_ASSERT( p );
+    p->Run();
 }
 
 void MainWindow::MainSplitterMoved( int pos, int index )
