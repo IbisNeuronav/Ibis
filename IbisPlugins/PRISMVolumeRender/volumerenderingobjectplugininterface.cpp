@@ -20,7 +20,7 @@ VolumeRenderingObjectPluginInterface::VolumeRenderingObjectPluginInterface()
 {
     m_vrObject = VolumeRenderingObject::New();
     m_vrObject->SetCanChangeParent( false );
-    m_vrObject->SetName( "Volume Renderer" );
+    m_vrObject->SetName( "PRISM Volume Render" );
     m_vrObject->SetNameChangeable( false );
     m_vrObject->SetCanAppendChildren( false );
     m_vrObject->SetCanEditTransformManually( false );

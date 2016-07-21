@@ -23,7 +23,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "vtkColorTransferFunction.h"
 #include "vtkImageData.h"
 #include "vtkImageShiftScale.h"
-#include "vtkIbisGLSLVolumeRaycastMapper.h"
+#include "vtkPRISMVolumeMapper.h"
 #include "vtkEventQtSlotConnect.h"
 #include "vtkTransform.h"
 #include "vtkHandleWidget.h"
@@ -329,7 +329,7 @@ bool VolumeRenderingObject::Setup( View * view )
             return false;
 
         PerView perView;
-        perView.volumeMapper = vtkIbisGLSLVolumeRaycastMapper::New();
+        perView.volumeMapper = vtkPRISMVolumeMapper::New();
 
         perView.volumeActor = vtkVolume::New();
         perView.volumeActor->SetMapper( perView.volumeMapper );
@@ -1128,7 +1128,7 @@ void VolumeRenderingObject::UpdateMapper( PerView & pv )
     if( m_perImage.size() > 0 )
         pv.volumeActor->SetProperty( m_perImage[0]->volumeProperty );
 
-    vtkIbisGLSLVolumeRaycastMapper * mapper = pv.volumeMapper;
+    vtkPRISMVolumeMapper * mapper = pv.volumeMapper;
     mapper->ClearAllInputs();
     for( unsigned i = 0; i < m_perImage.size(); ++i )
     {

@@ -15,7 +15,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include <QObject>
 #include "toolplugininterface.h"
-#include "vtkIbisGLSLVolumeRaycastMapper.h"
+#include "vtkPRISMVolumeMapper.h"
 
 class VolumeRenderingObject;
 class DomeRenderer;

@@ -9,7 +9,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
 // Thanks to Simon Drouin for writing this class
-// .NAME vtkIbisGLSLVolumeRaycastMapper - volume render with GLSL Raycast
+// .NAME vtkPRISMVolumeMapper - volume render with GLSL Raycast
 //
 // .SECTION Description
 //
@@ -20,8 +20,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 // .SECTION see also
 // vtkVolumeMapper
 
-#ifndef __vtkIbisGLSLVolumeRaycastMapper_h
-#define __vtkIbisGLSLVolumeRaycastMapper_h
+#ifndef __vtkPRISMVolumeMapper_h
+#define __vtkPRISMVolumeMapper_h
 
 #include "vtkVolumeMapper.h"
 #include <vector>
@@ -41,15 +41,15 @@ public:
     virtual void GetRenderSize( vtkRenderer * ren, int size[2] ) = 0;
 };
 
-class vtkIbisGLSLVolumeRaycastMapper : public vtkVolumeMapper
+class vtkPRISMVolumeMapper : public vtkVolumeMapper
 {
 
 public:
 
-  vtkTypeMacro(vtkIbisGLSLVolumeRaycastMapper,vtkVolumeMapper);
+  vtkTypeMacro(vtkPRISMVolumeMapper,vtkVolumeMapper);
   void PrintSelf(ostream& os, vtkIndent indent);
 
-  static vtkIbisGLSLVolumeRaycastMapper * New();
+  static vtkPRISMVolumeMapper * New();
 
   // Description:
   // Is hardware rendering supported? No if the input data is
@@ -95,8 +95,8 @@ public:
 
 protected:
 
-  vtkIbisGLSLVolumeRaycastMapper();
-  ~vtkIbisGLSLVolumeRaycastMapper();
+  vtkPRISMVolumeMapper();
+  ~vtkPRISMVolumeMapper();
 
   int FillInputPortInformation( int port, vtkInformation * info );
 
@@ -192,8 +192,8 @@ protected:
   
 private:
 
-  vtkIbisGLSLVolumeRaycastMapper(const vtkIbisGLSLVolumeRaycastMapper&);  // Not implemented.
-  void operator=(const vtkIbisGLSLVolumeRaycastMapper&);  // Not implemented.
+  vtkPRISMVolumeMapper(const vtkPRISMVolumeMapper&);  // Not implemented.
+  void operator=(const vtkPRISMVolumeMapper&);  // Not implemented.
 
 };
 

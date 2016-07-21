@@ -10,7 +10,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 // Thanks to Simon Drouin for writing this class
 
-#include "vtkIbisGLSLVolumeRaycastMapper.h"
+#include "vtkPRISMVolumeMapper.h"
 
 #include "vtkCamera.h"
 #include "vtkColorTransferFunction.h"
@@ -35,7 +35,7 @@ const char defaultVolumeContribution[] = "           vec4 volumeSample = texture
             vec4 transferFuncSample = texture1D( transferFunctions[volIndex], volumeSample.x ); \n\
             fullSample += transferFuncSample;";
 
-vtkIbisGLSLVolumeRaycastMapper::PerVolume::PerVolume()
+vtkPRISMVolumeMapper::PerVolume::PerVolume()
     : SavedTextureInput(0), VolumeTextureId(0), Property(0), TranferFunctionTextureId(0), Enabled(true), linearSampling(true)
 {
     shaderVolumeContribution = defaultVolumeContribution;
@@ -43,11 +43,11 @@ vtkIbisGLSLVolumeRaycastMapper::PerVolume::PerVolume()
 
 //----------------------------------------------------------------------------
 // Needed when we don't use the vtkStandardNewMacro.
-vtkInstantiatorNewMacro(vtkIbisGLSLVolumeRaycastMapper);
+vtkInstantiatorNewMacro(vtkPRISMVolumeMapper);
 //----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-vtkIbisGLSLVolumeRaycastMapper::vtkIbisGLSLVolumeRaycastMapper()
+vtkPRISMVolumeMapper::vtkPRISMVolumeMapper()
 {
     this->SampleDistance = 1.0;
     this->MultFactor = 1.0;
@@ -79,26 +79,26 @@ vtkIbisGLSLVolumeRaycastMapper::vtkIbisGLSLVolumeRaycastMapper()
 }
 
 //-----------------------------------------------------------------------------
-vtkIbisGLSLVolumeRaycastMapper::~vtkIbisGLSLVolumeRaycastMapper()
+vtkPRISMVolumeMapper::~vtkPRISMVolumeMapper()
 {
     this->WorldToTextureMatrix->Delete();
 }
 
 
 //-----------------------------------------------------------------------------
-vtkIbisGLSLVolumeRaycastMapper * vtkIbisGLSLVolumeRaycastMapper::New()
+vtkPRISMVolumeMapper * vtkPRISMVolumeMapper::New()
 {
-    return new vtkIbisGLSLVolumeRaycastMapper;
+    return new vtkPRISMVolumeMapper;
 }
 
 
-int vtkIbisGLSLVolumeRaycastMapper::IsRenderSupported( vtkVolumeProperty *, vtkRenderer * ren )
+int vtkPRISMVolumeMapper::IsRenderSupported( vtkVolumeProperty *, vtkRenderer * ren )
 {
     // simtodo : implement this properly
     return 1;
 }
 
-void vtkIbisGLSLVolumeRaycastMapper::CheckGLError( const char * msg )
+void vtkPRISMVolumeMapper::CheckGLError( const char * msg )
 {
     GLenum res = glGetError();
     if( res != GL_NO_ERROR )
@@ -125,10 +125,10 @@ void vtkIbisGLSLVolumeRaycastMapper::CheckGLError( const char * msg )
     }
 }
 
-void vtkIbisGLSLVolumeRaycastMapper::Render( vtkRenderer * ren, vtkVolume * vol )
+void vtkPRISMVolumeMapper::Render( vtkRenderer * ren, vtkVolume * vol )
 {
     // Resets GL error before we start rendering, which helps isolating error within the mapper
-    CheckGLError( "begin vtkIbisGLSLVolumeRaycastMapper::Render, " );
+    CheckGLError( "begin vtkPRISMVolumeMapper::Render, " );
 
     // Make sure we have all extensions we need
     if( !this->GlExtensionsLoaded )
@@ -374,7 +374,7 @@ void vtkIbisGLSLVolumeRaycastMapper::Render( vtkRenderer * ren, vtkVolume * vol 
     glPopAttrib();
 }
 
-void vtkIbisGLSLVolumeRaycastMapper::ReleaseGraphicsResources( vtkWindow * )
+void vtkPRISMVolumeMapper::ReleaseGraphicsResources( vtkWindow * )
 {
     if( BackfaceTexture )
     {
@@ -416,12 +416,12 @@ void vtkIbisGLSLVolumeRaycastMapper::ReleaseGraphicsResources( vtkWindow * )
     this->GlExtensionsLoaded = false;
 }
 
-int vtkIbisGLSLVolumeRaycastMapper::GetNumberOfInputs()
+int vtkPRISMVolumeMapper::GetNumberOfInputs()
 {
     return VolumesInfo.size();
 }
 
-void vtkIbisGLSLVolumeRaycastMapper::AddInput( vtkAlgorithmOutput * im, vtkVolumeProperty * property, const char * shaderContrib )
+void vtkPRISMVolumeMapper::AddInput( vtkAlgorithmOutput * im, vtkVolumeProperty * property, const char * shaderContrib )
 {
     this->AddInputConnection( im );
     PerVolume pv;
@@ -432,18 +432,18 @@ void vtkIbisGLSLVolumeRaycastMapper::AddInput( vtkAlgorithmOutput * im, vtkVolum
     this->VolumeShaderNeedsUpdate = true;
 }
 
-void vtkIbisGLSLVolumeRaycastMapper::SetShaderInitCode( const char * code )
+void vtkPRISMVolumeMapper::SetShaderInitCode( const char * code )
 {
     ShaderInitCode = code;
     this->VolumeShaderNeedsUpdate = true;
 }
 
-void vtkIbisGLSLVolumeRaycastMapper::EnableInput( int index, bool enable )
+void vtkPRISMVolumeMapper::EnableInput( int index, bool enable )
 {
     VolumesInfo[index].Enabled = enable;
 }
 
-void vtkIbisGLSLVolumeRaycastMapper::RemoveInput( int index )
+void vtkPRISMVolumeMapper::RemoveInput( int index )
 {
     // Remove input
     vtkAlgorithmOutput * algoOut = this->GetInputConnection( 0, index );
@@ -461,7 +461,7 @@ void vtkIbisGLSLVolumeRaycastMapper::RemoveInput( int index )
 }
 
 
-void vtkIbisGLSLVolumeRaycastMapper::ClearAllInputs()
+void vtkPRISMVolumeMapper::ClearAllInputs()
 {
     int i = VolumesInfo.size() - 1;
     for( ; i >= 0; --i )
@@ -469,12 +469,12 @@ void vtkIbisGLSLVolumeRaycastMapper::ClearAllInputs()
     this->VolumeShaderNeedsUpdate = true;
 }
 
-void vtkIbisGLSLVolumeRaycastMapper::SetUseLinearSampling( int index, bool use )
+void vtkPRISMVolumeMapper::SetUseLinearSampling( int index, bool use )
 {
     VolumesInfo[index].linearSampling = use;
 }
 
-#include "vtkIbisGLSLVolumeRaycast_FS.h"
+#include "vtkPRISMVolumeRaycast_FS.h"
 
 void ReplaceAll( std::string & original, std::string findString, std::string replaceString )
 {
@@ -499,7 +499,7 @@ const char backfaceShaderCode[] = "uniform ivec2 windowSize; \
             gl_FragColor.a =  -eyeSpaceCoord.z; \
         }";
 
-bool vtkIbisGLSLVolumeRaycastMapper::CreateBackfaceShader()
+bool vtkPRISMVolumeMapper::CreateBackfaceShader()
 {
     std::string shaderCode( backfaceShaderCode );
     if( !this->BackfaceShader )
@@ -510,10 +510,10 @@ bool vtkIbisGLSLVolumeRaycastMapper::CreateBackfaceShader()
     return result;
 }
 
-bool vtkIbisGLSLVolumeRaycastMapper::UpdateVolumeShader()
+bool vtkPRISMVolumeMapper::UpdateVolumeShader()
 {
     // Replace all occurences of numberOfVolumes in shader code
-    std::string shaderCode( vtkIbisGLSLVolumeRaycast_FS );
+    std::string shaderCode( vtkPRISMVolumeRaycast_FS );
     std::string nbVolumesFindString( "@NumberOfVolumes@" );
     std::ostringstream os;
     os << VolumesInfo.size();
@@ -548,7 +548,7 @@ bool vtkIbisGLSLVolumeRaycastMapper::UpdateVolumeShader()
     return result;
 }
 
-bool vtkIbisGLSLVolumeRaycastMapper::RenderClippingMask( int width, int height )
+bool vtkPRISMVolumeMapper::RenderClippingMask( int width, int height )
 {
     bool ok = true;
 
@@ -585,7 +585,7 @@ bool vtkIbisGLSLVolumeRaycastMapper::RenderClippingMask( int width, int height )
     return ok;
 }
 
-void vtkIbisGLSLVolumeRaycastMapper::UpdateWorldToTextureMatrix( vtkVolume * volume )
+void vtkPRISMVolumeMapper::UpdateWorldToTextureMatrix( vtkVolume * volume )
 {
     // Compute texture to volume
     double deltas[3];
@@ -612,7 +612,7 @@ void vtkIbisGLSLVolumeRaycastMapper::UpdateWorldToTextureMatrix( vtkVolume * vol
     this->WorldToTextureMatrix->Invert();
 }
 
-int vtkIbisGLSLVolumeRaycastMapper::IsTextureSizeSupported( int size[3] )
+int vtkPRISMVolumeMapper::IsTextureSizeSupported( int size[3] )
 {
     glTexImage3D( GL_PROXY_TEXTURE_3D, 0, GL_LUMINANCE, size[0], size[1], size[2], 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, NULL );
 
@@ -631,7 +631,7 @@ void Vertex( double xTex, double yTex, double zTex, double x, double y, double z
     glVertex3d( x, y, z );
 }
 
-void vtkIbisGLSLVolumeRaycastMapper::DrawCube()
+void vtkPRISMVolumeMapper::DrawCube()
 {
     glBegin( GL_QUADS );
     {
@@ -674,7 +674,7 @@ void vtkIbisGLSLVolumeRaycastMapper::DrawCube()
     glEnd();
 }
 
-void vtkIbisGLSLVolumeRaycastMapper::DrawCubeNoColor()
+void vtkPRISMVolumeMapper::DrawCubeNoColor()
 {
     glBegin( GL_QUADS );
     {
@@ -720,7 +720,7 @@ void vtkIbisGLSLVolumeRaycastMapper::DrawCubeNoColor()
 #include "SVL.h"
 #include "SVLgl.h"
 
-void vtkIbisGLSLVolumeRaycastMapper::RenderClippingPlane( vtkRenderer * ren )
+void vtkPRISMVolumeMapper::RenderClippingPlane( vtkRenderer * ren )
 {
     vtkCamera * cam = ren->GetActiveCamera();
     Vec3 pos( cam->GetPosition() );
@@ -767,7 +767,7 @@ void vtkIbisGLSLVolumeRaycastMapper::RenderClippingPlane( vtkRenderer * ren )
 }
 
 //-----------------------------------------------------------------------------
-int vtkIbisGLSLVolumeRaycastMapper::UpdateVolumes( )
+int vtkPRISMVolumeMapper::UpdateVolumes( )
 {
     int nbInputs = this->GetNumberOfInputConnections( 0 ); // all connections attached to port 0
     for( int i = 0; i < nbInputs; ++i )
@@ -874,7 +874,7 @@ int vtkIbisGLSLVolumeRaycastMapper::UpdateVolumes( )
 }
 
 
-int vtkIbisGLSLVolumeRaycastMapper::UpdateTransferFunctions( )
+int vtkPRISMVolumeMapper::UpdateTransferFunctions( )
 {
     for( unsigned i = 0; i < VolumesInfo.size(); ++i )
     {
@@ -939,7 +939,7 @@ int vtkIbisGLSLVolumeRaycastMapper::UpdateTransferFunctions( )
     return 1;
 }
 
-int vtkIbisGLSLVolumeRaycastMapper::UpdateDepthBufferTexture( int width, int height )
+int vtkPRISMVolumeMapper::UpdateDepthBufferTexture( int width, int height )
 {
     // Create texture if it doesn't exist and bind it
     if( this->DepthBufferTextureId == 0 )
@@ -973,7 +973,7 @@ int vtkIbisGLSLVolumeRaycastMapper::UpdateDepthBufferTexture( int width, int hei
     return 1;
 }
 
-bool vtkIbisGLSLVolumeRaycastMapper::SetEyeTo3DTextureMatrixVariable( vtkVolume * volume, vtkRenderer * renderer )
+bool vtkPRISMVolumeMapper::SetEyeTo3DTextureMatrixVariable( vtkVolume * volume, vtkRenderer * renderer )
 {
     // Compute texture to volume
     double deltas[3];
@@ -1019,7 +1019,7 @@ bool vtkIbisGLSLVolumeRaycastMapper::SetEyeTo3DTextureMatrixVariable( vtkVolume 
 
 #include <limits>
 
-bool vtkIbisGLSLVolumeRaycastMapper::SetCameraVariablesInShader( vtkRenderer * ren, vtkVolume * volume )
+bool vtkPRISMVolumeMapper::SetCameraVariablesInShader( vtkRenderer * ren, vtkVolume * volume )
 {
     vtkMatrix4x4 * volumeToWorld = volume->GetMatrix();
 
@@ -1076,7 +1076,7 @@ bool vtkIbisGLSLVolumeRaycastMapper::SetCameraVariablesInShader( vtkRenderer * r
 //      GL_EXT_framebuffer_object
 //      GL_ARB_texture_float
 //===============================================================
-void vtkIbisGLSLVolumeRaycastMapper::LoadExtensions( vtkRenderWindow * window )
+void vtkPRISMVolumeMapper::LoadExtensions( vtkRenderWindow * window )
 {
     this->UnsupportedExtensions.clear();
     this->GlExtensionsLoaded = true;
@@ -1114,7 +1114,7 @@ void vtkIbisGLSLVolumeRaycastMapper::LoadExtensions( vtkRenderWindow * window )
     extensions->Delete();
 }
 
-void vtkIbisGLSLVolumeRaycastMapper::GetRenderSize( vtkRenderer * ren, int size[2] )
+void vtkPRISMVolumeMapper::GetRenderSize( vtkRenderer * ren, int size[2] )
 {
     if( RenderState )
         RenderState->GetRenderSize( ren, size );
@@ -1128,7 +1128,7 @@ void vtkIbisGLSLVolumeRaycastMapper::GetRenderSize( vtkRenderer * ren, int size[
 
 #include "vtkInformation.h"
 
-int vtkIbisGLSLVolumeRaycastMapper::FillInputPortInformation( int port, vtkInformation * info )
+int vtkPRISMVolumeMapper::FillInputPortInformation( int port, vtkInformation * info )
 {
     if (!this->Superclass::FillInputPortInformation( port, info ) )
     {
@@ -1139,8 +1139,8 @@ int vtkIbisGLSLVolumeRaycastMapper::FillInputPortInformation( int port, vtkInfor
 }
 
 //-----------------------------------------------------------------------------
-// Print the vtkIbisGLSLVolumeRaycastMapper
-void vtkIbisGLSLVolumeRaycastMapper::PrintSelf(ostream& os, vtkIndent indent)
+// Print the vtkPRISMVolumeMapper
+void vtkPRISMVolumeMapper::PrintSelf(ostream& os, vtkIndent indent)
 {
   this->Superclass::PrintSelf(os,indent);
 
