@@ -55,6 +55,9 @@ QString IbisPlugin::GetPluginTypeAsString()
     case IbisPluginTypeHardwareModule:
         ret = "Hardware Module";
         break;
+    case IbisPluginTypeGenerator:
+        ret = "Generator";
+        break;
     }
     return ret;
 }

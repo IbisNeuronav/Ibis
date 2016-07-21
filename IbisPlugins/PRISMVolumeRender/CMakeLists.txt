@@ -23,7 +23,7 @@ endforeach(file)
 include_directories( ${CMAKE_CURRENT_BINARY_DIR} )
 
 # define sources
-set( PluginSrc  volumerenderingobjectplugininterface.cpp
+set( PluginSrc  PRISMVolumeRenderPluginInterface.cpp
                 volumerenderingobject.cpp
                 volumerenderingobjectsettingswidget.cpp
                 volumerenderingsinglevolumesettingswidget.cpp
@@ -33,7 +33,7 @@ set( PluginSrc  volumerenderingobjectplugininterface.cpp
 
 set( PluginHdr vtkPRISMVolumeMapper.h )
 
-set( PluginHdrMoc   volumerenderingobjectplugininterface.h
+set( PluginHdrMoc   PRISMVolumeRenderPluginInterface.h
                     volumerenderingobject.h
                     volumerenderingobjectsettingswidget.h
                     volumerenderingsinglevolumesettingswidget.h

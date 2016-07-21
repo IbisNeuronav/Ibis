@@ -10,28 +10,28 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 // Thanks to Simon Drouin for writing this class
 
-#ifndef __VolumeRenderingObjectPluginInterface_h_
-#define __VolumeRenderingObjectPluginInterface_h_
+#ifndef __PRISMVolumeRenderPluginInterface_h_
+#define __PRISMVolumeRenderPluginInterface_h_
 
 #include <QObject>
 #include "globalobjectplugininterface.h"
 
 class VolumeRenderingObject;
 
-class VolumeRenderingObjectPluginInterface : public QObject, public GlobalObjectPluginInterface
+class PRISMVolumeRenderPluginInterface : public QObject, public GlobalObjectPluginInterface
 {
 
     Q_OBJECT
     Q_INTERFACES(IbisPlugin)
-    Q_PLUGIN_METADATA(IID "Ibis.VolumeRenderingObjectPluginInterface" )
+    Q_PLUGIN_METADATA(IID "Ibis.PRISMVolumeRenderPluginInterface" )
 
 public:
 
-    VolumeRenderingObjectPluginInterface();
-    ~VolumeRenderingObjectPluginInterface();
+    PRISMVolumeRenderPluginInterface();
+    ~PRISMVolumeRenderPluginInterface();
 
     // Implement IbisPlugin
-    virtual QString GetPluginName() { return QString("VolumeRenderingObject"); }
+    virtual QString GetPluginName() { return QString("PRISMVolumeRender"); }
 
     // Implement GlobalObjectPluginInterface
     SceneObject * GetGlobalObjectInstance();
