@@ -26,8 +26,6 @@ class vtkMatrix4x4;
 class vtkHomogeneousTransform;
 class vtkEventQtSlotConnect;
 
-enum FILETYPE {UNKNOWN_FILE_TYPE, TEXT_FILE, XFM_FILE, XML_FILE};
-
 class vtkQtMatrixDialog : public QDialog
 { 
     Q_OBJECT
@@ -38,8 +36,6 @@ public:
     ~vtkQtMatrixDialog();
 
     void SetMatrix( vtkMatrix4x4 * mat );
-    void SetTransform( vtkHomogeneousTransform * t );
-    vtkMatrix4x4 * GetMatrix( );
     void SetDirectory(const QString &dir);
     void UpdateUI();
 
@@ -47,24 +43,31 @@ public:
     QPushButton * m_invertButton;
     QPushButton * m_identityButton;
     QPushButton * m_revertButton;
-    QPushButton * m_applyButton;
     QPushButton * m_loadButton;
     QPushButton * m_saveButton;
-        
+    QPushButton * m_copyButton;
+    QPushButton * m_pasteButton;
+
+signals:
+
+    void Modified();
+
 public slots:
     
     void InvertButtonClicked();
     void IdentityButtonClicked();
     void RevertButtonClicked();
     void MatrixChanged();
-    void ApplyButtonClicked();
     void LoadButtonClicked();
     void SaveButtonClicked();
+    void CopyButtonClicked();
+    void PasteButtonClicked();
+    void SetMatrixElements( );
+    void LineEditChanged();
 
 protected:
 
     bool m_readOnly;
-    vtkHomogeneousTransform * m_transform;
     vtkMatrix4x4 * m_matrix;
     vtkMatrix4x4 * m_copy_matrix;
     QString m_directory;
@@ -74,11 +77,9 @@ protected:
     QVBoxLayout * MatrixDialogLayout;
     QGridLayout * gridBox;
     QHBoxLayout * Layout3;
+    QHBoxLayout * Layout4;
 
-    void  SetMatrixElements( );
-    int   GetFileType(QFile *f); 
     bool  LoadFromXFMFile(QFile *f, vtkMatrix4x4 * mat);
-    bool  LoadFromTextFile(QFile *f, vtkMatrix4x4 * mat);
 };
 
 

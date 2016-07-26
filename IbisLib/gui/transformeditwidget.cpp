@@ -157,8 +157,10 @@ void TransformEditWidget::EditMatrixButtonToggled( bool isOn )
             m_matrixDialog = new vtkQtMatrixDialog( readOnly, 0 );
             m_matrixDialog->setWindowTitle( dialogTitle );
             m_matrixDialog->setAttribute( Qt::WA_DeleteOnClose );
-            m_matrixDialog->SetTransform( t );
+            m_matrixDialog->SetMatrix( t->GetMatrix() );
             m_matrixDialog->show();
+            connect( m_matrixDialog, SIGNAL(Modified()), m_sceneObject, SLOT(NotifyTransformChanged()) );
+            connect( m_matrixDialog, SIGNAL(Modified()), this, SLOT(UpdateUi()) );
             connect( m_matrixDialog, SIGNAL(destroyed()), this, SLOT(EditMatrixDialogClosed()) );
         }
     }
@@ -190,7 +192,7 @@ void TransformEditWidget::WorldMatrixButtonToggled( bool isOn )
         m_worldMatrixDialog = new vtkQtMatrixDialog( true, 0 );
         m_worldMatrixDialog->setWindowTitle( dialogTitle );
         m_worldMatrixDialog->setAttribute( Qt::WA_DeleteOnClose );
-        m_worldMatrixDialog->SetTransform( m_sceneObject->GetWorldTransform() );
+        m_worldMatrixDialog->SetMatrix( m_sceneObject->GetWorldTransform()->GetMatrix() );
         m_worldMatrixDialog->show();
         connect( m_worldMatrixDialog, SIGNAL(destroyed()), this, SLOT(WorldMatrixDialogClosed()) );
     }

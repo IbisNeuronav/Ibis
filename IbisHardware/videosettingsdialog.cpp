@@ -20,7 +20,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <qspinbox.h>
 #include <qsplitter.h>
 #include <qlayout.h>
-#include <QMessageBox>
 #include "videoviewdialog.h"
 #include "automaticgui.h"
 #include "vtkVideoSource2.h"

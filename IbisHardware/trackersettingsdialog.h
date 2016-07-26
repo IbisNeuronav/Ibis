@@ -13,7 +13,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include "ui_trackersettingsdialog.h"
 
-class vtkQtMatrixDialog;
 class Tracker;
 
 class TrackerSettingsDialog : public QWidget, public Ui::TrackerSettingsDialog

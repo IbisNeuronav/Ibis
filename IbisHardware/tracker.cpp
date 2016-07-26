@@ -29,7 +29,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include <QList>
 #include <QFileInfo>
-#include <QMessageBox>
 
 ObjectSerializationMacro( Tracker );
 ObjectSerializationMacro( ToolDescription );
