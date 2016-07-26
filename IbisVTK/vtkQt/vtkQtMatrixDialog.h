@@ -77,7 +77,6 @@ protected:
     QVBoxLayout * MatrixDialogLayout;
     QGridLayout * gridBox;
     QHBoxLayout * Layout3;
-    QHBoxLayout * Layout4;
 
     bool  LoadFromXFMFile(QFile *f, vtkMatrix4x4 * mat);
 };

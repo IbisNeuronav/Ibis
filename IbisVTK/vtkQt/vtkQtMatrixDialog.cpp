@@ -118,23 +118,14 @@ vtkQtMatrixDialog::vtkQtMatrixDialog( bool readOnly, QWidget* parent )
     m_revertButton->setEnabled(!readOnly);
     m_revertButton->setAutoDefault( false );
     Layout3->addWidget( m_revertButton );
-    
-    QSpacerItem* spacer_2 = new QSpacerItem( 20, 20, QSizePolicy::Expanding, QSizePolicy::Minimum );
-    Layout3->addItem( spacer_2 );
-    
-    MatrixDialogLayout->addLayout( Layout3 );
-    
-    Layout4 = new QHBoxLayout;
-    Layout4->setSpacing( 6 );
-    Layout4->setMargin( 0 );
-
+        
     m_copyButton = new QPushButton( this );
     m_copyButton->setObjectName("m_copyButton");
     m_copyButton->setText( tr( "Copy" ) );
     m_copyButton->setMinimumSize( QSize( 70, 30 ) );
     m_copyButton->setMaximumSize( QSize( 70, 30 ) );
     m_copyButton->setAutoDefault( false );
-    Layout4->addWidget( m_copyButton );
+    Layout3->addWidget( m_copyButton );
 
     m_pasteButton = new QPushButton( this );
     m_pasteButton->setObjectName("m_pasteButton");
@@ -143,12 +134,10 @@ vtkQtMatrixDialog::vtkQtMatrixDialog( bool readOnly, QWidget* parent )
     m_pasteButton->setMaximumSize( QSize( 70, 30 ) );
     m_pasteButton->setEnabled(!readOnly);
     m_pasteButton->setAutoDefault( false );
-    Layout4->addWidget( m_pasteButton );
+    Layout3->addWidget( m_pasteButton );
 
-    QSpacerItem* spacer_3 = new QSpacerItem( 20, 20, QSizePolicy::Expanding, QSizePolicy::Minimum );
-    Layout4->addItem( spacer_3 );
 
-    MatrixDialogLayout->addLayout( Layout4 );
+    MatrixDialogLayout->addLayout( Layout3);
 
     // signals and slots connections
     connect( m_invertButton, SIGNAL( clicked() ), this, SLOT( InvertButtonClicked() ) );
