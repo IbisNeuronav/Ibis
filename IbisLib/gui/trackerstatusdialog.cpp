@@ -99,14 +99,15 @@ void ToolUI::UpdateUI()
 
 void ToolUI::SnapshotButtonClicked()
 {
+    TrackedSceneObject * toolObject = TrackedSceneObject::SafeDownCast( m_manager->GetObjectByID( m_toolObjectId ) );
+    Q_ASSERT( toolObject );
+
     if( !this->SnapshotMatrixWidget )
     {
-        this->SnapshotMatrixWidget = new vtkQtMatrixDialog( false );
+        this->SnapshotMatrixWidget = new vtkQtMatrixDialog( true );
         connect( this->SnapshotMatrixWidget, SIGNAL(destroyed()), this, SLOT(SnapshotMatrixWidgetClosed()) );
     }
 
-    TrackedSceneObject * toolObject = TrackedSceneObject::SafeDownCast( m_manager->GetObjectByID( m_toolObjectId ) );
-    Q_ASSERT( toolObject );
 
     vtkMatrix4x4 * mat = vtkMatrix4x4::New();
     mat->DeepCopy( toolObject->GetWorldTransform()->GetMatrix() );

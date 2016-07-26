@@ -25,6 +25,8 @@ public:
     ~ToolUI();
     
     void SetSceneManager( SceneManager * man, int m_toolObjectId );
+
+public slots:
     void UpdateUI();
 
 protected slots:

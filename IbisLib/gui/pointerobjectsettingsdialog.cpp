@@ -165,16 +165,16 @@ void PointerObjectSettingsDialog::on_calibrationMatrixPushButton_toggled( bool o
 {
     if( on )
     {
-        Q_ASSERT_X( m_pointer, "TransformEditWidget::on_calibrationMatrixPushButton_toggled", "Can't call this function without setting PointerObject." );
+        Q_ASSERT_X( m_pointer, "PointerObjectSettingsDialog::on_calibrationMatrixPushButton_toggled", "Can't call this function without setting PointerObject." );
         Q_ASSERT( !m_matrixDialog );
 
         QString dialogTitle = m_pointer->GetName();
         dialogTitle += ": Pointer Calibration Matrix";
 
-        m_matrixDialog = new vtkQtMatrixDialog( true, 0 );
+        m_matrixDialog = new vtkQtMatrixDialog( false, 0 );
         m_matrixDialog->setWindowTitle( dialogTitle );
         m_matrixDialog->setAttribute( Qt::WA_DeleteOnClose );
-        m_matrixDialog->SetTransform( m_pointer->GetCalibrationTransform() );
+        m_matrixDialog->SetMatrix( m_pointer->GetCalibrationTransform()->GetMatrix() );
         m_matrixDialog->show();
         connect( m_matrixDialog, SIGNAL(destroyed()), this, SLOT(OnCalibrationMatrixDialogClosed()) );
     }
