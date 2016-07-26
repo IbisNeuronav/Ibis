@@ -240,6 +240,7 @@ void TripleCutPlaneObject::RemoveImage( int imageID )
         if ((*it) == imageID)
         {
             m_sliceMixMode.erase(m_sliceMixMode.begin()+i);
+            m_blendingModeIndices.erase(m_blendingModeIndices.begin()+i);
             ImageObject * im = ImageObject::SafeDownCast( this->GetManager()->GetObjectByID( imageID ) );
             if(im )
             {
