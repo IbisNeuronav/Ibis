@@ -240,6 +240,7 @@ void TripleCutPlaneObject::RemoveImage( int imageID )
         if ((*it) == imageID)
         {
             m_sliceMixMode.erase(m_sliceMixMode.begin()+i);
+            m_blendingModeIndices.erase(m_blendingModeIndices.begin()+i);
             ImageObject * im = ImageObject::SafeDownCast( this->GetManager()->GetObjectByID( imageID ) );
             if(im )
             {
@@ -253,12 +254,7 @@ void TripleCutPlaneObject::RemoveImage( int imageID )
             return;
 
     Images.erase( it );
-    if( this->GetManager()->GetReferenceDataObject()->GetObjectID() == imageID && Images.size() != 0 )
-    {
-        this->GetManager()->SetReferenceDataObject( this->GetManager()->GetObjectByID( Images[0] )); // emits callback that will execute AdjustAllImages()
-    }
-    else
-        this->AdjustAllImages();
+    this->AdjustAllImages();
 
     if( Images.size() == 0 )
         ReleaseAllViews();
@@ -266,15 +262,17 @@ void TripleCutPlaneObject::RemoveImage( int imageID )
 
 void TripleCutPlaneObject::AdjustAllImages()
 {
+    for( int j = 0; j < 3; ++j )
+    {
+        // remove all inputs and later re-add images.
+        this->Planes[j]->ClearAllInputs();
+    }
     ImageObject *referenceObject = this->GetManager()->GetReferenceDataObject();
     if( referenceObject && Images.size() > 0 )
     {
         int refID = referenceObject->GetObjectID();
         for( int j = 0; j < 3; ++j )
         {
-            // remove all inputs and re-add images.
-            // (seems stupid, but it is better like that for texture unit consistency)
-            this->Planes[j]->ClearAllInputs();
             // first add reference object
             bool canInterpolate = !referenceObject->IsLabelImage();
             this->Planes[j]->SetBoundingVolume( referenceObject->GetImage(), referenceObject->GetWorldTransform() );
