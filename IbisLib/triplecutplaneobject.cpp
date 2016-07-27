@@ -267,15 +267,17 @@ void TripleCutPlaneObject::RemoveImage( int imageID )
 
 void TripleCutPlaneObject::AdjustAllImages()
 {
+    for( int j = 0; j < 3; ++j )
+    {
+        // remove all inputs and later re-add images.
+        this->Planes[j]->ClearAllInputs();
+    }
     ImageObject *referenceObject = this->GetManager()->GetReferenceDataObject();
     if( referenceObject && Images.size() > 0 )
     {
         int refID = referenceObject->GetObjectID();
         for( int j = 0; j < 3; ++j )
         {
-            // remove all inputs and re-add images.
-            // (seems stupid, but it is better like that for texture unit consistency)
-            this->Planes[j]->ClearAllInputs();
             // first add reference object
             bool canInterpolate = !referenceObject->IsLabelImage();
             this->Planes[j]->SetBoundingVolume( referenceObject->GetImage(), referenceObject->GetWorldTransform() );
