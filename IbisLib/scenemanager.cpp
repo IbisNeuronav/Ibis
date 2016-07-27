@@ -642,9 +642,6 @@ void SceneManager::RemoveObject( SceneObject * object , bool viewChange)
 
     object->ObjectAboutToBeRemovedFromScene();
 
-    // remove the object from the global list
-    this->AllObjects.removeAt( indexAll );
-
     // remove all children
     this->RemoveAllChildrenObjects(object);
 
@@ -664,6 +661,24 @@ void SceneManager::RemoveObject( SceneObject * object , bool viewChange)
     if( object->IsListable() )
         emit StartRemovingObject( object->GetParent(), position );
 
+    // Set ReferenceDataObject if needed
+    if (object == this->ReferenceDataObject)
+    {
+        this->ReferenceDataObject  = 0;
+        QList< ImageObject* > imObjects;
+        this->GetAllImageObjects( imObjects );
+        int i = 0;
+        bool refSet = false;
+        while (i < imObjects.size() && !refSet )
+        {
+            if( imObjects[i] != object )
+            {
+                this->SetReferenceDataObject( imObjects[i] );
+                refSet = true;
+            }
+            i++;
+        }
+    }
 
     // Release from all views
     for( ViewList::iterator it = Views.begin(); it != Views.end(); ++it )
@@ -682,11 +697,13 @@ void SceneManager::RemoveObject( SceneObject * object , bool viewChange)
 
     object->UnRegister( this );
 
-    if (object == this->ReferenceDataObject)
-        this->ReferenceDataObject  = 0;
     if( object->IsListable() )
         emit FinishRemovingObject();
     ValidatePointerObject();
+
+    // remove the object from the global list
+    this->AllObjects.removeAt( indexAll );
+
     emit ObjectRemoved( objId );
 }
 
