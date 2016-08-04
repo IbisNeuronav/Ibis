@@ -157,7 +157,7 @@ void USAcquisitionObject::SetUsProbe( UsProbeObject * probe )
     m_usProbeObjectId = probe->GetObjectID();
 }
 
-bool USAcquisitionObject::Setup( View * view )
+void USAcquisitionObject::Setup( View * view )
 {
     this->SceneObject::Setup( view );
 
@@ -179,15 +179,11 @@ bool USAcquisitionObject::Setup( View * view )
 
         m_perViews[ view ] = elem;
     }
-
-    return true;
 }
 
-bool USAcquisitionObject::Release( View * view )
+void USAcquisitionObject::Release( View * view )
 {
-    bool success = SceneObject::Release( view );
-    if( !success )
-        return false;
+    SceneObject::Release( view );
 
     PerViewContainer::iterator it = m_perViews.begin();
     while( it != m_perViews.end() )
@@ -202,8 +198,6 @@ bool USAcquisitionObject::Release( View * view )
     }
 
     m_perViews.clear();
-
-    return true;
 }
 
 void USAcquisitionObject::Hide()

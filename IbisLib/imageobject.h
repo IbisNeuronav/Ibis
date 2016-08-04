@@ -94,8 +94,8 @@ public:
     
     // Implementation of parent virtual method
     virtual void ObjectAddedToScene();
-    virtual bool Setup( View * view );
-    virtual bool Release( View * view );
+    virtual void Setup( View * view );
+    virtual void Release( View * view );
     virtual void PreDisplaySetup();
     virtual void CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets);
 

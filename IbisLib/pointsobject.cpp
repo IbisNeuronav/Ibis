@@ -193,20 +193,18 @@ void PointsObject::Export()
         QMessageBox::warning( 0, tr("Error: "), tr("There are no points to save."), 1, 0 );
 }
 
-bool PointsObject::Setup( View * view )
+void PointsObject::Setup( View * view )
 {
     // register to receive mouse interaction event from this view
     view->AddInteractionObject( this, 0.5 );
 
-    return SceneObject::Setup( view );
+    SceneObject::Setup( view );
 }
 
-bool PointsObject::Release( View * view)
+void PointsObject::Release( View * view)
 {
     view->RemoveInteractionObject( this );
-    bool success = SceneObject::Release( view );
-    if( !success )
-        return false;
+    SceneObject::Release( view );
 }
 
 void PointsObject::Hide()

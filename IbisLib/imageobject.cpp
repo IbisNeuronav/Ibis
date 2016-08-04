@@ -398,11 +398,9 @@ void ImageObject::SetupInCutPlanes()
 	}
 }
 
-bool ImageObject::Setup( View * view )
+void ImageObject::Setup( View * view )
 {
-	bool success = SceneObject::Setup( view );
-	if( !success )
-		return false;
+    SceneObject::Setup( view );
 
     TripleCutPlaneObject * mainPlane = this->GetManager()->GetMainImagePlanes();
     Q_ASSERT( mainPlane );
@@ -428,7 +426,6 @@ bool ImageObject::Setup( View * view )
 
     this->SetViewOutline(this->viewOutline);
     this->GetManager()->ResetAllCameras();
-    return true;
 }
 
 void ImageObject::PreDisplaySetup()
@@ -437,11 +434,9 @@ void ImageObject::PreDisplaySetup()
     this->GetManager()->GetMainImagePlanes()->PreDisplaySetup();
 }
 
-bool ImageObject::Release( View * view )
+void ImageObject::Release( View * view )
 {
-	bool success = SceneObject::Release( view );
-	if( !success )
-		return false;
+    SceneObject::Release( view );
 
     Q_ASSERT( this->GetManager() );
     this->GetManager()->GetMainImagePlanes()->RemoveImage( this->GetObjectID() );
@@ -461,7 +456,6 @@ bool ImageObject::Release( View * view )
             this->Release3DRepresentation( view );
             break;
     }
-	return true;
 }
 
 void ImageObject::CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets )

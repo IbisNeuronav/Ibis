@@ -49,8 +49,8 @@ public:
     USMask *GetMask() { return m_mask; }
 
     // Implementation of standard SceneObject method
-    virtual bool Setup( View * view );
-    virtual bool Release( View * view );
+    virtual void Setup( View * view );
+    virtual void Release( View * view );
     virtual void CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets);
 
     void SetVideoInputConnection( vtkAlgorithmOutput * port );

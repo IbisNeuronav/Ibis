@@ -47,8 +47,8 @@ public:
     virtual bool IsExportable()  { return true; }
 
     // Implementation of parent virtual method
-    virtual bool Setup( View * view );
-    virtual bool Release( View * view );
+    virtual void Setup( View * view );
+    virtual void Release( View * view );
 
     virtual void Hide();
     virtual void Show();

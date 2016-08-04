@@ -57,7 +57,7 @@ PointerObject::~PointerObject()
 {
 }
 
-bool PointerObject::Setup( View * view )
+void PointerObject::Setup( View * view )
 {
     if( view->GetType() == THREED_VIEW_TYPE )
     {
@@ -87,10 +87,9 @@ bool PointerObject::Setup( View * view )
         this->pointerObjectInstances[ view ] = perView;
         connect( this, SIGNAL(Modified()), view, SLOT(NotifyNeedRender()) );
     }
-	return true;
 }
 
-bool PointerObject::Release( View * view )
+void PointerObject::Release( View * view )
 {
     if( view->GetType() == THREED_VIEW_TYPE )
     {
@@ -104,7 +103,6 @@ bool PointerObject::Release( View * view )
             this->pointerObjectInstances.erase( itAssociations );
         }
     }
-	return true;
 }
 
 void PointerObject::ObjectAddedToScene()

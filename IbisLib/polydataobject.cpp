@@ -220,11 +220,9 @@ void PolyDataObject::Export()
     writer1->Delete();
 }
 
-bool PolyDataObject::Setup( View * view )
+void PolyDataObject::Setup( View * view )
 {
-	bool success = SceneObject::Setup( view );
-	if( !success )
-		return false;
+    SceneObject::Setup( view );
 
     vtkPolyDataMapper * mapper = vtkPolyDataMapper::New();
     mapper->SetScalarVisibility( this->ScalarsVisible );
@@ -251,15 +249,11 @@ bool PolyDataObject::Setup( View * view )
         view->GetOverlayRenderer()->AddActor( actor );
     }
     mapper->Delete();
-
-	return true;
 }
 
-bool PolyDataObject::Release( View * view )
+void PolyDataObject::Release( View * view )
 {
-    bool success = SceneObject::Release( view );
-    if( !success )
-        return false;
+    SceneObject::Release( view );
 
     PolyDataObjectViewAssociation::iterator itAssociations = this->polydataObjectInstances.find( view );
     if( itAssociations != this->polydataObjectInstances.end() )
@@ -272,7 +266,6 @@ bool PolyDataObject::Release( View * view )
         actor->Delete();
         this->polydataObjectInstances.erase( itAssociations );
     }
-    return true;
 }
 
 void PolyDataObject::SetColor( double r, double g, double b )

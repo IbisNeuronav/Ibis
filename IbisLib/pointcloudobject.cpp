@@ -100,11 +100,9 @@ void PointCloudObject::Export()
     writer1->Delete();
 }
 
-bool PointCloudObject::Setup( View * view )
+void PointCloudObject::Setup( View * view )
 {
-    bool success = SceneObject::Setup( view );
-    if( !success )
-        return false;
+    SceneObject::Setup( view );
 
     if( view->GetType() == THREED_VIEW_TYPE )
     {
@@ -123,7 +121,6 @@ bool PointCloudObject::Setup( View * view )
         this->GetProperty()->GetColor(this->m_Color);
 
     }
-    return true;
 }
 
 // Deep Copy of Point Cloud Array
@@ -146,11 +143,9 @@ void PointCloudObject::SetColor(double color[3])
     emit Modified();
 }
 
-bool PointCloudObject::Release( View * view )
+void PointCloudObject::Release( View * view )
 {
-    bool success = SceneObject::Release( view );
-    if( !success )
-        return false;
+    SceneObject::Release( view );
 
     if( view->GetType() == THREED_VIEW_TYPE )
     {
@@ -166,7 +161,6 @@ bool PointCloudObject::Release( View * view )
             disconnect( view, SLOT(NotifyNeedRender()) );
         }
     }
-    return true;
 }
 
 void PointCloudObject::CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets)

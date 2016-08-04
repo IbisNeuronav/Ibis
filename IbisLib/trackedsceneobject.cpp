@@ -32,10 +32,9 @@ TrackedSceneObject::~TrackedSceneObject()
     m_uncalibratedWorldTransform->Delete();
 }
 
-bool TrackedSceneObject::Setup( View * view )
+void TrackedSceneObject::Setup( View * view )
 {
-    if( !SceneObject::Setup( view ) )
-        return false;
+    SceneObject::Setup( view );
 
     if( view->GetType() == THREED_VIEW_TYPE )
     {
@@ -60,10 +59,9 @@ bool TrackedSceneObject::Setup( View * view )
         // remember what we put in that view
         m_genericActors[ view ] = markerActor;
     }
-    return true;
 }
 
-bool TrackedSceneObject::Release( View * view )
+void TrackedSceneObject::Release( View * view )
 {
     if( view->GetType() == THREED_VIEW_TYPE )
     {
@@ -76,7 +74,6 @@ bool TrackedSceneObject::Release( View * view )
             m_genericActors.erase( it );
         }
     }
-    return true;
 }
 
 void TrackedSceneObject::Hide()

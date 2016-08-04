@@ -55,8 +55,8 @@ public:
     void SetPolyData( vtkPolyData * data );
     
     // Implementation of parent virtual method
-	virtual bool Setup( View * view );
-    virtual bool Release( View * view );
+    virtual void Setup( View * view );
+    virtual void Release( View * view );
 
     virtual void CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets);
 
