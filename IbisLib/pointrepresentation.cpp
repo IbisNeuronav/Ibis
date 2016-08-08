@@ -44,6 +44,7 @@ PointRepresentation::PerViewElements::~PerViewElements()
 
 PointRepresentation::PointRepresentation()
 {
+    this->AllowChildren = false;
     m_property = vtkProperty::New();
     m_property->SetColor(1.0,0.0,0.0);
     m_property->SetAmbient(1);
