@@ -225,31 +225,27 @@ void SceneObject::FinishModifyingTransform()
 
 // Implement base class behavior: keep track of the views in which the
 // object has been setup and watch for modifications (do we need that last part?).
-bool SceneObject::Setup( View * view )
+void SceneObject::Setup( View * view )
 {
 	ViewContainer::iterator it = std::find( Views.begin(), Views.end(), view );
 	if( it != Views.end() )
-		return false;
+        return;
 
 	view->Register( this );
 	Views.push_back( view );
 
     connect( this, SIGNAL( Modified() ), view, SLOT(NotifyNeedRender()) );
-
-	return true;
 }
 
-bool SceneObject::Release( View * view )
+void SceneObject::Release( View * view )
 {
 	ViewContainer::iterator it = std::find( Views.begin(), Views.end(), view );
 	if( it == Views.end() )
-		return false;
+        return;
 
 	this->disconnect( view );
 	view->UnRegister( this );
 	this->Views.erase( it );
-
-	return true;
 }
 
 void SceneObject::ReleaseAllViews()

@@ -228,12 +228,11 @@ void LandmarkRegistrationObject::Export()
     }
 }
 
-bool LandmarkRegistrationObject::Release( View * view)
+void LandmarkRegistrationObject::Release( View * view)
 {
     // m_targetPoints is not a child of LandmarkRegistrationObject, it has to be removed from all views
-    // its creator will have to delete it
     m_targetPoints->Release( view );
-    return SceneObject::Release( view );
+    SceneObject::Release( view );
 }
 
 void LandmarkRegistrationObject::WriteTagFile( const QString & filename, bool saveEnabledOnly )

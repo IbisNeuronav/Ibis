@@ -39,8 +39,8 @@ public:
     // SceneObject implementation
     virtual void Serialize( Serializer * ser );
     virtual void PostSceneRead();
-    virtual bool Setup( View * view );
-	virtual bool Release( View * view );
+    virtual void Setup( View * view );
+    virtual void Release( View * view );
     virtual void ReleaseAllViews();
 
     virtual QWidget * CreateSettingsDialog( QWidget * parent );

@@ -124,14 +124,12 @@ void TripleCutPlaneObject::PostSceneRead()
     emit Modified();
 }
 
-bool TripleCutPlaneObject::Setup( View * view )
+void TripleCutPlaneObject::Setup( View * view )
 {
     if( this->Images.size() == 0 )
-        return false;
+        return;
 
-    bool success = SceneObject::Setup( view );
-    if( !success )
-        return false;
+    SceneObject::Setup( view );
 
     switch( view->GetType() )
     {
@@ -148,14 +146,11 @@ bool TripleCutPlaneObject::Setup( View * view )
         this->Setup3DRepresentation( view );
         break;
     }
-    return true;
 }
 
-bool TripleCutPlaneObject::Release( View * view )
+void TripleCutPlaneObject::Release( View * view )
 {
-    bool success = SceneObject::Release( view );
-    if( !success )
-        return false;
+    SceneObject::Release( view );
 
     switch( view->GetType() )
     {
@@ -172,7 +167,6 @@ bool TripleCutPlaneObject::Release( View * view )
         this->Release3DRepresentation( view );
         break;
     }
-    return true;
 }
 
 

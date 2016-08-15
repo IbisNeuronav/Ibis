@@ -294,7 +294,7 @@ void CameraObject::RemoveClient()
         GetHardwareModule()->RemoveTrackedVideoClient( this );
 }
 
-bool CameraObject::Setup( View * view )
+void CameraObject::Setup( View * view )
 {
     if( view->GetType() == THREED_VIEW_TYPE )
     {
@@ -347,10 +347,9 @@ bool CameraObject::Setup( View * view )
 
         connect( this, SIGNAL(Modified()), view, SLOT(NotifyNeedRender()) );
     }
-    return true;
 }
 
-bool CameraObject::Release( View * view )
+void CameraObject::Release( View * view )
 {
     if( view->GetType() == THREED_VIEW_TYPE )
     {     
@@ -377,7 +376,6 @@ bool CameraObject::Release( View * view )
             RemoveClient();
         }
     }
-    return true;
 }
 
 void CameraObject::CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets )

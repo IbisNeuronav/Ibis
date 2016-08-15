@@ -121,7 +121,7 @@ void PointRepresentation::Show()
     }
 }
 
-bool PointRepresentation::Setup( View * view )
+void PointRepresentation::Setup( View * view )
 {
     PointsObject *parent = PointsObject::SafeDownCast( this->GetParent() );
 
@@ -177,10 +177,9 @@ bool PointRepresentation::Setup( View * view )
     perView->labelActor = labelActor;
     m_perViewContainer[view] = perView;
     connect( this, SIGNAL(Modified()), view, SLOT(NotifyNeedRender()) );
-    return true;
 }
 
-bool PointRepresentation::Release( View * view )
+void PointRepresentation::Release( View * view )
 {
     disconnect( this, SIGNAL(Modified()), view, SLOT(NotifyNeedRender()) );
     PerViewContainer::iterator it = m_perViewContainer.find( view );
@@ -197,7 +196,6 @@ bool PointRepresentation::Release( View * view )
         delete perView;
         this->m_perViewContainer.erase( it );
     }
-    return true;
 }
 
 void PointRepresentation::UpdateVisibility()

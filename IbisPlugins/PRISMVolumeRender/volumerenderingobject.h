@@ -45,9 +45,9 @@ public:
     void Clear();
 
     // SceneObject implementation
-    virtual bool Setup( View * view );
+    virtual void Setup( View * view );
     virtual void PreDisplaySetup();
-    virtual bool Release( View * view );
+    virtual void Release( View * view );
     virtual QWidget * CreateSettingsDialog( QWidget * parent );
     virtual void CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets) {}
 

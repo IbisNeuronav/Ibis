@@ -167,7 +167,7 @@ void UsProbeObject::ObjectRemovedFromScene()
     disconnect( &Application::GetInstance(), SIGNAL(IbisClockTick()), this, SLOT(OnUpdate()) );
 }
 
-bool UsProbeObject::Setup( View * view )
+void UsProbeObject::Setup( View * view )
 {
     SceneObject::Setup( view );
 
@@ -186,10 +186,9 @@ bool UsProbeObject::Setup( View * view )
 
         m_perViews[ view ] = pv;
     }
-	return true;
 }
 
-bool UsProbeObject::Release( View * view )
+void UsProbeObject::Release( View * view )
 {
     SceneObject::Release( view );
 
@@ -206,7 +205,6 @@ bool UsProbeObject::Release( View * view )
                 RemoveClient();
         }
     }
-    return true;
 }
 
 void UsProbeObject::Hide()

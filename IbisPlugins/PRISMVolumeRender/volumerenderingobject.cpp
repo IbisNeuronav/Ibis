@@ -319,14 +319,14 @@ void VolumeRenderingObject::ObjectRemovedFromScene()
 
 #include "vtkProperty.h"
 
-bool VolumeRenderingObject::Setup( View * view )
+void VolumeRenderingObject::Setup( View * view )
 {
     if( view->GetType() == THREED_VIEW_TYPE )
     {
         // make sure we haven't setup already
         PerViewContainer::iterator it = m_perView.find( view );
         if( it != m_perView.end() )
-            return false;
+            return;
 
         PerView perView;
         perView.volumeMapper = vtkPRISMVolumeMapper::New();
@@ -369,7 +369,6 @@ bool VolumeRenderingObject::Setup( View * view )
 
         m_perView[ view ] = perView;
     }
-    return true;
 }
 
 void VolumeRenderingObject::PreDisplaySetup()
@@ -378,12 +377,12 @@ void VolumeRenderingObject::PreDisplaySetup()
     UpdateInteractionWidgetVisibility();
 }
 
-bool VolumeRenderingObject::Release( View * view )
+void VolumeRenderingObject::Release( View * view )
 {
     // Make sure the view has been setup
     PerViewContainer::iterator it = m_perView.find( view );
     if( it == m_perView.end() )
-        return false;
+        return;
 
     PerView & perView = (*it).second;
     view->GetRenderer()->RemoveViewProp( perView.volumeActor );
@@ -393,8 +392,6 @@ bool VolumeRenderingObject::Release( View * view )
     perView.sphereWidget->SetInteractor( 0 );
     perView.sphereWidget->Delete();
     m_perView.erase( view );
-
-    return true;
 }
 
 QWidget * VolumeRenderingObject::CreateSettingsDialog( QWidget * parent )
