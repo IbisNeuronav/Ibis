@@ -96,8 +96,6 @@ public:
     int GetChildListableIndex( SceneObject * child );
     int GetObjectIndex();
     int GetObjectListableIndex();
-    SceneObject * GetObject( const QString & objectName );
-    SceneObject * GetObjectByID( int id );
     SceneObject * GetParent() { return this->Parent; }
     bool CanAppendChildren() { return AllowChildren; }
     void SetCanAppendChildren( bool c ) { AllowChildren = c; }

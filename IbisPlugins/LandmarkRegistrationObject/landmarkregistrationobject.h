@@ -33,7 +33,6 @@ public:
     virtual void CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets );
     virtual void Export();
     virtual bool IsExportable()  { return true; }
-    virtual void Release( View * view );
     virtual void Serialize( Serializer * ser );
     virtual void PostSceneRead();
 

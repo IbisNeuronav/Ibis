@@ -344,6 +344,16 @@ void SceneManager::LoadScene( QString & fileName, bool interactive )
     this->LoadingScene = false;
 }
 
+void SceneManager::NewScene()
+{
+    SetRenderingEnabled( false );
+
+    // Clear the scene
+    InternalClearScene();
+
+    SetRenderingEnabled( true );
+}
+
 void SceneManager::CancelProgress()
 {
     Application::GetInstance().StopProgress(m_sceneLoadSaveProgressDialog);

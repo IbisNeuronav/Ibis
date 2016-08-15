@@ -23,7 +23,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "pointerobject.h"
 #include "polydataobject.h"
 #include "pointsobject.h"
-#include "ignsconfig.h"
+#include "ibisconfig.h"
 #include "ibisplugin.h"
 #include "objectplugininterface.h"
 #include "toolplugininterface.h"
@@ -66,7 +66,7 @@ void ApplicationSettings::LoadSettings( QSettings & settings )
     MainWindowLeftPanelSize = settings.value( "MainWindowLeftPanelSize", 150 ).toInt();
     MainWindowRightPanelSize = settings.value( "MainWindowRightPanelSize", 150 ).toInt();
     QString workDir(QDir::homePath());
-    workDir.append(IGNS_WORKING_DIRECTORY);
+    workDir.append(IBIS_CONFIGURATION_SUBDIRECTORY);
     WorkingDirectory = settings.value( "WorkingDirectory", workDir).toString();
 
     // Should be able to load and save a QColor directly, but doesn't work well on linux: to check: anything to do with the fact that destructor can be called after QApplication's destructor?
@@ -354,7 +354,7 @@ QString Application::GetFullVersionString()
 
 QString Application::GetConfigDirectory()
 {
-    QString configDir = QDir::homePath() + "/" + IGNS_CONFIGURATION_SUBDIRECTORY + "/";
+    QString configDir = QDir::homePath() + "/" + IBIS_CONFIGURATION_SUBDIRECTORY + "/";
     return configDir;
 }
 

@@ -20,7 +20,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "filereader.h"
 #include "worldobject.h"
 #include "triplecutplaneobject.h"
-#include "ignsconfig.h"
+#include "ibisconfig.h"
 #include "toolplugininterface.h"
 #include "objectplugininterface.h"
 #include "generatorplugininterface.h"
@@ -48,7 +48,6 @@ const QString MainWindow::m_appName( tr("Intraoperative Brain Imaging System") )
 
 MainWindow::MainWindow( QWidget * parent )
     : QMainWindow( parent )
-    , m_fileLoadSceneAction(0)
     , m_viewXPlaneAction(0)
     , m_viewYPlaneAction(0)
     , m_viewZPlaneAction(0)
@@ -87,7 +86,8 @@ MainWindow::MainWindow( QWidget * parent )
     fileMenu->addSeparator();
     fileMenu->addAction( tr("Save S&cene"), this, SLOT( fileSaveScene() ), QKeySequence::Save );
     fileMenu->addAction( tr("Save S&cene As..."), this, SLOT( fileSaveSceneAs() ) );
-    m_fileLoadSceneAction = fileMenu->addAction( tr("&Load Scene"), this, SLOT( fileLoadScene() ));
+    fileMenu->addAction( tr("&Load Scene"), this, SLOT( fileLoadScene() ));
+    fileMenu->addAction( tr("&New Scene"), this, SLOT( fileNewScene() ));
     fileMenu->addSeparator();
     fileMenu->addAction( tr("&Exit"), this, SLOT( close() ), QKeySequence::Quit );
     connect( fileMenu, SIGNAL( aboutToShow() ), this, SLOT( ModifyFileMenu() ) );
@@ -557,7 +557,6 @@ void MainWindow::fileLoadScene()
     if(!QFile::exists(workingDir))
     {
         workingDir = QDir::homePath();
-        workingDir.append(IGNS_WORKING_DIRECTORY);
     }
 
     QString fileName = Application::GetInstance().GetOpenFileName( tr("Load Scene"), workingDir, tr("Scene files (*.xml)") );
@@ -569,6 +568,24 @@ void MainWindow::fileLoadScene()
         Application::GetInstance().GetSettings()->WorkingDirectory = newDir;
         manager->LoadScene(fileName);
     }
+}
+
+void MainWindow::fileNewScene()
+{
+    SceneManager * manager = Application::GetSceneManager();
+    bool sceneNotEmpty = manager->GetNumberOfUserObjects() > 0;
+    if( sceneNotEmpty )
+    {
+        int ret = QMessageBox::warning(this, "New Scene",
+                                       tr("All the objects currently in the scene will be removed."),
+                                       QMessageBox::Yes | QMessageBox::Default,
+                                       QMessageBox::No | QMessageBox::Escape);
+        if (ret == QMessageBox::No)
+            return;
+    }
+    Application::GetInstance().GetSettings()->WorkingDirectory = QDir::homePath();
+    manager->SetSceneDirectory( "" ); // to force directory selection
+    manager->NewScene();
 }
 
 void MainWindow::ObjectListWidgetChanged( QWidget * newWidget )
