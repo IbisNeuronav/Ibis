@@ -75,7 +75,7 @@ void OpenDataFileDialog::Update()
     int index = 1;
     for( int i = 0; i < allObjects.size(); ++i )
     {
-        if( allObjects[i]->CanAppendChildren() )
+        if( allObjects[i]->CanAppendChildren() && allObjects[i]->IsListable() )
         {
             ui->parentComboBox->addItem( allObjects[i]->GetName(), QVariant( allObjects[i]->GetObjectID() ) );
             if( allObjects[i] == m_fileParams->defaultParent )
