@@ -232,7 +232,9 @@ void TrackerSettingsDialog::ToolUseComboChanged( int index )
 void TrackerSettingsDialog::UpdateUI()
 {
     int currentTool = m_tracker->GetCurrentToolIndex();
-    bool enableButton = m_tracker->IsToolActive( currentTool ) == 0;
+    bool enableButton = false;
+    if( currentTool >= 0 ) // currentTool == -1 means no tools were configured
+        enableButton = m_tracker->IsToolActive( currentTool ) == 0;
     m_removeToolButton->setEnabled( enableButton );
     m_renameToolButton->setEnabled( enableButton );
     m_romFilenameEdit->setEnabled( enableButton );

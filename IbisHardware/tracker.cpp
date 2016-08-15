@@ -421,7 +421,7 @@ void Tracker::RemoveTool( int toolIndex )
         if( GetNumberOfTools() > 1 )
             SetCurrentToolIndex( 0 );
         else
-            SetCurrentToolIndex( -1 );
+            m_currentTool = -1;
     }
     else if( m_currentTool > toolIndex )
         SetCurrentToolIndex( m_currentTool - 1 );
@@ -432,7 +432,7 @@ void Tracker::RemoveTool( int toolIndex )
         if( GetNumberOfTools() > 1 )
             SetReferenceToolIndex( 0 );
         else
-            SetReferenceToolIndex( -1 );
+            m_referenceTool = -1;
     }
     else if( m_referenceTool > toolIndex )
         SetReferenceToolIndex( m_referenceTool - 1 );

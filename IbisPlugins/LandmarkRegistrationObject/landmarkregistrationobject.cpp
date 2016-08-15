@@ -13,7 +13,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "landmarkregistrationobjectsettingswidget.h"
 #include "landmarktransform.h"
 #include "scenemanager.h"
-#include "ignsconfig.h"
+#include "ibisconfig.h"
 #include "application.h"
 #include "view.h"
 #include "vtkPoints.h"
@@ -181,6 +181,8 @@ void LandmarkRegistrationObject::ObjectAddedToScene()
 
 void LandmarkRegistrationObject::ObjectAboutToBeRemovedFromScene()
 {
+    // m_targetPoints is not a child of LandmarkRegistrationObject, it has to be removed explicitly
+    GetManager()->RemoveObject( m_targetPoints );
     disconnect( GetManager(), SIGNAL(CurrentObjectChanged()), this, SLOT(CurrentObjectChanged()));
 }
 
@@ -199,7 +201,7 @@ void LandmarkRegistrationObject::Export()
     QString tag_directory = this->GetManager()->GetSceneDirectory();
     if(!QFile::exists(tag_directory))
     {
-        tag_directory = QDir::homePath() + "/" + IGNS_CONFIGURATION_SUBDIRECTORY;
+        tag_directory = QDir::homePath() + "/" + IBIS_CONFIGURATION_SUBDIRECTORY;
     }
     QString filename = Application::GetInstance().GetSaveFileName( "Save tag file", tag_directory, "Tag file (*.tag)" );
 
@@ -226,13 +228,6 @@ void LandmarkRegistrationObject::Export()
         this->WriteXFMFile(info.absoluteFilePath());
         return;
     }
-}
-
-void LandmarkRegistrationObject::Release( View * view)
-{
-    // m_targetPoints is not a child of LandmarkRegistrationObject, it has to be removed from all views
-    m_targetPoints->Release( view );
-    SceneObject::Release( view );
 }
 
 void LandmarkRegistrationObject::WriteTagFile( const QString & filename, bool saveEnabledOnly )
@@ -317,15 +312,6 @@ void LandmarkRegistrationObject::SetSourcePoints(PointsObject *pts)
     {
         m_sourcePoints->disconnect( this );
         m_sourcePoints->UnRegister( this );
-        double selectedColor[3], enabledColor[3], disabledColor[3];
-        m_sourcePoints->GetSelectedColor( selectedColor );
-        pts->SetSelectedColor( selectedColor );
-        m_sourcePoints->GetEnabledColor( enabledColor );
-        pts->SetEnabledColor( enabledColor );
-        m_sourcePoints->GetDisabledColor( disabledColor );
-        pts->SetDisabledColor( disabledColor );
-        m_sourcePoints->SetPickable( false );
-        m_sourcePoints->SetPickabilityLocked( false );
         this->GetManager()->RemoveObject( m_sourcePoints );
     }
     m_sourcePoints = pts;
@@ -344,7 +330,6 @@ void LandmarkRegistrationObject::SetSourcePoints(PointsObject *pts)
         }
         m_sourcePoints->Register( this );
         m_sourcePoints->SetHidden( this->IsHidden() );
-        m_sourcePoints->SetPickabilityLocked( true );
         if( this->GetManager()->GetCurrentObject() == this )
             m_sourcePoints->SetPickable( true );
         m_activeSourcePoints->Reset();
@@ -352,6 +337,7 @@ void LandmarkRegistrationObject::SetSourcePoints(PointsObject *pts)
         connect( m_sourcePoints, SIGNAL(PointAdded()), this, SLOT(PointAdded()) );
         connect( m_sourcePoints, SIGNAL(PointRemoved(int)), this, SLOT(PointRemoved(int)) );
         connect( m_sourcePoints, SIGNAL(PointsChanged()), this, SLOT(Update()) );
+        disconnect( this->GetManager(), SIGNAL(CurrentObjectChanged()), m_sourcePoints, SLOT(OnCurrentObjectChanged()) );
         m_sourcePointsID = m_sourcePoints->GetObjectID();
     }
 }
@@ -363,13 +349,6 @@ void LandmarkRegistrationObject::SetTargetPoints(PointsObject *pts)
     if( m_targetPoints )
     {
         m_targetPoints->UnRegister( this );
-        double selectedColor[3], enabledColor[3], disabledColor[3];
-        m_targetPoints->GetSelectedColor( selectedColor );
-        pts->SetSelectedColor( selectedColor );
-        m_targetPoints->GetEnabledColor( enabledColor );
-        pts->SetEnabledColor( enabledColor );
-        m_targetPoints->GetDisabledColor( disabledColor );
-        pts->SetDisabledColor( disabledColor );
         this->GetManager()->RemoveObject( m_targetPoints );
     }
     m_targetPoints = pts;
@@ -381,9 +360,10 @@ void LandmarkRegistrationObject::SetTargetPoints(PointsObject *pts)
         if( m_targetPoints->GetObjectID() == SceneObject::InvalidObjectId )
             this->GetManager()->AddObject( m_targetPoints, this->GetManager()->GetObjectByID( m_targetObjectID ) );
         else if( m_targetPoints->GetParent() != this->GetManager()->GetObjectByID( m_targetObjectID ) )
-            this->GetManager()->ChangeParent( m_sourcePoints, this->GetManager()->GetObjectByID( m_targetObjectID ), 0);
+            this->GetManager()->ChangeParent( m_targetPoints, this->GetManager()->GetObjectByID( m_targetObjectID ), 0);
         m_targetPoints->Register( this );
         m_targetPoints->SetHidden( this->IsHidden() );
+        m_targetPoints->SetPickabilityLocked( true );
         m_activeTargetPoints->Reset();
         m_activeTargetPoints->DeepCopy( m_targetPoints->GetPoints() );
         m_targetPointsID = m_targetPoints->GetObjectID();
@@ -513,10 +493,8 @@ void LandmarkRegistrationObject::PointRemoved( int index )
 
 void LandmarkRegistrationObject::EnablePicking( bool enable )
 {
-    // simtodo : should do Q_ASSERT( m_sourcePoints ); instead, but during scene reading, object is
-    // set as current object before points are read (which is useless)
-    if( m_sourcePoints )
-        m_sourcePoints->SetPickable(enable);
+    Q_ASSERT( m_sourcePoints );
+    m_sourcePoints->SetPickable(enable);
 }
 
 void LandmarkRegistrationObject::UpdateActivePoints()
@@ -632,7 +610,7 @@ bool LandmarkRegistrationObject::ReadTagFile( )
     QString tag_directory = this->GetManager()->GetSceneDirectory();
     if (!QFile::exists(tag_directory))
     {
-        tag_directory = QDir::homePath() + "/" + IGNS_CONFIGURATION_SUBDIRECTORY;
+        tag_directory = QDir::homePath() + "/" + IBIS_CONFIGURATION_SUBDIRECTORY;
     }
     if (!QFile::exists(tag_directory))
         tag_directory = QDir::homePath();

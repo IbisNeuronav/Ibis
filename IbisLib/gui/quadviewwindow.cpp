@@ -29,7 +29,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "view.h"
 #include "zoomfactordialog.h"
 #include "vtkRenderWindow.h"
-#include "vtkTextMapper.h"
 #include "vtkCornerAnnotation.h"
 
 const QString QuadViewWindow::ViewNames[4] = { "Transverse","ThreeD","Coronal","Sagittal" };
@@ -483,10 +482,7 @@ void QuadViewWindow::PlaceCornerText()
     ca->SetText(2, "R");
     ca->SetText(3, "L");
     ca->SetMaximumFontSize(20);
-    vtkTextMapper *textMapper = vtkTextMapper::New();
-    ca->SetMapper(textMapper);
     renderer->AddViewProp( ca );
-    textMapper->Delete();
     ca->Delete();
 
     v = m_sceneManager->GetView( TRANSVERSE_VIEW_TYPE );
@@ -497,10 +493,7 @@ void QuadViewWindow::PlaceCornerText()
     ca->SetText(2, "R");
     ca->SetText(3, "L");
     ca->SetMaximumFontSize(20);
-    textMapper = vtkTextMapper::New();
-    ca->SetMapper(textMapper);
     renderer->AddViewProp( ca );
-    textMapper->Delete();
     ca->Delete();
 
     v = m_sceneManager->GetView( SAGITTAL_VIEW_TYPE );
@@ -511,10 +504,7 @@ void QuadViewWindow::PlaceCornerText()
     ca->SetText(2, "A");
     ca->SetText(3, "P");
     ca->SetMaximumFontSize(20);
-    textMapper = vtkTextMapper::New();
-    ca->SetMapper(textMapper);
     renderer->AddViewProp( ca );
-    textMapper->Delete();
     ca->Delete();
 
     v = m_sceneManager->GetView(THREED_VIEW_TYPE);
@@ -525,10 +515,7 @@ void QuadViewWindow::PlaceCornerText()
     ca->SetText(2, "S");
     ca->SetText(3, "S");
     ca->SetMaximumFontSize(20);
-    textMapper = vtkTextMapper::New();
-    ca->SetMapper(textMapper);
     renderer->AddViewProp( ca );
-    textMapper->Delete();
     ca->Delete();
 }
 

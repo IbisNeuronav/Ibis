@@ -17,7 +17,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "scenemanager.h"
 #include "application.h"
 #include "view.h"
-#include "ignsconfig.h"
+#include "ibisconfig.h"
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QDateTime>
@@ -87,47 +87,47 @@ void PointsObject::Serialize( Serializer * ser )
     ::Serialize( ser, "LineToPointerColor", m_lineToPointerColor, 3 );
     ::Serialize( ser, "Opacity", m_opacity );
     ::Serialize( ser, "SelectedPointIndex", m_selectedPointIndex );
-    if (this->FullFileName.isEmpty() || this->DataFileName.isEmpty())
+    int numberOfPoints;
+    double coords[3];
+    QString pointName, timeStamp("n/a");
+    if (!ser->IsReader())
     {
-        int numberOfPoints;
-        double coords[3];
-        QString pointName, timeStamp("n/a");
-        if (!ser->IsReader())
+        numberOfPoints = m_pointCoordinates->GetNumberOfPoints();
+        ::Serialize( ser, "NumberOfPoints", numberOfPoints );
+        for(int i = 0; i < numberOfPoints; i++)
         {
-            numberOfPoints = m_pointCoordinates->GetNumberOfPoints();
-            ::Serialize( ser, "NumberOfPoints", numberOfPoints );
-            for(int i = 0; i < numberOfPoints; i++)
-            {
-                pointName = m_pointNames.at( i );
-                timeStamp = m_timeStamps.at( i );
-                m_pointCoordinates->GetPoint( i, coords );
-                QString sectionName = QString( "Point_%1" ).arg(i);
-                ser->BeginSection(sectionName.toUtf8().data());
-                ::Serialize( ser, "PointName", pointName );
-                ::Serialize( ser, "PointCoordinates", coords, 3 );
-                ::Serialize( ser, "PointTimeStamp", timeStamp );
-                ser->EndSection();
-            }
+            pointName = m_pointNames.at( i );
+            timeStamp = m_timeStamps.at( i );
+            m_pointCoordinates->GetPoint( i, coords );
+            QString sectionName = QString( "Point_%1" ).arg(i);
+            ser->BeginSection(sectionName.toUtf8().data());
+            ::Serialize( ser, "PointName", pointName );
+            ::Serialize( ser, "PointCoordinates", coords, 3 );
+            ::Serialize( ser, "PointTimeStamp", timeStamp );
+            ser->EndSection();
         }
-        else
+    }
+    else
+    {
+        this->SetEnabledColor( m_activeColor );
+        this->SetDisabledColor( m_inactiveColor );
+        this->SetSelectedColor( m_selectedColor );
+        ::Serialize( ser, "NumberOfPoints", numberOfPoints );
+        m_pointNames.clear();
+        m_timeStamps.clear();
+        m_pointCoordinates->Reset();
+        for (int i = 0; i < numberOfPoints; i++)
         {
-            ::Serialize( ser, "NumberOfPoints", numberOfPoints );
-            m_pointNames.clear();
-            m_timeStamps.clear();
-            m_pointCoordinates->Reset();
-            for (int i = 0; i < numberOfPoints; i++)
-            {
-                QString sectionName = QString( "Point_%1" ).arg(i);
-                ser->BeginSection(sectionName.toUtf8().data() );
-                ::Serialize( ser, "PointName", pointName );
-                ::Serialize( ser, "PointCoordinates", coords, 3 );
-                ::Serialize( ser, "PointTimeStamp", timeStamp );
-                ser->EndSection();
-                this->AddPointLocal( coords, pointName, timeStamp );
-            }
-            m_lineToPointerProperty->SetColor( m_lineToPointerColor[0], m_lineToPointerColor[1], m_lineToPointerColor[2] );
-            this->SetSelectedPoint( m_selectedPointIndex );
+            QString sectionName = QString( "Point_%1" ).arg(i);
+            ser->BeginSection(sectionName.toUtf8().data() );
+            ::Serialize( ser, "PointName", pointName );
+            ::Serialize( ser, "PointCoordinates", coords, 3 );
+            ::Serialize( ser, "PointTimeStamp", timeStamp );
+            ser->EndSection();
+            this->AddPointLocal( coords, pointName, timeStamp );
         }
+        m_lineToPointerProperty->SetColor( m_lineToPointerColor[0], m_lineToPointerColor[1], m_lineToPointerColor[2] );
+        this->SetSelectedPoint( m_selectedPointIndex );
     }
 }
 
@@ -140,7 +140,7 @@ void PointsObject::Export()
         QString workingDirectory(this->GetManager()->GetSceneDirectory());
         if( !QFile::exists( workingDirectory ) )
         {
-            workingDirectory = QDir::homePath() + IGNS_CONFIGURATION_SUBDIRECTORY;
+            workingDirectory = QDir::homePath() + IBIS_CONFIGURATION_SUBDIRECTORY;
             QDir configDir( workingDirectory );
             if( !configDir.exists( ) )
             {

@@ -12,7 +12,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "trackedvideobuffer.h"
 #include "serializerhelper.h"
 #include "application.h"
-#include "ignsconfig.h"
+#include "ibisconfig.h"
 #include "scenemanager.h"
 #include "usacquisitionsettingswidget.h"
 #include "usmasksettingswidget.h"
@@ -63,7 +63,7 @@ USAcquisitionObject::USAcquisitionObject()
     m_videoBuffer = new TrackedVideoBuffer( m_defaultImageSize[0], m_defaultImageSize[1] );
 
     m_isRecording = false;
-    m_baseDirectory = QDir::homePath() + "/" + IGNS_CONFIGURATION_SUBDIRECTORY + "/" + ACQ_BASE_DIR;
+    m_baseDirectory = QDir::homePath() + "/" + IBIS_CONFIGURATION_SUBDIRECTORY + "/" + ACQ_BASE_DIR;
 
     m_usDepth = "9cm";
     m_acquisitionType = UsProbeObject::ACQ_B_MODE;

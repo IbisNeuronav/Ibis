@@ -51,6 +51,7 @@ private slots:
     void fileSaveScene();
     void fileSaveSceneAs();
     void fileLoadScene();
+    void fileNewScene();
     void NewPointSet();
     void ModifyFileMenu( );
     void ModifyNewObjectFileMenu( );
@@ -98,7 +99,6 @@ protected:
 	// Capture events sent to application (ex.:fileopen event on OSX)
 	bool eventFilter(QObject *obj, QEvent *event);
 
-    QAction * m_fileLoadSceneAction;
     QAction * m_viewXPlaneAction;
     QAction * m_viewYPlaneAction;
     QAction * m_viewZPlaneAction;

@@ -374,42 +374,6 @@ int SceneObject::GetObjectListableIndex()
     return 0; // scene root is unique
 }
 
-SceneObject * SceneObject::GetObject( const QString & objectName )
-{
-    SceneObjectVec::iterator it = this->Children.begin();
-    for( ; it != this->Children.end(); ++it )
-    {
-        if( (*it)->GetName() == objectName )
-        {
-            return (*it);
-        }
-        SceneObject * result = (*it)->GetObject( objectName );
-        if( result )
-        {
-            return result;
-        }
-    }
-    return 0;
-}
-
-SceneObject * SceneObject::GetObjectByID( int id )
-{
-    SceneObjectVec::iterator it = this->Children.begin();
-    for( ; it != this->Children.end(); ++it )
-    {
-        if( (*it)->GetObjectID() == id )
-        {
-            return (*it);
-        }
-        SceneObject * result = (*it)->GetObjectByID( id );
-        if( result )
-        {
-            return result;
-        }
-    }
-    return 0;
-}
-
 bool SceneObject::DescendsFrom( SceneObject * obj )
 {
     if( obj == this )

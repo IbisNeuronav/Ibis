@@ -67,7 +67,7 @@ SET( IGNS_IBISLIB_HDR
                      ibisplugin.h
                      serializer.h 
                      serializerhelper.h
-                     ignsconfig.h
+                     ibisconfig.h
                      toolplugininterface.h
                      objectplugininterface.h
                      globalobjectplugininterface.h

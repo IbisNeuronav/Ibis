@@ -242,6 +242,7 @@ public:
     void ClearScene();
     void LoadScene(QString & fileName, bool interactive = true );
     void SaveScene(QString & fileName);
+    void NewScene();
     void ObjectReader( Serializer * ser, bool interactive );
     void ObjectWriter( Serializer * ser );
 
