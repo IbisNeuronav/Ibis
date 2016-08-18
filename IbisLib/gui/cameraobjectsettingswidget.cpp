@@ -182,20 +182,20 @@ void CameraObjectSettingsWidget::UpdateUI()
 
     ui->xTransparencyCenterSlider->blockSignals( true );
     ui->xTransparencyCenterSlider->setEnabled( !m_camera->IsTransparencyCenterTracked() );
-    ui->xTransparencyCenterSlider->setValue( (int)(m_camera->GetTransparencyCenter()[0] / m_camera->GetImageWidth() * 100.0) );
+    ui->xTransparencyCenterSlider->setValue( (int)(m_camera->GetTransparencyCenter()[0] * 100.0) );
     ui->xTransparencyCenterSlider->blockSignals( false );
 
     ui->yTransparencyCenterSlider->blockSignals( true );
     ui->yTransparencyCenterSlider->setEnabled( !m_camera->IsTransparencyCenterTracked() );
-    ui->yTransparencyCenterSlider->setValue( (int)(m_camera->GetTransparencyCenter()[1] / m_camera->GetImageHeight() * 100.0) );
+    ui->yTransparencyCenterSlider->setValue( (int)(m_camera->GetTransparencyCenter()[1] * 100.0) );
     ui->yTransparencyCenterSlider->blockSignals( false );
 
     ui->minTransparencyRadiusSlider->blockSignals( true );
-    ui->minTransparencyRadiusSlider->setValue( (int)(m_camera->GetTransparencyRadius()[0] / 1000.0 * 100.0) );
+    ui->minTransparencyRadiusSlider->setValue( (int)(m_camera->GetTransparencyRadius()[0] * 100.0) );
     ui->minTransparencyRadiusSlider->blockSignals( false );
 
     ui->maxTransparencyRadiusSlider->blockSignals( true );
-    ui->maxTransparencyRadiusSlider->setValue( (int)(m_camera->GetTransparencyRadius()[1] / 1000.0 * 100.0) );
+    ui->maxTransparencyRadiusSlider->setValue( (int)(m_camera->GetTransparencyRadius()[1] * 100.0) );
     ui->maxTransparencyRadiusSlider->blockSignals( false );
 
 }
@@ -254,8 +254,8 @@ void CameraObjectSettingsWidget::CalibrationMatrixDialogClosed()
 void CameraObjectSettingsWidget::on_xTransparencyCenterSlider_valueChanged(int value)
 {
     Q_ASSERT( m_camera );
-    double realValue = (double)value * .01 * m_camera->GetImageWidth();
-    double yRealValue = (double)(ui->yTransparencyCenterSlider->value()) * .01 * m_camera->GetImageHeight();
+    double realValue = (double)value * .01;
+    double yRealValue = (double)(ui->yTransparencyCenterSlider->value()) * .01;
     m_camera->SetTransparencyCenter( realValue, yRealValue );
     UpdateUI();
 }
@@ -263,8 +263,8 @@ void CameraObjectSettingsWidget::on_xTransparencyCenterSlider_valueChanged(int v
 void CameraObjectSettingsWidget::on_yTransparencyCenterSlider_valueChanged(int value)
 {
     Q_ASSERT( m_camera );
-    double realValue = (double)value * .01 * m_camera->GetImageHeight();
-    double xRealValue = (double)(ui->xTransparencyCenterSlider->value()) * .01 * m_camera->GetImageWidth();
+    double realValue = (double)value * .01;
+    double xRealValue = (double)(ui->xTransparencyCenterSlider->value()) * .01;
     m_camera->SetTransparencyCenter( xRealValue, realValue );
     UpdateUI();
 }
@@ -272,8 +272,8 @@ void CameraObjectSettingsWidget::on_yTransparencyCenterSlider_valueChanged(int v
 void CameraObjectSettingsWidget::on_minTransparencyRadiusSlider_valueChanged(int value)
 {
     Q_ASSERT( m_camera );
-    double realValue = (double)value * .01 * 1000.0;
-    double maxRealValue = (double)(ui->maxTransparencyRadiusSlider->value()) * .01 * 1000.0;
+    double realValue = (double)value * .01;
+    double maxRealValue = (double)(ui->maxTransparencyRadiusSlider->value()) * .01;
     if( realValue > maxRealValue )
         realValue = maxRealValue;
     m_camera->SetTransparencyRadius( realValue, maxRealValue );
@@ -283,8 +283,8 @@ void CameraObjectSettingsWidget::on_minTransparencyRadiusSlider_valueChanged(int
 void CameraObjectSettingsWidget::on_maxTransparencyRadiusSlider_valueChanged(int value)
 {
     Q_ASSERT( m_camera );
-    double realValue = (double)value * .01 * 1000.0;
-    double minRealValue = (double)(ui->minTransparencyRadiusSlider->value()) * .01 * 1000.0;
+    double realValue = (double)value * .01;
+    double minRealValue = (double)(ui->minTransparencyRadiusSlider->value()) * .01;
     if( realValue < minRealValue )
         realValue = minRealValue;
     m_camera->SetTransparencyRadius( minRealValue, realValue );
