@@ -17,6 +17,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QPushButton>
 #include <QLabel>
 #include <QComboBox>
+#include <QLineEdit>
 #include <QLayout>
 #include <qvariant.h>
 
@@ -36,6 +37,7 @@ UsProbeObjectSettingsWidget::UsProbeObjectSettingsWidget(QWidget *parent) :
 
     m_usProbeObject = 0;
     m_matrixDialog = 0;
+    connect(ui->depthComboBox->lineEdit(), SIGNAL(returnPressed(), this, SLOT())
 }
 
 UsProbeObjectSettingsWidget::~UsProbeObjectSettingsWidget()
@@ -60,18 +62,45 @@ void UsProbeObjectSettingsWidget::SetUsProbeObject( UsProbeObject * probeObject 
     this->UpdateUI();
 }
 
-void UsProbeObjectSettingsWidget::on_depthComboBox_currentIndexChanged( int newSelection ) //DepthComboBoxSelectionChanged
+void UsProbeObjectSettingsWidget::on_depthComboBox_currentIndexChanged( int newSelection )
 {
     Q_ASSERT( m_usProbeObject );
     QVariant v = ui->depthComboBox->itemData( ui->depthComboBox->currentIndex() );
-    int flag = v.toInt();
-    if( flag >= 0 )
+    bool ok;
+    int flag = v.toInt( &ok );
+    if( ok && flag >= 0 )
     {
         m_usProbeObject->SetCurrentCalibrationMatrixIndex( newSelection );
+        m_usProbeObject->SetCurrentCalibrationMatrixName( name );
         return;
     }
-    // add new entry
+    else
+        ui->depthComboBox->setEditText("");
 }
+
+void UsProbeObjectSettingsWidget::MatrixAdded( QString name )
+{
+
+}
+
+//void UsProbeObjectSettingsWidget::on_depthComboBox_currentTextChanged( QString name )
+//{
+//    Q_ASSERT( m_usProbeObject );
+//    int index =  ui->depthComboBox->currentIndex();
+//    QVariant v = ui->depthComboBox->itemData( index );
+//    bool ok;
+//    int flag = v.toInt( &ok );
+//    if( ok && flag >= 0 )
+//    {
+//        m_usProbeObject->SetCurrentCalibrationMatrixIndex( index );
+//        m_usProbeObject->SetCurrentCalibrationMatrixName( name );
+//        return;
+//    }
+//    // we add an entry
+//    ui->depthComboBox->setItemData( index, QVariant(index) );
+//    m_usProbeObject->AddCalibrationMatrix( name );
+//    this->UpdateDepth();
+//}
 
 void UsProbeObjectSettingsWidget::UpdateToolStatus()
 {
@@ -110,6 +139,7 @@ void UsProbeObjectSettingsWidget::UpdateDepth()
     ui->depthComboBox->clear();
 
     int currentIndex = -1;
+    int newSettings = -1;
     QString currentScaleFactor = m_usProbeObject->GetCurrentCalibrationMatrixName();
     int numberOfScaleFactors = m_usProbeObject->GetNumberOfCalibrationMatrices();
     for( int i = 0; i < numberOfScaleFactors; ++i )
@@ -121,7 +151,7 @@ void UsProbeObjectSettingsWidget::UpdateDepth()
             currentIndex = i;
         }
     }
-    ui->depthComboBox->addItem( "Add New", QVariant(-1) );
+    ui->depthComboBox->addItem( "Add New", QVariant( newSettings) );
     if( currentIndex == -1 )
     {
         currentIndex = 0;
@@ -131,19 +161,19 @@ void UsProbeObjectSettingsWidget::UpdateDepth()
     ui->depthComboBox->blockSignals(false);
 }
 
-void UsProbeObjectSettingsWidget::on_bModeRadioButton_clicked() //BModeRadioButtonClicked()
+void UsProbeObjectSettingsWidget::on_bModeRadioButton_clicked()
 {
     m_usProbeObject->SetAcquisitionType( UsProbeObject::ACQ_B_MODE );
     UpdateUI();
 }
 
-void UsProbeObjectSettingsWidget::on_colorDopplerRadioButton_clicked() //ColorDopplerRadioButtonClicked()
+void UsProbeObjectSettingsWidget::on_colorDopplerRadioButton_clicked()
 {
     m_usProbeObject->SetAcquisitionType( UsProbeObject::ACQ_DOPPLER );
     UpdateUI();
 }
 
-void UsProbeObjectSettingsWidget::on_powerDopplerRadioButton_clicked() //PowerDopplerRadioButtonClicked()
+void UsProbeObjectSettingsWidget::on_powerDopplerRadioButton_clicked()
 {
     m_usProbeObject->SetAcquisitionType( UsProbeObject::ACQ_POWER_DOPPLER );
     UpdateUI();

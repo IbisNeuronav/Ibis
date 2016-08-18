@@ -33,10 +33,6 @@ public:
 public slots:
 
      void UpdateToolStatus();
-//    virtual void DepthComboBoxSelectionChanged(int newSelection);
-//    virtual void BModeRadioButtonClicked();
-//    virtual void ColorDopplerRadioButtonClicked();
-//    virtual void PowerDopplerRadioButtonClicked();
 
 protected:
 
@@ -46,7 +42,9 @@ protected:
 
 private slots:
 
-    void on_depthComboBox_currentIndexChanged( int newSelection);
+    void MatrixAdded( QString name );
+    void on_depthComboBox_currentIndexChanged( int newSelection );
+//    void on_depthComboBox_currentTextChanged( QString name );
     void on_bModeRadioButton_clicked();
     void on_colorDopplerRadioButton_clicked();
     void on_powerDopplerRadioButton_clicked();
