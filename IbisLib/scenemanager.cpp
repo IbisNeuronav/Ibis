@@ -828,7 +828,7 @@ void SceneManager::GetAllTrackedObjects( QList<TrackedSceneObject*> & all )
     for( int i = 0; i < this->AllObjects.size(); ++i )
     {
         TrackedSceneObject * obj = TrackedSceneObject::SafeDownCast( this->AllObjects[i] );
-        if( obj )
+        if( obj && obj->IsDrivenByHardware() )
             all.push_back( obj );
     }
 }
