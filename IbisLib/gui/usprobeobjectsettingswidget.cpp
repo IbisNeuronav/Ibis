@@ -18,6 +18,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QLabel>
 #include <QComboBox>
 #include <QLayout>
+#include <qvariant.h>
 
 UsProbeObjectSettingsWidget::UsProbeObjectSettingsWidget(QWidget *parent) :
     QWidget(parent),
@@ -59,10 +60,17 @@ void UsProbeObjectSettingsWidget::SetUsProbeObject( UsProbeObject * probeObject 
     this->UpdateUI();
 }
 
-void UsProbeObjectSettingsWidget::DepthComboBoxSelectionChanged( int newSelection )
+void UsProbeObjectSettingsWidget::on_depthComboBox_currentIndexChanged( int newSelection ) //DepthComboBoxSelectionChanged
 {
     Q_ASSERT( m_usProbeObject );
-    m_usProbeObject->SetCurrentCalibrationMatrixIndex( newSelection );
+    QVariant v = ui->depthComboBox->itemData( ui->depthComboBox->currentIndex() );
+    int flag = v.toInt();
+    if( flag >= 0 )
+    {
+        m_usProbeObject->SetCurrentCalibrationMatrixIndex( newSelection );
+        return;
+    }
+    // add new entry
 }
 
 void UsProbeObjectSettingsWidget::UpdateToolStatus()
@@ -107,33 +115,35 @@ void UsProbeObjectSettingsWidget::UpdateDepth()
     for( int i = 0; i < numberOfScaleFactors; ++i )
     {
         QString name = m_usProbeObject->GetCalibrationMatrixName( i );
-        ui->depthComboBox->addItem( name );
+        ui->depthComboBox->addItem( name, QVariant(i) );
         if( name == currentScaleFactor )
         {
             currentIndex = i;
         }
     }
-    if( currentIndex != -1 )
+    ui->depthComboBox->addItem( "Add New", QVariant(-1) );
+    if( currentIndex == -1 )
     {
-        ui->depthComboBox->setCurrentIndex( currentIndex );
+        currentIndex = 0;
     }
+    ui->depthComboBox->setCurrentIndex( currentIndex );
 
     ui->depthComboBox->blockSignals(false);
 }
 
-void UsProbeObjectSettingsWidget::BModeRadioButtonClicked()
+void UsProbeObjectSettingsWidget::on_bModeRadioButton_clicked() //BModeRadioButtonClicked()
 {
     m_usProbeObject->SetAcquisitionType( UsProbeObject::ACQ_B_MODE );
     UpdateUI();
 }
 
-void UsProbeObjectSettingsWidget::ColorDopplerRadioButtonClicked()
+void UsProbeObjectSettingsWidget::on_colorDopplerRadioButton_clicked() //ColorDopplerRadioButtonClicked()
 {
     m_usProbeObject->SetAcquisitionType( UsProbeObject::ACQ_DOPPLER );
     UpdateUI();
 }
 
-void UsProbeObjectSettingsWidget::PowerDopplerRadioButtonClicked()
+void UsProbeObjectSettingsWidget::on_powerDopplerRadioButton_clicked() //PowerDopplerRadioButtonClicked()
 {
     m_usProbeObject->SetAcquisitionType( UsProbeObject::ACQ_POWER_DOPPLER );
     UpdateUI();
