@@ -334,8 +334,8 @@ void CameraObject::Setup( View * view )
         perView.cameraImageMapper->SetUseTransparency( m_useTransparency );
         perView.cameraImageMapper->SetUseGradient( m_useGradient );
         perView.cameraImageMapper->SetShowMask( m_showMask );
-        perView.cameraImageMapper->SetTransparencyPosition( m_transparencyCenter[0] * GetImageWidth(), m_transparencyCenter[1] * GetImageHeight() );
-        perView.cameraImageMapper->SetTransparencyRadius( m_transparencyRadius[0] * GetImageWidth(), m_transparencyRadius[1] * GetImageWidth() );
+        perView.cameraImageMapper->SetTransparencyPosition( m_transparencyCenter[0], m_transparencyCenter[1] );
+        perView.cameraImageMapper->SetTransparencyRadius( m_transparencyRadius[0], m_transparencyRadius[1] );
         perView.cameraImageActor->SetMapper( perView.cameraImageMapper );
         perView.cameraImageMapper->SetInputConnection( m_videoInputSwitch->GetOutputPort() );
         view->GetRenderer()->AddViewProp( perView.cameraImageActor );
@@ -474,7 +474,7 @@ void CameraObject::GetImageCenterPix( double & x, double & y )
 void CameraObject::GetFocalPix( double & x, double & y )
 {
     x = m_intrinsicParams.m_focal[0] * GetImageWidth();
-    x = m_intrinsicParams.m_focal[1] * GetImageHeight();
+    y = m_intrinsicParams.m_focal[1] * GetImageHeight();
 }
 
 void CameraObject::SetLensDistortion( double dist )
@@ -920,7 +920,7 @@ void CameraObject::VideoUpdatedSlot()
             WorldToImage( tip, cx, cy );
 
             // Set new center for transparency
-            SetTransparencyCenter( cx, cy );
+            SetTransparencyCenter( cx / GetImageWidth(), cy / GetImageHeight() );
         }
     }
 
@@ -966,8 +966,8 @@ void CameraObject::UpdateGeometricRepresentation()
         PerViewElements & elem = (*it).second;
         elem.cameraImageMapper->SetImageCenter( m_intrinsicParams.m_center[0] * GetImageWidth(), m_intrinsicParams.m_center[1] * GetImageHeight() );
         elem.cameraImageMapper->SetLensDistortion( m_intrinsicParams.m_distorsionK1 );
-        elem.cameraImageMapper->SetTransparencyPosition( m_transparencyCenter[0] * width, m_transparencyCenter[1] * height );
-        elem.cameraImageMapper->SetTransparencyRadius( m_transparencyRadius[0] * width, m_transparencyRadius[1] * width );
+        elem.cameraImageMapper->SetTransparencyPosition( m_transparencyCenter[0], m_transparencyCenter[1] );
+        elem.cameraImageMapper->SetTransparencyRadius( m_transparencyRadius[0], m_transparencyRadius[1] );
         ++it;
     }
     m_camera->SetViewAngle( m_intrinsicParams.GetVerticalAngleDegrees() );
