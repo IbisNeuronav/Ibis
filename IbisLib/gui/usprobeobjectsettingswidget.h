@@ -42,9 +42,8 @@ protected:
 
 private slots:
 
-    void MatrixAdded( QString name );
+    void MatrixAdded( );
     void on_depthComboBox_currentIndexChanged( int newSelection );
-//    void on_depthComboBox_currentTextChanged( QString name );
     void on_bModeRadioButton_clicked();
     void on_colorDopplerRadioButton_clicked();
     void on_powerDopplerRadioButton_clicked();

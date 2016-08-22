@@ -37,7 +37,7 @@ UsProbeObjectSettingsWidget::UsProbeObjectSettingsWidget(QWidget *parent) :
 
     m_usProbeObject = 0;
     m_matrixDialog = 0;
-    connect(ui->depthComboBox->lineEdit(), SIGNAL(returnPressed(), this, SLOT())
+    connect(ui->depthComboBox->lineEdit(), SIGNAL(returnPressed()), this, SLOT(MatrixAdded()));
 }
 
 UsProbeObjectSettingsWidget::~UsProbeObjectSettingsWidget()
@@ -71,36 +71,16 @@ void UsProbeObjectSettingsWidget::on_depthComboBox_currentIndexChanged( int newS
     if( ok && flag >= 0 )
     {
         m_usProbeObject->SetCurrentCalibrationMatrixIndex( newSelection );
-        m_usProbeObject->SetCurrentCalibrationMatrixName( name );
-        return;
     }
-    else
-        ui->depthComboBox->setEditText("");
 }
 
-void UsProbeObjectSettingsWidget::MatrixAdded( QString name )
+void UsProbeObjectSettingsWidget::MatrixAdded()
 {
-
+    Q_ASSERT( m_usProbeObject );
+    ui->depthComboBox->setItemData( ui->depthComboBox->currentIndex(), QVariant( ui->depthComboBox->currentIndex() ) );
+    m_usProbeObject->AddCalibrationMatrix( ui->depthComboBox->currentText() );
+    this->UpdateDepth();
 }
-
-//void UsProbeObjectSettingsWidget::on_depthComboBox_currentTextChanged( QString name )
-//{
-//    Q_ASSERT( m_usProbeObject );
-//    int index =  ui->depthComboBox->currentIndex();
-//    QVariant v = ui->depthComboBox->itemData( index );
-//    bool ok;
-//    int flag = v.toInt( &ok );
-//    if( ok && flag >= 0 )
-//    {
-//        m_usProbeObject->SetCurrentCalibrationMatrixIndex( index );
-//        m_usProbeObject->SetCurrentCalibrationMatrixName( name );
-//        return;
-//    }
-//    // we add an entry
-//    ui->depthComboBox->setItemData( index, QVariant(index) );
-//    m_usProbeObject->AddCalibrationMatrix( name );
-//    this->UpdateDepth();
-//}
 
 void UsProbeObjectSettingsWidget::UpdateToolStatus()
 {
@@ -240,7 +220,7 @@ void UsProbeObjectSettingsWidget::on_calibrationMatrixPushButton_toggled( bool o
         m_matrixDialog = new vtkQtMatrixDialog( false, 0 );
         m_matrixDialog->setWindowTitle( dialogTitle );
         m_matrixDialog->setAttribute( Qt::WA_DeleteOnClose );
-        m_matrixDialog->SetMatrix( m_usProbeObject->GetCalibrationTransform()->GetMatrix() );
+        m_matrixDialog->SetMatrix( m_usProbeObject->GetCurrentCalibrationMatrix() );
         m_matrixDialog->show();
         connect( m_matrixDialog, SIGNAL(destroyed()), this, SLOT(OnCalibrationMatrixDialogClosed()) );
     }
