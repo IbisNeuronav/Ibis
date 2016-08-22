@@ -103,8 +103,12 @@ int vtkIbisImagePlaneMapper::RenderTranslucentPolygonalGeometry( vtkRenderer *re
     this->Shader->SetVariable( "UseTransparency", this->UseTransparency );
     this->Shader->SetVariable( "UseGradient", this->UseGradient );
     this->Shader->SetVariable( "ShowMask", this->ShowMask );
-    this->Shader->SetVariable( "TransparencyPosition", (float)this->TransparencyPosition[0], (float)this->TransparencyPosition[1] );
-    this->Shader->SetVariable( "TransparencyRadius", (float)this->TransparencyRadius[0], (float)this->TransparencyRadius[1] );
+    float transpPosX = (float)(this->TransparencyPosition[0] * dim[0]);
+    float transpPosY = (float)(this->TransparencyPosition[1] * dim[1]);
+    this->Shader->SetVariable( "TransparencyPosition", transpPosX, transpPosY );
+    float transpMin = (float)(this->TransparencyRadius[0] * dim[0]);
+    float transpMax = (float)(this->TransparencyRadius[1] * dim[0]);
+    this->Shader->SetVariable( "TransparencyRadius", transpMin, transpMax );
     this->Shader->SetVariable( "ImageOffset", (float)offsetX, (float)offsetY );
     this->Shader->SetVariable( "LensDistortion", (float)this->LensDistortion );
     this->Shader->SetVariable( "GlobalOpacity", (float)(this->GlobalOpacity) );
