@@ -10,7 +10,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 #include "videosettingsdialog.h"
 
-#include <qvariant.h>
 #include <qpushbutton.h>
 #include <qlabel.h>
 #include <qlineedit.h>

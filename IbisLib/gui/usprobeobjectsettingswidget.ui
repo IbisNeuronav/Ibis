@@ -95,6 +95,9 @@
          <height>0</height>
         </size>
        </property>
+       <property name="editable">
+        <bool>true</bool>
+       </property>
       </widget>
      </item>
     </layout>
@@ -182,72 +185,7 @@
   </layout>
  </widget>
  <resources/>
- <connections>
-  <connection>
-   <sender>bModeRadioButton</sender>
-   <signal>clicked()</signal>
-   <receiver>UsProbeObjectSettingsWidget</receiver>
-   <slot>BModeRadioButtonClicked()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>102</x>
-     <y>201</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>98</x>
-     <y>154</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>colorDopplerRadioButton</sender>
-   <signal>clicked()</signal>
-   <receiver>UsProbeObjectSettingsWidget</receiver>
-   <slot>ColorDopplerRadioButtonClicked()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>102</x>
-     <y>229</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>98</x>
-     <y>154</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>powerDopplerRadioButton</sender>
-   <signal>clicked()</signal>
-   <receiver>UsProbeObjectSettingsWidget</receiver>
-   <slot>PowerDopplerRadioButtonClicked()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>102</x>
-     <y>257</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>98</x>
-     <y>154</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>depthComboBox</sender>
-   <signal>currentIndexChanged(int)</signal>
-   <receiver>UsProbeObjectSettingsWidget</receiver>
-   <slot>DepthComboBoxSelectionChanged(int)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>136</x>
-     <y>145</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>98</x>
-     <y>154</y>
-    </hint>
-   </hints>
-  </connection>
- </connections>
+ <connections/>
  <slots>
   <slot>ShowIn3DCheckBoxToggled(bool)</slot>
   <slot>DepthComboBoxSelectionChanged(int)</slot>

@@ -76,7 +76,7 @@ UsProbeObject::UsProbeObject()
 {
     this->SetCanChangeParent( false );
 
-    m_currentCalibrationMatrix = -1;
+    m_currentCalibrationMatrixIndex = -1;
 
     m_videoInput = vtkPassThrough::New();
     m_actorInput = vtkPassThrough::New();
@@ -131,7 +131,7 @@ void UsProbeObject::SerializeTracked( Serializer * ser )
 {
     TrackedSceneObject::SerializeTracked( ser );
     ::Serialize( ser, "DefaultMask", m_defaultMask );
-    ::Serialize( ser, "CurrentCalibrationMatrix", m_currentCalibrationMatrix );
+    ::Serialize( ser, "CurrentCalibrationMatrix", m_currentCalibrationMatrixIndex );
     ::Serialize( ser, "AllCalibrationMatrices", m_calibrationMatrices );
     if( ser->IsReader() )
     {
@@ -140,8 +140,8 @@ void UsProbeObject::SerializeTracked( Serializer * ser )
         *m_mask = *m_defaultMask;
         m_mask->SetAsDefault();
 
-        if( m_currentCalibrationMatrix != -1 )
-            SetCurrentCalibrationMatrixIndex( m_currentCalibrationMatrix );
+        if( m_currentCalibrationMatrixIndex != -1 )
+            SetCurrentCalibrationMatrixIndex( m_currentCalibrationMatrixIndex );
     }
 }
 
@@ -268,7 +268,7 @@ int UsProbeObject::GetNumberOfCalibrationMatrices()
 void UsProbeObject::SetCurrentCalibrationMatrixIndex( int index )
 {
     Q_ASSERT( index >= 0 && index < m_calibrationMatrices.size() );
-    m_currentCalibrationMatrix = index;
+    m_currentCalibrationMatrixIndex = index;
     SetCalibrationMatrix( m_calibrationMatrices[index].matrix );
 }
 
@@ -280,28 +280,37 @@ QString UsProbeObject::GetCalibrationMatrixName( int index )
 
 void UsProbeObject::SetCurrentCalibrationMatrixName( QString name )
 {
-    Q_ASSERT( m_currentCalibrationMatrix >= 0 && m_currentCalibrationMatrix < m_calibrationMatrices.size() );
-    m_calibrationMatrices[ m_currentCalibrationMatrix ].name = name;
+    Q_ASSERT( m_currentCalibrationMatrixIndex >= 0 && m_currentCalibrationMatrixIndex < m_calibrationMatrices.size() );
+    m_calibrationMatrices[ m_currentCalibrationMatrixIndex ].name = name;
 }
 
 QString UsProbeObject::GetCurrentCalibrationMatrixName()
 {
-    if( m_currentCalibrationMatrix > 0 )
-        return m_calibrationMatrices[ m_currentCalibrationMatrix ].name;
+    if( m_currentCalibrationMatrixIndex > 0 )
+        return m_calibrationMatrices[ m_currentCalibrationMatrixIndex ].name;
     return QString("NONE");
 }
 
 void UsProbeObject::SetCurrentCalibrationMatrix( vtkMatrix4x4 * mat )
 {
-    Q_ASSERT( m_currentCalibrationMatrix >= 0 && m_currentCalibrationMatrix < m_calibrationMatrices.size() );
-    m_calibrationMatrices[ m_currentCalibrationMatrix ].matrix->DeepCopy( mat );
+    Q_ASSERT( m_currentCalibrationMatrixIndex >= 0 && m_currentCalibrationMatrixIndex < m_calibrationMatrices.size() );
+    m_calibrationMatrices[ m_currentCalibrationMatrixIndex ].matrix->DeepCopy( mat );
     SetCalibrationMatrix( mat );
 }
 
 vtkMatrix4x4 * UsProbeObject::GetCurrentCalibrationMatrix()
 {
-    Q_ASSERT( m_currentCalibrationMatrix >= 0 && m_currentCalibrationMatrix < m_calibrationMatrices.size() );
-    return m_calibrationMatrices[ m_currentCalibrationMatrix ].matrix;
+    Q_ASSERT( m_currentCalibrationMatrixIndex >= 0 && m_currentCalibrationMatrixIndex < m_calibrationMatrices.size() );
+    return m_calibrationMatrices[ m_currentCalibrationMatrixIndex ].matrix;
+}
+
+void UsProbeObject:: AddCalibrationMatrix( QString name )
+{
+    CalibrationMatrixInfo newEntry;
+    int index = m_calibrationMatrices.size();
+    m_calibrationMatrices.push_back( newEntry );
+    this->SetCurrentCalibrationMatrixIndex( index );
+    this->SetCurrentCalibrationMatrixName( name );
 }
 
 void UsProbeObject::SetAcquisitionType( ACQ_TYPE type )

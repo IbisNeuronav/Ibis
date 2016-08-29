@@ -69,6 +69,7 @@ public:
     QString GetCurrentCalibrationMatrixName();
     void SetCurrentCalibrationMatrix( vtkMatrix4x4 * mat );
     vtkMatrix4x4 * GetCurrentCalibrationMatrix();
+    void AddCalibrationMatrix( QString name ); //the matrix will be identity, user may change it using calibrationMatrix button in settings
 
     enum ACQ_TYPE {ACQ_B_MODE = 0, ACQ_DOPPLER = 1, ACQ_POWER_DOPPLER = 2};
     void SetAcquisitionType(ACQ_TYPE type);
@@ -116,7 +117,7 @@ protected:
     vtkTransform           * m_imageTransform;
 
     // Calibration matrices for different scale levels
-    int m_currentCalibrationMatrix;
+    int m_currentCalibrationMatrixIndex;
     QList< CalibrationMatrixInfo > m_calibrationMatrices;
 
     struct PerViewElements
