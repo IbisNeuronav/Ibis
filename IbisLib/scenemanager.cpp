@@ -296,8 +296,9 @@ void SceneManager::LoadScene( QString & fileName, bool interactive )
     }
     else if( reader.FileVersionIsLowerThan( QString::number(6.0) ) )
     {
-        QString message = "This scene version is older than 6.0. This is not supported anymore. Scene may not be correctly restored.\n";
+        QString message = "This scene version is older than 6.0. This is not supported anymore. Scene may not be restored.\n";
         QMessageBox::warning( 0, "Error", message, 1, 0 );
+        return;
     }
     int numberOfSceneObjects;
     ::Serialize( &reader, "NumberOfSceneObjects", numberOfSceneObjects );
@@ -1312,7 +1313,6 @@ void SceneManager::ObjectReader( Serializer * ser, bool interactive )
 
     for (i = 0; i < numberOfSceneObjects; i++)
     {
-        QString objectName;
         QString sectionName = QString( "ObjectInScene_%1" ).arg(i);
         ser->BeginSection( sectionName.toUtf8().data() );
         ::Serialize( ser, "ObjectClass", className );
