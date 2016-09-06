@@ -36,6 +36,7 @@ public:
 private:
 
     void UpdateUI();
+    void UpdateTransparencyCenterUI();
     void UpdateExtrinsicTransform();
 
     CameraObject * m_camera;
@@ -46,6 +47,7 @@ private:
 private slots:
 
     void CameraModified();
+    void CameraParamsModified();
 
     void on_trackCameraPushButton_toggled(bool checked);
     void on_freezeButton_toggled(bool checked);

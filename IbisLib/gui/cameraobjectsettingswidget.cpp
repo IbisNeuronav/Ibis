@@ -38,6 +38,7 @@ void CameraObjectSettingsWidget::SetCamera( CameraObject * cam )
 {
     Q_ASSERT( m_camera == 0 );
     m_camera = cam;
+    connect( m_camera, SIGNAL(ParamsModified()), this, SLOT(CameraParamsModified()) );
     connect( m_camera, SIGNAL(Modified()), this, SLOT(CameraModified()) );
     UpdateUI();
 }
@@ -180,15 +181,7 @@ void CameraObjectSettingsWidget::UpdateUI()
     ui->trackTransparencyCenterCheckBox->setChecked( m_camera->IsTransparencyCenterTracked() );
     ui->trackTransparencyCenterCheckBox->blockSignals( false );
 
-    ui->xTransparencyCenterSlider->blockSignals( true );
-    ui->xTransparencyCenterSlider->setEnabled( !m_camera->IsTransparencyCenterTracked() );
-    ui->xTransparencyCenterSlider->setValue( (int)(m_camera->GetTransparencyCenter()[0] * 100.0) );
-    ui->xTransparencyCenterSlider->blockSignals( false );
-
-    ui->yTransparencyCenterSlider->blockSignals( true );
-    ui->yTransparencyCenterSlider->setEnabled( !m_camera->IsTransparencyCenterTracked() );
-    ui->yTransparencyCenterSlider->setValue( (int)(m_camera->GetTransparencyCenter()[1] * 100.0) );
-    ui->yTransparencyCenterSlider->blockSignals( false );
+    UpdateTransparencyCenterUI();
 
     ui->minTransparencyRadiusSlider->blockSignals( true );
     ui->minTransparencyRadiusSlider->setValue( (int)(m_camera->GetTransparencyRadius()[0] * 100.0) );
@@ -200,10 +193,28 @@ void CameraObjectSettingsWidget::UpdateUI()
 
 }
 
+void CameraObjectSettingsWidget::UpdateTransparencyCenterUI()
+{
+    ui->xTransparencyCenterSlider->blockSignals( true );
+    ui->xTransparencyCenterSlider->setEnabled( !m_camera->IsTransparencyCenterTracked() );
+    ui->xTransparencyCenterSlider->setValue( (int)(m_camera->GetTransparencyCenter()[0] * 100.0) );
+    ui->xTransparencyCenterSlider->blockSignals( false );
+
+    ui->yTransparencyCenterSlider->blockSignals( true );
+    ui->yTransparencyCenterSlider->setEnabled( !m_camera->IsTransparencyCenterTracked() );
+    ui->yTransparencyCenterSlider->setValue( (int)(m_camera->GetTransparencyCenter()[1] * 100.0) );
+    ui->yTransparencyCenterSlider->blockSignals( false );
+}
+
 void CameraObjectSettingsWidget::CameraModified()
 {
-    UpdateUI();
+    UpdateTransparencyCenterUI();
 }
+
+ void CameraObjectSettingsWidget::CameraParamsModified()
+ {
+    UpdateUI();
+ }
 
 void CameraObjectSettingsWidget::on_trackCameraPushButton_toggled( bool checked )
 {
