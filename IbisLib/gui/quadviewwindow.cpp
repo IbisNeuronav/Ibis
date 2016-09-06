@@ -223,7 +223,7 @@ void QuadViewWindow::SetSceneManager( SceneManager * man )
 
         connect (m_sceneManager, SIGNAL(ExpandView()), this, SLOT(ExpandViewButtonClicked()));
         m_sceneManager->PreDisplaySetup();
-        this->PlaceCornerText();
+//        this->PlaceCornerText(); temporarily blocked until
     }
 }
 
@@ -279,7 +279,8 @@ void QuadViewWindow::Win3NeedsRender() { this->WinNeedsRender( 3 ); }
 
 void QuadViewWindow::WinNeedsRender( int winIndex )
 {
-    m_vtkWindows[ winIndex ]->update();
+    if( !m_sceneManager->IsLoadingScene() )
+        m_vtkWindows[ winIndex ]->update();
 }
 
 void QuadViewWindow::ZoomInButtonClicked()
@@ -311,9 +312,12 @@ void QuadViewWindow::ZoomCameraButtonClicked()
 
 void QuadViewWindow::RenderAll()
 {
-    for( int i = 0; i < 4; i++ )
+    if( !m_sceneManager->IsLoadingScene() )
     {
-        m_vtkWindows[i]->update();
+        for( int i = 0; i < 4; i++ )
+        {
+            m_vtkWindows[i]->update();
+        }
     }
 }
 
