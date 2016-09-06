@@ -110,6 +110,7 @@ int vtkIbisImagePlaneMapper::RenderTranslucentPolygonalGeometry( vtkRenderer *re
     float transpMax = (float)(this->TransparencyRadius[1] * dim[0]);
     this->Shader->SetVariable( "TransparencyRadius", transpMin, transpMax );
     this->Shader->SetVariable( "ImageOffset", (float)offsetX, (float)offsetY );
+    this->Shader->SetVariable( "ImageCenter", (float)ImageCenter[0], (float)ImageCenter[1] );
     this->Shader->SetVariable( "LensDistortion", (float)this->LensDistortion );
     this->Shader->SetVariable( "GlobalOpacity", (float)(this->GlobalOpacity) );
     this->Shader->SetVariable( "Saturation", (float)(this->Saturation) );
@@ -358,8 +359,8 @@ const char defaultShaderCode[] = " \
             vec2 offsetTexCoord = gl_TexCoord[0].st + ImageOffset; \
             vec2 dist = offsetTexCoord - ImageCenter; \
             float r2 = dist.x * dist.x + dist.y * dist.y; \
-            float distFactor = 1.0 / ( 1 + LensDistortion * r2 ); \
-            vec2 newTexCoord = offsetTexCoord; \
+            vec2 distortionOffset = dist * LensDistortion * r2; \
+            vec2 newTexCoord = offsetTexCoord + distortionOffset; \
             float factor = 0.0; \
             if( UseTransparency ) \
             { \
