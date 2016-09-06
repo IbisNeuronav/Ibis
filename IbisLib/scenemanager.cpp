@@ -227,7 +227,6 @@ void SceneManager::ClearScene()
 
     // Make sure everything is updated
     Application::GetInstance().UpdateProgress(progressDialog, 4);
-    QApplication::processEvents();
 
     NotifyPluginsSceneFinishedLoading();
 
@@ -306,14 +305,17 @@ void SceneManager::LoadScene( QString & fileName, bool interactive )
 
     // Start Progress dialog
     if( interactive )
+    {
+        QApplication::processEvents();
         m_sceneLoadSaveProgressDialog = Application::GetInstance().StartProgress( numberOfSceneObjects*2+3, tr("Loading Scene...") );
+    }
 
     this->ObjectReader(&reader, interactive);
-    if( interactive && !this->UpdateProgress(numberOfSceneObjects+1) )
+    if( interactive && !this->UpdateProgress(numberOfSceneObjects+1, false ) )
         return;
     ::Serialize( &reader, "SceneManager", this );
     SceneObject *currentObject = this->GetCurrentObject();
-    if( interactive && !this->UpdateProgress(numberOfSceneObjects+1) )
+    if( interactive && !this->UpdateProgress(numberOfSceneObjects+1), false )
         return;
 
     // Read other params of the scene
@@ -326,7 +328,7 @@ void SceneManager::LoadScene( QString & fileName, bool interactive )
     reader.EndSection();
     reader.Finish();
     this->SetSceneFile( fileName );
-    if( interactive && !this->UpdateProgress(numberOfSceneObjects+3) )
+    if( interactive && !this->UpdateProgress(numberOfSceneObjects+3, false ) )
         return;
 
     // Give a chance to all objects to react after scene is read
@@ -362,7 +364,7 @@ void SceneManager::CancelProgress()
     this->ClearScene();
 }
 
-bool SceneManager::UpdateProgress(int value)
+bool SceneManager::UpdateProgress(int value, int processEvents)
 {
     if (!m_sceneLoadSaveProgressDialog)
         return false;
@@ -371,8 +373,7 @@ bool SceneManager::UpdateProgress(int value)
         this->CancelProgress();
         return false;
     }
-    QApplication::processEvents();
-    Application::GetInstance().UpdateProgress(m_sceneLoadSaveProgressDialog, value);
+    Application::GetInstance().UpdateProgress(m_sceneLoadSaveProgressDialog, value, processEvents );
     return true;
 }
 
@@ -1464,7 +1465,7 @@ void SceneManager::ObjectReader( Serializer * ser, bool interactive )
             }
         }
         ser->EndSection();
-        if ( interactive && !this->UpdateProgress(i+1) )
+        if ( interactive && !this->UpdateProgress(i+1), false )
             return;
     }
     ser->EndSection();
@@ -1479,7 +1480,7 @@ void SceneManager::ObjectReader( Serializer * ser, bool interactive )
         if( sectionFound )
             ser->EndSection();
         // simtodo : THIS IS WEIRD!! (Anka: yes, it is, interactive is always true in current version, it is prepared for some background scene loading, maybe should be discarded?)
-        if( interactive && !this->UpdateProgress(++i) )
+        if( interactive && !this->UpdateProgress(++i), false )
             return;
     }
     ser->EndSection();
