@@ -142,6 +142,9 @@ CameraObject::CameraObject()
     m_recordingCamera = 0;
     m_cachedImageSize[ 0 ] = DefaultImageSize[0];
     m_cachedImageSize[ 1 ] = DefaultImageSize[1];
+
+    // make sure every ParamModified signal also generates a Modified signal
+    connect( this, SIGNAL(ParamsModified()), this, SLOT(ParamsModifiedSlot()) );
 }
 
 CameraObject::~CameraObject()
@@ -172,7 +175,7 @@ void CameraObject::Serialize( Serializer * ser )
     if (ser->IsReader())
     {
         SetIntrinsicParams( m_intrinsicParams );
-        emit Modified();
+        emit ParamsModified();
     }
 }
 
@@ -441,7 +444,7 @@ void CameraObject::SetImageDistance( double distance )
 {
     m_imageDistance = distance;
     UpdateGeometricRepresentation();
-    emit Modified();
+    emit ParamsModified();
 }
 
 void CameraObject::SetGlobalOpacity( double opacity )
@@ -455,7 +458,7 @@ void CameraObject::SetGlobalOpacity( double opacity )
         elem.cameraImageMapper->SetGlobalOpacity( opacity );
         ++it;
     }
-    emit Modified();
+    emit ParamsModified();
 }
 
 void CameraObject::SetImageCenterPix( double x, double y )
@@ -492,13 +495,13 @@ void CameraObject::SetLensDisplacement( double d )
 {
     m_lensDisplacementTransform->GetMatrix()->SetElement( 2, 3, d );
     m_lensDisplacementTransform->Modified();
-    emit Modified();
+    emit ParamsModified();
 }
 
 void CameraObject::SetTransparencyCenterTracked( bool t )
 {
     m_trackedTransparencyCenter = t;
-    emit Modified();
+    emit ParamsModified();
 }
 
 void CameraObject::SetTransparencyCenter( double x, double y )
@@ -512,7 +515,7 @@ void CameraObject::SetTransparencyCenter( double x, double y )
         elem.cameraImageMapper->SetTransparencyPosition( x, y );
         ++it;
     }
-    emit Modified();
+    emit Modified(); // This can be set dynamically by the system so no ParamsModified
 }
 
 void CameraObject::SetUseTransparency( bool use )
@@ -525,7 +528,7 @@ void CameraObject::SetUseTransparency( bool use )
         elem.cameraImageMapper->SetUseTransparency( m_useTransparency );
         ++it;
     }
-    emit Modified();
+    emit ParamsModified();
 }
 
 void CameraObject::SetUseGradient( bool use )
@@ -538,7 +541,7 @@ void CameraObject::SetUseGradient( bool use )
         elem.cameraImageMapper->SetUseGradient( m_useGradient );
         ++it;
     }
-    emit Modified();
+    emit ParamsModified();
 }
 
 void CameraObject::SetShowMask( bool show )
@@ -551,7 +554,7 @@ void CameraObject::SetShowMask( bool show )
         elem.cameraImageMapper->SetShowMask( m_showMask );
         ++it;
     }
-    emit Modified();
+    emit ParamsModified();
 }
 
 void CameraObject::SetSaturation( double s )
@@ -564,7 +567,7 @@ void CameraObject::SetSaturation( double s )
         elem.cameraImageMapper->SetSaturation( s );
         ++it;
     }
-    emit Modified();
+    emit ParamsModified();
 }
 
 void CameraObject::SetBrightness( double b )
@@ -577,7 +580,7 @@ void CameraObject::SetBrightness( double b )
         elem.cameraImageMapper->SetBrightness( b );
         ++it;
     }
-    emit Modified();
+    emit ParamsModified();
 }
 
 void CameraObject::SetTransparencyRadius( double min, double max )
@@ -591,7 +594,7 @@ void CameraObject::SetTransparencyRadius( double min, double max )
         elem.cameraImageMapper->SetTransparencyRadius( min, max );
         ++it;
     }
-    emit Modified();
+    emit ParamsModified();
 }
 
 void CameraObject::SetTrackCamera( bool t )
@@ -638,7 +641,7 @@ void CameraObject::SetTrackCamera( bool t )
     {
         this->ReleaseControl( 0 );
     }
-    emit Modified();
+    emit ParamsModified();
 }
 
 bool CameraObject::GetTrackCamera()
@@ -657,14 +660,14 @@ void CameraObject::FreezeTransform()
 {
     if( IsDrivenByHardware() )
         m_hardwareModule->FreezeTransform( this, 10 );
-    emit Modified();
+    emit ParamsModified();
 }
 
 void CameraObject::UnFreezeTransform()
 {
     if( IsDrivenByHardware() )
         m_hardwareModule->UnFreezeTransform( this );
-    emit Modified();
+    emit ParamsModified();
 }
 
 void CameraObject::TakeSnapshot()
@@ -731,7 +734,7 @@ void CameraObject::AddFrame( vtkImageData * image, vtkMatrix4x4 * uncalMat )
 void CameraObject::SetCurrentFrame( int frame )
 {
     m_videoBuffer->SetCurrentFrame( frame );
-    emit Modified();
+    emit ParamsModified();
 }
 
 int CameraObject::GetCurrentFrame()
@@ -894,6 +897,11 @@ void CameraObject::ClearDrawing()
     }
 }
 
+void CameraObject::ParamsModifiedSlot()
+{
+    emit Modified();
+}
+
 void CameraObject::VideoUpdatedSlot()
 {
     Q_ASSERT( IsDrivenByHardware() );
@@ -991,7 +999,7 @@ void CameraObject::UpdateGeometricRepresentation()
     m_cachedImageSize[ 0 ] = width;
     m_cachedImageSize[ 1 ] = height;
 
-    emit Modified();
+    emit ParamsModified();
 }
 
 void CameraObject::UpdateVtkCamera()

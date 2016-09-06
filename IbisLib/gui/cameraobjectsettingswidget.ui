@@ -359,21 +359,27 @@
          <widget class="QDoubleSpinBox" name="distortionSpinBox">
           <property name="maximumSize">
            <size>
-            <width>100</width>
+            <width>120</width>
             <height>16777215</height>
            </size>
           </property>
+          <property name="correctionMode">
+           <enum>QAbstractSpinBox::CorrectToNearestValue</enum>
+          </property>
+          <property name="keyboardTracking">
+           <bool>false</bool>
+          </property>
           <property name="decimals">
-           <number>6</number>
+           <number>10</number>
           </property>
           <property name="minimum">
-           <double>-50.000000000000000</double>
+           <double>-1.000000000000000</double>
           </property>
           <property name="maximum">
-           <double>50.000000000000000</double>
+           <double>1.000000000000000</double>
           </property>
           <property name="singleStep">
-           <double>0.010000000000000</double>
+           <double>0.000001000000000</double>
           </property>
          </widget>
         </item>

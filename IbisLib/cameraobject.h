@@ -148,10 +148,12 @@ public:
 
 signals:
 
+    void ParamsModified();
     void VideoUpdatedSignal();
 
 protected slots:
 
+    void ParamsModifiedSlot();
     void VideoUpdatedSlot();
 
 protected:
