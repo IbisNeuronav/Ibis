@@ -223,7 +223,7 @@ void QuadViewWindow::SetSceneManager( SceneManager * man )
 
         connect (m_sceneManager, SIGNAL(ExpandView()), this, SLOT(ExpandViewButtonClicked()));
         m_sceneManager->PreDisplaySetup();
-//        this->PlaceCornerText(); temporarily blocked until
+//        this->PlaceCornerText(); temporarily blocked
     }
 }
 
@@ -231,15 +231,10 @@ void QuadViewWindow::AddBottomWidget( QWidget * w )
 {
     w->setParent( m_bottomWidgetFrame );
     m_bottomWidgetLayout->addWidget( w );
-    //w->setMinimumHeight( 50 );
-    //w->show();
-    //m_generalLayout->addWidget( w );
 }
 
 void QuadViewWindow::RemoveBottomWidget( QWidget * w )
 {
-    //w->setParent( 0 );
-    //m_generalLayout->removeWidget( w );
     w->close();
 }
 
