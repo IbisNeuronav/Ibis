@@ -1471,16 +1471,13 @@ void SceneManager::ObjectReader( Serializer * ser, bool interactive )
     ser->BeginSection("Plugins");
     QList<ToolPluginInterface*> allTools;
     Application::GetInstance().GetAllToolPlugins( allTools );
-    for( int i = 0; i < allTools.size(); ++i )
+    for( int t = 0; t < allTools.size(); ++t )
     {
-        ToolPluginInterface * toolModule = allTools[i];
+        ToolPluginInterface * toolModule = allTools[t];
         bool sectionFound = ser->BeginSection( toolModule->GetPluginName().toUtf8().data() );
         toolModule->Serialize(ser);
         if( sectionFound )
             ser->EndSection();
-        // simtodo : THIS IS WEIRD!! (Anka: yes, it is, interactive is always true in current version, it is prepared for some background scene loading, maybe should be discarded?)
-        if( interactive && !this->UpdateProgress(++i) )
-            return;
     }
     ser->EndSection();
 }
@@ -1566,13 +1563,12 @@ void SceneManager::ObjectWriter( Serializer * ser )
     ser->BeginSection("Plugins");
     QList<ToolPluginInterface*> allTools;
     Application::GetInstance().GetAllToolPlugins( allTools );
-    for( int i = 0; i < allTools.size(); ++i )
+    for( int t = 0; t < allTools.size(); ++t )
     {
-        ToolPluginInterface * toolModule = allTools[i];
+        ToolPluginInterface * toolModule = allTools[t];
         ser->BeginSection( toolModule->GetPluginName().toUtf8().data() );
         toolModule->Serialize(ser);
         ser->EndSection();
-        this->UpdateProgress(++i);
     }
     ser->EndSection();
 }
