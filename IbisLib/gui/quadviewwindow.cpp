@@ -202,8 +202,6 @@ void QuadViewWindow::SetSceneManager( SceneManager * man )
         view->SetInteractor( m_vtkWindows[3]->GetInteractor() );
         connect( view, SIGNAL( Modified() ), this, SLOT( Win3NeedsRender() ) );
         
-        connect( man, SIGNAL( ObjectRemoved( int ) ), this, SLOT( RenderAll() ) );
-
         m_sceneManager = man;
         int expandedView = m_sceneManager->GetExpandedView();
         if (expandedView > -1)

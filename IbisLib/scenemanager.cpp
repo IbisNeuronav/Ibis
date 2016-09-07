@@ -275,9 +275,6 @@ void SceneManager::LoadScene( QString & fileName, bool interactive )
 
     NotifyPluginsSceneAboutToLoad();
 
-    // Clear the scene
-    InternalClearScene();
-
     // Read all objects in the scene
     SerializerReader reader;
     reader.SetFilename( fileName.toUtf8().data() );

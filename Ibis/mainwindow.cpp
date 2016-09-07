@@ -552,6 +552,7 @@ void MainWindow::fileLoadScene()
         if (ret == QMessageBox::No)
             return;
     }
+    manager->NewScene();
 
     QString workingDir = Application::GetInstance().GetSettings()->WorkingDirectory;
     if(!QFile::exists(workingDir))

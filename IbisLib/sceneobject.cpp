@@ -246,6 +246,7 @@ void SceneObject::Release( View * view )
 	this->disconnect( view );
 	view->UnRegister( this );
 	this->Views.erase( it );
+    view->Modified();
 }
 
 void SceneObject::ReleaseAllViews()
