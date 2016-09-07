@@ -44,6 +44,7 @@ private slots:
     void on_cubeTextureSizeSlider_valueChanged(int value);
     void on_cubeTextureSizeSpinBox_valueChanged(int arg1);
     void on_cameraKeyCheckBox_toggled(bool checked);
+    void on_renderHDRadioButton_toggled(bool checked);
     void on_render1KradioButton_toggled(bool checked);
     void on_render2KRadioButton_toggled(bool checked);
     void on_render4KradioButton_toggled(bool checked);

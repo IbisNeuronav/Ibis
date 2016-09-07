@@ -30,7 +30,7 @@ class QTime;
 // This is a hack that allows to tell the volume renderer that
 // the size of the render surface is not that of the window
 // because we render to a texture.
-class AnimateRenderState : public vtkIbisRenderState
+class DomeRenderState : public vtkIbisRenderState
 {
 public:
     virtual void GetRenderSize( vtkRenderer * ren, int size[2] );
@@ -130,7 +130,7 @@ protected:
 
     bool m_renderDome;
     DomeRenderer * m_domeRenderDelegate;
-    AnimateRenderState * m_renderState;
+    DomeRenderState * m_renderState;
     TimelineWidget * m_timelineWidget;
 
     int m_renderSize[2];
