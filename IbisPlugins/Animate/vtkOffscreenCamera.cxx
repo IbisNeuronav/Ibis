@@ -126,7 +126,8 @@ void vtkOffscreenCamera::Render(vtkRenderer *ren)
   glMatrixMode( GL_PROJECTION);
   if(usize && vsize)
   {
-      matrix->DeepCopy(this->GetProjectionTransformMatrix( usize/vsize, -1,1 ) );
+      double ratio = ((double)usize) / vsize;
+      matrix->DeepCopy(this->GetProjectionTransformMatrix( ratio, -1,1 ) );
       matrix->Transpose();
   }
 
