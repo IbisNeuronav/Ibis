@@ -362,7 +362,7 @@ protected:
 
     // scene loading/saving progress
     QProgressDialog *m_sceneLoadSaveProgressDialog;
-    bool UpdateProgress(int value);
+    bool UpdateProgress(int value, int processEvents = true );
 
     QStringList TemporaryFiles;
 

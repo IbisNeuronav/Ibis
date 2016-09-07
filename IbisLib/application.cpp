@@ -944,7 +944,7 @@ void Application::StopProgress(QProgressDialog * progressDialog)
 }
 
 
-void Application::UpdateProgress( QProgressDialog * progressDialog, int current )
+void Application::UpdateProgress( QProgressDialog * progressDialog, int current, bool processEvents )
 {
     if (!progressDialog) // the process might have been cancelled
         return;
@@ -952,7 +952,9 @@ void Application::UpdateProgress( QProgressDialog * progressDialog, int current 
         progressDialog->reset();
     else
         progressDialog->setValue( current );
-    QApplication::processEvents();
+
+    if( processEvents )
+        QApplication::processEvents();
 }
 
 void Application::ShowMinc1Warning( bool cando)

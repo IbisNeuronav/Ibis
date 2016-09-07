@@ -621,7 +621,6 @@ bool USAcquisitionObject::LoadFramesFromMINCFile( QStringList & allMINCFiles )
             localTransform->Delete();
 
             progress->setValue(i);
-            qApp->processEvents();
             if ( progress->wasCanceled() )
             {
                 QMessageBox::information(0, "Importing frames", "Process cancelled", 1, 0);

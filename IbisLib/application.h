@@ -171,7 +171,7 @@ public:
     void ShowMinc1Warning( bool cando);
 
 public slots:
-    void UpdateProgress( QProgressDialog*, int current );
+    void UpdateProgress( QProgressDialog*, int current, bool processEvents = true );
 
 private slots:
 
