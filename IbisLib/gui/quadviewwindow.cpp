@@ -202,9 +202,8 @@ void QuadViewWindow::SetSceneManager( SceneManager * man )
         view->SetInteractor( m_vtkWindows[3]->GetInteractor() );
         connect( view, SIGNAL( Modified() ), this, SLOT( Win3NeedsRender() ) );
         
-        connect( man, SIGNAL( ObjectAdded( int ) ), this, SLOT( RenderAll() ) );
         connect( man, SIGNAL( ObjectRemoved( int ) ), this, SLOT( RenderAll() ) );
-        
+
         m_sceneManager = man;
         int expandedView = m_sceneManager->GetExpandedView();
         if (expandedView > -1)
@@ -223,7 +222,7 @@ void QuadViewWindow::SetSceneManager( SceneManager * man )
 
         connect (m_sceneManager, SIGNAL(ExpandView()), this, SLOT(ExpandViewButtonClicked()));
         m_sceneManager->PreDisplaySetup();
-        this->PlaceCornerText();
+//        this->PlaceCornerText(); temporarily blocked
     }
 }
 
@@ -231,15 +230,10 @@ void QuadViewWindow::AddBottomWidget( QWidget * w )
 {
     w->setParent( m_bottomWidgetFrame );
     m_bottomWidgetLayout->addWidget( w );
-    //w->setMinimumHeight( 50 );
-    //w->show();
-    //m_generalLayout->addWidget( w );
 }
 
 void QuadViewWindow::RemoveBottomWidget( QWidget * w )
 {
-    //w->setParent( 0 );
-    //m_generalLayout->removeWidget( w );
     w->close();
 }
 

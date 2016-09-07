@@ -227,7 +227,6 @@ void SceneManager::ClearScene()
 
     // Make sure everything is updated
     Application::GetInstance().UpdateProgress(progressDialog, 4);
-    QApplication::processEvents();
 
     NotifyPluginsSceneFinishedLoading();
 
@@ -296,8 +295,9 @@ void SceneManager::LoadScene( QString & fileName, bool interactive )
     }
     else if( reader.FileVersionIsLowerThan( QString::number(6.0) ) )
     {
-        QString message = "This scene version is older than 6.0. This is not supported anymore. Scene may not be correctly restored.\n";
+        QString message = "This scene version is older than 6.0. This is not supported anymore. Scene may not be restored.\n";
         QMessageBox::warning( 0, "Error", message, 1, 0 );
+        return;
     }
     int numberOfSceneObjects;
     ::Serialize( &reader, "NumberOfSceneObjects", numberOfSceneObjects );
@@ -305,7 +305,10 @@ void SceneManager::LoadScene( QString & fileName, bool interactive )
 
     // Start Progress dialog
     if( interactive )
+    {
+        QApplication::processEvents();
         m_sceneLoadSaveProgressDialog = Application::GetInstance().StartProgress( numberOfSceneObjects*2+3, tr("Loading Scene...") );
+    }
 
     this->ObjectReader(&reader, interactive);
     if( interactive && !this->UpdateProgress(numberOfSceneObjects+1) )
@@ -370,7 +373,6 @@ bool SceneManager::UpdateProgress(int value)
         this->CancelProgress();
         return false;
     }
-    QApplication::processEvents();
     Application::GetInstance().UpdateProgress(m_sceneLoadSaveProgressDialog, value);
     return true;
 }
@@ -1312,7 +1314,6 @@ void SceneManager::ObjectReader( Serializer * ser, bool interactive )
 
     for (i = 0; i < numberOfSceneObjects; i++)
     {
-        QString objectName;
         QString sectionName = QString( "ObjectInScene_%1" ).arg(i);
         ser->BeginSection( sectionName.toUtf8().data() );
         ::Serialize( ser, "ObjectClass", className );

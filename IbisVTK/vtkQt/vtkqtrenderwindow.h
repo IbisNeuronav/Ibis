@@ -31,6 +31,9 @@ public:
     bool event( QEvent * event );
     virtual void paintEvent(QPaintEvent* event);
 
+    // Control rendering of the window
+    void SetRenderingEnabled( bool b ) {m_renderingEnabled = b;}
+
 signals:
 
     void ZoomView( double factor );
@@ -38,6 +41,7 @@ signals:
 protected:
 
     // trackpad gesture handling
+    bool m_renderingEnabled;
     bool gestureEvent( QGestureEvent * event );
     void panTriggered( QPanGesture * gesture );
     void pinchTriggered( QPinchGesture * gesture );

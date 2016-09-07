@@ -22,6 +22,7 @@ vtkQtRenderWindow::vtkQtRenderWindow( QWidget * parent ) : QVTKWidget( parent )
 {
     grabGesture( Qt::PanGesture );
     grabGesture( Qt::PinchGesture );
+    m_renderingEnabled = true;
 }
 
 bool vtkQtRenderWindow::event(QEvent *event)
@@ -76,14 +77,15 @@ void vtkQtRenderWindow::pinchTriggered( QPinchGesture * gesture )
 
 void vtkQtRenderWindow::paintEvent( QPaintEvent* )
 {
-    if( !this->mRenWin )
-        return;
+  if( !this->mRenWin )
+    return;
 
   // if we have a saved image, use it
   if( this->paintCachedImage() )
     return;
 
-  this->mRenWin->Render();
+  if( m_renderingEnabled )
+    this->mRenWin->Render();
 
   // In Qt 4.1+ let's support redirected painting
   // if redirected, let's grab the image from VTK, and paint it to the device
