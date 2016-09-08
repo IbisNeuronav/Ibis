@@ -30,7 +30,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QTimer>
 #include <QTime>
 
-void AnimateRenderState::GetRenderSize( vtkRenderer * ren, int size[2] )
+void DomeRenderState::GetRenderSize( vtkRenderer * ren, int size[2] )
 {
     DomeRenderer * dr = DomeRenderer::SafeDownCast( ren->GetDelegate() );
     Q_ASSERT(dr);
@@ -44,7 +44,7 @@ AnimatePluginInterface::AnimatePluginInterface()
     m_renderDome = false;
     m_domeRenderDelegate = DomeRenderer::New();
     m_domeRenderDelegate->UsedOn();
-    m_renderState = new AnimateRenderState;
+    m_renderState = new DomeRenderState;
     m_renderSize[0] = 1024;
     m_renderSize[1] = 1024;
     m_useMinCamDistance = false;
@@ -319,18 +319,49 @@ bool AnimatePluginInterface::HasCamMinDistKey()
 
 #include "offscreenrenderer.h"
 
+// This is a hack that allows to tell the volume renderer that
+// the size of the render surface is not that of the window
+// because we render to a texture.
+class OffscreenRenderState : public vtkIbisRenderState
+{
+public:
+    OffscreenRenderState( int width, int height ) : m_width( width ), m_height( height ) {}
+    virtual void GetRenderSize( vtkRenderer * ren, int size[2] ) { size[0] = m_width; size[1] = m_height; }
+private:
+    int m_width;
+    int m_height;
+};
+
 void AnimatePluginInterface::RenderCurrentFrame()
 {
+    // Hack to tell volume renderer to render to a different size than the window
+    OffscreenRenderState rs( m_renderSize[0], m_renderSize[1] );
+    VolumeRenderingObject * vr = GetVolumeRenderer();
+    if( !GetRenderDome() && vr )
+        vr->SetRenderState( &rs );
+
     OffscreenRenderer ren( this );
     ren.SetRenderSize( m_renderSize[0], m_renderSize[1] );
     ren.RenderCurrent();
+
+    if( !GetRenderDome() && vr )
+        vr->SetRenderState( 0 );
 }
 
 void AnimatePluginInterface::RenderAnimation()
 {
+    // Hack to tell volume renderer to render to a different size than the window
+    OffscreenRenderState rs( m_renderSize[0], m_renderSize[1] );
+    VolumeRenderingObject * vr = GetVolumeRenderer();
+    if( !GetRenderDome() && vr )
+        vr->SetRenderState( &rs );
+
     OffscreenRenderer ren( this );
     ren.SetRenderSize( m_renderSize[0], m_renderSize[1] );
     ren.RenderAnimation();
+
+    if( !GetRenderDome() && vr )
+        vr->SetRenderState( 0 );
 }
 
 void AnimatePluginInterface::NextKeyframe()

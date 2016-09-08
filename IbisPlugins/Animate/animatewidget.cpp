@@ -71,7 +71,9 @@ void AnimateWidget::UpdateUi()
     // Render
     int size = m_pluginInterface->GetRenderSize()[0];
     ui->renderSizeButtonGroup->blockSignals( true );
-    if( size == 1024 )
+    if( size == 1920 )
+        ui->renderHDRadioButton->setChecked( true );
+    else if( size == 1024 )
         ui->render1KradioButton->setChecked( true );
     else if( size == 2048 )
         ui->render2KRadioButton->setChecked( true );
@@ -134,6 +136,13 @@ void AnimateWidget::on_cameraKeyCheckBox_toggled( bool checked )
 {
     Q_ASSERT( m_pluginInterface );
     m_pluginInterface->SetCameraKey( checked );
+}
+
+void AnimateWidget::on_renderHDRadioButton_toggled(bool checked)
+{
+    Q_ASSERT( m_pluginInterface );
+    if( checked )
+        m_pluginInterface->SetRenderSize( 1920, 1080 );
 }
 
 void AnimateWidget::on_render1KradioButton_toggled(bool checked)
@@ -231,3 +240,4 @@ void AnimateWidget::on_domeViewAngleSpinBox_valueChanged(int arg1)
     m_pluginInterface->SetDomeViewAngle( arg1 );
     UpdateUi();
 }
+
