@@ -181,6 +181,8 @@ void View::SetRenderingEnabled( bool b )
     if( m_renderingEnabled == b )
         return;
     m_renderingEnabled = b;
+    if( this->RenderWindow )
+        this->RenderWindow->SetRenderingEnabled( m_renderingEnabled );
     if( m_renderingEnabled )
         NotifyNeedRender();
 }
