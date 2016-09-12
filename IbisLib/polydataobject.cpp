@@ -211,13 +211,17 @@ void PolyDataObject::Export()
         if (ret == QMessageBox::No)
             return;
     }
-    this->SetFullFileName(saveName);
-    vtkPolyDataWriter *writer1 = vtkPolyDataWriter::New();
-    writer1->SetFileName( saveName.toUtf8().data() );
-    writer1->SetInputData(this->PolyData);
-    writer1->Update();
-    writer1->Write();
-    writer1->Delete();
+    this->SavePolyData( saveName );
+}
+
+void PolyDataObject::SavePolyData( QString &fileName )
+{
+    vtkPolyDataWriter *writer = vtkPolyDataWriter::New();
+    writer->SetFileName( fileName.toUtf8().data() );
+    writer->SetInputData(this->PolyData);
+    writer->Update();
+    writer->Write();
+    writer->Delete();
 }
 
 void PolyDataObject::Setup( View * view )

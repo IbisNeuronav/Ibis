@@ -77,7 +77,7 @@ public:
     virtual void Serialize( Serializer * ser );
     virtual void Export();
     virtual bool IsExportable()  { return true; }
-    void WriteFile(QString &name);
+    void SaveImageData(QString &name);
 
     bool IsLabelImage();
     
