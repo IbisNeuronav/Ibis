@@ -825,7 +825,7 @@ int ndiSerialWrite(HANDLE serial_port, const char *text, int n)
   int i = 0;
 
   while (n > 0) {
-    if (WriteFile(serial_port,&text[i],n,&m,NULL) == FALSE) {
+    if (SaveImageData(serial_port,&text[i],n,&m,NULL) == FALSE) {
       if (GetLastError() == ERROR_OPERATION_ABORTED) {/* system cancelled us */
   ClearCommError(serial_port,&dumb,NULL); /* so clear error and retry */
       }

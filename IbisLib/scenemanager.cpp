@@ -1530,13 +1530,20 @@ void SceneManager::ObjectWriter( Serializer * ser )
             }
         }
         else
-        {// we only have to create a MINC file, other objects will be saved within scene, used only for reconstructed volumes
+        {// we only have to create a MINC or PolyData (vtk) file, other objects will be saved within scene, used only for reconstructed volumes
             if (obj->IsA("ImageObject"))
             {
                 dataFileName.append("mnc");
                 newPath.append(dataFileName);
                 ImageObject *image = ImageObject::SafeDownCast(obj);
-                image->WriteFile(newPath);
+                image->SaveImageData(newPath);
+            }
+            else if (obj->IsA("PolyDataObject") && !obj->IsA("GeneratedSurface"))
+            {
+                dataFileName.append("vtk");
+                newPath.append(dataFileName);
+                PolyDataObject *pObj = PolyDataObject::SafeDownCast(obj);
+                pObj->SavePolyData(newPath);
             }
             else
                 newPath = QString("none");

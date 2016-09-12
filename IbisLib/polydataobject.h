@@ -91,6 +91,8 @@ public:
     void UseScalarSource( bool use );
     ImageObject * GetScalarSource() { return this->ScalarSource; }
     void SetScalarSource( ImageObject * im );
+
+    void SavePolyData( QString &fileName );
      
 public slots:
 

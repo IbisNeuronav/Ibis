@@ -232,7 +232,7 @@ void ImageObject::Export()
             return;
     }
 
-    this->WriteFile(saveName);
+    this->SaveImageData(saveName);
 }
 
 void ImageObject::ObjectAddedToScene()
@@ -899,7 +899,7 @@ void ImageObject::BuildVtkImport( itk::VTKImageExportBase * exporter )
 }
 
 //generic file writer
-void ImageObject::WriteFile(QString &name)
+void ImageObject::SaveImageData(QString &name)
 {
     if( this->ItkImage )
     {
