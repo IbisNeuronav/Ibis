@@ -623,6 +623,12 @@ void SceneManager::AddObjectUsingID( SceneObject * object, SceneObject * attachT
         this->SetupInAllViews( object );
         object->PreDisplaySetup();
 
+        // adding first image object has to call ResetAllCameras,
+        // there maybe some other type of objects added anfd the camera position may not be suitable for ImageObject
+        // at this point the object is already added to the list
+        if( this->GetNumberOfImageObjects() == 1 )
+            this->ResetAllCameras();
+
         // Notify clients the object has been added
         if( object->IsListable() )
         {
@@ -708,10 +714,10 @@ void SceneManager::RemoveObject( SceneObject * object , bool viewChange)
 
     if( object->IsListable() )
         emit FinishRemovingObject();
-    ValidatePointerObject();
 
     // remove the object from the global list
     this->AllObjects.removeAt( indexAll );
+    ValidatePointerObject();
 
     emit ObjectRemoved( objId );
 }
@@ -1262,6 +1268,13 @@ int SceneManager::GetNumberOfUserObjects()
     QList<SceneObject*> allUserObjects;
     GetAllUserObjects( allUserObjects );
     return allUserObjects.size();
+}
+
+int SceneManager::GetNumberOfImageObjects()
+{
+    QList<ImageObject*> allImageObjects;
+    GetAllImageObjects( allImageObjects );
+    return allImageObjects.size();
 }
 
 void SceneManager::GetAllUserObjects(QList<SceneObject*> &list)

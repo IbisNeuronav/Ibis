@@ -231,7 +231,7 @@ cl_platform_id OpenCLSelectPlatform(const char* name)
 
   // debug
   ciErrNum = clGetPlatformInfo (clPlatformIDs[0], CL_PLATFORM_NAME, 1024, &chBuffer, NULL);
-  std::cout << "Platform " << " : " << chBuffer << std::endl;
+  //std::cout << "Platform " << " : " << chBuffer << std::endl;
   //
           }
 
@@ -244,7 +244,7 @@ cl_platform_id OpenCLSelectPlatform(const char* name)
             ciErrNum = clGetPlatformInfo (clPlatformIDs[i], CL_PLATFORM_NAME, 1024, &chBuffer, NULL);
 
 // debug
-            std::cout << "Platform " << i << " : " << chBuffer << std::endl;
+//            std::cout << "Platform " << i << " : " << chBuffer << std::endl;
 //
 
             if(ciErrNum == CL_SUCCESS)
