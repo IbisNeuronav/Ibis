@@ -425,10 +425,6 @@ void ImageObject::Setup( View * view )
     }
 
     this->SetViewOutline(this->viewOutline);
-//    // adding first image object has to call ResetAllCameras,
-//    // there maybe some other type of objects added anfd the camera position may not be suitable for ImageObject
-//    if( this->GetManager()->GetNumberOfImageObjects() == 1 )
-//        this->GetManager()->ResetAllCameras();
 }
 
 void ImageObject::PreDisplaySetup()
