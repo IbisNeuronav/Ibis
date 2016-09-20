@@ -624,7 +624,7 @@ void SceneManager::AddObjectUsingID( SceneObject * object, SceneObject * attachT
         object->PreDisplaySetup();
 
         // adding first image object has to call ResetAllCameras,
-        // there maybe some other type of objects added anfd the camera position may not be suitable for ImageObject
+        // there maybe some other type of objects added and the camera position may not be suitable for ImageObject
         // at this point the object is already added to the list
         if( this->GetNumberOfImageObjects() == 1 )
             this->ResetAllCameras();
