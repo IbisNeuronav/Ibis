@@ -680,6 +680,8 @@ void SceneManager::RemoveObject( SceneObject * object , bool viewChange)
     if (object == this->ReferenceDataObject)
     {
         this->ReferenceDataObject  = 0;
+        m_referenceTransform->Identity();
+        m_invReferenceTransform->Identity();
         QList< ImageObject* > imObjects;
         this->GetAllImageObjects( imObjects );
         int i = 0;
