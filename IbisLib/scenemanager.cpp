@@ -587,6 +587,7 @@ void SceneManager::AddObjectUsingID( SceneObject * object, SceneObject * attachT
 {
     if( object )
     {
+        int numberOfUserObjects = this->GetNumberOfUserObjects();
         // Register and add to the global list
          object->Register( this );
         this->AllObjects.push_back( object );
@@ -626,7 +627,7 @@ void SceneManager::AddObjectUsingID( SceneObject * object, SceneObject * attachT
         // adding first image object has to call ResetAllCameras,
         // there maybe some other type of objects added and the camera position may not be suitable for ImageObject
         // at this point the object is already added to the list
-        if( this->GetNumberOfImageObjects() == 1 )
+        if( this->GetNumberOfImageObjects() == 1 ||  numberOfUserObjects == 0 )
             this->ResetAllCameras();
 
         // Notify clients the object has been added

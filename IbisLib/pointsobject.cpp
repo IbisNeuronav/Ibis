@@ -127,6 +127,8 @@ void PointsObject::Serialize( Serializer * ser )
             this->AddPointLocal( coords, pointName, timeStamp );
         }
         m_lineToPointerProperty->SetColor( m_lineToPointerColor[0], m_lineToPointerColor[1], m_lineToPointerColor[2] );
+        if( numberOfPoints > 0 && m_selectedPointIndex == InvalidPointIndex )
+            m_selectedPointIndex = 0;
         this->SetSelectedPoint( m_selectedPointIndex );
     }
 }
