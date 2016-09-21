@@ -90,16 +90,14 @@ void View::Serialize( Serializer * ser )
     // camera settings: position, focal point, zoom factor
     vtkCamera *camera = this->Renderer->GetActiveCamera();
     int parallel = camera->GetParallelProjection();
-    double fp[3] = {0.0,0.0,0.0}, pos[3]={0.0,0.0,1.0}, scale=150.0;
-    double viewUp[3]= {0.0,0.0,1.0}, viewAngle = 30.0;
-    if(!ser->IsReader())
-    {
-        camera->GetPosition( pos );
-        camera->GetFocalPoint( fp );
-        scale = camera->GetParallelScale();
-        camera->GetViewUp( viewUp );
-        viewAngle = camera->GetViewAngle();
-    }
+    double fp[3], pos[3], scale;
+    double viewUp[3], viewAngle;
+    // get current camera parameters to save then in scene or to set them as defzult.
+    camera->GetPosition( pos );
+    camera->GetFocalPoint( fp );
+    scale = camera->GetParallelScale();
+    camera->GetViewUp( viewUp );
+    viewAngle = camera->GetViewAngle();
 
     ::Serialize( ser, "Position", pos, 3 );
     ::Serialize( ser, "FocalPoint", fp, 3 );
@@ -112,13 +110,13 @@ void View::Serialize( Serializer * ser )
         this->ResetCamera();
         camera->SetPosition( pos );
         camera->SetFocalPoint( fp );
+        camera->SetViewUp( viewUp );
         if( parallel )
         {
             camera->SetParallelScale(scale);
         }
         else
         {
-            camera->SetViewUp( viewUp );
             camera->SetViewAngle( viewAngle );
         }
 
