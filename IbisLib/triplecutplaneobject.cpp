@@ -293,7 +293,6 @@ void TripleCutPlaneObject::AdjustAllImages()
                 }
             }
         }
-        this->GetManager()->ResetAllCameras();
     }
 }
 

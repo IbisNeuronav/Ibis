@@ -425,7 +425,6 @@ void ImageObject::Setup( View * view )
     }
 
     this->SetViewOutline(this->viewOutline);
-    this->GetManager()->ResetAllCameras();
 }
 
 void ImageObject::PreDisplaySetup()

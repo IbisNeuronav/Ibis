@@ -89,22 +89,37 @@ void View::Serialize( Serializer * ser )
 {
     // camera settings: position, focal point, zoom factor
     vtkCamera *camera = this->Renderer->GetActiveCamera();
+    int parallel = camera->GetParallelProjection();
     double fp[3], pos[3], scale;
-    if(!ser->IsReader())
-    {
-        camera->GetPosition( pos );
-        camera->GetFocalPoint( fp );
-        scale = camera->GetParallelScale();
-    }
+    double viewUp[3], viewAngle;
+    // get current camera parameters to save then in scene or to set them as defzult.
+    camera->GetPosition( pos );
+    camera->GetFocalPoint( fp );
+    scale = camera->GetParallelScale();
+    camera->GetViewUp( viewUp );
+    viewAngle = camera->GetViewAngle();
+
     ::Serialize( ser, "Position", pos, 3 );
     ::Serialize( ser, "FocalPoint", fp, 3 );
     ::Serialize( ser, "Scale", scale );
+    ::Serialize( ser, "ViewUp", viewUp, 3 );
+    ::Serialize( ser, "ViewAngle", viewAngle );
+
     if (ser->IsReader())
     {
         this->ResetCamera();
         camera->SetPosition( pos );
         camera->SetFocalPoint( fp );
-        camera->SetParallelScale(scale);
+        camera->SetViewUp( viewUp );
+        if( parallel )
+        {
+            camera->SetParallelScale(scale);
+        }
+        else
+        {
+            camera->SetViewAngle( viewAngle );
+        }
+
         this->NotifyNeedRender();
     }
 }
@@ -508,7 +523,6 @@ void View::ReferenceTransformChanged()
 
             vtkCamera * cam = this->Renderer->GetActiveCamera();
             cam->ApplyTransform( t );
-
             t->Delete();
 
             // backup inverted current transform

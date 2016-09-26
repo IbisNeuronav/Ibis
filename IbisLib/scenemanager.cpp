@@ -587,6 +587,7 @@ void SceneManager::AddObjectUsingID( SceneObject * object, SceneObject * attachT
 {
     if( object )
     {
+        int numberOfUserObjects = this->GetNumberOfUserObjects();
         // Register and add to the global list
          object->Register( this );
         this->AllObjects.push_back( object );
@@ -622,6 +623,12 @@ void SceneManager::AddObjectUsingID( SceneObject * object, SceneObject * attachT
         // Setup in views
         this->SetupInAllViews( object );
         object->PreDisplaySetup();
+
+        // adding first image object has to call ResetAllCameras,
+        // there maybe some other type of objects added and the camera position may not be suitable for ImageObject
+        // at this point the object is already added to the list
+        if( this->GetNumberOfImageObjects() == 1 ||  numberOfUserObjects == 0 )
+            this->ResetAllCameras();
 
         // Notify clients the object has been added
         if( object->IsListable() )
@@ -674,6 +681,8 @@ void SceneManager::RemoveObject( SceneObject * object , bool viewChange)
     if (object == this->ReferenceDataObject)
     {
         this->ReferenceDataObject  = 0;
+        m_referenceTransform->Identity();
+        m_invReferenceTransform->Identity();
         QList< ImageObject* > imObjects;
         this->GetAllImageObjects( imObjects );
         int i = 0;
@@ -708,10 +717,10 @@ void SceneManager::RemoveObject( SceneObject * object , bool viewChange)
 
     if( object->IsListable() )
         emit FinishRemovingObject();
-    ValidatePointerObject();
 
     // remove the object from the global list
     this->AllObjects.removeAt( indexAll );
+    ValidatePointerObject();
 
     emit ObjectRemoved( objId );
 }
@@ -1262,6 +1271,13 @@ int SceneManager::GetNumberOfUserObjects()
     QList<SceneObject*> allUserObjects;
     GetAllUserObjects( allUserObjects );
     return allUserObjects.size();
+}
+
+int SceneManager::GetNumberOfImageObjects()
+{
+    QList<ImageObject*> allImageObjects;
+    GetAllImageObjects( allImageObjects );
+    return allImageObjects.size();
 }
 
 void SceneManager::GetAllUserObjects(QList<SceneObject*> &list)

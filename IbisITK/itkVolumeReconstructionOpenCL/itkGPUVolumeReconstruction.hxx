@@ -463,8 +463,8 @@ GPUVolumeReconstruction< TImage >
   unsigned int size_output = nbrOfPixelsInVolume*sizeof(ImagePixelType);
   unsigned int size_slice = m_NbrPixelsInSlice * sizeof(InternalRealType);
 
-  std::cout << "Volume Spacing:\t" << m_VolumeSpacing << std::endl;
-  std::cout << "Standard Deviation:\t" << m_KernelStdDev << std::endl;
+//  std::cout << "Volume Spacing:\t" << m_VolumeSpacing << std::endl;
+//  std::cout << "Standard Deviation:\t" << m_KernelStdDev << std::endl;
 
 
   unsigned char * maskValues = new unsigned char[m_NbrPixelsInSlice];

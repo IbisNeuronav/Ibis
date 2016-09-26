@@ -164,6 +164,7 @@ public:
     void RemoveObjectById( int objectId );
     void RemoveObject( SceneObject * object , bool viewChange = true);
     void ChangeParent( SceneObject * object, SceneObject * newParent, int newChildIndex );
+    int  GetNumberOfImageObjects();
     void GetAllImageObjects( QList<ImageObject*> & objects );
     void GetChildrenImageObjects( SceneObject * obj, QList<ImageObject*> & all );
     void GetAllPolydataObjects( QList<PolyDataObject*> & objects );

@@ -623,6 +623,7 @@ bool FileReader::OpenTagFile( QList<SceneObject*> & readObjects, QString filenam
         pointsObject->AddPoint( QString(reader->GetPointNames()[i].c_str()), pts->GetPoint(i) );
         pointsObject->SetPointTimeStamp( i, reader->GetTimeStamps()[i].c_str() );
     }
+    pointsObject->SetSelectedPoint( 0 );
     readObjects.push_back( pointsObject );
 
     // is there a second set of points?
@@ -640,6 +641,7 @@ bool FileReader::OpenTagFile( QList<SceneObject*> & readObjects, QString filenam
             pointsObject1->AddPoint(QString(reader->GetPointNames()[i].c_str()), pts1->GetPoint(i));
             pointsObject1->SetPointTimeStamp( i, reader->GetTimeStamps()[i].c_str() );
         }
+        pointsObject1->SetSelectedPoint( 0 );
         readObjects.push_back( pointsObject1 );
     }
     reader->Delete();
