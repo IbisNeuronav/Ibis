@@ -42,7 +42,7 @@ class PointerObject;
 class vtkInteractor;
 
 // Scene file format version
-#define IGNS_SCENE_SAVE_VERSION "7.0"
+#define IGNS_SCENE_SAVE_VERSION "6.0"
 
 #define PREOP_ROOT_OBJECT_NAME "Pre-operative"
 #define INTRAOP_ROOT_OBJECT_NAME "Intra-operative"
