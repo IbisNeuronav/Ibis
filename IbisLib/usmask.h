@@ -45,6 +45,7 @@ public:
     void SetMaskAngles( double angles[2] );
     void SetMaskDepthTop( double depthTop );
     void SetMaskDepthBottom(double depthBottom );
+    void SetMaskSize( int width, int height ) { m_defaultMaskSize[0] = width; m_defaultMaskSize[1] = height; }
 
     int * GetMaskSize() { return &m_maskSize[0]; }
     int * GetMaskCrop() { return &m_maskCrop[0]; }

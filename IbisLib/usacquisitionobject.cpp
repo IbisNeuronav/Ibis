@@ -54,8 +54,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 ObjectSerializationMacro( USAcquisitionObject );
 
-int USAcquisitionObject::m_defaultImageSize[2] = { 640, 480 };
-
 USAcquisitionObject::USAcquisitionObject()
 {
     m_usProbeObjectId = SceneObject::InvalidObjectId;
@@ -121,6 +119,8 @@ USAcquisitionObject::USAcquisitionObject()
     m_staticSlicesProperties = vtkImageProperty::New();
     m_staticSlicesLutIndex = 0;  // default to greyscale
     m_staticSlicesDataNeedUpdate = true;
+    m_defaultImageSize[0] = 640;
+    m_defaultImageSize[1] = 480;
 }
 
 USAcquisitionObject::~USAcquisitionObject()
@@ -318,7 +318,11 @@ void USAcquisitionObject::Record()
     UsProbeObject * probe = UsProbeObject::SafeDownCast( GetManager()->GetObjectByID( m_usProbeObjectId ) );
     Q_ASSERT( probe );
     if( probe->IsOk() )
+    {
+        int * dims = probe->GetVideoOutput()->GetDimensions();
+        this->SetFrameAndMaskSize( dims[0], dims[1] );
         m_videoBuffer->AddFrame( probe->GetVideoOutput(), probe->GetUncalibratedWorldTransform()->GetMatrix() );
+    }
 
     // Start watching the clock for updates
     connect( &Application::GetInstance(), SIGNAL(IbisClockTick()), this, SLOT(Updated()));
@@ -1147,6 +1151,13 @@ bool USAcquisitionObject::Import()
         }
     }
     return success;
+}
+
+void USAcquisitionObject::SetFrameAndMaskSize( int width, int height )
+{
+    m_defaultImageSize[0] = width;
+    m_defaultImageSize[1] = height;
+    m_mask->SetMaskSize( width, height );
 }
 
 int USAcquisitionObject::GetCurrentSlice()

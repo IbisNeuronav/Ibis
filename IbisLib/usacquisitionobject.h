@@ -93,6 +93,8 @@ public:
     vtkImageData * GetVideoOutput();
     vtkTransform * GetTransform();
 
+    void SetFrameAndMaskSize( int width, int height );
+
     // Return itk image of a given frame
     bool GetItkImage(IbisItk3DImageType::Pointer itkOutputImage, int frameNo, vtkMatrix4x4* sliceMatrix);
     void GetItkRGBImage(IbisRGBImageType::Pointer itkOutputImage, int frameNo, bool masked, bool useCalibratedTransform = false, vtkMatrix4x4 *relativeMatrix = 0 );
@@ -157,7 +159,7 @@ protected:
     int m_usProbeObjectId;  // probe we record from
 
     // Images and matrices
-    static int m_defaultImageSize[2];
+    int m_defaultImageSize[2];
     TrackedVideoBuffer * m_videoBuffer;
 
     // 3D viewing data
