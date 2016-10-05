@@ -5,15 +5,18 @@ project( ${project_name} )
 # Find Qt5
 find_package( Qt5 COMPONENTS Widgets REQUIRED )
 
+# Find out version numbers of dependencies
+include(${CMAKE_CURRENT_SOURCE_DIR}/../CMakeCommon/DependencyVersions.cmake)
+
 # Build All External Dependencies except Qt (vtk, Itk, minc, etc.)
 add_subdirectory( ibisExternalDependencies )
 
 # Build Ibis
 INCLUDE(ExternalProject)
 set( CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR}/Ibis-install )
-set( VTK_DIR ${CMAKE_CURRENT_BINARY_DIR}/ibisExternalDependencies/vtk-6.2/install/lib/cmake/vtk-6.2)
-set( ITK_DIR ${CMAKE_CURRENT_BINARY_DIR}/ibisExternalDependencies/itk-4.5.2/install/lib/cmake/ITK-4.5 )
-set( OpenCV_DIR ${CMAKE_CURRENT_BINARY_DIR}/ibisExternalDependencies/opencv-3.1.0/install/share/OpenCV )
+set( VTK_DIR ${CMAKE_CURRENT_BINARY_DIR}/ibisExternalDependencies/vtk-${IBIS_VTK_LONG_VERSION}/install/lib/cmake/vtk-${IBIS_VTK_LONG_VERSION})
+set( ITK_DIR ${CMAKE_CURRENT_BINARY_DIR}/ibisExternalDependencies/itk-${IBIS_ITK_LONG_VERSION}/install/lib/cmake/ITK-${IBIS_VTK_SHORT_VERSION} )
+set( OpenCV_DIR ${CMAKE_CURRENT_BINARY_DIR}/ibisExternalDependencies/opencv-${IBIS_OPENCV_LONG_VERSION}/install/share/OpenCV )
 ExternalProject_Add( Ibis
 		SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../
 		BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/Ibis
