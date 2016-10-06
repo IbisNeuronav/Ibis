@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.5)
 set( project_name IbisExternalDependencies )
 project( ${project_name} )
 
@@ -7,12 +7,12 @@ set( external_project_dir ${CMAKE_CURRENT_BINARY_DIR} )
 INCLUDE(ExternalProject)
 
 # Get and build vtk
-set( vtk_name vtk-6.2 )
+set( vtk_name vtk-${IBIS_VTK_LONG_VERSION} )
 ExternalProject_Add( ${vtk_name} 
     SOURCE_DIR ${external_project_dir}/${vtk_name}/src
     BINARY_DIR ${external_project_dir}/${vtk_name}/build
-    GIT_REPOSITORY "git://vtk.org/VTK.git"
-    GIT_TAG v6.2.0
+    GIT_REPOSITORY "https://github.com/Kitware/VTK.git"
+    GIT_TAG v${IBIS_VTK_LONG_VERSION}
     BUILD_COMMAND   make
     INSTALL_COMMAND make install 
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=${external_project_dir}/${vtk_name}/install
@@ -23,24 +23,24 @@ ExternalProject_Add( ${vtk_name}
   )
 
 # Get and build itk
-set( itk_name itk-4.5.2 )
+set( itk_name itk-${IBIS_ITK_LONG_VERSION} )
 ExternalProject_Add( ${itk_name} 
     SOURCE_DIR ${external_project_dir}/${itk_name}/src
-    GIT_REPOSITORY "git://itk.org/ITK.git"
-    GIT_TAG v4.5.2
+    GIT_REPOSITORY "https://github.com/InsightSoftwareConsortium/ITK.git"
+    GIT_TAG v${IBIS_ITK_LONG_VERSION}
 	BINARY_DIR ${external_project_dir}/${itk_name}/build
     BUILD_COMMAND   make
     INSTALL_COMMAND make install 
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=${external_project_dir}/${itk_name}/install -DCMAKE_OSX_SYSROOT:PATH=${CMAKE_OSX_SYSROOT} -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE} -DBUILD_TESTING:BOOL=FALSE -DBUILD_EXAMPLES:BOOL=FALSE -DITKV3_COMPATIBILITY:BOOL=TRUE -DModule_ITKIOMINC=ON -DModule_ITKReview=ON
   )
-set( itk_dir ${external_project_dir}/${itk_name}/install/lib/cmake/ITK-4.5 )
+#set( itk_dir ${external_project_dir}/${itk_name}/install/lib/cmake/ITK-4.5 )
 
 # Get and build OpenCV
-set( opencv_name opencv-3.1.0 )
+set( opencv_name opencv-${IBIS_OPENCV_LONG_VERSION} )
 ExternalProject_Add( ${opencv_name} 
     SOURCE_DIR ${external_project_dir}/${opencv_name}/src
     GIT_REPOSITORY "https://github.com/opencv/opencv.git"
-    GIT_TAG 3.1.0
+    GIT_TAG ${IBIS_OPENCV_LONG_VERSION}
     BINARY_DIR ${external_project_dir}/${opencv_name}/build
     BUILD_COMMAND   make
     INSTALL_COMMAND make install 
