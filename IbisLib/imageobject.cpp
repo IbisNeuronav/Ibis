@@ -28,6 +28,9 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "vtkColorTransferFunction.h"
 #include "vtkImageImport.h"
 #include "vtkEventQtSlotConnect.h"
+#include "vtkImageShiftScale.h"
+#include "vtkBoxWidget2.h"
+#include "vtkBoxRepresentation.h"
 
 #include "application.h"
 #include "imageobjectsettingsdialog.h"
@@ -101,6 +104,14 @@ ImageObject::ImageObject()
     this->intensityFactor = 1.0;
     this->HistogramComputer = vtkImageAccumulate::New();
 
+    m_showVolumeClippingBox = false;
+    m_volumeRenderingBounds[0] = 0.0;
+    m_volumeRenderingBounds[1] = 1.0;
+    m_volumeRenderingBounds[2] = 0.0;
+    m_volumeRenderingBounds[3] = 1.0;
+    m_volumeRenderingBounds[4] = 0.0;
+    m_volumeRenderingBounds[5] = 1.0;
+
     // setup default volume properties for vtk volume rendering
     m_vtkVolumeRenderingEnabled = false;
     m_volumeProperty = vtkVolumeProperty::New();
@@ -128,6 +139,9 @@ ImageObject::ImageObject()
     m_volumePropertyWatcher->Connect( m_volumeProperty->GetGradientOpacity(), vtkCommand::ModifiedEvent, this, SLOT(MarkModified()) );
     m_volumePropertyWatcher->Connect( m_volumeProperty->GetRGBTransferFunction(), vtkCommand::ModifiedEvent, this, SLOT(MarkModified()) );
 
+    // Watch clipping widgets for volume rendering
+    m_volumeClippingBoxWatcher = vtkEventQtSlotConnect::New();
+
     m_colorWindow = 1.0;
     m_colorLevel = 0.5;
     m_vtkVolumeRenderMode = vtkSmartVolumeMapper::GPURenderMode;
@@ -151,6 +165,7 @@ ImageObject::~ImageObject()
 
     m_volumeProperty->Delete();
     m_volumePropertyWatcher->Delete();
+    m_volumeClippingBoxWatcher->Delete();
 }
 
 #include "serializerhelper.h"
@@ -198,6 +213,8 @@ void ImageObject::Serialize( Serializer * ser )
     ::Serialize( ser, "EnableGradientOpacity", enableGradientOpacity );
     ::Serialize( ser, "AutoSampleDistance", m_autoSampleDistance );
     ::Serialize( ser, "SampleDistance", m_sampleDistance );
+    ::Serialize( ser, "ShowVolumeClippingBox", m_showVolumeClippingBox );
+    ::Serialize( ser, "VolumeRenderingBounds", m_volumeRenderingBounds, 6 );
     if( ser->IsReader() )
     {
         m_volumeProperty->SetShade( enableShading ? 1 : 0 );
@@ -338,6 +355,7 @@ void ImageObject::SetImage(vtkImageData * image)
     if( this->Image )
     {
         this->Image->Register( this );
+        this->Image->GetBounds( m_volumeRenderingBounds );
     }
 
     double range[2];
@@ -536,6 +554,12 @@ void ImageObject::SetSampleDistance( double dist )
     m_sampleDistance = dist;
 }
 
+void ImageObject::SetShowVolumeClippingWidget( bool show )
+{
+    m_showVolumeClippingBox = show;
+    UpdateVolumeRenderingParamsInMapper();
+}
+
 void ImageObject::UpdateVolumeRenderingParamsInMapper()
 {
     ImageObjectViewAssociation::iterator it = this->imageObjectInstances.begin();
@@ -546,16 +570,25 @@ void ImageObject::UpdateVolumeRenderingParamsInMapper()
         {
             PerViewElements * pv = (*it).second;
             vtkSmartVolumeMapper * mapper = vtkSmartVolumeMapper::SafeDownCast( pv->volume->GetMapper() );
-            if( mapper )
-            {
-                mapper->SetFinalColorLevel( m_colorLevel );
-                mapper->SetFinalColorWindow( m_colorWindow );
-            }
+            Q_ASSERT( mapper );
+
+            mapper->SetFinalColorLevel( m_colorLevel );
+            mapper->SetFinalColorWindow( m_colorWindow );
+            mapper->SetCroppingRegionPlanes( m_volumeRenderingBounds );
+
+            SetVolumeClippingEnabled( pv->volumeClippingWidget, !IsHidden() && m_showVolumeClippingBox );
         }
         ++it;
     }
     emit Modified();
 }
+
+void ImageObject::SetVolumeClippingEnabled( vtkBoxWidget2 * widget, bool enabled )
+{
+    widget->SetProcessEvents( enabled ? 1 : 0 );
+    widget->SetEnabled( enabled ? 1 : 0 );
+}
+
 
 void ImageObject::SetViewOutline( int isOn )
 {
@@ -605,7 +638,6 @@ int ImageObject::GetViewError()
     return this->viewError;
 }
 
-#include "vtkImageShiftScale.h"
 void ImageObject::Setup3DRepresentation( View * view )
 {
     // add an outline to the view to make sure camera includes the whole volume
@@ -627,6 +659,7 @@ void ImageObject::Setup3DRepresentation( View * view )
     volumeMapper->SetRequestedRenderMode( m_vtkVolumeRenderMode );
     volumeMapper->SetFinalColorLevel( m_colorLevel );
     volumeMapper->SetFinalColorWindow( m_colorWindow );
+    volumeMapper->CroppingOn();
     vtkImageShiftScale * volumeShiftScale = vtkImageShiftScale::New();
     volumeShiftScale->SetOutputScalarTypeToUnsignedChar();
     volumeShiftScale->SetInputData( this->GetImage() );
@@ -645,11 +678,29 @@ void ImageObject::Setup3DRepresentation( View * view )
     volume->SetVisibility( m_vtkVolumeRenderingEnabled ? 1 : 0 );
     view->GetRenderer()->AddVolume( volume );
 
+    // clipping box
+    vtkBoxWidget2 * volumeClippingWidget = vtkBoxWidget2::New();
+    volumeClippingWidget->TranslationEnabledOff();
+    volumeClippingWidget->RotationEnabledOff();
+    volumeClippingWidget->ScalingEnabledOff();
+    volumeClippingWidget->SetInteractor( view->GetInteractor() );
+    volumeClippingWidget->GetRepresentation()->SetPlaceFactor( 1 ); // Default is 0.5
+    volumeClippingWidget->GetRepresentation()->PlaceWidget( m_volumeRenderingBounds );
+    vtkBoxRepresentation * boxRep = vtkBoxRepresentation::SafeDownCast( volumeClippingWidget->GetRepresentation() );
+    boxRep->InsideOutOn();
+    boxRep->OutlineCursorWiresOff();
+
+    m_volumeClippingBoxWatcher->Connect( volumeClippingWidget, vtkCommand::InteractionEvent, this, SLOT(OnVolumeClippingBoxModified(vtkObject*)) );
+
+
     // Add the actors to the map of instances we keep
     PerViewElements * elem = new PerViewElements;
     elem->outlineActor = outActor;
     elem->volume = volume;
+    elem->volumeClippingWidget = volumeClippingWidget;
     this->imageObjectInstances[ view ] = elem;
+
+    UpdateVolumeRenderingParamsInMapper();
 }
 
 void ImageObject::Release3DRepresentation( View * view )
@@ -667,6 +718,10 @@ void ImageObject::Release3DRepresentation( View * view )
         // remove volume
         view->GetRenderer()->RemoveViewProp( perView->volume );
         perView->volume->Delete();
+
+        // remove volume clipping box
+        perView->volumeClippingWidget->SetInteractor( 0 );
+        perView->volumeClippingWidget->Delete();
 
         delete perView;
         this->imageObjectInstances.erase( itAssociations );
@@ -828,6 +883,22 @@ double ImageObject::GetIntensityFactor()
     return this->intensityFactor;
 }
 
+void ImageObject::OnVolumeClippingBoxModified( vtkObject * caller )
+{
+    vtkBoxWidget2 * widget = vtkBoxWidget2::SafeDownCast( caller );
+    Q_ASSERT( widget );
+    vtkBoxRepresentation * box = vtkBoxRepresentation::SafeDownCast( widget->GetRepresentation() );
+    Q_ASSERT( box );
+    double * bounds = box->GetBounds();
+    m_volumeRenderingBounds[0] = bounds[0];
+    m_volumeRenderingBounds[1] = bounds[1];
+    m_volumeRenderingBounds[2] = bounds[2];
+    m_volumeRenderingBounds[3] = bounds[3];
+    m_volumeRenderingBounds[4] = bounds[4];
+    m_volumeRenderingBounds[5] = bounds[5];
+    UpdateVolumeRenderingParamsInMapper();
+}
+
 void ImageObject::Hide()
 {
 	if (this->viewOutline)
@@ -839,6 +910,7 @@ void ImageObject::Hide()
 		this->outlineWasVisible = 0;
     if( this->GetManager() )
         this->GetManager()->GetMainImagePlanes()->SetImageHidden( this->GetObjectID(), true );
+    UpdateVolumeRenderingParamsInMapper();
     emit Modified();
 }
 
@@ -848,6 +920,7 @@ void ImageObject::Show()
 		this->SetViewOutline(1);
     if( this->GetManager() )
         this->GetManager()->GetMainImagePlanes()->SetImageHidden( this->GetObjectID(), false );
+    UpdateVolumeRenderingParamsInMapper();
     emit Modified();
 }
 
