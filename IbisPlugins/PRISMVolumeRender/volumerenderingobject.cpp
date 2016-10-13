@@ -865,6 +865,14 @@ void VolumeRenderingObject::DeleteShaderContributionType( QString shaderName )
     emit Modified();
 }
 
+QString VolumeRenderingObject::GetUniqueCustomShaderName( QString name )
+{
+    QStringList allNames;
+    for( int i = 0; i < m_shaderContribs.size(); ++i )
+        allNames.push_back( m_shaderContribs[i].name );
+    return SceneManager::FindUniqueName( name, allNames );
+}
+
 void VolumeRenderingObject::DuplicateShaderContribType( int typeIndex )
 {
     Q_ASSERT( typeIndex < m_shaderContribs.size() );
@@ -873,10 +881,7 @@ void VolumeRenderingObject::DuplicateShaderContribType( int typeIndex )
     contrib.custom = true;
 
     // Make sure we have a unique name
-    QStringList allNames;
-    for( int i = 0; i < m_shaderContribs.size(); ++i )
-        allNames.push_back( m_shaderContribs[i].name );
-    contrib.name = SceneManager::FindUniqueName( contrib.name, allNames );
+    contrib.name = GetUniqueCustomShaderName( contrib.name );
 
     m_shaderContribs.push_back( contrib );
 
