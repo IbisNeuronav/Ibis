@@ -998,10 +998,9 @@ void VolumeRenderingObject::ObjectAddedSlot( int objectId )
     Q_ASSERT( this->GetManager() );
     ImageObject * im = ImageObject::SafeDownCast( this->GetManager()->GetObjectByID( objectId ) );
 
-    if( im )
+    if( im && !this->GetImage( 0 ) && !GetManager()->IsLoadingScene() )
     {
-        if( this->GetNumberOfImageSlots() > 0 && !this->GetImage( 0 ) )
-            this->SetImage( 0, im );
+        this->SetImage( 0, im );
     }
 }
 
