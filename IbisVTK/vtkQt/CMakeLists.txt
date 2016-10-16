@@ -11,6 +11,10 @@ SET( IGNS_VTK_QT_SRC
 SET( IGNS_VTK_QT_HDR_MOC vtkQtImageViewer.h vtkQtMatrixDialog.h vtkqtrenderwindow.h )
 set( IGNS_VTK_QT_PLUGIN_HDR_MOC vtkQtHistogramWidget.h vtkQtPiecewiseFunctionWidget.h vtkQtColorTransferFunctionWidget.h )
 
+if(APPLE)
+    set( IGNS_VTK_QT_SRC ${IGNS_VTK_QT_SRC} retinadisplayhack.mm retinadisplayhack.h )
+endif()
+
 # moc Qt source file without a ui file
 qt5_wrap_cpp( IGNS_VTK_QT_MOC ${IGNS_VTK_QT_HDR_MOC} )
 qt5_wrap_cpp( IGNS_VTK_QT_PLUGIN_MOC ${IGNS_VTK_QT_PLUGIN_HDR_MOC} )
