@@ -86,6 +86,7 @@ public:
   void ClearAllInputs();
   void SetUseLinearSampling( int index, bool use );
   void SetMultFactor( double value ) { this->MultFactor = value; }
+  std::string GetShaderBuildError();
 
   vtkSetMacro( Time, float );
   vtkSetVector3Macro( InteractionPoint1, double );

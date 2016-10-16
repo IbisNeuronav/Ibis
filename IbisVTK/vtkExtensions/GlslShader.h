@@ -32,6 +32,7 @@ public:
     void Reset();
 
 	bool Init();
+    std::string GetErrorMessage() { return m_errorMessage; }
 	bool UseProgram( bool use );
 	bool SetVariable( const char * name, int value );
     bool SetVariable( const char * name, int count, int * values );
@@ -53,7 +54,7 @@ protected:
 	unsigned m_glslVertexShader;
 	unsigned m_glslProg;
 	bool m_init;
-
+    std::string m_errorMessage;
 };
 
 #endif

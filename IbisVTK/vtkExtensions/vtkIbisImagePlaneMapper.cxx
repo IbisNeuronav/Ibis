@@ -141,6 +141,8 @@ int vtkIbisImagePlaneMapper::RenderTranslucentPolygonalGeometry( vtkRenderer *re
         glMatrixMode(GL_MODELVIEW);
         glPopMatrix();
     }
+
+    return 1;
 }
 
 void vtkIbisImagePlaneMapper::ReleaseGraphicsResources(vtkWindow *)
