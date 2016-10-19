@@ -180,15 +180,15 @@
       </spacer>
      </item>
      <item>
-      <widget class="QSpinBox" name="originXSpinBox">
+      <widget class="QDoubleSpinBox" name="originXDoubleSpinBox">
        <property name="keyboardTracking">
         <bool>false</bool>
        </property>
        <property name="maximum">
-        <number>1000</number>
+        <double>999.990000000000009</double>
        </property>
        <property name="value">
-        <number>318</number>
+        <double>318.000000000000000</double>
        </property>
       </widget>
      </item>
@@ -229,15 +229,15 @@
       </spacer>
      </item>
      <item>
-      <widget class="QSpinBox" name="originYSpinBox">
+      <widget class="QDoubleSpinBox" name="originYDoubleSpinBox">
        <property name="keyboardTracking">
         <bool>false</bool>
        </property>
        <property name="maximum">
-        <number>1000</number>
+        <double>999.990000000000009</double>
        </property>
        <property name="value">
-        <number>448</number>
+        <double>448.000000000000000</double>
        </property>
       </widget>
      </item>
@@ -402,15 +402,15 @@
       </spacer>
      </item>
      <item>
-      <widget class="QSpinBox" name="leftSpinBox">
+      <widget class="QDoubleSpinBox" name="leftDoubleSpinBox">
        <property name="keyboardTracking">
         <bool>false</bool>
        </property>
        <property name="maximum">
-        <number>1000</number>
+        <double>999.990000000000009</double>
        </property>
        <property name="value">
-        <number>50</number>
+        <double>50.000000000000000</double>
        </property>
       </widget>
      </item>
@@ -451,15 +451,15 @@
       </spacer>
      </item>
      <item>
-      <widget class="QSpinBox" name="rightSpinBox">
+      <widget class="QDoubleSpinBox" name="rightDoubleSpinBox">
        <property name="keyboardTracking">
         <bool>false</bool>
        </property>
        <property name="maximum">
-        <number>1000</number>
+        <double>999.990000000000009</double>
        </property>
        <property name="value">
-        <number>500</number>
+        <double>540.000000000000000</double>
        </property>
       </widget>
      </item>

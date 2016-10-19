@@ -57,14 +57,14 @@ DoubleViewWidget::DoubleViewWidget( QWidget * parent, Qt::WindowFlags f ) :
 
     m_reslice = vtkImageResliceToColors::New();  // set up the reslice
     m_reslice->SetInterpolationModeToLinear( );
-    m_reslice->SetOutputExtent(0, 639, 0, 479, 0, 1);
+    m_reslice->SetOutputExtent(0, ui->usImageWindow->width()-1, 0, ui->usImageWindow->height()-1, 0, 1);
     m_reslice->SetOutputSpacing( 1.0, 1.0, 1.0 );
     m_reslice->SetOutputOrigin( 0.0, 0.0, 0.0 );
 
     // put one more for the second MRI
     m_reslice2 = vtkImageResliceToColors::New();  // set up the reslice2
     m_reslice2->SetInterpolationModeToLinear( );
-    m_reslice2->SetOutputExtent(0, 639, 0, 479, 0, 1);
+    m_reslice2->SetOutputExtent(0, ui->usImageWindow->width()-1, 0, ui->usImageWindow->height()-1, 0, 1);
     m_reslice2->SetOutputSpacing( 1.0, 1.0, 1.0 );
     m_reslice2->SetOutputOrigin( 0.0, 0.0, 0.0 );
 

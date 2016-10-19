@@ -40,16 +40,16 @@ public:
     void SetAsDefault();
 
     void SetMaskSize( int size[2] );
-    void SetMaskOrigin( int orig[2] );
-    void SetMaskCrop( int crop[2] );
+    void SetMaskOrigin( double orig[2] );
+    void SetMaskCrop( double crop[2] );
     void SetMaskAngles( double angles[2] );
     void SetMaskDepthTop( double depthTop );
     void SetMaskDepthBottom(double depthBottom );
     void SetMaskSize( int width, int height ) { m_defaultMaskSize[0] = width; m_defaultMaskSize[1] = height; }
 
     int * GetMaskSize() { return &m_maskSize[0]; }
-    int * GetMaskCrop() { return &m_maskCrop[0]; }
-    int * GetMaskOrigin() { return &m_maskOrigin[0]; }
+    double * GetMaskCrop() { return &m_maskCrop[0]; }
+    double * GetMaskOrigin() { return &m_maskOrigin[0]; }
     double GetMaskBottom() { return m_maskDepthBottom; }
     double GetMaskTop() { return m_maskDepthTop; }
     double *GetMaskAngles() { return &m_maskAngles[0]; }
@@ -72,15 +72,15 @@ signals:
 
 protected:
     int m_maskSize[2]; //width, height
-    int m_maskCrop[2];
-    int m_maskOrigin[2];
+    double m_maskCrop[2];
+    double m_maskOrigin[2];
     double m_maskDepthTop;
     double m_maskDepthBottom;
     double m_maskAngles[2]; //radians
 
     int m_defaultMaskSize[2];
-    int m_defaultMaskCrop[2];
-    int m_defaultMaskOrigin[2];
+    double m_defaultMaskCrop[2];
+    double m_defaultMaskOrigin[2];
     double m_defaultMaskDepthTop;
     double m_defaultMaskDepthBottom;
     double m_defaultMaskAngles[2];
