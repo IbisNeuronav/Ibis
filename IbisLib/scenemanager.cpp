@@ -288,12 +288,16 @@ void SceneManager::LoadScene( QString & fileName, bool interactive )
         reader.Finish();
         QString message = "SaveScene version from file (" + reader.GetVersionFromFile() + ") is more recent than supported (" + this->SupportedSceneSaveVersion + ")\n";
         QMessageBox::warning( 0, "Error", message, 1, 0 );
+        SetRenderingEnabled( true );
+        this->LoadingScene = false;
         return;
     }
     else if( reader.FileVersionIsLowerThan( QString::number(6.0) ) )
     {
         QString message = "This scene version is older than 6.0. This is not supported anymore. Scene may not be restored.\n";
         QMessageBox::warning( 0, "Error", message, 1, 0 );
+        SetRenderingEnabled( true );
+        this->LoadingScene = false;
         return;
     }
     int numberOfSceneObjects;
@@ -308,12 +312,12 @@ void SceneManager::LoadScene( QString & fileName, bool interactive )
     }
 
     this->ObjectReader(&reader, interactive);
-    if( interactive && !this->UpdateProgress(numberOfSceneObjects+1) )
-        return;
+    if( interactive )
+        this->UpdateProgress(numberOfSceneObjects+1);
     ::Serialize( &reader, "SceneManager", this );
     SceneObject *currentObject = this->GetCurrentObject();
-    if( interactive && !this->UpdateProgress(numberOfSceneObjects+1) )
-        return;
+    if( interactive )
+        this->UpdateProgress(numberOfSceneObjects+1);
 
     // Read other params of the scene
     bool axesHidden;
@@ -325,8 +329,8 @@ void SceneManager::LoadScene( QString & fileName, bool interactive )
     reader.EndSection();
     reader.Finish();
     this->SetSceneFile( fileName );
-    if( interactive && !this->UpdateProgress(numberOfSceneObjects+3) )
-        return;
+    if( interactive )
+        this->UpdateProgress(numberOfSceneObjects+3);
 
     // Give a chance to all objects to react after scene is read
     this->PostSceneRead(numberOfSceneObjects+3);
