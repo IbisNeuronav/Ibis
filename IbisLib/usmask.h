@@ -57,14 +57,14 @@ public:
     // define default
 #define MASK_WIDTH          640
 #define MASK_HEIGHT         480
-#define MASK_ORIGIN_X       318
-#define MASK_ORIGIN_Y       448
-#define MASK_CROP_LEFT       50
-#define MASK_CROP_RIGHT     540
+#define MASK_ORIGIN_X       318.0
+#define MASK_ORIGIN_Y       448.0
+#define MASK_CROP_LEFT       50.0
+#define MASK_CROP_RIGHT     540.0
 #define MASK_ANGLE_LEFT     -M_PI_4
 #define MASK_ANGLE_RIGHT    -M_PI_4
-#define MASK_DEPTH_TOP       24  // as In Xiao's code ?
-#define MASK_DEPTH_BOTTOM   400
+#define MASK_DEPTH_TOP       24.0  // as In Xiao's code ?
+#define MASK_DEPTH_BOTTOM   400.0
 
 signals:
 

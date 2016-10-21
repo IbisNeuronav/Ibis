@@ -21,12 +21,12 @@ USMask::USMask()
     m_defaultMaskAngles[0] = MASK_ANGLE_LEFT;
     m_defaultMaskAngles[1] = MASK_ANGLE_RIGHT;
     //normalize all other params
-    m_defaultMaskOrigin[0] = (double)MASK_ORIGIN_X/(double)MASK_WIDTH;
-    m_defaultMaskOrigin[1] = (double)MASK_ORIGIN_Y/(double)MASK_HEIGHT;
-    m_defaultMaskCrop[0] = (double)MASK_CROP_LEFT/(double)MASK_WIDTH;
-    m_defaultMaskCrop[1] = (double)MASK_CROP_RIGHT/(double)MASK_WIDTH;
-    m_defaultMaskDepthTop = (double)MASK_DEPTH_TOP/(double)MASK_HEIGHT;
-    m_defaultMaskDepthBottom = (double)MASK_DEPTH_BOTTOM/(double)MASK_HEIGHT;
+    m_defaultMaskOrigin[0] = MASK_ORIGIN_X/MASK_WIDTH;
+    m_defaultMaskOrigin[1] = MASK_ORIGIN_Y/MASK_HEIGHT;
+    m_defaultMaskCrop[0] = MASK_CROP_LEFT/MASK_WIDTH;
+    m_defaultMaskCrop[1] = MASK_CROP_RIGHT/MASK_WIDTH;
+    m_defaultMaskDepthTop = MASK_DEPTH_TOP/MASK_HEIGHT;
+    m_defaultMaskDepthBottom = MASK_DEPTH_BOTTOM/MASK_HEIGHT;
 
     m_maskSize[0] = m_defaultMaskSize[0];
     m_maskSize[1] = m_defaultMaskSize[1];
