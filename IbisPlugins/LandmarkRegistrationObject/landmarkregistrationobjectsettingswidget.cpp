@@ -27,6 +27,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QContextMenuEvent>
 #include <QPalette>
 #include <QDateTime>
+#include <QMessageBox>
 
 LandmarkRegistrationObjectSettingsWidget::LandmarkRegistrationObjectSettingsWidget(QWidget *parent) :
     QWidget(parent),
@@ -189,6 +190,11 @@ void LandmarkRegistrationObjectSettingsWidget::contextMenuEvent( QContextMenuEve
 {
     if ( !ui->pointsTreeView->hasFocus() )
         return;
+    if( m_registrationObject->GetNumberOfActivePoints() < 4 )
+    {
+        QMessageBox::warning( 0, "Warning", "There are 3 active points left.\nRemoving or disabling point is not allowed.", 1, 0 );
+        return;
+    }
     Q_ASSERT(m_registrationObject);
     QModelIndex currentIndex = ui->pointsTreeView->currentIndex();
     if (currentIndex.isValid())

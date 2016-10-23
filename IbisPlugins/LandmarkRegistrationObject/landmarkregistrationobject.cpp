@@ -397,12 +397,6 @@ void LandmarkRegistrationObject::SetPointEnabledStatus (int index, int stat )
     this->UpdateLandmarkTransform();
 }
 
-void LandmarkRegistrationObject::DeleteAllPoints()
-{
-    for( int i = GetNumberOfPoints() - 1; i >= 0; --i )
-        DeletePoint( i );
-}
-
 void LandmarkRegistrationObject::DeletePoint( int index )
 {
     m_sourcePoints->RemovePoint( index );
@@ -417,7 +411,8 @@ void LandmarkRegistrationObject::DeletePoint( int index )
     {
         m_activePointNames.append(names->at(i));
     }
-    this->UpdateLandmarkTransform();
+    if( m_sourcePoints->GetNumberOfPoints() > 2 )
+        this->UpdateLandmarkTransform();
 }
 
 void LandmarkRegistrationObject::SelectPoint( int index )
