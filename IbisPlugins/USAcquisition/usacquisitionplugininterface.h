@@ -19,7 +19,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 class USAcquisitionObject;
 class UsProbeObject;
 class DoubleViewWidget;
-class TrackedVideoSource;
 class ImageObject;
 
 class USAcquisitionPluginInterface : public QObject, public ToolPluginInterface

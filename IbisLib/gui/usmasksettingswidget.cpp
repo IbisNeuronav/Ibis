@@ -54,32 +54,32 @@ void USMaskSettingsWidget::on_heightSpinBox_valueChanged( int val )
 void USMaskSettingsWidget::on_topDoubleSpinBox_valueChanged( double val )
 {
     Q_ASSERT( m_mask );
-    m_mask->SetMaskDepthTop( val );
+    m_mask->SetMaskDepthTop( val/m_mask->GetMaskSize()[1]);
     this->UpdateUI();
 }
 
 void USMaskSettingsWidget::on_bottomDoubleSpinBox_valueChanged( double val )
 {
-    m_mask->SetMaskDepthBottom( val );
+    m_mask->SetMaskDepthBottom( val/m_mask->GetMaskSize()[1] );
     this->UpdateUI();
 }
 
-void USMaskSettingsWidget::on_leftSpinBox_valueChanged( int val )
+void USMaskSettingsWidget::on_leftDoubleSpinBox_valueChanged( double val )
 {
     Q_ASSERT( m_mask );
-    int crop[2];
-    crop[0] = val;
+    double crop[2];
+    crop[0] = val/m_mask->GetMaskSize()[0];
     crop[1] = m_mask->GetMaskCrop()[1];
     m_mask->SetMaskCrop( crop );
     this->UpdateUI();
 }
 
-void USMaskSettingsWidget::on_rightSpinBox_valueChanged( int val )
+void USMaskSettingsWidget::on_rightDoubleSpinBox_valueChanged( double val )
 {
     Q_ASSERT( m_mask );
-    int crop[2];
+    double crop[2];
     crop[0] = m_mask->GetMaskCrop()[0];
-    crop[1] = val;
+    crop[1] = val/m_mask->GetMaskSize()[0];
     m_mask->SetMaskCrop( crop );
     this->UpdateUI();
 }
@@ -104,23 +104,23 @@ void USMaskSettingsWidget::on_rightAngleDoubleSpinBox_valueChanged( double val )
     this->UpdateUI();
 }
 
-void USMaskSettingsWidget::on_originXSpinBox_valueChanged( int val )
+void USMaskSettingsWidget::on_originXDoubleSpinBox_valueChanged( double val )
 {
     Q_ASSERT( m_mask );
-    int origin[2];
-    origin[0] = val;
+    double origin[2];
+    origin[0] = val/m_mask->GetMaskSize()[0];
     origin[1] = m_mask->GetMaskOrigin()[1];
     m_mask->SetMaskOrigin( origin );
     this->UpdateUI();
 
 }
 
-void USMaskSettingsWidget::on_originYSpinBox_valueChanged( int val )
+void USMaskSettingsWidget::on_originYDoubleSpinBox_valueChanged( double val )
 {
     Q_ASSERT( m_mask );
-    int origin[2];
+    double origin[2];
     origin[0] = m_mask->GetMaskOrigin()[0];
-    origin[1] = val;
+    origin[1] = val/m_mask->GetMaskSize()[1];
     m_mask->SetMaskOrigin( origin );
     this->UpdateUI();
 }
@@ -148,12 +148,12 @@ void USMaskSettingsWidget::UpdateUI()
     Q_ASSERT( m_mask );
     ui->widthSpinBox->setValue( m_mask->GetMaskSize()[0] );
     ui->heightSpinBox->setValue( m_mask->GetMaskSize()[1] );
-    ui->originXSpinBox->setValue( m_mask->GetMaskOrigin()[0] );
-    ui->originYSpinBox->setValue( m_mask->GetMaskOrigin()[1] );
-    ui->topDoubleSpinBox->setValue( m_mask->GetMaskTop() );
-    ui->bottomDoubleSpinBox->setValue( m_mask->GetMaskBottom() );
-    ui->leftSpinBox->setValue( m_mask->GetMaskCrop()[0] );
-    ui->rightSpinBox->setValue( m_mask->GetMaskCrop()[1] );
+    ui->originXDoubleSpinBox->setValue( m_mask->GetMaskOrigin()[0]*m_mask->GetMaskSize()[0] );
+    ui->originYDoubleSpinBox->setValue( m_mask->GetMaskOrigin()[1]*m_mask->GetMaskSize()[1] );
+    ui->topDoubleSpinBox->setValue( m_mask->GetMaskTop()*m_mask->GetMaskSize()[1] );
+    ui->bottomDoubleSpinBox->setValue( m_mask->GetMaskBottom()*m_mask->GetMaskSize()[1] );
+    ui->leftDoubleSpinBox->setValue( m_mask->GetMaskCrop()[0]*m_mask->GetMaskSize()[0] );
+    ui->rightDoubleSpinBox->setValue( m_mask->GetMaskCrop()[1]*m_mask->GetMaskSize()[0] );
     ui->leftAngleDoubleSpinBox->setValue( to_degrees(m_mask->GetMaskAngles()[0] ) );
     ui->rightAngleDoubleSpinBox->setValue( to_degrees(m_mask->GetMaskAngles()[1] ) );
 }
