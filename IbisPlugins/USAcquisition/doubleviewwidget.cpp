@@ -57,14 +57,14 @@ DoubleViewWidget::DoubleViewWidget( QWidget * parent, Qt::WindowFlags f ) :
 
     m_reslice = vtkImageResliceToColors::New();  // set up the reslice
     m_reslice->SetInterpolationModeToLinear( );
-    m_reslice->SetOutputExtent(0, 639, 0, 479, 0, 1);
+    m_reslice->SetOutputExtent(0, ui->usImageWindow->width()-1, 0, ui->usImageWindow->height()-1, 0, 1);
     m_reslice->SetOutputSpacing( 1.0, 1.0, 1.0 );
     m_reslice->SetOutputOrigin( 0.0, 0.0, 0.0 );
 
     // put one more for the second MRI
     m_reslice2 = vtkImageResliceToColors::New();  // set up the reslice2
     m_reslice2->SetInterpolationModeToLinear( );
-    m_reslice2->SetOutputExtent(0, 639, 0, 479, 0, 1);
+    m_reslice2->SetOutputExtent(0, ui->usImageWindow->width()-1, 0, ui->usImageWindow->height()-1, 0, 1);
     m_reslice2->SetOutputSpacing( 1.0, 1.0, 1.0 );
     m_reslice2->SetOutputOrigin( 0.0, 0.0, 0.0 );
 
@@ -427,7 +427,10 @@ void DoubleViewWidget::UpdateStatus()
 
 void DoubleViewWidget::MakeCrossLinesToShowProbeIsOutOfView()
 {
-    double p1[3] = {0.0, 0.0, 0.0} , p2[3] = {640.0, 480.0, 0.0};
+    double p1[3] = {0.0, 0.0, 0.0} , p2[3];
+    p2[0] = (double)ui->usImageWindow->width();
+    p2[1] = (double)ui->usImageWindow->height();
+    p2[2] = 0;
     vtkSmartPointer<vtkLineSource> line1 = vtkSmartPointer<vtkLineSource>::New();
     line1->SetPoint1(p1);
     line1->SetPoint2(p2);
@@ -442,7 +445,13 @@ void DoubleViewWidget::MakeCrossLinesToShowProbeIsOutOfView()
     m_usLine1Actor->SetVisibility(0);
     m_usRenderer->AddViewProp(m_usLine1Actor);
 
-    double p3[3] = {0.0, 480.0, 0.0} , p4[3] = {640.0, 0.0, 0.0};
+    double p3[3], p4[3];
+    p3[0] = 0.0;
+    p3[1] = (double)ui->usImageWindow->height();
+    p3[2] = 0.0;
+    p4[0] = (double)ui->usImageWindow->width();
+    p4[1] = 0.0;
+    p4[2] = 0.0;
     vtkSmartPointer<vtkLineSource> line2 = vtkSmartPointer<vtkLineSource>::New();
     line2->SetPoint1(p3);
     line2->SetPoint2(p4);
@@ -458,6 +467,9 @@ void DoubleViewWidget::MakeCrossLinesToShowProbeIsOutOfView()
     m_usRenderer->AddViewProp(m_usLine2Actor);
 
 
+    p2[0] = (double)ui->mriImageWindow->width();
+    p2[1] = (double)ui->mriImageWindow->height();
+    p2[2] = 0;
     vtkSmartPointer<vtkLineSource> line3 = vtkSmartPointer<vtkLineSource>::New();
     line3->SetPoint1(p1);
     line3->SetPoint2(p2);
@@ -472,6 +484,12 @@ void DoubleViewWidget::MakeCrossLinesToShowProbeIsOutOfView()
     m_mriLine1Actor->SetVisibility(0);
     m_mriRenderer->AddViewProp(m_mriLine1Actor);
 
+    p3[0] = 0.0;
+    p3[1] = (double)ui->mriImageWindow->height();
+    p3[2] = 0.0;
+    p4[0] = (double)ui->mriImageWindow->width();
+    p4[1] = 0.0;
+    p4[2] = 0.0;
     vtkSmartPointer<vtkLineSource> line4 = vtkSmartPointer<vtkLineSource>::New();
     line4->SetPoint1(p3);
     line4->SetPoint2(p4);

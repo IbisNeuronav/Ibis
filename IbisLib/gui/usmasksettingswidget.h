@@ -39,12 +39,12 @@ private slots:
     void on_heightSpinBox_valueChanged( int val );
     void on_topDoubleSpinBox_valueChanged( double val );
     void on_bottomDoubleSpinBox_valueChanged( double val );
-    void on_leftSpinBox_valueChanged( int val );
-    void on_rightSpinBox_valueChanged( int val );
+    void on_leftDoubleSpinBox_valueChanged( double val );
+    void on_rightDoubleSpinBox_valueChanged( double val );
     void on_leftAngleDoubleSpinBox_valueChanged( double val );
     void on_rightAngleDoubleSpinBox_valueChanged( double val );
-    void on_originXSpinBox_valueChanged( int val );
-    void on_originYSpinBox_valueChanged( int val );
+    void on_originXDoubleSpinBox_valueChanged( double val );
+    void on_originYDoubleSpinBox_valueChanged( double val );
     void on_defaultPushButton_clicked( );
     void on_setDefaultPushButton_clicked( );
 
