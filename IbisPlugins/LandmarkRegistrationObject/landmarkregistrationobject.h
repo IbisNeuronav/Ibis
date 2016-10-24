@@ -44,6 +44,7 @@ public:
     PointsObject *GetTargetPoints() { return m_targetPoints; }
     QStringList GetPointNames( );
     int  GetNumberOfPoints();
+    int  GetNumberOfActivePoints() { return m_activeSourcePoints->GetNumberOfPoints(); }
     LandmarkTransform *GetLandmarkTransform() { return m_registrationTransform; }
     void UpdateLandmarkTransform();
     void RegisterObject( bool on );
@@ -54,7 +55,6 @@ public:
     void SetTargetObjectID( int id );
     int  GetPointEnabledStatus( int index );
     void SetPointEnabledStatus (int index, int stat );
-    void DeleteAllPoints();
     void DeletePoint( int index );
     void SelectPoint( int index );
     void SetPointLabel( int index, const QString & label );

@@ -289,8 +289,7 @@ void LandmarkRegistrationObjectSettingsWidget::UpdateUI()
     }
     ui->registerPushButton->blockSignals( false );
 
-    int numberOfPoints = m_registrationObject->GetNumberOfPoints();
-    if( numberOfPoints >  3  && rms > 0 ) // we never expect perfect match (rms == 0), should we?
+    if( m_registrationObject->GetNumberOfActivePoints() >  2  && rms > 0 ) // we never expect perfect match (rms == 0), should we?
         ui->registerPushButton->setEnabled( true );
     else
         ui->registerPushButton->setEnabled( false );
@@ -302,7 +301,7 @@ void LandmarkRegistrationObjectSettingsWidget::UpdateUI()
     QColor disabled("gray");
     QBrush brush(disabled);
     int activePointsCount = 0;
-    for (int idx = 0; idx < numberOfPoints; idx++)
+    for (int idx = 0; idx < m_registrationObject->GetNumberOfPoints(); idx++)
     {
         m_model->insertRow(idx);
         m_model->setData(m_model->index(idx, 0), m_registrationObject->GetPointNames().at(idx));
