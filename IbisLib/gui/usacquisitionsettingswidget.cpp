@@ -100,7 +100,15 @@ void UsAcquisitionSettingsWidget::UpdateUi()
     ui->currentSliceColorComboBox->blockSignals( false );
 
     ui->staticSlicesGroupBox->blockSignals( true );
-    ui->staticSlicesGroupBox->setChecked( m_acquisitionObject->IsStaticSlicesEnabled() );
+    if( m_acquisitionObject->GetNumberOfSlices() > 1 )
+    {
+        ui->staticSlicesGroupBox->setEnabled( true );
+        ui->staticSlicesGroupBox->setChecked( m_acquisitionObject->IsStaticSlicesEnabled() );
+    }
+    else
+    {
+        ui->staticSlicesGroupBox->setEnabled( false );
+    }
     ui->staticSlicesGroupBox->blockSignals( false );
 
     ui->nbStaticSlicesSpinBox->blockSignals( true );

@@ -18,14 +18,15 @@ USMask::USMask()
     m_mask = vtkImageData::New();
     m_defaultMaskSize[0] = MASK_WIDTH;
     m_defaultMaskSize[1] = MASK_HEIGHT;
-    m_defaultMaskOrigin[0] = MASK_ORIGIN_X;
-    m_defaultMaskOrigin[1] = MASK_ORIGIN_Y;
-    m_defaultMaskCrop[0] = MASK_CROP_LEFT;
-    m_defaultMaskCrop[1] = MASK_CROP_RIGHT;
     m_defaultMaskAngles[0] = MASK_ANGLE_LEFT;
     m_defaultMaskAngles[1] = MASK_ANGLE_RIGHT;
-    m_defaultMaskDepthTop = MASK_DEPTH_TOP;
-    m_defaultMaskDepthBottom = MASK_DEPTH_BOTTOM;
+    //normalize all other params
+    m_defaultMaskOrigin[0] = MASK_ORIGIN_X/MASK_WIDTH;
+    m_defaultMaskOrigin[1] = MASK_ORIGIN_Y/MASK_HEIGHT;
+    m_defaultMaskCrop[0] = MASK_CROP_LEFT/MASK_WIDTH;
+    m_defaultMaskCrop[1] = MASK_CROP_RIGHT/MASK_WIDTH;
+    m_defaultMaskDepthTop = MASK_DEPTH_TOP/MASK_HEIGHT;
+    m_defaultMaskDepthBottom = MASK_DEPTH_BOTTOM/MASK_HEIGHT;
 
     m_maskSize[0] = m_defaultMaskSize[0];
     m_maskSize[1] = m_defaultMaskSize[1];
@@ -85,6 +86,16 @@ void USMask::Serialize( Serializer * ser )
     ::Serialize( ser, "MaskAngles", m_maskAngles, 2 );
     ::Serialize( ser, "MaskDepthTop", m_maskDepthTop );
     ::Serialize( ser, "MaskDepthBottom", m_maskDepthBottom );
+    //Provide for old, non  normalized params, TODOAnkaremember to change if we bump scene version
+    if( m_maskOrigin[0] >= 1.0 )
+    {
+        m_maskOrigin[0] = m_maskOrigin[0]/m_maskSize[0];
+        m_maskOrigin[1] = m_maskOrigin[1]/m_maskSize[1];
+        m_maskCrop[0] = m_maskCrop[0]/m_maskSize[0];
+        m_maskCrop[1] = m_maskCrop[1]/m_maskSize[0];
+        m_maskDepthTop = m_maskDepthTop/m_maskSize[1];
+        m_maskDepthBottom = m_maskDepthBottom/m_maskSize[1];
+    }
     if( ser->IsReader() )
         this->BuildMask();
 }
@@ -125,14 +136,14 @@ void USMask::SetMaskSize( int size[2] )
     this->BuildMask();
 }
 
-void USMask::SetMaskOrigin( int orig[2] )
+void USMask::SetMaskOrigin( double orig[2] )
 {
     m_maskOrigin[0] = orig[0];
     m_maskOrigin[1] = orig[1];
     this->BuildMask();
 }
 
-void USMask::SetMaskCrop( int crop[2] )
+void USMask::SetMaskCrop(double crop[] )
 {
     m_maskCrop[0] = crop[0];
     m_maskCrop[1] = crop[1];
@@ -161,8 +172,14 @@ void USMask::SetMaskDepthBottom( double depthBottom )
 void USMask::BuildMask()
 {
     m_mask->SetDimensions( m_maskSize[0], m_maskSize[1], 1 );
-    m_mask->SetExtent(0, 639, 0, 479, 0, 0);
+    m_mask->SetExtent(0, m_maskSize[0]-1, 0, m_maskSize[1]-1, 0, 0);
     m_mask->AllocateScalars(VTK_UNSIGNED_CHAR, 1);
+    double crop0 = m_maskCrop[0] * m_maskSize[0];
+    double crop1 = m_maskCrop[1] * m_maskSize[0];
+    double origin0 = m_maskOrigin[0] * m_maskSize[0];
+    double origin1 = m_maskOrigin[1] * m_maskSize[1];
+    double bottom = m_maskDepthBottom * m_maskSize[1];
+    double top = m_maskDepthTop * m_maskSize[1];
 
     unsigned char * pix = (unsigned char *)m_mask->GetScalarPointer();
 
@@ -171,7 +188,7 @@ void USMask::BuildMask()
         for( int ix = 0; ix < m_maskSize[0]; ++ix )
         {
             // Test 1 : x, y bounds
-            if( ix < m_maskCrop[0] || ix > m_maskCrop[1] || iy >= m_maskOrigin[1] )
+            if( ix < crop0 || ix > crop1 || iy >= origin1 )
             {
                 *pix = 0;
             }
@@ -179,10 +196,10 @@ void USMask::BuildMask()
             {
                 // Test 2 : Distance from origin
                 double diff[2];
-                diff[0] = (double)ix - m_maskOrigin[0];
-                diff[1] = (double)iy - m_maskOrigin[1];
+                diff[0] = (double)ix - origin0;
+                diff[1] = (double)iy - origin1;
                 double dist = sqrt( diff[0] * diff[0] + diff[1] * diff[1] );
-                if( dist > m_maskDepthBottom || dist < m_maskDepthTop )
+                if( dist > bottom || dist < top )
                     *pix = 0;
                 else
                 {
