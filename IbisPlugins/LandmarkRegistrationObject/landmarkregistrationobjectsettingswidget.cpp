@@ -27,7 +27,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QContextMenuEvent>
 #include <QPalette>
 #include <QDateTime>
-#include <QMessageBox>
 
 LandmarkRegistrationObjectSettingsWidget::LandmarkRegistrationObjectSettingsWidget(QWidget *parent) :
     QWidget(parent),
@@ -190,11 +189,6 @@ void LandmarkRegistrationObjectSettingsWidget::contextMenuEvent( QContextMenuEve
 {
     if ( !ui->pointsTreeView->hasFocus() )
         return;
-    if( m_registrationObject->GetNumberOfActivePoints() < 4 )
-    {
-        QMessageBox::warning( 0, "Warning", "There are 3 active points left.\nRemoving or disabling point is not allowed.", 1, 0 );
-        return;
-    }
     Q_ASSERT(m_registrationObject);
     QModelIndex currentIndex = ui->pointsTreeView->currentIndex();
     if (currentIndex.isValid())
@@ -295,8 +289,7 @@ void LandmarkRegistrationObjectSettingsWidget::UpdateUI()
     }
     ui->registerPushButton->blockSignals( false );
 
-    int numberOfPoints = m_registrationObject->GetNumberOfPoints();
-    if( numberOfPoints >  3  && rms > 0 ) // we never expect perfect match (rms == 0), should we?
+    if( m_registrationObject->GetNumberOfActivePoints() >  2  && rms > 0 ) // we never expect perfect match (rms == 0), should we?
         ui->registerPushButton->setEnabled( true );
     else
         ui->registerPushButton->setEnabled( false );
@@ -308,7 +301,7 @@ void LandmarkRegistrationObjectSettingsWidget::UpdateUI()
     QColor disabled("gray");
     QBrush brush(disabled);
     int activePointsCount = 0;
-    for (int idx = 0; idx < numberOfPoints; idx++)
+    for (int idx = 0; idx < m_registrationObject->GetNumberOfPoints(); idx++)
     {
         m_model->insertRow(idx);
         m_model->setData(m_model->index(idx, 0), m_registrationObject->GetPointNames().at(idx));

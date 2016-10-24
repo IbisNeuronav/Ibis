@@ -411,7 +411,7 @@ void LandmarkRegistrationObject::DeletePoint( int index )
     {
         m_activePointNames.append(names->at(i));
     }
-    if( m_sourcePoints->GetNumberOfPoints() > 2 )
+    if( this->GetNumberOfActivePoints() > 2 )
         this->UpdateLandmarkTransform();
 }
 
