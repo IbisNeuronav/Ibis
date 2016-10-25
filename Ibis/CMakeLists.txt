@@ -51,15 +51,21 @@ endif()
 if(APPLE)
     # set how it shows up in the Info.plist file
     set( MACOSX_BUNDLE_INFO_STRING "Ibis" )
+    set( MACOSX_BUNDLE_BUNDLE_NAME "Ibis" )
     set( MACOSX_BUNDLE_ICON_FILE "ibis.icns" )
     set( MACOSX_BUNDLE_VERSION ${IBIS_MAJOR_VERSION}.${IBIS_MINOR_VERSION}.${IBIS_PATCH_VERSION} )
     set( MACOSX_BUNDLE_SHORT_VERSION_STRING ${IBIS_MAJOR_VERSION}.${IBIS_MINOR_VERSION}.${IBIS_PATCH_VERSION} )
     set( MACOSX_BUNDLE_LONG_VERSION_STRING "${IBIS_MAJOR_VERSION}.${IBIS_MINOR_VERSION}.${IBIS_PATCH_VERSION} - ${IBIS_VERSION_QUALIFIER} rev. ${IBIS_GIT_HASH}" )
     set( MACOSX_BUNDLE_COPYRIGHT "2002-2011 McConnell Brain Imaging Centre" )
+    configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/IbisInfo.plist.in ${CMAKE_CURRENT_BINARY_DIR}/IbisInfo.plist )
+
     # set where in the bundle to put the icns file
     set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/icons/ibis.icns PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+
     # include the icns file in the target
     set( IGNS_IBIS_SRC_ICNS ${CMAKE_CURRENT_SOURCE_DIR}/icons/ibis.icns )
+
+    # make sure we create an app bundle and not a standalone executable
     set( executable_flags MACOSX_BUNDLE )
 endif(APPLE)
 
@@ -68,6 +74,10 @@ endif(APPLE)
 #================================
 SET( SOURCE ${IGNS_IBIS_HDR} ${IGNS_IBIS_HDR_MOC} ${IGNS_IBIS_SRC} ${ImportPluginsSourceFile} ${IGNS_IBIS_MOC} ${IGNS_IBIS_RCC_SRC} ${IGNS_IBIS_SRC_ICNS} )
 ADD_EXECUTABLE( ${exec_name} ${executable_flags} ${SOURCE} )
+
+if (APPLE)
+    set_target_properties( ${exec_name} PROPERTIES MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_BINARY_DIR}/IbisInfo.plist )
+endif()
 
 set( itkLibsToUse ${ITK_LIBRARIES} )
 

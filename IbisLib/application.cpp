@@ -189,6 +189,10 @@ void Application::Init( bool viewerOnly )
         if( mod )
             m_hardwareModules.push_back( mod );
     }
+
+    // Despite what the user says, if there is no hardware module, go viewer only.
+    if( m_hardwareModules.size() == 0 )
+        m_viewerOnly = true;
 }
 
 Application::~Application()

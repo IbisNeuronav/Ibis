@@ -865,6 +865,14 @@ void VolumeRenderingObject::DeleteShaderContributionType( QString shaderName )
     emit Modified();
 }
 
+QString VolumeRenderingObject::GetUniqueCustomShaderName( QString name )
+{
+    QStringList allNames;
+    for( int i = 0; i < m_shaderContribs.size(); ++i )
+        allNames.push_back( m_shaderContribs[i].name );
+    return SceneManager::FindUniqueName( name, allNames );
+}
+
 void VolumeRenderingObject::DuplicateShaderContribType( int typeIndex )
 {
     Q_ASSERT( typeIndex < m_shaderContribs.size() );
@@ -873,10 +881,7 @@ void VolumeRenderingObject::DuplicateShaderContribType( int typeIndex )
     contrib.custom = true;
 
     // Make sure we have a unique name
-    QStringList allNames;
-    for( int i = 0; i < m_shaderContribs.size(); ++i )
-        allNames.push_back( m_shaderContribs[i].name );
-    contrib.name = SceneManager::FindUniqueName( contrib.name, allNames );
+    contrib.name = GetUniqueCustomShaderName( contrib.name );
 
     m_shaderContribs.push_back( contrib );
 
@@ -998,10 +1003,9 @@ void VolumeRenderingObject::ObjectAddedSlot( int objectId )
     Q_ASSERT( this->GetManager() );
     ImageObject * im = ImageObject::SafeDownCast( this->GetManager()->GetObjectByID( objectId ) );
 
-    if( im )
+    if( im && !this->GetImage( 0 ) && !GetManager()->IsLoadingScene() )
     {
-        if( this->GetNumberOfImageSlots() > 0 && !this->GetImage( 0 ) )
-            this->SetImage( 0, im );
+        this->SetImage( 0, im );
     }
 }
 

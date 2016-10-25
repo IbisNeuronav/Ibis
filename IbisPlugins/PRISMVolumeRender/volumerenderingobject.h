@@ -111,6 +111,7 @@ public:
     QString GetShaderContributionTypeName( int typeIndex );
     bool DoesShaderContributionTypeExist( QString name );
     void AddShaderContributionType( QString shaderName, QString code, bool custom );
+    QString GetUniqueCustomShaderName( QString name );
     void DuplicateShaderContribType( int typeIndex );
     void DeleteShaderContributionType( QString shaderName );
     void SetShaderContributionType( int volumeIndex, int typeIndex );

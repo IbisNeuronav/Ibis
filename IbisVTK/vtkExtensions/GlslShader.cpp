@@ -85,10 +85,12 @@ bool GlslShader::Init()
         vtkgl::GLchar * infoLog = new vtkgl::GLchar[ logLength + 1 ];
         vtkgl::GetProgramInfoLog( m_glslProg, logLength, NULL, infoLog );
         vtkErrorMacro( << "Error in glsl program linking:" << infoLog );
+        m_errorMessage = infoLog;
 		delete [] infoLog;
 		return false;
     }
 
+    m_errorMessage = "";
 	m_init = true;
 	return true;
 }
@@ -119,9 +121,11 @@ bool GlslShader::CreateAndCompileShader( unsigned shaderType, unsigned & shaderI
         vtkgl::GLchar * infoLog = new vtkgl::GLchar[logLength+1];
         vtkgl::GetShaderInfoLog( shaderId, logLength, NULL, infoLog);
         vtkErrorMacro( << "Error in shader complilation." << infoLog );
+        m_errorMessage = infoLog;
 		delete [] infoLog;
         return false;
     }
+    m_errorMessage = "";
 	return true;
 }
 

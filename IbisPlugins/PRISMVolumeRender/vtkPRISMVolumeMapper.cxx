@@ -474,6 +474,11 @@ void vtkPRISMVolumeMapper::SetUseLinearSampling( int index, bool use )
     VolumesInfo[index].linearSampling = use;
 }
 
+std::string vtkPRISMVolumeMapper::GetShaderBuildError()
+{
+    return this->VolumeShader->GetErrorMessage();
+}
+
 #include "vtkPRISMVolumeRaycast_FS.h"
 
 void ReplaceAll( std::string & original, std::string findString, std::string replaceString )
@@ -1056,10 +1061,12 @@ bool vtkPRISMVolumeMapper::SetCameraVariablesInShader( vtkRenderer * ren, vtkVol
                 vtkMath::Subtract( vertex, cameraPos, vertexDir );
                 double dist = vtkMath::Dot( vertexDir, cameraDir );
                 if( dist < minDist )
+                {
                     if( dist < 0.0 )
                         minDist = 0.0;
                     else
                         minDist = dist;
+                }
                 if( dist > maxDist )
                     maxDist = dist;
             }

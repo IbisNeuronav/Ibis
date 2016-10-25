@@ -18,11 +18,21 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QPanGesture>
 #include <QPinchGesture>
 
+#ifdef Q_OS_OSX
+#include "retinadisplayhack.h"
+#endif
+
 vtkQtRenderWindow::vtkQtRenderWindow( QWidget * parent ) : QVTKWidget( parent )
 {
     grabGesture( Qt::PanGesture );
     grabGesture( Qt::PinchGesture );
     m_renderingEnabled = true;
+
+    // This is a hack to make sure the window behaves properly on retina displays
+#ifdef Q_OS_OSX
+    disableGLHiDPI( this->winId() );
+#endif
+
 }
 
 bool vtkQtRenderWindow::event(QEvent *event)
