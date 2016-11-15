@@ -94,7 +94,6 @@ ImageObject::ImageObject()
     this->OutlineFilter = vtkOutlineFilter::New();
     this->viewOutline = 0;
     this->outlineWasVisible = 0;
-    this->viewError = 0;
 	this->lutIndex = -1;
     this->lutRange[0] = 0.0;
     this->lutRange[1] = 0.0;
@@ -593,16 +592,6 @@ void ImageObject::SetViewOutline( int isOn )
 int ImageObject::GetViewOutline()
 {
     return this->viewOutline;
-}
-
-void ImageObject::ResetViewError( )
-{
-    this->viewError = 0;
-}
-
-int ImageObject::GetViewError()
-{
-    return this->viewError;
 }
 
 #include "vtkImageShiftScale.h"

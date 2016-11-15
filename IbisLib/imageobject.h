@@ -101,8 +101,6 @@ public:
 
     void SetViewOutline( int isOn );
     int GetViewOutline();
-    void ResetViewError( );
-    int GetViewError();
 
 	// Choose from the set of lookup table templates available from the SceneManager
     int ChooseColorTable(int index);
@@ -178,7 +176,6 @@ protected:
     
     int viewOutline;
     int outlineWasVisible;
-    int viewError;
     int lutIndex;
     double lutRange[2];
     double intensityFactor;

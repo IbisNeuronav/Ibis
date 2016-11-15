@@ -642,6 +642,73 @@ void SceneManager::AddObjectUsingID( SceneObject * object, SceneObject * attachT
     }
 }
 
+bool SceneManager::GetCursorVisible()
+{
+    Q_ASSERT( MainCutPlanes );
+    return MainCutPlanes->GetCursorVisible();
+}
+
+void SceneManager::SetCursorVisibility( bool v )
+{
+    Q_ASSERT( MainCutPlanes );
+    MainCutPlanes->SetCursorVisibility( v );
+}
+
+void SceneManager::SetCursorColor( const QColor & c )
+{
+    Q_ASSERT( MainCutPlanes );
+    MainCutPlanes->SetCursorColor( c );
+}
+
+QColor SceneManager::GetCursorColor()
+{
+    Q_ASSERT( MainCutPlanes );
+    return MainCutPlanes->GetCursorColor();
+}
+
+void SceneManager::ViewPlane( int index, bool show )
+{
+    Q_ASSERT( MainCutPlanes );
+    MainCutPlanes->SetViewPlane( index, show );
+}
+
+bool SceneManager::IsPlaneVisible( int index )
+{
+    Q_ASSERT( MainCutPlanes );
+    return MainCutPlanes->GetViewPlane( index );
+}
+
+void SceneManager::ViewAllPlanes( bool show )
+{
+    Q_ASSERT( MainCutPlanes );
+    MainCutPlanes->SetViewAllPlanes( show );
+}
+
+void SceneManager::SetResliceInterpolationType( int type )
+{
+    Q_ASSERT( MainCutPlanes );
+    MainCutPlanes->SetResliceInterpolationType( type );
+}
+
+int SceneManager::GetResliceInterpolationType()
+{
+    Q_ASSERT( MainCutPlanes );
+    return MainCutPlanes->GetResliceInterpolationType();
+}
+
+void SceneManager::SetDisplayInterpolationType( int type )
+{
+    Q_ASSERT( MainCutPlanes );
+    MainCutPlanes->SetDisplayInterpolationType( type );
+}
+
+int SceneManager::GetDisplayInterpolationType()
+{
+    Q_ASSERT( MainCutPlanes );
+    return MainCutPlanes->GetDisplayInterpolationType();
+}
+
+
 void SceneManager::RemoveObjectById( int objectId )
 {
     SceneObject * obj = GetObjectByID( objectId );

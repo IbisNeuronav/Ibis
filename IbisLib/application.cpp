@@ -29,7 +29,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "toolplugininterface.h"
 #include "globalobjectplugininterface.h"
 #include "generatorplugininterface.h"
-#include "triplecutplaneobject.h"
 #include "filereader.h"
 #include "imageobject.h"
 #include "lookuptablemanager.h"
@@ -168,12 +167,12 @@ void Application::Init( bool viewerOnly )
     m_sceneManager->SetExpandedView(m_settings.ExpandedView);
     m_sceneManager->Set3DInteractorStyle( m_settings.InteractorStyle3D );
 
-    m_sceneManager->GetMainImagePlanes()->SetCursorVisibility( m_settings.ShowCursor );
-    m_sceneManager->GetMainImagePlanes()->SetViewPlane( 0, m_settings.ShowXPlane );
-    m_sceneManager->GetMainImagePlanes()->SetViewPlane( 1, m_settings.ShowYPlane );
-    m_sceneManager->GetMainImagePlanes()->SetViewPlane( 2, m_settings.ShowZPlane );
-    m_sceneManager->GetMainImagePlanes()->SetDisplayInterpolationType( m_settings.TripleCutPlaneDisplayInterpolationType );
-    m_sceneManager->GetMainImagePlanes()->SetResliceInterpolationType( m_settings.TripleCutPlaneResliceInterpolationType );
+    m_sceneManager->SetCursorVisibility( m_settings.ShowCursor );
+    m_sceneManager->ViewPlane( 0, m_settings.ShowXPlane );
+    m_sceneManager->ViewPlane( 1, m_settings.ShowYPlane );
+    m_sceneManager->ViewPlane( 2, m_settings.ShowZPlane );
+    m_sceneManager->SetDisplayInterpolationType( m_settings.TripleCutPlaneDisplayInterpolationType );
+    m_sceneManager->SetResliceInterpolationType( m_settings.TripleCutPlaneResliceInterpolationType );
 
     m_sceneManager->GetAxesObject()->SetHidden( !m_settings.ShowAxes );
 
@@ -205,14 +204,14 @@ Application::~Application()
     m_settings.ExpandedView = m_sceneManager->GetExpandedView();
     m_settings.InteractorStyle3D = m_sceneManager->Get3DInteractorStyle();
     m_settings.CameraViewAngle3D = m_sceneManager->Get3DCameraViewAngle();
-    m_settings.ShowCursor = m_sceneManager->GetMainImagePlanes()->GetCursorVisible();
+    m_settings.ShowCursor = m_sceneManager->GetCursorVisible();
     m_settings.ShowAxes = !m_sceneManager->GetAxesObject()->IsHidden();
     m_settings.ViewFollowsReference = m_sceneManager->Is3DViewFollowingReferenceVolume();
-    m_settings.ShowXPlane = m_sceneManager->GetMainImagePlanes()->GetViewPlane( 0 );
-    m_settings.ShowYPlane = m_sceneManager->GetMainImagePlanes()->GetViewPlane( 1 );
-    m_settings.ShowZPlane = m_sceneManager->GetMainImagePlanes()->GetViewPlane( 2 );
-    m_settings.TripleCutPlaneDisplayInterpolationType = m_sceneManager->GetMainImagePlanes()->GetDisplayInterpolationType();
-    m_settings.TripleCutPlaneResliceInterpolationType = m_sceneManager->GetMainImagePlanes()->GetResliceInterpolationType();
+    m_settings.ShowXPlane = m_sceneManager->IsPlaneVisible( 0 );
+    m_settings.ShowYPlane = m_sceneManager->IsPlaneVisible( 1 );
+    m_settings.ShowZPlane = m_sceneManager->IsPlaneVisible( 2 );
+    m_settings.TripleCutPlaneDisplayInterpolationType = m_sceneManager->GetDisplayInterpolationType();
+    m_settings.TripleCutPlaneResliceInterpolationType = m_sceneManager->GetResliceInterpolationType();
 
     if( !m_viewerOnly )
     {

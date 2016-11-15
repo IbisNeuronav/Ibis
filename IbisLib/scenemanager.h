@@ -25,6 +25,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "sceneobject.h"
 #include "serializer.h"
 #include "view.h"
+#include <QColor>
 
 class QWidget;
 class QStringList;
@@ -178,6 +179,21 @@ public:
     void GetAllTrackedObjects( QList<TrackedSceneObject*> & all );
     void GetAllObjectsOfType( const char * typeName, QList<SceneObject*> & all );
 
+    // Manage cursor visibility and color - wrapper for TrippleCutPlane
+    bool GetCursorVisible();
+    void SetCursorVisibility( bool v );
+    void SetCursorColor( const QColor & c );
+    QColor GetCursorColor();
+    // Manage planes visibility - wrapper for TrippleCutPlane
+    void ViewPlane( int index, bool show );
+    bool IsPlaneVisible( int index );
+    void ViewAllPlanes( bool show );
+    // Manage data interpolation for reslice and display - wrapper for TrippleCutPlane
+    void SetResliceInterpolationType( int type );
+    int GetResliceInterpolationType();
+    void SetDisplayInterpolationType( int type );
+    int GetDisplayInterpolationType();
+
     // Description:
     // Get object by ID
     SceneObject * GetObjectByID( int id );
@@ -216,6 +232,10 @@ public:
     // initialize new Views.
     void SetupAllObjects( View * v );
     void ReleaseAllObjects( View * v );
+
+    // Description:
+    // Utility function to setup an object in all views
+    void SetupInAllViews( SceneObject * object );
 
     // Description:
     // Utility function to detach all views from the render window.
@@ -332,7 +352,7 @@ protected:
 
     // Description:
     // Utility function to setup an object in all views
-    void SetupInAllViews( SceneObject * object );
+//    void SetupInAllViews( SceneObject * object );
 
     // Description:
     // Recursive function used to setup all objects bellow obj
