@@ -296,6 +296,42 @@ void TripleCutPlaneObject::AdjustAllImages()
     }
 }
 
+void TripleCutPlaneObject::ObjectAddedToScene()
+{
+    Q_ASSERT( GetManager() );
+    connect( GetManager(), SIGNAL(ObjectAdded(int)), this, SLOT(ObjectAddedSlot(int)) );
+    connect( GetManager(), SIGNAL(ObjectRemoved(int)), this, SLOT(ObjectRemovedSlot(int)) );
+}
+
+void TripleCutPlaneObject::ObjectRemovedFromScene()
+{
+    Q_ASSERT( GetManager() );
+    disconnect( GetManager(), SIGNAL(ObjectAdded(int)), this, SLOT(ObjectAddedSlot(int)) );
+    disconnect( GetManager(), SIGNAL(ObjectRemoved(int)), this, SLOT(ObjectRemovedSlot(int)) );
+}
+
+void TripleCutPlaneObject::ObjectAddedSlot( int objectId )
+{
+    Q_ASSERT( GetManager() );
+    ImageObject * img = ImageObject::SafeDownCast( this->GetManager()->GetObjectByID( objectId ) );
+    if( img )
+    {
+//        this->GetManager()->SetupInAllViews( this );
+//        this->AddImage( objectId );
+//        connect( img, SIGNAL(Modified()), this, SLOT(MarkModified()) );
+    }
+}
+
+void TripleCutPlaneObject::ObjectRemovedSlot( int objectId )
+{
+    Q_ASSERT( GetManager() );
+    ImageObject * img = ImageObject::SafeDownCast( this->GetManager()->GetObjectByID( objectId ) );
+    if( img )
+    {
+        disconnect( img, SIGNAL(Modified()), this, SLOT(MarkModified()) );
+    }
+}
+
 void TripleCutPlaneObject::UpdateLut(int imageID )
 {
     ImageObject * im = ImageObject::SafeDownCast( this->GetManager()->GetObjectByID( imageID ) );

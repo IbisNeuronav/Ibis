@@ -106,6 +106,8 @@ public slots:
     void PlaneEndInteractionEvent( vtkObject * caller, unsigned long event );
     // Adjust planes
     void AdjustAllImages(  );
+    void ObjectAddedSlot( int objectId );
+    void ObjectRemovedSlot( int objectId );
     virtual void MarkModified();
 
 signals:
@@ -115,6 +117,8 @@ signals:
 
 protected:
 
+    void ObjectAddedToScene();
+    void ObjectRemovedFromScene();
     View * Get3DView();
 	void Setup3DRepresentation( View * view );
 	void Release3DRepresentation( View * view );
