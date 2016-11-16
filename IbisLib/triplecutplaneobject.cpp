@@ -316,9 +316,10 @@ void TripleCutPlaneObject::ObjectAddedSlot( int objectId )
     ImageObject * img = ImageObject::SafeDownCast( this->GetManager()->GetObjectByID( objectId ) );
     if( img )
     {
-//        this->GetManager()->SetupInAllViews( this );
-//        this->AddImage( objectId );
-//        connect( img, SIGNAL(Modified()), this, SLOT(MarkModified()) );
+        this->AddImage( objectId );
+        this->GetManager()->SetupInAllViews( this );
+        this->PreDisplaySetup();
+        connect( img, SIGNAL(Modified()), this, SLOT(MarkModified()) );
     }
 }
 

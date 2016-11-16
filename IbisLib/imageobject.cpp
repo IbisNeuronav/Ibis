@@ -401,12 +401,6 @@ void ImageObject::Setup( View * view )
 {
     SceneObject::Setup( view );
 
-    TripleCutPlaneObject * mainPlane = this->GetManager()->GetMainImagePlanes();
-    Q_ASSERT( mainPlane );
-    mainPlane->AddImage( this->GetObjectID() );
-    connect( this, SIGNAL(Modified()), mainPlane, SLOT(MarkModified()) );  // This is to make sure transforms update the reslice - simtodo : find better solution.
-    mainPlane->Setup( view );
-
     switch( view->GetType() )
     {
         case SAGITTAL_VIEW_TYPE:
