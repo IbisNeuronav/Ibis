@@ -420,12 +420,6 @@ void ImageObject::Setup( View * view )
     this->SetViewOutline(this->viewOutline);
 }
 
-void ImageObject::PreDisplaySetup()
-{
-    Q_ASSERT( this->GetManager() );
-    this->GetManager()->GetMainImagePlanes()->PreDisplaySetup();
-}
-
 void ImageObject::Release( View * view )
 {
     SceneObject::Release( view );
@@ -708,7 +702,7 @@ void ImageObject::SetLut(vtkScalarsToColors *lut)
             this->Lut->Register(0);
         }
     }
-    emit LutChanged();
+    emit LutChanged( this->GetObjectID() );
     emit Modified();
 }
 
@@ -744,10 +738,6 @@ int ImageObject::ChooseColorTable(int index)
         this->SetLut( lut );
         lut->Delete();
     }
-
-	// Tell the main cut planes to change the lookup table
-
-    this->GetManager()->GetMainImagePlanes()->UpdateLut( this->GetObjectID() );
 
     emit Modified();
     return 1;

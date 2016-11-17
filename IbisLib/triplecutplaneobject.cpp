@@ -320,6 +320,7 @@ void TripleCutPlaneObject::ObjectAddedSlot( int objectId )
         this->GetManager()->SetupInAllViews( this );
         this->PreDisplaySetup();
         connect( img, SIGNAL(Modified()), this, SLOT(MarkModified()) );
+        connect( img, SIGNAL(LutChanged( int )), this, SLOT(UpdateLut( int )) );
     }
 }
 

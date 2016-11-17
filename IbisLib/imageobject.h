@@ -96,7 +96,6 @@ public:
     virtual void ObjectAddedToScene();
     virtual void Setup( View * view );
     virtual void Release( View * view );
-    virtual void PreDisplaySetup();
     virtual void CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets);
 
     void SetViewOutline( int isOn );
@@ -137,7 +136,7 @@ public:
 
 signals:
 
-    void LutChanged();
+    void LutChanged( int );
     
 protected:
     

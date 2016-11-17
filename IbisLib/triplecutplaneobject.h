@@ -51,7 +51,6 @@ public:
     ImageObject * GetImage( int index );
     void AddImage( int imageID);
     void RemoveImage(int imageID );
-    void UpdateLut( int imageID);
     void SetImageHidden(int imageID, bool hidden );
 	void PreDisplaySetup();
 	void ResetPlanes();
@@ -106,6 +105,7 @@ public slots:
     void PlaneEndInteractionEvent( vtkObject * caller, unsigned long event );
     // Adjust planes
     void AdjustAllImages(  );
+    void UpdateLut( int imageID );
     void ObjectAddedSlot( int objectId );
     void ObjectRemovedSlot( int objectId );
     virtual void MarkModified();
