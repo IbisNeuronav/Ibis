@@ -169,7 +169,6 @@ void QuadViewWindow::SetSceneManager( SceneManager * man )
         view->SetQtRenderWindow( m_vtkWindows[0] );
         view->SetInteractor( m_vtkWindows[0]->GetInteractor() );
         connect( view, SIGNAL( Modified() ), this, SLOT( Win0NeedsRender() ) );
-        connect( m_vtkWindows[0], SIGNAL(ZoomView(double)), view, SLOT(ZoomCamera(double)) );
         
         view = man->GetView( ViewNames[1] );
         if( !view )
@@ -180,7 +179,6 @@ void QuadViewWindow::SetSceneManager( SceneManager * man )
         view->SetQtRenderWindow( m_vtkWindows[1] );
         view->SetInteractor( m_vtkWindows[1]->GetInteractor() );
         connect( view, SIGNAL( Modified() ), this, SLOT( Win1NeedsRender() ) );
-        connect( m_vtkWindows[1], SIGNAL(ZoomView(double)), view, SLOT(ZoomCamera(double)) );
         
         view = man->GetView( ViewNames[2] );
         if( !view )
