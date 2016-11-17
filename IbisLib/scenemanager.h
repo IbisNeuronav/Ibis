@@ -351,10 +351,6 @@ protected:
     void AddObjectUsingID( SceneObject * object, SceneObject * attachTo = 0, int objID = SceneObject::InvalidObjectId);
 
     // Description:
-    // Utility function to setup an object in all views
-//    void SetupInAllViews( SceneObject * object );
-
-    // Description:
     // Recursive function used to setup all objects bellow obj
     // in view v.
     void SetupOneObject( View * v, SceneObject * obj );

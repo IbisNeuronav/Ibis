@@ -107,7 +107,7 @@ public slots:
     void AdjustAllImages(  );
     void UpdateLut( int imageID );
     void ObjectAddedSlot( int objectId );
-    void ObjectRemovedSlot( int objectId );
+    void ObjectRemovedSlot(int objectId );
     virtual void MarkModified();
 
 signals:

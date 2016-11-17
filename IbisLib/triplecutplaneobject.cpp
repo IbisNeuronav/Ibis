@@ -327,10 +327,10 @@ void TripleCutPlaneObject::ObjectAddedSlot( int objectId )
 void TripleCutPlaneObject::ObjectRemovedSlot( int objectId )
 {
     Q_ASSERT( GetManager() );
-    ImageObject * img = ImageObject::SafeDownCast( this->GetManager()->GetObjectByID( objectId ) );
-    if( img )
+    ImageContainer::iterator it = std::find( Images.begin(), Images.end(), objectId );
+    if( it != Images.end() )
     {
-        disconnect( img, SIGNAL(Modified()), this, SLOT(MarkModified()) );
+        this->RemoveImage( objectId );
     }
 }
 

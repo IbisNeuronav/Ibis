@@ -425,7 +425,6 @@ void ImageObject::Release( View * view )
     SceneObject::Release( view );
 
     Q_ASSERT( this->GetManager() );
-    this->GetManager()->GetMainImagePlanes()->RemoveImage( this->GetObjectID() );
 
     switch( view->GetType() )
     {
