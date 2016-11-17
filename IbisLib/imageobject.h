@@ -96,13 +96,10 @@ public:
     virtual void ObjectAddedToScene();
     virtual void Setup( View * view );
     virtual void Release( View * view );
-    virtual void PreDisplaySetup();
     virtual void CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets);
 
     void SetViewOutline( int isOn );
     int GetViewOutline();
-    void ResetViewError( );
-    int GetViewError();
 
 	// Choose from the set of lookup table templates available from the SceneManager
     int ChooseColorTable(int index);
@@ -139,8 +136,9 @@ public:
 
 signals:
 
-    void LutChanged();
-    
+    void LutChanged( int );
+    void VisibilityChanged( int );
+
 protected:
     
     virtual void Hide();
@@ -178,7 +176,6 @@ protected:
     
     int viewOutline;
     int outlineWasVisible;
-    int viewError;
     int lutIndex;
     double lutRange[2];
     double intensityFactor;

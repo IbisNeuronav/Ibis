@@ -296,6 +296,45 @@ void TripleCutPlaneObject::AdjustAllImages()
     }
 }
 
+void TripleCutPlaneObject::ObjectAddedToScene()
+{
+    Q_ASSERT( GetManager() );
+    connect( GetManager(), SIGNAL(ObjectAdded(int)), this, SLOT(ObjectAddedSlot(int)) );
+    connect( GetManager(), SIGNAL(ObjectRemoved(int)), this, SLOT(ObjectRemovedSlot(int)) );
+}
+
+void TripleCutPlaneObject::ObjectRemovedFromScene()
+{
+    Q_ASSERT( GetManager() );
+    disconnect( GetManager(), SIGNAL(ObjectAdded(int)), this, SLOT(ObjectAddedSlot(int)) );
+    disconnect( GetManager(), SIGNAL(ObjectRemoved(int)), this, SLOT(ObjectRemovedSlot(int)) );
+}
+
+void TripleCutPlaneObject::ObjectAddedSlot( int objectId )
+{
+    Q_ASSERT( GetManager() );
+    ImageObject * img = ImageObject::SafeDownCast( this->GetManager()->GetObjectByID( objectId ) );
+    if( img )
+    {
+        this->AddImage( objectId );
+        this->GetManager()->SetupInAllViews( this );
+        this->PreDisplaySetup();
+        connect( img, SIGNAL(Modified()), this, SLOT(MarkModified()) );
+        connect( img, SIGNAL(LutChanged( int )), this, SLOT(UpdateLut( int )) );
+        connect( img, SIGNAL(VisibilityChanged( int )), this, SLOT(SetImageHidden( int )) );
+    }
+}
+
+void TripleCutPlaneObject::ObjectRemovedSlot( int objectId )
+{
+    Q_ASSERT( GetManager() );
+    ImageContainer::iterator it = std::find( Images.begin(), Images.end(), objectId );
+    if( it != Images.end() )
+    {
+        this->RemoveImage( objectId );
+    }
+}
+
 void TripleCutPlaneObject::UpdateLut(int imageID )
 {
     ImageObject * im = ImageObject::SafeDownCast( this->GetManager()->GetObjectByID( imageID ) );
@@ -305,11 +344,12 @@ void TripleCutPlaneObject::UpdateLut(int imageID )
     }
 }
 
-void TripleCutPlaneObject::SetImageHidden( int imageID, bool hidden )
+void TripleCutPlaneObject::SetImageHidden( int imageID )
 {
     ImageObject * im = ImageObject::SafeDownCast( this->GetManager()->GetObjectByID( imageID ) );
     for( int i = 0; i < 3; ++i )
-        this->Planes[i]->SetImageHidden( im->GetImage(), hidden );
+        this->Planes[i]->SetImageHidden( im->GetImage(), im->IsHidden() );
+    this->MarkModified();
 }
 
 void TripleCutPlaneObject::PreDisplaySetup()

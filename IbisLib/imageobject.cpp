@@ -33,7 +33,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "imageobjectsettingsdialog.h"
 #include "imageobjectvolumesettingswidget.h"
 #include "scenemanager.h"
-#include "triplecutplaneobject.h"
 #include "lookuptablemanager.h"
 #include <QMessageBox>
 
@@ -94,7 +93,6 @@ ImageObject::ImageObject()
     this->OutlineFilter = vtkOutlineFilter::New();
     this->viewOutline = 0;
     this->outlineWasVisible = 0;
-    this->viewError = 0;
 	this->lutIndex = -1;
     this->lutRange[0] = 0.0;
     this->lutRange[1] = 0.0;
@@ -402,12 +400,6 @@ void ImageObject::Setup( View * view )
 {
     SceneObject::Setup( view );
 
-    TripleCutPlaneObject * mainPlane = this->GetManager()->GetMainImagePlanes();
-    Q_ASSERT( mainPlane );
-    mainPlane->AddImage( this->GetObjectID() );
-    connect( this, SIGNAL(Modified()), mainPlane, SLOT(MarkModified()) );  // This is to make sure transforms update the reslice - simtodo : find better solution.
-    mainPlane->Setup( view );
-
     switch( view->GetType() )
     {
         case SAGITTAL_VIEW_TYPE:
@@ -427,18 +419,11 @@ void ImageObject::Setup( View * view )
     this->SetViewOutline(this->viewOutline);
 }
 
-void ImageObject::PreDisplaySetup()
-{
-    Q_ASSERT( this->GetManager() );
-    this->GetManager()->GetMainImagePlanes()->PreDisplaySetup();
-}
-
 void ImageObject::Release( View * view )
 {
     SceneObject::Release( view );
 
     Q_ASSERT( this->GetManager() );
-    this->GetManager()->GetMainImagePlanes()->RemoveImage( this->GetObjectID() );
 
     switch( view->GetType() )
     {
@@ -595,16 +580,6 @@ int ImageObject::GetViewOutline()
     return this->viewOutline;
 }
 
-void ImageObject::ResetViewError( )
-{
-    this->viewError = 0;
-}
-
-int ImageObject::GetViewError()
-{
-    return this->viewError;
-}
-
 #include "vtkImageShiftScale.h"
 void ImageObject::Setup3DRepresentation( View * view )
 {
@@ -725,7 +700,7 @@ void ImageObject::SetLut(vtkScalarsToColors *lut)
             this->Lut->Register(0);
         }
     }
-    emit LutChanged();
+    emit LutChanged( this->GetObjectID() );
     emit Modified();
 }
 
@@ -761,10 +736,6 @@ int ImageObject::ChooseColorTable(int index)
         this->SetLut( lut );
         lut->Delete();
     }
-
-	// Tell the main cut planes to change the lookup table
-
-    this->GetManager()->GetMainImagePlanes()->UpdateLut( this->GetObjectID() );
 
     emit Modified();
     return 1;
@@ -837,18 +808,14 @@ void ImageObject::Hide()
 	}
 	else
 		this->outlineWasVisible = 0;
-    if( this->GetManager() )
-        this->GetManager()->GetMainImagePlanes()->SetImageHidden( this->GetObjectID(), true );
-    emit Modified();
+    emit VisibilityChanged( this->GetObjectID() );
 }
 
 void ImageObject::Show()
 {
 	if( !this->viewOutline && this->outlineWasVisible )
 		this->SetViewOutline(1);
-    if( this->GetManager() )
-        this->GetManager()->GetMainImagePlanes()->SetImageHidden( this->GetObjectID(), false );
-    emit Modified();
+    emit VisibilityChanged( this->GetObjectID() );
 }
 
 #include "mincinfowidget.h"

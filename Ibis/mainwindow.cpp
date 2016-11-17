@@ -19,7 +19,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "opendatafiledialog.h"
 #include "filereader.h"
 #include "worldobject.h"
-#include "triplecutplaneobject.h"
 #include "ibisconfig.h"
 #include "toolplugininterface.h"
 #include "objectplugininterface.h"
@@ -359,31 +358,31 @@ void MainWindow::NewPointSet()
 void MainWindow::ViewXPlaneToggled(bool viewOn)
 {
     SceneManager * manager = Application::GetSceneManager();
-    manager->GetMainImagePlanes()->SetViewPlane( 0, viewOn );
+    manager->ViewPlane( 0, viewOn );
 }
 
 void MainWindow::ViewYPlaneToggled(bool viewOn)
 {
     SceneManager * manager = Application::GetSceneManager();
-    manager->GetMainImagePlanes()->SetViewPlane( 1, viewOn );
+    manager->ViewPlane( 1, viewOn );
 }
 
 void MainWindow::ViewZPlaneToggled(bool viewOn)
 {
     SceneManager * manager = Application::GetSceneManager();
-    manager->GetMainImagePlanes()->SetViewPlane( 2, viewOn );
+    manager->ViewPlane( 2, viewOn );
 }
 
 void MainWindow::ViewAllPlanes()
 {
     SceneManager * manager = Application::GetSceneManager();
-    manager->GetMainImagePlanes()->SetViewAllPlanes( 1 );
+    manager->ViewAllPlanes( 1 );
 }
 
 void MainWindow::HideAllPlanes()
 {
     SceneManager * manager = Application::GetSceneManager();
-    manager->GetMainImagePlanes()->SetViewAllPlanes( 0 );
+    manager->ViewAllPlanes( 0 );
 }
 
 void MainWindow::View3DFront( )
@@ -501,9 +500,9 @@ void MainWindow::FileGenerateMenuAboutToShow()
 void MainWindow::ModifyViewMenu()
 {
     SceneManager * manager = Application::GetSceneManager();
-    m_viewXPlaneAction->setChecked(manager->GetMainImagePlanes()->GetViewPlane(0));
-    m_viewYPlaneAction->setChecked(manager->GetMainImagePlanes()->GetViewPlane(1));
-    m_viewZPlaneAction->setChecked(manager->GetMainImagePlanes()->GetViewPlane(2));
+    m_viewXPlaneAction->setChecked(manager->IsPlaneVisible(0));
+    m_viewYPlaneAction->setChecked(manager->IsPlaneVisible(1));
+    m_viewZPlaneAction->setChecked(manager->IsPlaneVisible(2));
 }
 
 void MainWindow::fileSaveScene()

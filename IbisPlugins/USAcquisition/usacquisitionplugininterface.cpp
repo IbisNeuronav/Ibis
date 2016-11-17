@@ -260,14 +260,14 @@ void USAcquisitionPluginInterface::SetCurrentVolumeObjectId( int id )
     ImageObject * prev = ImageObject::SafeDownCast( GetSceneManager()->GetObjectByID( m_currentVolumeObjectId ) );
     if( prev )
     {
-        disconnect( prev, SIGNAL(LutChanged()), this, SLOT(LutChanged()) );
+        disconnect( prev, SIGNAL(LutChanged(int)), this, SLOT(LutChanged(int)) );
         disconnect( prev, SIGNAL(Modified()), this, SLOT(OnImageChanged()));
     }
     m_currentVolumeObjectId = id;
     ImageObject * im = ImageObject::SafeDownCast( GetSceneManager()->GetObjectByID( id ) );
     if( im )
     {
-        connect( im, SIGNAL(LutChanged()), this, SLOT(LutChanged()) );
+        connect( im, SIGNAL(LutChanged(int)), this, SLOT(LutChanged(int)) );
         connect( im, SIGNAL(Modified()), this, SLOT(OnImageChanged()));
     }
 }
@@ -277,14 +277,14 @@ void USAcquisitionPluginInterface::SetAddedVolumeObjectId( int id )
     ImageObject * prev = ImageObject::SafeDownCast( GetSceneManager()->GetObjectByID( m_addedVolumeObjectId ) );
     if( prev )
     {
-        disconnect( prev, SIGNAL(LutChanged()), this, SLOT(LutChanged()) );
+        disconnect( prev, SIGNAL(LutChanged(int)), this, SLOT(LutChanged(int)) );
         disconnect( prev, SIGNAL(Modified()), this, SLOT(OnImageChanged()));
     }
     m_addedVolumeObjectId = id;
     ImageObject * im = ImageObject::SafeDownCast( GetSceneManager()->GetObjectByID( id ) );
     if( im )
     {
-        connect( im, SIGNAL(LutChanged()), this, SLOT(LutChanged()) );
+        connect( im, SIGNAL(LutChanged(int)), this, SLOT(LutChanged(int)) );
         connect( im, SIGNAL(Modified()), this, SLOT(OnImageChanged()));
     }
 }
@@ -294,7 +294,7 @@ void USAcquisitionPluginInterface::SceneContentChanged()
     ValidateAllSceneObjects();
 }
 
-void USAcquisitionPluginInterface::LutChanged()
+void USAcquisitionPluginInterface::LutChanged( int vtkNotUsed(id) )
 {
     emit ObjectsChanged();
 }

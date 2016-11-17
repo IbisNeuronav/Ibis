@@ -51,8 +51,6 @@ public:
     ImageObject * GetImage( int index );
     void AddImage( int imageID);
     void RemoveImage(int imageID );
-    void UpdateLut( int imageID);
-    void SetImageHidden(int imageID, bool hidden );
 	void PreDisplaySetup();
 	void ResetPlanes();
     vtkMultiImagePlaneWidget * GetPlane( int index ) { return (index < 3 && index >= 0) ? Planes[index] : 0; }
@@ -106,7 +104,11 @@ public slots:
     void PlaneEndInteractionEvent( vtkObject * caller, unsigned long event );
     // Adjust planes
     void AdjustAllImages(  );
+    void UpdateLut( int imageID );
+    void ObjectAddedSlot( int objectId );
+    void ObjectRemovedSlot(int objectId );
     virtual void MarkModified();
+    void SetImageHidden(int imageID );
 
 signals:
     void StartPlaneMoved(int);
@@ -115,6 +117,8 @@ signals:
 
 protected:
 
+    void ObjectAddedToScene();
+    void ObjectRemovedFromScene();
     View * Get3DView();
 	void Setup3DRepresentation( View * view );
 	void Release3DRepresentation( View * view );
