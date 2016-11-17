@@ -24,8 +24,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 vtkQtRenderWindow::vtkQtRenderWindow( QWidget * parent ) : QVTKWidget( parent )
 {
-    grabGesture( Qt::PanGesture );
-    grabGesture( Qt::PinchGesture );
     m_renderingEnabled = true;
 
     // This is a hack to make sure the window behaves properly on retina displays
@@ -33,56 +31,6 @@ vtkQtRenderWindow::vtkQtRenderWindow( QWidget * parent ) : QVTKWidget( parent )
     disableGLHiDPI( this->winId() );
 #endif
 
-}
-
-bool vtkQtRenderWindow::event(QEvent *event)
-{
-    if (event->type() == QEvent::Gesture)
-        return gestureEvent(static_cast<QGestureEvent*>(event));
-    return QVTKWidget::event(event);
-}
-
-bool vtkQtRenderWindow::gestureEvent( QGestureEvent * event )
-{
-    if( QGesture *pan = event->gesture(Qt::PanGesture) )
-        panTriggered(static_cast<QPanGesture *>(pan));
-    if( QGesture *pinch = event->gesture(Qt::PinchGesture) )
-        pinchTriggered(static_cast<QPinchGesture *>(pinch));
-    return true;
-}
-
-void vtkQtRenderWindow::panTriggered(QPanGesture *gesture)
-{
-#ifndef QT_NO_CURSOR
-    switch (gesture->state())
-    {
-    case Qt::GestureStarted:
-    case Qt::GestureUpdated:
-        setCursor(Qt::SizeAllCursor);
-        break;
-    default:
-        setCursor(Qt::ArrowCursor);
-    }
-#endif
-    update();
-}
-
-void vtkQtRenderWindow::pinchTriggered( QPinchGesture * gesture )
-{
-    QPinchGesture::ChangeFlags changeFlags = gesture->changeFlags();
-    /*if (changeFlags & QPinchGesture::RotationAngleChanged)
-    {
-        qreal value = gesture->property("rotationAngle").toReal();
-        qreal lastValue = gesture->property("lastRotationAngle").toReal();
-    }*/
-    if (changeFlags & QPinchGesture::ScaleFactorChanged)
-    {
-        qreal value = gesture->property("scaleFactor").toReal();
-        qreal lastValue = gesture->property("lastScaleFactor").toReal();
-        double scaleFactor = 1.0 + ( value - lastValue );
-        emit ZoomView( scaleFactor );
-    }
-    update();
 }
 
 void vtkQtRenderWindow::paintEvent( QPaintEvent* )
