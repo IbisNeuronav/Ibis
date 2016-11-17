@@ -137,7 +137,8 @@ public:
 signals:
 
     void LutChanged( int );
-    
+    void VisibilityChanged( int );
+
 protected:
     
     virtual void Hide();

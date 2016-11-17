@@ -321,6 +321,7 @@ void TripleCutPlaneObject::ObjectAddedSlot( int objectId )
         this->PreDisplaySetup();
         connect( img, SIGNAL(Modified()), this, SLOT(MarkModified()) );
         connect( img, SIGNAL(LutChanged( int )), this, SLOT(UpdateLut( int )) );
+        connect( img, SIGNAL(VisibilityChanged( int )), this, SLOT(SetImageHidden( int )) );
     }
 }
 
@@ -343,11 +344,12 @@ void TripleCutPlaneObject::UpdateLut(int imageID )
     }
 }
 
-void TripleCutPlaneObject::SetImageHidden( int imageID, bool hidden )
+void TripleCutPlaneObject::SetImageHidden( int imageID )
 {
     ImageObject * im = ImageObject::SafeDownCast( this->GetManager()->GetObjectByID( imageID ) );
     for( int i = 0; i < 3; ++i )
-        this->Planes[i]->SetImageHidden( im->GetImage(), hidden );
+        this->Planes[i]->SetImageHidden( im->GetImage(), im->IsHidden() );
+    this->MarkModified();
 }
 
 void TripleCutPlaneObject::PreDisplaySetup()

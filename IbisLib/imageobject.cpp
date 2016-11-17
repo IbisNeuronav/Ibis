@@ -33,7 +33,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "imageobjectsettingsdialog.h"
 #include "imageobjectvolumesettingswidget.h"
 #include "scenemanager.h"
-#include "triplecutplaneobject.h"
 #include "lookuptablemanager.h"
 #include <QMessageBox>
 
@@ -809,18 +808,14 @@ void ImageObject::Hide()
 	}
 	else
 		this->outlineWasVisible = 0;
-    if( this->GetManager() )
-        this->GetManager()->GetMainImagePlanes()->SetImageHidden( this->GetObjectID(), true );
-    emit Modified();
+    emit VisibilityChanged( this->GetObjectID() );
 }
 
 void ImageObject::Show()
 {
 	if( !this->viewOutline && this->outlineWasVisible )
 		this->SetViewOutline(1);
-    if( this->GetManager() )
-        this->GetManager()->GetMainImagePlanes()->SetImageHidden( this->GetObjectID(), false );
-    emit Modified();
+    emit VisibilityChanged( this->GetObjectID() );
 }
 
 #include "mincinfowidget.h"

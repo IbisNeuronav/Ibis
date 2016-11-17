@@ -51,7 +51,6 @@ public:
     ImageObject * GetImage( int index );
     void AddImage( int imageID);
     void RemoveImage(int imageID );
-    void SetImageHidden(int imageID, bool hidden );
 	void PreDisplaySetup();
 	void ResetPlanes();
     vtkMultiImagePlaneWidget * GetPlane( int index ) { return (index < 3 && index >= 0) ? Planes[index] : 0; }
@@ -109,6 +108,7 @@ public slots:
     void ObjectAddedSlot( int objectId );
     void ObjectRemovedSlot(int objectId );
     virtual void MarkModified();
+    void SetImageHidden(int imageID );
 
 signals:
     void StartPlaneMoved(int);
