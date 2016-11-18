@@ -35,6 +35,7 @@ class vtkIbisGLSLVolumeRaycastMapper;
 class vtkVolume;
 class vtkVolumeProperty;
 class vtkImageImport;
+class vtkBoxWidget2;
 
 typedef itk::RGBPixel< unsigned char > RGBPixelType;
 typedef itk::Image< RGBPixelType, 3 > IbisRGBImageType;
@@ -133,11 +134,17 @@ public:
     bool GetAutoSampleDistance() { return m_autoSampleDistance; }
     void SetSampleDistance( double dist );
     double GetSampleDistance() { return m_sampleDistance; }
+    bool IsShowingVolumeClippingWidget() { return m_showVolumeClippingBox; }
+    void SetShowVolumeClippingWidget( bool show );
 
 signals:
 
     void LutChanged( int );
     void VisibilityChanged( int );
+
+protected slots:
+
+    void OnVolumeClippingBoxModified( vtkObject * caller );
 
 protected:
     
@@ -182,6 +189,7 @@ protected:
 
     // vtk volume rendering attributes
     void UpdateVolumeRenderingParamsInMapper();
+    void SetVolumeClippingEnabled( vtkBoxWidget2 * widget, bool enabled );
 
     bool m_vtkVolumeRenderingEnabled;
     vtkVolumeProperty * m_volumeProperty;
@@ -191,6 +199,10 @@ protected:
     int m_vtkVolumeRenderMode;
     bool m_autoSampleDistance;
     double m_sampleDistance;
+
+    bool m_showVolumeClippingBox;
+    double m_volumeRenderingBounds[6];
+    vtkEventQtSlotConnect * m_volumeClippingBoxWatcher;
     
     struct PerViewElements
     {
@@ -198,6 +210,7 @@ protected:
         ~PerViewElements();
         vtkActor * outlineActor;
         vtkVolume * volume;
+        vtkBoxWidget2 * volumeClippingWidget;
     };
     
     typedef std::map<View*,PerViewElements*> ImageObjectViewAssociation;

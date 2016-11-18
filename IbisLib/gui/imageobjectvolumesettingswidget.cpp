@@ -51,6 +51,10 @@ void ImageObjectVolumeSettingsWidget::UpdateUi()
     ui->enableVolumeRenderingCheckBox->setChecked( m_imageObject->GetVtkVolumeRenderingEnabled() );
     ui->enableVolumeRenderingCheckBox->blockSignals( false );
 
+    ui->showClippingWidgetCheckBox->blockSignals( true );
+    ui->showClippingWidgetCheckBox->setChecked( m_imageObject->IsShowingVolumeClippingWidget() );
+    ui->showClippingWidgetCheckBox->blockSignals( false );
+
     ui->renderModeComboBox->blockSignals( true );
     ui->renderModeComboBox->clear();
     ui->renderModeComboBox->addItem( "GPU Raycast", QVariant( (int)vtkSmartVolumeMapper::GPURenderMode ) );
@@ -202,4 +206,10 @@ void ImageObjectVolumeSettingsWidget::on_sampleDistanceSpinBox_valueChanged( dou
 {
     Q_ASSERT( m_imageObject );
     m_imageObject->SetSampleDistance( val );
+}
+
+void ImageObjectVolumeSettingsWidget::on_showClippingWidgetCheckBox_toggled(bool checked)
+{
+    Q_ASSERT( m_imageObject );
+    m_imageObject->SetShowVolumeClippingWidget( checked );
 }

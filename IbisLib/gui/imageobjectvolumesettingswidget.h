@@ -47,6 +47,8 @@ private slots:
 
     void on_sampleDistanceSpinBox_valueChanged(double arg1);
 
+    void on_showClippingWidgetCheckBox_toggled(bool checked);
+
 private:
 
     void UpdateUi();

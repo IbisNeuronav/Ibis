@@ -22,6 +22,13 @@
     </widget>
    </item>
    <item>
+    <widget class="QCheckBox" name="showClippingWidgetCheckBox">
+     <property name="text">
+      <string>Show Clipping Widget</string>
+     </property>
+    </widget>
+   </item>
+   <item>
     <layout class="QHBoxLayout" name="horizontalLayout_5">
      <item>
       <widget class="QLabel" name="renderModeLabel">
