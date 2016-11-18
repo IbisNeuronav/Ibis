@@ -83,7 +83,7 @@ signals:
 private slots:
 
     void SceneContentChanged();
-    void LutChanged();
+    void LutChanged( int );
     void OnImageChanged();
 
 protected:

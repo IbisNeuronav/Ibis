@@ -32,7 +32,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "polydataobjectsettingsdialog.h"
 #include "application.h"
 #include "scenemanager.h"
-#include "triplecutplaneobject.h"
 #include "imageobject.h"
 #include "vtkProbeFilter.h"
 #include "vtkClipPolyData.h"

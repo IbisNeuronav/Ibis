@@ -12,7 +12,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "worldobjectsettingswidget.h"
 #include "scenemanager.h"
 #include "polydataobject.h"
-#include "triplecutplaneobject.h"
 #include "application.h"
 
 WorldObject::WorldObject()
@@ -73,32 +72,32 @@ bool WorldObject::Is3DViewFollowingReferenceVolume()
 void WorldObject::SetCursorVisible( bool v )
 {
     Q_ASSERT( this->GetManager() );
-    this->GetManager()->GetMainImagePlanes()->SetCursorVisibility( v );
+    this->GetManager()->SetCursorVisibility( v );
 }
 
 bool WorldObject::GetCursorVisible()
 {
     Q_ASSERT( this->GetManager() );
-    return this->GetManager()->GetMainImagePlanes()->GetCursorVisible();
+    return this->GetManager()->GetCursorVisible();
 }
 
 void WorldObject::SetCursorColor( const QColor & c )
 {
     Q_ASSERT( this->GetManager() );
-    this->GetManager()->GetMainImagePlanes()->SetCursorColor(c);
+    this->GetManager()->SetCursorColor(c);
 }
 
 void WorldObject::SetCursorColor( double color[3] )
 {
     Q_ASSERT( this->GetManager() );
     QColor col( (int)(color[0] * 255), (int)(color[1] * 255), (int)(color[2] * 255) );
-    this->GetManager()->GetMainImagePlanes()->SetCursorColor(col);
+    this->GetManager()->SetCursorColor(col);
 }
 
 QColor WorldObject::GetCursorColor()
 {
     Q_ASSERT( this->GetManager() );
-    return this->GetManager()->GetMainImagePlanes()->GetCursorColor();
+    return this->GetManager()->GetCursorColor();
 }
 
 void WorldObject::SetBackgroundColor( const QColor & c )
