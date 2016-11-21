@@ -810,53 +810,31 @@ void SceneManager::ChangeParent( SceneObject * object, SceneObject * newParent, 
 
 void SceneManager::GetAllImageObjects( QList<ImageObject*> & objects )
 {
-    GetChildrenImageObjects( GetSceneRoot(), objects );
-}
-
-
-void SceneManager::GetChildrenImageObjects( SceneObject * obj, QList<ImageObject*> & all )
-{
-    for( int i = 0; i < obj->GetNumberOfChildren(); ++i )
+    for( int i = 0; i < this->AllObjects.size(); ++i )
     {
-        SceneObject * child = obj->GetChild(i);
-        ImageObject * imChild = ImageObject::SafeDownCast( child );
-        if( imChild )
-            all.push_back( imChild );
-        GetChildrenImageObjects( child, all );
+        ImageObject * obj = ImageObject::SafeDownCast( this->AllObjects[i] );
+        if( obj )
+            objects.push_back( obj );
     }
 }
 
 void SceneManager::GetAllPolydataObjects( QList<PolyDataObject*> & objects )
 {
-    GetChildrenPolydataObjects( GetSceneRoot(), objects );
-}
-
-void SceneManager::GetChildrenPolydataObjects( SceneObject * obj, QList<PolyDataObject*> & all )
-{
-    for( int i = 0; i < obj->GetNumberOfChildren(); ++i )
+    for( int i = 0; i < this->AllObjects.size(); ++i )
     {
-        SceneObject * child = obj->GetChild(i);
-        PolyDataObject * imChild = PolyDataObject::SafeDownCast( child );
-        if( imChild )
-            all.push_back( imChild );
-        GetChildrenPolydataObjects( child, all );
+        PolyDataObject * obj = PolyDataObject::SafeDownCast( this->AllObjects[i] );
+        if( obj )
+            objects.push_back( obj );
     }
 }
 
 void SceneManager::GetAllPointsObjects( QList<PointsObject*> & objects )
 {
-    GetChildrenPointsObjects( this->GetSceneRoot(), objects );
-}
-
-void SceneManager::GetChildrenPointsObjects( SceneObject * obj, QList<PointsObject*> & all )
-{
-    for( int i = 0; i < obj->GetNumberOfChildren(); ++i )
+    for( int i = 0; i < this->AllObjects.size(); ++i )
     {
-        SceneObject * child = obj->GetChild(i);
-        PointsObject * imChild = PointsObject::SafeDownCast( child );
-        if( imChild )
-            all.push_back( imChild );
-        GetChildrenPointsObjects( child, all );
+        PointsObject * obj = PointsObject::SafeDownCast( this->AllObjects[i] );
+        if( obj )
+            objects.push_back( obj );
     }
 }
 

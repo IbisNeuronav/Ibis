@@ -167,11 +167,8 @@ public:
     void ChangeParent( SceneObject * object, SceneObject * newParent, int newChildIndex );
     int  GetNumberOfImageObjects();
     void GetAllImageObjects( QList<ImageObject*> & objects );
-    void GetChildrenImageObjects( SceneObject * obj, QList<ImageObject*> & all );
     void GetAllPolydataObjects( QList<PolyDataObject*> & objects );
-    void GetChildrenPolydataObjects( SceneObject * obj, QList<PolyDataObject*> & all );
     void GetAllPointsObjects( QList<PointsObject*> & objects );
-    void GetChildrenPointsObjects( SceneObject * obj, QList<PointsObject*> & all );
     void GetAllCameraObjects( QList<CameraObject*> & all );
     void GetAllUSAcquisitionObjects( QList<USAcquisitionObject*> & all );
     void GetAllUsProbeObjects( QList<UsProbeObject*> & all );
