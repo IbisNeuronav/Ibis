@@ -27,8 +27,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "vtkExecutive.h"
 #include "DrawableTexture.h"
 #include "GlslShader.h"
-#include "vtkgl.h"
 #include "vtkColoredCube.h"
+#include "vtkgl.h"
 
 #include <sstream>
 
