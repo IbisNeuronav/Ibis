@@ -28,6 +28,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "DrawableTexture.h"
 #include "GlslShader.h"
 #include "vtkgl.h"
+#include "vtkColoredCube.h"
 
 #include <sstream>
 
@@ -66,7 +67,6 @@ vtkPRISMVolumeMapper::vtkPRISMVolumeMapper()
     this->InteractionPoint2[1] = 0.0;
     this->InteractionPoint2[2] = 200.0;
     this->BackfaceTexture = 0;
-    this->ClippingMask = 0;
     this->DepthBufferTextureId = 0;
     this->DepthBufferTextureSize[0] = 1;
     this->DepthBufferTextureSize[1] = 1;
@@ -76,12 +76,14 @@ vtkPRISMVolumeMapper::vtkPRISMVolumeMapper()
     this->VolumeShaderNeedsUpdate = true;
     this->GlExtensionsLoaded = false;
     this->RenderState = 0;
+    this->ColoredCube = vtkColoredCube::New();
 }
 
 //-----------------------------------------------------------------------------
 vtkPRISMVolumeMapper::~vtkPRISMVolumeMapper()
 {
     this->WorldToTextureMatrix->Delete();
+    this->ColoredCube->Delete();
 }
 
 
@@ -227,10 +229,6 @@ void vtkPRISMVolumeMapper::Render( vtkRenderer * ren, vtkVolume * vol )
 
     glShadeModel( GL_SMOOTH );
 
-    // Render clipping mask
-    if( !this->RenderClippingMask( renderSize[0], renderSize[1] ) )
-        vtkErrorMacro( << "Couldn't render clipping mask" );
-
     // Draw backfaces to the texture
     glEnable( GL_CULL_FACE );
     glCullFace( GL_FRONT );
@@ -239,7 +237,13 @@ void vtkPRISMVolumeMapper::Render( vtkRenderer * ren, vtkVolume * vol )
     BackfaceTexture->DrawToTexture( true );
     glClearColor( 0.0, 0.0, 0.0, 0.0 );
     glClear( GL_COLOR_BUFFER_BIT );
-    DrawCube();
+
+    ColoredCube->SetBounds( this->VolumeBounds );
+    ColoredCube->SetCropping( this->Cropping );
+    ColoredCube->SetCroppingRegionPlanes( this->CroppingRegionPlanes );
+    ColoredCube->UpdateGeometry( ren, vol->GetMatrix() );
+    ColoredCube->Render();
+
     BackfaceTexture->DrawToTexture( false );
 
     // Draw front of cube and do raycasting in the shader
@@ -256,19 +260,14 @@ void vtkPRISMVolumeMapper::Render( vtkRenderer * ren, vtkVolume * vol )
     glEnable( vtkgl::TEXTURE_RECTANGLE_ARB );
     glBindTexture( vtkgl::TEXTURE_RECTANGLE_ARB, DepthBufferTextureId );
 
-    // Bind mask texture in texture unit 2
-    vtkgl::ActiveTexture( GL_TEXTURE2 );
-    glEnable( vtkgl::TEXTURE_RECTANGLE_ARB );
-    glBindTexture( vtkgl::TEXTURE_RECTANGLE_ARB, ClippingMask->GetTexId() );
-
     // Bind all volumes and their respective transfer functions to texture units starting at 1
     for( unsigned i = 0; i < VolumesInfo.size(); ++i )
     {
-        vtkgl::ActiveTexture( GL_TEXTURE3 + 2 * i );
+        vtkgl::ActiveTexture( GL_TEXTURE2 + 2 * i );
         glEnable( GL_TEXTURE_1D );
         glBindTexture( GL_TEXTURE_1D, VolumesInfo[i].TranferFunctionTextureId );
 
-        vtkgl::ActiveTexture( GL_TEXTURE3 + 2 * i + 1 );
+        vtkgl::ActiveTexture( GL_TEXTURE2 + 2 * i + 1 );
         glEnable( GL_TEXTURE_3D );
         glBindTexture( GL_TEXTURE_3D, VolumesInfo[i].VolumeTextureId );
         glTexParameteri( GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, VolumesInfo[i].linearSampling ? GL_LINEAR : GL_NEAREST );
@@ -282,8 +281,6 @@ void vtkPRISMVolumeMapper::Render( vtkRenderer * ren, vtkVolume * vol )
     res = VolumeShader->SetVariable( "multFactor", this->MultFactor );
     res = VolumeShader->SetVariable( "back_tex_id", int(0) );
     res = VolumeShader->SetVariable( "depthBuffer", int(1) );
-    res = VolumeShader->SetVariable( "clippingMask", int(2) );
-    res = VolumeShader->SetVariable( "useClipping", int(0) );
     res = VolumeShader->SetVariable( "windowSize", renderSize[0], renderSize[1] );
 
     int * transferFuncTextureUnits = new int[ VolumesInfo.size() ];
@@ -291,8 +288,8 @@ void vtkPRISMVolumeMapper::Render( vtkRenderer * ren, vtkVolume * vol )
     int * volEnabled = new int[ VolumesInfo.size() ];
     for( unsigned i = 0; i < VolumesInfo.size(); ++i )
     {
-        transferFuncTextureUnits[i] = 2 * i + 3;
-        volumeTextureUnits[i] = 2 * i + 4;
+        transferFuncTextureUnits[i] = 2 * i + 2;
+        volumeTextureUnits[i] = 2 * i + 3;
         volEnabled[i] = VolumesInfo[i].Enabled ? 1 : 0;
     }
     res = VolumeShader->SetVariable( "transferFunctions", VolumesInfo.size(), transferFuncTextureUnits );
@@ -328,32 +325,25 @@ void vtkPRISMVolumeMapper::Render( vtkRenderer * ren, vtkVolume * vol )
 
     glEnable( GL_BLEND );
     glBlendFunc( GL_ONE, GL_ONE_MINUS_SRC_ALPHA );
-    DrawCube();
-    res = VolumeShader->SetVariable( "useClipping", int(1) );
+    ColoredCube->Render();
 
     // retrieve old modelview matrix
     glMatrixMode( GL_MODELVIEW );
     glPopMatrix();
-    RenderClippingPlane( ren );
 
     glDisable( GL_BLEND );
 
     // Unbind all volume and transfer function textures
     for( unsigned i = 0; i < VolumesInfo.size(); ++i )
     {
-        vtkgl::ActiveTexture( GL_TEXTURE3 + 2 * i );
+        vtkgl::ActiveTexture( GL_TEXTURE2 + 2 * i );
         glBindTexture( GL_TEXTURE_1D, 0 );
         glDisable( GL_TEXTURE_1D );
 
-        vtkgl::ActiveTexture( GL_TEXTURE3 + 2 * i + 1 );
+        vtkgl::ActiveTexture( GL_TEXTURE2 + 2 * i + 1 );
         glBindTexture( GL_TEXTURE_3D, 0 );
         glDisable( GL_TEXTURE_3D );
     }
-
-    // unbind clipping mask texture in tex unit 2
-    vtkgl::ActiveTexture( GL_TEXTURE2 );
-    glBindTexture( vtkgl::TEXTURE_RECTANGLE_ARB, 0 );
-    glDisable( vtkgl::TEXTURE_RECTANGLE_ARB );
 
     // unbind depth texture in tex unit 1
     vtkgl::ActiveTexture( GL_TEXTURE1 );
@@ -380,11 +370,6 @@ void vtkPRISMVolumeMapper::ReleaseGraphicsResources( vtkWindow * )
     {
         delete BackfaceTexture;
         BackfaceTexture = 0;
-    }
-    if( ClippingMask )
-    {
-        delete ClippingMask;
-        ClippingMask = 0;
     }
     if( BackfaceShader )
     {
@@ -553,43 +538,6 @@ bool vtkPRISMVolumeMapper::UpdateVolumeShader()
     return result;
 }
 
-bool vtkPRISMVolumeMapper::RenderClippingMask( int width, int height )
-{
-    bool ok = true;
-
-    // draw cube to the texture with invert blending to create
-    // a mask of areas of the front side that have been clipped.
-    if( !ClippingMask )
-    {
-        ClippingMask = new DrawableTexture;
-        ClippingMask->UseByteTexture();
-        ok |= ClippingMask->Init( 1, 1 );
-    }
-    ClippingMask->Resize( width, height );
-    ClippingMask->DrawToTexture( true );
-    glClearColor( 0.0, 0.0, 0.0, 0.0 );
-    glClear( GL_COLOR_BUFFER_BIT );
-
-    glEnable( GL_CULL_FACE );
-    glDisable( GL_BLEND );
-    glDisable( GL_DEPTH_TEST );
-    glEnable( GL_COLOR_LOGIC_OP );
-    glLogicOp( GL_INVERT );
-
-    glColor4d( 1.0, 1.0, 1.0, 1.0 );
-    glCullFace( GL_FRONT );
-    DrawCubeNoColor();
-    glCullFace( GL_BACK );
-    DrawCubeNoColor();
-
-    glDisable( GL_COLOR_LOGIC_OP );
-    glDisable( GL_CULL_FACE );
-
-    ClippingMask->DrawToTexture( false );
-
-    return ok;
-}
-
 void vtkPRISMVolumeMapper::UpdateWorldToTextureMatrix( vtkVolume * volume )
 {
     // Compute texture to volume
@@ -627,148 +575,6 @@ int vtkPRISMVolumeMapper::IsTextureSizeSupported( int size[3] )
     if( width != 0 )
         return 1;
     return 0;
-}
-
-void Vertex( double xTex, double yTex, double zTex, double x, double y, double z )
-{
-    glTexCoord3f( xTex, yTex, zTex );
-    glColor3d( xTex, yTex, zTex );
-    glVertex3d( x, y, z );
-}
-
-void vtkPRISMVolumeMapper::DrawCube()
-{
-    glBegin( GL_QUADS );
-    {
-        // front ( x+ normal )
-        Vertex( 1.0, 0.0, 0.0, VolumeBounds[1], VolumeBounds[2], VolumeBounds[4] );
-        Vertex( 1.0, 1.0, 0.0, VolumeBounds[1], VolumeBounds[3], VolumeBounds[4] );
-        Vertex( 1.0, 1.0, 1.0, VolumeBounds[1], VolumeBounds[3], VolumeBounds[5] );
-        Vertex( 1.0, 0.0, 1.0, VolumeBounds[1], VolumeBounds[2], VolumeBounds[5] );
-
-        // right ( y+ normal )
-        Vertex( 1.0, 1.0, 0.0, VolumeBounds[1], VolumeBounds[3], VolumeBounds[4] );
-        Vertex( 0.0, 1.0, 0.0, VolumeBounds[0], VolumeBounds[3], VolumeBounds[4] );
-        Vertex( 0.0, 1.0, 1.0, VolumeBounds[0], VolumeBounds[3], VolumeBounds[5] );
-        Vertex( 1.0, 1.0, 1.0, VolumeBounds[1], VolumeBounds[3], VolumeBounds[5] );
-
-        // back ( x- normal )
-        Vertex( 0.0, 1.0, 0.0, VolumeBounds[0], VolumeBounds[3], VolumeBounds[4] );
-        Vertex( 0.0, 0.0, 0.0, VolumeBounds[0], VolumeBounds[2], VolumeBounds[4] );
-        Vertex( 0.0, 0.0, 1.0, VolumeBounds[0], VolumeBounds[2], VolumeBounds[5] );
-        Vertex( 0.0, 1.0, 1.0, VolumeBounds[0], VolumeBounds[3], VolumeBounds[5] );
-
-        // left ( y- normal )
-        Vertex( 0.0, 0.0, 0.0, VolumeBounds[0], VolumeBounds[2], VolumeBounds[4] );
-        Vertex( 1.0, 0.0, 0.0, VolumeBounds[1], VolumeBounds[2], VolumeBounds[4] );
-        Vertex( 1.0, 0.0, 1.0, VolumeBounds[1], VolumeBounds[2], VolumeBounds[5] );
-        Vertex( 0.0, 0.0, 1.0, VolumeBounds[0], VolumeBounds[2], VolumeBounds[5] );
-
-        // top ( z+ normal )
-        Vertex( 1.0, 0.0, 1.0, VolumeBounds[1], VolumeBounds[2], VolumeBounds[5] );
-        Vertex( 1.0, 1.0, 1.0, VolumeBounds[1], VolumeBounds[3], VolumeBounds[5] );
-        Vertex( 0.0, 1.0, 1.0, VolumeBounds[0], VolumeBounds[3], VolumeBounds[5] );
-        Vertex( 0.0, 0.0, 1.0, VolumeBounds[0], VolumeBounds[2], VolumeBounds[5] );
-
-        // bottom ( z- normal )
-        Vertex( 1.0, 0.0, 0.0, VolumeBounds[1], VolumeBounds[2], VolumeBounds[4] );
-        Vertex( 0.0, 0.0, 0.0, VolumeBounds[0], VolumeBounds[2], VolumeBounds[4] );
-        Vertex( 0.0, 1.0, 0.0, VolumeBounds[0], VolumeBounds[3], VolumeBounds[4] );
-        Vertex( 1.0, 1.0, 0.0, VolumeBounds[1], VolumeBounds[3], VolumeBounds[4] );
-    }
-    glEnd();
-}
-
-void vtkPRISMVolumeMapper::DrawCubeNoColor()
-{
-    glBegin( GL_QUADS );
-    {
-        // front ( x+ normal )
-        glVertex3d( VolumeBounds[1], VolumeBounds[2], VolumeBounds[4] );
-        glVertex3d( VolumeBounds[1], VolumeBounds[3], VolumeBounds[4] );
-        glVertex3d( VolumeBounds[1], VolumeBounds[3], VolumeBounds[5] );
-        glVertex3d( VolumeBounds[1], VolumeBounds[2], VolumeBounds[5] );
-
-        // right ( y+ normal )
-        glVertex3d( VolumeBounds[1], VolumeBounds[3], VolumeBounds[4] );
-        glVertex3d( VolumeBounds[0], VolumeBounds[3], VolumeBounds[4] );
-        glVertex3d( VolumeBounds[0], VolumeBounds[3], VolumeBounds[5] );
-        glVertex3d( VolumeBounds[1], VolumeBounds[3], VolumeBounds[5] );
-
-        // back ( x- normal )
-        glVertex3d( VolumeBounds[0], VolumeBounds[3], VolumeBounds[4] );
-        glVertex3d( VolumeBounds[0], VolumeBounds[2], VolumeBounds[4] );
-        glVertex3d( VolumeBounds[0], VolumeBounds[2], VolumeBounds[5] );
-        glVertex3d( VolumeBounds[0], VolumeBounds[3], VolumeBounds[5] );
-
-        // left ( y- normal )
-        glVertex3d( VolumeBounds[0], VolumeBounds[2], VolumeBounds[4] );
-        glVertex3d( VolumeBounds[1], VolumeBounds[2], VolumeBounds[4] );
-        glVertex3d( VolumeBounds[1], VolumeBounds[2], VolumeBounds[5] );
-        glVertex3d( VolumeBounds[0], VolumeBounds[2], VolumeBounds[5] );
-
-        // top ( z+ normal )
-        glVertex3d( VolumeBounds[1], VolumeBounds[2], VolumeBounds[5] );
-        glVertex3d( VolumeBounds[1], VolumeBounds[3], VolumeBounds[5] );
-        glVertex3d( VolumeBounds[0], VolumeBounds[3], VolumeBounds[5] );
-        glVertex3d( VolumeBounds[0], VolumeBounds[2], VolumeBounds[5] );
-
-        // bottom ( z- normal )
-        glVertex3d( VolumeBounds[1], VolumeBounds[2], VolumeBounds[4] );
-        glVertex3d( VolumeBounds[0], VolumeBounds[2], VolumeBounds[4] );
-        glVertex3d( VolumeBounds[0], VolumeBounds[3], VolumeBounds[4] );
-        glVertex3d( VolumeBounds[1], VolumeBounds[3], VolumeBounds[4] );
-    }
-    glEnd();
-}
-
-#include "SVL.h"
-#include "SVLgl.h"
-
-void vtkPRISMVolumeMapper::RenderClippingPlane( vtkRenderer * ren )
-{
-    vtkCamera * cam = ren->GetActiveCamera();
-    Vec3 pos( cam->GetPosition() );
-    Vec3 lookAt( cam->GetFocalPoint() );
-    Vec3 camUp( cam->GetViewUp() );
-    double near = cam->GetClippingRange()[0];
-    double lensAngle = vtkMath::RadiansFromDegrees( cam->GetViewAngle() / 2 );
-    int renderSize[2];
-    this->GetRenderSize( ren, renderSize );
-    double ratio = (double)(renderSize[0]) / renderSize[1];
-    double epsilon = 0.0001;
-
-    double planeDist = near + epsilon;
-    double halfHeight = planeDist * tan( lensAngle );
-    double halfWidth = halfHeight * ratio;
-
-    Vec3 camDir = lookAt - pos;
-    camDir.Normalise();
-    Vec3 planeCenter = pos + planeDist * camDir;
-    Vec3 right = cross( camDir, camUp ).Normalise();
-    Vec3 down = cross( camDir, right ).Normalise();
-
-    Vec3 p0 = planeCenter - halfWidth * right + halfHeight * down;
-    Vec3 p1 = planeCenter + halfWidth * right + halfHeight * down;
-    Vec3 p2 = planeCenter + halfWidth * right - halfHeight * down;
-    Vec3 p3 = planeCenter - halfWidth * right - halfHeight * down;
-
-    // find color of vertices relative to cube coord
-    Vec4 c0 = Vec4( p0, 1.0 );
-    this->WorldToTextureMatrix->MultiplyPoint( c0.Ref(), c0.Ref() );
-    Vec4 c1 = Vec4( p1, 1.0 );
-    this->WorldToTextureMatrix->MultiplyPoint( c1.Ref(), c1.Ref() );
-    Vec4 c2 = Vec4( p2, 1.0 );
-    this->WorldToTextureMatrix->MultiplyPoint( c2.Ref(), c2.Ref() );
-    Vec4 c3 = Vec4( p3, 1.0 );
-    this->WorldToTextureMatrix->MultiplyPoint( c3.Ref(), c3.Ref() );
-
-    glBegin( GL_QUADS );
-        glColor3d( c0[0], c0[1], c0[2] ); glVertex( p0 );
-        glColor3d( c1[0], c1[1], c1[2] ); glVertex( p1 );
-        glColor3d( c2[0], c2[1], c2[2] ); glVertex( p2 );
-        glColor3d( c3[0], c3[1], c3[2] ); glVertex( p3 );
-    glEnd();
 }
 
 //-----------------------------------------------------------------------------

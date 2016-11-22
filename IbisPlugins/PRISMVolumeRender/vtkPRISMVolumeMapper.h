@@ -34,6 +34,7 @@ class vtkVolumeProperty;
 class vtkRenderWindow;
 class DrawableTexture;
 class GlslShader;
+class vtkColoredCube;
 
 class vtkIbisRenderState
 {
@@ -133,13 +134,13 @@ protected:
 
   // Graphics resources
   DrawableTexture * BackfaceTexture;
-  DrawableTexture * ClippingMask;
   GlslShader * VolumeShader;
   GlslShader * BackfaceShader;
   bool VolumeShaderNeedsUpdate;
   unsigned DepthBufferTextureId;
   int DepthBufferTextureSize[2];
   vtkMatrix4x4 * WorldToTextureMatrix;
+  vtkColoredCube * ColoredCube;
 
   // Extension management
   bool GlExtensionsLoaded;
@@ -148,7 +149,6 @@ protected:
 
   bool CreateBackfaceShader();
   bool UpdateVolumeShader();
-  bool RenderClippingMask( int width, int height );
 
   // update the matrix that transforms from world coordinate to GL texture coordinates
   void UpdateWorldToTextureMatrix( vtkVolume * volume );
@@ -183,9 +183,6 @@ protected:
   // Impemented in subclass - check is texture size is OK.
   virtual int IsTextureSizeSupported( int size[3] );
 
-  void DrawCube();
-  void DrawCubeNoColor();
-  void RenderClippingPlane( vtkRenderer * ren );
   void LoadExtensions( vtkRenderWindow * window );
   void GetRenderSize( vtkRenderer * ren, int size[2] );
 
