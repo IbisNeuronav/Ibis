@@ -2,8 +2,6 @@
 
 uniform sampler2DRect back_tex_id;
 uniform sampler2DRect depthBuffer;
-uniform sampler2DRect clippingMask;
-uniform int useClipping;
 uniform float time;
 uniform sampler3D volumes[@NumberOfVolumes@];
 uniform sampler1D transferFunctions[@NumberOfVolumes@];
@@ -131,16 +129,6 @@ vec3 hsv2rgb(vec3 c)
 
 void main()
 {
-    // When rendering clipped part of the cube, discard every section that is not in the mask
-    if( useClipping == 1 )
-    {
-        vec4 clipMaskSample = texture2DRect( clippingMask, gl_FragCoord.xy );
-        if( clipMaskSample.x < 0.1 )
-        {
-            discard;
-        }
-    }
-
     // Basic depth test : if something is in front of the front cube, just give up now
     vec4 depthSample = texture2DRect( depthBuffer, gl_FragCoord.xy );
     if( depthSample.x < gl_FragCoord.z )
