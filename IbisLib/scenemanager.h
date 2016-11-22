@@ -378,8 +378,6 @@ protected:
     QProgressDialog *m_sceneLoadSaveProgressDialog;
     bool UpdateProgress(int value);
 
-    QStringList TemporaryFiles;
-
     // navigation
     int NavigationPointerID;
     bool IsNavigating;

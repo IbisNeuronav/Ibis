@@ -99,18 +99,6 @@ void SceneManager::Destroy()
         (*it)->Delete();
     }
     Views.clear();
-    for( int i = 0; i < TemporaryFiles.count(); i++ )
-    {
-        QString program( "rm" );
-        QStringList arguments;
-        arguments << "-rf" << TemporaryFiles[i];
-        QProcess *removeProcess = new QProcess(0);
-        removeProcess->start(program, arguments);
-        if( removeProcess->waitForStarted() )
-            removeProcess->waitForFinished();
-        delete removeProcess;
-    }
-    TemporaryFiles.clear();
     this->Delete();
 }
 
@@ -194,18 +182,6 @@ void SceneManager::Init()
 
 void SceneManager::Clear()
 {
-    for( int i = 0; i < TemporaryFiles.count(); i++ )
-    {
-        QString program( "rm" );
-        QStringList arguments;
-        arguments << "-rf" << TemporaryFiles[i];
-        QProcess *removeProcess = new QProcess(0);
-        removeProcess->start(program, arguments);
-        if( removeProcess->waitForStarted() )
-            removeProcess->waitForFinished();
-        delete removeProcess;
-    }
-    TemporaryFiles.clear();
     disconnect( this->GetMainImagePlanes(), SIGNAL(PlaneMoved(int)), this, SLOT(OnCutPlanesPositionChanged()) );
     disconnect( this, SIGNAL(ReferenceObjectChanged()), this->MainCutPlanes, SLOT(AdjustAllImages()) );
     this->RemoveAllSceneObjects();
@@ -1422,8 +1398,6 @@ void SceneManager::ObjectReader( Serializer * ser, bool interactive )
                 SceneObject *obj = loadedObject.at(0);
                 obj->Serialize(ser);
                 this->AddObjectUsingID(obj, parentObject, oldId);
-                if( filePath != obj->GetFullFileName() )
-                    TemporaryFiles.push_back( obj->GetFullFileName() );
             }
             else
             {
