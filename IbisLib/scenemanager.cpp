@@ -91,7 +91,6 @@ void SceneManager::Destroy()
 {
     disconnect(this);
     this->blockSignals( true );  // at this point, we don't want signals to be emited.
-    this->RemoveObject( this->SceneRoot );
 
     this->ReleaseAllViews();
     for( ViewList::iterator it = Views.begin(); it != Views.end(); ++it )
@@ -99,6 +98,8 @@ void SceneManager::Destroy()
         (*it)->Delete();
     }
     Views.clear();
+
+    this->RemoveObject( this->SceneRoot );
     this->Delete();
 }
 
@@ -128,6 +129,7 @@ void SceneManager::Init()
     CurrentObject = this->SceneRoot;
     AllObjects.push_back( this->SceneRoot );
     this->SceneRoot->Register(this);
+    this->SceneRoot->Delete();
 
     // Cut planes
     this->MainCutPlanes = TripleCutPlaneObject::New();
@@ -140,6 +142,7 @@ void SceneManager::Init()
     this->MainCutPlanes->SetHidable( false );
     this->MainCutPlanes->SetObjectDeletable(false);
     AddObject( this->MainCutPlanes, this->SceneRoot );
+    this->MainCutPlanes->Delete();
     connect( this->MainCutPlanes, SIGNAL(StartPlaneMoved(int)), this, SLOT(OnStartCutPlaneInteraction()) );
     connect( this->MainCutPlanes, SIGNAL(EndPlaneMove(int)), this, SLOT(OnEndCutPlaneInteraction()) );
     connect( this->MainCutPlanes, SIGNAL(PlaneMoved(int)), this, SLOT(OnCutPlanesPositionChanged()) );
@@ -149,7 +152,10 @@ void SceneManager::Init()
     QList<SceneObject*> globalObjects;
     Application::GetInstance().GetAllGlobalObjectInstances( globalObjects );
     for( int i = 0; i < globalObjects.size(); ++i )
+    {
         AddObject( globalObjects[i], this->SceneRoot );
+        globalObjects[i]->Delete();
+    }
 
     // Axes
     vtkAxes * axesSource = vtkAxes::New();
