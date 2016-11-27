@@ -91,6 +91,8 @@ public:
     // is no view of this type. GetOrCreateView() will return
     // a view of type 'type' if there is one, otherwise, it
     // will create one.
+    int GetNumberOfViews() { return this->Views.size(); }
+    View * GetViewByIndex( int index );
     View * CreateView( int type, QString name = QString::null );
     View * GetView( int type );
     View * GetMain3DView();

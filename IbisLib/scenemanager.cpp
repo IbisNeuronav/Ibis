@@ -493,6 +493,12 @@ QWidget * SceneManager::CreateTrackedToolsStatusWidget( QWidget * parent )
     return res;
 }
 
+View * SceneManager::GetViewByIndex( int index )
+{
+    Q_ASSERT( index < this->Views.size() && index >= 0 );
+    return this->Views[index];
+}
+
 View * SceneManager::CreateView( int type, QString name )
 {
     View * res = this->GetView( type );
