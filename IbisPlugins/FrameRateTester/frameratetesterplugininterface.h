@@ -41,8 +41,8 @@ public:
     void SetRunning( bool run );
     bool IsRunning();
 
-    void SetPeriod( int nbSeconds );
-    int GetPeriod() { return m_period; }
+    void SetNumberOfFrames( int nb );
+    int GetNumberOfFrames() { return m_numberOfFrames; }
 
     int GetLastNumberOfFrames() { return m_lastNumberOfFrames; }
     double GetLastPeriod() { return m_lastPeriod; }
@@ -64,7 +64,7 @@ protected:
 
     void SetRenderingEnabled( bool enabled );
 
-    int m_period;
+    int m_numberOfFrames;
     QTimer * m_timer;
     QTime * m_time;
 

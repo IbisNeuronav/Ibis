@@ -12,9 +12,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include "frameratetesterplugininterface.h"
 #include "frameratetesterwidget.h"
-//#include <QtPlugin>
-//#include "vtkEventQtSlotConnect.h"
-//#include "vtkRenderer.h"
 #include "application.h"
 #include "scenemanager.h"
 #include "view.h"
@@ -23,11 +20,11 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 FrameRateTesterPluginInterface::FrameRateTesterPluginInterface()
 {
-    m_period = 10;
+    m_numberOfFrames = 200;
     m_timer = 0;
     m_lastNumberOfFrames = 0;
     m_lastPeriod = 0.0;
-    m_currentViewIndex = 3;
+    m_currentViewIndex = 1;
     m_time = new QTime;
     m_accumulatedFrames = 0;
 }
@@ -67,9 +64,6 @@ void FrameRateTesterPluginInterface::SetRunning( bool run )
         // Make sure other views are not rendering
         SetRenderingEnabled( false );
 
-        // Init time measure
-        m_time->restart();
-
         // Start a timer
         m_timer = new QTimer;
         connect( m_timer, SIGNAL(timeout()), this, SLOT(OnTimerTriggered()) );
@@ -85,6 +79,7 @@ void FrameRateTesterPluginInterface::SetRunning( bool run )
         // Reenable rendering everywhere
         SetRenderingEnabled( true );
     }
+    emit Modified();
 }
 
 bool FrameRateTesterPluginInterface::IsRunning()
@@ -92,9 +87,9 @@ bool FrameRateTesterPluginInterface::IsRunning()
     return m_timer != 0;
 }
 
-void FrameRateTesterPluginInterface::SetPeriod( int nbSeconds )
+void FrameRateTesterPluginInterface::SetNumberOfFrames( int nb )
 {
-    m_period = nbSeconds;
+    m_numberOfFrames = nb;
 }
 
 double FrameRateTesterPluginInterface::GetLastFrameRate()
@@ -108,10 +103,14 @@ void FrameRateTesterPluginInterface::SetCurrentViewIndex( int index )
 {
     Q_ASSERT( index < GetSceneManager()->GetNumberOfViews() && index >= 0 );
     m_currentViewIndex = index;
+    emit Modified();
 }
 
 void FrameRateTesterPluginInterface::OnTimerTriggered()
 {
+    if( m_lastNumberOfFrames == 0 )
+        m_time->restart();
+
     // Render
     GetSceneManager()->GetViewByIndex( m_currentViewIndex )->Render();
 
@@ -124,6 +123,9 @@ void FrameRateTesterPluginInterface::OnTimerTriggered()
         m_accumulatedFrames = 0;
         emit PeriodicSignal();
     }
+
+    if( m_lastNumberOfFrames == m_numberOfFrames )
+        SetRunning( false );
 }
 
 void FrameRateTesterPluginInterface::SetRenderingEnabled( bool enabled )

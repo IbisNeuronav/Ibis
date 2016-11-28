@@ -61,11 +61,12 @@ void FrameRateTesterWidget::UpdateUi()
     // Run button
     ui->runButton->blockSignals( true );
     ui->runButton->setChecked( m_pluginInterface->IsRunning() );
+    ui->runButton->setText(  m_pluginInterface->IsRunning() ? "Stop" : "Run" );
     ui->runButton->blockSignals( false );
 
     // Period
     ui->periodSpinBox->blockSignals( true );
-    ui->periodSpinBox->setValue( m_pluginInterface->GetPeriod() );
+    ui->periodSpinBox->setValue( m_pluginInterface->GetNumberOfFrames() );
     ui->periodSpinBox->blockSignals( false );
 
     UpdateStats();
@@ -88,7 +89,7 @@ void FrameRateTesterWidget::on_currentViewComboBox_currentIndexChanged(int index
 void FrameRateTesterWidget::on_periodSpinBox_valueChanged(int arg1)
 {
     Q_ASSERT( m_pluginInterface );
-    m_pluginInterface->SetPeriod( arg1 );
+    m_pluginInterface->SetNumberOfFrames( arg1 );
 }
 
 void FrameRateTesterWidget::on_runButton_toggled(bool checked)
