@@ -93,13 +93,15 @@ void SceneManager::Destroy()
     this->blockSignals( true );  // at this point, we don't want signals to be emited.
 
     this->ReleaseAllViews();
+
+    this->RemoveObject( this->SceneRoot );
+
     for( ViewList::iterator it = Views.begin(); it != Views.end(); ++it )
     {
         (*it)->Delete();
     }
     Views.clear();
 
-    this->RemoveObject( this->SceneRoot );
     this->Delete();
 }
 
@@ -154,7 +156,6 @@ void SceneManager::Init()
     for( int i = 0; i < globalObjects.size(); ++i )
     {
         AddObject( globalObjects[i], this->SceneRoot );
-        globalObjects[i]->Delete();
     }
 
     // Axes
