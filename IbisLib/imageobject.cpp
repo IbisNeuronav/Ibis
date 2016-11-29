@@ -19,7 +19,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "vtkTransform.h"
 #include "vtkImageAccumulate.h"
 
-#include "vtkSmartVolumeMapper.h"
 #include "vtkGPUVolumeRayCastMapper.h"
 #include "vtkVolume.h"
 #include "vtkVolumeProperty.h"
@@ -142,7 +141,6 @@ ImageObject::ImageObject()
 
     m_colorWindow = 1.0;
     m_colorLevel = 0.5;
-    m_vtkVolumeRenderMode = vtkSmartVolumeMapper::GPURenderMode;
     m_autoSampleDistance = true;
     m_sampleDistance = 1.0;
 }
@@ -200,7 +198,6 @@ void ImageObject::Serialize( Serializer * ser )
         enableGradientOpacity = m_volumeProperty->GetDisableGradientOpacity() == 1 ? false : true;
     }
     ::Serialize( ser, "VolumeRenderingEnabled", m_vtkVolumeRenderingEnabled );
-    ::Serialize( ser, "VolumeRenderMode", m_vtkVolumeRenderMode );
     ::Serialize( ser, "ColorWindow", m_colorWindow );
     ::Serialize( ser, "ColorLevel", m_colorLevel );
     ::Serialize( ser, "EnableShading", enableShading );
@@ -497,26 +494,6 @@ void ImageObject::SetVtkVolumeRenderingEnabled( bool on )
     emit Modified();
 }
 
-void ImageObject::SetVtkVolumeRenderMode( int mode )
-{
-    m_vtkVolumeRenderMode = mode;
-
-    ImageObjectViewAssociation::iterator it = this->imageObjectInstances.begin();
-    while( it != imageObjectInstances.end() )
-    {
-        View * v = (*it).first;
-        if( v->GetType() == THREED_VIEW_TYPE )
-        {
-            PerViewElements * pv = (*it).second;
-            vtkSmartVolumeMapper * mapper = vtkSmartVolumeMapper::SafeDownCast( pv->volume->GetMapper() );
-            if( mapper )
-                mapper->SetRequestedRenderMode( m_vtkVolumeRenderMode );
-        }
-        ++it;
-    }
-    emit Modified();
-}
-
 void ImageObject::SetVolumeRenderingWindow( double window )
 {
     m_colorWindow = window;
@@ -532,11 +509,13 @@ void ImageObject::SetVolumeRenderingLevel( double level )
 void ImageObject::SetAutoSampleDistance( bool on )
 {
     m_autoSampleDistance = on;
+    UpdateVolumeRenderingParamsInMapper();
 }
 
 void ImageObject::SetSampleDistance( double dist )
 {
     m_sampleDistance = dist;
+    UpdateVolumeRenderingParamsInMapper();
 }
 
 void ImageObject::SetShowVolumeClippingWidget( bool show )
@@ -554,8 +533,11 @@ void ImageObject::UpdateVolumeRenderingParamsInMapper()
         if( v->GetType() == THREED_VIEW_TYPE )
         {
             PerViewElements * pv = (*it).second;
-            vtkSmartVolumeMapper * mapper = vtkSmartVolumeMapper::SafeDownCast( pv->volume->GetMapper() );
+            vtkGPUVolumeRayCastMapper * mapper = vtkGPUVolumeRayCastMapper::SafeDownCast( pv->volume->GetMapper() );
             Q_ASSERT( mapper );
+
+            mapper->SetAutoAdjustSampleDistances( m_autoSampleDistance ? 1 : 0 );
+            mapper->SetSampleDistance( m_sampleDistance );
 
             mapper->SetFinalColorLevel( m_colorLevel );
             mapper->SetFinalColorWindow( m_colorWindow );
@@ -630,8 +612,7 @@ void ImageObject::Setup3DRepresentation( View * view )
     view->GetRenderer()->AddActor( outActor );
 
     // vtk volume renderer
-    vtkSmartVolumeMapper * volumeMapper = vtkSmartVolumeMapper::New();
-    volumeMapper->SetRequestedRenderMode( m_vtkVolumeRenderMode );
+    vtkGPUVolumeRayCastMapper * volumeMapper = vtkGPUVolumeRayCastMapper::New();
     volumeMapper->SetFinalColorLevel( m_colorLevel );
     volumeMapper->SetFinalColorWindow( m_colorWindow );
     volumeMapper->CroppingOn();
