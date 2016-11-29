@@ -73,6 +73,7 @@ public:
     void SetQtRenderWindow( vtkQtRenderWindow * w );
 
     // Control rendering of the view
+    void Render();
     void SetRenderingEnabled( bool b );
     
     vtkGetObjectMacro(Interactor,vtkRenderWindowInteractor);
