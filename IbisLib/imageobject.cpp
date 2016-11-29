@@ -533,6 +533,9 @@ void ImageObject::UpdateVolumeRenderingParamsInMapper()
         if( v->GetType() == THREED_VIEW_TYPE )
         {
             PerViewElements * pv = (*it).second;
+
+            pv->volume->SetVisibility( !IsHidden() && m_vtkVolumeRenderingEnabled ? 1 : 0 );
+
             vtkGPUVolumeRayCastMapper * mapper = vtkGPUVolumeRayCastMapper::SafeDownCast( pv->volume->GetMapper() );
             Q_ASSERT( mapper );
 
