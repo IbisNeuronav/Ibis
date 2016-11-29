@@ -124,8 +124,6 @@ public:
     void SetVtkVolumeRenderingEnabled( bool on );
     bool GetVtkVolumeRenderingEnabled() { return m_vtkVolumeRenderingEnabled; }
     vtkVolumeProperty * GetVolumeProperty() { return m_volumeProperty; }
-    void SetVtkVolumeRenderMode( int mode );
-    int GetVtkVolumeRenderMode() { return m_vtkVolumeRenderMode; }
     void SetVolumeRenderingWindow( double window );
     double GetVolumeRenderingWindow() { return m_colorWindow; }
     void SetVolumeRenderingLevel( double level );
@@ -196,7 +194,6 @@ protected:
     vtkEventQtSlotConnect * m_volumePropertyWatcher;
     double m_colorWindow;
     double m_colorLevel;
-    int m_vtkVolumeRenderMode;
     bool m_autoSampleDistance;
     double m_sampleDistance;
 

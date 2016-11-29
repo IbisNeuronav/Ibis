@@ -35,8 +35,6 @@ void ImageObjectVolumeSettingsWidget::SetImageObject( ImageObject * img )
     vtkVolumeProperty * prop = m_imageObject->GetVolumeProperty();
     ui->scalarOpacityFunctionWidget->SetFunction( prop->GetScalarOpacity() );
     ui->scalarOpacityFunctionWidget->SetYRange( 0.0, 1.0 );
-    ui->gradientOpacityFunctionWidget->SetFunction( prop->GetGradientOpacity() );
-    ui->gradientOpacityFunctionWidget->SetYRange( 0.0, 1.0 );
     ui->colorFunctionWidget->SetColorTransferFunction( prop->GetRGBTransferFunction() );
     ui->colorFunctionWidget->SetXRange( 0.0, 255.0 );
 
@@ -54,19 +52,6 @@ void ImageObjectVolumeSettingsWidget::UpdateUi()
     ui->showClippingWidgetCheckBox->blockSignals( true );
     ui->showClippingWidgetCheckBox->setChecked( m_imageObject->IsShowingVolumeClippingWidget() );
     ui->showClippingWidgetCheckBox->blockSignals( false );
-
-    ui->renderModeComboBox->blockSignals( true );
-    ui->renderModeComboBox->clear();
-    ui->renderModeComboBox->addItem( "GPU Raycast", QVariant( (int)vtkSmartVolumeMapper::GPURenderMode ) );
-    if( m_imageObject->GetVtkVolumeRenderMode() == (int)vtkSmartVolumeMapper::GPURenderMode )
-        ui->renderModeComboBox->setCurrentIndex( 0 );
-    ui->renderModeComboBox->addItem( "3D Texture", QVariant( (int)vtkSmartVolumeMapper::TextureRenderMode ) );
-    if( m_imageObject->GetVtkVolumeRenderMode() == (int)vtkSmartVolumeMapper::TextureRenderMode )
-        ui->renderModeComboBox->setCurrentIndex( 1 );
-    ui->renderModeComboBox->addItem( "3D Texture + Raycast", QVariant( (int)vtkSmartVolumeMapper::RayCastAndTextureRenderMode ) );
-    if( m_imageObject->GetVtkVolumeRenderMode() == (int)vtkSmartVolumeMapper::RayCastAndTextureRenderMode )
-        ui->renderModeComboBox->setCurrentIndex( 2 );
-    ui->renderModeComboBox->blockSignals( false );
 
     ui->levelSpinBox->blockSignals( true );
     ui->levelSpinBox->setValue( m_imageObject->GetVolumeRenderingLevel() );
@@ -104,34 +89,7 @@ void ImageObjectVolumeSettingsWidget::UpdateUi()
 
     ui->specularPowerSpinBox->blockSignals( true );
     ui->specularPowerSpinBox->setValue( prop->GetSpecularPower() );
-    ui->specularPowerSpinBox->blockSignals( false );
-
-    ui->gradientOpacityCheckBox->blockSignals( true );
-    ui->gradientOpacityCheckBox->setChecked( prop->GetDisableGradientOpacity() == 1 ? false : true );
-    ui->gradientOpacityCheckBox->blockSignals( false );
-
-    // Hide control that are useless in certain render mode
-    if( m_imageObject->GetVtkVolumeRenderMode() == (int)vtkSmartVolumeMapper::GPURenderMode )
-    {
-        ui->windowLevelFrame->setHidden( false );
-        ui->shadingParamsFrame->setHidden( true );
-        ui->gradientOpacityCheckBox->setHidden( true );
-        ui->gradientOpacityFunctionWidget->setHidden( true );
-    }
-    else if( m_imageObject->GetVtkVolumeRenderMode() == (int)vtkSmartVolumeMapper::TextureRenderMode )
-    {
-        ui->windowLevelFrame->setHidden( true );
-        ui->shadingParamsFrame->setHidden( false );
-        ui->gradientOpacityCheckBox->setHidden( false );
-        ui->gradientOpacityFunctionWidget->setHidden( false );
-    }
-    else if( m_imageObject->GetVtkVolumeRenderMode() == (int)vtkSmartVolumeMapper::RayCastAndTextureRenderMode )
-    {
-        ui->windowLevelFrame->setHidden( true );
-        ui->shadingParamsFrame->setHidden( false );
-        ui->gradientOpacityCheckBox->setHidden( false );
-        ui->gradientOpacityFunctionWidget->setHidden( false );
-    }
+    ui->specularPowerSpinBox->blockSignals( false );   
 }
 
 void ImageObjectVolumeSettingsWidget::on_enableVolumeRenderingCheckBox_toggled( bool checked )
@@ -174,14 +132,6 @@ void ImageObjectVolumeSettingsWidget::on_gradientOpacityCheckBox_toggled(bool ch
 {
     Q_ASSERT( m_imageObject );
     m_imageObject->GetVolumeProperty()->SetDisableGradientOpacity( checked ? 0 : 1 );
-}
-
-void ImageObjectVolumeSettingsWidget::on_renderModeComboBox_currentIndexChanged( int index )
-{
-    Q_ASSERT( m_imageObject );
-    int renderMode = ui->renderModeComboBox->itemData( index ).toInt();
-    m_imageObject->SetVtkVolumeRenderMode( renderMode );
-    UpdateUi();
 }
 
 void ImageObjectVolumeSettingsWidget::on_levelSpinBox_valueChanged( double val )

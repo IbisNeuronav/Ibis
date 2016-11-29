@@ -29,33 +29,6 @@
     </widget>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_5">
-     <item>
-      <widget class="QLabel" name="renderModeLabel">
-       <property name="text">
-        <string>Render Mode</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QComboBox" name="renderModeComboBox"/>
-     </item>
-     <item>
-      <spacer name="horizontalSpacer">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-    </layout>
-   </item>
-   <item>
     <widget class="QCheckBox" name="shadingCheckBox">
      <property name="text">
       <string>Enable Shading</string>
@@ -345,20 +318,6 @@
     <widget class="vtkQtPiecewiseFunctionWidget" name="scalarOpacityFunctionWidget" native="true">
      <property name="toolTip">
       <string>Scalar Opacity Transfer Function</string>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QCheckBox" name="gradientOpacityCheckBox">
-     <property name="text">
-      <string>Enable Gradient Opacity</string>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="vtkQtPiecewiseFunctionWidget" name="gradientOpacityFunctionWidget" native="true">
-     <property name="toolTip">
-      <string>Gradient Opacity Transfer Function</string>
      </property>
     </widget>
    </item>

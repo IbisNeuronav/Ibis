@@ -191,6 +191,11 @@ void View::SetQtRenderWindow( vtkQtRenderWindow * w )
     this->RenderWindow = w;
 }
 
+void View::Render()
+{
+    this->Interactor->Render();
+}
+
 void View::SetRenderingEnabled( bool b )
 {
     if( m_renderingEnabled == b )

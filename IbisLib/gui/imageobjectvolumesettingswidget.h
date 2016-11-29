@@ -39,14 +39,10 @@ private slots:
     void on_specularSpinBox_valueChanged(double arg1);
     void on_specularPowerSpinBox_valueChanged(double arg1);
     void on_gradientOpacityCheckBox_toggled(bool checked);
-    void on_renderModeComboBox_currentIndexChanged(int index);
     void on_levelSpinBox_valueChanged(double arg1);
     void on_windowSpinBox_valueChanged(double arg1);
-
     void on_autoSampleDistanceCheckBox_toggled(bool checked);
-
     void on_sampleDistanceSpinBox_valueChanged(double arg1);
-
     void on_showClippingWidgetCheckBox_toggled(bool checked);
 
 private:
