@@ -78,6 +78,7 @@ SceneManager::~SceneManager()
 {
     m_referenceTransform->Delete();
     m_invReferenceTransform->Delete();
+    this->SceneRoot->Delete();
 }
 
 // for debugging only
@@ -131,7 +132,6 @@ void SceneManager::Init()
     CurrentObject = this->SceneRoot;
     AllObjects.push_back( this->SceneRoot );
     this->SceneRoot->Register(this);
-    this->SceneRoot->Delete();
 
     // Cut planes
     this->MainCutPlanes = TripleCutPlaneObject::New();
@@ -237,10 +237,10 @@ void SceneManager::RemoveAllSceneObjects()
 
 void SceneManager::RemoveAllChildrenObjects(SceneObject *obj)
 {
-    int n;
-    while( (n = obj->GetNumberOfChildren()) > 0)
+    int n, i = 0;
+    while( ((n = obj->GetNumberOfChildren()) > 0) && (i < n) )
     {
-        SceneObject * o1 = obj->GetChild( n - 1 );
+        SceneObject * o1 = obj->GetChild( i++ ); //n - 1 );
         this->RemoveAllChildrenObjects( o1 );
         this->RemoveObject( o1 );
     }

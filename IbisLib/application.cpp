@@ -467,12 +467,14 @@ void Application::OpenFiles( OpenFileParams * params, bool addToScene )
                 if( cur.loadedObject )
                 {
                     Application::GetSceneManager()->AddObject( cur.loadedObject, parent );
+                    cur.loadedObject->Delete();
                     if( !cur.secondaryObject )
                         Application::GetSceneManager()->SetCurrentObject( cur.loadedObject );
                 }
                 if( cur.secondaryObject )
                 {
                     Application::GetSceneManager()->AddObject( cur.secondaryObject, parent );
+                    cur.secondaryObject->Delete();
                     Application::GetSceneManager()->SetCurrentObject( cur.loadedObject );
                 }
             }
