@@ -13,6 +13,7 @@ uniform float multFactor;
 uniform mat4 eyeToTexture;
 uniform vec3 interactionPoint1TSpace;
 uniform vec3 interactionPoint2TSpace;
+uniform vec3 lightPosTSpace;
 uniform vec3 cameraPosTSpace;
 uniform vec2 volumeDistanceRangeTSpace;
 
