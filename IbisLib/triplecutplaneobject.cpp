@@ -61,6 +61,7 @@ TripleCutPlaneObject::TripleCutPlaneObject()
     }
     this->CursorVisible = true;   
     m_sliceThickness = 1;
+    SceneManager::InConstructor( "TripleCutPlaneObject", this );
 }
 
 
@@ -84,6 +85,7 @@ TripleCutPlaneObject::~TripleCutPlaneObject()
         ImageObject * im = ImageObject::SafeDownCast( this->GetManager()->GetObjectByID( Images[i] ) );
         im->UnRegister( 0 );
     }
+    SceneManager::InDestructor( "TripleCutPlaneObject", this );
 }
 
 void TripleCutPlaneObject::Serialize( Serializer * ser )

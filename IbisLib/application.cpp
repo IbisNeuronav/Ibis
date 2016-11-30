@@ -468,6 +468,7 @@ void Application::OpenFiles( OpenFileParams * params, bool addToScene )
                 {
                     Application::GetSceneManager()->AddObject( cur.loadedObject, parent );
                     cur.loadedObject->Delete();
+                    SceneManager::AddingRegistering( cur.loadedObject->GetName(), parent->GetName(), cur.loadedObject->GetReferenceCount(), cur.loadedObject );
                     if( !cur.secondaryObject )
                         Application::GetSceneManager()->SetCurrentObject( cur.loadedObject );
                 }

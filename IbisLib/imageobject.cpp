@@ -143,6 +143,7 @@ ImageObject::ImageObject()
     m_colorLevel = 0.5;
     m_autoSampleDistance = true;
     m_sampleDistance = 1.0;
+    SceneManager::InConstructor( "ImageObject", this );
 }
 
 ImageObject::~ImageObject()
@@ -162,6 +163,7 @@ ImageObject::~ImageObject()
     m_volumeProperty->Delete();
     m_volumePropertyWatcher->Delete();
     m_volumeClippingBoxWatcher->Delete();
+    SceneManager::InDestructor( "ImageObject", this );
 }
 
 #include "serializerhelper.h"

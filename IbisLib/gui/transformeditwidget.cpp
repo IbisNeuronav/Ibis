@@ -52,12 +52,10 @@ void TransformEditWidget::SetSceneObject( SceneObject * obj )
     if( m_sceneObject )
     {
         m_transformModifiedConnection->Disconnect( m_sceneObject->GetLocalTransform() );
-        m_sceneObject->UnRegister( 0 );
     }
     m_sceneObject = obj;
     if( m_sceneObject )
     {
-        m_sceneObject->Register( 0 );
         m_transformModifiedConnection->Connect( m_sceneObject->GetLocalTransform(), vtkCommand::ModifiedEvent, this, SLOT(UpdateUi()) );
     }
 

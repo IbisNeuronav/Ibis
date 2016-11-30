@@ -72,6 +72,7 @@ SceneManager::SceneManager()
     m_invReferenceTransform = vtkTransform::New();
 
     this->Init();
+    this->InConstructor( "SceneManager", 0 );
 }
 
 SceneManager::~SceneManager()
@@ -79,6 +80,7 @@ SceneManager::~SceneManager()
     m_referenceTransform->Delete();
     m_invReferenceTransform->Delete();
     this->SceneRoot->Delete();
+    this->InDestructor( "SceneManager", 0 );
 }
 
 // for debugging only
@@ -144,7 +146,8 @@ void SceneManager::Init()
     this->MainCutPlanes->SetHidable( false );
     this->MainCutPlanes->SetObjectDeletable(false);
     AddObject( this->MainCutPlanes, this->SceneRoot );
-    this->MainCutPlanes->Delete();
+    this->AddingRegistering( "TripleCutPlaneObject", "WorldObject", this->MainCutPlanes->GetReferenceCount(), this->MainCutPlanes );
+//    this->MainCutPlanes->Delete();
     connect( this->MainCutPlanes, SIGNAL(StartPlaneMoved(int)), this, SLOT(OnStartCutPlaneInteraction()) );
     connect( this->MainCutPlanes, SIGNAL(EndPlaneMove(int)), this, SLOT(OnEndCutPlaneInteraction()) );
     connect( this->MainCutPlanes, SIGNAL(PlaneMoved(int)), this, SLOT(OnCutPlanesPositionChanged()) );
@@ -156,6 +159,7 @@ void SceneManager::Init()
     for( int i = 0; i < globalObjects.size(); ++i )
     {
         AddObject( globalObjects[i], this->SceneRoot );
+        this->AddingRegistering( globalObjects[i]->GetName(), "WorldObject", globalObjects[i]->GetReferenceCount(), globalObjects[i] );
     }
 
     // Axes
@@ -177,6 +181,7 @@ void SceneManager::Init()
     axesObject->SetObjectManagedBySystem(true);
     axesObject->SetHidden( false );
     this->AddObject( axesObject );
+    this->AddingRegistering( "PolyDataObject - Axes", "WorldObject", axesObject->GetReferenceCount(), axesObject );
     this->SetAxesObject( axesObject );
     axesSource->Delete();
     axesObject->Delete();
@@ -771,6 +776,7 @@ void SceneManager::RemoveObject( SceneObject * object , bool viewChange)
     // Tell other this object is being removed
     object->RemoveFromScene();
 
+    this->RemovingUnRegistering( object, object->GetReferenceCount() );
     object->UnRegister( this );
 
     if( object->IsListable() )
@@ -1737,4 +1743,30 @@ void SceneManager::ValidatePointerObject()
     }
     if( pointerId != this->NavigationPointerID )
         SetNavigationPointerID( pointerId );
+}
+
+//for debugging
+void SceneManager::InConstructor(const QString &text, SceneObject *obj )
+{
+    cout <<" InConstructor - "  << text.toUtf8().data() << " " << obj << endl;
+}
+
+void SceneManager::InDestructor( const QString &text, SceneObject *obj )
+{
+    cout <<" InDestructor - "  << text.toUtf8().data() << " " << obj << endl;
+}
+
+void SceneManager::AddingRegistering(const QString &objClass, const QString &regClass, int refCount, SceneObject *obj )
+{
+    cout <<"After  AddingRegistering - "  << obj << " " << objClass.toUtf8().data()  << " to " << regClass.toUtf8().data() << " ref. count = " << refCount << endl;
+}
+
+void SceneManager::RemovingUnRegistering( const QString &objClass, const QString &regClass, int refCount, SceneObject *obj )
+{
+    cout <<"Before RemovingUnRegistering - "  << obj << " " << objClass.toUtf8().data()  << " from " << regClass.toUtf8().data() << " ref. count = " << refCount << endl;
+}
+
+void SceneManager::RemovingUnRegistering( SceneObject *obj, int refCount )
+{
+    cout <<"Before UnRegistering - "  << obj << " " << " ref. count = " << refCount << endl;
 }

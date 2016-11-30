@@ -22,12 +22,19 @@ WorldObject::WorldObject()
     this->AllowHiding = false;
     this->ObjectDeletable = false;
     this->NameChangeable = false;
+    SceneManager::InConstructor( "WorldObject", this );
 }
 
 WorldObject::~WorldObject()
 {
-    if( this->m_axesObject )
-        this->m_axesObject->UnRegister( this );
+//    if( this->m_axesObject )
+//        this->m_axesObject->UnRegister( this );
+    if( m_axesObject )
+    {
+        SceneManager::RemovingUnRegistering( "PolydataObject - Axes", "WorldObject", m_axesObject->GetReferenceCount(), m_axesObject );
+        m_axesObject->UnRegister( this );
+    }
+    SceneManager::InDestructor( "WorldObject", this );
 }
 
 void WorldObject::SetAxesObject( PolyDataObject * obj )

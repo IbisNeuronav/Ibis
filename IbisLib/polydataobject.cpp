@@ -102,6 +102,7 @@ PolyDataObject::PolyDataObject()
     this->LutBackup = 0;
     this->ProbeFilter = vtkProbeFilter::New();
     this->ProbeFilter->SetInputConnection( m_clippingSwitch->GetOutputPort() );
+    SceneManager::InConstructor( "PolyDataObject", this );
 }
 
 PolyDataObject::~PolyDataObject()
@@ -131,6 +132,7 @@ PolyDataObject::~PolyDataObject()
         this->ScalarSource->UnRegister( this );
     this->TextureMap->Delete();
     this->ProbeFilter->Delete();
+    SceneManager::InDestructor( "PolyDataObject", this );
 }
 
 void PolyDataObject::SetPolyData( vtkPolyData * poly )

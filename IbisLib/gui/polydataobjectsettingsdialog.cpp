@@ -44,10 +44,6 @@ PolyDataObjectSettingsDialog::PolyDataObjectSettingsDialog( QWidget* parent, Qt:
 
 PolyDataObjectSettingsDialog::~PolyDataObjectSettingsDialog()
 {
-    if( m_object )
-    {
-        m_object->UnRegister( 0 );
-    }
 }
 
 #include <QGroupBox>
@@ -61,7 +57,6 @@ void PolyDataObjectSettingsDialog::SetPolyDataObject( PolyDataObject * object )
     
     if( m_object )
     {
-        m_object->UnRegister( 0 );
         disconnect( m_object, SIGNAL(Modified()), this, SLOT(UpdateSettings()) );
     }
     
@@ -70,7 +65,6 @@ void PolyDataObjectSettingsDialog::SetPolyDataObject( PolyDataObject * object )
     if( m_object )
     {
         connect( m_object, SIGNAL(Modified()), this, SLOT(UpdateSettings()) );
-        m_object->Register( 0 );
     }
     
     this->UpdateUI();
