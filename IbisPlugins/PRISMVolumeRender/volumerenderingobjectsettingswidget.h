@@ -47,6 +47,7 @@ private:
     QList<VolumeRenderingSingleVolumeSettingsWidget*> m_volumeWidgets;
 
     VolumeShaderEditorWidget * m_shaderInitWidget;
+    VolumeShaderEditorWidget * m_shaderStopConditionWidget;
 
     Ui::VolumeRenderingObjectSettingsWidget * ui;
     VolumeRenderingObject * m_vr;
@@ -69,6 +70,15 @@ private slots:
     void on_rayInitComboBox_currentIndexChanged(int index);
     void on_multFactorSlider_valueChanged(int value);
     void on_multFactorSpinBox_valueChanged(double arg1);
+
+    void on_stopConditionComboBox_currentIndexChanged(int index);
+
+    void on_addStopConditionShaderButton_clicked();
+
+    void on_removeStopConditionShaderButton_clicked();
+
+    void on_shaderStopConditionButton_toggled(bool checked);
+    void OnShaderStopConditionEditorWidgetClosed();
 
 protected:
 

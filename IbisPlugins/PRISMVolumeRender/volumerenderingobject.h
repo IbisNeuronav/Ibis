@@ -105,6 +105,21 @@ public:
     QString GetRayInitShaderCode();
     void SetRayInitShaderCode( QString code );
 
+    // Manage Stop condition shaders
+    int GetNumberOfStopConditionShaderTypes();
+    QString GetStopConditionShaderTypeName( int index );
+    bool IsStopConditionShaderTypeCustom( int index );
+    bool DoesStopConditionShaderTypeExist( QString name );
+    void SetStopConditionShaderType( int typeIndex );
+    void SetStopConditionShaderTypeByName( QString name );
+    int GetStopConditionShaderType();
+    QString GetStopConditionShaderName();
+    void AddStopConditionShaderType( QString name, QString code, bool custom );
+    void DuplicateStopConditionShaderType();
+    void DeleteStopConditionShaderType();
+    QString GetStopConditionShaderCode();
+    void SetStopConditionShaderCode( QString code );
+
     // Manage shader contribution of each volume
     int GetNumberOfShaderContributionTypes();
     int GetShaderContributionTypeIndex( QString shaderName );
@@ -150,6 +165,8 @@ public:
     void LoadCustomShaderContribs();
     void SaveCustomRayInitShaders();
     void LoadCustomRayInitShaders();
+    void SaveCustomStopConditionShaders();
+    void LoadCustomStopConditionShaders();
 
 signals:
 
@@ -194,6 +211,9 @@ protected:
 
     QList< ShaderContrib > m_initShaderContribs;
     int m_initShaderContributionType;
+
+    QList< ShaderContrib > m_stopConditionShaders;
+    int m_stopConditionShaderType;
 
     struct PerView
     {
