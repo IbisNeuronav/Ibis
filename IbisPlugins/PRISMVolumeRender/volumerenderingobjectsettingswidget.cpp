@@ -29,6 +29,7 @@ VolumeRenderingObjectSettingsWidget::VolumeRenderingObjectSettingsWidget(QWidget
 {
     m_needVolumeSlotUpdate = true;
     m_shaderInitWidget = 0;
+    m_shaderStopConditionWidget = 0;
     ui->setupUi(this);
     ui->interactionPointTypeButtonGroup->setId( ui->pointTypeRadioButton, 0 );
     ui->interactionPointTypeButtonGroup->setId( ui->lineTypeRadioButton, 1 );
@@ -108,6 +109,16 @@ void VolumeRenderingObjectSettingsWidget::UpdateUI()
         }
         ui->rayInitComboBox->setCurrentIndex( m_vr->GetRayInitShaderType() );
         ui->rayInitComboBox->blockSignals( false );
+
+        ui->removeStopConditionShaderButton->setEnabled( m_vr->IsStopConditionShaderTypeCustom( m_vr->GetStopConditionShaderType() ) );
+        ui->stopConditionComboBox->blockSignals( true );
+        ui->stopConditionComboBox->clear();
+        for( int i = 0; i < m_vr->GetNumberOfStopConditionShaderTypes(); ++i )
+        {
+            ui->stopConditionComboBox->addItem( m_vr->GetStopConditionShaderTypeName( i ) );
+        }
+        ui->stopConditionComboBox->setCurrentIndex( m_vr->GetStopConditionShaderType() );
+        ui->stopConditionComboBox->blockSignals( false );
 
         SetupVolumeWidgets();
     }
@@ -268,6 +279,52 @@ void VolumeRenderingObjectSettingsWidget::on_rayInitComboBox_currentIndexChanged
     m_vr->SetRayInitShaderType( index );
 }
 
+void VolumeRenderingObjectSettingsWidget::on_stopConditionComboBox_currentIndexChanged(int index)
+{
+    Q_ASSERT( m_vr );
+    m_vr->SetStopConditionShaderType( index );
+}
+
+void VolumeRenderingObjectSettingsWidget::on_addStopConditionShaderButton_clicked()
+{
+    Q_ASSERT( m_vr );
+    m_vr->DuplicateStopConditionShaderType();
+    UpdateUI();
+}
+
+void VolumeRenderingObjectSettingsWidget::on_removeStopConditionShaderButton_clicked()
+{
+    Q_ASSERT( m_vr );
+    m_vr->DeleteRayInitShaderType();
+    UpdateUI();
+}
+
+void VolumeRenderingObjectSettingsWidget::on_shaderStopConditionButton_toggled(bool checked)
+{
+    if( checked )
+    {
+        Q_ASSERT( m_shaderStopConditionWidget == 0 );
+        m_shaderStopConditionWidget = new VolumeShaderEditorWidget( 0 );
+        m_shaderStopConditionWidget->setAttribute( Qt::WA_DeleteOnClose );
+        m_shaderStopConditionWidget->SetVolumeRenderer( m_vr, -2 );
+        connect( m_shaderStopConditionWidget, SIGNAL(destroyed()), this, SLOT(OnShaderStopConditionEditorWidgetClosed()) );
+        m_shaderStopConditionWidget->show();
+    }
+    else
+    {
+        Q_ASSERT( m_shaderStopConditionWidget );
+        m_shaderStopConditionWidget->close();
+    }
+}
+
+void VolumeRenderingObjectSettingsWidget::OnShaderStopConditionEditorWidgetClosed()
+{
+    m_shaderStopConditionWidget = 0;
+    ui->shaderStopConditionButton->blockSignals( true );
+    ui->shaderStopConditionButton->setChecked( false );
+    ui->shaderStopConditionButton->blockSignals( false );
+}
+
 void VolumeRenderingObjectSettingsWidget::on_multFactorSlider_valueChanged(int value)
 {
     Q_ASSERT( m_vr );
@@ -285,3 +342,4 @@ void VolumeRenderingObjectSettingsWidget::on_multFactorSpinBox_valueChanged(doub
 
     UpdateUI();
 }
+
