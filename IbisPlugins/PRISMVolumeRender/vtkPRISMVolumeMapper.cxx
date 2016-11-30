@@ -13,6 +13,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "vtkPRISMVolumeMapper.h"
 
 #include "vtkCamera.h"
+#include "vtkLightCollection.h"
+#include "vtkLight.h"
 #include "vtkColorTransferFunction.h"
 #include "vtkDataArray.h"
 #include "vtkImageData.h"
@@ -319,6 +321,18 @@ void vtkPRISMVolumeMapper::Render( vtkRenderer * ren, vtkVolume * vol )
     double interactP2Trans[4];
     this->WorldToTextureMatrix->MultiplyPoint( interactP2, interactP2Trans );
     res = VolumeShader->SetVariable( "interactionPoint2TSpace", (float)interactP2Trans[0], (float)interactP2Trans[1], (float)interactP2Trans[2] );
+
+    // Compute light position in texture space
+    double lightPos[4] = { 0.0, 0.0, 0.0, 1.0 };
+    vtkLightCollection * lights = ren->GetLights();
+    if( lights->GetNumberOfItems() > 0 )
+    {
+        lights->InitTraversal();
+        vtkLight * l = lights->GetNextItem();
+        l->GetTransformedPosition( lightPos );
+    }
+    this->WorldToTextureMatrix->MultiplyPoint( lightPos, lightPos );
+    res = VolumeShader->SetVariable( "lightPosTSpace", (float)lightPos[0], (float)lightPos[1], (float)lightPos[2] );
 
     // Set cam position and distance range variables in the shader
     res |= SetCameraVariablesInShader( ren, vol );
