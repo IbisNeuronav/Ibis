@@ -174,7 +174,7 @@ void main()
 
     // Initialize accumulator
     float curDist = 0.0;  // distance from the start of the ray in texture coord units
-    vec4 colorAccumulator = vec4( 0.0, 0.0, 0.0, 0.0 );
+    vec4 finalColor = vec4( 0.0, 0.0, 0.0, 0.0 );
 
     // Put custom initialization code here
     @ShaderInit@
@@ -194,16 +194,15 @@ void main()
         fullSample.a = 1.0 - pow( 1.0 - fullSample.a, stepSizeAdjustment );
 
         // merge with existing
-        float oneMinusDstAlpha = 1.0 - colorAccumulator.a;
-        colorAccumulator.rgb += oneMinusDstAlpha * fullSample.a * fullSample.rgb;
-        colorAccumulator.a += oneMinusDstAlpha * fullSample.a;
+        float oneMinusDstAlpha = 1.0 - finalColor.a;
+        finalColor.rgb += oneMinusDstAlpha * fullSample.a * fullSample.rgb;
+        finalColor.a += oneMinusDstAlpha * fullSample.a;
 
-        if( colorAccumulator.a > .99 )
-            break;
+        @StopCondition@
 
         curDist += stepSize;
     }
 
-    gl_FragColor.rgb = colorAccumulator.rgb * multFactor;
-    gl_FragColor.a = colorAccumulator.a;
+    gl_FragColor.rgb = finalColor.rgb * multFactor;
+    gl_FragColor.a = finalColor.a;
 }

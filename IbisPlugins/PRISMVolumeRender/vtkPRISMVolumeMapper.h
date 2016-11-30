@@ -83,6 +83,7 @@ public:
   int GetNumberOfInputs();
   void AddInput( vtkAlgorithmOutput * im, vtkVolumeProperty * property, const char * shaderContrib );
   void SetShaderInitCode( const char * code );
+  void SetStopConditionCode( const char * code );
   void EnableInput( int index, bool enable );
   void ClearAllInputs();
   void SetUseLinearSampling( int index, bool use );
@@ -114,6 +115,7 @@ protected:
   double       InteractionPoint2[3];
 
   std::string  ShaderInitCode;
+  std::string  StopConditionCode;
 
   // Data about each of the volume
   struct PerVolume

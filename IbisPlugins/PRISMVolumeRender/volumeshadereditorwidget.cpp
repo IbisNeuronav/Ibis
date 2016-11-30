@@ -44,8 +44,10 @@ void VolumeShaderEditorWidget::SetShaderCode( QString shaderCode )
 {
     if( m_volumeIndex >= 0 )
         m_volumeRenderer->SetCustomShaderCode( m_volumeIndex, shaderCode );
-    else
+    else if( m_volumeIndex == -1 )
         m_volumeRenderer->SetRayInitShaderCode( shaderCode );
+    else
+        m_volumeRenderer->SetStopConditionShaderCode( shaderCode );
 }
 
 QString VolumeShaderEditorWidget::GetShaderCode()
@@ -53,8 +55,10 @@ QString VolumeShaderEditorWidget::GetShaderCode()
     QString shaderText;
     if( m_volumeIndex >= 0 )
         shaderText = m_volumeRenderer->GetCustomShaderContribution( m_volumeIndex );
-    else
+    else if( m_volumeIndex == -1 )
         shaderText = m_volumeRenderer->GetRayInitShaderCode();
+    else
+        shaderText = m_volumeRenderer->GetStopConditionShaderCode();
     return shaderText;
 }
 
@@ -62,15 +66,19 @@ bool VolumeShaderEditorWidget::IsShaderCustom()
 {
     if( m_volumeIndex >= 0 )
         return m_volumeRenderer->IsShaderTypeCustom( m_volumeRenderer->GetShaderContributionType( m_volumeIndex ) );
-    return m_volumeRenderer->IsRayInitShaderTypeCustom( m_volumeRenderer->GetRayInitShaderType() );
+    if( m_volumeIndex == -1 )
+        return m_volumeRenderer->IsRayInitShaderTypeCustom( m_volumeRenderer->GetRayInitShaderType() );
+    return m_volumeRenderer->IsStopConditionShaderTypeCustom( m_volumeRenderer->GetStopConditionShaderType() );
 }
 
 void VolumeShaderEditorWidget::DuplicateShader()
 {
     if( m_volumeIndex >= 0 )
         m_volumeRenderer->DuplicateShaderContribType( m_volumeRenderer->GetShaderContributionType( m_volumeIndex ) );
-    else
+    else if( m_volumeIndex == -1 )
         m_volumeRenderer->DuplicateRayInitShaderType();
+    else
+        m_volumeRenderer->DuplicateStopConditionShaderType();
 }
 
 void VolumeShaderEditorWidget::UpdateUi()
@@ -88,9 +96,13 @@ void VolumeShaderEditorWidget::UpdateUi()
             header += " - ";
         }
     }
-    else
+    else if( m_volumeIndex == -1 )
     {
         header = "Ray Init - ";
+    }
+    else
+    {
+        header = "Stop Condition - ";
     }
     header += GetCurrentShaderTypeName();
     this->setWindowTitle( header );
@@ -106,8 +118,10 @@ QString VolumeShaderEditorWidget::GetCurrentShaderTypeName()
 {
     if( m_volumeIndex >= 0 )
         return m_volumeRenderer->GetShaderContributionTypeName( m_volumeRenderer->GetShaderContributionType( m_volumeIndex ) );
-    else
+    else if( m_volumeIndex == -1 )
         return m_volumeRenderer->GetRayInitShaderTypeName( m_volumeRenderer->GetRayInitShaderType() );
+    else
+        return m_volumeRenderer->GetStopConditionShaderTypeName( m_volumeRenderer->GetStopConditionShaderType() );
 }
 
 void VolumeShaderEditorWidget::VolumeRendererModifiedSlot()

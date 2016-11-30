@@ -38,6 +38,8 @@ const char defaultVolumeContribution[] = "           vec4 volumeSample = texture
             vec4 transferFuncSample = texture1D( transferFunctions[volIndex], volumeSample.x ); \n\
             fullSample += transferFuncSample;";
 
+const char defaultStopConditionCode[] = "        if( finalColor.a > .99 ) \n            break;";
+
 vtkPRISMVolumeMapper::PerVolume::PerVolume()
     : SavedTextureInput(0), VolumeTextureId(0), Property(0), TranferFunctionTextureId(0), Enabled(true), linearSampling(true)
 {
@@ -79,6 +81,7 @@ vtkPRISMVolumeMapper::vtkPRISMVolumeMapper()
     this->GlExtensionsLoaded = false;
     this->RenderState = 0;
     this->ColoredCube = vtkColoredCube::New();
+    this->StopConditionCode = defaultStopConditionCode;
 }
 
 //-----------------------------------------------------------------------------
@@ -437,6 +440,12 @@ void vtkPRISMVolumeMapper::SetShaderInitCode( const char * code )
     this->VolumeShaderNeedsUpdate = true;
 }
 
+void vtkPRISMVolumeMapper::SetStopConditionCode( const char * code )
+{
+    StopConditionCode = code;
+    this->VolumeShaderNeedsUpdate = true;
+}
+
 void vtkPRISMVolumeMapper::EnableInput( int index, bool enable )
 {
     VolumesInfo[index].Enabled = enable;
@@ -542,6 +551,11 @@ bool vtkPRISMVolumeMapper::UpdateVolumeShader()
     std::string volumeContributionsFindString( "@VolumeContributions@" );
     size_t volContribPos = shaderCode.find( volumeContributionsFindString );
     shaderCode.replace( volContribPos, volumeContributionsFindString.length(), osVolContrib.str() );
+
+    // Replace StopCondition with custom code
+    std::string stopConditionFindString( "@StopCondition@" );
+    size_t stopConditionPos = shaderCode.find( stopConditionFindString );
+    shaderCode.replace( stopConditionPos, stopConditionFindString.length(), StopConditionCode );
 
     // Build shader
     if( !this->VolumeShader )

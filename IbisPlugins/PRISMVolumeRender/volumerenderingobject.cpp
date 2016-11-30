@@ -125,6 +125,10 @@ else \n\
 
 const char initShaderContribNone[] = "";
 
+// ======== Builtin Stop Condition shader code =============
+
+const char stopConditionShaderERT[] = "        if( finalColor.a > .99 ) \n            break;";
+const char stopConditionShaderNone[] = "";
 
 
 VolumeRenderingObject::PerImage::PerImage()
@@ -237,7 +241,7 @@ VolumeRenderingObject::VolumeRenderingObject()
     contribNone.code = shaderContributionNone;
     m_shaderContribs.push_back( contribNone );
 
-    // Register Init ray shader types
+    // Register Builtin Init ray shader types
     ShaderContrib initContribClipFront;
     initContribClipFront.name = "Clip Front";
     initContribClipFront.code = initShaderContribClipFront;
@@ -254,6 +258,19 @@ VolumeRenderingObject::VolumeRenderingObject()
     m_initShaderContribs.push_back( initContribNone );
 
     m_initShaderContributionType = 2;
+
+    // Register Builtin Stop Condition shader types
+    ShaderContrib stopConditionNone;
+    stopConditionNone.name = "None";
+    stopConditionNone.code = stopConditionShaderNone;
+    m_stopConditionShaders.push_back( stopConditionNone );
+
+    ShaderContrib stopConditionERT;  // ERT = Early Ray Termination
+    stopConditionERT.name = "ERT alpha 99%";
+    stopConditionERT.code = stopConditionShaderERT;
+    m_stopConditionShaders.push_back( stopConditionERT );
+
+    m_stopConditionShaderType = 1; // default to ERT
 
     // Make one slot
     this->AddImageSlot();
@@ -807,6 +824,122 @@ void VolumeRenderingObject::SetRayInitShaderCode( QString code )
     emit Modified();
 }
 
+int VolumeRenderingObject::GetNumberOfStopConditionShaderTypes()
+{
+    return m_stopConditionShaders.size();
+}
+
+QString VolumeRenderingObject::GetStopConditionShaderTypeName( int index )
+{
+    Q_ASSERT( index < GetNumberOfStopConditionShaderTypes() && index >= 0 );
+    return m_stopConditionShaders[ index ].name;
+}
+
+bool VolumeRenderingObject::IsStopConditionShaderTypeCustom( int index )
+{
+    Q_ASSERT( index < GetNumberOfStopConditionShaderTypes() && index >= 0 );
+    return m_stopConditionShaders[ index ].custom;
+}
+
+bool VolumeRenderingObject::DoesStopConditionShaderTypeExist( QString name )
+{
+    for( int i = 0; i < GetNumberOfStopConditionShaderTypes(); ++i )
+    {
+        if( m_stopConditionShaders[i].name == name )
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+void VolumeRenderingObject::SetStopConditionShaderType( int typeIndex )
+{
+    Q_ASSERT( typeIndex < GetNumberOfStopConditionShaderTypes() && typeIndex >= 0 );
+    m_stopConditionShaderType = typeIndex;
+    UpdateAllMappers();
+    emit Modified();
+}
+
+void VolumeRenderingObject::SetStopConditionShaderTypeByName( QString name )
+{
+    int index = -1;
+    for( int i = 0; i < GetNumberOfStopConditionShaderTypes(); ++i )
+    {
+        if( m_stopConditionShaders[i].name == name )
+        {
+            index = i;
+            break;
+        }
+    }
+
+    if( index != -1 )
+        SetStopConditionShaderType( index );
+}
+
+int VolumeRenderingObject::GetStopConditionShaderType()
+{
+    return m_stopConditionShaderType;
+}
+
+QString VolumeRenderingObject::GetStopConditionShaderName()
+{
+    Q_ASSERT( m_stopConditionShaderType >= 0 && m_stopConditionShaderType < m_stopConditionShaders.size() );
+    return m_stopConditionShaders[ m_stopConditionShaderType ].name;
+}
+
+void VolumeRenderingObject::AddStopConditionShaderType( QString name, QString code, bool custom )
+{
+    ShaderContrib newContrib;
+    newContrib.name = name;
+    newContrib.code = code;
+    newContrib.custom = custom;
+    m_stopConditionShaders.push_back( newContrib );
+    m_stopConditionShaderType = m_stopConditionShaders.size() - 1;
+    emit Modified();
+}
+
+void VolumeRenderingObject::DuplicateStopConditionShaderType()
+{
+    ShaderContrib newContrib = m_stopConditionShaders[ m_stopConditionShaderType ];
+
+    // Find unique name
+    QStringList allNames;
+    for( int i = 0; i < m_stopConditionShaders.size(); ++i )
+        allNames.push_back( m_stopConditionShaders[i].name );
+    newContrib.name = SceneManager::FindUniqueName( newContrib.name, allNames );
+
+    newContrib.custom = true;
+    m_stopConditionShaders.push_back( newContrib );
+    m_stopConditionShaderType = m_stopConditionShaders.size() - 1;
+    emit Modified();
+}
+
+void VolumeRenderingObject::DeleteStopConditionShaderType()
+{
+    //Q_ASSERT( m_stopConditionShaders[ m_stopConditionShaderType ].custom == true );
+    m_stopConditionShaders.removeAt( m_stopConditionShaderType );
+    int newInitShaderType = m_stopConditionShaderType;
+    if( newInitShaderType > 0 )
+        --newInitShaderType;
+    SetStopConditionShaderType( newInitShaderType );
+}
+
+QString VolumeRenderingObject::GetStopConditionShaderCode()
+{
+    Q_ASSERT( m_stopConditionShaderType >= 0 && m_stopConditionShaderType < m_stopConditionShaders.size() );
+    return m_stopConditionShaders[ m_stopConditionShaderType ].code;
+}
+
+void VolumeRenderingObject::SetStopConditionShaderCode( QString code )
+{
+    //Q_ASSERT( m_stopConditionShaders[ m_stopConditionShaderType ].custom == true );
+    Q_ASSERT( m_stopConditionShaderType >= 0 && m_stopConditionShaderType < m_stopConditionShaders.size() );
+    m_stopConditionShaders[ m_stopConditionShaderType ].code = code;
+    UpdateAllMappers();
+    emit Modified();
+}
+
 int VolumeRenderingObject::GetNumberOfShaderContributionTypes()
 {
     return m_shaderContribs.size();
@@ -1146,6 +1279,8 @@ void VolumeRenderingObject::UpdateMapper( PerView & pv )
     mapper->SetSampleDistance( m_samplingDistance );
     QString initShaderCode = m_initShaderContribs[ m_initShaderContributionType ].code;
     mapper->SetShaderInitCode( initShaderCode.toUtf8().data() );
+    QString stopConditionShaderCode = m_stopConditionShaders[ m_stopConditionShaderType ].code;
+    mapper->SetStopConditionCode( stopConditionShaderCode.toUtf8().data() );
 }
 
 void VolumeRenderingObject::UpdateAllMappers()
@@ -1333,6 +1468,65 @@ void VolumeRenderingObject::SaveCustomRayInitShaders()
             {
                 QTextStream shaderStream( &shaderFile );
                 shaderStream << m_initShaderContribs[i].code;
+            }
+            shaderFile.close();
+        }
+    }
+}
+
+void VolumeRenderingObject::LoadCustomStopConditionShaders()
+{
+    QString configDir = Application::GetConfigDirectory();
+    QString shadersDir = configDir + "VolumeRenderer/CustomStopConditionShaders/";
+    if( QFile::exists( shadersDir ) )
+    {
+        // list all .glsl files
+        QDir dir( shadersDir );
+        QStringList filter;
+        filter.push_back( QString("*.glsl") );
+        QStringList allFiles = dir.entryList( filter );
+
+        // for each file, read and create a shader contrib.
+        for( int i = 0; i < allFiles.size(); ++i )
+        {
+            QString shaderFileName = shadersDir + allFiles[i];
+            QFile shaderFile( shaderFileName );
+            if( shaderFile.open( QIODevice::ReadOnly | QIODevice::Text ) )
+            {
+                ShaderContrib contrib;
+                contrib.custom = true;
+                QFileInfo info( allFiles[i] );
+                contrib.name = info.baseName();
+                QTextStream shaderStream( &shaderFile );
+                contrib.code = shaderStream.readAll();
+                m_stopConditionShaders.push_back( contrib );
+            }
+            shaderFile.close();
+        }
+    }
+}
+
+void VolumeRenderingObject::SaveCustomStopConditionShaders()
+{
+    // Make sure dir exists
+    QString configDir = Application::GetInstance().GetConfigDirectory();
+    QString shadersDir = configDir + "VolumeRenderer/CustomStopConditionShaders/";
+    if( !QFile::exists( shadersDir ) )
+    {
+        QDir dir;
+        dir.mkpath( shadersDir );
+    }
+
+    for( int i = 0; i < m_stopConditionShaders.size(); ++i )
+    {
+        if( m_stopConditionShaders[i].custom )
+        {
+            QString filename = shadersDir + m_stopConditionShaders[i].name + ".glsl";
+            QFile shaderFile( filename );
+            if( shaderFile.open( QIODevice::WriteOnly | QIODevice::Text ) )
+            {
+                QTextStream shaderStream( &shaderFile );
+                shaderStream << m_stopConditionShaders[i].code;
             }
             shaderFile.close();
         }
