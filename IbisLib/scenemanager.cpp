@@ -79,6 +79,7 @@ SceneManager::~SceneManager()
 {
     m_referenceTransform->Delete();
     m_invReferenceTransform->Delete();
+    this->MainCutPlanes->Delete();
     this->SceneRoot->Delete();
     this->InDestructor( "SceneManager", 0 );
 }
@@ -144,7 +145,6 @@ void SceneManager::Init()
     this->MainCutPlanes->SetObjectDeletable(false);
     AddObject( this->MainCutPlanes, this->SceneRoot );
     this->AddingRegistering( "TripleCutPlaneObject", "WorldObject", this->MainCutPlanes->GetReferenceCount(), this->MainCutPlanes );
-    this->MainCutPlanes->Delete();
     connect( this->MainCutPlanes, SIGNAL(StartPlaneMoved(int)), this, SLOT(OnStartCutPlaneInteraction()) );
     connect( this->MainCutPlanes, SIGNAL(EndPlaneMove(int)), this, SLOT(OnEndCutPlaneInteraction()) );
     connect( this->MainCutPlanes, SIGNAL(PlaneMoved(int)), this, SLOT(OnCutPlanesPositionChanged()) );
@@ -234,6 +234,7 @@ void SceneManager::InternalClearScene()
 void SceneManager::RemoveAllSceneObjects()
 {
     this->RemoveObject( this->SceneRoot );
+    this->MainCutPlanes->Delete();
     this->MainCutPlanes = 0;
 }
 
