@@ -1418,6 +1418,7 @@ void SceneManager::ObjectReader( Serializer * ser, bool interactive )
                 SceneObject *obj = loadedObject.at(0);
                 obj->Serialize(ser);
                 this->AddObjectUsingID(obj, parentObject, oldId);
+                obj->Delete();
             }
             else
             {

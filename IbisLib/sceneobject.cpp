@@ -44,6 +44,8 @@ SceneObject::SceneObject()
     this->ObjectManagedByTracker = false;
     this->AllowManualTransformEdit = true;
     this->LocalTransform = vtkTransform::New();  // by default, we have a vtkTransform that can be manipulated manually. Could be changed in certain object types.
+    this->LocalTransform->Register( this );
+    this->LocalTransform->Delete();
     this->WorldTransform = vtkTransform::New();
     this->IsModifyingTransform = false;
     this->TransformModified = false;
@@ -168,7 +170,11 @@ void SceneObject::SetLocalTransform( vtkLinearTransform * localTransform )
         this->LocalTransform->Register(this);
     }
     else
+    {
         this->LocalTransform = vtkTransform::New();
+        this->LocalTransform->Register( this );
+        this->LocalTransform->Delete();
+    }
 
     this->m_vtkConnections->Connect( this->LocalTransform, vtkCommand::ModifiedEvent, this, SLOT(NotifyTransformChanged()), 0, 0.0, Qt::DirectConnection );
 

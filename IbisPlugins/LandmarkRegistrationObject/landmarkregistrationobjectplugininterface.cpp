@@ -24,12 +24,14 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 LandmarkRegistrationObjectPluginInterface::LandmarkRegistrationObjectPluginInterface()
 {
     m_landmarkRegistrationObject = 0;
+    SceneManager::InConstructor( "LandmarkRegistrationObjectPluginInterface", 0 );
 }
 
 LandmarkRegistrationObjectPluginInterface::~LandmarkRegistrationObjectPluginInterface()
 {
     if (m_landmarkRegistrationObject)
         m_landmarkRegistrationObject->Delete();
+    SceneManager::InDestructor( "LandmarkRegistrationObjectPluginInterface", 0 );
 }
 
 SceneObject *LandmarkRegistrationObjectPluginInterface::CreateObject()
