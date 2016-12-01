@@ -22,12 +22,14 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 ContourSurfacePluginInterface::ContourSurfacePluginInterface()
 {
     m_generatedSurface = 0;
+    SceneManager::InConstructor( "ContourSurfacePluginInterface", 0 );
 }
 
 ContourSurfacePluginInterface::~ContourSurfacePluginInterface()
 {
     if( m_generatedSurface )
         m_generatedSurface ->Delete();
+    SceneManager::InDestructor( "ContourSurfacePluginInterface", 0 );
 }
 
 SceneObject *ContourSurfacePluginInterface::CreateObject()
@@ -38,6 +40,7 @@ SceneObject *ContourSurfacePluginInterface::CreateObject()
     m_generatedSurface->SetPluginInterface( this );
     if( manager->IsLoadingScene() )
     {
+        SceneManager::AddingRegistering( "ContourSurfacePluginInterface", "WorldObject", m_generatedSurface->GetReferenceCount(), m_generatedSurface );
         manager->AddObject(m_generatedSurface);
         return m_generatedSurface;
     }
@@ -66,6 +69,7 @@ SceneObject *ContourSurfacePluginInterface::CreateObject()
             surfaceName.append(QString::number(image->GetNumberOfChildren()));
             m_generatedSurface->SetName(surfaceName);
             m_generatedSurface->SetScalarsVisible(0);
+            SceneManager::AddingRegistering( "ContourSurfacePluginInterface", image->GetName(), m_generatedSurface->GetReferenceCount(), m_generatedSurface );
             manager->AddObject(m_generatedSurface, image);
             manager->SetCurrentObject( m_generatedSurface );
         }

@@ -240,15 +240,9 @@ Application::~Application()
     for( int i = 0; i < allPlugins.size(); ++i )
     {
         allPlugins[i]->BaseSaveSettings( settings );
+        allPlugins[i]->Delete();
     }
     settings.endGroup();
-
-    QList<SceneObject*> globalObjects;
-    this->GetAllGlobalObjectInstances( globalObjects );
-    for( int i = 0; i < globalObjects.size(); ++i )
-    {
-        globalObjects[i]->Delete();
-    }
 }
 
 void Application::CreateInstance( bool viewerOnly )

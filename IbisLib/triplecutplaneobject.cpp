@@ -78,13 +78,6 @@ TripleCutPlaneObject::~TripleCutPlaneObject()
     {
         this->Planes[i]->Delete();
     }
-
-//    // Release hook on images
-//    for( unsigned i = 0; i < Images.size(); ++i )
-//    {
-//        ImageObject * im = ImageObject::SafeDownCast( this->GetManager()->GetObjectByID( Images[i] ) );
-//        im->UnRegister( 0 );
-//    }
     SceneManager::InDestructor( "TripleCutPlaneObject", this );
 }
 
