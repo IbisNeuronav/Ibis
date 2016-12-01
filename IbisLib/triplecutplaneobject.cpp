@@ -79,12 +79,12 @@ TripleCutPlaneObject::~TripleCutPlaneObject()
         this->Planes[i]->Delete();
     }
 
-    // Release hook on images
-    for( unsigned i = 0; i < Images.size(); ++i )
-    {
-        ImageObject * im = ImageObject::SafeDownCast( this->GetManager()->GetObjectByID( Images[i] ) );
-        im->UnRegister( 0 );
-    }
+//    // Release hook on images
+//    for( unsigned i = 0; i < Images.size(); ++i )
+//    {
+//        ImageObject * im = ImageObject::SafeDownCast( this->GetManager()->GetObjectByID( Images[i] ) );
+//        im->UnRegister( 0 );
+//    }
     SceneManager::InDestructor( "TripleCutPlaneObject", this );
 }
 
@@ -308,6 +308,12 @@ void TripleCutPlaneObject::ObjectAddedToScene()
 void TripleCutPlaneObject::ObjectRemovedFromScene()
 {
     Q_ASSERT( GetManager() );
+    // Release hook on images
+    for( unsigned i = 0; i < Images.size(); ++i )
+    {
+        ImageObject * im = ImageObject::SafeDownCast( this->GetManager()->GetObjectByID( Images[i] ) );
+        im->UnRegister( 0 );
+    }
     disconnect( GetManager(), SIGNAL(ObjectAdded(int)), this, SLOT(ObjectAddedSlot(int)) );
     disconnect( GetManager(), SIGNAL(ObjectRemoved(int)), this, SLOT(ObjectRemovedSlot(int)) );
 }

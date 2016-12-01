@@ -92,9 +92,6 @@ int SceneManager::GetRefCount()
 
 void SceneManager::Destroy()
 {
-    disconnect(this);
-    this->blockSignals( true );  // at this point, we don't want signals to be emited.
-
     this->ReleaseAllViews();
 
     this->RemoveObject( this->SceneRoot );
@@ -147,7 +144,7 @@ void SceneManager::Init()
     this->MainCutPlanes->SetObjectDeletable(false);
     AddObject( this->MainCutPlanes, this->SceneRoot );
     this->AddingRegistering( "TripleCutPlaneObject", "WorldObject", this->MainCutPlanes->GetReferenceCount(), this->MainCutPlanes );
-//    this->MainCutPlanes->Delete();
+    this->MainCutPlanes->Delete();
     connect( this->MainCutPlanes, SIGNAL(StartPlaneMoved(int)), this, SLOT(OnStartCutPlaneInteraction()) );
     connect( this->MainCutPlanes, SIGNAL(EndPlaneMove(int)), this, SLOT(OnEndCutPlaneInteraction()) );
     connect( this->MainCutPlanes, SIGNAL(PlaneMoved(int)), this, SLOT(OnCutPlanesPositionChanged()) );
@@ -242,10 +239,10 @@ void SceneManager::RemoveAllSceneObjects()
 
 void SceneManager::RemoveAllChildrenObjects(SceneObject *obj)
 {
-    int n, i = 0;
-    while( ((n = obj->GetNumberOfChildren()) > 0) && (i < n) )
+    int n;
+    while( (n = obj->GetNumberOfChildren()) > 0 )
     {
-        SceneObject * o1 = obj->GetChild( i++ ); //n - 1 );
+        SceneObject * o1 = obj->GetChild( n - 1 );
         this->RemoveAllChildrenObjects( o1 );
         this->RemoveObject( o1 );
     }
@@ -775,6 +772,10 @@ void SceneManager::RemoveObject( SceneObject * object , bool viewChange)
 
     // Tell other this object is being removed
     object->RemoveFromScene();
+    //at this moment object still exist, we send ObjectRemoved() signal
+    //in order to let other objects to deal with the a still valid object,
+    //unregister shoul trigger destruction of the object
+    emit ObjectRemoved( objId );
 
     this->RemovingUnRegistering( object, object->GetReferenceCount() );
     object->UnRegister( this );
@@ -786,7 +787,6 @@ void SceneManager::RemoveObject( SceneObject * object , bool viewChange)
     this->AllObjects.removeAt( indexAll );
     ValidatePointerObject();
 
-    emit ObjectRemoved( objId );
 }
 
 void SceneManager::ChangeParent( SceneObject * object, SceneObject * newParent, int newChildIndex )

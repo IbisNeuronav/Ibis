@@ -31,8 +31,6 @@ UsAcquisitionSettingsWidget::~UsAcquisitionSettingsWidget()
 {
     if( m_calibrationMatrixWidget )
         m_calibrationMatrixWidget->close();
-    if( m_acquisitionObject )
-        m_acquisitionObject->UnRegister(0);
     delete ui;
 }
 
@@ -43,7 +41,6 @@ void UsAcquisitionSettingsWidget::SetUSAcquisitionObject( USAcquisitionObject * 
 
     if (m_acquisitionObject)
     {
-        m_acquisitionObject->UnRegister(0);
         disconnect( m_acquisitionObject, SIGNAL(Modified()), this, SLOT(UpdateUi()) );
     }
     m_acquisitionObject = acq;
@@ -51,7 +48,6 @@ void UsAcquisitionSettingsWidget::SetUSAcquisitionObject( USAcquisitionObject * 
     {
         if (m_acquisitionObject->GetNumberOfSlices() > 0)
             m_acquisitionObject->SetNumberOfStaticSlices(m_acquisitionObject->GetNumberOfStaticSlices());
-        m_acquisitionObject->Register(0);
         connect( m_acquisitionObject, SIGNAL(Modified()), this, SLOT(UpdateUi()) );
         UpdateUi();
     }

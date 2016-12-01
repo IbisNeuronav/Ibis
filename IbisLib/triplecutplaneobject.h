@@ -117,8 +117,8 @@ signals:
 
 protected:
 
-    void ObjectAddedToScene();
-    void ObjectRemovedFromScene();
+    virtual void ObjectAddedToScene();
+    virtual void ObjectRemovedFromScene();
     View * Get3DView();
 	void Setup3DRepresentation( View * view );
 	void Release3DRepresentation( View * view );

@@ -30,8 +30,6 @@ WorldObjectSettingsWidget::WorldObjectSettingsWidget(QWidget *parent) :
 
 WorldObjectSettingsWidget::~WorldObjectSettingsWidget()
 {
-    if( m_worldObject )
-        m_worldObject->UnRegister(0);
     delete ui;
 }
 
@@ -40,14 +38,10 @@ void WorldObjectSettingsWidget::SetWorldObject( WorldObject * obj )
     if( obj == m_worldObject )
         return;
 
-    if( m_worldObject )
-        m_worldObject->UnRegister(0);
-
     m_worldObject = obj;
 
     if( m_worldObject )
     {
-        m_worldObject->Register(0);
         UpdateUi();
     }
 }

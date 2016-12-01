@@ -274,6 +274,7 @@ VolumeRenderingObject::VolumeRenderingObject()
 
     // Make one slot
     this->AddImageSlot();
+    SceneManager::InConstructor( "VolumeRenderingObject", this );
 }
 
 VolumeRenderingObject::~VolumeRenderingObject()
@@ -286,6 +287,7 @@ VolumeRenderingObject::~VolumeRenderingObject()
 
     m_interactionWidgetModifiedCallback->Delete();
     m_transferFunctionModifiedCallback->Delete();
+    SceneManager::InDestructor( "VolumeRenderingObject", this );
 }
 
 void VolumeRenderingObject::Serialize( Serializer * ser )
