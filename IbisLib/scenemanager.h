@@ -138,13 +138,6 @@ public:
     void SetGenericLabelText( const QString &text ) { GenericText = text; }
     const QString GetGenericLabelText( ) { return GenericText; }
 
-    //for debugging
-    static void InConstructor( const QString &text, SceneObject *obj );
-    static void InDestructor(const QString &text,SceneObject *obj );
-    static void AddingRegistering( const QString &objClass, const QString &regClass, int refCount, SceneObject *obj );
-    static void RemovingUnRegistering( const QString &objClass, const QString &regClass, int refCount, SceneObject *obj );
-    static void RemovingUnRegistering( SceneObject *obj, int refCount );
-
 public slots:
 
     void ResetCursorPosition();

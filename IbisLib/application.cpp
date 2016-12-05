@@ -152,7 +152,6 @@ void Application::Init( bool viewerOnly )
     // Create the object that will manage the 3D scene in the visualizer
     // and add axes at its origin
     m_sceneManager = SceneManager::New();
-//    m_sceneManager->SetSceneDirectory(m_settings.WorkingDirectory);
     double bgColor[3];
     m_settings.ViewBackgroundColor.getRgbF( &bgColor[0], &bgColor[1], &bgColor[2] );
     m_sceneManager->SetViewBackgroundColor( bgColor );
@@ -462,7 +461,6 @@ void Application::OpenFiles( OpenFileParams * params, bool addToScene )
                 {
                     Application::GetSceneManager()->AddObject( cur.loadedObject, parent );
                     cur.loadedObject->Delete();
-                    SceneManager::AddingRegistering( cur.loadedObject->GetName(), parent->GetName(), cur.loadedObject->GetReferenceCount(), cur.loadedObject );
                     if( !cur.secondaryObject )
                         Application::GetSceneManager()->SetCurrentObject( cur.loadedObject );
                 }

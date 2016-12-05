@@ -61,7 +61,6 @@ TripleCutPlaneObject::TripleCutPlaneObject()
     }
     this->CursorVisible = true;   
     m_sliceThickness = 1;
-    SceneManager::InConstructor( "TripleCutPlaneObject", this );
 }
 
 
@@ -78,7 +77,6 @@ TripleCutPlaneObject::~TripleCutPlaneObject()
     {
         this->Planes[i]->Delete();
     }
-    SceneManager::InDestructor( "TripleCutPlaneObject", this );
 }
 
 void TripleCutPlaneObject::Serialize( Serializer * ser )

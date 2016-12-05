@@ -39,14 +39,12 @@ GeneratedSurface::GeneratedSurface()
     m_standardDeviation = DEFAULT_STANDARD_DEVIATION;
     m_gaussianSmoothing = false;
     m_reductionPercent = 0;
-    SceneManager::InConstructor( "GeneratedSurface", this );
 }
 
 GeneratedSurface::~GeneratedSurface()
 {
     if (m_imageObject)
         m_imageObject->UnRegister(this);
-    SceneManager::InDestructor( "GeneratedSurface", this );
 }
 
 void GeneratedSurface::Serialize( Serializer * ser )

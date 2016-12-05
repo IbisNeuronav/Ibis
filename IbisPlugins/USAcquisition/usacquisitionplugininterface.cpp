@@ -41,12 +41,10 @@ USAcquisitionPluginInterface::USAcquisitionPluginInterface() : m_allowTrackerles
     m_isBlendingVolumes = false;
     m_blendingVolumesPercent = 0.5;
     m_addedVolumeObjectId = SceneObject::InvalidObjectId;
-    SceneManager::InConstructor( "USAcquisitionPluginInterface", 0 );
 }
 
 USAcquisitionPluginInterface::~USAcquisitionPluginInterface()
 {
-    SceneManager::InDestructor( "USAcquisitionPluginInterface", 0 );
 }
 
 bool USAcquisitionPluginInterface::CanRun()

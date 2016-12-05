@@ -63,7 +63,6 @@ PointsObject::PointsObject() : SceneObject()
     for ( int i = 0; i < 3; i++ )
         m_lineToPointerColor[i] = 1.0;
     m_lineToPointerProperty->SetColor( m_lineToPointerColor[0], m_lineToPointerColor[1], m_lineToPointerColor[2] );
-    SceneManager::InConstructor( "PointsObject", this );
 }
 
 PointsObject::~PointsObject()
@@ -73,7 +72,6 @@ PointsObject::~PointsObject()
     if( m_lineToPointerTip )
         m_lineToPointerTip->Delete();
     m_lineToPointerProperty->Delete();
-    SceneManager::InDestructor( "PointsObject", this );
 }
 
 void PointsObject::Serialize( Serializer * ser )
