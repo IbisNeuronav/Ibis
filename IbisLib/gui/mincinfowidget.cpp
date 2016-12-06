@@ -27,18 +27,13 @@ MincInfoWidget::MincInfoWidget(QWidget *parent) :
 
 MincInfoWidget::~MincInfoWidget()
 {
-    if( m_imageObj )
-        m_imageObj->UnRegister( 0 );
 }
 
 void MincInfoWidget::SetImageObject( ImageObject *img )
 {
     if( m_imageObj == img )
         return;
-    if( m_imageObj )
-        m_imageObj->UnRegister( 0 );
     m_imageObj = img;
-    m_imageObj->Register( 0 );
     this->UpdateUI();
 }
 

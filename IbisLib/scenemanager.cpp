@@ -78,6 +78,8 @@ SceneManager::~SceneManager()
 {
     m_referenceTransform->Delete();
     m_invReferenceTransform->Delete();
+    this->MainCutPlanes->Delete();
+    this->SceneRoot->Delete();
 }
 
 // for debugging only
@@ -89,28 +91,16 @@ int SceneManager::GetRefCount()
 
 void SceneManager::Destroy()
 {
-    disconnect(this);
-    this->blockSignals( true );  // at this point, we don't want signals to be emited.
+    this->ReleaseAllViews();
+
     this->RemoveObject( this->SceneRoot );
 
-    this->ReleaseAllViews();
     for( ViewList::iterator it = Views.begin(); it != Views.end(); ++it )
     {
         (*it)->Delete();
     }
     Views.clear();
-    for( int i = 0; i < TemporaryFiles.count(); i++ )
-    {
-        QString program( "rm" );
-        QStringList arguments;
-        arguments << "-rf" << TemporaryFiles[i];
-        QProcess *removeProcess = new QProcess(0);
-        removeProcess->start(program, arguments);
-        if( removeProcess->waitForStarted() )
-            removeProcess->waitForFinished();
-        delete removeProcess;
-    }
-    TemporaryFiles.clear();
+
     this->Delete();
 }
 
@@ -161,7 +151,9 @@ void SceneManager::Init()
     QList<SceneObject*> globalObjects;
     Application::GetInstance().GetAllGlobalObjectInstances( globalObjects );
     for( int i = 0; i < globalObjects.size(); ++i )
+    {
         AddObject( globalObjects[i], this->SceneRoot );
+    }
 
     // Axes
     vtkAxes * axesSource = vtkAxes::New();
@@ -194,23 +186,12 @@ void SceneManager::Init()
 
 void SceneManager::Clear()
 {
-    for( int i = 0; i < TemporaryFiles.count(); i++ )
-    {
-        QString program( "rm" );
-        QStringList arguments;
-        arguments << "-rf" << TemporaryFiles[i];
-        QProcess *removeProcess = new QProcess(0);
-        removeProcess->start(program, arguments);
-        if( removeProcess->waitForStarted() )
-            removeProcess->waitForFinished();
-        delete removeProcess;
-    }
-    TemporaryFiles.clear();
     disconnect( this->GetMainImagePlanes(), SIGNAL(PlaneMoved(int)), this, SLOT(OnCutPlanesPositionChanged()) );
     disconnect( this, SIGNAL(ReferenceObjectChanged()), this->MainCutPlanes, SLOT(AdjustAllImages()) );
     this->RemoveAllSceneObjects();
     Q_ASSERT_X( AllObjects.size() == 0, "SceneManager::~SceneManager()", "Objects are left in the global list.");
     this->SceneRoot->Delete();
+    this->SceneRoot = 0;
 }
 
 void SceneManager::ClearScene()
@@ -249,13 +230,14 @@ void SceneManager::InternalClearScene()
 void SceneManager::RemoveAllSceneObjects()
 {
     this->RemoveObject( this->SceneRoot );
+    this->MainCutPlanes->Delete();
     this->MainCutPlanes = 0;
 }
 
 void SceneManager::RemoveAllChildrenObjects(SceneObject *obj)
 {
     int n;
-    while( (n = obj->GetNumberOfChildren()) > 0)
+    while( (n = obj->GetNumberOfChildren()) > 0 )
     {
         SceneObject * o1 = obj->GetChild( n - 1 );
         this->RemoveAllChildrenObjects( o1 );
@@ -787,6 +769,10 @@ void SceneManager::RemoveObject( SceneObject * object , bool viewChange)
 
     // Tell other this object is being removed
     object->RemoveFromScene();
+    //at this moment object still exist, we send ObjectRemoved() signal
+    //in order to let other objects to deal with the a still valid object,
+    //unregister shoul trigger destruction of the object
+    emit ObjectRemoved( objId );
 
     object->UnRegister( this );
 
@@ -797,7 +783,6 @@ void SceneManager::RemoveObject( SceneObject * object , bool viewChange)
     this->AllObjects.removeAt( indexAll );
     ValidatePointerObject();
 
-    emit ObjectRemoved( objId );
 }
 
 void SceneManager::ChangeParent( SceneObject * object, SceneObject * newParent, int newChildIndex )
@@ -816,53 +801,31 @@ void SceneManager::ChangeParent( SceneObject * object, SceneObject * newParent, 
 
 void SceneManager::GetAllImageObjects( QList<ImageObject*> & objects )
 {
-    GetChildrenImageObjects( GetSceneRoot(), objects );
-}
-
-
-void SceneManager::GetChildrenImageObjects( SceneObject * obj, QList<ImageObject*> & all )
-{
-    for( int i = 0; i < obj->GetNumberOfChildren(); ++i )
+    for( int i = 0; i < this->AllObjects.size(); ++i )
     {
-        SceneObject * child = obj->GetChild(i);
-        ImageObject * imChild = ImageObject::SafeDownCast( child );
-        if( imChild )
-            all.push_back( imChild );
-        GetChildrenImageObjects( child, all );
+        ImageObject * obj = ImageObject::SafeDownCast( this->AllObjects[i] );
+        if( obj )
+            objects.push_back( obj );
     }
 }
 
 void SceneManager::GetAllPolydataObjects( QList<PolyDataObject*> & objects )
 {
-    GetChildrenPolydataObjects( GetSceneRoot(), objects );
-}
-
-void SceneManager::GetChildrenPolydataObjects( SceneObject * obj, QList<PolyDataObject*> & all )
-{
-    for( int i = 0; i < obj->GetNumberOfChildren(); ++i )
+    for( int i = 0; i < this->AllObjects.size(); ++i )
     {
-        SceneObject * child = obj->GetChild(i);
-        PolyDataObject * imChild = PolyDataObject::SafeDownCast( child );
-        if( imChild )
-            all.push_back( imChild );
-        GetChildrenPolydataObjects( child, all );
+        PolyDataObject * obj = PolyDataObject::SafeDownCast( this->AllObjects[i] );
+        if( obj )
+            objects.push_back( obj );
     }
 }
 
 void SceneManager::GetAllPointsObjects( QList<PointsObject*> & objects )
 {
-    GetChildrenPointsObjects( this->GetSceneRoot(), objects );
-}
-
-void SceneManager::GetChildrenPointsObjects( SceneObject * obj, QList<PointsObject*> & all )
-{
-    for( int i = 0; i < obj->GetNumberOfChildren(); ++i )
+    for( int i = 0; i < this->AllObjects.size(); ++i )
     {
-        SceneObject * child = obj->GetChild(i);
-        PointsObject * imChild = PointsObject::SafeDownCast( child );
-        if( imChild )
-            all.push_back( imChild );
-        GetChildrenPointsObjects( child, all );
+        PointsObject * obj = PointsObject::SafeDownCast( this->AllObjects[i] );
+        if( obj )
+            objects.push_back( obj );
     }
 }
 
@@ -1450,8 +1413,7 @@ void SceneManager::ObjectReader( Serializer * ser, bool interactive )
                 SceneObject *obj = loadedObject.at(0);
                 obj->Serialize(ser);
                 this->AddObjectUsingID(obj, parentObject, oldId);
-                if( filePath != obj->GetFullFileName() )
-                    TemporaryFiles.push_back( obj->GetFullFileName() );
+                obj->Delete();
             }
             else
             {

@@ -77,13 +77,6 @@ TripleCutPlaneObject::~TripleCutPlaneObject()
     {
         this->Planes[i]->Delete();
     }
-
-    // Release hook on images
-    for( unsigned i = 0; i < Images.size(); ++i )
-    {
-        ImageObject * im = ImageObject::SafeDownCast( this->GetManager()->GetObjectByID( Images[i] ) );
-        im->UnRegister( 0 );
-    }
 }
 
 void TripleCutPlaneObject::Serialize( Serializer * ser )
@@ -201,7 +194,6 @@ void TripleCutPlaneObject::AddImage( int imageID )
 
     ImageObject * im = ImageObject::SafeDownCast( this->GetManager()->GetObjectByID( imageID ) );
     Q_ASSERT(im);
-    im->Register( 0 );
     Images.push_back( imageID );
     if (m_sliceMixMode.size() < Images.size())
         m_sliceMixMode.push_back( VTK_IMAGE_SLAB_MEAN );
@@ -235,11 +227,6 @@ void TripleCutPlaneObject::RemoveImage( int imageID )
         {
             m_sliceMixMode.erase(m_sliceMixMode.begin()+i);
             m_blendingModeIndices.erase(m_blendingModeIndices.begin()+i);
-            ImageObject * im = ImageObject::SafeDownCast( this->GetManager()->GetObjectByID( imageID ) );
-            if(im )
-            {
-                im->UnRegister( 0 );
-            }
             break;
         }
     }

@@ -403,6 +403,7 @@ void VolumeRenderingObject::Release( View * view )
 
     PerView & perView = (*it).second;
     view->GetRenderer()->RemoveViewProp( perView.volumeActor );
+    view->RemoveInteractionObject( this );
     perView.volumeActor->Delete();
     perView.volumeMapper->Delete();
     perView.sphereWidget->EnabledOff();

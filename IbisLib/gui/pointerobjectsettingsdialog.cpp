@@ -30,8 +30,6 @@ PointerObjectSettingsDialog::PointerObjectSettingsDialog(QWidget *parent) :
 
 PointerObjectSettingsDialog::~PointerObjectSettingsDialog()
 {
-    if (m_pointer)
-        m_pointer->UnRegister(0);
     if( m_tipCalibrationWidget )
         m_tipCalibrationWidget->close();
     if( m_matrixDialog )
@@ -46,14 +44,10 @@ void PointerObjectSettingsDialog::SetPointer(PointerObject *ptr)
     if (ptr == m_pointer)
         return;
 
-    if (m_pointer)
-        m_pointer->UnRegister(0);
-
     m_pointer = ptr;
 
     if (m_pointer)
     {
-        m_pointer->Register(0);
         this->UpdatePointSetsComboBox();
     }
 }
@@ -63,13 +57,7 @@ void PointerObjectSettingsDialog::SetPointerPickedPointsObject(PointsObject *pts
     if (pts == m_pointerPickedPointsObject)
         return;
 
-    if (m_pointerPickedPointsObject)
-        m_pointerPickedPointsObject->UnRegister(0);
-
     m_pointerPickedPointsObject = pts;
-
-    if (m_pointerPickedPointsObject)
-        m_pointerPickedPointsObject->Register(0);
 }
 
 void PointerObjectSettingsDialog::on_savePositionPushButton_clicked()

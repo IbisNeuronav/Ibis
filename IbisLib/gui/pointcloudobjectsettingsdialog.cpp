@@ -32,10 +32,6 @@ PointCloudObjectSettingsDialog::PointCloudObjectSettingsDialog( QWidget* parent,
 
 PointCloudObjectSettingsDialog::~PointCloudObjectSettingsDialog()
 {
-    if( m_object )
-    {
-        m_object->UnRegister( 0 );
-    }
 }
 
 void PointCloudObjectSettingsDialog::SetPointCloudObject( PointCloudObject * object )
@@ -47,7 +43,6 @@ void PointCloudObjectSettingsDialog::SetPointCloudObject( PointCloudObject * obj
     
     if( m_object )
     {
-        m_object->UnRegister( 0 );
         disconnect( m_object, SIGNAL(Modified()), this, SLOT(UpdateSettings()) );
     }
     
@@ -56,7 +51,6 @@ void PointCloudObjectSettingsDialog::SetPointCloudObject( PointCloudObject * obj
     if( m_object )
     {
         connect( m_object, SIGNAL(Modified()), this, SLOT(UpdateSettings()) );
-        m_object->Register( 0 );
     }
     
     this->UpdateUI();

@@ -29,8 +29,6 @@ SurfaceSettingsWidget::SurfaceSettingsWidget(QWidget *parent) :
 SurfaceSettingsWidget::~SurfaceSettingsWidget()
 {
     delete ui;
-    if (m_surface)
-        m_surface->UnRegister( 0 );
 }
 
 void SurfaceSettingsWidget::SetGeneratedSurface( GeneratedSurface * surface )
@@ -39,12 +37,9 @@ void SurfaceSettingsWidget::SetGeneratedSurface( GeneratedSurface * surface )
     {
         return;
     }
-    if (m_surface)
-        m_surface->UnRegister( 0 );
     m_surface = surface;
     if (m_surface)
     {
-        m_surface->Register( 0 );
         m_reductionPercent = m_surface->GetReduction();
         if( m_surface->IsValid() )
             this->SetupHistogramWidget();

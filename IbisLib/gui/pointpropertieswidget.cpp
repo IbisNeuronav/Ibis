@@ -36,7 +36,6 @@ PointPropertiesWidget::~PointPropertiesWidget()
     if(m_points)
     {
         this->disconnect();
-        m_points->UnRegister( 0 );
     }
     delete ui;
 }
@@ -114,14 +113,12 @@ void PointPropertiesWidget::SetPointsObject(PointsObject *obj)
     if(m_points)
     {
         this->disconnect();
-        m_points->UnRegister( 0 );
     }
 
     m_points = obj;
 
     if(m_points)
     {
-        m_points->Register( 0 );
         Q_ASSERT( m_points->GetManager() );
 
         // simtodo : can't we have a single signal? check in points object

@@ -28,7 +28,6 @@ class SceneManager;
 class SceneObject;
 class WorldObject;
 class CameraObject;
-class PointerObject;
 class IbisPlugin;
 class ToolPluginInterface;
 class ObjectPluginInterface;

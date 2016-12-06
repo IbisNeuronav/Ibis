@@ -152,7 +152,6 @@ void Application::Init( bool viewerOnly )
     // Create the object that will manage the 3D scene in the visualizer
     // and add axes at its origin
     m_sceneManager = SceneManager::New();
-//    m_sceneManager->SetSceneDirectory(m_settings.WorkingDirectory);
     double bgColor[3];
     m_settings.ViewBackgroundColor.getRgbF( &bgColor[0], &bgColor[1], &bgColor[2] );
     m_sceneManager->SetViewBackgroundColor( bgColor );
@@ -240,6 +239,7 @@ Application::~Application()
     for( int i = 0; i < allPlugins.size(); ++i )
     {
         allPlugins[i]->BaseSaveSettings( settings );
+        allPlugins[i]->Delete(); // this is called because otherwise plugins destructors are never called, Qt bug. The codde has to be revised once Qt is fixed.
     }
     settings.endGroup();
 }
@@ -460,12 +460,14 @@ void Application::OpenFiles( OpenFileParams * params, bool addToScene )
                 if( cur.loadedObject )
                 {
                     Application::GetSceneManager()->AddObject( cur.loadedObject, parent );
+                    cur.loadedObject->Delete();
                     if( !cur.secondaryObject )
                         Application::GetSceneManager()->SetCurrentObject( cur.loadedObject );
                 }
                 if( cur.secondaryObject )
                 {
                     Application::GetSceneManager()->AddObject( cur.secondaryObject, parent );
+                    cur.secondaryObject->Delete();
                     Application::GetSceneManager()->SetCurrentObject( cur.loadedObject );
                 }
             }

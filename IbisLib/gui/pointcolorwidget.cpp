@@ -33,7 +33,6 @@ PointColorWidget::~PointColorWidget()
     if(m_points)
     {
         this->disconnect();
-        m_points->UnRegister( 0 );
     }
     m_points = 0;
     delete ui;
@@ -49,15 +48,10 @@ void PointColorWidget::SetPointsObject(PointsObject *obj)
     if(m_points)
     {
         this->disconnect();
-        m_points->UnRegister( 0 );
     }
 
     m_points = obj;
 
-    if(m_points)
-    {
-        m_points->Register( 0 );
-    }
     this->UpdateUI();
 }
 

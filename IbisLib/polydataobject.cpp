@@ -127,6 +127,8 @@ PolyDataObject::~PolyDataObject()
     m_2dProperty->Delete();
     if( this->Texture )
         this->Texture->UnRegister( this );
+    if( this->ScalarSource )
+        this->ScalarSource->UnRegister( this );
     this->TextureMap->Delete();
     this->ProbeFilter->Delete();
 }

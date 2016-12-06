@@ -29,10 +29,6 @@ ImageObjectSettingsDialog::ImageObjectSettingsDialog( QWidget* parent, Qt::Windo
 
 ImageObjectSettingsDialog::~ImageObjectSettingsDialog()
 {
-    if (m_imageObject)
-    {
-        m_imageObject->UnRegister( 0 );
-    }
 }
 
 void ImageObjectSettingsDialog::languageChange()
@@ -46,18 +42,11 @@ void ImageObjectSettingsDialog::SetImageObject( ImageObject * obj )
     {
         return;
     }
-    
-    if( m_imageObject )
-    {
-        m_imageObject->UnRegister( 0 );
-    }
-    
+        
     m_imageObject = obj;
     
     if( m_imageObject )
     {
-        m_imageObject->Register( 0 );
-
         if( m_imageObject->IsLabelImage() )
         {
             selectColorTableComboBox->setHidden( true );
