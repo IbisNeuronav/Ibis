@@ -51,7 +51,6 @@ SET( IGNS_IBISLIB_SRC
                      gui/usacquisitionsettingswidget.cpp
                      gui/exportacquisitiondialog.cpp
                      gui/usmasksettingswidget.cpp
-                     gui/zoomfactordialog.cpp
                      gui/transformeditwidget.cpp
                      gui/automaticgui.cpp
                      gui/usprobeobjectsettingswidget.cpp
@@ -116,7 +115,6 @@ SET( IGNS_IBISLIB_HDR_MOC
                          gui/usacquisitionsettingswidget.h
                          gui/exportacquisitiondialog.h
                          gui/usmasksettingswidget.h
-                         gui/zoomfactordialog.h
                          gui/transformeditwidget.h
                          gui/automaticgui.h
                          gui/pointerobjectsettingsdialog.h
@@ -141,7 +139,6 @@ set( IGNS_IBISLIB_UI
             gui/polydataobjectsettingsdialog.ui
             gui/pointcloudobjectsettingsdialog.ui
             gui/worldobjectsettingswidget.ui
-            gui/zoomfactordialog.ui
             gui/transformeditwidget.ui
             gui/pointerobjectsettingsdialog.ui
             gui/cameraobjectsettingswidget.ui

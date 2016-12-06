@@ -20,6 +20,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QLabel>
 #include <QFont>
 #include "QVTKWidget.h"
+#include <QApplication>
 #include "vtkqtrenderwindow.h"
 #include "vtkRenderer.h"
 #include "vtkRenderWindowInteractor.h"
@@ -27,7 +28,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "vtkInteractorStyle.h"
 #include "scenemanager.h"
 #include "view.h"
-#include "zoomfactordialog.h"
 #include "vtkRenderWindow.h"
 #include "vtkCornerAnnotation.h"
 
@@ -52,7 +52,6 @@ QuadViewWindow::QuadViewWindow( QWidget* parent, Qt::WindowFlags fl ) : QWidget(
     CreateToolButton( "ZoomInButton", ":/Icons/zoom-in.png", "Zoom In", SLOT(ZoomInButtonClicked()) );
     CreateToolButton( "ZoomOutButton", ":/Icons/zoom-out.png", "Zoom Out", SLOT(ZoomOutButtonClicked()) );
     CreateToolButton( "ZoomFitButton", ":/Icons/zoom-fit.png", "Zoom To Fit Window", SLOT( ResetCameraButtonClicked() ) );
-    CreateToolButton( "ZoomButton", ":/Icons/zoom.png", "Custom Zoom factor...", SLOT( ZoomCameraButtonClicked() ) );
     m_expandViewButton = CreateToolButton( "ExpandViewButton", ":/Icons/expand.png", "Expand Current View", SLOT( ExpandViewButtonClicked() ) );
     CreateToolButton( "ResetPlanesButton", ":/Icons/reset-planes-2.png", "Reset Image Planes to original position", SLOT( ResetPlanesButtonClicked() ) );
     CreateToolButton( "ViewFront", ":/Icons/front.png", "View Front Side", SLOT( ViewFrontButtonClicked() ));
@@ -288,15 +287,6 @@ void QuadViewWindow::ResetCameraButtonClicked()
 {
     m_sceneManager->ResetAllCameras();
     this->RenderAll();
-}
-
-void QuadViewWindow::ZoomCameraButtonClicked()
-{
-    ZoomFactorDialog *dlg = new ZoomFactorDialog( this );
-    dlg->setAttribute(Qt::WA_DeleteOnClose);
-    dlg->SetSceneManager(m_sceneManager);
-    if (dlg->exec() == QDialog::Accepted)
-        this->RenderAll();
 }
 
 void QuadViewWindow::RenderAll()
