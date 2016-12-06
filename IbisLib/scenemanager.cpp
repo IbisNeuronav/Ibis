@@ -191,6 +191,7 @@ void SceneManager::Clear()
     this->RemoveAllSceneObjects();
     Q_ASSERT_X( AllObjects.size() == 0, "SceneManager::~SceneManager()", "Objects are left in the global list.");
     this->SceneRoot->Delete();
+    this->SceneRoot = 0;
 }
 
 void SceneManager::ClearScene()
