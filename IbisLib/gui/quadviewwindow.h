@@ -66,7 +66,6 @@ public slots:
     void ZoomInButtonClicked();
     void ZoomOutButtonClicked();
     void ResetCameraButtonClicked();
-    void ZoomCameraButtonClicked();
     void ExpandViewButtonClicked();
     void ResetPlanesButtonClicked();
     void ViewFrontButtonClicked();
