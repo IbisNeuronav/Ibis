@@ -239,7 +239,7 @@ Application::~Application()
     for( int i = 0; i < allPlugins.size(); ++i )
     {
         allPlugins[i]->BaseSaveSettings( settings );
-        allPlugins[i]->Delete();
+        allPlugins[i]->Delete(); // this is called because otherwise plugins destructors are never called, Qt bug. The codde has to be revised once Qt is fixed.
     }
     settings.endGroup();
 }
