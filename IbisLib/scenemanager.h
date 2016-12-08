@@ -135,6 +135,7 @@ public:
 
     void EmitShowGenericLabel( bool );
     void EmitShowGenericLabelText();
+    void EmitExpandView( );
     void SetGenericLabelText( const QString &text ) { GenericText = text; }
     const QString GetGenericLabelText( ) { return GenericText; }
 

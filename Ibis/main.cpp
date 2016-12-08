@@ -58,6 +58,7 @@ int main( int argc, char** argv )
     MainWindow * mw = new MainWindow( 0 );
     mw->setAttribute( Qt::WA_DeleteOnClose );
     mw->show();
+    mw->SetUpViews();
     a.connect( &a, SIGNAL( lastWindowClosed() ), &a, SLOT( quit() ) );
 	a.installEventFilter( mw );
 

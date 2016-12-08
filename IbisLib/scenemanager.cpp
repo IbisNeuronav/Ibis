@@ -1741,3 +1741,8 @@ void SceneManager::ValidatePointerObject()
     if( pointerId != this->NavigationPointerID )
         SetNavigationPointerID( pointerId );
 }
+
+void SceneManager::EmitExpandView( )
+{
+    emit ExpandView();
+}
