@@ -128,12 +128,6 @@ void ImageObjectVolumeSettingsWidget::on_specularPowerSpinBox_valueChanged( doub
     m_imageObject->GetVolumeProperty()->SetSpecularPower( val );
 }
 
-void ImageObjectVolumeSettingsWidget::on_gradientOpacityCheckBox_toggled(bool checked)
-{
-    Q_ASSERT( m_imageObject );
-    m_imageObject->GetVolumeProperty()->SetDisableGradientOpacity( checked ? 0 : 1 );
-}
-
 void ImageObjectVolumeSettingsWidget::on_levelSpinBox_valueChanged( double val )
 {
     Q_ASSERT( m_imageObject );

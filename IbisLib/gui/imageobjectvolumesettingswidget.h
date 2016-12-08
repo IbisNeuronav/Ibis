@@ -38,7 +38,6 @@ private slots:
     void on_diffuseSpinBox_valueChanged(double arg1);
     void on_specularSpinBox_valueChanged(double arg1);
     void on_specularPowerSpinBox_valueChanged(double arg1);
-    void on_gradientOpacityCheckBox_toggled(bool checked);
     void on_levelSpinBox_valueChanged(double arg1);
     void on_windowSpinBox_valueChanged(double arg1);
     void on_autoSampleDistanceCheckBox_toggled(bool checked);
