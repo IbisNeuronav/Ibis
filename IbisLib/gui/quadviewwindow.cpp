@@ -204,7 +204,6 @@ void QuadViewWindow::SetSceneManager( SceneManager * man )
         if (expandedView > -1)
         {
             m_sceneManager->SetCurrentView(expandedView);
-            ExpandViewButtonClicked();
         }
         else
             SetCurrentView( 1 );

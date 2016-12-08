@@ -873,3 +873,8 @@ bool MainWindow::eventFilter( QObject * obj, QEvent * event )
 
     return true;
 }
+
+void MainWindow::SetUpViews()
+{
+    Application::GetSceneManager()->EmitExpandView();
+}
