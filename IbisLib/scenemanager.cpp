@@ -1744,5 +1744,6 @@ void SceneManager::ValidatePointerObject()
 
 void SceneManager::EmitExpandView( )
 {
-    emit ExpandView();
+    if( this->GetExpandedView() > -1 )
+        emit ExpandView();
 }
