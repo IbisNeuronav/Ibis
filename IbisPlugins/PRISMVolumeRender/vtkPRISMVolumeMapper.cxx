@@ -36,7 +36,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 const char defaultVolumeContribution[] = "           vec4 volumeSample = texture3D( volumes[volIndex], pos ); \n\
             vec4 transferFuncSample = texture1D( transferFunctions[volIndex], volumeSample.x ); \n\
-            fullSample += transferFuncSample;";
+            sampleRGBA += transferFuncSample;";
 
 const char defaultStopConditionCode[] = "        if( finalColor.a > .99 ) \n            break;";
 
@@ -317,13 +317,13 @@ void vtkPRISMVolumeMapper::Render( vtkRenderer * ren, vtkVolume * vol )
     interactP1[0] = InteractionPoint1[0]; interactP1[1] = InteractionPoint1[1]; interactP1[2] = InteractionPoint1[2]; interactP1[3] = 1.0;
     double interactP1Trans[4];
     this->WorldToTextureMatrix->MultiplyPoint( interactP1, interactP1Trans );
-    res = VolumeShader->SetVariable( "interactionPoint1TSpace", (float)interactP1Trans[0], (float)interactP1Trans[1], (float)interactP1Trans[2] );
+    res = VolumeShader->SetVariable( "interactionPoint1", (float)interactP1Trans[0], (float)interactP1Trans[1], (float)interactP1Trans[2] );
 
     double interactP2[4];
     interactP2[0] = InteractionPoint2[0]; interactP2[1] = InteractionPoint2[1]; interactP2[2] = InteractionPoint2[2]; interactP2[3] = 1.0;
     double interactP2Trans[4];
     this->WorldToTextureMatrix->MultiplyPoint( interactP2, interactP2Trans );
-    res = VolumeShader->SetVariable( "interactionPoint2TSpace", (float)interactP2Trans[0], (float)interactP2Trans[1], (float)interactP2Trans[2] );
+    res = VolumeShader->SetVariable( "interactionPoint2", (float)interactP2Trans[0], (float)interactP2Trans[1], (float)interactP2Trans[2] );
 
     // Compute light position in texture space
     double lightPos[4] = { 0.0, 0.0, 0.0, 1.0 };
@@ -335,7 +335,7 @@ void vtkPRISMVolumeMapper::Render( vtkRenderer * ren, vtkVolume * vol )
         l->GetTransformedPosition( lightPos );
     }
     this->WorldToTextureMatrix->MultiplyPoint( lightPos, lightPos );
-    res = VolumeShader->SetVariable( "lightPosTSpace", (float)lightPos[0], (float)lightPos[1], (float)lightPos[2] );
+    res = VolumeShader->SetVariable( "lightPosition", (float)lightPos[0], (float)lightPos[1], (float)lightPos[2] );
 
     // Set cam position and distance range variables in the shader
     res |= SetCameraVariablesInShader( ren, vol );
@@ -867,7 +867,7 @@ bool vtkPRISMVolumeMapper::SetCameraVariablesInShader( vtkRenderer * ren, vtkVol
     double cameraPos[4];
     cameraPos[0] = camPos3[0]; cameraPos[1] = camPos3[1]; cameraPos[2] = camPos3[2]; cameraPos[3] = 1.0;
     this->WorldToTextureMatrix->MultiplyPoint( cameraPos, cameraPos );
-    bool res = VolumeShader->SetVariable( "cameraPosTSpace", (float)cameraPos[0], (float)cameraPos[1], (float)cameraPos[2] );
+    bool res = VolumeShader->SetVariable( "cameraPosition", (float)cameraPos[0], (float)cameraPos[1], (float)cameraPos[2] );
 
     // Compute camera axis in texture space
     double * camTarget3 = ren->GetActiveCamera()->GetFocalPoint();
@@ -907,7 +907,7 @@ bool vtkPRISMVolumeMapper::SetCameraVariablesInShader( vtkRenderer * ren, vtkVol
         }
     }
 
-    res |= VolumeShader->SetVariable( "volumeDistanceRangeTSpace", (float)minDist, (float)maxDist );
+    res |= VolumeShader->SetVariable( "volumeDistanceRange", (float)minDist, (float)maxDist );
     return res;
 }
 

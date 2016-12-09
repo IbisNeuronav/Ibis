@@ -220,10 +220,10 @@ void AnimatePluginInterface::SetMinCamDistance( double dist )
 }
 
 static const char * shaderInitName = "Camera Min Distance";
-static const char * shaderInitCode = "float d = length( rayStart - cameraPosTSpace ); \
+static const char * shaderInitCode = "float d = length( rayStart - cameraPosition ); \
         if( d < @min-distance@ ) \
         { \
-            curDist = @min-distance@ - d; \
+            currentDistance = @min-distance@ - d; \
         }";
 
 void AnimatePluginInterface::UpdateVolumeInitShader()

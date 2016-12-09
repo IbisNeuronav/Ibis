@@ -11,11 +11,11 @@ uniform float stepSize;
 uniform float stepSizeAdjustment;
 uniform float multFactor;
 uniform mat4 eyeToTexture;
-uniform vec3 interactionPoint1TSpace;
-uniform vec3 interactionPoint2TSpace;
-uniform vec3 lightPosTSpace;
-uniform vec3 cameraPosTSpace;
-uniform vec2 volumeDistanceRangeTSpace;
+uniform vec3 interactionPoint1;
+uniform vec3 interactionPoint2;
+uniform vec3 lightPosition;
+uniform vec3 cameraPosition;
+uniform vec2 volumeDistanceRange;
 
 // Determine if ptTest is inside the cylinder defined by pt1, pt2 and radius.
 // Returns distance to the central axis of the cylinder if inside and -1.0 otherwise
@@ -56,14 +56,14 @@ float SampleVolume( int volIndex, vec3 pos )
     return volSample.x;
 }
 
-vec4 SampleVolumeWithTransferFunction( int volIndex, vec3 pos )
+vec4 SampleVolumeWithTF( int volIndex, vec3 pos )
 {
     vec4 volSample = texture3D( volumes[volIndex], pos );
     vec4 tFuncSample = texture1D( transferFunctions[volIndex], volSample.x );
     return tFuncSample;
 }
 
-vec4 SampleTransferFunction( int volIndex, float value )
+vec4 SampleTF( int volIndex, float value )
 {
     vec4 tFuncSample = texture1D( transferFunctions[volIndex], value );
     return tFuncSample;
@@ -81,7 +81,7 @@ float SampleVolumeSmooth( int volIndex, vec3 pos, float sampleSize )
     return volSample;
 }
 
-vec4 SampleVolumeSmoothWithTransferFunction( int volIndex, vec3 pos, float sampleSize )
+vec4 SampleVolumeSmoothWithTF( int volIndex, vec3 pos, float sampleSize )
 {
     float volSample = SampleVolumeSmooth( volIndex, pos, sampleSize );
     vec4 tFuncSample = texture1D( transferFunctions[volIndex], volSample );
@@ -173,34 +173,34 @@ void main()
     vec3 rayDir = normalize( diff );      // direction of the ray (unit vector)
 
     // Initialize accumulator
-    float curDist = 0.0;  // distance from the start of the ray in texture coord units
+    float currentDistance = 0.0;  // distance from the start of the ray in texture coord units
     vec4 finalColor = vec4( 0.0, 0.0, 0.0, 0.0 );
 
     // Put custom initialization code here
     @ShaderInit@
 
     // Do the actual ray tracing
-    while( curDist < stopDist )
+    while( currentDistance < stopDist )
     {
         // Compute current sample position
-        vec3 pos = rayStart + rayDir * curDist;
+        vec3 pos = rayStart + rayDir * currentDistance;
 
         // Compute new sample
-        vec4 fullSample = vec4( 0.0, 0.0, 0.0, 0.0 );
+        vec4 sampleRGBA = vec4( 0.0, 0.0, 0.0, 0.0 );
 
         @VolumeContributions@
 
         // Adjust alpha to compensate for smaller or larger step sizes
-        fullSample.a = 1.0 - pow( 1.0 - fullSample.a, stepSizeAdjustment );
+        sampleRGBA.a = 1.0 - pow( 1.0 - sampleRGBA.a, stepSizeAdjustment );
 
         // merge with existing
         float oneMinusDstAlpha = 1.0 - finalColor.a;
-        finalColor.rgb += oneMinusDstAlpha * fullSample.a * fullSample.rgb;
-        finalColor.a += oneMinusDstAlpha * fullSample.a;
+        finalColor.rgb += oneMinusDstAlpha * sampleRGBA.a * sampleRGBA.rgb;
+        finalColor.a += oneMinusDstAlpha * sampleRGBA.a;
 
         @StopCondition@
 
-        curDist += stepSize;
+        currentDistance += stepSize;
     }
 
     gl_FragColor.rgb = finalColor.rgb * multFactor;
