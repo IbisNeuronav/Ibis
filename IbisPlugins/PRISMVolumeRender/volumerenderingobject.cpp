@@ -37,24 +37,24 @@ ObjectSerializationMacro( VolumeRenderingObject );
 ObjectSerializationMacro( VolumeRenderingObject::PerImage );
 
 // ======== Builtin shader contrib code ===================
-const char shaderContributionAdd[] = "vec4 sample = SampleVolumeWithTransferFunction( volIndex, pos ); \n\
-fullSample += sample;";
+const char shaderContributionAdd[] = "vec4 sample = SampleVolumeWithTF( volIndex, pos ); \n\
+sampleRGBA += sample;";
 
-const char shaderContributionAddSmooth[] = "vec4 sample = SampleVolumeSmoothWithTransferFunction( volIndex, pos, 0.002 ); \n\
-fullSample += sample;";
+const char shaderContributionAddSmooth[] = "vec4 sample = SampleVolumeSmoothWithTF( volIndex, pos, 0.002 ); \n\
+sampleRGBA += sample;";
 
-const char shaderContributionMultiply[] = "vec4 sample = SampleVolumeWithTransferFunction( volIndex, pos ); \n\
-fullSample *= sample;";
+const char shaderContributionMultiply[] = "vec4 sample = SampleVolumeWithTF( volIndex, pos ); \n\
+sampleRGBA *= sample;";
 
 const char shaderContributionDiffuseShade[] = "// param initialization\n\
 float gradStep = 0.01;\n\
-vec3 lightPos = interactionPoint1TSpace;\n\
+vec3 lightPos = interactionPoint1;\n\
 float diffuseK = 0.5;\n\
 vec3 diffuseColor = vec3( 1.0, 1.0, 1.0 );\n\
 \n\
 // shading \n\
-vec4 sample = SampleVolumeWithTransferFunction( volIndex, pos ); \n\
-fullSample += sample; \n\
+vec4 sample = SampleVolumeWithTF( volIndex, pos ); \n\
+sampleRGBA += sample; \n\
 if( sample.a > 0.1 ) \n\
 { \n\
     vec3 n = ComputeGradient( volIndex, pos, gradStep ).rgb; \n\
@@ -62,51 +62,51 @@ if( sample.a > 0.1 ) \n\
     vec3 v = -1.0 * rayDir; \n\
     float dotNL = dot( n, l ); \n\
     vec3 diffuseContrib = clamp(dotNL, 0.0, 1.0 ) * diffuseColor * diffuseK; \n\
-    fullSample.rgb += diffuseContrib; \n\
+    sampleRGBA.rgb += diffuseContrib; \n\
 }";
 
-const char shaderContributionDiffuseShadeFalloff[] = "vec4 sample = SampleVolumeWithTransferFunction( volIndex, pos ); \n\
-fullSample += sample; \n\
+const char shaderContributionDiffuseShadeFalloff[] = "vec4 sample = SampleVolumeWithTF( volIndex, pos ); \n\
+sampleRGBA += sample; \n\
 \n\
 if( sample.a > 0.1 ) \n\
 { \n\
-    float lightDist = length( interactionPoint1TSpace - pos ); \n\
+    float lightDist = length( interactionPoint1 - pos ); \n\
     float maxLightDist = 0.7; \n\
     if( lightDist < maxLightDist ) \n\
     { \n\
         float gradStep = 0.01; \n\
         vec4 n = ComputeGradient( volIndex, pos, gradStep ); \n\
-        vec3 l = normalize( interactionPoint1TSpace - pos ); \n\
+        vec3 l = normalize( interactionPoint1 - pos ); \n\
         vec4 diffuseContrib = dot( n.rgb, l ) * vec4( 1.0, 1.0, 1.0, 0.0 ) * 0.5; \n\
         diffuseContrib *= 1.0 - lightDist / maxLightDist; \n\
-        fullSample += diffuseContrib; \n\
+        sampleRGBA += diffuseContrib; \n\
     } \n\
 }";
 
 const char shaderContributionAddGradientOpacity[] = "vec4 g = ComputeGradient( volIndex, pos, 0.004 ); \n\
         float alp = texture1D( transferFunctions[volIndex], g.a ).a; \n\
-        vec4 col = SampleVolumeWithTransferFunction( volIndex, pos ); \n\
+        vec4 col = SampleVolumeWithTF( volIndex, pos ); \n\
         col.a = alp; \n\
-        fullSample += col;";
+        sampleRGBA += col;";
 
 const char shaderContributionNone[] = "";
 
 // ======== Builtin Init Ray shader contrib code =============
 
-const char initShaderContribClipFront[] = "vec3 dp = interactionPoint1TSpace - rayStart; \n\
+const char initShaderContribClipFront[] = "vec3 dp = interactionPoint1 - rayStart; \n\
 float dplane = dot( dp, rayDir ); \n\
 if( dplane > 0 ) \n\
 { \n\
     // make ray integration start there \n\
-    curDist = dplane; \n\
+    currentDistance = dplane; \n\
     \n\
     // compute color contribution on this plane \n\
-    vec3 pos = rayStart + rayDir * curDist; \n\
-    vec4 sample = SampleVolumeWithTransferFunction( 0, pos ); \n\
+    vec3 pos = rayStart + rayDir * currentDistance; \n\
+    vec4 sample = SampleVolumeWithTF( 0, pos ); \n\
     if( sample.a > 0.1 ) \n\
     { \n\
         vec3 n = -1.0 * rayDir; \n\
-        vec3 l = normalize( interactionPoint2TSpace - pos ); \n\
+        vec3 l = normalize( interactionPoint2 - pos ); \n\
         vec4 diffuseContrib = dot( n, l ) * vec4( 1.0, 1.0, 1.0, 0.0 ) * 0.2; \n\
         sample += diffuseContrib; \n\
     } \n\
@@ -114,7 +114,7 @@ if( dplane > 0 ) \n\
     colorAccumulator += sample; \n\
 }";
 
-const char initShaderContribClipBack[] = "vec3 dp = interactionPoint1TSpace - rayStart; \n\
+const char initShaderContribClipBack[] = "vec3 dp = interactionPoint1 - rayStart; \n\
 float dplane = dot( dp, rayDir ); \n\
 if( dplane > 0.0 ) \n\
 {	\n\
