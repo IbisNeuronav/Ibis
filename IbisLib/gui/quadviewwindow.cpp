@@ -109,8 +109,10 @@ QuadViewWindow::QuadViewWindow( QWidget* parent, Qt::WindowFlags fl ) : QWidget(
     m_generalLayout->addWidget( m_bottomWidgetFrame );
 
     resize( QSize(1000, 800).expandedTo(minimumSizeHint()) );
-    
-    this->currentViewExpanded = 0;
+
+     m_viewExpanded = false;
+     m_currentView = THREED_VIEW_TYPE;
+//    this->currentViewExpanded = 0;
 }
 
 QAbstractButton * QuadViewWindow::CreateToolButton( QString name, QString iconPath, QString toolTip, const char * callbackSlot )
@@ -299,21 +301,19 @@ void QuadViewWindow::RenderAll()
 
 void QuadViewWindow::ExpandViewButtonClicked()
 {
-    int currentView = m_sceneManager->GetCurrentView();
-    if( this->currentViewExpanded )
+    if( m_viewExpanded )
     {
         for( int i = 0; i < 4; i++ )
         {
             m_vtkWindowFrames[i]->show();
             m_vtkWindows[i]->update();
         }
-        this->currentViewExpanded = 0;
-        m_sceneManager->SetExpandedView(-1);
+        m_viewExpanded = false;
     }
     else
     {
         int currentWindow;
-        switch(currentView)
+        switch( m_currentView )
         {
         case TRANSVERSE_VIEW_TYPE:
             currentWindow = TRANSVERSE_WIN;
@@ -335,8 +335,7 @@ void QuadViewWindow::ExpandViewButtonClicked()
                 m_vtkWindowFrames[i]->hide();
             }
         }
-        this->currentViewExpanded = 1;
-        m_sceneManager->SetExpandedView(currentView);
+        m_viewExpanded = true;
     }
 }
 
@@ -421,33 +420,30 @@ bool QuadViewWindow::eventFilter(QObject *obj, QEvent *event)
 
 void QuadViewWindow::SetCurrentView( int index )
 {
-    if( m_sceneManager )
+    switch(index)
     {
-        switch(index)
+    case TRANSVERSE_WIN:
+        m_currentView = TRANSVERSE_VIEW_TYPE;
+        break;
+    case THREED_WIN:
+        m_currentView = THREED_VIEW_TYPE;
+        break;
+    case CORONAL_WIN:
+        m_currentView = CORONAL_VIEW_TYPE;
+        break;
+    case SAGITTAL_WIN:
+        m_currentView = SAGITTAL_VIEW_TYPE ;
+        break;
+    }
+    for( int i = 0; i < 4; ++i )
+    {
+        if( i == index )
         {
-        case TRANSVERSE_WIN:
-            m_sceneManager->SetCurrentView( TRANSVERSE_VIEW_TYPE );
-            break;
-        case THREED_WIN:
-            m_sceneManager->SetCurrentView( THREED_VIEW_TYPE );
-            break;
-        case CORONAL_WIN:
-            m_sceneManager->SetCurrentView( CORONAL_VIEW_TYPE );
-            break;
-        case SAGITTAL_WIN:
-            m_sceneManager->SetCurrentView( SAGITTAL_VIEW_TYPE );
-            break;
+            m_vtkWindowFrames[i]->setStyleSheet( "background-color:red" );
         }
-        for( int i = 0; i < 4; ++i )
+        else
         {
-            if( i == index )
-            {
-                m_vtkWindowFrames[i]->setStyleSheet( "background-color:red" );
-            }
-            else
-            {
-                m_vtkWindowFrames[i]->setStyleSheet( "" );
-            }
+            m_vtkWindowFrames[i]->setStyleSheet( "" );
         }
     }
 }

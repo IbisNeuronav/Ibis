@@ -47,6 +47,7 @@ const QString MainWindow::m_appName( tr("Intraoperative Brain Imaging System") )
 
 MainWindow::MainWindow( QWidget * parent )
     : QMainWindow( parent )
+    , m_4Views(0)
     , m_viewXPlaneAction(0)
     , m_viewYPlaneAction(0)
     , m_viewZPlaneAction(0)
@@ -165,8 +166,8 @@ MainWindow::MainWindow( QWidget * parent )
     // -----------------------------------------
     // Create main QuadView window
     // -----------------------------------------
-    QuadViewWindow * dlg = (QuadViewWindow*)Application::GetSceneManager()->CreateQuadViewWindow( this );
-    Application::GetInstance().SetQuadViewWidget( dlg );
+    m_4Views = (QuadViewWindow*)Application::GetSceneManager()->CreateQuadViewWindow( this );
+    Application::GetInstance().SetQuadViewWidget( m_4Views );
 
     // -----------------------------------------
     // Create right panel (1 tab per plugin)
@@ -181,7 +182,7 @@ MainWindow::MainWindow( QWidget * parent )
     m_mainSplitter = new QSplitter(this);
     m_mainSplitter->setContentsMargins( 5, 5, 5, 5 );
     m_mainSplitter->addWidget( m_leftFrame );
-    m_mainSplitter->addWidget( dlg );
+    m_mainSplitter->addWidget( m_4Views );
     m_mainSplitter->addWidget( m_rightPanel );
     setCentralWidget( m_mainSplitter );
     connect( m_mainSplitter, SIGNAL(splitterMoved(int,int)), this, SLOT(MainSplitterMoved(int,int) ));
@@ -794,6 +795,9 @@ void MainWindow::closeEvent( QCloseEvent * event )
     s->MainWindowLeftPanelSize = m_leftPanelSize;
     s->MainWindowRightPanelSize = m_rightPanelSize;
 
+    s->CurrentView = m_4Views->GetCurrentView();
+    s->ExpandedView = m_4Views->GetExpandedView();
+
     // Tell all plugins their window/tab is about to close
     QList<ToolPluginInterface*> allTools;
     Application::GetInstance().GetAllToolPlugins( allTools );
@@ -873,3 +877,4 @@ bool MainWindow::eventFilter( QObject * obj, QEvent * event )
 
     return true;
 }
+

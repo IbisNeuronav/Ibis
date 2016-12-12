@@ -13,6 +13,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include <qvariant.h>
 #include <qwidget.h>
+#include "ibistypes.h"
 
 class QVBoxLayout;
 class QHBoxLayout;
@@ -50,6 +51,8 @@ public:
 
     void AddBottomWidget( QWidget * w );
     void RemoveBottomWidget( QWidget * w );
+    VIEWTYPES GetCurrentView() { return m_currentView; }
+    bool GetExpandedView() { return m_viewExpanded; }
     
 public slots:
 
@@ -122,7 +125,9 @@ protected:
     QFrame * m_bottomWidgetFrame;
     QVBoxLayout * m_bottomWidgetLayout;
     
-    int currentViewExpanded;
+    VIEWTYPES m_currentView;
+    bool m_viewExpanded;
+//    int currentViewExpanded;
 };
 
 

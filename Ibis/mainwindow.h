@@ -26,6 +26,7 @@ class SceneObject;
 class ImageMixerWidget;
 class OpenFileParams;
 class ToolPluginInterface;
+class QuadViewWindow;
 
 class MainWindow : public QMainWindow
 {
@@ -99,6 +100,7 @@ protected:
 	// Capture events sent to application (ex.:fileopen event on OSX)
 	bool eventFilter(QObject *obj, QEvent *event);
 
+    QuadViewWindow *m_4Views;
     QAction * m_viewXPlaneAction;
     QAction * m_viewYPlaneAction;
     QAction * m_viewZPlaneAction;

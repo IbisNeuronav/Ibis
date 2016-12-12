@@ -64,6 +64,8 @@ void ApplicationSettings::LoadSettings( QSettings & settings )
     MainWindowSize = settings.value( "MainWindow_size", mainWindowRect.size() ).toSize();
     MainWindowLeftPanelSize = settings.value( "MainWindowLeftPanelSize", 150 ).toInt();
     MainWindowRightPanelSize = settings.value( "MainWindowRightPanelSize", 150 ).toInt();
+    CurrentView = settings.value( "CurrentView", 1 ).toInt();
+    ExpandedView = settings.value( "ExpandedView", false ).toBool();
     QString workDir(QDir::homePath());
     workDir.append(IBIS_CONFIGURATION_SUBDIRECTORY);
     WorkingDirectory = settings.value( "WorkingDirectory", workDir).toString();
@@ -77,7 +79,7 @@ void ApplicationSettings::LoadSettings( QSettings & settings )
     CutPlanesCursorColor.setGreen( settings.value("CutPlanesCursorColor_g", 50 ).toInt() );
     CutPlanesCursorColor.setBlue( settings.value("CutPlanesCursorColor_b", 50 ).toInt() );
 
-    ExpandedView = settings.value( "ExpandedView", -1).toInt();
+//    ExpandedView = settings.value( "ExpandedView", -1).toInt();
 
     InteractorStyle3D = (InteractorStyle)settings.value( "InteractorStyle3D", (int)InteractorStyleTerrain ).toInt();
     CameraViewAngle3D = settings.value( "CameraViewAngle3D", 30.0 ).toDouble();
@@ -101,6 +103,8 @@ void ApplicationSettings::SaveSettings( QSettings & settings )
     settings.setValue( "MainWindow_size", MainWindowSize );
     settings.setValue( "MainWindowLeftPanelSize", MainWindowLeftPanelSize );
     settings.setValue( "MainWindowRightPanelSize", MainWindowRightPanelSize );
+    settings.setValue( "CurrentView", CurrentView );
+    settings.setValue( "ExpandedView", ExpandedView );
     settings.setValue( "WorkingDirectory", WorkingDirectory );
 
     // Should be able to load and save a QColor directly, but doesn't work well on linux: to check: anything to do with the fact that destructor can be called after QApplication's destructor?
@@ -111,7 +115,7 @@ void ApplicationSettings::SaveSettings( QSettings & settings )
     settings.setValue( "CutPlanesCursorColor_g", CutPlanesCursorColor.green() );
     settings.setValue( "CutPlanesCursorColor_b", CutPlanesCursorColor.blue() );
 
-    settings.setValue( "ExpandedView", ExpandedView );
+//    settings.setValue( "ExpandedView", ExpandedView );
     settings.setValue( "InteractorStyle3D", (int)InteractorStyle3D );
     settings.setValue( "CameraViewAngle3D", CameraViewAngle3D );
     settings.setValue( "ShowCursor", ShowCursor );
@@ -163,7 +167,7 @@ void Application::Init( bool viewerOnly )
     world->SetCursorColor(cursorColor);
 
     m_sceneManager->Set3DViewFollowingReferenceVolume( m_settings.ViewFollowsReference );
-    m_sceneManager->SetExpandedView(m_settings.ExpandedView);
+//    m_sceneManager->SetExpandedView(m_settings.ExpandedView);
     m_sceneManager->Set3DInteractorStyle( m_settings.InteractorStyle3D );
 
     m_sceneManager->SetCursorVisibility( m_settings.ShowCursor );
@@ -200,7 +204,7 @@ Application::~Application()
     m_settings.ViewBackgroundColor = QColor( int(backgroundColor[0] * 255), int(backgroundColor[1] * 255), int(backgroundColor[2] * 255) );
     WorldObject * world = WorldObject::SafeDownCast(m_sceneManager->GetSceneRoot());
     m_settings.CutPlanesCursorColor =  world->GetCursorColor();
-    m_settings.ExpandedView = m_sceneManager->GetExpandedView();
+//    m_settings.ExpandedView = m_sceneManager->GetExpandedView();
     m_settings.InteractorStyle3D = m_sceneManager->Get3DInteractorStyle();
     m_settings.CameraViewAngle3D = m_sceneManager->Get3DCameraViewAngle();
     m_settings.ShowCursor = m_sceneManager->GetCursorVisible();
