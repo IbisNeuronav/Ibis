@@ -163,7 +163,9 @@ public:
     };
 
     void SaveCustomShaders();
+    void SaveCustomShaders( QString baseDirectory );
     void LoadCustomShaders();
+    void ImportCustomShaders( QString baseDirectory, QString & initName, QString & stopName );
 
 signals:
 

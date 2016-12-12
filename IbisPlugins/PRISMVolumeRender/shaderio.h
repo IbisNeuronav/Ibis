@@ -3,6 +3,7 @@
 
 #include "shadercontrib.h"
 #include <QList>
+#include <QMap>
 
 class ShaderIO
 {
@@ -22,10 +23,13 @@ public:
     QList<ShaderContrib> & GetStopConditionShaders() { return m_stopConditionShaders; }
     void SetStopConditionShaders( const QList<ShaderContrib> & shaders ) { m_stopConditionShaders = shaders; }
 
+    QMap<QString,QString> MergeShaderLists( QList<ShaderContrib> & original, const QList<ShaderContrib> & in );
+
 protected:
 
     void LoadShaderDir( QString dir, QList<ShaderContrib> & shaders );
     void SaveShaderDir( QString dir, QList<ShaderContrib> & shaders );
+    int GetShaderWithName( QString name, QList<ShaderContrib> & shaders );
 
     QList<ShaderContrib> m_initShaders;
     QList<ShaderContrib> m_volumeShaders;

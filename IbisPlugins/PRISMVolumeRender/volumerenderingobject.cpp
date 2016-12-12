@@ -305,14 +305,20 @@ void VolumeRenderingObject::Serialize( Serializer * ser )
     ser->Serialize( "InteractionPoint2", m_interactionPoint2, 3 );
     QString rayInitShaderTypeName = GetRayInitShaderName();
     ser->Serialize( "RayInitShaderTypeName", rayInitShaderTypeName );
+    QString stopConditionShaderTypeName = GetStopConditionShaderName();
+    ser->Serialize( "StopConditionShaderTypeName", stopConditionShaderTypeName );
     ::Serialize( ser, "ImageSlots", m_perImage );
     if( ser->IsReader() )
     {
+        ImportCustomShaders( ser->GetCurrentDirectory(), rayInitShaderTypeName, stopConditionShaderTypeName );
         SetRayInitShaderTypeByName( rayInitShaderTypeName );
+        SetStopConditionShaderTypeByName( stopConditionShaderTypeName );
         UpdateShaderContributionTypeIndices();
         UpdateInteractionPointPos();
         UpdateInteractionWidgetVisibility();
     }
+    else
+        SaveCustomShaders( ser->GetCurrentDirectory() );
 }
 
 void VolumeRenderingObject::Clear()
@@ -1358,11 +1364,16 @@ void VolumeRenderingObject::InternalPostSceneRead()
 void VolumeRenderingObject::SaveCustomShaders()
 {
     QString configDir = Application::GetInstance().GetConfigDirectory();
+    SaveCustomShaders( configDir );
+}
+
+void VolumeRenderingObject::SaveCustomShaders( QString baseDirectory )
+{
     ShaderIO io;
     io.SetInitShaders( m_initShaders );
     io.SetVolumeShaders( m_volumeShaders );
     io.SetStopConditionShaders( m_stopConditionShaders );
-    io.SaveShaders( configDir );
+    io.SaveShaders( baseDirectory );
 }
 
 void VolumeRenderingObject::LoadCustomShaders()
@@ -1373,6 +1384,31 @@ void VolumeRenderingObject::LoadCustomShaders()
     m_initShaders += io.GetInitShaders();
     m_volumeShaders += io.GetVolumeShaders();
     m_stopConditionShaders += io.GetStopConditionShaders();
+}
+
+void VolumeRenderingObject::ImportCustomShaders( QString baseDirectory, QString & initName, QString & stopName )
+{
+    ShaderIO io;
+    io.LoadShaders( baseDirectory );
+
+    // Update current init shader name
+    QMap<QString,QString> initTT = io.MergeShaderLists( m_initShaders, io.GetInitShaders() );
+    if( initTT.contains(initName) )
+        initName = initTT[initName];
+
+    // Update current stop condition shader name
+    QMap<QString,QString> stopTT = io.MergeShaderLists( m_stopConditionShaders, io.GetStopConditionShaders() );
+    if( stopTT.contains(stopName) )
+        stopName = stopTT[stopName];
+
+    // Update volume shader name for each image slot
+    QMap<QString,QString> volTT = io.MergeShaderLists( m_volumeShaders, io.GetVolumeShaders() );
+    for( int i = 0; i < m_perImage.size(); ++i )
+    {
+        QString volName = m_perImage[i]->shaderContributionTypeName;
+        if( volTT.contains( volName ) )
+            m_perImage[i]->shaderContributionTypeName = volTT[volName];
+    }
 }
 
 void VolumeRenderingObject::UpdateShaderContributionTypeIndices()

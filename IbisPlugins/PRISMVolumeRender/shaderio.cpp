@@ -1,10 +1,11 @@
 #include "shaderio.h"
 #include <QDir>
 #include <QTextStream>
+#include "scenemanager.h"
 
-#define INIT_SHADERS_DIR "PRISM/InitShaders/"
-#define VOLUME_SHADERS_DIR "PRISM/VolumeShaders/"
-#define STOP_CONDITION_SHADERS_DIR "PRISM/StopConditionShaders/"
+#define INIT_SHADERS_DIR "/PRISM/InitShaders/"
+#define VOLUME_SHADERS_DIR "/PRISM/VolumeShaders/"
+#define STOP_CONDITION_SHADERS_DIR "/PRISM/StopConditionShaders/"
 
 void ShaderIO::LoadShaders( QString baseDir )
 {
@@ -24,6 +25,28 @@ void ShaderIO::SaveShaders( QString baseDir )
     SaveShaderDir( volumeShaderDir, m_volumeShaders );
     QString stopConditionShaderDir = baseDir + STOP_CONDITION_SHADERS_DIR;
     SaveShaderDir( stopConditionShaderDir, m_stopConditionShaders );
+}
+
+QMap<QString,QString> ShaderIO::MergeShaderLists( QList<ShaderContrib> & originals, const QList<ShaderContrib> & in )
+{
+    // Get a list of all original shader names that will be used to find unique names
+    QStringList allNames;
+    for( int i = 0; i < originals.size(); ++i )
+        allNames.push_back( originals[i].name );
+
+    QMap<QString,QString> translationTable;
+    for( int i = 0; i < in.size(); ++i )
+    {
+        int shaderIndex = GetShaderWithName( in[i].name, originals );
+        if( shaderIndex != -1 && in[i] != originals[shaderIndex] )
+        {
+            ShaderContrib newShader( in[i] );
+            newShader.name = SceneManager::FindUniqueName( in[i].name, allNames );
+            translationTable[ in[i].name ] = newShader.name;
+            originals.push_back( newShader );
+        }
+    }
+    return translationTable;
 }
 
 void ShaderIO::LoadShaderDir( QString dirName, QList<ShaderContrib> & shaders )
@@ -79,4 +102,12 @@ void ShaderIO::SaveShaderDir( QString dirName, QList<ShaderContrib> & shaders )
             shaderFile.close();
         }
     }
+}
+
+int ShaderIO::GetShaderWithName( QString name, QList<ShaderContrib> & shaders )
+{
+    for( int i = 0; i < shaders.size(); ++i )
+        if( shaders[i].name == name )
+            return i;
+    return -1;
 }
