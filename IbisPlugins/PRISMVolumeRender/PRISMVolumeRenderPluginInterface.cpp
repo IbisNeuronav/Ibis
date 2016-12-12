@@ -41,9 +41,7 @@ SceneObject * PRISMVolumeRenderPluginInterface::GetGlobalObjectInstance()
 
 void PRISMVolumeRenderPluginInterface::LoadSettings( QSettings & s )
 {
-    m_vrObject->LoadCustomRayInitShaders();
-    m_vrObject->LoadCustomStopConditionShaders();
-    m_vrObject->LoadCustomShaderContribs();
+    m_vrObject->LoadCustomShaders();
     bool vrEnabled = true;
     vrEnabled = s.value( "VolumeRendererEnabled", vrEnabled ).toBool();
     m_vrObject->SetHidden( !vrEnabled );
@@ -52,7 +50,5 @@ void PRISMVolumeRenderPluginInterface::LoadSettings( QSettings & s )
 void PRISMVolumeRenderPluginInterface::SaveSettings( QSettings & s )
 {
     s.setValue( "VolumeRendererEnabled", !m_vrObject->IsHidden() );
-    m_vrObject->SaveCustomRayInitShaders();
-    m_vrObject->SaveCustomStopConditionShaders();
-    m_vrObject->SaveCustomShaderContribs();
+    m_vrObject->SaveCustomShaders();
 }

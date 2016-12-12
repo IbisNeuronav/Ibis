@@ -32,6 +32,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "vtkLineRepresentation.h"
 #include "application.h"
 #include <QTime>
+#include "shaderio.h"
 
 ObjectSerializationMacro( VolumeRenderingObject );
 ObjectSerializationMacro( VolumeRenderingObject::PerImage );
@@ -209,53 +210,53 @@ VolumeRenderingObject::VolumeRenderingObject()
     ShaderContrib contribAdd;
     contribAdd.name = "Add";
     contribAdd.code = shaderContributionAdd;
-    m_shaderContribs.push_back( contribAdd );
+    m_volumeShaders.push_back( contribAdd );
 
     ShaderContrib contribAddSmooth;
     contribAddSmooth.name = "Add Smooth";
     contribAddSmooth.code = shaderContributionAddSmooth;
-    m_shaderContribs.push_back( contribAddSmooth );
+    m_volumeShaders.push_back( contribAddSmooth );
 
     ShaderContrib contribMult;
     contribMult.name = "Multiply";
     contribMult.code = shaderContributionMultiply;
-    m_shaderContribs.push_back( contribMult );
+    m_volumeShaders.push_back( contribMult );
 
     ShaderContrib contribDiffuseShade;
     contribDiffuseShade.name = "Diffuse Shade";
     contribDiffuseShade.code = shaderContributionDiffuseShade;
-    m_shaderContribs.push_back( contribDiffuseShade );
+    m_volumeShaders.push_back( contribDiffuseShade );
 
     ShaderContrib contribDiffuseShadeFalloff;
     contribDiffuseShadeFalloff.name = "Diffuse Shade Falloff";
     contribDiffuseShadeFalloff.code = shaderContributionDiffuseShadeFalloff;
-    m_shaderContribs.push_back( contribDiffuseShadeFalloff );
+    m_volumeShaders.push_back( contribDiffuseShadeFalloff );
 
     ShaderContrib contribAddGradientOpacity;
     contribAddGradientOpacity.name = "Add Gradient Opacity";
     contribAddGradientOpacity.code = shaderContributionAddGradientOpacity;
-    m_shaderContribs.push_back( contribAddGradientOpacity );
+    m_volumeShaders.push_back( contribAddGradientOpacity );
 
     ShaderContrib contribNone;
     contribNone.name = "None";
     contribNone.code = shaderContributionNone;
-    m_shaderContribs.push_back( contribNone );
+    m_volumeShaders.push_back( contribNone );
 
     // Register Builtin Init ray shader types
     ShaderContrib initContribClipFront;
     initContribClipFront.name = "Clip Front";
     initContribClipFront.code = initShaderContribClipFront;
-    m_initShaderContribs.push_back( initContribClipFront );
+    m_initShaders.push_back( initContribClipFront );
 
     ShaderContrib initContribClipBack;
     initContribClipBack.name = "Clip Back";
     initContribClipBack.code = initShaderContribClipBack;
-    m_initShaderContribs.push_back( initContribClipBack );
+    m_initShaders.push_back( initContribClipBack );
 
     ShaderContrib initContribNone;
     initContribNone.name = "None";
     initContribNone.code = initShaderContribNone;
-    m_initShaderContribs.push_back( initContribNone );
+    m_initShaders.push_back( initContribNone );
 
     m_initShaderContributionType = 2;
 
@@ -710,26 +711,26 @@ void VolumeRenderingObject::GetInteractionPoint2( double & x, double & y, double
 
 int VolumeRenderingObject::GetNumberOfRayInitShaderTypes()
 {
-    return m_initShaderContribs.size();
+    return m_initShaders.size();
 }
 
 QString VolumeRenderingObject::GetRayInitShaderTypeName( int index )
 {
     Q_ASSERT( index < GetNumberOfRayInitShaderTypes() && index >= 0 );
-    return m_initShaderContribs[ index ].name;
+    return m_initShaders[ index ].name;
 }
 
 bool VolumeRenderingObject::IsRayInitShaderTypeCustom( int index )
 {
     Q_ASSERT( index < GetNumberOfRayInitShaderTypes() && index >= 0 );
-    return m_initShaderContribs[ index ].custom;
+    return m_initShaders[ index ].custom;
 }
 
 bool VolumeRenderingObject::DoesRayInitShaderExist( QString name )
 {
     for( int i = 0; i < GetNumberOfRayInitShaderTypes(); ++i )
     {
-        if( m_initShaderContribs[i].name == name )
+        if( m_initShaders[i].name == name )
         {
             return true;
         }
@@ -750,7 +751,7 @@ void VolumeRenderingObject::SetRayInitShaderTypeByName( QString name )
     int index = -1;
     for( int i = 0; i < GetNumberOfRayInitShaderTypes(); ++i )
     {
-        if( m_initShaderContribs[i].name == name )
+        if( m_initShaders[i].name == name )
         {
             index = i;
             break;
@@ -768,8 +769,8 @@ int VolumeRenderingObject::GetRayInitShaderType()
 
 QString VolumeRenderingObject::GetRayInitShaderName()
 {
-    Q_ASSERT( m_initShaderContributionType >= 0 && m_initShaderContributionType < m_initShaderContribs.size() );
-    return m_initShaderContribs[ m_initShaderContributionType ].name;
+    Q_ASSERT( m_initShaderContributionType >= 0 && m_initShaderContributionType < m_initShaders.size() );
+    return m_initShaders[ m_initShaderContributionType ].name;
 }
 
 void VolumeRenderingObject::AddRayInitShaderType( QString name, QString code, bool custom )
@@ -778,31 +779,31 @@ void VolumeRenderingObject::AddRayInitShaderType( QString name, QString code, bo
     newContrib.name = name;
     newContrib.code = code;
     newContrib.custom = custom;
-    m_initShaderContribs.push_back( newContrib );
-    m_initShaderContributionType = m_initShaderContribs.size() - 1;
+    m_initShaders.push_back( newContrib );
+    m_initShaderContributionType = m_initShaders.size() - 1;
     emit Modified();
 }
 
 void VolumeRenderingObject::DuplicateRayInitShaderType()
 {
-    ShaderContrib newContrib = m_initShaderContribs[ m_initShaderContributionType ];
+    ShaderContrib newContrib = m_initShaders[ m_initShaderContributionType ];
 
     // Find unique name
     QStringList allNames;
-    for( int i = 0; i < m_initShaderContribs.size(); ++i )
-        allNames.push_back( m_initShaderContribs[i].name );
+    for( int i = 0; i < m_initShaders.size(); ++i )
+        allNames.push_back( m_initShaders[i].name );
     newContrib.name = SceneManager::FindUniqueName( newContrib.name, allNames );
 
     newContrib.custom = true;
-    m_initShaderContribs.push_back( newContrib );
-    m_initShaderContributionType = m_initShaderContribs.size() - 1;
+    m_initShaders.push_back( newContrib );
+    m_initShaderContributionType = m_initShaders.size() - 1;
     emit Modified();
 }
 
 void VolumeRenderingObject::DeleteRayInitShaderType()
 {
     //Q_ASSERT( m_initShaderContribs[ m_initShaderContributionType ].custom == true );
-    m_initShaderContribs.removeAt( m_initShaderContributionType );
+    m_initShaders.removeAt( m_initShaderContributionType );
     int newInitShaderType = m_initShaderContributionType;
     if( newInitShaderType > 0 )
         --newInitShaderType;
@@ -811,15 +812,15 @@ void VolumeRenderingObject::DeleteRayInitShaderType()
 
 QString VolumeRenderingObject::GetRayInitShaderCode()
 {
-    Q_ASSERT( m_initShaderContributionType >= 0 && m_initShaderContributionType < m_initShaderContribs.size() );
-    return m_initShaderContribs[ m_initShaderContributionType ].code;
+    Q_ASSERT( m_initShaderContributionType >= 0 && m_initShaderContributionType < m_initShaders.size() );
+    return m_initShaders[ m_initShaderContributionType ].code;
 }
 
 void VolumeRenderingObject::SetRayInitShaderCode( QString code )
 {
     //Q_ASSERT( m_initShaderContribs[ m_initShaderContributionType ].custom == true );
-    Q_ASSERT( m_initShaderContributionType >= 0 && m_initShaderContributionType < m_initShaderContribs.size() );
-    m_initShaderContribs[ m_initShaderContributionType ].code = code;
+    Q_ASSERT( m_initShaderContributionType >= 0 && m_initShaderContributionType < m_initShaders.size() );
+    m_initShaders[ m_initShaderContributionType ].code = code;
     UpdateAllMappers();
     emit Modified();
 }
@@ -942,14 +943,14 @@ void VolumeRenderingObject::SetStopConditionShaderCode( QString code )
 
 int VolumeRenderingObject::GetNumberOfShaderContributionTypes()
 {
-    return m_shaderContribs.size();
+    return m_volumeShaders.size();
 }
 
 int VolumeRenderingObject::GetShaderContributionTypeIndex( QString shaderName )
 {
-    for( int i = 0; i < m_shaderContribs.size(); ++i )
+    for( int i = 0; i < m_volumeShaders.size(); ++i )
     {
-        if( m_shaderContribs[i].name == shaderName )
+        if( m_volumeShaders[i].name == shaderName )
             return i;
     }
     return -1;
@@ -958,14 +959,14 @@ int VolumeRenderingObject::GetShaderContributionTypeIndex( QString shaderName )
 QString VolumeRenderingObject::GetShaderContributionTypeName( int typeIndex )
 {
     Q_ASSERT( typeIndex < GetNumberOfShaderContributionTypes() );
-    return m_shaderContribs[typeIndex].name;
+    return m_volumeShaders[typeIndex].name;
 }
 
 bool VolumeRenderingObject::DoesShaderContributionTypeExist( QString name )
 {
     for( int i = 0; i < GetNumberOfShaderContributionTypes(); ++i )
     {
-        if( m_shaderContribs[i].name == name )
+        if( m_volumeShaders[i].name == name )
         {
             return true;
         }
@@ -979,7 +980,7 @@ void VolumeRenderingObject::AddShaderContributionType( QString shaderName, QStri
     contrib.custom = custom;
     contrib.code = code;
     contrib.name = shaderName;
-    m_shaderContribs.push_back( contrib );
+    m_volumeShaders.push_back( contrib );
     emit Modified();
 }
 
@@ -994,7 +995,7 @@ void VolumeRenderingObject::DeleteShaderContributionType( QString shaderName )
             SetShaderContributionType( i, 0 );
     }
 
-    m_shaderContribs.removeAt( shaderType );
+    m_volumeShaders.removeAt( shaderType );
 
     emit Modified();
 }
@@ -1002,22 +1003,22 @@ void VolumeRenderingObject::DeleteShaderContributionType( QString shaderName )
 QString VolumeRenderingObject::GetUniqueCustomShaderName( QString name )
 {
     QStringList allNames;
-    for( int i = 0; i < m_shaderContribs.size(); ++i )
-        allNames.push_back( m_shaderContribs[i].name );
+    for( int i = 0; i < m_volumeShaders.size(); ++i )
+        allNames.push_back( m_volumeShaders[i].name );
     return SceneManager::FindUniqueName( name, allNames );
 }
 
 void VolumeRenderingObject::DuplicateShaderContribType( int typeIndex )
 {
-    Q_ASSERT( typeIndex < m_shaderContribs.size() );
+    Q_ASSERT( typeIndex < m_volumeShaders.size() );
 
-    ShaderContrib contrib = m_shaderContribs[ typeIndex ];
+    ShaderContrib contrib = m_volumeShaders[ typeIndex ];
     contrib.custom = true;
 
     // Make sure we have a unique name
     contrib.name = GetUniqueCustomShaderName( contrib.name );
 
-    m_shaderContribs.push_back( contrib );
+    m_volumeShaders.push_back( contrib );
 
     emit Modified();
 }
@@ -1027,7 +1028,7 @@ void VolumeRenderingObject::SetShaderContributionType( int volumeIndex, int type
     Q_ASSERT( (unsigned)volumeIndex < m_perImage.size() );
     Q_ASSERT( typeIndex < GetNumberOfShaderContributionTypes() );
     m_perImage[ volumeIndex ]->shaderContributionType = typeIndex;
-    m_perImage[ volumeIndex ]->shaderContributionTypeName = m_shaderContribs[ typeIndex ].name;
+    m_perImage[ volumeIndex ]->shaderContributionTypeName = m_volumeShaders[ typeIndex ].name;
     UpdateAllMappers();
     emit Modified();
 }
@@ -1037,7 +1038,7 @@ void VolumeRenderingObject::SetShaderContributionTypeByName( int volumeIndex, QS
     Q_ASSERT( (unsigned)volumeIndex < m_perImage.size() );
     for( int i = 0; i < GetNumberOfShaderContributionTypes(); ++i )
     {
-        if( m_shaderContribs[ i ].name == name )
+        if( m_volumeShaders[ i ].name == name )
         {
             SetShaderContributionType( volumeIndex, i );
             break;
@@ -1053,24 +1054,24 @@ int VolumeRenderingObject::GetShaderContributionType( int volumeIndex )
 
 bool VolumeRenderingObject::IsShaderTypeCustom( int typeIndex )
 {
-    Q_ASSERT( typeIndex < m_shaderContribs.size() );
-    return m_shaderContribs[ typeIndex ].custom;
+    Q_ASSERT( typeIndex < m_volumeShaders.size() );
+    return m_volumeShaders[ typeIndex ].custom;
 }
 
 QString VolumeRenderingObject::GetCustomShaderContribution( int volumeIndex )
 {
     Q_ASSERT( (unsigned)volumeIndex < m_perImage.size() );
     int contributionType = m_perImage[ volumeIndex ]->shaderContributionType;
-    Q_ASSERT( contributionType < m_shaderContribs.size() );
-    return m_shaderContribs[ contributionType ].code;
+    Q_ASSERT( contributionType < m_volumeShaders.size() );
+    return m_volumeShaders[ contributionType ].code;
 }
 
 void VolumeRenderingObject::SetCustomShaderCode( int volumeIndex, QString code )
 {
     Q_ASSERT( (unsigned)volumeIndex < m_perImage.size() );
     int contributionType = m_perImage[ volumeIndex ]->shaderContributionType;
-    Q_ASSERT( contributionType < m_shaderContribs.size() );
-    m_shaderContribs[ contributionType ].code = code;
+    Q_ASSERT( contributionType < m_volumeShaders.size() );
+    m_volumeShaders[ contributionType ].code = code;
     UpdateAllMappers();
     emit Modified();
 }
@@ -1270,14 +1271,14 @@ void VolumeRenderingObject::UpdateMapper( PerView & pv )
         PerImage * pi = m_perImage[i];
         if( pi->imageCast )
         {
-            QString shaderContribution = m_shaderContribs[ pi->shaderContributionType ].code;
+            QString shaderContribution = m_volumeShaders[ pi->shaderContributionType ].code;
             mapper->AddInput( pi->imageCast->GetOutputPort(), pi->volumeProperty, shaderContribution.toUtf8().data() );
             mapper->EnableInput( i, pi->volumeEnabled );
             mapper->SetUseLinearSampling( i, pi->linearSampling );
         }
     }
     mapper->SetSampleDistance( m_samplingDistance );
-    QString initShaderCode = m_initShaderContribs[ m_initShaderContributionType ].code;
+    QString initShaderCode = m_initShaders[ m_initShaderContributionType ].code;
     mapper->SetShaderInitCode( initShaderCode.toUtf8().data() );
     QString stopConditionShaderCode = m_stopConditionShaders[ m_stopConditionShaderType ].code;
     mapper->SetStopConditionCode( stopConditionShaderCode.toUtf8().data() );
@@ -1354,183 +1355,24 @@ void VolumeRenderingObject::InternalPostSceneRead()
     emit Modified();
 }
 
-#include <QDir>
-
-void VolumeRenderingObject::LoadCustomShaderContribs()
+void VolumeRenderingObject::SaveCustomShaders()
 {
-    QString configDir = Application::GetConfigDirectory();
-    QString shaderContribDir = configDir + "VolumeRenderer/ShaderContribs/";
-    if( QFile::exists( shaderContribDir ) )
-    {
-        // list all .glsl files
-        QDir dir( shaderContribDir );
-        QStringList filter;
-        filter.push_back( QString("*.glsl") );
-        QStringList allFiles = dir.entryList( filter );
-
-        // for each file, read and create a shader contrib.
-        for( int i = 0; i < allFiles.size(); ++i )
-        {
-            QString shaderFileName = shaderContribDir + allFiles[i];
-            QFile shaderFile( shaderFileName );
-            if( shaderFile.open( QIODevice::ReadOnly | QIODevice::Text ) )
-            {
-                ShaderContrib contrib;
-                contrib.custom = true;
-                QFileInfo info( allFiles[i] );
-                contrib.name = info.baseName();
-                QTextStream shaderStream( &shaderFile );
-                contrib.code = shaderStream.readAll();
-                m_shaderContribs.push_back( contrib );
-            }
-            shaderFile.close();
-        }
-    }
-}
-
-void VolumeRenderingObject::SaveCustomShaderContribs()
-{
-    // Make sure dir exists
     QString configDir = Application::GetInstance().GetConfigDirectory();
-    QString shaderContribDir = configDir + "VolumeRenderer/ShaderContribs/";
-    if( !QFile::exists( shaderContribDir ) )
-    {
-        QDir dir;
-        dir.mkpath( shaderContribDir );
-    }
-
-    for( int i = 0; i < m_shaderContribs.size(); ++i )
-    {
-        if( m_shaderContribs[i].custom )
-        {
-            QString filename = shaderContribDir + m_shaderContribs[i].name + ".glsl";
-            QFile shaderFile( filename );
-            if( shaderFile.open( QIODevice::WriteOnly | QIODevice::Text ) )
-            {
-                QTextStream shaderStream( &shaderFile );
-                shaderStream << m_shaderContribs[i].code;
-            }
-            shaderFile.close();
-        }
-    }
+    ShaderIO io;
+    io.SetInitShaders( m_initShaders );
+    io.SetVolumeShaders( m_volumeShaders );
+    io.SetStopConditionShaders( m_stopConditionShaders );
+    io.SaveShaders( configDir );
 }
 
-void VolumeRenderingObject::LoadCustomRayInitShaders()
+void VolumeRenderingObject::LoadCustomShaders()
 {
-    QString configDir = Application::GetConfigDirectory();
-    QString shadersDir = configDir + "VolumeRenderer/CustomRayInitShaders/";
-    if( QFile::exists( shadersDir ) )
-    {
-        // list all .glsl files
-        QDir dir( shadersDir );
-        QStringList filter;
-        filter.push_back( QString("*.glsl") );
-        QStringList allFiles = dir.entryList( filter );
-
-        // for each file, read and create a shader contrib.
-        for( int i = 0; i < allFiles.size(); ++i )
-        {
-            QString shaderFileName = shadersDir + allFiles[i];
-            QFile shaderFile( shaderFileName );
-            if( shaderFile.open( QIODevice::ReadOnly | QIODevice::Text ) )
-            {
-                ShaderContrib contrib;
-                contrib.custom = true;
-                QFileInfo info( allFiles[i] );
-                contrib.name = info.baseName();
-                QTextStream shaderStream( &shaderFile );
-                contrib.code = shaderStream.readAll();
-                m_initShaderContribs.push_back( contrib );
-            }
-            shaderFile.close();
-        }
-    }
-}
-
-void VolumeRenderingObject::SaveCustomRayInitShaders()
-{
-    // Make sure dir exists
     QString configDir = Application::GetInstance().GetConfigDirectory();
-    QString shadersDir = configDir + "VolumeRenderer/CustomRayInitShaders/";
-    if( !QFile::exists( shadersDir ) )
-    {
-        QDir dir;
-        dir.mkpath( shadersDir );
-    }
-
-    for( int i = 0; i < m_initShaderContribs.size(); ++i )
-    {
-        if( m_initShaderContribs[i].custom )
-        {
-            QString filename = shadersDir + m_initShaderContribs[i].name + ".glsl";
-            QFile shaderFile( filename );
-            if( shaderFile.open( QIODevice::WriteOnly | QIODevice::Text ) )
-            {
-                QTextStream shaderStream( &shaderFile );
-                shaderStream << m_initShaderContribs[i].code;
-            }
-            shaderFile.close();
-        }
-    }
-}
-
-void VolumeRenderingObject::LoadCustomStopConditionShaders()
-{
-    QString configDir = Application::GetConfigDirectory();
-    QString shadersDir = configDir + "VolumeRenderer/CustomStopConditionShaders/";
-    if( QFile::exists( shadersDir ) )
-    {
-        // list all .glsl files
-        QDir dir( shadersDir );
-        QStringList filter;
-        filter.push_back( QString("*.glsl") );
-        QStringList allFiles = dir.entryList( filter );
-
-        // for each file, read and create a shader contrib.
-        for( int i = 0; i < allFiles.size(); ++i )
-        {
-            QString shaderFileName = shadersDir + allFiles[i];
-            QFile shaderFile( shaderFileName );
-            if( shaderFile.open( QIODevice::ReadOnly | QIODevice::Text ) )
-            {
-                ShaderContrib contrib;
-                contrib.custom = true;
-                QFileInfo info( allFiles[i] );
-                contrib.name = info.baseName();
-                QTextStream shaderStream( &shaderFile );
-                contrib.code = shaderStream.readAll();
-                m_stopConditionShaders.push_back( contrib );
-            }
-            shaderFile.close();
-        }
-    }
-}
-
-void VolumeRenderingObject::SaveCustomStopConditionShaders()
-{
-    // Make sure dir exists
-    QString configDir = Application::GetInstance().GetConfigDirectory();
-    QString shadersDir = configDir + "VolumeRenderer/CustomStopConditionShaders/";
-    if( !QFile::exists( shadersDir ) )
-    {
-        QDir dir;
-        dir.mkpath( shadersDir );
-    }
-
-    for( int i = 0; i < m_stopConditionShaders.size(); ++i )
-    {
-        if( m_stopConditionShaders[i].custom )
-        {
-            QString filename = shadersDir + m_stopConditionShaders[i].name + ".glsl";
-            QFile shaderFile( filename );
-            if( shaderFile.open( QIODevice::WriteOnly | QIODevice::Text ) )
-            {
-                QTextStream shaderStream( &shaderFile );
-                shaderStream << m_stopConditionShaders[i].code;
-            }
-            shaderFile.close();
-        }
-    }
+    ShaderIO io;
+    io.LoadShaders( configDir );
+    m_initShaders += io.GetInitShaders();
+    m_volumeShaders += io.GetVolumeShaders();
+    m_stopConditionShaders += io.GetStopConditionShaders();
 }
 
 void VolumeRenderingObject::UpdateShaderContributionTypeIndices()
@@ -1539,9 +1381,9 @@ void VolumeRenderingObject::UpdateShaderContributionTypeIndices()
     for( int i = 0; i < m_perImage.size(); ++i )
     {
         QString name = m_perImage[i]->shaderContributionTypeName;
-        for( int t = 0; t < m_shaderContribs.size(); ++t )
+        for( int t = 0; t < m_volumeShaders.size(); ++t )
         {
-            if( m_shaderContribs[t].name == name )
+            if( m_volumeShaders[t].name == name )
             {
                 m_perImage[i]->shaderContributionType = t;
                 break;

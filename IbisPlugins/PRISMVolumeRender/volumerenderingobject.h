@@ -15,6 +15,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include <map>
 #include "sceneobject.h"
+#include "shadercontrib.h"
 
 class ImageObject;
 class View;
@@ -161,12 +162,8 @@ public:
         QString shaderContributionTypeName;
     };
 
-    void SaveCustomShaderContribs();
-    void LoadCustomShaderContribs();
-    void SaveCustomRayInitShaders();
-    void LoadCustomRayInitShaders();
-    void SaveCustomStopConditionShaders();
-    void LoadCustomStopConditionShaders();
+    void SaveCustomShaders();
+    void LoadCustomShaders();
 
 signals:
 
@@ -199,17 +196,10 @@ protected:
 
     virtual void InternalPostSceneRead();
 
-    struct ShaderContrib
-    {
-        ShaderContrib() : custom( false ), name("NoName") {}
-        bool custom;
-        QString name;
-        QString code;
-    };
-    QList< ShaderContrib > m_shaderContribs;
+    QList< ShaderContrib > m_volumeShaders;
     void UpdateShaderContributionTypeIndices();
 
-    QList< ShaderContrib > m_initShaderContribs;
+    QList< ShaderContrib > m_initShaders;
     int m_initShaderContributionType;
 
     QList< ShaderContrib > m_stopConditionShaders;
