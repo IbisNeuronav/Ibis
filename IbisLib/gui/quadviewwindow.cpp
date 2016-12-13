@@ -30,6 +30,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "view.h"
 #include "vtkRenderWindow.h"
 #include "vtkCornerAnnotation.h"
+#include "application.h"
 
 const QString QuadViewWindow::ViewNames[4] = { "Transverse","ThreeD","Coronal","Sagittal" };
 
@@ -112,7 +113,6 @@ QuadViewWindow::QuadViewWindow( QWidget* parent, Qt::WindowFlags fl ) : QWidget(
 
      m_viewExpanded = false;
      m_currentView = THREED_VIEW_TYPE;
-//    this->currentViewExpanded = 0;
 }
 
 QAbstractButton * QuadViewWindow::CreateToolButton( QString name, QString iconPath, QString toolTip, const char * callbackSlot )
@@ -202,14 +202,6 @@ void QuadViewWindow::SetSceneManager( SceneManager * man )
         connect( view, SIGNAL( Modified() ), this, SLOT( Win3NeedsRender() ) );
         
         m_sceneManager = man;
-        int expandedView = m_sceneManager->GetExpandedView();
-        if (expandedView > -1)
-        {
-            m_sceneManager->SetCurrentView(expandedView);
-            ExpandViewButtonClicked();
-        }
-        else
-            SetCurrentView( 1 );
 
         connect( man, SIGNAL(CursorPositionChanged()), this, SLOT(OnCursorMoved()) );
         OnCursorMoved();
@@ -217,7 +209,6 @@ void QuadViewWindow::SetSceneManager( SceneManager * man )
         connect( man, SIGNAL(ShowGenericLabel(bool)), this, SLOT(OnShowGenericLabel(bool)) );
         connect( man, SIGNAL(ShowGenericLabelText()), this, SLOT(OnShowGenericLabelText()) );
 
-        connect (m_sceneManager, SIGNAL(ExpandView()), this, SLOT(ExpandViewButtonClicked()));
         m_sceneManager->PreDisplaySetup();
 //        this->PlaceCornerText(); temporarily blocked
     }
@@ -337,6 +328,8 @@ void QuadViewWindow::ExpandViewButtonClicked()
         }
         m_viewExpanded = true;
     }
+    ApplicationSettings * s = Application::GetInstance().GetSettings();
+    s->ExpandedView = m_viewExpanded;
 }
 
 void QuadViewWindow::ResetPlanesButtonClicked()
@@ -438,6 +431,49 @@ void QuadViewWindow::SetCurrentView( int index )
     for( int i = 0; i < 4; ++i )
     {
         if( i == index )
+        {
+            m_vtkWindowFrames[i]->setStyleSheet( "background-color:red" );
+        }
+        else
+        {
+            m_vtkWindowFrames[i]->setStyleSheet( "" );
+        }
+    }
+    ApplicationSettings * s = Application::GetInstance().GetSettings();
+    s->CurrentView = m_currentView;
+}
+
+void QuadViewWindow::SetExpandedView( bool on )
+{
+    if( m_viewExpanded != on )
+    {
+        ExpandViewButtonClicked();
+    }
+    ApplicationSettings * s = Application::GetInstance().GetSettings();
+    s->ExpandedView = m_viewExpanded;
+}
+
+void QuadViewWindow::SetCurrentWindow( int index )
+{
+    WINTYPES currentWindow = TRANSVERSE_WIN;
+    switch(index)
+    {
+    case TRANSVERSE_VIEW_TYPE:
+        currentWindow = TRANSVERSE_WIN;
+        break;
+    case THREED_VIEW_TYPE:
+        currentWindow = THREED_WIN;
+        break;
+    case CORONAL_VIEW_TYPE:
+        currentWindow = CORONAL_WIN;
+        break;
+    case SAGITTAL_VIEW_TYPE:
+        currentWindow = SAGITTAL_WIN;
+        break;
+    }
+    for( int i = 0; i < 4; ++i )
+    {
+        if( i == currentWindow )
         {
             m_vtkWindowFrames[i]->setStyleSheet( "background-color:red" );
         }

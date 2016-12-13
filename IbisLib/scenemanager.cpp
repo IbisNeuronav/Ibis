@@ -57,8 +57,6 @@ ObjectSerializationMacro( SceneManager );
 SceneManager::SceneManager()
 {
     m_viewFollowsReferenceObject = true;
-    this->CurrentView = -1;
-    this->ExpandedView = -1;
     this->ViewBackgroundColor[0] = 0;
     this->ViewBackgroundColor[1] = 0;
     this->ViewBackgroundColor[2] = 0;
@@ -414,20 +412,8 @@ void SceneManager::Serialize( Serializer * ser )
         QString viewName(view->GetName());
         ::Serialize( ser, viewName.toUtf8().data(), view );
     }
-    int oldExpandedView = ExpandedView;
-    ::Serialize( ser, "ExpandedView", ExpandedView );
-    int newExpandedView = ExpandedView;
     if (ser->IsReader())
     {
-        if (oldExpandedView > -1)
-        {
-            emit ExpandView();
-        }
-        if (newExpandedView > -1)
-        {
-            CurrentView = newExpandedView;
-            emit ExpandView();
-        }
         this->SetCurrentObject(this->GetObjectByID(id));
         if( refObjID != SceneObject::InvalidObjectId )
             this->SetReferenceDataObject( this->GetObjectByID(refObjID) );

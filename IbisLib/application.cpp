@@ -79,8 +79,6 @@ void ApplicationSettings::LoadSettings( QSettings & settings )
     CutPlanesCursorColor.setGreen( settings.value("CutPlanesCursorColor_g", 50 ).toInt() );
     CutPlanesCursorColor.setBlue( settings.value("CutPlanesCursorColor_b", 50 ).toInt() );
 
-//    ExpandedView = settings.value( "ExpandedView", -1).toInt();
-
     InteractorStyle3D = (InteractorStyle)settings.value( "InteractorStyle3D", (int)InteractorStyleTerrain ).toInt();
     CameraViewAngle3D = settings.value( "CameraViewAngle3D", 30.0 ).toDouble();
     ShowCursor = settings.value( "ShowCursor", true ).toBool();
@@ -115,7 +113,6 @@ void ApplicationSettings::SaveSettings( QSettings & settings )
     settings.setValue( "CutPlanesCursorColor_g", CutPlanesCursorColor.green() );
     settings.setValue( "CutPlanesCursorColor_b", CutPlanesCursorColor.blue() );
 
-//    settings.setValue( "ExpandedView", ExpandedView );
     settings.setValue( "InteractorStyle3D", (int)InteractorStyle3D );
     settings.setValue( "CameraViewAngle3D", CameraViewAngle3D );
     settings.setValue( "ShowCursor", ShowCursor );

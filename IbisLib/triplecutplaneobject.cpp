@@ -12,6 +12,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "view.h"
 #include "imageobject.h"
 #include "scenemanager.h"
+#include "application.h"
 #include "triplecutplaneobjectsettingswidget.h"
 #include "vtkMultiImagePlaneWidget.h"
 #include <vtkAssembly.h>
@@ -573,7 +574,9 @@ void TripleCutPlaneObject::PlaneEndInteractionEvent( vtkObject * caller, unsigne
 
     this->UpdateOtherPlanesPosition( whichPlane );
 
-    if (this->GetManager()->GetCurrentView() == THREED_VIEW_TYPE)
+    ApplicationSettings * settings = Application::GetInstance().GetSettings();
+//    if (this->GetManager()->GetCurrentView() == THREED_VIEW_TYPE)
+    if (settings->CurrentView == THREED_VIEW_TYPE)
         emit EndPlaneMove(whichPlane);
     else
     {

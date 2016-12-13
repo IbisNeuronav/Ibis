@@ -98,10 +98,6 @@ public:
     View * GetMain3DView();
     View * GetView( const QString & name );
     View * GetViewFromInteractor( vtkRenderWindowInteractor * interactor );
-    vtkSetMacro( CurrentView, int );
-    vtkGetMacro( CurrentView, int );
-    vtkSetMacro( ExpandedView, int );
-    vtkGetMacro( ExpandedView, int );
     void Set3DViewFollowingReferenceVolume( bool follow ) { m_viewFollowsReferenceObject = follow; }
     bool Is3DViewFollowingReferenceVolume() { return m_viewFollowsReferenceObject; }
     void SetViewBackgroundColor( double * color );
@@ -321,8 +317,6 @@ signals:
     void ReferenceTransformChanged();
     void ReferenceObjectChanged();
 
-    void ExpandView();
-
 protected:
 
     void ValidatePointerObject();
@@ -361,8 +355,6 @@ protected:
     bool m_viewFollowsReferenceObject;
     typedef std::vector<View*> ViewList;
     ViewList Views;
-    int CurrentView;
-    int ExpandedView;
 
     TripleCutPlaneObject * MainCutPlanes;
 

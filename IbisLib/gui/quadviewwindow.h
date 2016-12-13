@@ -51,9 +51,9 @@ public:
 
     void AddBottomWidget( QWidget * w );
     void RemoveBottomWidget( QWidget * w );
-    VIEWTYPES GetCurrentView() { return m_currentView; }
-    bool GetExpandedView() { return m_viewExpanded; }
-    
+    void SetExpandedView( bool on );
+    void SetCurrentWindow( int index );
+
 public slots:
 
     void Detach3DView( QWidget * parent );
