@@ -467,9 +467,10 @@ int PointsObject::FindPoint(vtkActor *actor, double *pos)
     }
 
     // Now see if any of 2D actors are picked
-    ApplicationSettings * settings = Application::GetInstance().GetSettings();
-    //    int viewType = this->GetManager()->GetCurrentView();
-    int viewType = settings->CurrentView;
+//    ApplicationSettings * settings = Application::GetInstance().GetSettings();
+//    //    int viewType = this->GetManager()->GetCurrentView();
+//    int viewType = settings->CurrentView;
+    int viewType = 0;
     if( viewType != THREED_VIEW_TYPE )
     {
         vtkTransform * wt = this->GetWorldTransform();

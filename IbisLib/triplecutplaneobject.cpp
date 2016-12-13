@@ -576,9 +576,9 @@ void TripleCutPlaneObject::PlaneEndInteractionEvent( vtkObject * caller, unsigne
 
     ApplicationSettings * settings = Application::GetInstance().GetSettings();
 //    if (this->GetManager()->GetCurrentView() == THREED_VIEW_TYPE)
-    if (settings->CurrentView == THREED_VIEW_TYPE)
-        emit EndPlaneMove(whichPlane);
-    else
+//    if (settings->CurrentView == THREED_VIEW_TYPE)
+//        emit EndPlaneMove(whichPlane);
+//    else
     {
         // if we use left mouse button, then only the "whichPlane" moves, if it is a right button, 2 other planes move
         // at this point, we do not know which button was pressed, so we adjust all planes

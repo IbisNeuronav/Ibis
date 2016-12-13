@@ -55,11 +55,10 @@ struct ApplicationSettings
     QPoint MainWindowPosition;
     int MainWindowLeftPanelSize;
     int MainWindowRightPanelSize;
-    int CurrentView;
+    int CurrentViewWindow;
     bool ExpandedView;
     QColor ViewBackgroundColor;
     QColor CutPlanesCursorColor;
-//    qint32 ExpandedView;
     InteractorStyle InteractorStyle3D;
     double CameraViewAngle3D;
     bool ShowCursor;

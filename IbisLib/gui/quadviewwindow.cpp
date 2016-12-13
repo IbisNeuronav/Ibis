@@ -112,7 +112,7 @@ QuadViewWindow::QuadViewWindow( QWidget* parent, Qt::WindowFlags fl ) : QWidget(
     resize( QSize(1000, 800).expandedTo(minimumSizeHint()) );
 
      m_viewExpanded = false;
-     m_currentView = THREED_VIEW_TYPE;
+     m_currentViewWindow = THREED_VIEW_TYPE;
 }
 
 QAbstractButton * QuadViewWindow::CreateToolButton( QString name, QString iconPath, QString toolTip, const char * callbackSlot )
@@ -303,25 +303,9 @@ void QuadViewWindow::ExpandViewButtonClicked()
     }
     else
     {
-        int currentWindow;
-        switch( m_currentView )
-        {
-        case TRANSVERSE_VIEW_TYPE:
-            currentWindow = TRANSVERSE_WIN;
-            break;
-        case THREED_VIEW_TYPE:
-            currentWindow = THREED_WIN;
-            break;
-        case CORONAL_VIEW_TYPE:
-            currentWindow = CORONAL_WIN;
-            break;
-        case SAGITTAL_VIEW_TYPE:
-            currentWindow = SAGITTAL_WIN;
-            break;
-        }
         for( int i = 0; i < 4; i++ )
         {
-            if( i != currentWindow )
+            if( i != m_currentViewWindow )
             {
                 m_vtkWindowFrames[i]->hide();
             }
@@ -406,41 +390,9 @@ bool QuadViewWindow::eventFilter(QObject *obj, QEvent *event)
             }
         }
         if( which != -1 )
-            SetCurrentView( which );
+            SetCurrentViewWindow( which );
     }
     return false;
-}
-
-void QuadViewWindow::SetCurrentView( int index )
-{
-    switch(index)
-    {
-    case TRANSVERSE_WIN:
-        m_currentView = TRANSVERSE_VIEW_TYPE;
-        break;
-    case THREED_WIN:
-        m_currentView = THREED_VIEW_TYPE;
-        break;
-    case CORONAL_WIN:
-        m_currentView = CORONAL_VIEW_TYPE;
-        break;
-    case SAGITTAL_WIN:
-        m_currentView = SAGITTAL_VIEW_TYPE ;
-        break;
-    }
-    for( int i = 0; i < 4; ++i )
-    {
-        if( i == index )
-        {
-            m_vtkWindowFrames[i]->setStyleSheet( "background-color:red" );
-        }
-        else
-        {
-            m_vtkWindowFrames[i]->setStyleSheet( "" );
-        }
-    }
-    ApplicationSettings * s = Application::GetInstance().GetSettings();
-    s->CurrentView = m_currentView;
 }
 
 void QuadViewWindow::SetExpandedView( bool on )
@@ -453,27 +405,12 @@ void QuadViewWindow::SetExpandedView( bool on )
     s->ExpandedView = m_viewExpanded;
 }
 
-void QuadViewWindow::SetCurrentWindow( int index )
+void QuadViewWindow::SetCurrentViewWindow(int index )
 {
-    WINTYPES currentWindow = TRANSVERSE_WIN;
-    switch(index)
-    {
-    case TRANSVERSE_VIEW_TYPE:
-        currentWindow = TRANSVERSE_WIN;
-        break;
-    case THREED_VIEW_TYPE:
-        currentWindow = THREED_WIN;
-        break;
-    case CORONAL_VIEW_TYPE:
-        currentWindow = CORONAL_WIN;
-        break;
-    case SAGITTAL_VIEW_TYPE:
-        currentWindow = SAGITTAL_WIN;
-        break;
-    }
+    m_currentViewWindow = index;
     for( int i = 0; i < 4; ++i )
     {
-        if( i == currentWindow )
+        if( i == m_currentViewWindow )
         {
             m_vtkWindowFrames[i]->setStyleSheet( "background-color:red" );
         }
@@ -482,6 +419,8 @@ void QuadViewWindow::SetCurrentWindow( int index )
             m_vtkWindowFrames[i]->setStyleSheet( "" );
         }
     }
+    ApplicationSettings * s = Application::GetInstance().GetSettings();
+    s->CurrentViewWindow = m_currentViewWindow;
 }
 
 void QuadViewWindow::PlaceCornerText()

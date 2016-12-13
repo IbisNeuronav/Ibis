@@ -64,7 +64,7 @@ void ApplicationSettings::LoadSettings( QSettings & settings )
     MainWindowSize = settings.value( "MainWindow_size", mainWindowRect.size() ).toSize();
     MainWindowLeftPanelSize = settings.value( "MainWindowLeftPanelSize", 150 ).toInt();
     MainWindowRightPanelSize = settings.value( "MainWindowRightPanelSize", 150 ).toInt();
-    CurrentView = settings.value( "CurrentView", 1 ).toInt();
+    CurrentViewWindow = settings.value( "CurrentViewWindow", 1 ).toInt();
     ExpandedView = settings.value( "ExpandedView", false ).toBool();
     QString workDir(QDir::homePath());
     workDir.append(IBIS_CONFIGURATION_SUBDIRECTORY);
@@ -101,7 +101,7 @@ void ApplicationSettings::SaveSettings( QSettings & settings )
     settings.setValue( "MainWindow_size", MainWindowSize );
     settings.setValue( "MainWindowLeftPanelSize", MainWindowLeftPanelSize );
     settings.setValue( "MainWindowRightPanelSize", MainWindowRightPanelSize );
-    settings.setValue( "CurrentView", CurrentView );
+    settings.setValue( "CurrentViewWindow", CurrentViewWindow );
     settings.setValue( "ExpandedView", ExpandedView );
     settings.setValue( "WorkingDirectory", WorkingDirectory );
 

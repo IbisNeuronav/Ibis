@@ -29,13 +29,6 @@ class SceneManager;
 class View;
 class vtkRenderWindowInteractor;
 
-enum WINTYPES
-{ TRANSVERSE_WIN,
-  THREED_WIN,
-  CORONAL_WIN,
-  SAGITTAL_WIN
-};
-
 //#define USE_QVTKWIDGET_2
 
 class QuadViewWindow : public QWidget
@@ -52,7 +45,7 @@ public:
     void AddBottomWidget( QWidget * w );
     void RemoveBottomWidget( QWidget * w );
     void SetExpandedView( bool on );
-    void SetCurrentWindow( int index );
+    void SetCurrentViewWindow( int index );
 
 public slots:
 
@@ -93,8 +86,6 @@ protected:
     // reimplemented from QObject. Filters event sent to children. Used to track focus
     bool eventFilter(QObject *obj, QEvent *event);
 
-    void SetCurrentView( int index );
-    
     void PlaceCornerText();
 
     SceneManager * m_sceneManager;
@@ -125,9 +116,8 @@ protected:
     QFrame * m_bottomWidgetFrame;
     QVBoxLayout * m_bottomWidgetLayout;
     
-    VIEWTYPES m_currentView;
+    int m_currentViewWindow;
     bool m_viewExpanded;
-//    int currentViewExpanded;
 };
 
 

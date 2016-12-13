@@ -215,7 +215,7 @@ MainWindow::MainWindow( QWidget * parent )
     UpdateMainSplitter();
     Application::GetInstance().SetMainWindow(this);
 
-    m_4Views->SetCurrentWindow( settings->CurrentView );
+    m_4Views->SetCurrentViewWindow( settings->CurrentViewWindow );
     m_4Views->SetExpandedView( settings->ExpandedView );
 
     // Tell the qApp unique instance to send event to MainWindow::eventFilter before anyone else
