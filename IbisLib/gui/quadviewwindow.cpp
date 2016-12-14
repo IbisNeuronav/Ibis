@@ -17,6 +17,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QToolButton>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
+#include <QGridLayout>
 #include <QLabel>
 #include <QFont>
 #include "QVTKWidget.h"
@@ -44,7 +45,7 @@ QuadViewWindow::QuadViewWindow( QWidget* parent, Qt::WindowFlags fl ) : QWidget(
     m_generalLayout->setContentsMargins( 0, 0, 0, 0 );
     m_generalLayout->setSpacing( 0 );
 
-    // Add a button box at the top of the window. These buttons control view layout and manipulation tools    
+    // Add a button box at the top of the window. These buttons control view layout and manipulation tools
     m_buttonBox = new QHBoxLayout();
     m_buttonBox->setContentsMargins( 6, 0, 6, 0 );
     m_buttonBox->setSpacing( 5 );
@@ -81,26 +82,16 @@ QuadViewWindow::QuadViewWindow( QWidget* parent, Qt::WindowFlags fl ) : QWidget(
     m_buttonBox->addWidget( m_genericLabel );
     m_genericLabel->hide();
 
+    m_viewWindowsLayout = new QGridLayout( );
+    m_viewWindowsLayout->setObjectName( "4Views" );
+    m_generalLayout->addLayout( m_viewWindowsLayout );
+    m_viewWindowsLayout->setContentsMargins( 1, 1, 1, 1 );
+    m_viewWindowsLayout->setSpacing( 1 );
 
-    // Add the 3 splitters that separate the 4 vtk windows
-    m_verticalSplitter = new QSplitter( this );
-    m_verticalSplitter->setObjectName( "VerticalSplitter" );
-    m_verticalSplitter->setOrientation( Qt::Vertical );
-    m_generalLayout->addWidget( m_verticalSplitter );
-
-    m_upperHorizontalSplitter = new QSplitter( m_verticalSplitter );
-    m_upperHorizontalSplitter->setObjectName( "UpperHorizontalSplitter" );
-    m_upperHorizontalSplitter->setOrientation( Qt::Horizontal );
-    
-    m_lowerHorizontalSplitter = new QSplitter( m_verticalSplitter );
-    m_lowerHorizontalSplitter->setObjectName( "LowerHorizontalSplitter" );
-    m_lowerHorizontalSplitter->setOrientation( Qt::Horizontal );
-
-    // Create the 4 basic vtk windows
-    MakeOneView( 0, "UpperLeftView", m_upperHorizontalSplitter );
-    MakeOneView( 1, "UpperRightView", m_upperHorizontalSplitter );
-    MakeOneView( 2, "LowerLeftView", m_lowerHorizontalSplitter );
-    MakeOneView( 3, "LowerRightView", m_lowerHorizontalSplitter );
+    MakeOneView( 0, "UpperLeftView" );
+    MakeOneView( 1, "UpperRightView" );
+    MakeOneView( 2, "LowerLeftView" );
+    MakeOneView( 3, "LowerRightView" );
 
     // An empty frame for plugins to add custom widgets at the bottom
     m_bottomWidgetFrame = new QFrame( this );
@@ -129,9 +120,9 @@ QAbstractButton * QuadViewWindow::CreateToolButton( QString name, QString iconPa
     return button;
 }
 
-void QuadViewWindow::MakeOneView( int index, const char * name, QSplitter * splitter )
+void QuadViewWindow::MakeOneView( int index, const char * name )
 {
-    m_vtkWindowFrames[index] = new QFrame( splitter );
+    m_vtkWindowFrames[index] = new QFrame( );
     m_vtkWindowFrames[index]->setFrameShape( QFrame::NoFrame );
 
 #ifdef USE_QVTKWIDGET_2
@@ -149,8 +140,31 @@ void QuadViewWindow::MakeOneView( int index, const char * name, QSplitter * spli
     m_frameLayouts[index] = new QVBoxLayout( m_vtkWindowFrames[index] );
     m_frameLayouts[index]->addWidget( m_vtkWindows[index] );
     m_frameLayouts[index]->setContentsMargins( 1, 1, 1, 1 );
-}
 
+    int row, col;
+    switch( index )
+    {
+    case 1:
+        row = 0;
+        col = 1;
+        break;
+    case 2:
+        row = 1;
+        col = 0;
+        break;
+    case 3:
+        row = 1;
+        col = 1;
+        break;
+    case 0:
+    default:
+        row = 0;
+        col = 0;
+        break;
+    }
+
+    m_viewWindowsLayout->addWidget( m_vtkWindowFrames[index], row, col);
+}
 
 QuadViewWindow::~QuadViewWindow()
 {

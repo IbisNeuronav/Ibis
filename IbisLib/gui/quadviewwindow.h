@@ -17,6 +17,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 class QVBoxLayout;
 class QHBoxLayout;
+class QGridLayout;
 class QAbstractButton;
 class QSpacerItem;
 class QSplitter;
@@ -79,8 +80,8 @@ public slots:
 protected:
 
     QAbstractButton * CreateToolButton( QString name, QString iconPath, QString toolTip, const char * callbackSlot );
-    void MakeOneView( int index, const char * name, QSplitter * splitter );
-    
+    void MakeOneView( int index, const char * name );
+
     void WinNeedsRender( int winIndex );
 
     // reimplemented from QObject. Filters event sent to children. Used to track focus
@@ -98,9 +99,7 @@ protected:
     QSpacerItem * m_buttonBoxSpacer;
     QLabel      * m_genericLabel;
 
-    QSplitter * m_verticalSplitter;
-    QSplitter * m_upperHorizontalSplitter;
-    QSplitter * m_lowerHorizontalSplitter;
+    QGridLayout *m_viewWindowsLayout;
 
     static const QString ViewNames[4];
 #ifdef USE_QVTKWIDGET_2
