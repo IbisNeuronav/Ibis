@@ -129,7 +129,7 @@ protected:
     virtual bool OnMouseMoved( View * v, int x, int y, unsigned modifiers );
 
     void AddPointLocal( double coords[3], QString name = QString(), QString timestamp = QString() );
-    int FindPoint(vtkActor *actor, double *pos);
+    int FindPoint(vtkActor *actor, double *pos, int viewType );
 
     virtual void Hide();
     virtual void Show();
