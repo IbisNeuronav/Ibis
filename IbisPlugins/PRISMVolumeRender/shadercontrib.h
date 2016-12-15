@@ -17,7 +17,7 @@ struct ShaderContrib
     }
     bool operator!=( const ShaderContrib & other ) const
     {
-        !(*this == other);
+        return !(*this == other);
     }
     bool custom;
     QString name;

@@ -38,11 +38,20 @@ QMap<QString,QString> ShaderIO::MergeShaderLists( QList<ShaderContrib> & origina
     for( int i = 0; i < in.size(); ++i )
     {
         int shaderIndex = GetShaderWithName( in[i].name, originals );
-        if( shaderIndex != -1 && in[i] != originals[shaderIndex] )
+
+        // no shader with this name already exists
+        if( shaderIndex == -1 )
+        {
+            ShaderContrib newShader( in[i] );
+            originals.push_back( newShader );
+        }
+        // a shader with this name already exists, but the one from the new list is different
+        else if( in[i] != originals[shaderIndex] )
         {
             ShaderContrib newShader( in[i] );
             newShader.name = SceneManager::FindUniqueName( in[i].name, allNames );
             translationTable[ in[i].name ] = newShader.name;
+            allNames.push_back( newShader.name );
             originals.push_back( newShader );
         }
     }
