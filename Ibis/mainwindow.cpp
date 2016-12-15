@@ -24,6 +24,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "objectplugininterface.h"
 #include "generatorplugininterface.h"
 #include "aboutpluginswidget.h"
+#include "serializer.h"
 
 #include <QApplication>
 #include <QAction>
@@ -539,7 +540,18 @@ void MainWindow::SaveScene(bool asFile)
         else
             return;
     }
-    manager->SaveScene(fileName);
+    SerializerWriter writer;
+    writer.SetFilename( fileName.toUtf8().data() );
+    writer.Start();
+    writer.BeginSection("SaveScene");
+    QString version(IGNS_SCENE_SAVE_VERSION);
+    ::Serialize( &writer, "Version", version);
+
+    m_4Views->Serialize( &writer );
+    manager->SaveScene( &writer );
+
+    writer.EndSection();
+    writer.Finish();
 }
 
 void MainWindow::fileLoadScene()
@@ -570,7 +582,39 @@ void MainWindow::fileLoadScene()
         QFileInfo info( fileName );
         QString newDir = info.dir().absolutePath();
         Application::GetInstance().GetSettings()->WorkingDirectory = newDir;
-        manager->LoadScene(fileName);
+
+        SerializerReader reader;
+        reader.SetFilename( fileName.toUtf8().data() );
+        QString version(IGNS_SCENE_SAVE_VERSION);
+        reader.SetSupportedVersion( version );
+        reader.Start();
+        reader.BeginSection("SaveScene");
+        reader.ReadVersionFromFile();
+        if( reader.FileVersionNewerThanSupported() )
+        {
+            reader.EndSection();
+            reader.Finish();
+            QString message = "SaveScene version from file (" + reader.GetVersionFromFile() + ") is more recent than supported (" + version + ")\n";
+            QMessageBox::warning( 0, "Error", message, 1, 0 );
+            return;
+        }
+        else if( reader.FileVersionIsLowerThan( QString::number(6.0) ) )
+        {
+            QString message = "This scene version is older than 6.0. This is not supported anymore. Scene may not be restored.\n";
+            QMessageBox::warning( 0, "Error", message, 1, 0 );
+            return;
+        }
+//        else if( reader.GetVersionFromFile() == QString::number(6.0) )
+//        {
+//            QString message = "Scenes saved with scene version 6.0 will show correctly\nCurrent and expanded view may differ from what was saved with the scene.\n";
+//            QMessageBox::warning( 0, "Warning", message, 1, 0 );
+//        }
+
+        m_4Views->Serialize( &reader );
+        manager->LoadScene( &reader, fileName );
+
+        reader.EndSection();
+        reader.Finish();
     }
 }
 

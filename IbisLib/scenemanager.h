@@ -45,8 +45,6 @@ class vtkInteractor;
 // Scene file format version
 #define IGNS_SCENE_SAVE_VERSION "6.0"
 
-#define PREOP_ROOT_OBJECT_NAME "Pre-operative"
-#define INTRAOP_ROOT_OBJECT_NAME "Intra-operative"
 // Description:
 // This class is the main interface for all 3D display. It manages the hierarchy
 // of 3D objects that compose the scene that can be displayed. It also manages
@@ -255,8 +253,8 @@ public:
     void RemoveAllSceneObjects();
     void RemoveAllChildrenObjects(SceneObject *);
     void ClearScene();
-    void LoadScene(QString & fileName, bool interactive = true );
-    void SaveScene(QString & fileName);
+    void LoadScene( Serializer * reader, QString & fileName, bool interactive = true );
+    void SaveScene(Serializer * writer ); //QString & fileName);
     void NewScene();
     void ObjectReader( Serializer * ser, bool interactive );
     void ObjectWriter( Serializer * ser );

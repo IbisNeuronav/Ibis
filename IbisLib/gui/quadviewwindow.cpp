@@ -33,6 +33,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "vtkCornerAnnotation.h"
 #include "application.h"
 
+ObjectSerializationMacro( QuadViewWindow );
+
 const QString QuadViewWindow::ViewNames[4] = { "Transverse","ThreeD","Coronal","Sagittal" };
 
 QuadViewWindow::QuadViewWindow( QWidget* parent, Qt::WindowFlags fl ) : QWidget( parent, fl )
@@ -421,6 +423,8 @@ void QuadViewWindow::SetExpandedView( bool on )
 
 void QuadViewWindow::SetCurrentViewWindow(int index )
 {
+    if( m_currentViewWindow == index )
+        return;
     m_currentViewWindow = index;
     for( int i = 0; i < 4; ++i )
     {
@@ -435,6 +439,19 @@ void QuadViewWindow::SetCurrentViewWindow(int index )
     }
     ApplicationSettings * s = Application::GetInstance().GetSettings();
     s->CurrentViewWindow = m_currentViewWindow;
+}
+
+void QuadViewWindow::Serialize( Serializer * ser )
+{
+    ser->BeginSection("QuadViewWindow");
+    ::Serialize( ser, "CurrentViewWindow", m_currentViewWindow );
+    ::Serialize( ser, "ViewExpanded", m_viewExpanded );
+    if( ser->IsReader() )
+    {
+        this->SetCurrentViewWindow( m_currentViewWindow );
+        this->SetExpandedView(  m_viewExpanded );
+    }
+    ser->EndSection();
 }
 
 void QuadViewWindow::PlaceCornerText()
@@ -483,4 +500,3 @@ void QuadViewWindow::PlaceCornerText()
     renderer->AddViewProp( ca );
     ca->Delete();
 }
-

@@ -14,6 +14,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <qvariant.h>
 #include <qwidget.h>
 #include "ibistypes.h"
+#include "serializer.h"
 
 class QVBoxLayout;
 class QHBoxLayout;
@@ -41,6 +42,7 @@ public:
     QuadViewWindow( QWidget * parent = 0, Qt::WindowFlags fl = 0 );
     virtual ~QuadViewWindow();
 
+    virtual void Serialize( Serializer * ser );
     virtual void SetSceneManager( SceneManager * man );
 
     void AddBottomWidget( QWidget * w );
@@ -119,5 +121,6 @@ protected:
     bool m_viewExpanded;
 };
 
+ObjectSerializationHeaderMacro( QuadViewWindow );
 
 #endif
