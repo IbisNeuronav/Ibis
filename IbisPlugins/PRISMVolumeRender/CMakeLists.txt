@@ -31,11 +31,14 @@ set( PluginSrc  PRISMVolumeRenderPluginInterface.cpp
                 vtkPRISMVolumeMapper.cxx
                 vtkColoredCube.cxx
                 vtkColorPolyData.cxx
+                shaderio.cpp
                 ${LibGlslSrc} )
 
 set( PluginHdr vtkPRISMVolumeMapper.h
                 vtkColoredCube.h
-                vtkColorPolyData.h )
+                vtkColorPolyData.h
+                shaderio.h
+                shadercontrib.h )
 
 set( PluginHdrMoc   PRISMVolumeRenderPluginInterface.h
                     volumerenderingobject.h

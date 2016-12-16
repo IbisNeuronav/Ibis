@@ -778,6 +778,9 @@ int vtkPRISMVolumeMapper::UpdateTransferFunctions( )
     return 1;
 }
 
+#include "vtkImageImport.h"
+#include "vtkPNGWriter.h"
+
 int vtkPRISMVolumeMapper::UpdateDepthBufferTexture( int width, int height )
 {
     // Create texture if it doesn't exist and bind it
@@ -805,6 +808,34 @@ int vtkPRISMVolumeMapper::UpdateDepthBufferTexture( int width, int height )
     // Now copy depth buffer to texture
     glReadBuffer( GL_BACK );
     glCopyTexSubImage2D( vtkgl::TEXTURE_RECTANGLE_ARB, 0, 0, 0, 0, 0, width, height );
+
+    // ===========================================================================
+    // TEMP DEBUG : save depth buffer
+    /*int bufferSize = width * height;
+    int byteSize = bufferSize * sizeof(unsigned short);
+    unsigned short * buffer = new unsigned short[ bufferSize ];
+
+    glGetTexImage( vtkgl::TEXTURE_RECTANGLE_ARB, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_SHORT, buffer );
+
+    vtkImageImport * importer=vtkImageImport::New();
+    importer->CopyImportVoidPointer( buffer, static_cast<int>(byteSize) );
+    importer->SetDataScalarTypeToUnsignedShort();
+    importer->SetNumberOfScalarComponents(1);
+    importer->SetWholeExtent(0,width-1,0,height-1,0,0);
+    importer->SetDataExtentToWholeExtent();
+
+    importer->Update();
+
+    vtkPNGWriter *writer=vtkPNGWriter::New();
+    writer->SetFileName("/home/simon/depth.png");
+    writer->SetInputConnection(importer->GetOutputPort());
+    importer->Delete();
+    writer->Write();
+    writer->Delete();
+
+    delete[] buffer;*/
+    // TEMP DEBUG
+    // ===========================================================================
 
     glBindTexture( vtkgl::TEXTURE_RECTANGLE_ARB, 0 );
     glDisable( vtkgl::TEXTURE_RECTANGLE_ARB );
