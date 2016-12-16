@@ -11,11 +11,11 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 // Thanks to Simon Drouin for writing this class
 
 #include "DrawableTexture.h"
-#include <vtkgl.h>
+#include "vtk_glew.h"
 
 static const GLenum pixelFormat = GL_RGBA;
 static const GLenum pixelType = GL_FLOAT;
-static const int pixelInternalFormat = vtkgl::RGBA16F_ARB;
+static const int pixelInternalFormat = GL_RGBA16F;
 static const GLenum pixelTypeByte = GL_UNSIGNED_BYTE;
 static const int pixelInternalFormatByte = GL_RGBA8;
 
@@ -46,24 +46,24 @@ bool DrawableTexture::Init( int width, int height )
 
 	// init texture
 	glGenTextures( 1, &m_texId );
-    glBindTexture( vtkgl::TEXTURE_RECTANGLE_ARB, m_texId );
-    glTexParameteri( vtkgl::TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
-    glTexParameteri( vtkgl::TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+    glBindTexture( GL_TEXTURE_RECTANGLE, m_texId );
+    glTexParameteri( GL_TEXTURE_RECTANGLE, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+    glTexParameteri( GL_TEXTURE_RECTANGLE, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
     glTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
     if( m_isFloatTexture )
-        glTexImage2D( vtkgl::TEXTURE_RECTANGLE_ARB, 0, pixelInternalFormat, width, height, 0, pixelFormat, pixelType, 0 );
+        glTexImage2D( GL_TEXTURE_RECTANGLE, 0, pixelInternalFormat, width, height, 0, pixelFormat, pixelType, 0 );
     else
-        glTexImage2D( vtkgl::TEXTURE_RECTANGLE_ARB, 0, pixelInternalFormatByte, width, height, 0, pixelFormat, pixelTypeByte, 0 );
-    glBindTexture( vtkgl::TEXTURE_RECTANGLE_ARB, 0 );
+        glTexImage2D( GL_TEXTURE_RECTANGLE, 0, pixelInternalFormatByte, width, height, 0, pixelFormat, pixelTypeByte, 0 );
+    glBindTexture( GL_TEXTURE_RECTANGLE, 0 );
 
 	// Init framebuffer
 	bool success = true;
-    vtkgl::GenFramebuffersEXT( 1, &m_fbId );
+    glGenFramebuffers( 1, &m_fbId );
     BindFramebuffer();
-    vtkgl::FramebufferTexture2DEXT( vtkgl::FRAMEBUFFER_EXT, vtkgl::COLOR_ATTACHMENT0_EXT, vtkgl::TEXTURE_RECTANGLE_ARB, m_texId, 0 );
+    glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_RECTANGLE, m_texId, 0 );
 
-    GLenum ret = vtkgl::CheckFramebufferStatusEXT( vtkgl::FRAMEBUFFER_EXT );
-    if( ret != vtkgl::FRAMEBUFFER_COMPLETE_EXT )
+    GLenum ret = glCheckFramebufferStatus( GL_FRAMEBUFFER );
+    if( ret != GL_FRAMEBUFFER_COMPLETE )
 		success = false;
 
 	// clear the texture
@@ -81,12 +81,12 @@ void DrawableTexture::Resize( int width, int height )
 	{
 		m_width = width;
 		m_height = height;
-        glBindTexture( vtkgl::TEXTURE_RECTANGLE_ARB, m_texId );
+        glBindTexture( GL_TEXTURE_RECTANGLE, m_texId );
         if( m_isFloatTexture )
-            glTexImage2D( vtkgl::TEXTURE_RECTANGLE_ARB, 0, pixelInternalFormat, width, height, 0, pixelFormat, pixelType, 0 );
+            glTexImage2D( GL_TEXTURE_RECTANGLE, 0, pixelInternalFormat, width, height, 0, pixelFormat, pixelType, 0 );
         else
-            glTexImage2D( vtkgl::TEXTURE_RECTANGLE_ARB, 0, pixelInternalFormatByte, width, height, 0, pixelFormat, pixelTypeByte, 0 );
-        glBindTexture( vtkgl::TEXTURE_RECTANGLE_ARB, 0 );
+            glTexImage2D( GL_TEXTURE_RECTANGLE, 0, pixelInternalFormatByte, width, height, 0, pixelFormat, pixelTypeByte, 0 );
+        glBindTexture( GL_TEXTURE_RECTANGLE, 0 );
 
         BindFramebuffer();
 		glClearColor( 0.0, 0.0, 0.0, 0.0 );
@@ -98,7 +98,7 @@ void DrawableTexture::Resize( int width, int height )
 void DrawableTexture::Release()
 {
 	if( m_fbId )
-        vtkgl::DeleteFramebuffersEXT( 1, &m_fbId );
+        glDeleteFramebuffers( 1, &m_fbId );
 	if( m_texId )
         glDeleteTextures( 1, &m_texId );
 }
@@ -128,8 +128,8 @@ void DrawableTexture::PasteToScreen( int x, int y, int width, int height )
     glPushMatrix();
     glLoadIdentity();
 
-    glEnable( vtkgl::TEXTURE_RECTANGLE_ARB );
-    glBindTexture( vtkgl::TEXTURE_RECTANGLE_ARB, m_texId );
+    glEnable( GL_TEXTURE_RECTANGLE );
+    glBindTexture( GL_TEXTURE_RECTANGLE, m_texId );
 	glBegin( GL_QUADS );
 	{
 		glTexCoord2i( x, y );					glVertex2d( x, y );
@@ -138,8 +138,8 @@ void DrawableTexture::PasteToScreen( int x, int y, int width, int height )
 		glTexCoord2i( x, y + height );			glVertex2d( x, y + height );
 	}
     glEnd();
-    glBindTexture( vtkgl::TEXTURE_RECTANGLE_ARB, 0 );
-    glDisable( vtkgl::TEXTURE_RECTANGLE_ARB );
+    glBindTexture( GL_TEXTURE_RECTANGLE, 0 );
+    glDisable( GL_TEXTURE_RECTANGLE );
 
     // Pop modelview
     glPopMatrix();
@@ -180,37 +180,39 @@ void DrawableTexture::PasteToScreen()
     PasteToScreen( 0, 0, m_width, m_height );
 }
 
+#include <iostream>
+
 void DrawableTexture::PrintGLTextureState()
 {
     GLint maxNbUnits;
-    glGetIntegerv( vtkgl::MAX_TEXTURE_UNITS, &maxNbUnits );
+    glGetIntegerv( GL_MAX_TEXTURE_UNITS, &maxNbUnits );
     for( int i = 0; i < maxNbUnits; ++i )
     {
-        vtkgl::ActiveTexture( vtkgl::TEXTURE0 + static_cast<GLenum>( i ) );
-        cout << "Unit " << i << ":" << endl;
+        glActiveTexture( GL_TEXTURE0 + static_cast<GLenum>( i ) );
+        std::cout << "Unit " << i << ":" << std::endl;
         int binding = 0;
         glGetIntegerv( GL_TEXTURE_BINDING_1D, &binding );
-        cout << "   TEXTURE_1D - enabled: " << ( glIsEnabled( GL_TEXTURE_1D ) == GL_TRUE ? 1 : 0 ) << " - Binding: " << binding << endl;
+        std::cout << "   TEXTURE_1D - enabled: " << ( glIsEnabled( GL_TEXTURE_1D ) == GL_TRUE ? 1 : 0 ) << " - Binding: " << binding << std::endl;
         glGetIntegerv( GL_TEXTURE_BINDING_2D, &binding );
-        cout << "   TEXTURE_2D - enabled: " << ( glIsEnabled( GL_TEXTURE_2D ) == GL_TRUE ? 1 : 0 ) << " - Binding: " << binding << endl;
-        glGetIntegerv( vtkgl::TEXTURE_BINDING_3D, &binding );
-        cout << "   TEXTURE_3D - enabled: " << ( glIsEnabled( vtkgl::TEXTURE_3D ) == GL_TRUE ? 1 : 0 ) << " - Binding: " << binding << endl;
-        glGetIntegerv( vtkgl::TEXTURE_BINDING_RECTANGLE, &binding );
-        cout << "   TEXTURE_RECTANGLE - enabled: " << ( glIsEnabled( vtkgl::TEXTURE_RECTANGLE ) == GL_TRUE ? 1 : 0 ) << " - Binding: " << binding << endl;
+        std::cout << "   TEXTURE_2D - enabled: " << ( glIsEnabled( GL_TEXTURE_2D ) == GL_TRUE ? 1 : 0 ) << " - Binding: " << binding << std::endl;
+        glGetIntegerv( GL_TEXTURE_BINDING_3D, &binding );
+        std::cout << "   TEXTURE_3D - enabled: " << ( glIsEnabled( GL_TEXTURE_3D ) == GL_TRUE ? 1 : 0 ) << " - Binding: " << binding << std::endl;
+        glGetIntegerv( GL_TEXTURE_BINDING_RECTANGLE, &binding );
+        std::cout << "   TEXTURE_RECTANGLE - enabled: " << ( glIsEnabled( GL_TEXTURE_RECTANGLE ) == GL_TRUE ? 1 : 0 ) << " - Binding: " << binding << std::endl;
     }
 
-    vtkgl::ActiveTexture( vtkgl::TEXTURE0 );
+    glActiveTexture( GL_TEXTURE0 );
 }
 
 void DrawableTexture::BindFramebuffer()
 {
     GLint prevFrameBuffer;
-    glGetIntegerv( vtkgl::FRAMEBUFFER_BINDING_EXT, &prevFrameBuffer );
+    glGetIntegerv( GL_FRAMEBUFFER_BINDING, &prevFrameBuffer );
     m_backupFramebuffer = (unsigned)prevFrameBuffer;
-    vtkgl::BindFramebufferEXT( vtkgl::FRAMEBUFFER_EXT, m_fbId );
+    glBindFramebuffer( GL_FRAMEBUFFER, m_fbId );
 }
 
 void DrawableTexture::UnBindFramebuffer()
 {
-    vtkgl::BindFramebufferEXT( vtkgl::FRAMEBUFFER_EXT, m_backupFramebuffer );
+    glBindFramebuffer( GL_FRAMEBUFFER, m_backupFramebuffer );
 }
