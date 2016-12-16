@@ -14,8 +14,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <iostream>
 #include <stdio.h>
 #include <stdarg.h>
-#include <vtkgl.h>
-#include <vtkMatrix4x4.h>
+#include "vtk_glew.h"
+#include "vtkMatrix4x4.h"
 
 using namespace std;
 
@@ -55,12 +55,12 @@ bool GlslShader::Init()
 	
 	// Load and try compiling vertex shader
     if( m_vertexMemSources.size() != 0 )
-        if( !CreateAndCompileShader( vtkgl::VERTEX_SHADER, m_glslVertexShader, m_vertexMemSources ) )
+        if( !CreateAndCompileShader( GL_VERTEX_SHADER, m_glslVertexShader, m_vertexMemSources ) )
 			return false;
 	
 	// Load and try compiling pixel shader
     if( m_memSources.size() != 0 )
-        if( !CreateAndCompileShader( vtkgl::FRAGMENT_SHADER, m_glslShader, m_memSources ) )
+        if( !CreateAndCompileShader( GL_FRAGMENT_SHADER, m_glslShader, m_memSources ) )
 			return false;
 	
     // Check that at least one of the shaders has been compiled
@@ -68,22 +68,22 @@ bool GlslShader::Init()
 		return false;
 
 	// Create program object and attach shader
-    m_glslProg = vtkgl::CreateProgram();
+    m_glslProg = glCreateProgram();
 	if( m_glslVertexShader )
-        vtkgl::AttachShader( m_glslProg, m_glslVertexShader );
+        glAttachShader( m_glslProg, m_glslVertexShader );
 	if( m_glslShader )
-        vtkgl::AttachShader( m_glslProg, m_glslShader );
+        glAttachShader( m_glslProg, m_glslShader );
 
 	// Create program and link shaders
-    vtkgl::LinkProgram( m_glslProg );
+    glLinkProgram( m_glslProg );
 	GLint success = 0;
-    vtkgl::GetProgramiv( m_glslProg, vtkgl::LINK_STATUS, &success );
+    glGetProgramiv( m_glslProg, GL_LINK_STATUS, &success );
     if (!success)
     {
 		GLint logLength = 0;
-        vtkgl::GetProgramiv( m_glslProg, vtkgl::INFO_LOG_LENGTH, &logLength );
-        vtkgl::GLchar * infoLog = new vtkgl::GLchar[ logLength + 1 ];
-        vtkgl::GetProgramInfoLog( m_glslProg, logLength, NULL, infoLog );
+        glGetProgramiv( m_glslProg, GL_INFO_LOG_LENGTH, &logLength );
+        GLchar * infoLog = new GLchar[ logLength + 1 ];
+        glGetProgramInfoLog( m_glslProg, logLength, NULL, infoLog );
         vtkErrorMacro( << "Error in glsl program linking:" << infoLog );
         m_errorMessage = infoLog;
 		delete [] infoLog;
@@ -98,28 +98,28 @@ bool GlslShader::Init()
 bool GlslShader::CreateAndCompileShader( unsigned shaderType, unsigned & shaderId, std::vector< std::string > & memSources )
 {
 	// put all the sources in an array of const GLchar*
-    const vtkgl::GLchar ** shaderStringPtr = new const vtkgl::GLchar*[ memSources.size() ];
+    const GLchar ** shaderStringPtr = new const GLchar*[ memSources.size() ];
 	for( unsigned i = 0; i < memSources.size(); ++i )
 	{
 		shaderStringPtr[i] = memSources[i].c_str();
 	}
 	
 	// Create the shader and set its source
-    shaderId = vtkgl::CreateShader( shaderType );
-    vtkgl::ShaderSource( shaderId, memSources.size(), shaderStringPtr, NULL);
+    shaderId = glCreateShader( shaderType );
+    glShaderSource( shaderId, memSources.size(), shaderStringPtr, NULL);
 	
 	delete [] shaderStringPtr;
 	
 	// Compile the shader
 	GLint success = 0;
-    vtkgl::CompileShader( shaderId );
-    vtkgl::GetShaderiv( shaderId, vtkgl::COMPILE_STATUS, &success );
+    glCompileShader( shaderId );
+    glGetShaderiv( shaderId, GL_COMPILE_STATUS, &success );
     if (!success)
     {
 		GLint logLength = 0;
-        vtkgl::GetShaderiv( shaderId, vtkgl::INFO_LOG_LENGTH, &logLength );
-        vtkgl::GLchar * infoLog = new vtkgl::GLchar[logLength+1];
-        vtkgl::GetShaderInfoLog( shaderId, logLength, NULL, infoLog);
+        glGetShaderiv( shaderId, GL_INFO_LOG_LENGTH, &logLength );
+        GLchar * infoLog = new GLchar[logLength+1];
+        glGetShaderInfoLog( shaderId, logLength, NULL, infoLog);
         vtkErrorMacro( << "Error in shader complilation." << infoLog );
         m_errorMessage = infoLog;
 		delete [] infoLog;
@@ -134,22 +134,22 @@ bool GlslShader::UseProgram( bool use )
 	bool res = true;
 	if( use && m_init )
 	{
-        vtkgl::UseProgram( m_glslProg );
+        glUseProgram( m_glslProg );
 	}
 	else
 	{
 		res = true;
-        vtkgl::UseProgram( 0 );
+        glUseProgram( 0 );
 	}
 	return res;
 }
 
 bool GlslShader::SetVariable( const char * name, int value )
 {
-    int location = vtkgl::GetUniformLocation( m_glslProg, name );
+    int location = glGetUniformLocation( m_glslProg, name );
 	if( location != -1 )
 	{
-        vtkgl::Uniform1i( location, value );
+        glUniform1i( location, value );
 		return true;
 	}
 	return false;
@@ -157,10 +157,10 @@ bool GlslShader::SetVariable( const char * name, int value )
 
 bool GlslShader::SetVariable( const char * name, int count, int * values )
 {
-    int location = vtkgl::GetUniformLocation( m_glslProg, name );
+    int location = glGetUniformLocation( m_glslProg, name );
     if( location != -1 )
     {
-        vtkgl::Uniform1iv( location, count, values );
+        glUniform1iv( location, count, values );
         return true;
     }
     return false;
@@ -168,10 +168,10 @@ bool GlslShader::SetVariable( const char * name, int count, int * values )
 
 bool GlslShader::SetVariable( const char * name, float value )
 {
-    int location = vtkgl::GetUniformLocation( m_glslProg, name );
+    int location = glGetUniformLocation( m_glslProg, name );
 	if( location != -1 )
 	{
-        vtkgl::Uniform1f( location, value );
+        glUniform1f( location, value );
 		return true;
 	}
 	return false;
@@ -179,10 +179,10 @@ bool GlslShader::SetVariable( const char * name, float value )
 
 bool GlslShader::SetVariable( const char * name, double value )
 {
-    int location = vtkgl::GetUniformLocation( m_glslProg, name );
+    int location = glGetUniformLocation( m_glslProg, name );
     if( location != -1 )
     {
-        vtkgl::Uniform1d( location, value );
+        glUniform1d( location, value );
         return true;
     }
     return false;
@@ -190,10 +190,10 @@ bool GlslShader::SetVariable( const char * name, double value )
 
 bool GlslShader::SetVariable( const char * name, int val1, int val2 )
 {
-    int location = vtkgl::GetUniformLocation( m_glslProg, name );
+    int location = glGetUniformLocation( m_glslProg, name );
     if( location != -1 )
     {
-        vtkgl::Uniform2i( location, val1, val2 );
+        glUniform2i( location, val1, val2 );
         return true;
     }
     return false;
@@ -201,10 +201,10 @@ bool GlslShader::SetVariable( const char * name, int val1, int val2 )
 
 bool GlslShader::SetVariable( const char * name, float val1, float val2 )
 {
-    int location = vtkgl::GetUniformLocation( m_glslProg, name );
+    int location = glGetUniformLocation( m_glslProg, name );
     if( location != -1 )
     {
-        vtkgl::Uniform2f( location, val1, val2 );
+        glUniform2f( location, val1, val2 );
         return true;
     }
     return false;
@@ -212,10 +212,10 @@ bool GlslShader::SetVariable( const char * name, float val1, float val2 )
 
 bool GlslShader::SetVariable( const char * name, float val1, float val2, float val3 )
 {
-    int location = vtkgl::GetUniformLocation( m_glslProg, name );
+    int location = glGetUniformLocation( m_glslProg, name );
     if( location != -1 )
     {
-        vtkgl::Uniform3f( location, val1, val2, val3 );
+        glUniform3f( location, val1, val2, val3 );
         return true;
     }
     return false;
@@ -225,14 +225,14 @@ bool GlslShader::SetVariable( const char * name, float val1, float val2, float v
 
 bool GlslShader::SetVariable( const char * name, vtkMatrix4x4 * mat )
 {
-    int location = vtkgl::GetUniformLocation( m_glslProg, name );
+    int location = glGetUniformLocation( m_glslProg, name );
     if( location != -1 )
     {
         float local[16];
         for( int i = 0; i < 4; ++i )
             for( int j = 0; j < 4; ++j )
                 local[ i * 4 + j ] = mat->Element[i][j];
-        vtkgl::UniformMatrix4fv( location, 1, GL_TRUE, local );
+        glUniformMatrix4fv( location, 1, GL_TRUE, local );
         return true;
     }
     return false;
@@ -242,17 +242,17 @@ void GlslShader::Clear()
 {
 	if( m_glslVertexShader != 0 )
 	{
-        vtkgl::DeleteShader( m_glslVertexShader );
+        glDeleteShader( m_glslVertexShader );
 		m_glslVertexShader = 0;
 	}
 	if( m_glslShader != 0 )
 	{
-        vtkgl::DeleteShader( m_glslShader );
+        glDeleteShader( m_glslShader );
 		m_glslShader = 0;
 	}
 	if( m_glslProg != 0 )
 	{
-        vtkgl::DeleteProgram( m_glslProg );
+        glDeleteProgram( m_glslProg );
 		m_glslProg = 0;
 	}
 	m_init = false;

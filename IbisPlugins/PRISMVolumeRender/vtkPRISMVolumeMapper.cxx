@@ -12,25 +12,24 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include "vtkPRISMVolumeMapper.h"
 
-#include <vtkCamera.h>
-#include <vtkLightCollection.h>
-#include <vtkLight.h>
-#include <vtkColorTransferFunction.h>
-#include <vtkDataArray.h>
-#include <vtkImageData.h>
-#include <vtkMath.h>
-#include <vtkMatrix4x4.h>
-#include <vtkPiecewiseFunction.h>
-#include <vtkPointData.h>
-#include <vtkRenderer.h>
-#include <vtkVolume.h>
-#include <vtkVolumeProperty.h>
-#include <vtkOpenGLExtensionManager.h>
-#include <vtkExecutive.h>
+#include "vtkCamera.h"
+#include "vtkLightCollection.h"
+#include "vtkLight.h"
+#include "vtkColorTransferFunction.h"
+#include "vtkDataArray.h"
+#include "vtkImageData.h"
+#include "vtkMath.h"
+#include "vtkMatrix4x4.h"
+#include "vtkPiecewiseFunction.h"
+#include "vtkPointData.h"
+#include "vtkRenderer.h"
+#include "vtkVolume.h"
+#include "vtkVolumeProperty.h"
+#include "vtkExecutive.h"
 #include "DrawableTexture.h"
 #include "GlslShader.h"
 #include "vtkColoredCube.h"
-#include <vtkgl.h>
+#include "vtk_glew.h"
 
 #include <sstream>
 
@@ -116,7 +115,7 @@ void vtkPRISMVolumeMapper::CheckGLError( const char * msg )
             message += "GL_INVALID_VALUE";
         else if( res == GL_INVALID_OPERATION )
             message += "GL_INVALID_OPERATION";
-        else if( res == vtkgl::INVALID_FRAMEBUFFER_OPERATION )
+        else if( res == GL_INVALID_FRAMEBUFFER_OPERATION )
             message += "GL_INVALID_FRAMEBUFFER_OPERATION";
         else if( res == GL_OUT_OF_MEMORY )
             message += "GL_OUT_OF_MEMORY";
@@ -254,27 +253,27 @@ void vtkPRISMVolumeMapper::Render( vtkRenderer * ren, vtkVolume * vol )
     glColor4d( 1.0, 1.0, 1.0, 1.0 );
 
     // Bind back texture in texture unit 0
-    vtkgl::ActiveTexture( vtkgl::TEXTURE0 );
-    glEnable( vtkgl::TEXTURE_RECTANGLE_ARB );
-    glBindTexture( vtkgl::TEXTURE_RECTANGLE_ARB, BackfaceTexture->GetTexId() );
+    glActiveTexture( GL_TEXTURE0 );
+    glEnable( GL_TEXTURE_RECTANGLE );
+    glBindTexture( GL_TEXTURE_RECTANGLE, BackfaceTexture->GetTexId() );
 
     // Bind depth texture in texture unit 1
-    vtkgl::ActiveTexture( vtkgl::TEXTURE1 );
-    glEnable( vtkgl::TEXTURE_RECTANGLE_ARB );
-    glBindTexture( vtkgl::TEXTURE_RECTANGLE_ARB, DepthBufferTextureId );
+    glActiveTexture( GL_TEXTURE1 );
+    glEnable( GL_TEXTURE_RECTANGLE );
+    glBindTexture( GL_TEXTURE_RECTANGLE, DepthBufferTextureId );
 
     // Bind all volumes and their respective transfer functions to texture units starting at 1
     for( unsigned i = 0; i < VolumesInfo.size(); ++i )
     {
-        vtkgl::ActiveTexture(vtkgl::TEXTURE2 + 2 * i );
+        glActiveTexture( GL_TEXTURE2 + 2 * i );
         glEnable( GL_TEXTURE_1D );
         glBindTexture( GL_TEXTURE_1D, VolumesInfo[i].TranferFunctionTextureId );
 
-        vtkgl::ActiveTexture( vtkgl::TEXTURE2 + 2 * i + 1 );
-        glEnable( vtkgl::TEXTURE_3D );
-        glBindTexture( vtkgl::TEXTURE_3D, VolumesInfo[i].VolumeTextureId );
-        glTexParameteri( vtkgl::TEXTURE_3D, GL_TEXTURE_MIN_FILTER, VolumesInfo[i].linearSampling ? GL_LINEAR : GL_NEAREST );
-        glTexParameteri( vtkgl::TEXTURE_3D, GL_TEXTURE_MAG_FILTER, VolumesInfo[i].linearSampling ? GL_LINEAR : GL_NEAREST );
+        glActiveTexture( GL_TEXTURE2 + 2 * i + 1 );
+        glEnable( GL_TEXTURE_3D );
+        glBindTexture( GL_TEXTURE_3D, VolumesInfo[i].VolumeTextureId );
+        glTexParameteri( GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, VolumesInfo[i].linearSampling ? GL_LINEAR : GL_NEAREST );
+        glTexParameteri( GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, VolumesInfo[i].linearSampling ? GL_LINEAR : GL_NEAREST );
     }
 
     // Setup ray-tracer shader program and render front of cube
@@ -351,24 +350,24 @@ void vtkPRISMVolumeMapper::Render( vtkRenderer * ren, vtkVolume * vol )
     // Unbind all volume and transfer function textures
     for( unsigned i = 0; i < VolumesInfo.size(); ++i )
     {
-        vtkgl::ActiveTexture( vtkgl::TEXTURE2 + 2 * i );
+        glActiveTexture( GL_TEXTURE2 + 2 * i );
         glBindTexture( GL_TEXTURE_1D, 0 );
         glDisable( GL_TEXTURE_1D );
 
-        vtkgl::ActiveTexture( vtkgl::TEXTURE2 + 2 * i + 1 );
-        glBindTexture( vtkgl::TEXTURE_3D, 0 );
-        glDisable( vtkgl::TEXTURE_3D );
+        glActiveTexture( GL_TEXTURE2 + 2 * i + 1 );
+        glBindTexture( GL_TEXTURE_3D, 0 );
+        glDisable( GL_TEXTURE_3D );
     }
 
     // unbind depth texture in tex unit 1
-    vtkgl::ActiveTexture( vtkgl::TEXTURE1 );
-    glBindTexture( vtkgl::TEXTURE_RECTANGLE_ARB, 0 );
-    glDisable( vtkgl::TEXTURE_RECTANGLE_ARB );
+    glActiveTexture( GL_TEXTURE1 );
+    glBindTexture( GL_TEXTURE_RECTANGLE, 0 );
+    glDisable( GL_TEXTURE_RECTANGLE );
 
     // unbind back texture in tex unit 0
-    vtkgl::ActiveTexture( vtkgl::TEXTURE0 );
-    glBindTexture( vtkgl::TEXTURE_RECTANGLE_ARB, 0 );
-    glDisable( vtkgl::TEXTURE_RECTANGLE_ARB );
+    glActiveTexture( GL_TEXTURE0 );
+    glBindTexture( GL_TEXTURE_RECTANGLE, 0 );
+    glDisable( GL_TEXTURE_RECTANGLE );
 
     VolumeShader->UseProgram( false );
 
@@ -756,7 +755,7 @@ int vtkPRISMVolumeMapper::UpdateTransferFunctions( )
         glBindTexture( GL_TEXTURE_1D, pv.TranferFunctionTextureId );
         glTexParameteri( GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
         glTexParameteri( GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-        glTexParameteri( GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, vtkgl::CLAMP_TO_EDGE );
+        glTexParameteri( GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
         glTexImage1D( GL_TEXTURE_1D, 0, 4, tableSize, 0, GL_RGBA, GL_FLOAT, fullTable );
         glBindTexture( GL_TEXTURE_1D, 0 );
         glDisable( GL_TEXTURE_1D );
@@ -786,56 +785,28 @@ int vtkPRISMVolumeMapper::UpdateDepthBufferTexture( int width, int height )
         glGenTextures( 1, &this->DepthBufferTextureId );
     }
 
-    glEnable( vtkgl::TEXTURE_RECTANGLE_ARB );
-    glBindTexture( vtkgl::TEXTURE_RECTANGLE_ARB, this->DepthBufferTextureId );
+    glEnable( GL_TEXTURE_RECTANGLE );
+    glBindTexture( GL_TEXTURE_RECTANGLE, this->DepthBufferTextureId );
 
     // If size has changed, reallocate texture
     if( width != this->DepthBufferTextureSize[0] || height != this->DepthBufferTextureSize[1] )
     {
-        glTexParameteri( vtkgl::TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri( vtkgl::TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexParameterf( vtkgl::TEXTURE_RECTANGLE_ARB, GL_TEXTURE_WRAP_S, GL_CLAMP);
-        glTexParameterf( vtkgl::TEXTURE_RECTANGLE_ARB, GL_TEXTURE_WRAP_T, GL_CLAMP);
-        glTexParameteri( vtkgl::TEXTURE_RECTANGLE_ARB, vtkgl::TEXTURE_COMPARE_MODE_ARB, GL_NONE );
-        glTexImage2D( vtkgl::TEXTURE_RECTANGLE_ARB, 0, vtkgl::DEPTH_COMPONENT32F, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0 );
+        glTexParameteri( GL_TEXTURE_RECTANGLE, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri( GL_TEXTURE_RECTANGLE, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameterf( GL_TEXTURE_RECTANGLE, GL_TEXTURE_WRAP_S, GL_CLAMP);
+        glTexParameterf( GL_TEXTURE_RECTANGLE, GL_TEXTURE_WRAP_T, GL_CLAMP);
+        glTexParameteri( GL_TEXTURE_RECTANGLE, GL_TEXTURE_COMPARE_MODE, GL_NONE );
+        glTexImage2D( GL_TEXTURE_RECTANGLE, 0, GL_DEPTH_COMPONENT32F, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0 );
         this->DepthBufferTextureSize[0] = width;
         this->DepthBufferTextureSize[1] = height;
     }
 
     // Now copy depth buffer to texture
     glReadBuffer( GL_BACK );
-    glCopyTexSubImage2D( vtkgl::TEXTURE_RECTANGLE_ARB, 0, 0, 0, 0, 0, width, height );
+    glCopyTexSubImage2D( GL_TEXTURE_RECTANGLE, 0, 0, 0, 0, 0, width, height );
 
-    // ===========================================================================
-    // TEMP DEBUG : save depth buffer
-    /*int bufferSize = width * height;
-    int byteSize = bufferSize * sizeof(unsigned short);
-    unsigned short * buffer = new unsigned short[ bufferSize ];
-
-    glGetTexImage( vtkgl::TEXTURE_RECTANGLE_ARB, 0, GL_DEPTH_COMPONENT, GL_UNSIGNED_SHORT, buffer );
-
-    vtkImageImport * importer=vtkImageImport::New();
-    importer->CopyImportVoidPointer( buffer, static_cast<int>(byteSize) );
-    importer->SetDataScalarTypeToUnsignedShort();
-    importer->SetNumberOfScalarComponents(1);
-    importer->SetWholeExtent(0,width-1,0,height-1,0,0);
-    importer->SetDataExtentToWholeExtent();
-
-    importer->Update();
-
-    vtkPNGWriter *writer=vtkPNGWriter::New();
-    writer->SetFileName("/home/simon/depth.png");
-    writer->SetInputConnection(importer->GetOutputPort());
-    importer->Delete();
-    writer->Write();
-    writer->Delete();
-
-    delete[] buffer;*/
-    // TEMP DEBUG
-    // ===========================================================================
-
-    glBindTexture( vtkgl::TEXTURE_RECTANGLE_ARB, 0 );
-    glDisable( vtkgl::TEXTURE_RECTANGLE_ARB );
+    glBindTexture( GL_TEXTURE_RECTANGLE, 0 );
+    glDisable( GL_TEXTURE_RECTANGLE );
 
     return 1;
 }
@@ -934,46 +905,18 @@ bool vtkPRISMVolumeMapper::SetCameraVariablesInShader( vtkRenderer * ren, vtkVol
 
 //===============================================================
 // Need
-//      OpenGL 2.0
-//      GL_EXT_framebuffer_object
 //      GL_ARB_texture_float
 //===============================================================
 void vtkPRISMVolumeMapper::LoadExtensions( vtkRenderWindow * window )
 {
     this->UnsupportedExtensions.clear();
     this->GlExtensionsLoaded = true;
-    vtkOpenGLExtensionManager * extensions = vtkOpenGLExtensionManager::New();
-    extensions->SetRenderWindow( window );
 
-    if( !extensions->ExtensionSupported("GL_VERSION_2_0") )
-    {
-        this->GlExtensionsLoaded = false;
-        this->UnsupportedExtensions.push_back( std::string(" OpenGL 2.0 required but not supported" ) );
-    }
-
-    if( !extensions->ExtensionSupported("GL_EXT_framebuffer_object" ) )
-    {
-        this->GlExtensionsLoaded = false;
-        this->UnsupportedExtensions.push_back( std::string("GL_EXT_framebuffer_object is required but not supported" ) );
-    }
-
-    if( !extensions->ExtensionSupported("GL_ARB_texture_float" ) )
+    if( !glewIsSupported("GL_ARB_texture_float") )
     {
         this->GlExtensionsLoaded = false;
         this->UnsupportedExtensions.push_back( std::string("GL_ARB_texture_float is required but not supported" ) );
     }
-
-    // Really load now that we know everything is supported
-    if( this->GlExtensionsLoaded )
-    {
-        extensions->LoadExtension( "GL_VERSION_1_2" );
-        extensions->LoadExtension( "GL_VERSION_1_3" );
-        extensions->LoadExtension( "GL_VERSION_2_0" );
-        extensions->LoadExtension( "GL_EXT_framebuffer_object" );
-        extensions->LoadExtension( "GL_ARB_texture_float" );
-    }
-
-    extensions->Delete();
 }
 
 void vtkPRISMVolumeMapper::GetRenderSize( vtkRenderer * ren, int size[2] )
