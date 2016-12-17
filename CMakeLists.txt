@@ -64,7 +64,9 @@ include_directories(/usr/src/linux/include)
 #==================================================================
 # Create options to build or not the different dependent projects.
 #==================================================================
-OPTION( IBIS_BUILD_DEFAULT_HARDWARE_MODULE "Build default hardware module on Linux." ON )
+if( NOT APPLE )
+    OPTION( IBIS_BUILD_DEFAULT_HARDWARE_MODULE "Build default hardware module on Linux." ON )
+endif()
 OPTION( IBIS_BUILD_IGSIO_HARDWARE_MODULE "Build hardware module that allows connection to OpenIGTLinkServers" OFF )
 OPTION( IBIS_INSTALL_LIBS_AND_HEADERS "make install will install all libraries and headers if this option is ON. Otherwise, only executables are installed." OFF )
 
