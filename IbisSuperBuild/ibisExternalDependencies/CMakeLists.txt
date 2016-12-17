@@ -16,9 +16,9 @@ ExternalProject_Add( ${vtk_name}
     BUILD_COMMAND   make
     INSTALL_COMMAND make install 
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=${external_project_dir}/${vtk_name}/install
-               --DCMAKE_OSX_SYSROOT:PATH=${CMAKE_OSX_SYSROOT} -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
+               -DCMAKE_OSX_SYSROOT:PATH=${CMAKE_OSX_SYSROOT} -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
                -DQT_QMAKE_EXECUTABLE:PATH=${QT_QMAKE_EXECUTABLE} -DBUILD_TESTING:BOOL=FALSE -DBUILD_SHARED_LIBS:BOOL=FALSE
-               -DCMAKE_CXX_FLAGS:STRING=-fPIC -DVTK_QT_VERSION:STRING=5 -DModule_vtkGUISupportQt:BOOL=ON -DQt5Widgets_DIR:PATH=${Qt5Widgets_DIR}
+               -DCMAKE_CXX_FLAGS:STRING=-fPIC -DVTK_QT_VERSION:STRING=5 -DModule_vtkGUISupportQt:BOOL=ON -DQt5_DIR:PATH=${Qt5_DIR}
                -DVTK_LEGACY_REMOVE:BOOL=ON
   )
 
@@ -33,14 +33,13 @@ ExternalProject_Add( ${itk_name}
     INSTALL_COMMAND make install 
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=${external_project_dir}/${itk_name}/install -DCMAKE_OSX_SYSROOT:PATH=${CMAKE_OSX_SYSROOT} -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE} -DBUILD_TESTING:BOOL=FALSE -DBUILD_EXAMPLES:BOOL=FALSE -DITKV3_COMPATIBILITY:BOOL=TRUE -DModule_ITKIOMINC=ON -DModule_ITKReview=ON
   )
-#set( itk_dir ${external_project_dir}/${itk_name}/install/lib/cmake/ITK-4.5 )
 
 # Get and build OpenCV
 set( opencv_name opencv-${IBIS_OPENCV_LONG_VERSION} )
 ExternalProject_Add( ${opencv_name} 
     SOURCE_DIR ${external_project_dir}/${opencv_name}/src
     GIT_REPOSITORY "https://github.com/opencv/opencv.git"
-    GIT_TAG ${IBIS_OPENCV_LONG_VERSION}
+    GIT_TAG ef0811018229c584c21dafa1bf9555c9f56a1d4e
     BINARY_DIR ${external_project_dir}/${opencv_name}/build
     BUILD_COMMAND   make
     INSTALL_COMMAND make install 
