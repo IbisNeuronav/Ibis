@@ -13,7 +13,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include <qvariant.h>
 #include <qwidget.h>
-#include "ibistypes.h"
 #include "serializer.h"
 
 class QVBoxLayout;

@@ -164,7 +164,6 @@ void Application::Init( bool viewerOnly )
     world->SetCursorColor(cursorColor);
 
     m_sceneManager->Set3DViewFollowingReferenceVolume( m_settings.ViewFollowsReference );
-//    m_sceneManager->SetExpandedView(m_settings.ExpandedView);
     m_sceneManager->Set3DInteractorStyle( m_settings.InteractorStyle3D );
 
     m_sceneManager->SetCursorVisibility( m_settings.ShowCursor );
@@ -201,7 +200,6 @@ Application::~Application()
     m_settings.ViewBackgroundColor = QColor( int(backgroundColor[0] * 255), int(backgroundColor[1] * 255), int(backgroundColor[2] * 255) );
     WorldObject * world = WorldObject::SafeDownCast(m_sceneManager->GetSceneRoot());
     m_settings.CutPlanesCursorColor =  world->GetCursorColor();
-//    m_settings.ExpandedView = m_sceneManager->GetExpandedView();
     m_settings.InteractorStyle3D = m_sceneManager->Get3DInteractorStyle();
     m_settings.CameraViewAngle3D = m_sceneManager->Get3DCameraViewAngle();
     m_settings.ShowCursor = m_sceneManager->GetCursorVisible();
