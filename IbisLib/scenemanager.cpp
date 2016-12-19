@@ -332,7 +332,7 @@ bool SceneManager::UpdateProgress(int value)
     return true;
 }
 
-void SceneManager::SaveScene( Serializer * writer ) //QString & fileName)
+void SceneManager::SaveScene( Serializer * writer )
 {
     SceneObject *currentObject = this->GetCurrentObject();
     NotifyPluginsSceneAboutToSave();
