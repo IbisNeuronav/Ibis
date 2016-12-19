@@ -547,8 +547,9 @@ void MainWindow::SaveScene(bool asFile)
     QString version(IGNS_SCENE_SAVE_VERSION);
     ::Serialize( &writer, "Version", version);
 
-    m_4Views->Serialize( &writer );
     manager->SaveScene( &writer );
+
+    m_4Views->Serialize( &writer );
 
     writer.EndSection();
     writer.Finish();
@@ -604,14 +605,10 @@ void MainWindow::fileLoadScene()
             QMessageBox::warning( 0, "Error", message, 1, 0 );
             return;
         }
-//        else if( reader.GetVersionFromFile() == QString::number(6.0) )
-//        {
-//            QString message = "Scenes saved with scene version 6.0 will show correctly\nCurrent and expanded view may differ from what was saved with the scene.\n";
-//            QMessageBox::warning( 0, "Warning", message, 1, 0 );
-//        }
+
+        manager->LoadScene( &reader, fileName );
 
         m_4Views->Serialize( &reader );
-        manager->LoadScene( &reader, fileName );
 
         reader.EndSection();
         reader.Finish();

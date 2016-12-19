@@ -444,12 +444,14 @@ void QuadViewWindow::SetCurrentViewWindow(int index )
 void QuadViewWindow::Serialize( Serializer * ser )
 {
     ser->BeginSection("QuadViewWindow");
-    ::Serialize( ser, "CurrentViewWindow", m_currentViewWindow );
-    ::Serialize( ser, "ViewExpanded", m_viewExpanded );
+    int curWin = m_currentViewWindow;
+    bool expView = m_viewExpanded;
+    ::Serialize( ser, "CurrentViewWindow", curWin );
+    ::Serialize( ser, "ViewExpanded", expView );
     if( ser->IsReader() )
     {
-        this->SetCurrentViewWindow( m_currentViewWindow );
-        this->SetExpandedView(  m_viewExpanded );
+        this->SetCurrentViewWindow( curWin );
+        this->SetExpandedView(  expView );
     }
     ser->EndSection();
 }
