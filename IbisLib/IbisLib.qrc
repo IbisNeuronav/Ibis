@@ -28,5 +28,7 @@
         <file>Icons/reset-planes-2.png</file>
         <file>Icons/right.png</file>
         <file>Icons/top.png</file>
+        <file>Icons/ibis.png</file>
+        <file>Icons/ibis_2_red.svg</file>
     </qresource>
 </RCC>

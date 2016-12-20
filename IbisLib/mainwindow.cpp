@@ -44,6 +44,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QScrollArea>
 #include <QMimeData>
 
+ObjectSerializationMacro( MainWindow );
+
 const QString MainWindow::m_appName( tr("Intraoperative Brain Imaging System") );
 
 MainWindow::MainWindow( QWidget * parent )
@@ -168,7 +170,6 @@ MainWindow::MainWindow( QWidget * parent )
     // Create main QuadView window
     // -----------------------------------------
     m_4Views = (QuadViewWindow*)Application::GetSceneManager()->CreateQuadViewWindow( this );
-    Application::GetInstance().SetQuadViewWidget( m_4Views );
 
     // -----------------------------------------
     // Create right panel (1 tab per plugin)
@@ -192,7 +193,7 @@ MainWindow::MainWindow( QWidget * parent )
     // Setup program icon
     // -----------------------------------------
     QPixmap icon;
-    bool validIcon = icon.load( ":/icons/ibis.png" );
+    bool validIcon = icon.load( ":/Icons/ibis.png" );
     if (validIcon)
         setWindowIcon( icon );
     
@@ -540,19 +541,8 @@ void MainWindow::SaveScene(bool asFile)
         else
             return;
     }
-    SerializerWriter writer;
-    writer.SetFilename( fileName.toUtf8().data() );
-    writer.Start();
-    writer.BeginSection("SaveScene");
-    QString version(IGNS_SCENE_SAVE_VERSION);
-    ::Serialize( &writer, "Version", version);
 
-    manager->SaveScene( &writer );
-
-    m_4Views->Serialize( &writer );
-
-    writer.EndSection();
-    writer.Finish();
+    Application::GetInstance().SaveScene( fileName );
 }
 
 void MainWindow::fileLoadScene()
@@ -583,35 +573,7 @@ void MainWindow::fileLoadScene()
         QFileInfo info( fileName );
         QString newDir = info.dir().absolutePath();
         Application::GetInstance().GetSettings()->WorkingDirectory = newDir;
-
-        SerializerReader reader;
-        reader.SetFilename( fileName.toUtf8().data() );
-        QString version(IGNS_SCENE_SAVE_VERSION);
-        reader.SetSupportedVersion( version );
-        reader.Start();
-        reader.BeginSection("SaveScene");
-        reader.ReadVersionFromFile();
-        if( reader.FileVersionNewerThanSupported() )
-        {
-            reader.EndSection();
-            reader.Finish();
-            QString message = "SaveScene version from file (" + reader.GetVersionFromFile() + ") is more recent than supported (" + version + ")\n";
-            QMessageBox::warning( 0, "Error", message, 1, 0 );
-            return;
-        }
-        else if( reader.FileVersionIsLowerThan( QString::number(6.0) ) )
-        {
-            QString message = "This scene version is older than 6.0. This is not supported anymore. Scene may not be restored.\n";
-            QMessageBox::warning( 0, "Error", message, 1, 0 );
-            return;
-        }
-
-        manager->LoadScene( &reader, fileName );
-
-        m_4Views->Serialize( &reader );
-
-        reader.EndSection();
-        reader.Finish();
+        Application::GetInstance().LoadScene( fileName );
     }
 }
 
@@ -919,3 +881,17 @@ bool MainWindow::eventFilter( QObject * obj, QEvent * event )
     return true;
 }
 
+void MainWindow::AddBottomWidget( QWidget * w )
+{
+    m_4Views->AddBottomWidget( w );
+}
+
+void MainWindow::RemoveBottomWidget( QWidget * w )
+{
+    m_4Views->RemoveBottomWidget( w );
+}
+
+void MainWindow::Serialize( Serializer * ser )
+{
+    m_4Views->Serialize( ser );
+}

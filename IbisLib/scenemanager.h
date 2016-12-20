@@ -253,8 +253,8 @@ public:
     void RemoveAllSceneObjects();
     void RemoveAllChildrenObjects(SceneObject *);
     void ClearScene();
-    void LoadScene( Serializer * reader, QString & fileName, bool interactive = true );
-    void SaveScene(Serializer * writer ); //QString & fileName);
+    void LoadScene( QString & fileName, bool interactive = true );
+    void SaveScene( QString & fileName );
     void NewScene();
     void ObjectReader( Serializer * ser, bool interactive );
     void ObjectWriter( Serializer * ser );

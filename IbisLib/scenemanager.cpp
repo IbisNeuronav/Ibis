@@ -11,6 +11,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <iostream>
 #include <unistd.h>
 #include "scenemanager.h"
+#include "mainwindow.h"
 #include "quadviewwindow.h"
 #include "objecttreewidget.h"
 
@@ -243,7 +244,7 @@ void SceneManager::RemoveAllChildrenObjects(SceneObject *obj)
     }
 }
 
-void SceneManager::LoadScene(Serializer *reader, QString & fileName, bool interactive )
+void SceneManager::LoadScene(QString & fileName, bool interactive )
 {
     this->SetRenderingEnabled( false );
 
@@ -256,9 +257,33 @@ void SceneManager::LoadScene(Serializer *reader, QString & fileName, bool intera
     NotifyPluginsSceneAboutToLoad();
 
     // Read all objects in the scene
+    SerializerReader reader;
+    reader.SetFilename( fileName.toUtf8().data() );
+    reader.SetSupportedVersion( this->SupportedSceneSaveVersion );
+    reader.Start();
+    reader.BeginSection("SaveScene");
+    reader.ReadVersionFromFile();
+    if( reader.FileVersionNewerThanSupported() )
+    {
+        reader.EndSection();
+        reader.Finish();
+        QString message = "SaveScene version from file (" + reader.GetVersionFromFile() + ") is more recent than supported (" + this->SupportedSceneSaveVersion + ")\n";
+        QMessageBox::warning( 0, "Error", message, 1, 0 );
+        SetRenderingEnabled( true );
+        this->LoadingScene = false;
+        return;
+    }
+    else if( reader.FileVersionIsLowerThan( QString::number(6.0) ) )
+    {
+        QString message = "This scene version is older than 6.0. This is not supported anymore. Scene may not be restored.\n";
+        QMessageBox::warning( 0, "Error", message, 1, 0 );
+        SetRenderingEnabled( true );
+        this->LoadingScene = false;
+        return;
+    }
     int numberOfSceneObjects;
-    ::Serialize( reader, "NumberOfSceneObjects", numberOfSceneObjects );
-    ::Serialize( reader, "NextObjectID", this->NextObjectID);
+    ::Serialize( &reader, "NumberOfSceneObjects", numberOfSceneObjects );
+    ::Serialize( &reader, "NextObjectID", this->NextObjectID);
 
     // Start Progress dialog
     if( interactive )
@@ -267,10 +292,10 @@ void SceneManager::LoadScene(Serializer *reader, QString & fileName, bool intera
         m_sceneLoadSaveProgressDialog = Application::GetInstance().StartProgress( numberOfSceneObjects*2+3, tr("Loading Scene...") );
     }
 
-    this->ObjectReader(reader, interactive);
+    this->ObjectReader(&reader, interactive);
     if( interactive )
         this->UpdateProgress(numberOfSceneObjects+1);
-    ::Serialize( reader, "SceneManager", this );
+    ::Serialize( &reader, "SceneManager", this );
     SceneObject *currentObject = this->GetCurrentObject();
     if( interactive )
         this->UpdateProgress(numberOfSceneObjects+1);
@@ -278,10 +303,14 @@ void SceneManager::LoadScene(Serializer *reader, QString & fileName, bool intera
     // Read other params of the scene
     bool axesHidden;
     bool cursorVisible;
-    ::Serialize( reader, "AxesHidden", axesHidden);
-    ::Serialize( reader, "CursorVisible", cursorVisible);
+    ::Serialize( &reader, "AxesHidden", axesHidden);
+    ::Serialize( &reader, "CursorVisible", cursorVisible);
     this->SceneRoot->SetAxesHidden(axesHidden);
     this->SceneRoot->SetCursorVisible(cursorVisible);
+
+    Application::GetInstance().GetMainWindow()->Serialize( &reader );
+    reader.EndSection();
+    reader.Finish();
     this->SetSceneFile( fileName );
     if( interactive )
         this->UpdateProgress(numberOfSceneObjects+3);
@@ -332,7 +361,7 @@ bool SceneManager::UpdateProgress(int value)
     return true;
 }
 
-void SceneManager::SaveScene( Serializer * writer )
+void SceneManager::SaveScene( QString & fileName )
 {
     SceneObject *currentObject = this->GetCurrentObject();
     NotifyPluginsSceneAboutToSave();
@@ -342,15 +371,26 @@ void SceneManager::SaveScene( Serializer * writer )
     int numberOfSceneObjects = listedObjects.count();
     m_sceneLoadSaveProgressDialog = Application::GetInstance().StartProgress(numberOfSceneObjects+3, tr("Saving Scene..."));
     m_sceneLoadSaveProgressDialog->setCancelButton(0);
-    ::Serialize( writer, "NextObjectID", this->NextObjectID);
+    SerializerWriter writer;
+    writer.SetFilename( fileName.toUtf8().data() );
+    writer.Start();
+    writer.BeginSection("SaveScene");
+    QString version(IGNS_SCENE_SAVE_VERSION);
+    ::Serialize( &writer, "Version", version);
+    ::Serialize( &writer, "NextObjectID", this->NextObjectID);
     this->UpdateProgress(1);
-    this->ObjectWriter(writer);
-    ::Serialize( writer, "SceneManager", this);
+    this->ObjectWriter(&writer);
+    ::Serialize( &writer, "SceneManager", this);
     this->UpdateProgress(numberOfSceneObjects+2);
     bool axesHidden = this->SceneRoot->AxesHidden();
     bool cursorVisible = this->SceneRoot->GetCursorVisible();
-    ::Serialize( writer, "AxesHidden", axesHidden);
-    ::Serialize( writer, "CursorVisible", cursorVisible);
+    ::Serialize( &writer, "AxesHidden", axesHidden);
+    ::Serialize( &writer, "CursorVisible", cursorVisible);
+
+    Application::GetInstance().GetMainWindow()->Serialize( &writer );
+
+    writer.EndSection();
+    writer.Finish();
     Application::GetInstance().StopProgress(m_sceneLoadSaveProgressDialog);
     m_sceneLoadSaveProgressDialog = 0;
 

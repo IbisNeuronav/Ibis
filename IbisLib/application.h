@@ -19,6 +19,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <vector>
 #include "ibistypes.h"
 #include "globaleventhandler.h"
+#include "serializer.h"
 
 // forward declarations
 class QSettings;
@@ -39,7 +40,7 @@ class QProgressDialog;
 class QTimer;
 class QDialog;
 class vtkMatrix4x4;
-class QuadViewWindow;
+class MainWindow;
 class ImageObject;
 class PointsObject;
 class QMenu;
@@ -93,11 +94,8 @@ public:
     static void DeleteInstance();
     static Application & GetInstance();
 
-    void SetMainWindow( QWidget * mw ) { m_mainWindow = mw; }
-    QWidget * GetMainWindow() { return m_mainWindow; }
-
-    void SetQuadViewWidget( QuadViewWindow * w ) { m_quadView = w; }
-    QuadViewWindow * GetQuadViewWidget() { return m_quadView; }
+    void SetMainWindow( MainWindow * mw ) { m_mainWindow = mw; }
+    MainWindow * GetMainWindow() { return m_mainWindow; }
     void AddBottomWidget( QWidget * w );
     void RemoveBottomWidget( QWidget * w );
 
@@ -170,6 +168,9 @@ public:
 
     void ShowMinc1Warning( bool cando);
 
+    void LoadScene( QString fileName );
+    void SaveScene( QString fileName );
+
 public slots:
     void UpdateProgress( QProgressDialog*, int current );
 
@@ -203,8 +204,7 @@ private:
     QProgressDialog * m_fileOpenProgressDialog;
     QTimer * m_progressDialogUpdateTimer;
 
-    QWidget                     * m_mainWindow;
-    QuadViewWindow              * m_quadView;
+    MainWindow                  * m_mainWindow;
     SceneManager                * m_sceneManager;
     UpdateManager               * m_updateManager;
     QList<HardwareModule*>        m_hardwareModules;

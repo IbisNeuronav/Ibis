@@ -13,6 +13,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include <QMainWindow>
 #include <QMap>
+#include "serializer.h"
 
 class QAction;
 class QFrame;
@@ -36,6 +37,10 @@ public:
 
     MainWindow( QWidget * parent = 0 );
     ~MainWindow();
+
+    virtual void Serialize( Serializer * ser );
+    void AddBottomWidget( QWidget * w );
+    void RemoveBottomWidget( QWidget * w );
 
 public slots:
 
@@ -132,5 +137,6 @@ protected:
 
 };
 
+ObjectSerializationHeaderMacro( MainWindow );
 
 #endif

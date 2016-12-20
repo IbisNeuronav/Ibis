@@ -10,7 +10,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 #include "application.h"
 #include "hardwaremodule.h"
-#include "quadviewwindow.h"
+#include "mainwindow.h"
 #include "githash.h"
 #include "version.h"
 #include "updatemanager.h"
@@ -131,7 +131,6 @@ void ApplicationSettings::SaveSettings( QSettings & settings )
 Application::Application( )
 {
     m_mainWindow = 0;
-    m_quadView = 0;
     m_sceneManager = 0;
     m_viewerOnly = false;
     m_fileReader = 0;
@@ -267,12 +266,12 @@ Application & Application::GetInstance()
 
 void Application::AddBottomWidget( QWidget * w )
 {
-    m_quadView->AddBottomWidget( w );
+    m_mainWindow->AddBottomWidget( w );
 }
 
 void Application::RemoveBottomWidget( QWidget * w )
 {
-    m_quadView->RemoveBottomWidget( w );
+    m_mainWindow->RemoveBottomWidget( w );
 }
 
 void Application::OnStartMainLoop()
@@ -977,4 +976,15 @@ void Application::ShowMinc1Warning( bool cando)
         int ret = msgBox.exec();
     }
 }
+
+void Application::LoadScene(QString fileName)
+{
+    m_sceneManager->LoadScene( fileName );
+}
+
+void Application::SaveScene( QString fileName )
+{
+    m_sceneManager->SaveScene( fileName );
+}
+
 

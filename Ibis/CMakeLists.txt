@@ -1,9 +1,8 @@
 PROJECT ( IGNS_IBIS )
 
 # define sources
-SET( IGNS_IBIS_SRC main.cpp mainwindow.cpp commandlinearguments.cpp )
+SET( IGNS_IBIS_SRC main.cpp commandlinearguments.cpp )
 SET( IGNS_IBIS_HDR commandlinearguments.h )
-SET( IGNS_IBIS_HDR_MOC mainwindow.h )
 set( IGNS_IBIS_RCC Ibis.qrc )
 set( exec_name ibis )
 
@@ -17,7 +16,7 @@ endif()
 qt5_wrap_cpp( IGNS_IBIS_MOC ${IGNS_IBIS_HDR_MOC} )
 
 # make rules to create c++ source from Qt resource files
-QT5_ADD_RESOURCES(IGNS_IBIS_RCC_SRC ${IGNS_IBIS_RCC})
+#QT5_ADD_RESOURCES(IGNS_IBIS_RCC_SRC ${IGNS_IBIS_RCC})
 
 # Define include directories for other Igns libs
 include_directories( ${IGNS_VTK_QT_INCLUDE_DIR} )
@@ -72,7 +71,8 @@ endif(APPLE)
 #================================
 # Define executable
 #================================
-SET( SOURCE ${IGNS_IBIS_HDR} ${IGNS_IBIS_HDR_MOC} ${IGNS_IBIS_SRC} ${ImportPluginsSourceFile} ${IGNS_IBIS_MOC} ${IGNS_IBIS_RCC_SRC} ${IGNS_IBIS_SRC_ICNS} )
+#SET( SOURCE ${IGNS_IBIS_HDR} ${IGNS_IBIS_HDR_MOC} ${IGNS_IBIS_SRC} ${ImportPluginsSourceFile} ${IGNS_IBIS_MOC} ${IGNS_IBIS_RCC_SRC} ${IGNS_IBIS_SRC_ICNS} )
+SET( SOURCE ${IGNS_IBIS_HDR} ${IGNS_IBIS_HDR_MOC} ${IGNS_IBIS_SRC} ${ImportPluginsSourceFile} ${IGNS_IBIS_MOC} ${IGNS_IBIS_SRC_ICNS} )
 ADD_EXECUTABLE( ${exec_name} ${executable_flags} ${SOURCE} )
 
 if (APPLE)

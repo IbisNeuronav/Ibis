@@ -6,6 +6,7 @@ PROJECT( IGNS_IBISLIB )
 
 SET( IGNS_IBISLIB_SRC
                      application.cpp
+                     mainwindow.cpp
                      scenemanager.cpp
                      filereader.cpp
                      view.cpp
@@ -80,6 +81,7 @@ SET( IGNS_IBISLIB_HDR
 SET( IGNS_IBISLIB_HDR_MOC
                          view.h
                          application.h
+                         mainwindow.h
                          scenemanager.h
                          filereader.h
                          sceneobject.h
