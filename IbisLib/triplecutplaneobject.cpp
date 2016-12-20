@@ -12,6 +12,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "view.h"
 #include "imageobject.h"
 #include "scenemanager.h"
+#include "application.h"
 #include "triplecutplaneobjectsettingswidget.h"
 #include "vtkMultiImagePlaneWidget.h"
 #include <vtkAssembly.h>
@@ -573,15 +574,23 @@ void TripleCutPlaneObject::PlaneEndInteractionEvent( vtkObject * caller, unsigne
 
     this->UpdateOtherPlanesPosition( whichPlane );
 
-    if (this->GetManager()->GetCurrentView() == THREED_VIEW_TYPE)
-        emit EndPlaneMove(whichPlane);
-    else
+    vtkMultiImagePlaneWidget *movingPlane = this->Planes[whichPlane];
+    int currentInteractorIndex = movingPlane->GetCurrentInteractorIndex();
+    View *currentView = 0;
+    if( currentInteractorIndex > -1 )
     {
-        // if we use left mouse button, then only the "whichPlane" moves, if it is a right button, 2 other planes move
-        // at this point, we do not know which button was pressed, so we adjust all planes
-        for( int i = 0; i < 3; ++i )
+        currentView = this->GetManager()->GetViewFromInteractor( movingPlane->GetInteractor( currentInteractorIndex ) );
+
+        if( currentView->GetType() == THREED_VIEW_TYPE )
+            emit EndPlaneMove(whichPlane);
+        else
         {
-            emit EndPlaneMove(i);
+            // if we use left mouse button, then only the "whichPlane" moves, if it is a right button, 2 other planes move
+            // at this point, we do not know which button was pressed, so we adjust all planes
+            for( int i = 0; i < 3; ++i )
+            {
+                emit EndPlaneMove(i);
+            }
         }
     }
 

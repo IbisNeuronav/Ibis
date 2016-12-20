@@ -110,7 +110,10 @@ public:
   vtkSetMacro(KeyPressActivationValue,char);
   vtkGetMacro(KeyPressActivationValue,char);
 
-  // Sets up the keypress-i event. 
+  // Recover currently used interactor
+  vtkGetMacro(CurrentInteractorIndex,int);
+
+  // Sets up the keypress-i event.
   virtual void OnChar( vtkObject * caller, unsigned long eventId, void * callData );
   
 protected:

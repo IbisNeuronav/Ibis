@@ -11,6 +11,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <iostream>
 #include <unistd.h>
 #include "scenemanager.h"
+#include "mainwindow.h"
 #include "quadviewwindow.h"
 #include "objecttreewidget.h"
 
@@ -57,8 +58,6 @@ ObjectSerializationMacro( SceneManager );
 SceneManager::SceneManager()
 {
     m_viewFollowsReferenceObject = true;
-    this->CurrentView = -1;
-    this->ExpandedView = -1;
     this->ViewBackgroundColor[0] = 0;
     this->ViewBackgroundColor[1] = 0;
     this->ViewBackgroundColor[2] = 0;
@@ -245,7 +244,7 @@ void SceneManager::RemoveAllChildrenObjects(SceneObject *obj)
     }
 }
 
-void SceneManager::LoadScene( QString & fileName, bool interactive )
+void SceneManager::LoadScene(QString & fileName, bool interactive )
 {
     this->SetRenderingEnabled( false );
 
@@ -308,6 +307,8 @@ void SceneManager::LoadScene( QString & fileName, bool interactive )
     ::Serialize( &reader, "CursorVisible", cursorVisible);
     this->SceneRoot->SetAxesHidden(axesHidden);
     this->SceneRoot->SetCursorVisible(cursorVisible);
+
+    Application::GetInstance().GetMainWindow()->Serialize( &reader );
     reader.EndSection();
     reader.Finish();
     this->SetSceneFile( fileName );
@@ -360,7 +361,7 @@ bool SceneManager::UpdateProgress(int value)
     return true;
 }
 
-void SceneManager::SaveScene(QString & fileName)
+void SceneManager::SaveScene( QString & fileName )
 {
     SceneObject *currentObject = this->GetCurrentObject();
     NotifyPluginsSceneAboutToSave();
@@ -385,6 +386,9 @@ void SceneManager::SaveScene(QString & fileName)
     bool cursorVisible = this->SceneRoot->GetCursorVisible();
     ::Serialize( &writer, "AxesHidden", axesHidden);
     ::Serialize( &writer, "CursorVisible", cursorVisible);
+
+    Application::GetInstance().GetMainWindow()->Serialize( &writer );
+
     writer.EndSection();
     writer.Finish();
     Application::GetInstance().StopProgress(m_sceneLoadSaveProgressDialog);
@@ -406,6 +410,7 @@ void SceneManager::Serialize( Serializer * ser )
     }
     ::Serialize( ser, "CurrentObjectID", id );
     ::Serialize( ser, "ReferenceObjectID", refObjID );
+    ::Serialize( ser, "ViewBackgroundColor", this->ViewBackgroundColor, 3 );
 
     ser->BeginSection("Views");
     for( ViewList::iterator it = Views.begin(); it != Views.end(); ++it )
@@ -414,21 +419,10 @@ void SceneManager::Serialize( Serializer * ser )
         QString viewName(view->GetName());
         ::Serialize( ser, viewName.toUtf8().data(), view );
     }
-    int oldExpandedView = ExpandedView;
-    ::Serialize( ser, "ExpandedView", ExpandedView );
-    int newExpandedView = ExpandedView;
     if (ser->IsReader())
     {
-        if (oldExpandedView > -1)
-        {
-            emit ExpandView();
-        }
-        if (newExpandedView > -1)
-        {
-            CurrentView = newExpandedView;
-            emit ExpandView();
-        }
         this->SetCurrentObject(this->GetObjectByID(id));
+        this->SetViewBackgroundColor( this->ViewBackgroundColor );
         if( refObjID != SceneObject::InvalidObjectId )
             this->SetReferenceDataObject( this->GetObjectByID(refObjID) );
     }

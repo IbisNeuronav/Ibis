@@ -24,6 +24,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "objectplugininterface.h"
 #include "generatorplugininterface.h"
 #include "aboutpluginswidget.h"
+#include "serializer.h"
 
 #include <QApplication>
 #include <QAction>
@@ -43,10 +44,13 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QScrollArea>
 #include <QMimeData>
 
+ObjectSerializationMacro( MainWindow );
+
 const QString MainWindow::m_appName( tr("Intraoperative Brain Imaging System") );
 
 MainWindow::MainWindow( QWidget * parent )
     : QMainWindow( parent )
+    , m_4Views(0)
     , m_viewXPlaneAction(0)
     , m_viewYPlaneAction(0)
     , m_viewZPlaneAction(0)
@@ -165,8 +169,7 @@ MainWindow::MainWindow( QWidget * parent )
     // -----------------------------------------
     // Create main QuadView window
     // -----------------------------------------
-    QuadViewWindow * dlg = (QuadViewWindow*)Application::GetSceneManager()->CreateQuadViewWindow( this );
-    Application::GetInstance().SetQuadViewWidget( dlg );
+    m_4Views = (QuadViewWindow*)Application::GetSceneManager()->CreateQuadViewWindow( this );
 
     // -----------------------------------------
     // Create right panel (1 tab per plugin)
@@ -181,7 +184,7 @@ MainWindow::MainWindow( QWidget * parent )
     m_mainSplitter = new QSplitter(this);
     m_mainSplitter->setContentsMargins( 5, 5, 5, 5 );
     m_mainSplitter->addWidget( m_leftFrame );
-    m_mainSplitter->addWidget( dlg );
+    m_mainSplitter->addWidget( m_4Views );
     m_mainSplitter->addWidget( m_rightPanel );
     setCentralWidget( m_mainSplitter );
     connect( m_mainSplitter, SIGNAL(splitterMoved(int,int)), this, SLOT(MainSplitterMoved(int,int) ));
@@ -190,7 +193,7 @@ MainWindow::MainWindow( QWidget * parent )
     // Setup program icon
     // -----------------------------------------
     QPixmap icon;
-    bool validIcon = icon.load( ":/icons/ibis.png" );
+    bool validIcon = icon.load( ":/Icons/ibis.png" );
     if (validIcon)
         setWindowIcon( icon );
     
@@ -213,6 +216,9 @@ MainWindow::MainWindow( QWidget * parent )
 
     UpdateMainSplitter();
     Application::GetInstance().SetMainWindow(this);
+
+    m_4Views->SetCurrentViewWindow( settings->CurrentViewWindow );
+    m_4Views->SetExpandedView( settings->ExpandedView );
 
     // Tell the qApp unique instance to send event to MainWindow::eventFilter before anyone else
     // so that we can grab global keyboard shortcuts.
@@ -535,7 +541,8 @@ void MainWindow::SaveScene(bool asFile)
         else
             return;
     }
-    manager->SaveScene(fileName);
+
+    Application::GetInstance().SaveScene( fileName );
 }
 
 void MainWindow::fileLoadScene()
@@ -566,7 +573,7 @@ void MainWindow::fileLoadScene()
         QFileInfo info( fileName );
         QString newDir = info.dir().absolutePath();
         Application::GetInstance().GetSettings()->WorkingDirectory = newDir;
-        manager->LoadScene(fileName);
+        Application::GetInstance().LoadScene( fileName );
     }
 }
 
@@ -872,4 +879,19 @@ bool MainWindow::eventFilter( QObject * obj, QEvent * event )
 		return QObject::eventFilter(obj, event);		
 
     return true;
+}
+
+void MainWindow::AddBottomWidget( QWidget * w )
+{
+    m_4Views->AddBottomWidget( w );
+}
+
+void MainWindow::RemoveBottomWidget( QWidget * w )
+{
+    m_4Views->RemoveBottomWidget( w );
+}
+
+void MainWindow::Serialize( Serializer * ser )
+{
+    m_4Views->Serialize( ser );
 }

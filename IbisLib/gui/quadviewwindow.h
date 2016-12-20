@@ -13,9 +13,11 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include <qvariant.h>
 #include <qwidget.h>
+#include "serializer.h"
 
 class QVBoxLayout;
 class QHBoxLayout;
+class QGridLayout;
 class QAbstractButton;
 class QSpacerItem;
 class QSplitter;
@@ -28,13 +30,6 @@ class SceneManager;
 class View;
 class vtkRenderWindowInteractor;
 
-enum WINTYPES
-{ TRANSVERSE_WIN,
-  THREED_WIN,
-  CORONAL_WIN,
-  SAGITTAL_WIN
-};
-
 //#define USE_QVTKWIDGET_2
 
 class QuadViewWindow : public QWidget
@@ -46,11 +41,14 @@ public:
     QuadViewWindow( QWidget * parent = 0, Qt::WindowFlags fl = 0 );
     virtual ~QuadViewWindow();
 
+    virtual void Serialize( Serializer * ser );
     virtual void SetSceneManager( SceneManager * man );
 
     void AddBottomWidget( QWidget * w );
     void RemoveBottomWidget( QWidget * w );
-    
+    void SetExpandedView( bool on );
+    void SetCurrentViewWindow( int index );
+
 public slots:
 
     void Detach3DView( QWidget * parent );
@@ -83,15 +81,13 @@ public slots:
 protected:
 
     QAbstractButton * CreateToolButton( QString name, QString iconPath, QString toolTip, const char * callbackSlot );
-    void MakeOneView( int index, const char * name, QSplitter * splitter );
-    
+    void MakeOneView( int index, const char * name );
+
     void WinNeedsRender( int winIndex );
 
     // reimplemented from QObject. Filters event sent to children. Used to track focus
     bool eventFilter(QObject *obj, QEvent *event);
 
-    void SetCurrentView( int index );
-    
     void PlaceCornerText();
 
     SceneManager * m_sceneManager;
@@ -104,9 +100,7 @@ protected:
     QSpacerItem * m_buttonBoxSpacer;
     QLabel      * m_genericLabel;
 
-    QSplitter * m_verticalSplitter;
-    QSplitter * m_upperHorizontalSplitter;
-    QSplitter * m_lowerHorizontalSplitter;
+    QGridLayout *m_viewWindowsLayout;
 
     static const QString ViewNames[4];
 #ifdef USE_QVTKWIDGET_2
@@ -122,8 +116,10 @@ protected:
     QFrame * m_bottomWidgetFrame;
     QVBoxLayout * m_bottomWidgetLayout;
     
-    int currentViewExpanded;
+    int m_currentViewWindow;
+    bool m_viewExpanded;
 };
 
+ObjectSerializationHeaderMacro( QuadViewWindow );
 
 #endif

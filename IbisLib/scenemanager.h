@@ -45,8 +45,6 @@ class vtkInteractor;
 // Scene file format version
 #define IGNS_SCENE_SAVE_VERSION "6.0"
 
-#define PREOP_ROOT_OBJECT_NAME "Pre-operative"
-#define INTRAOP_ROOT_OBJECT_NAME "Intra-operative"
 // Description:
 // This class is the main interface for all 3D display. It manages the hierarchy
 // of 3D objects that compose the scene that can be displayed. It also manages
@@ -98,10 +96,6 @@ public:
     View * GetMain3DView();
     View * GetView( const QString & name );
     View * GetViewFromInteractor( vtkRenderWindowInteractor * interactor );
-    vtkSetMacro( CurrentView, int );
-    vtkGetMacro( CurrentView, int );
-    vtkSetMacro( ExpandedView, int );
-    vtkGetMacro( ExpandedView, int );
     void Set3DViewFollowingReferenceVolume( bool follow ) { m_viewFollowsReferenceObject = follow; }
     bool Is3DViewFollowingReferenceVolume() { return m_viewFollowsReferenceObject; }
     void SetViewBackgroundColor( double * color );
@@ -259,8 +253,8 @@ public:
     void RemoveAllSceneObjects();
     void RemoveAllChildrenObjects(SceneObject *);
     void ClearScene();
-    void LoadScene(QString & fileName, bool interactive = true );
-    void SaveScene(QString & fileName);
+    void LoadScene( QString & fileName, bool interactive = true );
+    void SaveScene( QString & fileName );
     void NewScene();
     void ObjectReader( Serializer * ser, bool interactive );
     void ObjectWriter( Serializer * ser );
@@ -321,8 +315,6 @@ signals:
     void ReferenceTransformChanged();
     void ReferenceObjectChanged();
 
-    void ExpandView();
-
 protected:
 
     void ValidatePointerObject();
@@ -361,8 +353,6 @@ protected:
     bool m_viewFollowsReferenceObject;
     typedef std::vector<View*> ViewList;
     ViewList Views;
-    int CurrentView;
-    int ExpandedView;
 
     TripleCutPlaneObject * MainCutPlanes;
 

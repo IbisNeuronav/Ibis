@@ -293,7 +293,7 @@ bool PointsObject::OnLeftButtonPressed( View * v, int x, int y, unsigned modifie
     if( picked )
     {
         // Find point clicked
-        int pointIndex = FindPoint( picked, realPosition );
+        int pointIndex = FindPoint( picked, realPosition, v->GetType() );
 
         // No point is close to where we clicked -> add point
         if( pointIndex == PointsObject::InvalidPointIndex )
@@ -340,7 +340,7 @@ bool PointsObject::OnRightButtonPressed( View * v, int x, int y, unsigned modifi
     vtkActor * picked = DoPicking( x, y, v->GetRenderer(), realPosition );
     if( picked )
     {
-        int pickedPointIndex = this->FindPoint( picked, realPosition );
+        int pickedPointIndex = this->FindPoint( picked, realPosition, v->GetType() );
         if( pickedPointIndex > PointsObject::InvalidPointIndex )
             this->RemovePoint( pickedPointIndex );
     }
@@ -444,7 +444,7 @@ void PointsObject::MoveCursorToPoint( int index )
     }
 }
 
-int PointsObject::FindPoint(vtkActor *actor, double *pos)
+int PointsObject::FindPoint(vtkActor *actor, double *pos, int viewType)
 {
     Q_ASSERT( this->GetManager() );
 
@@ -467,21 +467,18 @@ int PointsObject::FindPoint(vtkActor *actor, double *pos)
     }
 
     // Now see if any of 2D actors are picked
-    int viewType = this->GetManager()->GetCurrentView();
-    if( viewType != THREED_VIEW_TYPE )
+    ApplicationSettings * settings = Application::GetInstance().GetSettings();
+    vtkTransform * wt = this->GetWorldTransform();
+    double worldPicked[3], worldPt[3];
+    wt->TransformPoint( pos, worldPicked );
+    for (int i = 0; i < n; i++)
     {
-        vtkTransform * wt = this->GetWorldTransform();
-        double worldPicked[3], worldPt[3];
-        wt->TransformPoint( pos, worldPicked );
-        for (int i = 0; i < n; i++)
-        {
-            point = m_pointList.value(i);
-            point->GetPosition(pointPosition);
-            wt->TransformPoint( pointPosition, worldPt );
-            if( this->GetManager()->IsInPlane( (VIEWTYPES)viewType, worldPt ) &&
-                sqrt( vtkMath::Distance2BetweenPoints( worldPicked, worldPt ) < m_pointRadius2D ))
-                return i;
-        }
+        point = m_pointList.value(i);
+        point->GetPosition(pointPosition);
+        wt->TransformPoint( pointPosition, worldPt );
+        if( this->GetManager()->IsInPlane( (VIEWTYPES)viewType, worldPt ) &&
+            sqrt( vtkMath::Distance2BetweenPoints( worldPicked, worldPt ) < m_pointRadius2D ))
+            return i;
     }
     return InvalidPointIndex;
 }

@@ -17,6 +17,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QToolButton>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
+#include <QGridLayout>
 #include <QLabel>
 #include <QFont>
 #include "QVTKWidget.h"
@@ -30,6 +31,9 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "view.h"
 #include "vtkRenderWindow.h"
 #include "vtkCornerAnnotation.h"
+#include "application.h"
+
+ObjectSerializationMacro( QuadViewWindow );
 
 const QString QuadViewWindow::ViewNames[4] = { "Transverse","ThreeD","Coronal","Sagittal" };
 
@@ -43,7 +47,7 @@ QuadViewWindow::QuadViewWindow( QWidget* parent, Qt::WindowFlags fl ) : QWidget(
     m_generalLayout->setContentsMargins( 0, 0, 0, 0 );
     m_generalLayout->setSpacing( 0 );
 
-    // Add a button box at the top of the window. These buttons control view layout and manipulation tools    
+    // Add a button box at the top of the window. These buttons control view layout and manipulation tools
     m_buttonBox = new QHBoxLayout();
     m_buttonBox->setContentsMargins( 6, 0, 6, 0 );
     m_buttonBox->setSpacing( 5 );
@@ -80,26 +84,16 @@ QuadViewWindow::QuadViewWindow( QWidget* parent, Qt::WindowFlags fl ) : QWidget(
     m_buttonBox->addWidget( m_genericLabel );
     m_genericLabel->hide();
 
+    m_viewWindowsLayout = new QGridLayout( );
+    m_viewWindowsLayout->setObjectName( "4Views" );
+    m_generalLayout->addLayout( m_viewWindowsLayout );
+    m_viewWindowsLayout->setContentsMargins( 1, 1, 1, 1 );
+    m_viewWindowsLayout->setSpacing( 1 );
 
-    // Add the 3 splitters that separate the 4 vtk windows
-    m_verticalSplitter = new QSplitter( this );
-    m_verticalSplitter->setObjectName( "VerticalSplitter" );
-    m_verticalSplitter->setOrientation( Qt::Vertical );
-    m_generalLayout->addWidget( m_verticalSplitter );
-
-    m_upperHorizontalSplitter = new QSplitter( m_verticalSplitter );
-    m_upperHorizontalSplitter->setObjectName( "UpperHorizontalSplitter" );
-    m_upperHorizontalSplitter->setOrientation( Qt::Horizontal );
-    
-    m_lowerHorizontalSplitter = new QSplitter( m_verticalSplitter );
-    m_lowerHorizontalSplitter->setObjectName( "LowerHorizontalSplitter" );
-    m_lowerHorizontalSplitter->setOrientation( Qt::Horizontal );
-
-    // Create the 4 basic vtk windows
-    MakeOneView( 0, "UpperLeftView", m_upperHorizontalSplitter );
-    MakeOneView( 1, "UpperRightView", m_upperHorizontalSplitter );
-    MakeOneView( 2, "LowerLeftView", m_lowerHorizontalSplitter );
-    MakeOneView( 3, "LowerRightView", m_lowerHorizontalSplitter );
+    MakeOneView( 0, "UpperLeftView" );
+    MakeOneView( 1, "UpperRightView" );
+    MakeOneView( 2, "LowerLeftView" );
+    MakeOneView( 3, "LowerRightView" );
 
     // An empty frame for plugins to add custom widgets at the bottom
     m_bottomWidgetFrame = new QFrame( this );
@@ -109,8 +103,9 @@ QuadViewWindow::QuadViewWindow( QWidget* parent, Qt::WindowFlags fl ) : QWidget(
     m_generalLayout->addWidget( m_bottomWidgetFrame );
 
     resize( QSize(1000, 800).expandedTo(minimumSizeHint()) );
-    
-    this->currentViewExpanded = 0;
+
+     m_viewExpanded = false;
+     m_currentViewWindow = THREED_VIEW_TYPE;
 }
 
 QAbstractButton * QuadViewWindow::CreateToolButton( QString name, QString iconPath, QString toolTip, const char * callbackSlot )
@@ -127,9 +122,9 @@ QAbstractButton * QuadViewWindow::CreateToolButton( QString name, QString iconPa
     return button;
 }
 
-void QuadViewWindow::MakeOneView( int index, const char * name, QSplitter * splitter )
+void QuadViewWindow::MakeOneView( int index, const char * name )
 {
-    m_vtkWindowFrames[index] = new QFrame( splitter );
+    m_vtkWindowFrames[index] = new QFrame( );
     m_vtkWindowFrames[index]->setFrameShape( QFrame::NoFrame );
 
 #ifdef USE_QVTKWIDGET_2
@@ -147,8 +142,31 @@ void QuadViewWindow::MakeOneView( int index, const char * name, QSplitter * spli
     m_frameLayouts[index] = new QVBoxLayout( m_vtkWindowFrames[index] );
     m_frameLayouts[index]->addWidget( m_vtkWindows[index] );
     m_frameLayouts[index]->setContentsMargins( 1, 1, 1, 1 );
-}
 
+    int row, col;
+    switch( index )
+    {
+    case 1:
+        row = 0;
+        col = 1;
+        break;
+    case 2:
+        row = 1;
+        col = 0;
+        break;
+    case 3:
+        row = 1;
+        col = 1;
+        break;
+    case 0:
+    default:
+        row = 0;
+        col = 0;
+        break;
+    }
+
+    m_viewWindowsLayout->addWidget( m_vtkWindowFrames[index], row, col);
+}
 
 QuadViewWindow::~QuadViewWindow()
 {
@@ -200,14 +218,6 @@ void QuadViewWindow::SetSceneManager( SceneManager * man )
         connect( view, SIGNAL( Modified() ), this, SLOT( Win3NeedsRender() ) );
         
         m_sceneManager = man;
-        int expandedView = m_sceneManager->GetExpandedView();
-        if (expandedView > -1)
-        {
-            m_sceneManager->SetCurrentView(expandedView);
-            ExpandViewButtonClicked();
-        }
-        else
-            SetCurrentView( 1 );
 
         connect( man, SIGNAL(CursorPositionChanged()), this, SLOT(OnCursorMoved()) );
         OnCursorMoved();
@@ -215,7 +225,6 @@ void QuadViewWindow::SetSceneManager( SceneManager * man )
         connect( man, SIGNAL(ShowGenericLabel(bool)), this, SLOT(OnShowGenericLabel(bool)) );
         connect( man, SIGNAL(ShowGenericLabelText()), this, SLOT(OnShowGenericLabelText()) );
 
-        connect (m_sceneManager, SIGNAL(ExpandView()), this, SLOT(ExpandViewButtonClicked()));
         m_sceneManager->PreDisplaySetup();
 //        this->PlaceCornerText(); temporarily blocked
     }
@@ -299,45 +308,28 @@ void QuadViewWindow::RenderAll()
 
 void QuadViewWindow::ExpandViewButtonClicked()
 {
-    int currentView = m_sceneManager->GetCurrentView();
-    if( this->currentViewExpanded )
+    if( m_viewExpanded )
     {
         for( int i = 0; i < 4; i++ )
         {
             m_vtkWindowFrames[i]->show();
             m_vtkWindows[i]->update();
         }
-        this->currentViewExpanded = 0;
-        m_sceneManager->SetExpandedView(-1);
+        m_viewExpanded = false;
     }
     else
     {
-        int currentWindow;
-        switch(currentView)
-        {
-        case TRANSVERSE_VIEW_TYPE:
-            currentWindow = TRANSVERSE_WIN;
-            break;
-        case THREED_VIEW_TYPE:
-            currentWindow = THREED_WIN;
-            break;
-        case CORONAL_VIEW_TYPE:
-            currentWindow = CORONAL_WIN;
-            break;
-        case SAGITTAL_VIEW_TYPE:
-            currentWindow = SAGITTAL_WIN;
-            break;
-        }
         for( int i = 0; i < 4; i++ )
         {
-            if( i != currentWindow )
+            if( i != m_currentViewWindow )
             {
                 m_vtkWindowFrames[i]->hide();
             }
         }
-        this->currentViewExpanded = 1;
-        m_sceneManager->SetExpandedView(currentView);
+        m_viewExpanded = true;
     }
+    ApplicationSettings * s = Application::GetInstance().GetSettings();
+    s->ExpandedView = m_viewExpanded;
 }
 
 void QuadViewWindow::ResetPlanesButtonClicked()
@@ -414,42 +406,54 @@ bool QuadViewWindow::eventFilter(QObject *obj, QEvent *event)
             }
         }
         if( which != -1 )
-            SetCurrentView( which );
+            SetCurrentViewWindow( which );
     }
     return false;
 }
 
-void QuadViewWindow::SetCurrentView( int index )
+void QuadViewWindow::SetExpandedView( bool on )
 {
-    if( m_sceneManager )
+    if( m_viewExpanded != on )
     {
-        switch(index)
+        ExpandViewButtonClicked();
+    }
+    ApplicationSettings * s = Application::GetInstance().GetSettings();
+    s->ExpandedView = m_viewExpanded;
+}
+
+void QuadViewWindow::SetCurrentViewWindow(int index )
+{
+    if( m_currentViewWindow == index )
+        return;
+    m_currentViewWindow = index;
+    for( int i = 0; i < 4; ++i )
+    {
+        if( i == m_currentViewWindow )
         {
-        case TRANSVERSE_WIN:
-            m_sceneManager->SetCurrentView( TRANSVERSE_VIEW_TYPE );
-            break;
-        case THREED_WIN:
-            m_sceneManager->SetCurrentView( THREED_VIEW_TYPE );
-            break;
-        case CORONAL_WIN:
-            m_sceneManager->SetCurrentView( CORONAL_VIEW_TYPE );
-            break;
-        case SAGITTAL_WIN:
-            m_sceneManager->SetCurrentView( SAGITTAL_VIEW_TYPE );
-            break;
+            m_vtkWindowFrames[i]->setStyleSheet( "background-color:red" );
         }
-        for( int i = 0; i < 4; ++i )
+        else
         {
-            if( i == index )
-            {
-                m_vtkWindowFrames[i]->setStyleSheet( "background-color:red" );
-            }
-            else
-            {
-                m_vtkWindowFrames[i]->setStyleSheet( "" );
-            }
+            m_vtkWindowFrames[i]->setStyleSheet( "" );
         }
     }
+    ApplicationSettings * s = Application::GetInstance().GetSettings();
+    s->CurrentViewWindow = m_currentViewWindow;
+}
+
+void QuadViewWindow::Serialize( Serializer * ser )
+{
+    ser->BeginSection("QuadViewWindow");
+    int curWin = m_currentViewWindow;
+    bool expView = m_viewExpanded;
+    ::Serialize( ser, "CurrentViewWindow", curWin );
+    ::Serialize( ser, "ViewExpanded", expView );
+    if( ser->IsReader() )
+    {
+        this->SetCurrentViewWindow( curWin );
+        this->SetExpandedView(  expView );
+    }
+    ser->EndSection();
 }
 
 void QuadViewWindow::PlaceCornerText()
@@ -498,4 +502,3 @@ void QuadViewWindow::PlaceCornerText()
     renderer->AddViewProp( ca );
     ca->Delete();
 }
-

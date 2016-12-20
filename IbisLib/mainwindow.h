@@ -13,6 +13,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include <QMainWindow>
 #include <QMap>
+#include "serializer.h"
 
 class QAction;
 class QFrame;
@@ -26,6 +27,7 @@ class SceneObject;
 class ImageMixerWidget;
 class OpenFileParams;
 class ToolPluginInterface;
+class QuadViewWindow;
 
 class MainWindow : public QMainWindow
 {
@@ -35,6 +37,10 @@ public:
 
     MainWindow( QWidget * parent = 0 );
     ~MainWindow();
+
+    virtual void Serialize( Serializer * ser );
+    void AddBottomWidget( QWidget * w );
+    void RemoveBottomWidget( QWidget * w );
 
 public slots:
 
@@ -99,6 +105,7 @@ protected:
 	// Capture events sent to application (ex.:fileopen event on OSX)
 	bool eventFilter(QObject *obj, QEvent *event);
 
+    QuadViewWindow *m_4Views;
     QAction * m_viewXPlaneAction;
     QAction * m_viewYPlaneAction;
     QAction * m_viewZPlaneAction;
@@ -130,5 +137,6 @@ protected:
 
 };
 
+ObjectSerializationHeaderMacro( MainWindow );
 
 #endif
