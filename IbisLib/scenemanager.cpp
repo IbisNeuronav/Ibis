@@ -370,6 +370,7 @@ void SceneManager::Serialize( Serializer * ser )
     }
     ::Serialize( ser, "CurrentObjectID", id );
     ::Serialize( ser, "ReferenceObjectID", refObjID );
+    ::Serialize( ser, "ViewBackgroundColor", this->ViewBackgroundColor, 3 );
 
     ser->BeginSection("Views");
     for( ViewList::iterator it = Views.begin(); it != Views.end(); ++it )
@@ -381,6 +382,7 @@ void SceneManager::Serialize( Serializer * ser )
     if (ser->IsReader())
     {
         this->SetCurrentObject(this->GetObjectByID(id));
+        this->SetViewBackgroundColor( this->ViewBackgroundColor );
         if( refObjID != SceneObject::InvalidObjectId )
             this->SetReferenceDataObject( this->GetObjectByID(refObjID) );
     }
