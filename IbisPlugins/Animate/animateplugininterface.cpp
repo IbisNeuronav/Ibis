@@ -417,16 +417,6 @@ void AnimatePluginInterface::SetPlaying( bool p )
         m_playbackTimer->stop();
 }
 
-#include "quadviewwindow.h"
-
-void AnimatePluginInterface::ToggleDetachWindow( bool checked )
-{
-    if( checked )
-        GetApplication()->GetQuadViewWidget()->Detach3DView( GetApplication()->GetMainWindow() );
-    else
-        GetApplication()->GetQuadViewWidget()->Attach3DView();
-}
-
 //=============================
 // For now:
 // 0 - Camera anim

@@ -57,7 +57,6 @@ private slots:
     void on_cameraMinDistCheckBox_toggled(bool checked);
     void on_nextKeyframeButton_clicked();
     void on_prevKeyframeButton_clicked();
-    void on_detachWindowButton_toggled(bool checked);
     void on_domeViewAngleSlider_valueChanged(int value);
     void on_domeViewAngleSpinBox_valueChanged(int arg1);
 

@@ -102,8 +102,6 @@ public:
     bool IsPlaying();
     void SetPlaying( bool p );
 
-    void ToggleDetachWindow( bool checked );
-
     // Funcs to manipulate keyframes
     bool HasKey( int paramIndex, int frame );
     int FindClosestKey( int paramIndex, int frame );
