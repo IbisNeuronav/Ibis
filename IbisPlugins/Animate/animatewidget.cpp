@@ -221,12 +221,6 @@ void AnimateWidget::on_prevKeyframeButton_clicked()
     m_pluginInterface->PrevKeyframe();
 }
 
-void AnimateWidget::on_detachWindowButton_toggled(bool checked)
-{
-    Q_ASSERT( m_pluginInterface );
-    m_pluginInterface->ToggleDetachWindow( checked );
-}
-
 void AnimateWidget::on_domeViewAngleSlider_valueChanged(int value)
 {
     Q_ASSERT( m_pluginInterface );
