@@ -207,14 +207,14 @@ void TripleCutPlaneObject::AddImage( int imageID )
 
     for( int i = 0; i < 3; ++i )
     {
-        if( refImage )
-        {
-            this->Planes[i]->SetBoundingVolume( im->GetImage(), im->GetWorldTransform() );
-        }
         bool canInterpolate = !im->IsLabelImage();
         this->Planes[i]->AddInput( im->GetImage(), im->GetLut(), im->GetWorldTransform(), canInterpolate );
         this->Planes[i]->SetImageHidden( im->GetImage(), im->IsHidden() );
         this->Planes[i]->SetBlendingMode( Images.size() - 1, BlendingModes[ m_blendingModeIndices[ Images.size() - 1 ] ].mode );
+        if( refImage )
+        {
+            this->Planes[i]->SetBoundingVolume( im->GetImage(), im->GetWorldTransform() );
+        }
     }
 }
 
