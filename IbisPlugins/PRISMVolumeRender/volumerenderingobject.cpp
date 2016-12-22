@@ -32,6 +32,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "vtkLineRepresentation.h"
 #include "application.h"
 #include <QTime>
+#include <QInputDialog>
+#include <QMessageBox>
 #include "shaderio.h"
 
 ObjectSerializationMacro( VolumeRenderingObject );
@@ -799,10 +801,27 @@ void VolumeRenderingObject::DuplicateRayInitShaderType()
     for( int i = 0; i < m_initShaders.size(); ++i )
         allNames.push_back( m_initShaders[i].name );
     newContrib.name = SceneManager::FindUniqueName( newContrib.name, allNames );
-
     newContrib.custom = true;
-    m_initShaders.push_back( newContrib );
-    m_initShaderContributionType = m_initShaders.size() - 1;
+
+    // Ask users for a new name
+    bool ok = true;
+    bool nameFound = false;
+    while( !nameFound && ok )
+    {
+        newContrib.name = QInputDialog::getText( 0, "New Shader Name", "Shader Name", QLineEdit::Normal, newContrib.name, &ok );
+        nameFound = !this->DoesRayInitShaderExist( newContrib.name );
+        if( !nameFound )
+            QMessageBox::warning( 0, "Error", "Shader name already exists" );
+    }
+
+    int newIndex = -1;
+    if( nameFound && ok )
+    {
+        newIndex = m_initShaders.size();
+        m_volumeShaders.push_back( newContrib );
+        m_initShaderContributionType = newIndex;
+    }
+
     emit Modified();
 }
 
@@ -909,6 +928,7 @@ void VolumeRenderingObject::AddStopConditionShaderType( QString name, QString co
 void VolumeRenderingObject::DuplicateStopConditionShaderType()
 {
     ShaderContrib newContrib = m_stopConditionShaders[ m_stopConditionShaderType ];
+    newContrib.custom = true;
 
     // Find unique name
     QStringList allNames;
@@ -916,9 +936,25 @@ void VolumeRenderingObject::DuplicateStopConditionShaderType()
         allNames.push_back( m_stopConditionShaders[i].name );
     newContrib.name = SceneManager::FindUniqueName( newContrib.name, allNames );
 
-    newContrib.custom = true;
-    m_stopConditionShaders.push_back( newContrib );
-    m_stopConditionShaderType = m_stopConditionShaders.size() - 1;
+    // Ask users for a new name
+    bool ok = true;
+    bool nameFound = false;
+    while( !nameFound && ok )
+    {
+        newContrib.name = QInputDialog::getText( 0, "New Shader Name", "Shader Name", QLineEdit::Normal, newContrib.name, &ok );
+        nameFound = !this->DoesStopConditionShaderTypeExist( newContrib.name );
+        if( !nameFound )
+            QMessageBox::warning( 0, "Error", "Shader name already exists" );
+    }
+
+    int newIndex = -1;
+    if( nameFound && ok )
+    {
+        newIndex = m_volumeShaders.size();
+        m_volumeShaders.push_back( newContrib );
+        m_stopConditionShaderType = newIndex;
+    }
+
     emit Modified();
 }
 
@@ -990,10 +1026,9 @@ void VolumeRenderingObject::AddShaderContributionType( QString shaderName, QStri
     emit Modified();
 }
 
-void VolumeRenderingObject::DeleteShaderContributionType( QString shaderName )
+void VolumeRenderingObject::DeleteShaderContributionType( int shaderType )
 {
     // Set contribution type of volume using this shader to 0
-    int shaderType = GetShaderContributionTypeIndex( shaderName );
     for( int i = 0; i < m_perImage.size(); ++i )
     {
         PerImage * pi = m_perImage[i];
@@ -1014,19 +1049,35 @@ QString VolumeRenderingObject::GetUniqueCustomShaderName( QString name )
     return SceneManager::FindUniqueName( name, allNames );
 }
 
-void VolumeRenderingObject::DuplicateShaderContribType( int typeIndex )
+int VolumeRenderingObject::DuplicateShaderContribType( int typeIndex )
 {
     Q_ASSERT( typeIndex < m_volumeShaders.size() );
 
     ShaderContrib contrib = m_volumeShaders[ typeIndex ];
     contrib.custom = true;
-
-    // Make sure we have a unique name
     contrib.name = GetUniqueCustomShaderName( contrib.name );
 
-    m_volumeShaders.push_back( contrib );
+    // Ask users for a new name
+    bool ok = true;
+    bool nameFound = false;
+    while( !nameFound && ok )
+    {
+        contrib.name = QInputDialog::getText( 0, "New Shader Name", "Shader Name", QLineEdit::Normal, contrib.name, &ok );
+        nameFound = !this->DoesShaderContributionTypeExist( contrib.name );
+        if( !nameFound )
+            QMessageBox::warning( 0, "Error", "Shader name already exists" );
+    }
+
+    int newIndex = -1;
+    if( nameFound )
+    {
+        newIndex = m_volumeShaders.size();
+        m_volumeShaders.push_back( contrib );
+    }
 
     emit Modified();
+
+    return newIndex;
 }
 
 void VolumeRenderingObject::SetShaderContributionType( int volumeIndex, int typeIndex )
@@ -1358,6 +1409,13 @@ void VolumeRenderingObject::InternalPostSceneRead()
             this->SetImage( (int)i, image );
         }
     }
+
+    if( m_isAnimating )
+    {
+        m_time->restart();
+        m_timerId = startTimer( 0 );
+    }
+
     emit Modified();
 }
 

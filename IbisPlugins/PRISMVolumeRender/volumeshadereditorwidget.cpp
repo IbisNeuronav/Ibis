@@ -74,7 +74,11 @@ bool VolumeShaderEditorWidget::IsShaderCustom()
 void VolumeShaderEditorWidget::DuplicateShader()
 {
     if( m_volumeIndex >= 0 )
-        m_volumeRenderer->DuplicateShaderContribType( m_volumeRenderer->GetShaderContributionType( m_volumeIndex ) );
+    {
+        int newShaderType = m_volumeRenderer->DuplicateShaderContribType( m_volumeRenderer->GetShaderContributionType( m_volumeIndex ) );
+        if( newShaderType != -1 )
+            m_volumeRenderer->SetShaderContributionType( m_volumeIndex, newShaderType );
+    }
     else if( m_volumeIndex == -1 )
         m_volumeRenderer->DuplicateRayInitShaderType();
     else

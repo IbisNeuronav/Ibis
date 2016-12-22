@@ -48,6 +48,8 @@ private slots:
     void on_useLinearSamplingCheckBox_toggled(bool checked);
     void on_addShaderContribTypeButton_clicked();
 
+    void on_removeVolumeShaderButton_clicked();
+
 private:
 
     VolumeRenderingObject * m_vr;
