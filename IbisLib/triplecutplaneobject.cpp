@@ -240,6 +240,7 @@ void TripleCutPlaneObject::RemoveImage( int imageID )
 
     if( Images.size() == 0 )
         ReleaseAllViews();
+    emit Modified();
 }
 
 void TripleCutPlaneObject::AdjustAllImages()
@@ -261,15 +262,15 @@ void TripleCutPlaneObject::AdjustAllImages()
             this->Planes[j]->AddInput( referenceObject->GetImage(), referenceObject->GetLut(), referenceObject->GetWorldTransform(), canInterpolate );
             this->Planes[j]->SetImageHidden( referenceObject->GetImage(), referenceObject->IsHidden() );
             ImageContainer::iterator it = Images.begin();
-            for(int l = 0 ; it != Images.end(); it++, l++)
+            for(uint l = 0; it != Images.end(); it++, l++)
             {
                 if ((*it) == refID)
                 {
                     this->Planes[j]->SetBlendingMode( 0, BlendingModes[ m_blendingModeIndices[ l ] ].mode );
                 }
             }
-            if( it == Images.end() )
 
+            // add remaining images
             for( uint i = 0; i < Images.size(); ++i )
             {
                 ImageObject * im = ImageObject::SafeDownCast( this->GetManager()->GetObjectByID( Images[i] ) );
@@ -349,7 +350,7 @@ void TripleCutPlaneObject::PreDisplaySetup()
     {
         this->Planes[i]->EnabledOn();
         this->Planes[i]->ActivateCursor( CursorVisible );
-        SetViewPlane( i, this->ViewPlanes[ i ] );
+//        SetViewPlane( i, this->ViewPlanes[ i ] );
     }
 }
 
@@ -626,7 +627,8 @@ void TripleCutPlaneObject::Setup3DRepresentation( View * view )
         int renIndex = this->Planes[i]->AddRenderer( view->GetRenderer());
         this->Planes[i]->SetPlaneMoveMethod( renIndex, vtkMultiImagePlaneWidget::Move3D );
         this->Planes[i]->SetPicker( this->Planes[i]->GetNumberOfRenderers() - 1, view->GetPicker() );
-        SetViewPlane( i, this->ViewPlanes[i] );
+        this->Planes[i]->Show( view->GetRenderer(), this->ViewPlanes[i] );
+//        SetViewPlane( i, this->ViewPlanes[i] );
     }
 }
 
