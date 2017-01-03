@@ -52,6 +52,8 @@ void VolumeRenderingSingleVolumeSettingsWidget::UpdateUi()
     Q_ASSERT( m_vr );
     Q_ASSERT( m_vr->GetManager() );
 
+    ui->volumeGroupBox->setTitle( QString("Volume %1").arg( m_volumeIndex ) );
+
     ui->enableVolumeCheckBox->blockSignals( true );
     ui->volumeComboBox->blockSignals( true );
 
@@ -95,6 +97,15 @@ void VolumeRenderingSingleVolumeSettingsWidget::UpdateUi()
     ui->enableVolumeCheckBox->blockSignals( false );
     ui->volumeComboBox->blockSignals( false );
 
+    // Disable interpolation and 16 bit volume checkboxes when there is no valid volume
+    ui->use16BitsVolumeCheckBox->blockSignals( true );
+    ui->use16BitsVolumeCheckBox->setEnabled( !none );
+    ui->use16BitsVolumeCheckBox->blockSignals( false );
+
+    ui->useLinearSamplingCheckBox->blockSignals( true );
+    ui->useLinearSamplingCheckBox->setEnabled( !none );
+    ui->useLinearSamplingCheckBox->blockSignals( false );
+
     // Update shader contribution combo box
     ui->contributionTypeComboBox->blockSignals( true );
     ui->contributionTypeComboBox->clear();
@@ -104,6 +115,11 @@ void VolumeRenderingSingleVolumeSettingsWidget::UpdateUi()
     }
     ui->contributionTypeComboBox->setCurrentIndex( m_vr->GetShaderContributionType( m_volumeIndex ) );
     ui->contributionTypeComboBox->blockSignals( false );
+
+    // disable remove shader button if shader type is not custom
+    int currentShaderType = m_vr->GetShaderContributionType( m_volumeIndex );
+    bool shaderIsCustom = m_vr->IsShaderTypeCustom( currentShaderType );
+    ui->removeVolumeShaderButton->setEnabled( shaderIsCustom );
 
     // make sure we repaint transfer func widgets
     ui->colorFunctionWidget->update();
@@ -177,7 +193,15 @@ void VolumeRenderingSingleVolumeSettingsWidget::on_addShaderContribTypeButton_cl
 {
     Q_ASSERT( m_vr );
     int contribType = m_vr->GetShaderContributionType( m_volumeIndex );
-    m_vr->DuplicateShaderContribType( contribType );
-    m_vr->SetShaderContributionType( m_volumeIndex, m_vr->GetNumberOfShaderContributionTypes() - 1 );
+    int newShaderType = m_vr->DuplicateShaderContribType( contribType );
+    if( newShaderType != -1 )
+        m_vr->SetShaderContributionType( m_volumeIndex, newShaderType );
     UpdateUi();
+}
+
+void VolumeRenderingSingleVolumeSettingsWidget::on_removeVolumeShaderButton_clicked()
+{
+    Q_ASSERT( m_vr );
+    int contribType = m_vr->GetShaderContributionType( m_volumeIndex );
+    m_vr->DeleteShaderContributionType( contribType );
 }
