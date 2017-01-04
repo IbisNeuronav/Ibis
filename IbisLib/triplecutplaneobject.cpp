@@ -261,12 +261,13 @@ void TripleCutPlaneObject::AdjustAllImages()
             this->Planes[j]->SetBoundingVolume( referenceObject->GetImage(), referenceObject->GetWorldTransform() );
             this->Planes[j]->AddInput( referenceObject->GetImage(), referenceObject->GetLut(), referenceObject->GetWorldTransform(), canInterpolate );
             this->Planes[j]->SetImageHidden( referenceObject->GetImage(), referenceObject->IsHidden() );
-            ImageContainer::iterator it = Images.begin();
-            for(uint l = 0; it != Images.end(); it++, l++)
+            for( uint i = 0; i < Images.size(); ++i )
             {
-                if ((*it) == refID)
+                ImageObject * im = ImageObject::SafeDownCast( this->GetManager()->GetObjectByID( Images[i] ) );
+                if( im->GetObjectID() == refID )
                 {
-                    this->Planes[j]->SetBlendingMode( 0, BlendingModes[ m_blendingModeIndices[ l ] ].mode );
+                    this->Planes[j]->SetBlendingMode( 0, BlendingModes[ m_blendingModeIndices[ i ] ].mode );
+                    break;
                 }
             }
 
@@ -276,7 +277,7 @@ void TripleCutPlaneObject::AdjustAllImages()
                 ImageObject * im = ImageObject::SafeDownCast( this->GetManager()->GetObjectByID( Images[i] ) );
                 if( im->GetObjectID() != refID )
                 {
-                    bool canInterpolate = im->IsLabelImage();
+                    bool canInterpolate = !im->IsLabelImage();
                     this->Planes[j]->AddInput( im->GetImage(), im->GetLut(), im->GetWorldTransform(), canInterpolate );
                     this->Planes[j]->SetImageHidden( im->GetImage(), im->IsHidden() );
                 }
