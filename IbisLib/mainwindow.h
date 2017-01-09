@@ -22,6 +22,7 @@ class QSpacerItem;
 class QProgressDialog;
 class QSplitter;
 class QScrollArea;
+class QSettings;
 class ImageObject;
 class SceneObject;
 class ImageMixerWidget;
@@ -41,6 +42,9 @@ public:
     virtual void Serialize( Serializer * ser );
     void AddBottomWidget( QWidget * w );
     void RemoveBottomWidget( QWidget * w );
+
+    void LoadSettings( QSettings & s );
+    void SaveSettings( QSettings & s );
 
 public slots:
 
@@ -125,6 +129,8 @@ protected:
     QVBoxLayout * m_leftLayout;
     QScrollArea * m_objectSettingsScrollArea;
     QSpacerItem * m_leftEndSpacer;
+    QSize m_mainWindowSize;
+    QPoint m_mainWindowPosition;
 
     typedef QMap< QAction*, QWidget* > PluginWidgetMap;
     PluginWidgetMap m_pluginWidgets;
