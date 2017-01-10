@@ -120,8 +120,8 @@ void TripleCutPlaneObject::PostSceneRead()
 
 void TripleCutPlaneObject::Setup( View * view )
 {
-    if( this->Images.size() == 0 )
-        return;
+//    if( this->Images.size() == 0 )
+//        return;
 
     SceneObject::Setup( view );
 
@@ -129,7 +129,7 @@ void TripleCutPlaneObject::Setup( View * view )
     {
     case SAGITTAL_VIEW_TYPE:
         this->Setup2DRepresentation( 0, view );
-        break;
+         break;
     case CORONAL_VIEW_TYPE:
         this->Setup2DRepresentation( 1, view );
         break;
@@ -138,7 +138,7 @@ void TripleCutPlaneObject::Setup( View * view )
         break;
     case THREED_VIEW_TYPE:
         this->Setup3DRepresentation( view );
-        break;
+         break;
     }
 }
 
@@ -307,8 +307,7 @@ void TripleCutPlaneObject::ObjectAddedSlot( int objectId )
     if( img )
     {
         this->AddImage( objectId );
-        this->GetManager()->SetupInAllViews( this );
-        this->PreDisplaySetup();
+        this->UpdateAllPlanesVisibility();
         connect( img, SIGNAL(Modified()), this, SLOT(MarkModified()) );
         connect( img, SIGNAL(LutChanged( int )), this, SLOT(UpdateLut( int )) );
         connect( img, SIGNAL(VisibilityChanged( int )), this, SLOT(SetImageHidden( int )) );
@@ -351,8 +350,8 @@ void TripleCutPlaneObject::PreDisplaySetup()
     {
         this->Planes[i]->EnabledOn();
         this->Planes[i]->ActivateCursor( CursorVisible );
-//        SetViewPlane( i, this->ViewPlanes[ i ] );
     }
+    this->UpdateAllPlanesVisibility();
 }
 
 void TripleCutPlaneObject::ResetPlanes()
@@ -628,8 +627,6 @@ void TripleCutPlaneObject::Setup3DRepresentation( View * view )
         int renIndex = this->Planes[i]->AddRenderer( view->GetRenderer());
         this->Planes[i]->SetPlaneMoveMethod( renIndex, vtkMultiImagePlaneWidget::Move3D );
         this->Planes[i]->SetPicker( this->Planes[i]->GetNumberOfRenderers() - 1, view->GetPicker() );
-        this->Planes[i]->Show( view->GetRenderer(), this->ViewPlanes[i] );
-//        SetViewPlane( i, this->ViewPlanes[i] );
     }
 }
 
@@ -711,3 +708,57 @@ void TripleCutPlaneObject::UpdateOtherPlanesPosition( int planeIndex )
     }
 }
 
+void TripleCutPlaneObject::UpdateAllPlanesVisibility( )
+{
+    for( ViewContainer::iterator it = Views.begin(); it != Views.end(); ++it )
+    {
+        this->UpdatePlanesVisibility( *it );
+    }
+}
+
+void TripleCutPlaneObject::UpdatePlanesVisibility( View *view )
+{
+    switch( view->GetType() )
+    {
+    case SAGITTAL_VIEW_TYPE:
+        if( Images.size() > 0 )
+        {
+            this->Planes[0]->Show( view->GetRenderer(), 1 );
+        }
+        else
+            this->Planes[0]->Show( view->GetRenderer(), 0 );
+        break;
+    case CORONAL_VIEW_TYPE:
+        if( Images.size() > 0 )
+        {
+            this->Planes[1]->Show( view->GetRenderer(), 1 );
+        }
+        else
+            this->Planes[1]->Show( view->GetRenderer(), 0 );
+        break;
+    case TRANSVERSE_VIEW_TYPE:
+        if( Images.size() > 0 )
+        {
+            this->Planes[2]->Show( view->GetRenderer(), 1 );
+        }
+        else
+            this->Planes[2]->Show( view->GetRenderer(), 0 );
+        break;
+    case THREED_VIEW_TYPE:
+        if( Images.size() > 0 )
+        {
+            for( int i = 0; i < 3; i++ )
+            {
+                SetViewPlane( i, this->ViewPlanes[i] );
+            }
+        }
+        else
+        {
+            for( int i = 0; i < 3; i++ )
+            {
+                SetViewPlane( i, 0 );
+            }
+        }
+        break;
+    }
+}
