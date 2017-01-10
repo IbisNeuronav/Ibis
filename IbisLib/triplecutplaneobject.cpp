@@ -120,9 +120,6 @@ void TripleCutPlaneObject::PostSceneRead()
 
 void TripleCutPlaneObject::Setup( View * view )
 {
-//    if( this->Images.size() == 0 )
-//        return;
-
     SceneObject::Setup( view );
 
     switch( view->GetType() )
@@ -216,6 +213,7 @@ void TripleCutPlaneObject::AddImage( int imageID )
             this->Planes[i]->SetBoundingVolume( im->GetImage(), im->GetWorldTransform() );
         }
     }
+    this->UpdateAllPlanesVisibility();
 }
 
 void TripleCutPlaneObject::RemoveImage( int imageID )
@@ -307,7 +305,6 @@ void TripleCutPlaneObject::ObjectAddedSlot( int objectId )
     if( img )
     {
         this->AddImage( objectId );
-        this->UpdateAllPlanesVisibility();
         connect( img, SIGNAL(Modified()), this, SLOT(MarkModified()) );
         connect( img, SIGNAL(LutChanged( int )), this, SLOT(UpdateLut( int )) );
         connect( img, SIGNAL(VisibilityChanged( int )), this, SLOT(SetImageHidden( int )) );
