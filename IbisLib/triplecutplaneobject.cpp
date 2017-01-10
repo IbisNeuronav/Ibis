@@ -239,7 +239,7 @@ void TripleCutPlaneObject::RemoveImage( int imageID )
     this->AdjustAllImages();
 
     if( Images.size() == 0 )
-        ReleaseAllViews();
+        UpdateAllPlanesVisibility();
     emit Modified();
 }
 
