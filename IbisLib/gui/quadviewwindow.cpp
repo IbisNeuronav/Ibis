@@ -106,7 +106,7 @@ QuadViewWindow::QuadViewWindow( QWidget* parent, Qt::WindowFlags fl ) : QWidget(
     resize( QSize(1000, 800).expandedTo(minimumSizeHint()) );
 
      m_viewExpanded = false;
-     m_currentViewWindow = THREED_VIEW_TYPE;
+     m_currentViewWindow = 1; // upper right, 3D window;
 }
 
 QAbstractButton * QuadViewWindow::CreateToolButton( QString name, QString iconPath, QString toolTip, const char * callbackSlot )
@@ -420,8 +420,6 @@ void QuadViewWindow::SetExpandedView( bool on )
 
 void QuadViewWindow::SetCurrentViewWindow(int index )
 {
-    if( m_currentViewWindow == index )
-        return;
     m_currentViewWindow = index;
     for( int i = 0; i < 4; ++i )
     {
