@@ -22,6 +22,7 @@ class QAbstractButton;
 class QSpacerItem;
 class QSplitter;
 class QLabel;
+class QSettings;
 class QVTKWidget;
 class vtkQtRenderWindow;
 class QVTKWidget2;
@@ -43,6 +44,9 @@ public:
 
     virtual void Serialize( Serializer * ser );
     virtual void SetSceneManager( SceneManager * man );
+
+    void LoadSettings( QSettings & s );
+    void SaveSettings( QSettings & s );
 
     void AddBottomWidget( QWidget * w );
     void RemoveBottomWidget( QWidget * w );

@@ -43,6 +43,9 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QPluginLoader>
 #include <QScrollArea>
 #include <QMimeData>
+#include <QSettings>
+#include <QPoint>
+
 
 ObjectSerializationMacro( MainWindow );
 
@@ -202,18 +205,10 @@ MainWindow::MainWindow( QWidget * parent )
     // -----------------------------------------
     // Get window settings from the application
     // -----------------------------------------
-    ApplicationSettings * settings = Application::GetInstance().GetSettings();
-    resize( settings->MainWindowSize );
-    move( settings->MainWindowPosition );
-    m_leftPanelSize = settings->MainWindowLeftPanelSize;
-    m_rightPanelSize = settings->MainWindowRightPanelSize;
     Application::GetSceneManager()->UpdateBackgroundColor();
 
     UpdateMainSplitter();
     Application::GetInstance().SetMainWindow(this);
-
-    m_4Views->SetCurrentViewWindow( settings->CurrentViewWindow );
-    m_4Views->SetExpandedView( settings->ExpandedView );
 
     // -----------------------------------------
     // Create UI elements from the plugins
@@ -794,12 +789,8 @@ void MainWindow::closeEvent( QCloseEvent * event )
     m_windowClosing = true;
 
     // backup window settings
-    ApplicationSettings * s = Application::GetInstance().GetSettings();
-    s->MainWindowPosition = pos();
-    s->MainWindowSize = size();
-
-    s->MainWindowLeftPanelSize = m_leftPanelSize;
-    s->MainWindowRightPanelSize = m_rightPanelSize;
+    m_mainWindowSize = size();
+    m_mainWindowPosition = pos();
 
     // Tell all plugins their window/tab is about to close
     QList<ToolPluginInterface*> allTools;
@@ -894,4 +885,30 @@ void MainWindow::RemoveBottomWidget( QWidget * w )
 void MainWindow::Serialize( Serializer * ser )
 {
     m_4Views->Serialize( ser );
+}
+
+void MainWindow::LoadSettings( QSettings & s )
+{
+    s.beginGroup( "MainWindow" );
+    QRect mainWindowRect( 0, 0, 800, 600 );
+    m_mainWindowPosition = s.value( "MainWindow_pos", mainWindowRect.topLeft() ).toPoint();
+    m_mainWindowSize = s.value( "MainWindow_size", mainWindowRect.size() ).toSize();
+    m_leftPanelSize = s.value( "MainWindowLeftPanelSize", 150 ).toInt();
+    m_rightPanelSize = s.value( "MainWindowRightPanelSize", 150 ).toInt();
+    m_4Views->LoadSettings( s );
+    s.endGroup();
+    resize( m_mainWindowSize );
+    move( m_mainWindowPosition );
+    UpdateMainSplitter();
+}
+
+void MainWindow::SaveSettings( QSettings & s )
+{
+    s.beginGroup( "MainWindow" );
+    s.setValue( "MainWindow_pos", m_mainWindowPosition );
+    s.setValue( "MainWindow_size", m_mainWindowSize );
+    s.setValue( "MainWindowLeftPanelSize", m_leftPanelSize );
+    s.setValue( "MainWindowRightPanelSize", m_rightPanelSize );
+    m_4Views->SaveSettings( s );
+    s.endGroup();
 }
