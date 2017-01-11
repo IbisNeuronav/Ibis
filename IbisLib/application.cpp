@@ -189,6 +189,28 @@ void Application::Init( bool viewerOnly )
 
 Application::~Application()
 {
+    if( !m_viewerOnly )
+    {
+        // Stop everybody to make sure the order of deletion of objects doesn't matter
+        foreach( HardwareModule * module, m_hardwareModules )
+            module->ShutDown();
+         m_updateManager->Stop();
+     }
+
+    // Cleanup
+    if( m_updateManager )
+        m_updateManager->Delete();
+
+    m_sceneManager->Destroy();
+
+    delete m_lookupTableManager;
+
+    QList<IbisPlugin*> allPlugins;
+    this->GetAllPlugins( allPlugins );
+    for( int i = 0; i < allPlugins.size(); ++i )
+    {
+        allPlugins[i]->Delete(); // this is called because otherwise plugins destructors are never called, Qt bug. The codde has to be revised once Qt is fixed.
+    }
 }
 
 void Application::SaveSettings()
@@ -209,21 +231,6 @@ void Application::SaveSettings()
     m_settings.TripleCutPlaneDisplayInterpolationType = m_sceneManager->GetDisplayInterpolationType();
     m_settings.TripleCutPlaneResliceInterpolationType = m_sceneManager->GetResliceInterpolationType();
 
-    if( !m_viewerOnly )
-    {
-        // Stop everybody to make sure the order of deletion of objects doesn't matter
-        foreach( HardwareModule * module, m_hardwareModules )
-            module->ShutDown();
-         m_updateManager->Stop();
-     }
-
-    // Cleanup
-    if( m_updateManager )
-        m_updateManager->Delete();
-
-    m_sceneManager->Destroy();
-
-    delete m_lookupTableManager;
 
     // Save settings
     QSettings settings( m_appOrganisation, m_appName );
@@ -237,7 +244,6 @@ void Application::SaveSettings()
     for( int i = 0; i < allPlugins.size(); ++i )
     {
         allPlugins[i]->BaseSaveSettings( settings );
-        allPlugins[i]->Delete(); // this is called because otherwise plugins destructors are never called, Qt bug. The codde has to be revised once Qt is fixed.
     }
     settings.endGroup();
 }
