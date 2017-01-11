@@ -126,7 +126,7 @@ void TripleCutPlaneObject::Setup( View * view )
     {
     case SAGITTAL_VIEW_TYPE:
         this->Setup2DRepresentation( 0, view );
-         break;
+        break;
     case CORONAL_VIEW_TYPE:
         this->Setup2DRepresentation( 1, view );
         break;
@@ -135,7 +135,7 @@ void TripleCutPlaneObject::Setup( View * view )
         break;
     case THREED_VIEW_TYPE:
         this->Setup3DRepresentation( view );
-         break;
+        break;
     }
 }
 
