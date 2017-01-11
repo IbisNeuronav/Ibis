@@ -189,6 +189,10 @@ void Application::Init( bool viewerOnly )
 
 Application::~Application()
 {
+}
+
+void Application::SaveSettings()
+{
     // Update application settings
     double * backgroundColor = m_sceneManager->GetViewBackgroundColor();
     m_settings.ViewBackgroundColor = QColor( int(backgroundColor[0] * 255), int(backgroundColor[1] * 255), int(backgroundColor[2] * 255) );

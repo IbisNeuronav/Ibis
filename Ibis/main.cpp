@@ -59,7 +59,8 @@ int main( int argc, char** argv )
     mw->setAttribute( Qt::WA_DeleteOnClose );
     mw->show();
     a.connect( &a, SIGNAL( lastWindowClosed() ), &a, SLOT( quit() ) );
-	a.installEventFilter( mw );
+    a.connect( &a, SIGNAL( aboutToQuit() ), &Application::GetInstance(), SLOT( SaveSettings() ) );
+    a.installEventFilter( mw );
 
     // Will cause OnStartMainLoop slot to be called after main loop is started
     QTimer::singleShot( 0, mw, SLOT(OnStartMainLoop()) );
