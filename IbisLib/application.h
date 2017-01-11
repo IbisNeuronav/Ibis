@@ -52,12 +52,6 @@ struct ApplicationSettings
     void LoadSettings( QSettings & settings );
     void SaveSettings( QSettings & settings );
     QString WorkingDirectory;
-    QSize MainWindowSize;
-    QPoint MainWindowPosition;
-    int MainWindowLeftPanelSize;
-    int MainWindowRightPanelSize;
-    int CurrentViewWindow;
-    bool ExpandedView;
     QColor ViewBackgroundColor;
     QColor CutPlanesCursorColor;
     InteractorStyle InteractorStyle3D;
@@ -94,7 +88,7 @@ public:
     static void DeleteInstance();
     static Application & GetInstance();
 
-    void SetMainWindow( MainWindow * mw ) { m_mainWindow = mw; }
+    void SetMainWindow( MainWindow * mw );
     MainWindow * GetMainWindow() { return m_mainWindow; }
     void AddBottomWidget( QWidget * w );
     void RemoveBottomWidget( QWidget * w );

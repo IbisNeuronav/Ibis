@@ -22,6 +22,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QFont>
 #include "QVTKWidget.h"
 #include <QApplication>
+#include <QSettings>
 #include "vtkqtrenderwindow.h"
 #include "vtkRenderer.h"
 #include "vtkRenderWindowInteractor.h"
@@ -105,7 +106,7 @@ QuadViewWindow::QuadViewWindow( QWidget* parent, Qt::WindowFlags fl ) : QWidget(
     resize( QSize(1000, 800).expandedTo(minimumSizeHint()) );
 
      m_viewExpanded = false;
-     m_currentViewWindow = THREED_VIEW_TYPE;
+     m_currentViewWindow = 1; // upper right, 3D window;
 }
 
 QAbstractButton * QuadViewWindow::CreateToolButton( QString name, QString iconPath, QString toolTip, const char * callbackSlot )
@@ -328,8 +329,6 @@ void QuadViewWindow::ExpandViewButtonClicked()
         }
         m_viewExpanded = true;
     }
-    ApplicationSettings * s = Application::GetInstance().GetSettings();
-    s->ExpandedView = m_viewExpanded;
 }
 
 void QuadViewWindow::ResetPlanesButtonClicked()
@@ -417,14 +416,10 @@ void QuadViewWindow::SetExpandedView( bool on )
     {
         ExpandViewButtonClicked();
     }
-    ApplicationSettings * s = Application::GetInstance().GetSettings();
-    s->ExpandedView = m_viewExpanded;
 }
 
 void QuadViewWindow::SetCurrentViewWindow(int index )
 {
-    if( m_currentViewWindow == index )
-        return;
     m_currentViewWindow = index;
     for( int i = 0; i < 4; ++i )
     {
@@ -437,8 +432,6 @@ void QuadViewWindow::SetCurrentViewWindow(int index )
             m_vtkWindowFrames[i]->setStyleSheet( "" );
         }
     }
-    ApplicationSettings * s = Application::GetInstance().GetSettings();
-    s->CurrentViewWindow = m_currentViewWindow;
 }
 
 void QuadViewWindow::Serialize( Serializer * ser )
@@ -501,4 +494,18 @@ void QuadViewWindow::PlaceCornerText()
     ca->SetMaximumFontSize(20);
     renderer->AddViewProp( ca );
     ca->Delete();
+}
+
+void QuadViewWindow::LoadSettings( QSettings & s )
+{
+    int curWin = s.value( "CurrentViewWindow", 1 ).toInt();
+    bool expView = s.value( "ExpandedView", false ).toBool();
+    this->SetCurrentViewWindow( curWin );
+    this->SetExpandedView(  expView );
+}
+
+void QuadViewWindow::SaveSettings( QSettings & s )
+{
+    s.setValue( "CurrentViewWindow", m_currentViewWindow );
+    s.setValue( "ExpandedView", m_viewExpanded );
 }

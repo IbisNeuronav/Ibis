@@ -60,12 +60,6 @@ ApplicationSettings::~ApplicationSettings()
 void ApplicationSettings::LoadSettings( QSettings & settings )
 {
     QRect mainWindowRect( 0, 0, 800, 600 );
-    MainWindowPosition = settings.value( "MainWindow_pos", mainWindowRect.topLeft() ).toPoint();
-    MainWindowSize = settings.value( "MainWindow_size", mainWindowRect.size() ).toSize();
-    MainWindowLeftPanelSize = settings.value( "MainWindowLeftPanelSize", 150 ).toInt();
-    MainWindowRightPanelSize = settings.value( "MainWindowRightPanelSize", 150 ).toInt();
-    CurrentViewWindow = settings.value( "CurrentViewWindow", 1 ).toInt();
-    ExpandedView = settings.value( "ExpandedView", false ).toBool();
     QString workDir(QDir::homePath());
     workDir.append(IBIS_CONFIGURATION_SUBDIRECTORY);
     WorkingDirectory = settings.value( "WorkingDirectory", workDir).toString();
@@ -97,12 +91,6 @@ void ApplicationSettings::LoadSettings( QSettings & settings )
 
 void ApplicationSettings::SaveSettings( QSettings & settings )
 {
-    settings.setValue( "MainWindow_pos", MainWindowPosition );
-    settings.setValue( "MainWindow_size", MainWindowSize );
-    settings.setValue( "MainWindowLeftPanelSize", MainWindowLeftPanelSize );
-    settings.setValue( "MainWindowRightPanelSize", MainWindowRightPanelSize );
-    settings.setValue( "CurrentViewWindow", CurrentViewWindow );
-    settings.setValue( "ExpandedView", ExpandedView );
     settings.setValue( "WorkingDirectory", WorkingDirectory );
 
     // Should be able to load and save a QColor directly, but doesn't work well on linux: to check: anything to do with the fact that destructor can be called after QApplication's destructor?
@@ -139,6 +127,13 @@ Application::Application( )
     m_sceneManager = 0;
     m_updateManager = 0;
     m_lookupTableManager = 0;
+}
+
+void Application::SetMainWindow( MainWindow * mw )
+{
+    m_mainWindow = mw;
+    QSettings settings( m_appOrganisation, m_appName );
+    m_mainWindow->LoadSettings( settings );
 }
 
 void Application::Init( bool viewerOnly )
@@ -229,6 +224,7 @@ Application::~Application()
     // Save settings
     QSettings settings( m_appOrganisation, m_appName );
     m_settings.SaveSettings( settings );
+    m_mainWindow->SaveSettings( settings );
 
     // Save plugins settings
     settings.beginGroup("Plugins");
