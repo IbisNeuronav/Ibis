@@ -120,9 +120,6 @@ void TripleCutPlaneObject::PostSceneRead()
 
 void TripleCutPlaneObject::Setup( View * view )
 {
-    if( this->Images.size() == 0 )
-        return;
-
     SceneObject::Setup( view );
 
     switch( view->GetType() )
@@ -207,15 +204,16 @@ void TripleCutPlaneObject::AddImage( int imageID )
 
     for( int i = 0; i < 3; ++i )
     {
-        if( refImage )
-        {
-            this->Planes[i]->SetBoundingVolume( im->GetImage(), im->GetWorldTransform() );
-        }
         bool canInterpolate = !im->IsLabelImage();
         this->Planes[i]->AddInput( im->GetImage(), im->GetLut(), im->GetWorldTransform(), canInterpolate );
         this->Planes[i]->SetImageHidden( im->GetImage(), im->IsHidden() );
         this->Planes[i]->SetBlendingMode( Images.size() - 1, BlendingModes[ m_blendingModeIndices[ Images.size() - 1 ] ].mode );
+        if( refImage )
+        {
+            this->Planes[i]->SetBoundingVolume( im->GetImage(), im->GetWorldTransform() );
+        }
     }
+    this->UpdateAllPlanesVisibility();
 }
 
 void TripleCutPlaneObject::RemoveImage( int imageID )
@@ -239,7 +237,8 @@ void TripleCutPlaneObject::RemoveImage( int imageID )
     this->AdjustAllImages();
 
     if( Images.size() == 0 )
-        ReleaseAllViews();
+        UpdateAllPlanesVisibility();
+    emit Modified();
 }
 
 void TripleCutPlaneObject::AdjustAllImages()
@@ -260,22 +259,23 @@ void TripleCutPlaneObject::AdjustAllImages()
             this->Planes[j]->SetBoundingVolume( referenceObject->GetImage(), referenceObject->GetWorldTransform() );
             this->Planes[j]->AddInput( referenceObject->GetImage(), referenceObject->GetLut(), referenceObject->GetWorldTransform(), canInterpolate );
             this->Planes[j]->SetImageHidden( referenceObject->GetImage(), referenceObject->IsHidden() );
-            ImageContainer::iterator it = Images.begin();
-            for(int l = 0 ; it != Images.end(); it++, l++)
+            for( uint i = 0; i < Images.size(); ++i )
             {
-                if ((*it) == refID)
+                ImageObject * im = ImageObject::SafeDownCast( this->GetManager()->GetObjectByID( Images[i] ) );
+                if( im->GetObjectID() == refID )
                 {
-                    this->Planes[j]->SetBlendingMode( 0, BlendingModes[ m_blendingModeIndices[ l ] ].mode );
+                    this->Planes[j]->SetBlendingMode( 0, BlendingModes[ m_blendingModeIndices[ i ] ].mode );
+                    break;
                 }
             }
-            if( it == Images.end() )
 
+            // add remaining images
             for( uint i = 0; i < Images.size(); ++i )
             {
                 ImageObject * im = ImageObject::SafeDownCast( this->GetManager()->GetObjectByID( Images[i] ) );
                 if( im->GetObjectID() != refID )
                 {
-                    bool canInterpolate = im->IsLabelImage();
+                    bool canInterpolate = !im->IsLabelImage();
                     this->Planes[j]->AddInput( im->GetImage(), im->GetLut(), im->GetWorldTransform(), canInterpolate );
                     this->Planes[j]->SetImageHidden( im->GetImage(), im->IsHidden() );
                 }
@@ -305,8 +305,6 @@ void TripleCutPlaneObject::ObjectAddedSlot( int objectId )
     if( img )
     {
         this->AddImage( objectId );
-        this->GetManager()->SetupInAllViews( this );
-        this->PreDisplaySetup();
         connect( img, SIGNAL(Modified()), this, SLOT(MarkModified()) );
         connect( img, SIGNAL(LutChanged( int )), this, SLOT(UpdateLut( int )) );
         connect( img, SIGNAL(VisibilityChanged( int )), this, SLOT(SetImageHidden( int )) );
@@ -349,8 +347,8 @@ void TripleCutPlaneObject::PreDisplaySetup()
     {
         this->Planes[i]->EnabledOn();
         this->Planes[i]->ActivateCursor( CursorVisible );
-        SetViewPlane( i, this->ViewPlanes[ i ] );
     }
+    this->UpdateAllPlanesVisibility();
 }
 
 void TripleCutPlaneObject::ResetPlanes()
@@ -626,7 +624,6 @@ void TripleCutPlaneObject::Setup3DRepresentation( View * view )
         int renIndex = this->Planes[i]->AddRenderer( view->GetRenderer());
         this->Planes[i]->SetPlaneMoveMethod( renIndex, vtkMultiImagePlaneWidget::Move3D );
         this->Planes[i]->SetPicker( this->Planes[i]->GetNumberOfRenderers() - 1, view->GetPicker() );
-        SetViewPlane( i, this->ViewPlanes[i] );
     }
 }
 
@@ -708,3 +705,57 @@ void TripleCutPlaneObject::UpdateOtherPlanesPosition( int planeIndex )
     }
 }
 
+void TripleCutPlaneObject::UpdateAllPlanesVisibility( )
+{
+    for( ViewContainer::iterator it = Views.begin(); it != Views.end(); ++it )
+    {
+        this->UpdatePlanesVisibility( *it );
+    }
+}
+
+void TripleCutPlaneObject::UpdatePlanesVisibility( View *view )
+{
+    switch( view->GetType() )
+    {
+    case SAGITTAL_VIEW_TYPE:
+        if( Images.size() > 0 )
+        {
+            this->Planes[0]->Show( view->GetRenderer(), 1 );
+        }
+        else
+            this->Planes[0]->Show( view->GetRenderer(), 0 );
+        break;
+    case CORONAL_VIEW_TYPE:
+        if( Images.size() > 0 )
+        {
+            this->Planes[1]->Show( view->GetRenderer(), 1 );
+        }
+        else
+            this->Planes[1]->Show( view->GetRenderer(), 0 );
+        break;
+    case TRANSVERSE_VIEW_TYPE:
+        if( Images.size() > 0 )
+        {
+            this->Planes[2]->Show( view->GetRenderer(), 1 );
+        }
+        else
+            this->Planes[2]->Show( view->GetRenderer(), 0 );
+        break;
+    case THREED_VIEW_TYPE:
+        if( Images.size() > 0 )
+        {
+            for( int i = 0; i < 3; i++ )
+            {
+                SetViewPlane( i, this->ViewPlanes[i] );
+            }
+        }
+        else
+        {
+            for( int i = 0; i < 3; i++ )
+            {
+                SetViewPlane( i, 0 );
+            }
+        }
+        break;
+    }
+}

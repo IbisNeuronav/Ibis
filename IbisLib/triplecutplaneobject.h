@@ -149,6 +149,10 @@ protected:
     //used only to set planes position in PostRead()
     double m_planePosition[3];
 
+private:
+    void UpdateAllPlanesVisibility();
+    void UpdatePlanesVisibility(View *view );
+
 };
 
 ObjectSerializationHeaderMacro( TripleCutPlaneObject );

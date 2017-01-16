@@ -788,10 +788,6 @@ void MainWindow::closeEvent( QCloseEvent * event )
 {
     m_windowClosing = true;
 
-    // backup window settings
-    m_mainWindowSize = size();
-    m_mainWindowPosition = pos();
-
     // Tell all plugins their window/tab is about to close
     QList<ToolPluginInterface*> allTools;
     Application::GetInstance().GetAllToolPlugins( allTools );
@@ -891,22 +887,22 @@ void MainWindow::LoadSettings( QSettings & s )
 {
     s.beginGroup( "MainWindow" );
     QRect mainWindowRect( 0, 0, 800, 600 );
-    m_mainWindowPosition = s.value( "MainWindow_pos", mainWindowRect.topLeft() ).toPoint();
-    m_mainWindowSize = s.value( "MainWindow_size", mainWindowRect.size() ).toSize();
+    QPoint mainWindowPosition = s.value( "MainWindow_pos", mainWindowRect.topLeft() ).toPoint();
+    QSize mainWindowSize = s.value( "MainWindow_size", mainWindowRect.size() ).toSize();
     m_leftPanelSize = s.value( "MainWindowLeftPanelSize", 150 ).toInt();
     m_rightPanelSize = s.value( "MainWindowRightPanelSize", 150 ).toInt();
     m_4Views->LoadSettings( s );
     s.endGroup();
-    resize( m_mainWindowSize );
-    move( m_mainWindowPosition );
+    resize( mainWindowSize );
+    move( mainWindowPosition );
     UpdateMainSplitter();
 }
 
 void MainWindow::SaveSettings( QSettings & s )
 {
     s.beginGroup( "MainWindow" );
-    s.setValue( "MainWindow_pos", m_mainWindowPosition );
-    s.setValue( "MainWindow_size", m_mainWindowSize );
+    s.setValue( "MainWindow_pos", pos() );
+    s.setValue( "MainWindow_size", size() );
     s.setValue( "MainWindowLeftPanelSize", m_leftPanelSize );
     s.setValue( "MainWindowRightPanelSize", m_rightPanelSize );
     m_4Views->SaveSettings( s );

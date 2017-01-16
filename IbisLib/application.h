@@ -167,6 +167,7 @@ public:
 
 public slots:
     void UpdateProgress( QProgressDialog*, int current );
+    void SaveSettings();
 
 private slots:
 
