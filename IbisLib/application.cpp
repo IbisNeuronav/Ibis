@@ -189,22 +189,6 @@ void Application::Init( bool viewerOnly )
 
 Application::~Application()
 {
-    // Update application settings
-    double * backgroundColor = m_sceneManager->GetViewBackgroundColor();
-    m_settings.ViewBackgroundColor = QColor( int(backgroundColor[0] * 255), int(backgroundColor[1] * 255), int(backgroundColor[2] * 255) );
-    WorldObject * world = WorldObject::SafeDownCast(m_sceneManager->GetSceneRoot());
-    m_settings.CutPlanesCursorColor =  world->GetCursorColor();
-    m_settings.InteractorStyle3D = m_sceneManager->Get3DInteractorStyle();
-    m_settings.CameraViewAngle3D = m_sceneManager->Get3DCameraViewAngle();
-    m_settings.ShowCursor = m_sceneManager->GetCursorVisible();
-    m_settings.ShowAxes = !m_sceneManager->GetAxesObject()->IsHidden();
-    m_settings.ViewFollowsReference = m_sceneManager->Is3DViewFollowingReferenceVolume();
-    m_settings.ShowXPlane = m_sceneManager->IsPlaneVisible( 0 );
-    m_settings.ShowYPlane = m_sceneManager->IsPlaneVisible( 1 );
-    m_settings.ShowZPlane = m_sceneManager->IsPlaneVisible( 2 );
-    m_settings.TripleCutPlaneDisplayInterpolationType = m_sceneManager->GetDisplayInterpolationType();
-    m_settings.TripleCutPlaneResliceInterpolationType = m_sceneManager->GetResliceInterpolationType();
-
     if( !m_viewerOnly )
     {
         // Stop everybody to make sure the order of deletion of objects doesn't matter
@@ -221,6 +205,33 @@ Application::~Application()
 
     delete m_lookupTableManager;
 
+    QList<IbisPlugin*> allPlugins;
+    this->GetAllPlugins( allPlugins );
+    for( int i = 0; i < allPlugins.size(); ++i )
+    {
+        allPlugins[i]->Delete(); // this is called because otherwise plugins destructors are never called, Qt bug. The codde has to be revised once Qt is fixed.
+    }
+}
+
+void Application::SaveSettings()
+{
+    // Update application settings
+    double * backgroundColor = m_sceneManager->GetViewBackgroundColor();
+    m_settings.ViewBackgroundColor = QColor( int(backgroundColor[0] * 255), int(backgroundColor[1] * 255), int(backgroundColor[2] * 255) );
+    WorldObject * world = WorldObject::SafeDownCast(m_sceneManager->GetSceneRoot());
+    m_settings.CutPlanesCursorColor =  world->GetCursorColor();
+    m_settings.InteractorStyle3D = m_sceneManager->Get3DInteractorStyle();
+    m_settings.CameraViewAngle3D = m_sceneManager->Get3DCameraViewAngle();
+    m_settings.ShowCursor = m_sceneManager->GetCursorVisible();
+    m_settings.ShowAxes = !m_sceneManager->GetAxesObject()->IsHidden();
+    m_settings.ViewFollowsReference = m_sceneManager->Is3DViewFollowingReferenceVolume();
+    m_settings.ShowXPlane = m_sceneManager->IsPlaneVisible( 0 );
+    m_settings.ShowYPlane = m_sceneManager->IsPlaneVisible( 1 );
+    m_settings.ShowZPlane = m_sceneManager->IsPlaneVisible( 2 );
+    m_settings.TripleCutPlaneDisplayInterpolationType = m_sceneManager->GetDisplayInterpolationType();
+    m_settings.TripleCutPlaneResliceInterpolationType = m_sceneManager->GetResliceInterpolationType();
+
+
     // Save settings
     QSettings settings( m_appOrganisation, m_appName );
     m_settings.SaveSettings( settings );
@@ -233,7 +244,6 @@ Application::~Application()
     for( int i = 0; i < allPlugins.size(); ++i )
     {
         allPlugins[i]->BaseSaveSettings( settings );
-        allPlugins[i]->Delete(); // this is called because otherwise plugins destructors are never called, Qt bug. The codde has to be revised once Qt is fixed.
     }
     settings.endGroup();
 }
