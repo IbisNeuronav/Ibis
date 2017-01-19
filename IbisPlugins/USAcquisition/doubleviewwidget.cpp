@@ -173,7 +173,7 @@ void DoubleViewWidget::UpdateUi()
     else
     {
         ui->maskCheckBox->setEnabled( true );
-        ui->blendCheckBox->setEnabled( true );
+        ui->blendCheckBox->setEnabled( isNotEmptyAcquisition );
         ui->m_liveCheckBox->blockSignals( true );
         ui->m_liveCheckBox->setChecked( false );
         ui->m_liveCheckBox->setEnabled( canCaptureTrackedVideo && true );
