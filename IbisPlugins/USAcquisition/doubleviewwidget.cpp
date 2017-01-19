@@ -173,7 +173,7 @@ void DoubleViewWidget::UpdateUi()
     else
     {
         ui->maskCheckBox->setEnabled( true );
-        ui->blendCheckBox->setEnabled( isNotEmptyAcquisition );
+        ui->blendCheckBox->setEnabled( true );
         ui->m_liveCheckBox->blockSignals( true );
         ui->m_liveCheckBox->setChecked( false );
         ui->m_liveCheckBox->setEnabled( canCaptureTrackedVideo && true );
@@ -393,7 +393,11 @@ void DoubleViewWidget::UpdatePipelineConnections()
     else
         m_vol2Slice->VisibilityOff();
     m_vol2Slice->GetProperty()->SetOpacity( m_pluginInterface->GetBlendingVolumesPercent() );
-    m_usSlice->SetVisibility( m_pluginInterface->IsBlending() ? 1 : 0 );
+
+    if( m_pluginInterface->GetCurrentAcquisition() )
+        m_usSlice->SetVisibility( m_pluginInterface->IsBlending() ? 1 : 0 );
+    else
+        m_usSlice->VisibilityOff();
     m_usSlice->GetProperty()->SetOpacity( m_pluginInterface->GetBlendingPercent() );
 }
 
