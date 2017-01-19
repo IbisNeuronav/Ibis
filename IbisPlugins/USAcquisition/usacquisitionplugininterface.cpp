@@ -92,6 +92,8 @@ bool USAcquisitionPluginInterface::WidgetAboutToClose()
         this->SetLive(false);
     }
     m_interfaceWidget = 0;
+    m_currentVolumeObjectId = SceneObject::InvalidObjectId;
+    m_addedVolumeObjectId = SceneObject::InvalidObjectId;
     return true;
 }
 
