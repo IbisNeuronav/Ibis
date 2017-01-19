@@ -286,7 +286,7 @@ void UsProbeObject::SetCurrentCalibrationMatrixName( QString name )
 
 QString UsProbeObject::GetCurrentCalibrationMatrixName()
 {
-    if( m_currentCalibrationMatrixIndex > 0 )
+    if( m_currentCalibrationMatrixIndex >= 0 )
         return m_calibrationMatrices[ m_currentCalibrationMatrixIndex ].name;
     return QString("NONE");
 }
