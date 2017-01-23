@@ -92,6 +92,8 @@ bool USAcquisitionPluginInterface::WidgetAboutToClose()
         this->SetLive(false);
     }
     m_interfaceWidget = 0;
+    m_isBlending = false;
+    m_isBlendingVolumes = false;
     return true;
 }
 
@@ -162,11 +164,12 @@ ImageObject * USAcquisitionPluginInterface::GetAddedVolume()
 void USAcquisitionPluginInterface::ValidateCurrentVolume()
 {
     int initialVolumeId = m_currentVolumeObjectId;
-    int newVolumeId = m_currentVolumeObjectId;
-    SceneManager * man = GetSceneManager();
 
+    SceneManager * man = GetSceneManager();
     if( !man->GetObjectByID( m_currentVolumeObjectId ) )
-        newVolumeId = SceneObject::InvalidObjectId;
+        m_currentVolumeObjectId = SceneObject::InvalidObjectId;
+
+    int newVolumeId = m_currentVolumeObjectId;
     if( newVolumeId == SceneObject::InvalidObjectId )
     {
         QList<ImageObject*> images;
@@ -185,12 +188,12 @@ void USAcquisitionPluginInterface::ValidateCurrentVolume()
 void USAcquisitionPluginInterface::ValidateAddedVolume()
 {
     int initialVolumeId = m_addedVolumeObjectId;
-    int newVolumeId = m_addedVolumeObjectId;
+
     SceneManager * man = GetSceneManager();
+    if( !man->GetObjectByID( m_addedVolumeObjectId ) )
+        m_addedVolumeObjectId = SceneObject::InvalidObjectId;
 
-    if( !man->GetObjectByID( newVolumeId ) )
-        newVolumeId = SceneObject::InvalidObjectId;
-
+    int newVolumeId = m_addedVolumeObjectId;
     if( newVolumeId == SceneObject::InvalidObjectId )
     {
         QList<ImageObject*> images;
