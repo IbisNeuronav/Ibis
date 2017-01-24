@@ -9,8 +9,4 @@ MARK_AS_ADVANCED( IGNS_VTK_INCLUDE_DIR )
 
 add_subdirectory( vtkExtensions )
 add_subdirectory( vtkMNI )
-add_subdirectory( vtkTracker )
-add_subdirectory( vtkVideo )
 add_subdirectory( vtkQt )
-add_subdirectory( vtkUltrasound )
-

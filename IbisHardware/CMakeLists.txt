@@ -33,6 +33,10 @@ qt5_wrap_cpp( IbisHardwareMoc ${IbisHardwareHdrMoc} )
 # Generate code for .ui files -> ui_xxx.h
 qt5_wrap_ui( IbisHardwareUiHdr ${IbisHardwareUi} )
 
+add_subdirectory( vtkTracker )
+add_subdirectory( vtkVideo )
+add_subdirectory( vtkUltrasound )
+
 #================================
 # Define output
 #================================
