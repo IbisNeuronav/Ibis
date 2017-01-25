@@ -57,7 +57,8 @@ CameraCalibrationPluginInterface::CameraCalibrationPluginInterface()
 
 CameraCalibrationPluginInterface::~CameraCalibrationPluginInterface()
 {
-    m_calibrationGridObject->Delete();
+    if( m_calibrationGridObject )
+        m_calibrationGridObject->Delete();
 }
 
 QString CameraCalibrationPluginInterface::GetPluginDescription()
