@@ -761,6 +761,9 @@ void SceneManager::RemoveObject( SceneObject * object , bool viewChange)
         parent->RemoveChild( object );
     }
 
+    // remove the object from the global list
+    this->AllObjects.removeAt( indexAll );
+
     // Tell other this object is being removed
     object->RemoveFromScene();
     //at this moment object still exist, we send ObjectRemoved() signal
@@ -773,10 +776,7 @@ void SceneManager::RemoveObject( SceneObject * object , bool viewChange)
     if( object->IsListable() )
         emit FinishRemovingObject();
 
-    // remove the object from the global list
-    this->AllObjects.removeAt( indexAll );
     ValidatePointerObject();
-
 }
 
 void SceneManager::ChangeParent( SceneObject * object, SceneObject * newParent, int newChildIndex )
