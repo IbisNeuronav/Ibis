@@ -4,7 +4,6 @@ add_definitions( -DQT_STATICPLUGIN )
 add_subdirectory( vtkTracker )
 add_subdirectory( vtkVideo )
 add_subdirectory( vtkUltrasound )
-message( "vtk directory " ${VTK_TRACKER_INCLUDE_DIR} )
 
 #================================
 # Includes dir for other Ibis libs
