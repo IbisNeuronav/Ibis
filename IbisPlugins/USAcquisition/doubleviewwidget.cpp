@@ -30,7 +30,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "vtkImageResliceToColors.h"
 #include "vtkImageBlend.h"
 #include "vtkImageMask.h"
-#include "vtkTrackedVideoBuffer.h"
 #include "vtkImageData.h"
 #include "vtkImageStack.h"
 #include "vtkImageProperty.h"
