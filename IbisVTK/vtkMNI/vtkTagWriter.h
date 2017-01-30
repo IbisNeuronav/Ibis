@@ -27,6 +27,8 @@ public:
 
     static vtkTagWriter * New() { return new vtkTagWriter; }
 
+    vtkTypeMacro(vtkTagWriter,vtkObject);
+
     vtkSetStringMacro(FileName);
     
     void Write();

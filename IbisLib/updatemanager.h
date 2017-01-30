@@ -33,6 +33,8 @@ public:
     
     static UpdateManager * New() { return new UpdateManager; }
         
+    vtkTypeMacro(UpdateManager,vtkObject);
+
     UpdateManager();
     ~UpdateManager();
     
