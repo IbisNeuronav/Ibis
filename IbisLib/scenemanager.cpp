@@ -571,57 +571,56 @@ void SceneManager::AddObject( SceneObject * object, SceneObject * attachTo )
 
 void SceneManager::AddObjectUsingID( SceneObject * object, SceneObject * attachTo, int objID )
 {
-    if( object )
+    Q_ASSERT( object );
+
+    // Register and add to the global list
+    object->Register( this );
+    this->AllObjects.push_back( object );
+
+    if( !attachTo )
+        attachTo = GetSceneRoot();
+
+    // Notify clients we start adding an object
+    int position = attachTo->GetNumberOfListableChildren();
+    if( object->IsListable() )
+        emit StartAddingObject( attachTo, position );
+
+    // Setting object id and manager
+    int id = objID;  // if we get a valid id, use it
+    if( id == SceneObject::InvalidObjectId )
     {
-        // Register and add to the global list
-        object->Register( this );
-        this->AllObjects.push_back( object );
-
-        if( !attachTo )
-            attachTo = GetSceneRoot();
-
-        // Notify clients we start adding an object
-        int position = attachTo->GetNumberOfListableChildren();
-        if( object->IsListable() )
-            emit StartAddingObject( attachTo, position );
-
-        // Setting object id and manager
-        int id = objID;  // if we get a valid id, use it
-        if( id == SceneObject::InvalidObjectId )
-        {
-            // if the object has already been assigned an id, keep it
-            if( object->GetObjectID() != SceneObject::InvalidObjectId )
-                id = object->GetObjectID();
-            else if( object->IsManagedBySystem() )
-                id = this->NextSystemObjectID--;
-            else
-                id = this->NextObjectID++;
-        }
-        object->AddToScene( this, id );
-
-        // Attach object to the hierarchy
-        attachTo->AddChild( object );
-
-        if( !GetReferenceDataObject() && CanBeReference( object ) )
-            SetReferenceDataObject( object );
-
-        // Setup in views
-        this->SetupInAllViews( object );
-        object->PreDisplaySetup();
-
-        // adding first image object has to call ResetAllCameras,
-        // at this point the object is already added to the list
-        if( this->GetNumberOfUserObjects() == 1 )
-            this->ResetAllCameras();
-
-        // Notify clients the object has been added
-        if( object->IsListable() )
-        {
-            emit FinishAddingObject();
-        }
-        ValidatePointerObject();
-        emit ObjectAdded( id );
+        // if the object has already been assigned an id, keep it
+        if( object->GetObjectID() != SceneObject::InvalidObjectId )
+            id = object->GetObjectID();
+        else if( object->IsManagedBySystem() )
+            id = this->NextSystemObjectID--;
+        else
+            id = this->NextObjectID++;
     }
+    object->AddToScene( this, id );
+
+    // Attach object to the hierarchy
+    attachTo->AddChild( object );
+
+    if( !GetReferenceDataObject() && CanBeReference( object ) )
+        SetReferenceDataObject( object );
+
+    // Setup in views
+    this->SetupInAllViews( object );
+    object->PreDisplaySetup();
+
+    // adding first image object has to call ResetAllCameras,
+    // at this point the object is already added to the list
+    if( this->GetNumberOfUserObjects() == 1 && object->IsUserObject() )
+        this->ResetAllCameras();
+
+    // Notify clients the object has been added
+    if( object->IsListable() )
+    {
+        emit FinishAddingObject();
+    }
+    ValidatePointerObject();
+    emit ObjectAdded( id );
 }
 
 bool SceneManager::GetCursorVisible()
@@ -1287,22 +1286,28 @@ void SceneManager::GetReferenceOrientation( vtkMatrix4x4 * mat )
         mat->Identity();
 }
 
-void SceneManager::GetChildrenUserObjects( SceneObject * obj, QList<SceneObject*> & list )
-{
-    for( int i = 0; i < obj->GetNumberOfChildren(); ++i )
-    {
-        SceneObject * child = obj->GetChild(i);
-        if( !child->IsManagedByTracker() && !child->IsManagedBySystem() && child->IsListable() )
-            list.append(child);
-        GetChildrenUserObjects( child, list );
-    }
-}
-
 int SceneManager::GetNumberOfUserObjects()
 {
-    QList<SceneObject*> allUserObjects;
-    GetAllUserObjects( allUserObjects );
-    return allUserObjects.size();
+    int count = 0;
+    for( int i = 0; i < AllObjects.size(); ++i )
+    {
+        if( AllObjects[i]->IsUserObject() )
+        {
+            ++count;
+        }
+    }
+    return count;
+}
+
+void SceneManager::GetAllUserObjects(QList<SceneObject*> &list)
+{
+    for( int i = 0; i < AllObjects.size(); ++i )
+    {
+        if( AllObjects[i]->IsUserObject() )
+        {
+            list.push_back( AllObjects[i] );
+        }
+    }
 }
 
 int SceneManager::GetNumberOfImageObjects()
@@ -1310,11 +1315,6 @@ int SceneManager::GetNumberOfImageObjects()
     QList<ImageObject*> allImageObjects;
     GetAllImageObjects( allImageObjects );
     return allImageObjects.size();
-}
-
-void SceneManager::GetAllUserObjects(QList<SceneObject*> &list)
-{
-    GetChildrenUserObjects( GetSceneRoot(), list );
 }
 
 void SceneManager::GetAllListableNonTrackedObjects(QList<SceneObject*> &list)

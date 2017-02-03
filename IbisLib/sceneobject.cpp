@@ -390,6 +390,14 @@ bool SceneObject::DescendsFrom( SceneObject * obj )
     return false;
 }
 
+bool SceneObject::IsUserObject()
+{
+    bool user = !IsManagedByTracker();
+    user &= !IsManagedBySystem();
+    user &= IsListable();
+    return user;
+}
+
 int SceneObject::GetNumberOfListableChildren()
 {
     int count = 0;

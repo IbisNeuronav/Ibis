@@ -17,15 +17,15 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "cameraobject.h"
 #include <QDir>
 #include <QMenu>
-#include "vtkIGTLIOLogic.h"
+#include "igtlioLogic.h"
 #include "qIGTLIOLogicController.h"
 #include "qIGTLIOClientWidget.h"
-#include "vtkIGTLIOTransformDevice.h"
-#include "vtkIGTLIOImageDevice.h"
+#include "igtlioTransformDevice.h"
+#include "igtlioImageDevice.h"
 #include "vtkImageData.h"
 
-#include "igtlImageConverter.h"
-#include "igtlTransformConverter.h"
+#include "igtlioImageConverter.h"
+#include "igtlioTransformConverter.h"
 
 IbisHardwareIGSIO::IbisHardwareIGSIO()
 {
@@ -46,7 +46,7 @@ void IbisHardwareIGSIO::AddSettingsMenuEntries( QMenu * menu )
 bool IbisHardwareIGSIO::Init()
 {
     m_logicController = new qIGTLIOLogicController;
-    m_logic = vtkSmartPointer<vtkIGTLIOLogic>::New();
+    m_logic = vtkSmartPointer<igtlio::Logic>::New();
     m_logicController->setLogic( m_logic );
     return true;
 }
@@ -63,15 +63,15 @@ void IbisHardwareIGSIO::Update()
     {
         if( !tool->ioDevice )
             continue;
-        if( tool->ioDevice->GetDeviceType() == igtl::ImageConverter::GetIGTLTypeName() )
+        if( tool->ioDevice->GetDeviceType() == igtlio::ImageConverter::GetIGTLTypeName() )
         {
-            vtkIGTLIOImageDevice * imageDevice = vtkIGTLIOImageDevice::SafeDownCast( tool->ioDevice );
+            igtlio::ImageDevice * imageDevice = igtlio::ImageDevice::SafeDownCast( tool->ioDevice );
             tool->sceneObject->SetInputMatrix( imageDevice->GetContent().transform );
             tool->sceneObject->SetState( Undefined ); // todo : set state properly when available
         }
-        else if( tool->ioDevice->GetDeviceType() == igtl::TransformConverter::GetIGTLTypeName() )
+        else if( tool->ioDevice->GetDeviceType() == igtlio::TransformConverter::GetIGTLTypeName() )
         {
-            vtkIGTLIOTransformDevice * transformDevice = vtkIGTLIOTransformDevice::SafeDownCast( tool->ioDevice );
+            igtlio::TransformDevice * transformDevice = igtlio::TransformDevice::SafeDownCast( tool->ioDevice );
             tool->sceneObject->SetInputMatrix( transformDevice->GetContent().transform );
             tool->sceneObject->SetState( Undefined ); // todo : set state properly when available
         }
@@ -153,7 +153,7 @@ void IbisHardwareIGSIO::FindNewTools()
 {
     for( int i = 0; i < m_logic->GetNumberOfDevices(); ++i )
     {
-        vtkIGTLIODevicePointer dev = m_logic->GetDevice( i );
+        igtlio::DevicePointer dev = m_logic->GetDevice( i );
         if( !ModuleHasDevice( dev ) )
         {
             int toolIndex = FindToolByName( QString( dev->GetDeviceName().c_str() ) );
@@ -182,7 +182,7 @@ void IbisHardwareIGSIO::FindRemovedTools()
         if( tool->sceneObject && tool->sceneObject->IsObjectInScene() && tool->ioDevice && !IoHasDevice( tool->ioDevice ) )
         {
             GetSceneManager()->RemoveObject( tool->sceneObject );
-            tool->ioDevice = vtkIGTLIODevicePointer();
+            tool->ioDevice = igtlio::DevicePointer();
         }
     }
 }
@@ -195,7 +195,7 @@ int IbisHardwareIGSIO::FindToolByName( QString name )
     return -1;
 }
 
-bool IbisHardwareIGSIO::ModuleHasDevice( vtkIGTLIODevicePointer device )
+bool IbisHardwareIGSIO::ModuleHasDevice( igtlio::DevicePointer device )
 {
     foreach( Tool * tool, m_tools )
     {
@@ -205,7 +205,7 @@ bool IbisHardwareIGSIO::ModuleHasDevice( vtkIGTLIODevicePointer device )
     return false;
 }
 
-bool IbisHardwareIGSIO::IoHasDevice( vtkIGTLIODevicePointer device )
+bool IbisHardwareIGSIO::IoHasDevice( igtlio::DevicePointer device )
 {
     for( int i = 0; i < m_logic->GetNumberOfDevices(); ++i )
         if( m_logic->GetDevice( i ) == device )
@@ -216,19 +216,19 @@ bool IbisHardwareIGSIO::IoHasDevice( vtkIGTLIODevicePointer device )
 // TODO : for now, device of type Image are assumed to be US probes and devices of type Transform
 // are assumed to be pointers. Find a more suitable scheme or associate with some sort of
 // local config file.
-TrackedSceneObject * IbisHardwareIGSIO::InstanciateSceneObjectFromDevice( vtkIGTLIODevicePointer device )
+TrackedSceneObject * IbisHardwareIGSIO::InstanciateSceneObjectFromDevice( igtlio::DevicePointer device )
 {
     QString devName( device->GetDeviceName().c_str() );
     TrackedSceneObject * res = 0;
 
-    if( device->GetDeviceType() == igtl::ImageConverter::GetIGTLTypeName() )
+    if( device->GetDeviceType() == igtlio::ImageConverter::GetIGTLTypeName() )
     {
-        vtkIGTLIOImageDevice * imageDev = vtkIGTLIOImageDevice::SafeDownCast( device );
+        igtlio::ImageDevice * imageDev = igtlio::ImageDevice::SafeDownCast( device );
         UsProbeObject * probe = UsProbeObject::New();
         probe->SetVideoInputData( imageDev->GetContent().image );
         res = probe;
     }
-    else if( device->GetDeviceType() == igtl::TransformConverter::GetIGTLTypeName() )
+    else if( device->GetDeviceType() == igtlio::TransformConverter::GetIGTLTypeName() )
     {
         res = PointerObject::New();
     }
@@ -263,6 +263,6 @@ void IbisHardwareIGSIO::RemoveToolObjectsFromScene()
     foreach( Tool * tool, m_tools )
     {
         GetSceneManager()->RemoveObject( tool->sceneObject );
-        tool->ioDevice = vtkIGTLIODevicePointer();
+        tool->ioDevice = igtlio::DevicePointer();
     }
 }
