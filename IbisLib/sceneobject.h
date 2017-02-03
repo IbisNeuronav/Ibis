@@ -106,6 +106,8 @@ public:
     void WorldToLocal(double worldPoint[3], double localPoint[3] );
     void LocalToWorld(double localPoint[3], double worldPoint[3] );
 
+    bool IsUserObject();
+
     int GetNumberOfListableChildren();
     SceneObject * GetListableChild( int index );
     bool IsListable() { return this->ObjectListable; }

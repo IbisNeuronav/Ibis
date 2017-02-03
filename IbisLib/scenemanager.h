@@ -266,7 +266,6 @@ public:
     // returns list of all the user created/added objects with their parents
     int  GetNumberOfUserObjects();
     void GetAllUserObjects(QList<SceneObject*> &);
-    void GetChildrenUserObjects( SceneObject * obj, QList<SceneObject*> & );
 
     // Description
     // returns list of all the listable, non-tracked objects with their parents

@@ -12,12 +12,15 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #define __IbisHardwareIGSIO_h_
 
 #include "hardwaremodule.h"
-#include "vtkIGTLIODevice.h"
+#include "igtlioDevice.h"
 
+namespace  igtlio {
+    class Logic;
+}
 class QMenu;
 class qIGTLIOLogicController;
 class qIGTLIOClientWidget;
-class vtkIGTLIOLogic;
+
 
 class IbisHardwareIGSIO : public QObject, public HardwareModule
 {
@@ -69,19 +72,19 @@ protected:
     void FindNewTools();
     void FindRemovedTools();
     int FindToolByName( QString name );
-    bool IoHasDevice( vtkIGTLIODevicePointer device );
-    bool ModuleHasDevice( vtkIGTLIODevicePointer device );
-    TrackedSceneObject * InstanciateSceneObjectFromDevice( vtkIGTLIODevicePointer device );
+    bool IoHasDevice( igtlio::DevicePointer device );
+    bool ModuleHasDevice( igtlio::DevicePointer device );
+    TrackedSceneObject * InstanciateSceneObjectFromDevice( igtlio::DevicePointer device );
 
     struct Tool
     {
         TrackedSceneObject * sceneObject;
-        vtkIGTLIODevicePointer ioDevice;
+        igtlio::DevicePointer ioDevice;
     };
     typedef QList< Tool* > toolList;
     toolList m_tools;
 
-    vtkSmartPointer<vtkIGTLIOLogic> m_logic;
+    vtkSmartPointer<igtlio::Logic> m_logic;
     qIGTLIOLogicController * m_logicController;
     qIGTLIOClientWidget * m_clientWidget;
 };
