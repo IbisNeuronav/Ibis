@@ -64,6 +64,8 @@ public:
 
     static SceneManager * New() { return new SceneManager; }
 
+    vtkTypeMacro(SceneManager,vtkObject);
+
     SceneManager();
     ~SceneManager();
 
