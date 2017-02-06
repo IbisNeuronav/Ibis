@@ -94,7 +94,6 @@ IF( OPENCL_FOUND )
 ENDIF()
 
 
-#set( ignsLibsToUse IbisLib vtkVideo vtkQt vtkTracker vtkUltrasound vtkMNI vtkExtensions )
 set( ignsLibsToUse IbisLib  vtkQt  vtkMNI vtkExtensions )
 
 if( USE_POINT_GREY_CAMERA )
