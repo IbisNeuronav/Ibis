@@ -49,7 +49,6 @@ set( IbisHardwareSrcAll ${IbisHardwareSrc} ${IbisHardwareHdr} ${IbisHardwareHdrM
 add_library( IbisHardware ${IbisHardwareSrcAll} )
 
 # append necessary libraries to the list for ibis to link
-#set( HardwareModulesLibs ${HardwareModulesLibs} IbisHardware  PARENT_SCOPE )
 set( HardwareModulesLibs ${HardwareModulesLibs} IbisHardware ${ignsLibsToUse} PARENT_SCOPE )
 
 IF( CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64" )
