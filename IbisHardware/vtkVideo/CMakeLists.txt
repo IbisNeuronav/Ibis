@@ -72,6 +72,5 @@ endif( IGNS_INSTALL_LIBS_AND_HEADERS )
 # Define include dir for
 # dependent projects
 #================================
-SET( VTK_VIDEO_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR};${CMAKE_CURRENT_BINARY_DIR}" CACHE PATH "Include directory for vtkVideo .h files" )
-MARK_AS_ADVANCED( VTK_VIDEO_INCLUDE_DIR )
+SET( VTK_VIDEO_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR};${CMAKE_CURRENT_BINARY_DIR}" PARENT_SCOPE )
 

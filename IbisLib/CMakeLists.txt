@@ -164,12 +164,8 @@ qt5_add_resources( IGNS_IBISLIB_RCC_SRC ${IGNS_IBISLIB_RCC})
 # Includes dir for vtkIbis libs
 #================================
 include_directories( ${IGNS_VTK_QT_INCLUDE_DIR} )
-include_directories( ${VTK_TRACKER_INCLUDE_DIR} )
 include_directories( ${VTK_EXTENSIONS_INCLUDE_DIR} )
-include_directories( ${VTK_VIDEO_INCLUDE_DIR} )
-include_directories( ${VTK_ULTRASOUND_INCLUDE_DIR} )
 include_directories( ${VTK_MNI_INCLUDE_DIR} )
-include_directories( ${VTK_MINC_INCLUDE_DIR} )
 include_directories( ${IGNS_VTKIBIS_VOLUME_RENDERING_INCLUDE_DIR} )
 include_directories( ${IGNS_VTK_INCLUDE_DIR} )
 
