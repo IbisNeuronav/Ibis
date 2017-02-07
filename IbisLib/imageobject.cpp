@@ -14,7 +14,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "vtkPolyDataMapper.h"
 #include "vtkRenderer.h"
 #include "vtkActor.h"
-#include "vtkImageData.h"
 #include "view.h"
 #include "vtkTransform.h"
 
@@ -145,10 +144,6 @@ ImageObject::ImageObject()
 
 ImageObject::~ImageObject()
 {
-    if( this->Image )
-    {
-        this->Image->UnRegister( this );
-    }
 }
 
 #include "serializerhelper.h"
@@ -329,14 +324,9 @@ void ImageObject::SetImage(vtkImageData * image)
         return;
     }
 
-    if( this->Image )
-    {
-        this->Image->UnRegister( this );
-    }
     this->Image = image;
     if( this->Image )
     {
-        this->Image->Register( this );
         this->Image->GetBounds( m_volumeRenderingBounds );
     }
 

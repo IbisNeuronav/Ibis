@@ -16,6 +16,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "vtkScalarsToColors.h"
 #include "vtkImageAccumulate.h"
 #include "vtkVolumeProperty.h"
+#include "vtkImageData.h"
 #include "vtkSmartPointer.h"
 #include "serializer.h"
 #include <map>
@@ -28,7 +29,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 class vtkRenderer;
 class vtkRenderWindowInteractor;
-class vtkImageData;
 class vtkOutlineFilter;
 class vtkActor;
 class vtkTransform;
@@ -83,7 +83,7 @@ public:
 
     bool IsLabelImage();
     
-    vtkGetObjectMacro( Image, vtkImageData );
+    vtkImageData* GetImage( ) { return Image.GetPointer(); }
     void SetItkImage( IbisItk3DImageType::Pointer image );  // for all others
     void SetItkImage( IbisRGBImageType::Pointer image );  // for RGB images
     void SetItkLabelImage( IbisItk3DLabelType::Pointer image );  // for labels
@@ -91,7 +91,6 @@ public:
     IbisRGBImageType::Pointer GetItkRGBImage() { return this->ItkRGBImage; }
     IbisItk3DLabelType::Pointer GetItkLabelImage() { return this->ItkLabelImage; }
     void SetImage( vtkImageData * image );
-    const vtkImageData* const GetImage( vtkImageData * image ) const;
     void ForceUpdatePixels();
     
     // Implementation of parent virtual method
@@ -174,7 +173,7 @@ protected:
     ItkLabelExporterType::Pointer ItkToVtkLabelExporter;
     vtkSmartPointer<vtkImageImport> ItkToVtkImporter;
 
-    vtkImageData * Image;
+    vtkSmartPointer<vtkImageData> Image;
     vtkSmartPointer<vtkScalarsToColors> Lut;
     vtkSmartPointer<vtkOutlineFilter> OutlineFilter;
     static const int NumberOfBinsInHistogram;
