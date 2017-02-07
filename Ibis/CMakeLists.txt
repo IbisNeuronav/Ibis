@@ -18,10 +18,7 @@ qt5_wrap_cpp( IGNS_IBIS_MOC ${IGNS_IBIS_HDR_MOC} )
 
 # Define include directories for other Igns libs
 include_directories( ${IGNS_VTK_QT_INCLUDE_DIR} )
-include_directories( ${VTK_TRACKER_INCLUDE_DIR} )
-include_directories( ${VTK_VIDEO_INCLUDE_DIR} )
 include_directories( ${VTK_EXTENSIONS_INCLUDE_DIR} )
-include_directories( ${VTK_MINC_INCLUDE_DIR} )
 include_directories( ${IGNS_IBISLIB_INCLUDE_DIR} )
 include_directories( ${IGNS_IBISLIB_INCLUDE_DIR}/gui )
 include_directories( ${IGNS_IBISLIB_BINARY_DIR} )    # include qt-generated headers 
@@ -97,7 +94,7 @@ IF( OPENCL_FOUND )
 ENDIF()
 
 
-set( ignsLibsToUse IbisLib vtkVideo vtkQt vtkTracker vtkUltrasound vtkMNI vtkExtensions )
+set( ignsLibsToUse IbisLib  vtkQt  vtkMNI vtkExtensions )
 
 if( USE_POINT_GREY_CAMERA )
     set( flycaptureLib flycapture )

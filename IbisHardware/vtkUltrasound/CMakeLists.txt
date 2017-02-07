@@ -8,7 +8,8 @@ SET( IGNS_VTK_ULTRASOUND_HDR vtkTrackedVideoBuffer.h )
 #================================
 INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_SOURCE_DIR}/../vtkVideo )  # for vtkVideo
 INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_SOURCE_DIR}/../vtkTracker )  # for vtkTracker
-INCLUDE_DIRECTORIES( ${CMAKE_CURRENT_SOURCE_DIR}/../vtkExtensions )  # for vtkExtensions
+INCLUDE_DIRECTORIES( ${VTK_EXTENSIONS_INCLUDE_DIR} )  # for vtkExtensions
+
 ADD_LIBRARY( vtkUltrasound ${IGNS_VTK_ULTRASOUND_SRC} ${IGNS_VTK_ULTRASOUND_HDR} )
 
 if( IGNS_INSTALL_LIBS_AND_HEADERS )
@@ -20,6 +21,5 @@ endif( IGNS_INSTALL_LIBS_AND_HEADERS )
 # Define include dir for
 # dependent projects
 #================================
-SET( VTK_ULTRASOUND_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR} CACHE PATH "Include directory for vtkUltrasound .h files" )
-MARK_AS_ADVANCED( VTK_ULTRASOUND_INCLUDE_DIR )
+SET( VTK_ULTRASOUND_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE )
 

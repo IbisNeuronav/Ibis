@@ -69,5 +69,4 @@ endif( IGNS_INSTALL_LIBS_AND_HEADERS )
 # Define include dir for
 # dependent projects
 #================================
-SET( VTK_TRACKER_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR} CACHE PATH "Include directory for vtkTracker .h files" )
-MARK_AS_ADVANCED( VTK_TRACKER_INCLUDE_DIR )
+SET( VTK_TRACKER_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE )

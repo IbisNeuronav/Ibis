@@ -1,6 +1,10 @@
 # Hardware module is a Qt plugin - this flags is needed to build static plugins properly
 add_definitions( -DQT_STATICPLUGIN )
 
+add_subdirectory( vtkTracker )
+add_subdirectory( vtkVideo )
+add_subdirectory( vtkUltrasound )
+
 #================================
 # Includes dir for other Ibis libs
 #================================
@@ -33,6 +37,9 @@ qt5_wrap_cpp( IbisHardwareMoc ${IbisHardwareHdrMoc} )
 # Generate code for .ui files -> ui_xxx.h
 qt5_wrap_ui( IbisHardwareUiHdr ${IbisHardwareUi} )
 
+
+set( ignsLibsToUse vtkVideo vtkQt vtkTracker vtkUltrasound  )
+
 #================================
 # Define output
 #================================
@@ -42,7 +49,7 @@ set( IbisHardwareSrcAll ${IbisHardwareSrc} ${IbisHardwareHdr} ${IbisHardwareHdrM
 add_library( IbisHardware ${IbisHardwareSrcAll} )
 
 # append necessary libraries to the list for ibis to link
-set( HardwareModulesLibs ${HardwareModulesLibs} IbisHardware PARENT_SCOPE )
+set( HardwareModulesLibs ${HardwareModulesLibs} IbisHardware ${ignsLibsToUse} PARENT_SCOPE )
 
 IF( CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64" )
   SET_TARGET_PROPERTIES( IbisHardware PROPERTIES COMPILE_FLAGS "-fPIC")
