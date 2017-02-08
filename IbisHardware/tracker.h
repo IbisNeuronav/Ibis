@@ -85,6 +85,8 @@ public:
     
     static Tracker * New() { return new Tracker; }
     
+    vtkTypeMacro(Tracker,vtkObject);
+
     Tracker();
     ~Tracker();
 

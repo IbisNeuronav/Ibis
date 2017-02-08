@@ -56,6 +56,8 @@ public:
 
     static TrackedVideoSource * New() { return new TrackedVideoSource; }
 
+    vtkTypeMacro(TrackedVideoSource,vtkObject);
+
     TrackedVideoSource();
     ~TrackedVideoSource();
     
