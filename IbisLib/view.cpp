@@ -75,12 +75,13 @@ View::View()
 
 View::~View()
 {
+    this->Interactor->UnRegister( this );
     this->Renderer->Delete();
     this->OverlayRenderer->Delete();
     this->OverlayRenderer2->Delete();
     if( this->Picker )
         this->Picker->Delete();
-    this->InteractorStyle->Delete();
+    this->InteractorStyle->UnRegister( this );
     this->PrevViewingTransform->Delete();
     this->EventObserver->Delete();
 }
