@@ -21,7 +21,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "cameraobject.h"
 #include "pointsobject.h"
 #include "vtkImageData.h"
-#include "vtkTrackerTool.h"
 #include "vtkTransform.h"
 #include <QtPlugin>
 #include <QSettings>
