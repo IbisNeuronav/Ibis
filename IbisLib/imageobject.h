@@ -13,6 +13,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include "sceneobject.h"
 #include "vtkMatrix4x4.h"
+#include "vtkSmartPointer.h"
 #include "serializer.h"
 #include <map>
 #include <QVector>
@@ -24,18 +25,18 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 class vtkRenderer;
 class vtkRenderWindowInteractor;
-class vtkImageData;
-class vtkScalarsToColors;
 class vtkOutlineFilter;
 class vtkActor;
 class vtkTransform;
-class vtkImageAccumulate;
 class vtkGPUVolumeRayCastMapper;
 class vtkIbisGLSLVolumeRaycastMapper;
 class vtkVolume;
-class vtkVolumeProperty;
 class vtkImageImport;
 class vtkBoxWidget2;
+class vtkScalarsToColors;
+class vtkImageAccumulate;
+class vtkVolumeProperty;
+class vtkImageData;
 
 typedef itk::RGBPixel< unsigned char > RGBPixelType;
 typedef itk::Image< RGBPixelType, 3 > IbisRGBImageType;
@@ -82,7 +83,7 @@ public:
 
     bool IsLabelImage();
     
-    vtkGetObjectMacro( Image, vtkImageData );
+    vtkImageData* GetImage( );
     void SetItkImage( IbisItk3DImageType::Pointer image );  // for all others
     void SetItkImage( IbisRGBImageType::Pointer image );  // for RGB images
     void SetItkLabelImage( IbisItk3DLabelType::Pointer image );  // for labels
@@ -90,7 +91,6 @@ public:
     IbisRGBImageType::Pointer GetItkRGBImage() { return this->ItkRGBImage; }
     IbisItk3DLabelType::Pointer GetItkLabelImage() { return this->ItkLabelImage; }
     void SetImage( vtkImageData * image );
-    const vtkImageData* const GetImage( vtkImageData * image ) const;
     void ForceUpdatePixels();
     
     // Implementation of parent virtual method
@@ -105,7 +105,7 @@ public:
 	// Choose from the set of lookup table templates available from the SceneManager
     int ChooseColorTable(int index);
     int GetLutIndex() {return lutIndex;}
-    vtkScalarsToColors * GetLut() { return Lut; }
+    vtkScalarsToColors * GetLut();
     double * GetLutRange();
     void SetLutRange( double r[2] );
     void GetImageScalarRange(double *range);
@@ -118,12 +118,12 @@ public:
 
     virtual void ShowMincInfo( );
 
-    vtkImageAccumulate * GetHistogramComputer() { return HistogramComputer; }
+    vtkImageAccumulate * GetHistogramComputer();
 
     // vtk volume rendering
     void SetVtkVolumeRenderingEnabled( bool on );
     bool GetVtkVolumeRenderingEnabled() { return m_vtkVolumeRenderingEnabled; }
-    vtkVolumeProperty * GetVolumeProperty() { return m_volumeProperty; }
+    vtkVolumeProperty * GetVolumeProperty();
     void SetVolumeRenderingWindow( double window );
     double GetVolumeRenderingWindow() { return m_colorWindow; }
     void SetVolumeRenderingLevel( double level );
@@ -171,13 +171,13 @@ protected:
     ItkRGBImageExporterType::Pointer ItkRGBImageToVtkExporter;
     IbisItk3DLabelType::Pointer ItkLabelImage;
     ItkLabelExporterType::Pointer ItkToVtkLabelExporter;
-    vtkImageImport * ItkToVtkImporter;
+    vtkSmartPointer<vtkImageImport> ItkToVtkImporter;
 
-    vtkImageData * Image;
-    vtkScalarsToColors * Lut;
-    vtkOutlineFilter * OutlineFilter;
+    vtkSmartPointer<vtkImageData> Image;
+    vtkSmartPointer<vtkScalarsToColors> Lut;
+    vtkSmartPointer<vtkOutlineFilter> OutlineFilter;
     static const int NumberOfBinsInHistogram;
-    vtkImageAccumulate * HistogramComputer;
+    vtkSmartPointer<vtkImageAccumulate> HistogramComputer;
     
     int viewOutline;
     int outlineWasVisible;
@@ -190,8 +190,8 @@ protected:
     void SetVolumeClippingEnabled( vtkBoxWidget2 * widget, bool enabled );
 
     bool m_vtkVolumeRenderingEnabled;
-    vtkVolumeProperty * m_volumeProperty;
-    vtkEventQtSlotConnect * m_volumePropertyWatcher;
+    vtkSmartPointer<vtkVolumeProperty> m_volumeProperty;
+    vtkSmartPointer<vtkEventQtSlotConnect> m_volumePropertyWatcher;
     double m_colorWindow;
     double m_colorLevel;
     bool m_autoSampleDistance;
@@ -199,15 +199,15 @@ protected:
 
     bool m_showVolumeClippingBox;
     double m_volumeRenderingBounds[6];
-    vtkEventQtSlotConnect * m_volumeClippingBoxWatcher;
+    vtkSmartPointer<vtkEventQtSlotConnect> m_volumeClippingBoxWatcher;
     
     struct PerViewElements
     {
         PerViewElements();
         ~PerViewElements();
-        vtkActor * outlineActor;
-        vtkVolume * volume;
-        vtkBoxWidget2 * volumeClippingWidget;
+        vtkSmartPointer<vtkActor> outlineActor;
+        vtkSmartPointer<vtkVolume> volume;
+        vtkSmartPointer<vtkBoxWidget2> volumeClippingWidget;
     };
     
     typedef std::map<View*,PerViewElements*> ImageObjectViewAssociation;
