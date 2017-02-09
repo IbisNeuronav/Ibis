@@ -476,8 +476,9 @@ int PointsObject::FindPoint(vtkActor *actor, double *pos, int viewType)
         point = m_pointList.value(i);
         point->GetPosition(pointPosition);
         wt->TransformPoint( pointPosition, worldPt );
-        if( this->GetManager()->IsInPlane( (VIEWTYPES)viewType, worldPt ) &&
-            sqrt( vtkMath::Distance2BetweenPoints( worldPicked, worldPt ) < m_pointRadius2D ))
+        bool isInPlane = this->GetManager()->IsInPlane( (VIEWTYPES)viewType, worldPt );
+        bool isInRadius = sqrt( vtkMath::Distance2BetweenPoints( worldPicked, worldPt ) ) < m_pointRadius2D;
+        if( isInPlane && isInRadius )
             return i;
     }
     return InvalidPointIndex;
@@ -615,10 +616,16 @@ void PointsObject::RemovePoint(int index)
 
     // Update selected point index
     if( m_selectedPointIndex >= GetNumberOfPoints() )
+    {
         if( GetNumberOfPoints() > 0 )
+        {
             m_selectedPointIndex = GetNumberOfPoints() - 1;
+        }
         else
+        {
             m_selectedPointIndex = InvalidPointIndex;
+        }
+    }
 
     this->UpdatePoints();
     emit PointRemoved( index );

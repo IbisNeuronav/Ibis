@@ -12,7 +12,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QMouseEvent>
 #include <QPainter>
 #include <QPen>
-#include <math.h>
+#include <cmath>
 #include <algorithm>
 
 #include "vtkQtColorTransferFunctionWidget.h"
@@ -433,8 +433,8 @@ double vtkQtColorTransferFunctionWidget::PixelSize()
 int vtkQtColorTransferFunctionWidget::MinDistanceCursor( int mousePosition )
 {
     double mouseValue = widgetPosToSliderValue( mousePosition );
-    double minDist = abs( getMinSliderValue() - mouseValue );
-    double maxDist = abs( getMaxSliderValue() - mouseValue );
+    double minDist = std::abs( getMinSliderValue() - mouseValue );
+    double maxDist = std::abs( getMaxSliderValue() - mouseValue );
 
     if( minDist < maxDist )
         return 0;

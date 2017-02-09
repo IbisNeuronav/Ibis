@@ -23,7 +23,7 @@ int vtkTagReader::GetNumberOfVolumes()
     return this->Volumes.size();
 }
 
-vtkPoints * vtkTagReader::GetVolume( unsigned int volumeIndex )
+vtkPoints * vtkTagReader::GetVolume( int volumeIndex )
 {
     if( volumeIndex >= 0 && volumeIndex < this->Volumes.size() )
     {

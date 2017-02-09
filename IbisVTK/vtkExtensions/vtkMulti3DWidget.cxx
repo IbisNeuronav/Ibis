@@ -158,7 +158,7 @@ int vtkMulti3DWidget::GetNumberOfRenderers()
 }
 
 
-vtkRenderer * vtkMulti3DWidget::GetRenderer( unsigned int index )
+vtkRenderer * vtkMulti3DWidget::GetRenderer( int index )
 {
     if( index < this->Renderers.size() && index >= 0 )
     {
@@ -168,7 +168,7 @@ vtkRenderer * vtkMulti3DWidget::GetRenderer( unsigned int index )
 }
 
 
-vtkAssembly * vtkMulti3DWidget::GetAssembly( unsigned int index )
+vtkAssembly * vtkMulti3DWidget::GetAssembly( int index )
 {
     if( index < this->Renderers.size() && index >= 0 )
     {

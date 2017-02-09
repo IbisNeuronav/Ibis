@@ -10,6 +10,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 #include "usmask.h"
 #include <vtkImageData.h>
+#include <cmath>
 
 ObjectSerializationMacro( USMask );
 
@@ -204,8 +205,8 @@ void USMask::BuildMask()
                 else
                 {
                     // Test 3 : between angles
-                    double angle =  atan( abs( diff[0] ) / diff[1] );
-                    if( ( diff[0] < 0.0 && angle < m_maskAngles[0] ) || diff[0] > 0.0 && angle < m_maskAngles[1] )
+                    double angle =  atan( std::abs( diff[0] ) / diff[1] );
+                    if( ( diff[0] < 0.0 && angle < m_maskAngles[0] ) || ( diff[0] > 0.0 && angle < m_maskAngles[1] ) )
                         *pix = 0;
                     else
                         *pix = 255;

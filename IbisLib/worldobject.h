@@ -42,7 +42,7 @@ public:
 
     void SetAxesHidden( bool h );
     bool AxesHidden();
-    bool Set3DViewFollowsReferenceVolume( bool f );
+    void Set3DViewFollowsReferenceVolume( bool f );
     bool Is3DViewFollowingReferenceVolume();
     void SetCursorVisible( bool v );
     bool GetCursorVisible();

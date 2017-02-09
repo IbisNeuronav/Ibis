@@ -86,7 +86,7 @@ bool Serialize( Serializer * serial, const char * attrName, vtkPiecewiseFunction
 
 bool Serialize( Serializer * serial, const char * attrName, Vec3 & v )
 {
-    serial->Serialize( attrName, v.Ref(), 3 );
+    return serial->Serialize( attrName, v.Ref(), 3 );
 }
 
 bool Serialize( Serializer * serial, const char * attrName, vtkMatrix4x4 * mat )
