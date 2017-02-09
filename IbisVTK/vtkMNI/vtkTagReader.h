@@ -39,7 +39,7 @@ public:
 
     // Get the output of the reader
     int GetNumberOfVolumes();
-    vtkPoints * GetVolume( unsigned int volumeIndex );
+    vtkPoints * GetVolume( int volumeIndex );
     std::vector<std::string> & GetPointNames() { return PointNames; }
     std::vector<std::string> & GetVolumeNames() { return VolumeNames; }
     std::vector<std::string> & GetTimeStamps() { return TimeStamps; }

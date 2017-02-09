@@ -57,7 +57,7 @@ bool WorldObject::AxesHidden()
     return true;
 }
 
-bool WorldObject::Set3DViewFollowsReferenceVolume( bool f )
+void WorldObject::Set3DViewFollowsReferenceVolume( bool f )
 {
     Q_ASSERT( this->GetManager() );
     this->GetManager()->Set3DViewFollowingReferenceVolume( f );

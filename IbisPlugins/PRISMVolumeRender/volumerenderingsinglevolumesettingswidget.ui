@@ -256,10 +256,6 @@
       </item>
      </layout>
      <zorder>useLinearSamplingCheckBox</zorder>
-     <zorder></zorder>
-     <zorder></zorder>
-     <zorder></zorder>
-     <zorder></zorder>
      <zorder>colorFunctionWidget</zorder>
      <zorder>opacityFunctionWidget</zorder>
     </widget>

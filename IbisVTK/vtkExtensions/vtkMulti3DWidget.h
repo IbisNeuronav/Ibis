@@ -72,8 +72,8 @@ public:
     // child of the associated Prop3D in each renderer.
 	int AddRenderer( vtkRenderer * ren, vtkAssembly * assembly = 0 );
     int GetNumberOfRenderers();
-    vtkRenderer * GetRenderer( unsigned int index );
-    vtkAssembly * GetAssembly( unsigned int index );
+    vtkRenderer * GetRenderer( int index );
+    vtkAssembly * GetAssembly( int index );
     vtkAssembly * GetAssembly( vtkRenderer * ren );
     void RemoveRenderer( vtkRenderer * ren );
 

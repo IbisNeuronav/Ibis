@@ -136,6 +136,8 @@ bool TrackedVideoBuffer::Serialize( Serializer * ser, QString dataDirectory )
     if( ser->IsReader() )
         if( m_currentFrame != -1 )
             SetCurrentFrame( m_currentFrame );
+
+    return true;
 }
 
 void TrackedVideoBuffer::Export( QString dirName, QProgressDialog * progress )
