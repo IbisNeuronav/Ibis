@@ -62,10 +62,7 @@ FiberNavigatorPluginInterface::FiberNavigatorPluginInterface()
 
 FiberNavigatorPluginInterface::~FiberNavigatorPluginInterface()
 {
-    if(m_tubeFilter)
-        m_tubeFilter->UnRegister(0);
     m_roi->Delete();
-    m_roiCallbacks->Delete();
 }
 
 QString FiberNavigatorPluginInterface::OpenMaximaFile(QString fileName)
