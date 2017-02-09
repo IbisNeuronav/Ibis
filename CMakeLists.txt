@@ -35,7 +35,7 @@ include_directories( ${Qt5Xml_INCLUDE_DIRS} )
 # Look for VTK (required)
 #==================================================================
 set( AutoVtkPath ${IBIS_EXTERNAL_DEPENDENCIES_DIR}/vtk-${IBIS_VTK_LONG_VERSION}/install/lib/cmake/vtk-${IBIS_VTK_SHORT_VERSION} )
-find_package(VTK ${IBIS_VTK_SHORT_VERSION} COMPONENTS vtkGUISupportQt vtkRenderingOpenGL vtkRenderingVolumeOpenGL vtkRenderingImage
+find_package(VTK ${IBIS_VTK_LONG_VERSION} EXACT COMPONENTS vtkGUISupportQt vtkRenderingOpenGL vtkRenderingVolumeOpenGL vtkRenderingImage
     vtkRenderingAnnotation vtkImagingStencil vtkImagingStatistics vtkFiltersTexture
     vtkInteractionStyle vtkInteractionWidgets
     vtkIOXML vtkIOLegacy NO_MODULE
@@ -46,7 +46,7 @@ include(${VTK_USE_FILE})
 # Look for ITK (required)
 #==================================================================
 set( AutoItkPath ${IBIS_EXTERNAL_DEPENDENCIES_DIR}/itk-${IBIS_ITK_LONG_VERSION}/install/lib/cmake/ITK-${IBIS_ITK_SHORT_VERSION} )
-find_package( ITK REQUIRED PATHS ${AutoItkPath} )
+find_package( ITK ${IBIS_ITK_SHORT_VERSION} EXACT REQUIRED PATHS ${AutoItkPath} )
 include( ${ITK_USE_FILE} )
 
 #==================================================================

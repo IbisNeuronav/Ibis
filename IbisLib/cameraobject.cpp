@@ -63,6 +63,7 @@ CameraIntrinsicParams & CameraIntrinsicParams::operator=( const CameraIntrinsicP
     m_focal[1] = other.m_focal[1];
     m_distorsionK1 = other.m_distorsionK1;
     m_reprojectionError = other.m_reprojectionError;
+    return *this;
 }
 
 void CameraIntrinsicParams::Serialize( Serializer * ser )

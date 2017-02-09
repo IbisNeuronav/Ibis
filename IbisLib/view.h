@@ -58,6 +58,9 @@ public:
     
     static View * New() { return new View; }
     
+    vtkTypeMacro(View,vtkObject);
+
+
     View();
     ~View();
     
