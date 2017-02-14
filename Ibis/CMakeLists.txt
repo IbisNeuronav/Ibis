@@ -16,7 +16,7 @@ qt5_wrap_cpp( IBIS_MOC ${IBIS_HDR_MOC} )
 
 # make rules to create c++ source from Qt resource files
 
-# Define include directories for other Igns libs
+# Define include directories for other ibis libs
 include_directories( ${IBIS_VTK_INCLUDE_DIR} )
 include_directories( ${IBISLIB_INCLUDE_DIR} )
 include_directories( ${IBISLIB_INCLUDE_DIR}/gui )
@@ -91,13 +91,13 @@ IF( OPENCL_FOUND )
 ENDIF()
 
 
-set( ignsLibsToUse IbisLib  vtkQt  vtkMNI vtkExtensions )
+set( libsToUse IbisLib  vtkQt  vtkMNI vtkExtensions )
 
 if( USE_POINT_GREY_CAMERA )
     set( flycaptureLib flycapture )
 endif()
 
-TARGET_LINK_LIBRARIES( ${exec_name} ${PluginLibs} ${PluginExternalLibs} ${HardwareModulesLibs} ${ignsLibsToUse} ${QT_LIBRARIES}
+TARGET_LINK_LIBRARIES( ${exec_name} ${PluginLibs} ${PluginExternalLibs} ${HardwareModulesLibs} ${libsToUse} ${QT_LIBRARIES}
                                     ${VTK_LIBRARIES} ${MINC4ITK_LIBRARIES}
                                     ${itkLibsToUse} ${OpenCV_LIBS} ${flycaptureLib} svl ${gpuLibs} )
 qt5_use_modules( ${exec_name} Widgets Xml )

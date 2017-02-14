@@ -1,7 +1,7 @@
 #================================
 # Define sources
 #================================
-SET( IGNS_ITK_REGISTRATION_OPENCL_SRC    
+SET( IBIS_ITK_REGISTRATION_OPENCL_SRC
     itkOpenCLUtil.cxx
     itkGPUOrientationMatchingMatrixTransformationSparseMask.hxx
     itkGPU3DRigidSimilarityMetric.h
@@ -11,7 +11,7 @@ SET( IGNS_ITK_REGISTRATION_OPENCL_SRC
     itkGPUUSCalibrationSimilarityMetric.h    
 )
 
-SET( IGNS_ITK_REGISTRATION_OPENCL_HDR    
+SET( IBIS_ITK_REGISTRATION_OPENCL_HDR
 	itkOpenCLUtil.h
 	itkGPUOrientationMatchingMatrixTransformationSparseMask.h	
   itkGPU2D3DOrientationMatchingMatrixTransformationSparseMask.h 
@@ -50,9 +50,9 @@ include_directories( ${CMAKE_CURRENT_BINARY_DIR} ${OPENCL_INCLUDE_DIRS})
 # Define output
 #================================
 IF (BUILD_SHARED_LIBS)
-   ADD_LIBRARY( itkRegistrationOpenCL SHARED ${IGNS_ITK_REGISTRATION_OPENCL_SRC} ${IGNS_ITK_REGISTRATION_OPENCL_HDR} ${LibCLSrc} )
+   ADD_LIBRARY( itkRegistrationOpenCL SHARED ${IBIS_ITK_REGISTRATION_OPENCL_SRC} ${IBIS_ITK_REGISTRATION_OPENCL_HDR} ${LibCLSrc} )
 ELSE( BUILD_SHARED_LIBS )
-   ADD_LIBRARY( itkRegistrationOpenCL ${IGNS_ITK_REGISTRATION_OPENCL_SRC} ${IGNS_ITK_REGISTRATION_OPENCL_HDR} ${LibCLSrc} )
+   ADD_LIBRARY( itkRegistrationOpenCL ${IBIS_ITK_REGISTRATION_OPENCL_SRC} ${IBIS_ITK_REGISTRATION_OPENCL_HDR} ${LibCLSrc} )
 ENDIF( BUILD_SHARED_LIBS )
 
 target_link_libraries( itkRegistrationOpenCL ${ITK_LIBRARIES}  ${OPENCL_LIBRARIES})
@@ -60,7 +60,7 @@ target_link_libraries( itkRegistrationOpenCL ${ITK_LIBRARIES}  ${OPENCL_LIBRARIE
 # install
 if( IBIS_INSTALL_LIBS_AND_HEADERS )
     INSTALL_TARGETS(/lib itkRegistrationOpenCL)
-    INSTALL_FILES(/include FILES ${IGNS_ITK_REGISTRATION_OPENCL_HDR})
+    INSTALL_FILES(/include FILES ${IBIS_ITK_REGISTRATION_OPENCL_HDR})
 endif( IBIS_INSTALL_LIBS_AND_HEADERS )
 
 #================================

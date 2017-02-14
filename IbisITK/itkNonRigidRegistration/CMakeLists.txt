@@ -1,7 +1,7 @@
 #================================
 # Define sources
 #================================
-SET( IGNS_ITK_NONRIGID_REGISTRATION_SRC
+SET( IBIS_ITK_NONRIGID_REGISTRATION_SRC
     itkCannyEdgeDetectionImageFilter2.hxx  
     itkGradientOrientationAlignmentCostFunction.hxx  
     itkVelocityFieldTransformCustom.hxx
@@ -15,7 +15,7 @@ SET( IGNS_ITK_NONRIGID_REGISTRATION_SRC
     itkGradientOrientationDifferenceFilter.hxx    
 )
 
-SET( IGNS_ITK_NONRIGID_REGISTRATION_HDR
+SET( IBIS_ITK_NONRIGID_REGISTRATION_HDR
     itkCannyEdgeDetectionImageFilter2.h  
     itkGradientOrientationAlignmentCostFunction.h  
     itkVelocityFieldTransformCustom.h
@@ -31,7 +31,7 @@ SET( IGNS_ITK_NONRIGID_REGISTRATION_HDR
 
 # install
 if( IBIS_INSTALL_LIBS_AND_HEADERS )
-    INSTALL_FILES(/include FILES ${IGNS_ITK_NONRIGID_REGISTRATION_HDR})
+    INSTALL_FILES(/include FILES ${IBIS_ITK_NONRIGID_REGISTRATION_HDR})
 endif( IBIS_INSTALL_LIBS_AND_HEADERS )
 
 #================================
