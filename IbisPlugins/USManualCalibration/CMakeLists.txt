@@ -1,5 +1,3 @@
-project( ${PluginName} )
-
 include_directories( ${LandmarkRegistrationObjectIncludeDir} )
 
 # define sources

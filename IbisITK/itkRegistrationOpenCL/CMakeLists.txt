@@ -1,5 +1,3 @@
-PROJECT( IGNS_ITK_REGISTRATION_OPENCL )
-
 #================================
 # Define sources
 #================================

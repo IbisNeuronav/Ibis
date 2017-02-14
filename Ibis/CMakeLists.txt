@@ -1,4 +1,4 @@
-PROJECT ( IGNS_IBIS )
+PROJECT ( IBIS )
 
 # define sources
 SET( IGNS_IBIS_SRC main.cpp commandlinearguments.cpp )
@@ -6,8 +6,8 @@ SET( IGNS_IBIS_HDR commandlinearguments.h )
 set( exec_name ibis )
 
 # option to turn on vtk warnings
-OPTION( IGNS_ENABLE_VTK_WARNINGS "Enable vtk warnings in the terminal" OFF )
-if( NOT IGNS_ENABLE_VTK_WARNINGS )
+OPTION( IBIS_ENABLE_VTK_WARNINGS "Enable vtk warnings in the terminal" OFF )
+if( NOT IBIS_ENABLE_VTK_WARNINGS )
     add_definitions (-DVTK_NO_WARNINGS )
 endif()
 
@@ -17,12 +17,10 @@ qt5_wrap_cpp( IGNS_IBIS_MOC ${IGNS_IBIS_HDR_MOC} )
 # make rules to create c++ source from Qt resource files
 
 # Define include directories for other Igns libs
-include_directories( ${IGNS_VTK_QT_INCLUDE_DIR} )
-include_directories( ${VTK_EXTENSIONS_INCLUDE_DIR} )
-include_directories( ${IGNS_IBISLIB_INCLUDE_DIR} )
-include_directories( ${IGNS_IBISLIB_INCLUDE_DIR}/gui )
-include_directories( ${IGNS_IBISLIB_BINARY_DIR} )    # include qt-generated headers 
-include_directories( ${IGNS_IBIS_BINARY_DIR} )     # needed to include qt-generated source files
+include_directories( ${IBIS_VTK_INCLUDE_DIR} )
+include_directories( ${IBISLIB_INCLUDE_DIR} )
+include_directories( ${IBISLIB_INCLUDE_DIR}/gui )
+include_directories( ${IBISLIB_BINARY_DIR} )    # include qt-generated headers
 
 # Generate the file that is going to import the plugins
 set( ImportPluginsSourceFile ${CMAKE_CURRENT_BINARY_DIR}/importplugins.cpp )

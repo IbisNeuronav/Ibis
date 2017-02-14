@@ -1,5 +1,3 @@
-PROJECT( IGNS_VTK_VIDEO )
-
 # Mac OS X
 IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
     SET( IGNS_VTK_VIDEO_SRC vtkVideoSource2Factory.cxx
@@ -56,7 +54,7 @@ ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 CONFIGURE_FILE( ${CMAKE_CURRENT_SOURCE_DIR}/vtkVideoConfigure.h.in ${CMAKE_CURRENT_BINARY_DIR}/vtkVideoConfigure.h )
 
 include_directories( ${CMAKE_CURRENT_BINARY_DIR} )  # to include vtkVideoConfigure.h
-include_directories( ${VTK_EXTENSIONS_INCLUDE_DIR} )
+include_directories( ${IBIS_VTK_INCLUDE_DIR} )
 
 #================================
 # Define sources

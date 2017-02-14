@@ -1,4 +1,4 @@
-PROJECT( IGNS_IBISLIB )
+PROJECT( IBISLIB )
 
 #================================
 # Define source files
@@ -163,11 +163,8 @@ qt5_add_resources( IGNS_IBISLIB_RCC_SRC ${IGNS_IBISLIB_RCC})
 #================================
 # Includes dir for vtkIbis libs
 #================================
-include_directories( ${IGNS_VTK_QT_INCLUDE_DIR} )
-include_directories( ${VTK_EXTENSIONS_INCLUDE_DIR} )
-include_directories( ${VTK_MNI_INCLUDE_DIR} )
+include_directories( ${IBIS_VTK_INCLUDE_DIR} )
 include_directories( ${IGNS_VTKIBIS_VOLUME_RENDERING_INCLUDE_DIR} )
-include_directories( ${IGNS_VTK_INCLUDE_DIR} )
 
 #================================
 # Define output
@@ -186,8 +183,8 @@ ENDIF( CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64" )
 # Define include dir for
 # dependent projects
 #================================
-SET( IGNS_IBISLIB_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/gui CACHE PATH "Include directory for IbisLib header files" )
-MARK_AS_ADVANCED( IGNS_IBISLIB_INCLUDE_DIR )
+SET( IBISLIB_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/gui CACHE PATH "Include directory for IbisLib header files" )
+MARK_AS_ADVANCED( IBISLIB_INCLUDE_DIR )
 
 set (UI_FILES "ui*")
 set (MOC_FILES "moc*")

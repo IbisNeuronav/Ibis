@@ -1,5 +1,3 @@
-PROJECT( IGNS_VTK_TRACKER )
-
 #================================
 # Source files
 #

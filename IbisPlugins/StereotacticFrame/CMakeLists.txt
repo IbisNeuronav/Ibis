@@ -1,5 +1,3 @@
-project( ${PluginName} )
-
 # define sources
 set( PluginSrc stereotacticframeplugininterface.cpp stereotacticframewidget.cpp )
 set( PluginHdrMoc stereotacticframewidget.h stereotacticframeplugininterface.h )

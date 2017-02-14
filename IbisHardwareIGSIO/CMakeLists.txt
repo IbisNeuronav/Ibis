@@ -4,7 +4,7 @@ add_definitions( -DQT_STATICPLUGIN )
 #================================
 # Includes dir for other Ibis libs
 #================================
-include_directories( ${IGNS_IBISLIB_INCLUDE_DIR} )
+include_directories( ${IBISLIB_INCLUDE_DIR} )
 
 #================================
 # Find OpenIGTLink, OpenIGTLinkIO

@@ -13,7 +13,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/CMakeCommon ${CMAKE_MODULE_PAT
 INCLUDE(${CMAKE_COMMON_DIR}/InstallLocation.cmake)
 #======================================================
 
-PROJECT( Ibis )
+PROJECT( ibis )
 
 INCLUDE(CMakeDependentOption)
 

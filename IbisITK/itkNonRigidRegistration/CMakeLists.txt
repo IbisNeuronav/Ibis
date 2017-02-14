@@ -1,5 +1,3 @@
-PROJECT( IGNS_ITK_NONRIGID_REGISTRATION )
-
 #================================
 # Define sources
 #================================
@@ -30,8 +28,6 @@ SET( IGNS_ITK_NONRIGID_REGISTRATION_HDR
     vnl_sd_matrix_tools.h   
     itkGradientOrientationDifferenceFilter.h
 )
-
-include_directories( ${IGNS_ITK_INCLUDE_DIR} ) 
 
 # install
 if( IGNS_INSTALL_LIBS_AND_HEADERS )

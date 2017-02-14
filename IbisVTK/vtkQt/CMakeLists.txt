@@ -1,6 +1,4 @@
-PROJECT( IGNS_VTK_QT )
-
-SET( IGNS_VTK_QT_SRC
+SET( IBIS_VTK_QT_SRC
            vtkQtImageViewer.cpp
            vtkQtMatrixDialog.cpp
            vtkQtHistogramWidget.cpp
@@ -8,43 +6,35 @@ SET( IGNS_VTK_QT_SRC
            vtkQtColorTransferFunctionWidget.cpp
            vtkqtrenderwindow.cpp )
 
-SET( IGNS_VTK_QT_HDR_MOC vtkQtImageViewer.h vtkQtMatrixDialog.h vtkqtrenderwindow.h )
-set( IGNS_VTK_QT_PLUGIN_HDR_MOC vtkQtHistogramWidget.h vtkQtPiecewiseFunctionWidget.h vtkQtColorTransferFunctionWidget.h )
+SET( IBIS_VTK_QT_HDR_MOC vtkQtImageViewer.h vtkQtMatrixDialog.h vtkqtrenderwindow.h )
+set( IBIS_VTK_QT_PLUGIN_HDR_MOC vtkQtHistogramWidget.h vtkQtPiecewiseFunctionWidget.h vtkQtColorTransferFunctionWidget.h )
 
 if(APPLE)
-    set( IGNS_VTK_QT_SRC ${IGNS_VTK_QT_SRC} retinadisplayhack.mm retinadisplayhack.h )
+    set( IBIS_VTK_QT_SRC ${IBIS_VTK_QT_SRC} retinadisplayhack.mm retinadisplayhack.h )
 endif()
 
 # moc Qt source file without a ui file
-qt5_wrap_cpp( IGNS_VTK_QT_MOC ${IGNS_VTK_QT_HDR_MOC} )
-qt5_wrap_cpp( IGNS_VTK_QT_PLUGIN_MOC ${IGNS_VTK_QT_PLUGIN_HDR_MOC} )
+qt5_wrap_cpp( IBIS_VTK_QT_MOC ${IBIS_VTK_QT_HDR_MOC} )
+qt5_wrap_cpp( IBIS_VTK_QT_PLUGIN_MOC ${IBIS_VTK_QT_PLUGIN_HDR_MOC} )
 
 INCLUDE_DIRECTORIES(${QT_EXTENSIONS_INCLUDE_DIR})
 
 #================================
 # Define sources
 #================================
-INCLUDE_DIRECTORIES(${VTK_MNI_INCLUDE_DIR})
+INCLUDE_DIRECTORIES(${IBIS_VTK_INCLUDE_DIR})
 
-set( vtkQt_all_src ${IGNS_VTK_QT_SRC} ${IGNS_VTK_QT_HDR} ${IGNS_VTK_QT_HDR_MOC} ${IGNS_VTK_QT_MOC} ${IGNS_VTK_QT_PLUGING_HDR_MOC} ${IGNS_VTK_QT_PLUGIN_MOC} )
+set( vtkQt_all_src ${IBIS_VTK_QT_SRC} ${IBIS_VTK_QT_HDR} ${IBIS_VTK_QT_HDR_MOC} ${IBIS_VTK_QT_MOC} ${IBIS_VTK_QT_PLUGING_HDR_MOC} ${IBIS_VTK_QT_PLUGIN_MOC} )
 ADD_LIBRARY( vtkQt  ${vtkQt_all_src} )
 
 IF( CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64" )
   SET_TARGET_PROPERTIES( vtkQt PROPERTIES COMPILE_FLAGS "-fPIC")
 ENDIF( CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64" )
 
-if( IGNS_INSTALL_LIBS_AND_HEADERS )
+if( IBIS_INSTALL_LIBS_AND_HEADERS )
     INSTALL_TARGETS(/lib vtkQt)
-    INSTALL_FILES(/include FILES ${IGNS_VTK_QT_HDR} )
-endif( IGNS_INSTALL_LIBS_AND_HEADERS )
-
-#================================
-# Define include dir for
-# dependent projects
-#================================
-SET( IGNS_VTK_QT_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR} CACHE PATH "Include directory for vtkQt .h files" )
-MARK_AS_ADVANCED( IGNS_VTK_QT_INCLUDE_DIR )
-
+    INSTALL_FILES(/include FILES ${IBIS_VTK_QT_HDR} )
+endif( IBIS_INSTALL_LIBS_AND_HEADERS )
 
 #================================
 # Build plugin that allows
@@ -68,7 +58,7 @@ set( vtkQtPluginHdrMoc vtkQtPlugin.h )
 qt5_wrap_cpp( vtkQtPluginSrcMoc ${vtkQtPluginHdrMoc} )
 
 # add vtkQtPlugin from sources
-#ADD_LIBRARY( vtkQtPlugin SHARED ${vtkQtPluginSrc} ${vtkQtPluginSrcMoc} ${vtkQtPluginHdrMoc} ${IGNS_VTK_QT_PLUGING_HDR_MOC} ${IGNS_VTK_QT_PLUGIN_MOC} )
+#ADD_LIBRARY( vtkQtPlugin SHARED ${vtkQtPluginSrc} ${vtkQtPluginSrcMoc} ${vtkQtPluginHdrMoc} ${IBIS_VTK_QT_PLUGING_HDR_MOC} ${IBIS_VTK_QT_PLUGIN_MOC} )
 
 # link with release version of Qt libs
 

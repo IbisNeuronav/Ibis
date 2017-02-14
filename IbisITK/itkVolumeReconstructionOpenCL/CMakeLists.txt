@@ -1,5 +1,3 @@
-PROJECT( IGNS_ITK_VOLUME_RECONSTRUCTION_OPENCL )
-
 #================================
 # Define sources
 #================================

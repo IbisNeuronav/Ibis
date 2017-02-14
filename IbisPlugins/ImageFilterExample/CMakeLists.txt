@@ -1,5 +1,3 @@
-project( ${PluginName} )
-
 # define sources
 set( PluginSrc imagefilterexampleplugininterface.cpp imagefilterexamplewidget.cpp )
 set( PluginHdrMoc imagefilterexamplewidget.h imagefilterexampleplugininterface.h )

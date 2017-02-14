@@ -1,5 +1,3 @@
-PROJECT( IGNS_VTK_EXTENSIONS )
-
 #================================
 # Define sources
 #================================
@@ -40,8 +38,6 @@ SET( IGNS_VTK_EXTENSIONS_HDR
     GlslShader.h
     DrawableTexture.h )
 
-include_directories( ${IGNS_VTK_INCLUDE_DIR} )            # This is for Igns/vtk general include files
-
 #================================
 # Define output
 #================================
@@ -56,11 +52,4 @@ if( IGNS_INSTALL_LIBS_AND_HEADERS )
     INSTALL_TARGETS(/lib vtkExtensions)
     INSTALL_FILES(/include FILES ${IGNS_VTK_EXTENSIONS_HDR} ${CMAKE_CURRENT_SOURCE_DIR}/../vtkIgnsEvents.h)
 endif( IGNS_INSTALL_LIBS_AND_HEADERS )
-
-#================================
-# Define include dir for
-# dependent projects
-#================================
-SET( VTK_EXTENSIONS_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR} CACHE PATH "Include directory for vtkExtensions .h files" )
-MARK_AS_ADVANCED( VTK_EXTENSIONS_INCLUDE_DIR )
 

@@ -1,5 +1,3 @@
-project( ${PluginName} )
-
 #================================
 # Create custom commands to
 # encode each glsl file into a

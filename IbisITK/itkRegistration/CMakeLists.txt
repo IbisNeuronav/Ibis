@@ -1,5 +1,3 @@
-PROJECT( IGNS_ITK_REGISTRATION )
-
 #================================
 # Define sources
 #================================
@@ -84,9 +82,6 @@ SET( IGNS_ITK_REGISTRATION_LIB_HDR
     itkScaledSingleValuedNonLinearOptimizer.h
     itkScaledSingleValuedCostFunction.h
 )
-
-include_directories( ${IGNS_ITK_INCLUDE_DIR} ) 
-
 
 #================================
 # Define output

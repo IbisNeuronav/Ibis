@@ -1,5 +1,3 @@
-project( ${PluginName} )
-
 # define sources
 set( PluginSrc landmarkregistrationobjectplugininterface.cpp landmarkregistrationobject.cpp landmarktransform.cpp landmarkregistrationobjectsettingswidget.cpp landmarkregistrationobjectwidget.cpp )
 set( PluginHdr landmarktransform.h )
