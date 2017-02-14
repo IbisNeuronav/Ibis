@@ -95,10 +95,10 @@ ENDIF( BUILD_SHARED_LIBS )
 target_link_libraries( itkRegistration ${ITK_LIBRARIES} )
 
 # install
-if( IGNS_INSTALL_LIBS_AND_HEADERS )
+if( IBIS_INSTALL_LIBS_AND_HEADERS )
     INSTALL_TARGETS(/lib itkRegistration)
     INSTALL_FILES(/include FILES ${IGNS_ITK_REGISTRATION_HDR})
-endif( IGNS_INSTALL_LIBS_AND_HEADERS )
+endif( IBIS_INSTALL_LIBS_AND_HEADERS )
 
 #================================
 # Define include dir for

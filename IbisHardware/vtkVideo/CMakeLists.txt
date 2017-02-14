@@ -61,10 +61,10 @@ include_directories( ${IBIS_VTK_INCLUDE_DIR} )
 #================================
 ADD_LIBRARY( vtkVideo ${IGNS_VTK_VIDEO_SRC} ${IGNS_VTK_VIDEO_HDR} )
 
-if( IGNS_INSTALL_LIBS_AND_HEADERS )
+if( IBIS_INSTALL_LIBS_AND_HEADERS )
     INSTALL_TARGETS(/lib vtkVideo)
     INSTALL_FILES(/include FILES ${IGNS_VTK_VIDEO_HDR})
-endif( IGNS_INSTALL_LIBS_AND_HEADERS )
+endif( IBIS_INSTALL_LIBS_AND_HEADERS )
 
 #================================
 # Define include dir for

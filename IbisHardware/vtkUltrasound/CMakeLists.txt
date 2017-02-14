@@ -10,10 +10,10 @@ INCLUDE_DIRECTORIES( ${IBIS_VTK_INCLUDE_DIR} )  # for vtkExtensions
 
 ADD_LIBRARY( vtkUltrasound ${IGNS_VTK_ULTRASOUND_SRC} ${IGNS_VTK_ULTRASOUND_HDR} )
 
-if( IGNS_INSTALL_LIBS_AND_HEADERS )
+if( IBIS_INSTALL_LIBS_AND_HEADERS )
     INSTALL_TARGETS(/lib vtkUltrasound)
     INSTALL_FILES(/include FILES ${IGNS_VTK_ULTRASOUND_HDR})
-endif( IGNS_INSTALL_LIBS_AND_HEADERS )
+endif( IBIS_INSTALL_LIBS_AND_HEADERS )
 
 #================================
 # Define include dir for

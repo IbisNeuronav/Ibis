@@ -45,10 +45,10 @@ ENDIF( BUILD_SHARED_LIBS )
 target_link_libraries( itkVolumeReconstructionOpenCL ${ITK_LIBRARIES}  ${OPENCL_LIBRARIES})
 
 # install
-if( IGNS_INSTALL_LIBS_AND_HEADERS )
+if( IBIS_INSTALL_LIBS_AND_HEADERS )
     INSTALL_TARGETS(/lib itkVolumeReconstructionOpenCL)
     INSTALL_FILES(/include FILES ${IGNS_ITK_VOLUME_RECONSTRUCTION_OPENCL_HDR})
-endif( IGNS_INSTALL_LIBS_AND_HEADERS )
+endif( IBIS_INSTALL_LIBS_AND_HEADERS )
 
 #================================
 # Define include dir for
