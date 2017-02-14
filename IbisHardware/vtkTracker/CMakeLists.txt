@@ -62,9 +62,3 @@ if( IBIS_INSTALL_LIBS_AND_HEADERS )
     INSTALL_TARGETS(/lib vtkTracker ndicapi)
     INSTALL_FILES(/include .+h$)
 endif( IBIS_INSTALL_LIBS_AND_HEADERS )
-
-#================================
-# Define include dir for
-# dependent projects
-#================================
-SET( VTK_TRACKER_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE )

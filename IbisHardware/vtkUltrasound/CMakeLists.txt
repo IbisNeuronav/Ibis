@@ -14,10 +14,3 @@ if( IBIS_INSTALL_LIBS_AND_HEADERS )
     INSTALL_TARGETS(/lib vtkUltrasound)
     INSTALL_FILES(/include FILES ${ULTRASOUND_HDR})
 endif( IBIS_INSTALL_LIBS_AND_HEADERS )
-
-#================================
-# Define include dir for
-# dependent projects
-#================================
-SET( VTK_ULTRASOUND_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE )
-
