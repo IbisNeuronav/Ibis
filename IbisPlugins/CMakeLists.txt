@@ -1,6 +1,5 @@
 # at least for now, we will provide all plugins with the include dirs they might need
 include_directories( ${IBIS_VTK_INCLUDE_DIR} )
-include_directories( ${IGNS_VTKIBIS_VOLUME_RENDERING_INCLUDE_DIR} )
 include_directories( ${IBISLIB_INCLUDE_DIR} )
 include_directories( ${IBISLIB_INCLUDE_DIR}/gui )
 include_directories( ${IBISLIB_BINARY_DIR} )    # include qt-generated headers
