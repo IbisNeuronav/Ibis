@@ -1,14 +1,14 @@
 #================================
 # Define sources
 #================================
-SET( IGNS_VTK_MNI_SRC
+SET( VTK_MNI_SRC
     vtkMNIOBJReader.cxx
     vtkTagReader.cxx
     vtkTagWriter.cxx 
     vtkXFMReader.cxx
     vtkXFMWriter.cxx )
 
-SET( IGNS_VTK_MNI_HDR
+SET( VTK_MNI_HDR
     vtkMNIOBJReader.h
     vtkTagReader.h
     vtkTagWriter.h
@@ -20,7 +20,7 @@ include_directories( ${IBIS_VTK_INCLUDE_DIR} )
 #================================
 # Define output
 #================================
-ADD_LIBRARY( vtkMNI ${IGNS_VTK_MNI_SRC} ${IGNS_VTK_MNI_HDR} )
+ADD_LIBRARY( vtkMNI ${VTK_MNI_SRC} ${VTK_MNI_HDR} )
 
 if( IBIS_INSTALL_LIBS_AND_HEADERS )
     INSTALL_TARGETS(/lib vtkMNI)
