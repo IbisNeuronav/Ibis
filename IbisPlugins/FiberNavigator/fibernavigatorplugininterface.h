@@ -35,7 +35,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include <vtkAbstractTransform.h>
 #include <vtkActor.h>
-#include "vtkBoxWidget2.h"
+#include <vtkBoxWidget2.h>
 #include <vtkCellArray.h>
 #include <vtkEventQtSlotConnect.h>
 #include <vtkImageData.h>
@@ -43,20 +43,15 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <vtkPointData.h>
 #include <vtkPolyDataMapper.h>
 #include <vtkSmartPointer.h>
-#include "vtkTransform.h"
+#include <vtkTransform.h>
 #include <vtkTransformPolyDataFilter.h>
 #include <vtkTransformFilter.h>
-#include "vtkTubeFilter.h"
+#include <vtkTubeFilter.h>
 #include <vtkRenderer.h>
 #include <vtkUnsignedCharArray.h>
-#include "vtkWidgetRepresentation.h"
+#include <vtkWidgetRepresentation.h>
 
 typedef QList< SceneObject* > ObjectList;
-
-class PolyDataObject;
-class vtkBoxWidget2;
-class vtkEventQtSlotConnect;
-class vtkQtRenderWindow;
 
 class FiberNavigatorPluginInterface : public QObject, public ToolPluginInterface
 {
