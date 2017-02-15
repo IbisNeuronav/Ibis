@@ -53,7 +53,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 typedef QList< SceneObject* > ObjectList;
 
-class vtkTubeFilter;
 class PolyDataObject;
 class vtkBoxWidget2;
 class vtkEventQtSlotConnect;
