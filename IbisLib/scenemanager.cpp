@@ -62,7 +62,7 @@ SceneManager::SceneManager()
     this->ViewBackgroundColor[1] = 0;
     this->ViewBackgroundColor[2] = 0;
     this->CameraViewAngle3D = 30.0;
-    this->SupportedSceneSaveVersion = IGNS_SCENE_SAVE_VERSION;
+    this->SupportedSceneSaveVersion = IBIS_SCENE_SAVE_VERSION;
     this->NavigationPointerID = SceneObject::InvalidObjectId;
     this->IsNavigating = false;
     this->LoadingScene = false;
@@ -375,7 +375,7 @@ void SceneManager::SaveScene( QString & fileName )
     writer.SetFilename( fileName.toUtf8().data() );
     writer.Start();
     writer.BeginSection("SaveScene");
-    QString version(IGNS_SCENE_SAVE_VERSION);
+    QString version(IBIS_SCENE_SAVE_VERSION);
     ::Serialize( &writer, "Version", version);
     ::Serialize( &writer, "NextObjectID", this->NextObjectID);
     this->UpdateProgress(1);

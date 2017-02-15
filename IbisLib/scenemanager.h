@@ -43,7 +43,7 @@ class PointerObject;
 class vtkInteractor;
 
 // Scene file format version
-#define IGNS_SCENE_SAVE_VERSION "6.0"
+#define IBIS_SCENE_SAVE_VERSION "6.0"
 
 // Description:
 // This class is the main interface for all 3D display. It manages the hierarchy
