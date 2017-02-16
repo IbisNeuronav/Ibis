@@ -1,5 +1,3 @@
-PROJECT( svl )
-
 IF(UNIX)
 	SET( VL_HAS_ABSF 1 )
 	SET( VL_HAS_DRAND 1 )

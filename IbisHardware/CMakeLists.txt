@@ -5,21 +5,14 @@ add_subdirectory( vtkTracker )
 add_subdirectory( vtkVideo )
 add_subdirectory( vtkUltrasound )
 
+
 #================================
 # Includes dir for other Ibis libs
 #================================
-include_directories( ${IGNS_VTK_QT_INCLUDE_DIR} )
-include_directories( ${VTK_TRACKER_INCLUDE_DIR} )
-include_directories( ${VTK_EXTENSIONS_INCLUDE_DIR} )
-include_directories( ${VTK_VIDEO_INCLUDE_DIR} )
-include_directories( ${VTK_ULTRASOUND_INCLUDE_DIR} )
-include_directories( ${VTK_MNI_INCLUDE_DIR} )
-include_directories( ${VTK_MINC_INCLUDE_DIR} )
-include_directories( ${IGNS_VTKIBIS_VOLUME_RENDERING_INCLUDE_DIR} )
-include_directories( ${IGNS_VTK_INCLUDE_DIR} )
-include_directories( ${IGNS_IBISLIB_INCLUDE_DIR} )
-include_directories( ${IGNS_IBISLIB_INCLUDE_DIR}/gui )
-include_directories( ${IGNS_IBISLIB_BINARY_DIR} )    # include qt-generated headers
+include_directories( ${IBIS_VTK_INCLUDE_DIR} )
+include_directories( ${IBISLIB_INCLUDE_DIR} )
+include_directories( ${IBISLIB_INCLUDE_DIR}/gui )
+include_directories( ${IBISLIB_BINARY_DIR} )    # include qt-generated headers
 
 
 # Define sources
@@ -38,7 +31,7 @@ qt5_wrap_cpp( IbisHardwareMoc ${IbisHardwareHdrMoc} )
 qt5_wrap_ui( IbisHardwareUiHdr ${IbisHardwareUi} )
 
 
-set( ignsLibsToUse vtkVideo vtkQt vtkTracker vtkUltrasound  )
+set( libsToUse vtkVideo vtkQt vtkTracker vtkUltrasound  )
 
 #================================
 # Define output
@@ -48,8 +41,10 @@ include_directories( ${CMAKE_CURRENT_BINARY_DIR} )           # for files generat
 set( IbisHardwareSrcAll ${IbisHardwareSrc} ${IbisHardwareHdr} ${IbisHardwareHdrMoc} ${IbisHardwareMoc} ${IbisHardwareUiHdr} )
 add_library( IbisHardware ${IbisHardwareSrcAll} )
 
+target_include_directories( IbisHardware PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/vtkTracker ${CMAKE_CURRENT_SOURCE_DIR}/vtkVideo ${CMAKE_CURRENT_SOURCE_DIR}/vtkUltrasound )
+
 # append necessary libraries to the list for ibis to link
-set( HardwareModulesLibs ${HardwareModulesLibs} IbisHardware ${ignsLibsToUse} PARENT_SCOPE )
+set( HardwareModulesLibs ${HardwareModulesLibs} IbisHardware ${libsToUse} PARENT_SCOPE )
 
 IF( CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64" )
   SET_TARGET_PROPERTIES( IbisHardware PROPERTIES COMPILE_FLAGS "-fPIC")

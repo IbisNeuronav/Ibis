@@ -20,7 +20,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 class vtkPolyData;
 class vtkTransform;
 class vtkActor;
-class vtkTubeFilter;
 class vtkDataSetAlgorithm;
 class vtkImageData;
 class vtkProbeFilter;

@@ -1,5 +1,3 @@
-project( ${PluginName} )
-
 # define sources
 set( PluginSrc
         gpu_volumereconstructionplugininterface.cpp

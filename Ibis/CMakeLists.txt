@@ -1,28 +1,26 @@
-PROJECT ( IGNS_IBIS )
+PROJECT ( IBIS )
 
 # define sources
-SET( IGNS_IBIS_SRC main.cpp commandlinearguments.cpp )
-SET( IGNS_IBIS_HDR commandlinearguments.h )
+SET( IBIS_SRC main.cpp commandlinearguments.cpp )
+SET( IBIS_HDR commandlinearguments.h )
 set( exec_name ibis )
 
 # option to turn on vtk warnings
-OPTION( IGNS_ENABLE_VTK_WARNINGS "Enable vtk warnings in the terminal" OFF )
-if( NOT IGNS_ENABLE_VTK_WARNINGS )
+OPTION( IBIS_ENABLE_VTK_WARNINGS "Enable vtk warnings in the terminal" OFF )
+if( NOT IBIS_ENABLE_VTK_WARNINGS )
     add_definitions (-DVTK_NO_WARNINGS )
 endif()
 
 # moc Qt source file without a ui file
-qt5_wrap_cpp( IGNS_IBIS_MOC ${IGNS_IBIS_HDR_MOC} )
+qt5_wrap_cpp( IBIS_MOC ${IBIS_HDR_MOC} )
 
 # make rules to create c++ source from Qt resource files
 
-# Define include directories for other Igns libs
-include_directories( ${IGNS_VTK_QT_INCLUDE_DIR} )
-include_directories( ${VTK_EXTENSIONS_INCLUDE_DIR} )
-include_directories( ${IGNS_IBISLIB_INCLUDE_DIR} )
-include_directories( ${IGNS_IBISLIB_INCLUDE_DIR}/gui )
-include_directories( ${IGNS_IBISLIB_BINARY_DIR} )    # include qt-generated headers 
-include_directories( ${IGNS_IBIS_BINARY_DIR} )     # needed to include qt-generated source files
+# Define include directories for other ibis libs
+include_directories( ${IBIS_VTK_INCLUDE_DIR} )
+include_directories( ${IBISLIB_INCLUDE_DIR} )
+include_directories( ${IBISLIB_INCLUDE_DIR}/gui )
+include_directories( ${IBISLIB_BINARY_DIR} )    # include qt-generated headers
 
 # Generate the file that is going to import the plugins
 set( ImportPluginsSourceFile ${CMAKE_CURRENT_BINARY_DIR}/importplugins.cpp )
@@ -57,7 +55,7 @@ if(APPLE)
     set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/icons/ibis.icns PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
 
     # include the icns file in the target
-    set( IGNS_IBIS_SRC_ICNS ${CMAKE_CURRENT_SOURCE_DIR}/icons/ibis.icns )
+    set( IBIS_SRC_ICNS ${CMAKE_CURRENT_SOURCE_DIR}/icons/ibis.icns )
 
     # make sure we create an app bundle and not a standalone executable
     set( executable_flags MACOSX_BUNDLE )
@@ -66,8 +64,7 @@ endif(APPLE)
 #================================
 # Define executable
 #================================
-#SET( SOURCE ${IGNS_IBIS_HDR} ${IGNS_IBIS_HDR_MOC} ${IGNS_IBIS_SRC} ${ImportPluginsSourceFile} ${IGNS_IBIS_MOC} ${IGNS_IBIS_RCC_SRC} ${IGNS_IBIS_SRC_ICNS} )
-SET( SOURCE ${IGNS_IBIS_HDR} ${IGNS_IBIS_HDR_MOC} ${IGNS_IBIS_SRC} ${ImportPluginsSourceFile} ${IGNS_IBIS_MOC} ${IGNS_IBIS_SRC_ICNS} )
+SET( SOURCE ${IBIS_HDR} ${IBIS_HDR_MOC} ${IBIS_SRC} ${ImportPluginsSourceFile} ${IBIS_MOC} ${IBIS_SRC_ICNS} )
 ADD_EXECUTABLE( ${exec_name} ${executable_flags} ${SOURCE} )
 
 if (APPLE)
@@ -94,13 +91,13 @@ IF( OPENCL_FOUND )
 ENDIF()
 
 
-set( ignsLibsToUse IbisLib  vtkQt  vtkMNI vtkExtensions )
+set( libsToUse IbisLib  vtkQt  vtkMNI vtkExtensions )
 
 if( USE_POINT_GREY_CAMERA )
     set( flycaptureLib flycapture )
 endif()
 
-TARGET_LINK_LIBRARIES( ${exec_name} ${PluginLibs} ${PluginExternalLibs} ${HardwareModulesLibs} ${ignsLibsToUse} ${QT_LIBRARIES}
+TARGET_LINK_LIBRARIES( ${exec_name} ${PluginLibs} ${PluginExternalLibs} ${HardwareModulesLibs} ${libsToUse} ${QT_LIBRARIES}
                                     ${VTK_LIBRARIES} ${MINC4ITK_LIBRARIES}
                                     ${itkLibsToUse} ${OpenCV_LIBS} ${flycaptureLib} svl ${gpuLibs} )
 qt5_use_modules( ${exec_name} Widgets Xml )

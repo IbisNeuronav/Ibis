@@ -1,9 +1,7 @@
-PROJECT( IGNS_ITK_REGISTRATION )
-
 #================================
 # Define sources
 #================================
-SET( IGNS_ITK_REGISTRATION_SRC
+SET( IBIS_ITK_REGISTRATION_SRC
     itkAdvancedImageToImageMetric.hxx
     itkAdvancedOrientationMatchingBetaImageToImageMetric.hxx
     itkDiscreteGaussianGradientImageFilter.txx
@@ -36,7 +34,7 @@ SET( IGNS_ITK_REGISTRATION_SRC
     itkUSCalibrationTransform.hxx
 )
 
-SET( IGNS_ITK_REGISTRATION_HDR
+SET( IBIS_ITK_REGISTRATION_HDR
     itkAdvancedImageToImageMetric.h
     itkAdvancedOrientationMatchingBetaImageToImageMetric.h
     itkDiscreteGaussianGradientImageFilter.h
@@ -73,37 +71,34 @@ SET( IGNS_ITK_REGISTRATION_HDR
     itkUSCalibrationTransform.h
 )
 
-SET( IGNS_ITK_REGISTRATION_LIB_SRC
+SET( IBIS_ITK_REGISTRATION_LIB_SRC
     itkCMAEvolutionStrategyOptimizer.cxx
     itkScaledSingleValuedNonLinearOptimizer.cxx
     itkScaledSingleValuedCostFunction.cxx
 )
 
-SET( IGNS_ITK_REGISTRATION_LIB_HDR
+SET( IBIS_ITK_REGISTRATION_LIB_HDR
     itkCMAEvolutionStrategyOptimizer.h
     itkScaledSingleValuedNonLinearOptimizer.h
     itkScaledSingleValuedCostFunction.h
 )
 
-include_directories( ${IGNS_ITK_INCLUDE_DIR} ) 
-
-
 #================================
 # Define output
 #================================
 IF (BUILD_SHARED_LIBS)
-   ADD_LIBRARY( itkRegistration SHARED ${IGNS_ITK_REGISTRATION_LIB_SRC} ${IGNS_ITK_REGISTRATION_LIB_HDR} )
+   ADD_LIBRARY( itkRegistration SHARED ${IBIS_ITK_REGISTRATION_LIB_SRC} ${IBIS_ITK_REGISTRATION_LIB_HDR} )
 ELSE( BUILD_SHARED_LIBS )
-   ADD_LIBRARY( itkRegistration ${IGNS_ITK_REGISTRATION_LIB_SRC} ${IGNS_ITK_REGISTRATION_LIB_HDR} )
+   ADD_LIBRARY( itkRegistration ${IBIS_ITK_REGISTRATION_LIB_SRC} ${IBIS_ITK_REGISTRATION_LIB_HDR} )
 ENDIF( BUILD_SHARED_LIBS )
 
 target_link_libraries( itkRegistration ${ITK_LIBRARIES} )
 
 # install
-if( IGNS_INSTALL_LIBS_AND_HEADERS )
+if( IBIS_INSTALL_LIBS_AND_HEADERS )
     INSTALL_TARGETS(/lib itkRegistration)
-    INSTALL_FILES(/include FILES ${IGNS_ITK_REGISTRATION_HDR})
-endif( IGNS_INSTALL_LIBS_AND_HEADERS )
+    INSTALL_FILES(/include FILES ${IBIS_ITK_REGISTRATION_HDR})
+endif( IBIS_INSTALL_LIBS_AND_HEADERS )
 
 #================================
 # Define include dir for

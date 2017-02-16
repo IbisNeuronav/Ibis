@@ -1,5 +1,3 @@
-project( ${PluginName} )
-
 # define sources
 set( PluginSrc contoursurfaceplugininterface.cpp generatedsurface.cpp surfacesettingswidget.cpp )
 set( PluginHdrMoc contoursurfaceplugininterface.h surfacesettingswidget.h )

@@ -1,5 +1,3 @@
-PROJECT( IGNS_VTK_TRACKER )
-
 #================================
 # Source files
 #
@@ -60,13 +58,7 @@ ADD_LIBRARY (ndicapi ${NDI_SRCS} ${NDI_HDRS} )
 
 TARGET_LINK_LIBRARIES(vtkTracker ndicapi)
 
-if( IGNS_INSTALL_LIBS_AND_HEADERS )
+if( IBIS_INSTALL_LIBS_AND_HEADERS )
     INSTALL_TARGETS(/lib vtkTracker ndicapi)
     INSTALL_FILES(/include .+h$)
-endif( IGNS_INSTALL_LIBS_AND_HEADERS )
-
-#================================
-# Define include dir for
-# dependent projects
-#================================
-SET( VTK_TRACKER_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR} PARENT_SCOPE )
+endif( IBIS_INSTALL_LIBS_AND_HEADERS )

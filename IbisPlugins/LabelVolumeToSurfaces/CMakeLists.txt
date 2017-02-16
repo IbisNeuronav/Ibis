@@ -1,5 +1,3 @@
-project( ${PluginName} )
-
 # define sources
 set( PluginSrc labelvolumetosurfacesplugininterface.cpp )
 set( PluginHdrMoc labelvolumetosurfacesplugininterface.h )

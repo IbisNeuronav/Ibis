@@ -1,5 +1,3 @@
-project( ${PluginName} )
-
 # define sources
 set( PluginSrc frameratetesterplugininterface.cpp frameratetesterwidget.cpp )
 set( PluginHdrMoc frameratetesterwidget.h frameratetesterplugininterface.h )

@@ -1,18 +1,8 @@
-project( IGNS_IBIS_PLUGINS )
-
 # at least for now, we will provide all plugins with the include dirs they might need
-include_directories( ${IGNS_VTK_QT_INCLUDE_DIR} )
-include_directories( ${IGNS_VTK_INCLUDE_DIR} )
-include_directories( ${VTK_TRACKER_INCLUDE_DIR} )
-include_directories( ${VTK_VIDEO_INCLUDE_DIR} )
-include_directories( ${VTK_EXTENSIONS_INCLUDE_DIR} )
-include_directories( ${VTK_MINC_INCLUDE_DIR} )
-include_directories( ${VTK_MNI_INCLUDE_DIR} )
-include_directories( ${VTK_ULTRASOUND_INCLUDE_DIR} )
-include_directories( ${IGNS_VTKIBIS_VOLUME_RENDERING_INCLUDE_DIR} )
-include_directories( ${IGNS_IBISLIB_INCLUDE_DIR} )
-include_directories( ${IGNS_IBISLIB_INCLUDE_DIR}/gui )
-include_directories( ${IGNS_IBISLIB_BINARY_DIR} )    # include qt-generated headers 
+include_directories( ${IBIS_VTK_INCLUDE_DIR} )
+include_directories( ${IBISLIB_INCLUDE_DIR} )
+include_directories( ${IBISLIB_INCLUDE_DIR}/gui )
+include_directories( ${IBISLIB_BINARY_DIR} )    # include qt-generated headers
 
 # Needed to build static plugins properly
 add_definitions( -DQT_STATICPLUGIN )

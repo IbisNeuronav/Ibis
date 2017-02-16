@@ -1,5 +1,3 @@
-project( ${PluginName} )
-
 # define sources
 set( PluginSrc usacquisitionplugininterface.cpp doubleviewwidget.cpp )
 set( PluginHdrMoc usacquisitionplugininterface.h doubleviewwidget.h )
