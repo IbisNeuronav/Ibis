@@ -52,9 +52,11 @@ include( ${ITK_USE_FILE} )
 #==================================================================
 # Look for OpenCV (required by some plugins, but not the main app)
 #==================================================================
-set( AutoOpenCVPath ${IBIS_EXTERNAL_DEPENDENCIES_DIR}/opencv-${IBIS_OPENCV_LONG_VERSION}/install/share/OpenCV )
-find_package( OpenCV REQUIRED PATHS ${AutoOpenCVPath} )
-include_directories( ${OpenCV_INCLUDE_DIRS} )
+if( DEFINED OpenCV_DIR )
+    set( AutoOpenCVPath ${IBIS_EXTERNAL_DEPENDENCIES_DIR}/opencv-${IBIS_OPENCV_LONG_VERSION}/install/share/OpenCV )
+    find_package( OpenCV REQUIRED PATHS ${AutoOpenCVPath} )
+    include_directories( ${OpenCV_INCLUDE_DIRS} )
+endif()
 
 #==================================================================
 # Include linux include directories, needed for kernel 2.6.x+
