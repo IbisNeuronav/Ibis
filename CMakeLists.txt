@@ -53,6 +53,7 @@ include( ${ITK_USE_FILE} )
 # Look for OpenCV (required by some plugins, but not the main app)
 #==================================================================
 if( DEFINED OpenCV_DIR )
+message( "!!!!!!!!!!!!! defined OpenCV_Installed" )
     set( AutoOpenCVPath ${IBIS_EXTERNAL_DEPENDENCIES_DIR}/opencv-${IBIS_OPENCV_LONG_VERSION}/install/share/OpenCV )
     find_package( OpenCV REQUIRED PATHS ${AutoOpenCVPath} )
     include_directories( ${OpenCV_INCLUDE_DIRS} )
@@ -85,6 +86,9 @@ include_directories( ${svlIncludeDir} )
 #==================================================================
 add_subdirectory( IbisITK )
 add_subdirectory( IbisVTK )
+if( DEFINED OpenCV_DIR )
+    add_subdirectory( IbisOpenCV )
+endif()
 
 # define version and build info
 set( IBIS_MAJOR_VERSION 3 )
