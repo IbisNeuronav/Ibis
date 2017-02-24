@@ -153,16 +153,6 @@ double WorldObject::GetUpdateFrequency()
     return Application::GetInstance().GetUpdateFrequency();
 }
 
-void WorldObject::SetNumberOfImageProcessingThreads( int nbThreads )
-{
-    Application::GetInstance().SetNumberOfImageProcessingThreads( nbThreads );
-}
-
-int WorldObject::GetNumberOfImageProcessingThreads()
-{
-    return Application::GetInstance().GetNumberOfImageProcessingThreads();
-}
-
 QWidget * WorldObject::CreateSettingsDialog( QWidget * parent )
 {
     WorldObjectSettingsWidget * res = new WorldObjectSettingsWidget( parent );

@@ -60,8 +60,6 @@ public:
 
     void SetUpdateFrequency( double fps );
     double GetUpdateFrequency();
-    void SetNumberOfImageProcessingThreads( int nbThreads );
-    int GetNumberOfImageProcessingThreads();
 
     virtual QWidget * CreateSettingsDialog( QWidget * parent );
     virtual void CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets) {}

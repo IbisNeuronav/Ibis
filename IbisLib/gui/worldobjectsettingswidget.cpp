@@ -132,10 +132,6 @@ void WorldObjectSettingsWidget::UpdateUi()
         ui->cameraAngleSpinBox->setValue( (int)m_worldObject->Get3DCameraViewAngle() );
         ui->cameraAngleSpinBox->blockSignals( false );
 
-        ui->numberOfThreadsSpinBox->blockSignals( true );
-        ui->numberOfThreadsSpinBox->setValue( m_worldObject->GetNumberOfImageProcessingThreads() );
-        ui->numberOfThreadsSpinBox->blockSignals( false );
-
         int updateFrequencyIndex = GetUpdateFrequencyIndex( m_worldObject->GetUpdateFrequency() );
         ui->updateMaxFrequencySlider->blockSignals( true );
         ui->updateMaxFrequencySlider->setValue( updateFrequencyIndex );
@@ -152,12 +148,6 @@ int WorldObjectSettingsWidget::GetUpdateFrequencyIndex( double fps )
             return i;
     }
     return 0;
-}
-
-void WorldObjectSettingsWidget::on_numberOfThreadsSpinBox_valueChanged( int value )
-{
-    m_worldObject->SetNumberOfImageProcessingThreads( value );
-    UpdateUi();
 }
 
 void WorldObjectSettingsWidget::on_updateMaxFrequencySlider_valueChanged( int value )

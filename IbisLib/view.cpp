@@ -25,6 +25,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "scenemanager.h"
 #include "sceneobject.h"
 #include "imageobject.h"
+#include "SVL.h"
 
 vtkCxxSetObjectMacro(View,Picker,vtkCellPicker);
 
@@ -471,29 +472,23 @@ void View::SetBackgroundColor( double * color )
     this->NotifyNeedRender();
 }
 
-
 void View::ResetCamera()
 {
-    if( this->Renderer )
-    {
-        this->Renderer->ResetCamera();
-    }    
+    double prevViewAngle = this->Renderer->GetActiveCamera()->GetViewAngle();
+    this->Renderer->ResetCamera();
+    AdjustCameraDistance( prevViewAngle );
 }
 
 void View::ResetCamera( double bounds[6] )
 {
-    if( this->Renderer )
-    {
-        this->Renderer->ResetCamera( bounds );
-    }
+    double prevViewAngle = this->Renderer->GetActiveCamera()->GetViewAngle();
+    this->Renderer->ResetCamera( bounds );
+    AdjustCameraDistance( prevViewAngle );
 }
 
 void View::ZoomCamera(double factor)
 {
-    if( this->Renderer )
-    {
-        this->Renderer->GetActiveCamera()->Zoom(factor);
-    }    
+    this->Renderer->GetActiveCamera()->Zoom(factor);
 }
 
 double View::GetViewAngle()
@@ -559,4 +554,29 @@ void View::SetupAllObjects()
 void View::ReleaseAllObjects()
 {
     this->Manager->ReleaseAllObjects( this );
+}
+
+#include "vtkMath.h"
+
+// This function is used to conveniently readjust the view angle
+// of the camera after vtkRenderer::ResetCamera is called. The
+// vtkRenderer::ResetCamera function sets the view angle back
+// to 30 degrees, which is not what we want in Ibis. This function
+// readjusts the camera position to cover the same area as the
+// 30 degrees camera at focal point and sets the camera view
+// angle to the angle passed in parameter.
+void View::AdjustCameraDistance( double viewAngle )
+{
+    vtkCamera * cam = this->Renderer->GetActiveCamera();
+    Vec3 pos( cam->GetPosition() );
+    Vec3 target( cam->GetFocalPoint() );
+    Vec3 dir = target - pos;
+    double dr = len( dir );
+    Vec3 ndir = dir / dr;
+    double vtkHardcodedAngle = vtkMath::RadiansFromDegrees( 30.0 * 0.5 );
+    double wantedAngle = vtkMath::RadiansFromDegrees( viewAngle * 0.5 );
+    double du = dr * tan( vtkHardcodedAngle ) / tan( wantedAngle );
+    Vec3 newPos = pos + ( dr - du ) * ndir;
+    cam->SetPosition( newPos.Ref() );
+    cam->SetViewAngle( viewAngle );
 }

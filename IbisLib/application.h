@@ -66,7 +66,6 @@ struct ApplicationSettings
     int TripleCutPlaneDisplayInterpolationType;
     bool VolumeRendererEnabled;
     double UpdateFrequency;
-    int NumberOfImageProcessingThreads;
     bool ShowMINCConversionWarning;
     QList<QString> PluginsWithOpenWidget;
     QList<QString> PluginsWithOpenTab;
@@ -118,8 +117,6 @@ public:
     ApplicationSettings * GetSettings();
     void SetUpdateFrequency( double fps );
     double GetUpdateFrequency() { return GetSettings()->UpdateFrequency; }
-    void SetNumberOfImageProcessingThreads( int nbThreads );
-    int GetNumberOfImageProcessingThreads() { return GetSettings()->NumberOfImageProcessingThreads; }
 
     // Ibis Plugin management
     void LoadPlugins();

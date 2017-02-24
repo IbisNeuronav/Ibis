@@ -86,7 +86,6 @@ void ApplicationSettings::LoadSettings( QSettings & settings )
     VolumeRendererEnabled = settings.value( "VolumeRendererEnabled", false ).toBool();
     ShowMINCConversionWarning = settings.value( "ShowMINCConversionWarning", true ).toBool();
     UpdateFrequency = settings.value( "UpdateFrequency", 15.0 ).toDouble();
-    NumberOfImageProcessingThreads = settings.value( "NumberOfImageProcessingThreads", 1 ).toInt();
 }
 
 void ApplicationSettings::SaveSettings( QSettings & settings )
@@ -113,7 +112,6 @@ void ApplicationSettings::SaveSettings( QSettings & settings )
     settings.setValue( "TripleCutPlaneDisplayInterpolationType", TripleCutPlaneDisplayInterpolationType );
     settings.setValue( "ShowMINCConversionWarning", ShowMINCConversionWarning );
     settings.setValue( "UpdateFrequency", UpdateFrequency );
-    settings.setValue( "NumberOfImageProcessingThreads", NumberOfImageProcessingThreads );
 }
 
 Application::Application( )
@@ -775,11 +773,6 @@ void Application::SetUpdateFrequency( double fps )
 {
     m_settings.UpdateFrequency = fps;
     m_updateManager->SetUpdatePeriod( (int)( 1000.0 / fps ) );
-}
-
-void Application::SetNumberOfImageProcessingThreads( int nbThreads )
-{
-    m_settings.NumberOfImageProcessingThreads = nbThreads;
 }
 
 void Application::LoadPlugins()
