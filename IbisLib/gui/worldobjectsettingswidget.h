@@ -40,14 +40,10 @@ public slots:
     void On3DInteractionButtonClicked(int);
 
 private slots:
-    void on_numberOfThreadsSpinBox_valueChanged(int arg1);
 
     void on_updateMaxFrequencySlider_valueChanged(int value);
-
     void on_viewFollowsReferenceCheckBox_toggled(bool checked);
-
     void on_cameraAngleSlider_valueChanged(int value);
-
     void on_cameraAngleSpinBox_valueChanged(int arg1);
 
 private:
