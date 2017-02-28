@@ -41,7 +41,7 @@ if( IBIS_INSTALL_OPENCV )
     ExternalProject_Add( ${opencv_name}
         SOURCE_DIR ${external_project_dir}/${opencv_name}/src
         GIT_REPOSITORY "https://github.com/opencv/opencv.git"
-        GIT_TAG ef0811018229c584c21dafa1bf9555c9f56a1d4e
+        GIT_TAG 70bbf17b133496bd7d54d034b0f94bd869e0e810
         BINARY_DIR ${external_project_dir}/${opencv_name}/build
         BUILD_COMMAND   make
         INSTALL_COMMAND make install
