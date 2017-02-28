@@ -18,7 +18,6 @@ set( CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR}/Ibis-install )
 set( VTK_DIR ${CMAKE_CURRENT_BINARY_DIR}/ibisExternalDependencies/vtk-${IBIS_VTK_LONG_VERSION}/install/lib/cmake/vtk-${IBIS_VTK_LONG_VERSION})
 set( ITK_DIR ${CMAKE_CURRENT_BINARY_DIR}/ibisExternalDependencies/itk-${IBIS_ITK_LONG_VERSION}/install/lib/cmake/ITK-${IBIS_VTK_SHORT_VERSION} )
 if( IBIS_INSTALL_OPENCV )
-    set( OpenCV_Installed ON CACHE BOOL "tell CMake that OpenCV is available" )
     set( OpenCV_DIR ${CMAKE_CURRENT_BINARY_DIR}/ibisExternalDependencies/opencv-${IBIS_OPENCV_LONG_VERSION}/install/share/OpenCV )
     ExternalProject_Add( Ibis
                 SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../
