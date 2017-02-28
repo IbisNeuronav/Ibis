@@ -3,12 +3,12 @@ SET( IBIS_VTKOPENCV_INCLUDE_DIR ${IBIS_VTKOPENCV_INCLUDE_DIR} PARENT_SCOPE  )
 
 SET( VTKOPENCV_SRC
 	vtkopencvbridge.cpp
-        ibismath.cpp
+        ibisopencvmath.cpp
 )
 
 SET( VTKOPENCV_HDR
 	vtkopencvbridge.h
-        ibismath.h
+        ibisopencvmath.h
 )
 
 #================================

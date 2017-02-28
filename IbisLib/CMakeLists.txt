@@ -31,6 +31,7 @@ SET( IBISLIB_SRC
                      lookuptablemanager.cpp
                      linesfactory.cpp
                      simplepropcreator.cpp
+                     ibismath.cpp
                      ibisplugin.cpp
                      gui/aboutbicigns.cpp
                      gui/aboutpluginswidget.cpp
@@ -72,6 +73,7 @@ SET( IBISLIB_HDR
                      generatorplugininterface.h
                      linesfactory.h
                      simplepropcreator.h
+                     ibismath.h
                      gui/guiutilities.h )
 
 SET( IBISLIB_HDR_MOC
