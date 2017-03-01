@@ -54,7 +54,7 @@ include( ${ITK_USE_FILE} )
 #==================================================================
 if( IBIS_USE_OPENCV )
     set( AutoOpenCVPath ${IBIS_EXTERNAL_DEPENDENCIES_DIR}/opencv-${IBIS_OPENCV_LONG_VERSION}/install/share/OpenCV )
-    find_package( OpenCV REQUIRED PATHS ${AutoOpenCVPath} )
+    find_package( OpenCV ${IBIS_OPENCV_LONG_VERSION} REQUIRED EXACT PATHS ${AutoOpenCVPath} )
     include_directories( ${OpenCV_INCLUDE_DIRS} )
 endif()
 
