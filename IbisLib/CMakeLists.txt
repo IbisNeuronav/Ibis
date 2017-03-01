@@ -28,7 +28,6 @@ SET( IBISLIB_SRC
                      usacquisitionobject.cpp
                      trackedvideobuffer.cpp
                      toolplugininterface.cpp
-                     vtkopencvbridge.cpp
                      lookuptablemanager.cpp
                      linesfactory.cpp
                      simplepropcreator.cpp
@@ -72,7 +71,6 @@ SET( IBISLIB_HDR
                      objectplugininterface.h
                      globalobjectplugininterface.h
                      generatorplugininterface.h
-                     vtkopencvbridge.h
                      linesfactory.h
                      simplepropcreator.h
                      ibismath.h

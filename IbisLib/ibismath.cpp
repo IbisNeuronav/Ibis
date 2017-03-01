@@ -67,28 +67,6 @@ Vec3 IbisMath::StdDevVec3( std::vector<Vec3> & allVecs )
     return stdDev;
 }
 
-cv::Point3f IbisMath::AverageCvPoint3f( std::vector<cv::Point3f> & all )
-{
-    cv::Point3f res( 0.0, 0.0, 0.0 );
-    for( int i = 0; i < all.size(); ++i )
-    {
-        res += all[i];
-    }
-    res *= 1.0 / all.size();
-    return res;
-}
-
-cv::Point2f IbisMath::AverageCvPoint2f( std::vector<cv::Point2f> & all )
-{
-    cv::Point2f res( 0.0, 0.0 );
-    for( int i = 0; i < all.size(); ++i )
-    {
-        res += all[i];
-    }
-    res *= 1.0 / all.size();
-    return res;
-}
-
 Vec3 IbisMath::Translation( vtkMatrix4x4 * mat )
 {
     return Vec3( mat->GetElement(0,3), mat->GetElement(1,3), mat->GetElement(2,3) );
@@ -104,25 +82,6 @@ Vec3 IbisMath::MultMat4Point3( vtkMatrix4x4 * mat, const Vec3 & in )
     Vec4 in4( in, 1.0 );
     mat->MultiplyPoint( in4.Ref(), in4.Ref() );
     return Vec3( in4[0], in4[1], in4[2] );
-}
-
-cv::Point3f IbisMath::MultMat4CvPoint3f( vtkMatrix4x4 * mat, cv::Point3f & in )
-{
-    double in4[4];
-    in4[0] = in.x; in4[1] = in.y; in4[2] = in.z; in4[3] = 1.0;
-    double out4[4] = { 0.0, 0.0, 0.0, 1.0 };
-    mat->MultiplyPoint( in4, out4 );
-    return cv::Point3f( out4[0], out4[1], out4[2] );
-}
-
-cv::Point3f IbisMath::Vec3ToCVPoint3f( Vec3 & v )
-{
-    return cv::Point3f( v[0], v[1], v[2] );
-}
-
-Vec2 IbisMath::CVPoint2fToVec2( cv::Point2f & p )
-{
-    return Vec2( p.x, p.y );
 }
 
 vtkMatrix4x4 * IbisMath::DuplicateMat4( vtkMatrix4x4 * in )

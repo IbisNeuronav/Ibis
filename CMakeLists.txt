@@ -52,9 +52,11 @@ include( ${ITK_USE_FILE} )
 #==================================================================
 # Look for OpenCV (required by some plugins, but not the main app)
 #==================================================================
-set( AutoOpenCVPath ${IBIS_EXTERNAL_DEPENDENCIES_DIR}/opencv-${IBIS_OPENCV_LONG_VERSION}/install/share/OpenCV )
-find_package( OpenCV REQUIRED PATHS ${AutoOpenCVPath} )
-include_directories( ${OpenCV_INCLUDE_DIRS} )
+if( IBIS_USE_OPENCV )
+    set( AutoOpenCVPath ${IBIS_EXTERNAL_DEPENDENCIES_DIR}/opencv-${IBIS_OPENCV_LONG_VERSION}/install/share/OpenCV )
+    find_package( OpenCV ${IBIS_OPENCV_LONG_VERSION} REQUIRED EXACT PATHS ${AutoOpenCVPath} )
+    include_directories( ${OpenCV_INCLUDE_DIRS} )
+endif()
 
 #==================================================================
 # Include linux include directories, needed for kernel 2.6.x+
@@ -68,6 +70,7 @@ if( NOT APPLE )
     OPTION( IBIS_BUILD_DEFAULT_HARDWARE_MODULE "Build default hardware module on Linux." ON )
 endif()
 OPTION( IBIS_BUILD_IGSIO_HARDWARE_MODULE "Build hardware module that allows connection to OpenIGTLinkServers" OFF )
+OPTION( IBIS_USE_OPENCV "Use OpenCV library" OFF )
 OPTION( IBIS_INSTALL_LIBS_AND_HEADERS "make install will install all libraries and headers if this option is ON. Otherwise, only executables are installed." OFF )
 
 find_package ( OpenCL QUIET )
@@ -83,6 +86,9 @@ include_directories( ${svlIncludeDir} )
 #==================================================================
 add_subdirectory( IbisITK )
 add_subdirectory( IbisVTK )
+if( IBIS_USE_OPENCV )
+    add_subdirectory( IbisOpenCV )
+endif()
 
 # define version and build info
 set( IBIS_MAJOR_VERSION 3 )
