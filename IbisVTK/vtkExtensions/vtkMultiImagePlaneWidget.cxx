@@ -1815,14 +1815,17 @@ void vtkMultiImagePlaneWidget::GetPosition( double pos[3] )
 
 void vtkMultiImagePlaneWidget::MoveNSlices( int nbSlices )
 {
-    double spacing = this->BoundingImage->GetSpacing()[ this->PlaneOrientation ];
-    double move = nbSlices * spacing;
-    this->PlaneSource->Push( move );
-    this->PlaneSource->Update();
-    this->BuildRepresentation();
-    this->UpdateNormal();
-    this->UpdateMargins();
-    this->UpdateCursor();
+    if( this->BoundingImage )
+    {
+        double spacing = this->BoundingImage->GetSpacing()[ this->PlaneOrientation ];
+        double move = nbSlices * spacing;
+        this->PlaneSource->Push( move );
+        this->PlaneSource->Update();
+        this->BuildRepresentation();
+        this->UpdateNormal();
+        this->UpdateMargins();
+        this->UpdateCursor();
+    }
 }
 
 #include "vtkPlane.h"
