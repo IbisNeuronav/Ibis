@@ -39,7 +39,7 @@ public:
     
 private slots:
 
-    void on_sagitalPlaneCheckBox_toggled(bool checked);
+    void on_sagittalPlaneCheckBox_toggled(bool checked);
     void on_coronalPlaneCheckBox_toggled(bool checked);
     void on_transversePlaneCheckBox_toggled(bool checked);
     void on_viewAllPlanesButton_clicked();

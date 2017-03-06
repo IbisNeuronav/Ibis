@@ -274,7 +274,7 @@ void PointerObject::UpdateTip()
 {
     if( this->ObjectHidden )
         return;
-    View * view = this->GetManager()->GetView(THREED_VIEW_TYPE);
+    View * view = this->GetManager()->GetMain3DView();
     if (view)
     {
         PointerObjectViewAssociation::iterator itAssociations = this->pointerObjectInstances.find( view );
