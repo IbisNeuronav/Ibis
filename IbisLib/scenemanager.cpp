@@ -521,6 +521,21 @@ View * SceneManager::GetMain3DView()
     return GetView( THREED_VIEW_TYPE );
 }
 
+View * SceneManager::GetMainCoronalView()
+{
+    return GetView( CORONAL_VIEW_TYPE );
+}
+
+View * SceneManager::GetMainSagittalView()
+{
+    return GetView( SAGITTAL_VIEW_TYPE );
+}
+
+View * SceneManager::GetMainTransverseView()
+{
+    return GetView( TRANSVERSE_VIEW_TYPE );
+}
+
 View * SceneManager::GetView( const QString & name )
 {
     for( ViewList::iterator it = Views.begin(); it != Views.end(); ++it )
