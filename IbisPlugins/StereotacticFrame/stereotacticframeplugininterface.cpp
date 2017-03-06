@@ -124,7 +124,7 @@ void StereotacticFramePluginInterface::EnableManipulators()
 {
     m_manipulatorsCallbacks = vtkEventQtSlotConnect::New();
 
-    View * v = Application::GetSceneManager()->GetView( TRANSVERSE_VIEW_TYPE );
+    View * v = Application::GetSceneManager()->GetMainTransverseView( );
     Q_ASSERT_X( v, "StereotacticFramePluginInterface::CreateTab()", "No transverse view defined. It is needed by the StereotacticFrame plugin" );
 
     for( int i = 0; i < 4; ++i )
@@ -160,7 +160,7 @@ void StereotacticFramePluginInterface::DisableManipulators()
         m_manipulatorsCallbacks = 0;
     }
 
-    View * v = Application::GetSceneManager()->GetView( TRANSVERSE_VIEW_TYPE );
+    View * v = Application::GetSceneManager()->GetMainTransverseView( );
     Q_ASSERT_X( v, "StereotacticFramePluginInterface::WidgetAboutToClose()", "No transverse view defined. It is needed by the StereotacticFrame plugin" );
     for( int i = 0; i < 4; i++ )
     {

@@ -96,6 +96,9 @@ public:
     View * CreateView( int type, QString name = QString::null );
     View * GetView( int type );
     View * GetMain3DView();
+    View * GetMainCoronalView();
+    View * GetMainSagittalView();
+    View * GetMainTransverseView();
     View * GetView( const QString & name );
     View * GetViewFromInteractor( vtkRenderWindowInteractor * interactor );
     void Set3DViewFollowingReferenceVolume( bool follow ) { m_viewFollowsReferenceObject = follow; }
