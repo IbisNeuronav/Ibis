@@ -71,6 +71,9 @@ public:
     
     vtkGetMacro(Type,int);
     void SetType( int type );
+    static const int InvalidViewID;
+    vtkGetMacro(ViewID,int);
+    vtkSetMacro(ViewID,int);
 
     vtkQtRenderWindow * GetQtRenderWindow();
     void SetQtRenderWindow( vtkQtRenderWindow * w );
@@ -153,6 +156,7 @@ protected:
     SceneManager * Manager;
     vtkMatrix4x4 * PrevViewingTransform;
     int Type;
+    int ViewID;
     ViewController * CurrentController;  // this should be 0 if view is not controlled
 
     // Manage mouse and keyboard interaction with sceneobject
