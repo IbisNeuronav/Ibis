@@ -138,7 +138,7 @@ void VolumeRenderingSingleVolumeSettingsWidget::on_volumeComboBox_currentIndexCh
     Q_ASSERT( m_vr->GetManager() );
     int objectId = ui->volumeComboBox->itemData( index ).toInt();
     ImageObject * newObject = 0;
-    if( objectId != SceneObject::InvalidObjectId )
+    if( objectId != SceneManager::InvalidId )
         newObject =  ImageObject::SafeDownCast( m_vr->GetManager()->GetObjectByID( objectId ) );
     m_vr->SetImage( m_volumeIndex, newObject );
     UpdateUi();

@@ -55,6 +55,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 ObjectSerializationMacro( SceneManager );
 
+const int SceneManager::InvalidId = -1;
+
 SceneManager::SceneManager()
 {
     m_viewFollowsReferenceObject = true;
@@ -63,7 +65,7 @@ SceneManager::SceneManager()
     this->ViewBackgroundColor[2] = 0;
     this->CameraViewAngle3D = 30.0;
     this->SupportedSceneSaveVersion = IBIS_SCENE_SAVE_VERSION;
-    this->NavigationPointerID = SceneObject::InvalidObjectId;
+    this->NavigationPointerID = SceneManager::InvalidId;
     this->IsNavigating = false;
     this->LoadingScene = false;
 
@@ -399,8 +401,8 @@ void SceneManager::SaveScene( QString & fileName )
 
 void SceneManager::Serialize( Serializer * ser )
 {
-    int id = SceneObject::InvalidObjectId;
-    int refObjID = SceneObject::InvalidObjectId;
+    int id = SceneManager::InvalidId;
+    int refObjID = SceneManager::InvalidId;
     if (!ser->IsReader() && this->CurrentObject)
     {
         id = this->CurrentObject->GetObjectID();
@@ -421,7 +423,7 @@ void SceneManager::Serialize( Serializer * ser )
     {
         this->SetCurrentObject(this->GetObjectByID(id));
         this->SetViewBackgroundColor( this->ViewBackgroundColor );
-        if( refObjID != SceneObject::InvalidObjectId )
+        if( refObjID != SceneManager::InvalidId )
             this->SetReferenceDataObject( this->GetObjectByID(refObjID) );
     }
     ser->EndSection();
@@ -553,7 +555,7 @@ void SceneManager::UpdateBackgroundColor( )
 
 void SceneManager::AddObject( SceneObject * object, SceneObject * attachTo )
 {
-    this->AddObjectUsingID(object, attachTo, SceneObject::InvalidObjectId);
+    this->AddObjectUsingID(object, attachTo, SceneManager::InvalidId);
 }
 
 void SceneManager::AddObjectUsingID( SceneObject * object, SceneObject * attachTo, int objID )
@@ -574,10 +576,10 @@ void SceneManager::AddObjectUsingID( SceneObject * object, SceneObject * attachT
 
     // Setting object id and manager
     int id = objID;  // if we get a valid id, use it
-    if( id == SceneObject::InvalidObjectId )
+    if( id == SceneManager::InvalidId )
     {
         // if the object has already been assigned an id, keep it
-        if( object->GetObjectID() != SceneObject::InvalidObjectId )
+        if( object->GetObjectID() != SceneManager::InvalidId )
             id = object->GetObjectID();
         else if( object->IsManagedBySystem() )
             id = this->NextSystemObjectID--;
@@ -870,7 +872,7 @@ void SceneManager::GetAllObjectsOfType( const char * typeName, QList<SceneObject
 
 SceneObject * SceneManager::GetObjectByID( int id )
 {
-    if( id == SceneObject::InvalidObjectId )
+    if( id == SceneManager::InvalidId )
         return 0;
     for( int i = 0; i < this->AllObjects.size(); ++i )
     {
@@ -1355,7 +1357,7 @@ void SceneManager::ObjectReader( Serializer * ser, bool interactive )
         ::Serialize( ser, "ObjectID", oldId );
         ::Serialize( ser, "ParentID", oldParentId );
         parentObject = 0;
-        if( oldParentId != SceneObject::InvalidObjectId ) // only World does not have parent
+        if( oldParentId != SceneManager::InvalidId ) // only World does not have parent
         {
             parentObject = this->GetObjectByID(oldParentId);
             if (!parentObject)
@@ -1526,7 +1528,7 @@ void SceneManager::ObjectWriter( Serializer * ser )
     QList< SceneObject* >::iterator it = listedObjects.begin();
     ser->BeginSection("ObjectList");
     QString newPath;
-    int id, parentId = SceneObject::InvalidObjectId;
+    int id, parentId = SceneManager::InvalidId;
     for(i = 0 ; it != listedObjects.end(); ++it, i++ )
     {
         SceneObject * obj = (*it);
@@ -1698,7 +1700,7 @@ void SceneManager::SetNavigationPointerID( int id )
 
 PointerObject *SceneManager::GetNavigationPointerObject( )
 {
-    if( this->NavigationPointerID == SceneObject::InvalidObjectId )
+    if( this->NavigationPointerID == SceneManager::InvalidId )
         return 0;
     SceneObject *obj =  this->GetObjectByID( this->NavigationPointerID );
     if( obj )
@@ -1711,10 +1713,10 @@ PointerObject *SceneManager::GetNavigationPointerObject( )
 void SceneManager::ValidatePointerObject()
 {
     int pointerId = this->NavigationPointerID;
-    if( pointerId != SceneObject::InvalidObjectId )
+    if( pointerId != SceneManager::InvalidId )
         if( !GetObjectByID( pointerId ) )
-            pointerId = SceneObject::InvalidObjectId;
-    if( pointerId == SceneObject::InvalidObjectId )
+            pointerId = SceneManager::InvalidId;
+    if( pointerId == SceneManager::InvalidId )
     {
         QList<PointerObject*> allPointers;
         GetAllPointerObjects( allPointers );

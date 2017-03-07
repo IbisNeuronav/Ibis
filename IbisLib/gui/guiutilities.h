@@ -33,7 +33,7 @@ public:
                 cb->setCurrentIndex( i );
         }
         if( allObjs.size() == 0 )
-            cb->addItem( "None", QVariant( SceneObject::InvalidObjectId ) );
+            cb->addItem( "None", QVariant( SceneManager::InvalidId ) );
         cb->blockSignals( false );
     }
 
@@ -43,7 +43,7 @@ public:
         bool ok = false;
         int objectId = v.toInt( &ok );
         if( !ok )
-            objectId = SceneObject::InvalidObjectId;
+            objectId = SceneManager::InvalidId;
         return objectId;
     }
 };

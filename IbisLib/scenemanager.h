@@ -62,6 +62,7 @@ class SceneManager : public QObject, public vtkObject
 public:
 
     typedef QList< SceneObject* > ObjectList;
+    static const int InvalidId;
 
     static SceneManager * New() { return new SceneManager; }
 
@@ -351,7 +352,7 @@ protected:
 
     // Description:
     // Allow settin object id when adding object
-    void AddObjectUsingID( SceneObject * object, SceneObject * attachTo = 0, int objID = SceneObject::InvalidObjectId);
+    void AddObjectUsingID( SceneObject * object, SceneObject * attachTo = 0, int objID = SceneManager::InvalidId);
 
     // Description:
     // Recursive function used to setup all objects bellow obj
