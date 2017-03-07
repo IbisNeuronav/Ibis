@@ -45,7 +45,6 @@ View::View()
     this->Picker->SetTolerance(0.005); //need some fluff
     this->Picker->PickFromListOn();
     this->Type = THREED_VIEW_TYPE;
-    this->ViewID = SceneManager::InvalidId;
     this->Renderer = vtkRenderer::New();
     this->Renderer->SetLayer( 0 );
     this->Renderer->GetActiveCamera()->SetPosition( 1, 0, 0 );
