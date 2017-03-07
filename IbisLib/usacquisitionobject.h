@@ -18,6 +18,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QObject>
 #include <QString>
 #include "sceneobject.h"
+#include "scenemanager.h"
 #include "imageobject.h"
 #include "usprobeobject.h"
 #include <itkImage.h>
@@ -46,7 +47,7 @@ typedef itk::Image<float,3> IbisItk3DImageType;
 
 struct ExportParams
 {
-    ExportParams() : outputDir(""), masked(false), useCalibratedTransform(false), relativeToID(SceneObject::InvalidObjectId) {}
+    ExportParams() : outputDir(""), masked(false), useCalibratedTransform(false), relativeToID(SceneManager::InvalidId) {}
     QString outputDir;
     bool masked;
     bool useCalibratedTransform ;
@@ -73,7 +74,7 @@ public:
     bool Import();
     void    SetBaseDirectory(QString dir) {m_baseDirectory = dir;}
     QString GetBaseDirectory() {return m_baseDirectory;}
-    void    ExportTrackedVideoBuffer(QString destDir = "", bool masked = false , bool useCalibratedTransform = false, int relativeToID = SceneObject::InvalidObjectId );
+    void    ExportTrackedVideoBuffer(QString destDir = "", bool masked = false , bool useCalibratedTransform = false, int relativeToID = SceneManager::InvalidId );
     bool    LoadFramesFromMINCFile( QStringList & allMINCFiles );
     bool    LoadFramesFromMINCFile( Serializer * ser );
 
@@ -221,7 +222,7 @@ protected:
     std::vector< IbisRGBImageType::Pointer > m_itkRGBImages;
 
     void Save( );
-    void ConvertVtkImagesToItkRGBImages(bool masked = false, bool useCalibratedTransform = false, int relativeToID = SceneObject::InvalidObjectId );
+    void ConvertVtkImagesToItkRGBImages(bool masked = false, bool useCalibratedTransform = false, int relativeToID = SceneManager::InvalidId );
 };
 
 ObjectSerializationHeaderMacro( USAcquisitionObject );

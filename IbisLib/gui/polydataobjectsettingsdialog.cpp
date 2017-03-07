@@ -266,7 +266,7 @@ void PolyDataObjectSettingsDialog::on_clearTextureImageButton_clicked()
 void PolyDataObjectSettingsDialog::on_sampleVolumeComboBox_currentIndexChanged( int index )
 {
     int objectId = this->sampleVolumeComboBox->itemData( index ).toInt();
-    if( objectId == SceneObject::InvalidObjectId )
+    if( objectId == SceneManager::InvalidId )
         m_object->SetScalarSource( 0 );
     else
     {

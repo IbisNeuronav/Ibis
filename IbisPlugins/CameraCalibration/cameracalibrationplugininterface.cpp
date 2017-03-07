@@ -38,7 +38,7 @@ CameraCalibrationPluginInterface::CameraCalibrationPluginInterface()
     m_calibrationGridHeight = 8;
     m_calibrationGridCellSize = 30.0;
     m_cameraCalibrator = new CameraCalibrator;
-    m_currentCameraObjectId = SceneObject::InvalidObjectId;
+    m_currentCameraObjectId = SceneManager::InvalidId;
     m_calibrationGridObject = 0;
 
     m_computeCenter = false;
@@ -414,16 +414,16 @@ void CameraCalibrationPluginInterface::ValidateCurrentCamera()
 
     // if we have an id, check object is still valid
     int newCameraId = m_currentCameraObjectId;
-    if( m_currentCameraObjectId != SceneObject::InvalidObjectId )
+    if( m_currentCameraObjectId != SceneManager::InvalidId )
     {
         SceneObject * obj = GetSceneManager()->GetObjectByID( m_currentCameraObjectId );
         CameraObject * camObj = CameraObject::SafeDownCast( obj );
         if( !camObj || ( needTrackableCamera && !camObj->IsDrivenByHardware() ) )
-            newCameraId = SceneObject::InvalidObjectId;
+            newCameraId = SceneManager::InvalidId;
     }
 
     // If we don't have an id, try to find a valid camera
-    if( newCameraId == SceneObject::InvalidObjectId )
+    if( newCameraId == SceneManager::InvalidId )
     {
         QList< CameraObject* > cams;
         GetSceneManager()->GetAllCameraObjects( cams );
@@ -438,7 +438,7 @@ void CameraCalibrationPluginInterface::ValidateCurrentCamera()
     }
 
     // Still no valid camera, create one
-    if( newCameraId == SceneObject::InvalidObjectId && !needTrackableCamera )
+    if( newCameraId == SceneManager::InvalidId && !needTrackableCamera )
     {
         CameraObject * cam = CameraObject::New();
         cam->SetName( "Default Camera" );

@@ -18,7 +18,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 FiberNavigatorPluginInterface::FiberNavigatorPluginInterface()
 {
     m_settingsWidget = 0;
-    m_fiberObjectId = SceneObject::InvalidObjectId;
+    m_fiberObjectId = SceneManager::InvalidId;
     m_maximas = Maximas();
     m_FA = fractionalAnisotropy();
     m_volumeShape = 0;
