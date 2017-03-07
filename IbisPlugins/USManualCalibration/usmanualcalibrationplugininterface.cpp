@@ -38,11 +38,11 @@ const double phantomPoints[16][3] = { { 0, 5, 50 },
 
 USManualCalibrationPluginInterface::USManualCalibrationPluginInterface()
 {
-    m_calibrationPhantomObjectId = SceneObject::InvalidObjectId;
-    m_phantomRegSourcePointsId = SceneObject::InvalidObjectId;
-    m_phantomRegTargetPointsId = SceneObject::InvalidObjectId;
-    m_landmarkRegistrationObjectId = SceneObject::InvalidObjectId;
-    m_usProbeObjectId = SceneObject::InvalidObjectId;
+    m_calibrationPhantomObjectId = SceneManager::InvalidId;
+    m_phantomRegSourcePointsId = SceneManager::InvalidId;
+    m_phantomRegTargetPointsId = SceneManager::InvalidId;
+    m_landmarkRegistrationObjectId = SceneManager::InvalidId;
+    m_usProbeObjectId = SceneManager::InvalidId;
 }
 
 USManualCalibrationPluginInterface::~USManualCalibrationPluginInterface()
@@ -67,7 +67,7 @@ QWidget * USManualCalibrationPluginInterface::CreateFloatingWidget()
     USManualCalibrationWidget * calibrationWidget = new USManualCalibrationWidget;
     calibrationWidget->SetPluginInterface( this );
 
-    if( m_landmarkRegistrationObjectId == SceneObject::InvalidObjectId )
+    if( m_landmarkRegistrationObjectId == SceneManager::InvalidId )
         this->StartPhantomRegistration();
 
     return calibrationWidget;
@@ -100,8 +100,8 @@ void USManualCalibrationPluginInterface::ValidateUsProbe()
 {
     UsProbeObject * probe = UsProbeObject::SafeDownCast( GetSceneManager()->GetObjectByID( m_usProbeObjectId ) );
     if( !probe )
-        m_usProbeObjectId = SceneObject::InvalidObjectId;
-    if( m_usProbeObjectId == SceneObject::InvalidObjectId )
+        m_usProbeObjectId = SceneManager::InvalidId;
+    if( m_usProbeObjectId == SceneManager::InvalidId )
     {
         QList<UsProbeObject*> allProbes;
         GetSceneManager()->GetAllUsProbeObjects( allProbes );
@@ -117,7 +117,7 @@ void USManualCalibrationPluginInterface::ValidateUsProbe()
 
 void USManualCalibrationPluginInterface::BuildCalibrationPhantomRepresentation()
 {
-    bool needNewRepresentation = m_calibrationPhantomObjectId == SceneObject::InvalidObjectId;
+    bool needNewRepresentation = m_calibrationPhantomObjectId == SceneManager::InvalidId;
     needNewRepresentation |= GetSceneManager()->GetObjectByID( m_calibrationPhantomObjectId ) == 0;
     if( !needNewRepresentation )
         return;
