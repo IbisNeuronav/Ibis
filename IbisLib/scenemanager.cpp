@@ -485,7 +485,6 @@ View * SceneManager::CreateView( int type, int id, QString name )
     res->SetName( name );
     res->SetManager( this );
     res->SetType( type );
-    res->SetViewID( id );
     if( type == THREED_VIEW_TYPE )
     {
         AssignInteractorStyleToView( this->InteractorStyle3D, res );
