@@ -94,10 +94,9 @@ void SceneManager::Destroy()
 
     this->RemoveObject( this->SceneRoot );
 
-    for( ViewList::iterator it = Views.begin(); it != Views.end(); ++it )
-    {
-        (*it)->Delete();
-    }
+    foreach( View* v, Views.keys() )
+        v->Delete();
+
     Views.clear();
 
     this->Delete();
@@ -413,9 +412,8 @@ void SceneManager::Serialize( Serializer * ser )
     ::Serialize( ser, "ViewBackgroundColor", this->ViewBackgroundColor, 3 );
 
     ser->BeginSection("Views");
-    for( ViewList::iterator it = Views.begin(); it != Views.end(); ++it )
+    foreach( View* view, Views.keys() )
     {
-        View * view  = (*it);
         QString viewName(view->GetName());
         ::Serialize( ser, viewName.toUtf8().data(), view );
     }
@@ -469,15 +467,14 @@ QWidget * SceneManager::CreateTrackedToolsStatusWidget( QWidget * parent )
     return res;
 }
 
-View * SceneManager::GetViewByIndex( int index )
+View * SceneManager::GetViewByID( int id )
 {
-    Q_ASSERT( index < this->Views.size() && index >= 0 );
-    return this->Views[index];
+    return Views.key( id, NULL );
 }
 
-View * SceneManager::CreateView( int type, QString name )
+View * SceneManager::CreateView( int type, int id, QString name )
 {
-    View * res = this->GetView( type );
+    View * res = this->GetViewByID( id );
 
     if( res )
         return res;
@@ -486,6 +483,7 @@ View * SceneManager::CreateView( int type, QString name )
     res->SetName( name );
     res->SetManager( this );
     res->SetType( type );
+    res->SetViewID( id );
     if( type == THREED_VIEW_TYPE )
     {
         AssignInteractorStyleToView( this->InteractorStyle3D, res );
@@ -497,64 +495,38 @@ View * SceneManager::CreateView( int type, QString name )
     double bounds[6] = { -90.0, 91.0, -126.0, 91.0, -72.0, 109.0 };
     res->ResetCamera( bounds );
 
-    this->Views.push_back( res );
+    this->Views.insert( res, id );
 
     return res;
 }
 
-View * SceneManager::GetView( int type )
-{
-    for( ViewList::iterator it = Views.begin(); it != Views.end(); ++it )
-    {
-        if( (*it)->GetType() == type )
-        {
-            return (*it);
-        }
-    }
-    return NULL;
-}
-
-
-// Todo : do something smarter. Main 3D view is not any 3D view!
 View * SceneManager::GetMain3DView()
 {
-    return GetView( THREED_VIEW_TYPE );
+    return Views.key( this->Main3DViewID, NULL );
 }
 
 View * SceneManager::GetMainCoronalView()
 {
-    return GetView( CORONAL_VIEW_TYPE );
+    return Views.key( this->MainCoronalViewID, NULL );
 }
 
 View * SceneManager::GetMainSagittalView()
 {
-    return GetView( SAGITTAL_VIEW_TYPE );
+    return Views.key( this->MainSagittalViewID, NULL );
 }
 
 View * SceneManager::GetMainTransverseView()
 {
-    return GetView( TRANSVERSE_VIEW_TYPE );
-}
-
-View * SceneManager::GetView( const QString & name )
-{
-    for( ViewList::iterator it = Views.begin(); it != Views.end(); ++it )
-    {
-        if( (*it)->GetName() == name )
-        {
-            return (*it);
-        }
-    }
-    return NULL;
+    return Views.key( this->MainTransverseViewID, NULL );
 }
 
 View * SceneManager::GetViewFromInteractor( vtkRenderWindowInteractor * interactor )
 {
-    for( ViewList::iterator it = Views.begin(); it != Views.end(); ++it )
+    foreach( View* view, Views.keys() )
     {
-        if( (*it)->GetInteractor() == interactor )
+        if( view->GetInteractor() == interactor )
         {
-            return (*it);
+            return view;
         }
     }
     return NULL;
@@ -565,17 +537,17 @@ void SceneManager::SetViewBackgroundColor( double * color )
     this->ViewBackgroundColor[0] = color[0];
     this->ViewBackgroundColor[1] = color[1];
     this->ViewBackgroundColor[2] = color[2];
-    for( ViewList::iterator it = Views.begin(); it != Views.end(); ++it )
+    foreach( View* view, Views.keys() )
     {
-        (*it)->SetBackgroundColor( color );
+        view->SetBackgroundColor( color );
     }
 }
 
 void SceneManager::UpdateBackgroundColor( )
 {
-    for( ViewList::iterator it = Views.begin(); it != Views.end(); ++it )
+    foreach( View* view, Views.keys() )
     {
-        (*it)->SetBackgroundColor( this->ViewBackgroundColor );
+        view->SetBackgroundColor( this->ViewBackgroundColor );
     }
 }
 
@@ -764,9 +736,9 @@ void SceneManager::RemoveObject( SceneObject * object , bool viewChange)
     }
 
     // Release from all views
-    for( ViewList::iterator it = Views.begin(); it != Views.end(); ++it )
+    foreach( View* view, Views.keys() )
     {
-        object->Release( (*it) );
+        object->Release( view );
     }
 
     // Detach from parent
@@ -993,25 +965,25 @@ void SceneManager::PreDisplaySetup()
 
 void SceneManager::ResetAllCameras()
 {
-    for( ViewList::iterator it = Views.begin(); it != Views.end(); ++it )
+    foreach( View* view, Views.keys() )
     {
-        (*it)->ResetCamera();
+        view->ResetCamera();
     }
 }
 
 void SceneManager::ResetAllCameras( double bounds[6] )
 {
-    for( ViewList::iterator it = Views.begin(); it != Views.end(); ++it )
+    foreach( View* view, Views.keys() )
     {
-        (*it)->ResetCamera( bounds );
+        view->ResetCamera( bounds );
     }
 }
 
 void SceneManager::ZoomAllCameras(double factor)
 {
-    for( ViewList::iterator it = Views.begin(); it != Views.end(); ++it )
+    foreach( View* view, Views.keys() )
     {
-        (*it)->ZoomCamera(factor);
+        view->ZoomCamera(factor);
     }
 }
 
@@ -1036,27 +1008,27 @@ void SceneManager::SetupOneObject( View * v, SceneObject * obj )
 
 void SceneManager::ReleaseAllViews()
 {
-    for( ViewList::iterator it = Views.begin(); it != Views.end(); ++it )
+    foreach( View* view, Views.keys() )
     {
-        (*it)->ReleaseView();
+        view->ReleaseView();
     }
 }
 
 void SceneManager::SetupInAllViews( SceneObject * object )
 {
-    for( ViewList::iterator it = Views.begin(); it != Views.end(); ++it )
+    foreach( View* view, Views.keys() )
     {
-		object->Setup( (*it) );
+        object->Setup( view );
     }
 }
 
 void SceneManager::Set3DInteractorStyle( InteractorStyle style )
 {
     this->InteractorStyle3D = style;
-    for( ViewList::iterator it = Views.begin(); it != Views.end(); ++it )
+    foreach( View* view, Views.keys() )
     {
-        if( (*it)->GetType() == THREED_VIEW_TYPE )
-            AssignInteractorStyleToView( style, (*it) );
+        if( view->GetType() == THREED_VIEW_TYPE )
+            AssignInteractorStyleToView( style, view );
     }
 }
 
@@ -1112,7 +1084,7 @@ void SceneManager::AssignInteractorStyleToView( InteractorStyle style, View * v 
 
 void SceneManager::SetStandardView(STANDARDVIEW type)
 {
-    View * v3d = GetView( THREED_VIEW_TYPE );
+    View * v3d = GetMain3DView();
     if (v3d)
     {
         vtkCamera *camera = v3d->GetRenderer()->GetActiveCamera();
@@ -1186,16 +1158,18 @@ void SceneManager::ReferenceTransformChangedSlot()
 
 
 
-vtkRenderer *SceneManager::GetViewRenderer(int viewType)
+vtkRenderer *SceneManager::GetViewRenderer(int viewID )
 {
-    View *v = this->GetView(viewType);
-    return v->GetRenderer();
+    View *v = Views.key( viewID, NULL );
+    if( v )
+        return v->GetRenderer();
+    return NULL;
 }
 
 void SceneManager::SetRenderingEnabled( bool r )
 {
-    for( int i = 0; i < this->Views.size(); ++i )
-        this->Views[i]->SetRenderingEnabled( r );
+    foreach( View* view, Views.keys() )
+        view->SetRenderingEnabled( r );
 }
 
 double SceneManager::Get3DCameraViewAngle()
