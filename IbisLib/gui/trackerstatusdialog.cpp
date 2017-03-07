@@ -210,7 +210,7 @@ void TrackerStatusDialog::UpdateUI()
 void TrackerStatusDialog::OnNavigationComboBoxActivated( int index )
 {
     Q_ASSERT( m_sceneManager );
-    int newPointerId = GuiUtilities::ObjectIdFromSceneObjectComboBox( m_pointerToolCombo, index );
+    int newPointerId = GuiUtilities::ObjectIdFromObjectComboBox( m_pointerToolCombo, index );
     m_sceneManager->SetNavigationPointerID( newPointerId );
 }
 
