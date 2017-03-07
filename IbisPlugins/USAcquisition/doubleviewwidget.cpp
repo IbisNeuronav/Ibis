@@ -588,7 +588,7 @@ void DoubleViewWidget::on_restoreViewsPushButton_clicked()
 
 void DoubleViewWidget::on_acquisitionsComboBox_currentIndexChanged( int index )
 {
-    int objectId = GuiUtilities::ObjectIdFromSceneObjectComboBox( ui->acquisitionsComboBox, index );
+    int objectId = GuiUtilities::ObjectIdFromObjectComboBox( ui->acquisitionsComboBox, index );
     m_pluginInterface->SetCurrentAcquisitionObjectId( objectId );
     this->UpdateInputs();
     this->UpdateViews();
@@ -596,7 +596,7 @@ void DoubleViewWidget::on_acquisitionsComboBox_currentIndexChanged( int index )
 
 void DoubleViewWidget::on_imageObjectsComboBox_1_currentIndexChanged( int index )
 {
-    int objectId = GuiUtilities::ObjectIdFromSceneObjectComboBox( ui->imageObjectsComboBox_1, index );
+    int objectId = GuiUtilities::ObjectIdFromObjectComboBox( ui->imageObjectsComboBox_1, index );
     m_pluginInterface->SetCurrentVolumeObjectId( objectId );
     this->UpdateInputs();
     this->UpdateViews();
@@ -604,7 +604,7 @@ void DoubleViewWidget::on_imageObjectsComboBox_1_currentIndexChanged( int index 
 
 void DoubleViewWidget::on_imageObjectsComboBox_2_currentIndexChanged( int index )
 {
-    int objectId = GuiUtilities::ObjectIdFromSceneObjectComboBox( ui->imageObjectsComboBox_2, index );
+    int objectId = GuiUtilities::ObjectIdFromObjectComboBox( ui->imageObjectsComboBox_2, index );
     m_pluginInterface->SetAddedVolumeObjectId( objectId );
     this->UpdateInputs();
     this->UpdateViews();
