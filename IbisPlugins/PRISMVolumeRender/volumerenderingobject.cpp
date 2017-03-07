@@ -136,7 +136,7 @@ const char stopConditionShaderNone[] = "";
 
 VolumeRenderingObject::PerImage::PerImage()
 {
-    lastImageObjectId = InvalidObjectId;
+    lastImageObjectId = SceneManager::InvalidId;
     image = 0;
     imageCast = 0;
 
@@ -179,7 +179,7 @@ void VolumeRenderingObject::PerImage::Serialize( Serializer * ser )
         if( image )
             lastImageObjectId = image->GetObjectID();
         else
-            lastImageObjectId = InvalidObjectId;
+            lastImageObjectId = SceneManager::InvalidId;
     }
     ::Serialize( ser, "LastImageObjectId", lastImageObjectId );
     ::Serialize( ser, "ColorTransferFunction", volumeProperty->GetRGBTransferFunction() );
@@ -546,7 +546,7 @@ void VolumeRenderingObject::SetImage( int index, ImageObject * im )
         pi->image->Register( this );
     }
     else
-        pi->lastImageObjectId = SceneObject::InvalidObjectId;
+        pi->lastImageObjectId = SceneManager::InvalidId;
 
     // Grab transform if it is first volume
     if( index == 0 )

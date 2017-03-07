@@ -26,8 +26,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 ObjectSerializationMacro( SceneObject );
 
-const int SceneObject::InvalidObjectId = -1;
-
 SceneObject::SceneObject()
     : ObjectManagedBySystem(false)
 { 
@@ -35,7 +33,7 @@ SceneObject::SceneObject()
     this->AllowChildren = true;
     this->AllowChangeParent = true;
     this->Manager = 0;
-    this->ObjectID = InvalidObjectId;
+    this->ObjectID = SceneManager::InvalidId;
     this->ObjectHidden = false;
     this->AllowHiding = true;
     this->ObjectDeletable = true;

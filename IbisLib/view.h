@@ -71,7 +71,6 @@ public:
     
     vtkGetMacro(Type,int);
     void SetType( int type );
-    static const int InvalidViewID;
     vtkGetMacro(ViewID,int);
     vtkSetMacro(ViewID,int);
 

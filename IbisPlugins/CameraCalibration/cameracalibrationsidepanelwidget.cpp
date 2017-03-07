@@ -70,7 +70,7 @@ void CameraCalibrationSidePanelWidget::UpdateUi()
             ui->currentCameraComboBox->setCurrentIndex( i );
     }
     if( allCams.size() == 0 )
-        ui->currentCameraComboBox->addItem( "None", QVariant( SceneObject::InvalidObjectId ) );
+        ui->currentCameraComboBox->addItem( "None", QVariant( SceneManager::InvalidId ) );
     ui->currentCameraComboBox->blockSignals( false );
 
     ui->gridWidthSpinBox->blockSignals( true );

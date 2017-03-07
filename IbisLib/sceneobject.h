@@ -48,7 +48,6 @@ public:
     virtual void Export();
     virtual bool IsExportable() { return false; }
 
-    static const int InvalidObjectId;
     vtkSetMacro( ObjectID, int );
     vtkGetMacro( ObjectID, int );
     QString GetName() { return this->Name; }

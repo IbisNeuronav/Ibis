@@ -56,7 +56,7 @@ ObjectSerializationMacro( USAcquisitionObject );
 
 USAcquisitionObject::USAcquisitionObject()
 {
-    m_usProbeObjectId = SceneObject::InvalidObjectId;
+    m_usProbeObjectId = SceneManager::InvalidId;
 
     m_videoBuffer = new TrackedVideoBuffer( m_defaultImageSize[0], m_defaultImageSize[1] );
 
@@ -974,7 +974,7 @@ void USAcquisitionObject::ConvertVtkImagesToItkRGBImages(bool masked, bool useCa
     for( int i = 0; i < numberOfFrames; i++ )
     {
         IbisRGBImageType::Pointer itkOutputImage = IbisRGBImageType::New();
-        if( relativeToID  != SceneObject::InvalidObjectId )
+        if( relativeToID  != SceneManager::InvalidId )
         {
             SceneObject *relativeTo = this->GetManager()->GetObjectByID( relativeToID );
             Q_ASSERT( relativeTo );
