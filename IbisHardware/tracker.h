@@ -27,6 +27,7 @@ class vtkMatrix4x4;
 class SceneManager;
 class TrackedVideoSource;
 class IbisHardwareModule;
+class PolyDataObject;
 
 #define BR9600    9600
 #define BR14400  14400
@@ -53,6 +54,7 @@ struct ToolDescription
     QString romFileName;
     QString cachedSerialNumber;   // serial number used to recognize active tools when plugged in
     TrackedSceneObject * sceneObject;  // Object in the scene if active or holding state if inactive
+    PolyDataObject * toolModel; // tool 3D model with origin at origin of the tracker tool
 };
 
 ObjectSerializationHeaderMacro( ToolDescription );
