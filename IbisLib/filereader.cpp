@@ -15,6 +15,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "vtkProperty.h"
 #include "vtkXMLPolyDataReader.h"
 #include "vtkOBJReader2.h"
+#include "vtkPLYReader.h"
 #include "vtkDataObjectReader.h"
 #include "vtkStructuredPointsReader.h"
 #include "vtkErrorCode.h"
@@ -350,6 +351,13 @@ bool FileReader::OpenFile( QList<SceneObject*> & readObjects, QString filename, 
                 return true;
         }
 
+        // Try ply format
+        if( filename.endsWith( QString(".ply") ) )
+        {
+            if( OpenPlyFile( readObjects, filename, dataObjectName ) )
+                return true;
+        }
+
         // try vtp
         if( OpenVTPFile( readObjects, filename, dataObjectName ) )
             return true;
@@ -496,6 +504,26 @@ bool FileReader::OpenWavObjFile( QList<SceneObject*> & readObjects, QString file
     reader->SetFileName( filename.toUtf8().data() );
 
     // Read file and monito progress
+    m_fileProgressEvent->Connect( reader, vtkCommand::ProgressEvent, this, SLOT(OnReaderProgress( vtkObject*, unsigned long) ), 0, 0.0, Qt::DirectConnection );
+    reader->Update();
+    m_fileProgressEvent->Disconnect( reader );
+
+    PolyDataObject * object = PolyDataObject::New();
+    object->SetPolyData( reader->GetOutput() );
+    reader->Delete();
+
+    SetObjectName( object, dataObjectName, filename );
+    readObjects.push_back( object );
+
+    return true;
+}
+
+bool FileReader::OpenPlyFile( QList<SceneObject*> & readObjects, QString filename, const QString & dataObjectName )
+{
+    vtkPLYReader * reader = vtkPLYReader::New();
+    reader->SetFileName( filename.toUtf8().data() );
+
+    // Read file and monitor progress
     m_fileProgressEvent->Connect( reader, vtkCommand::ProgressEvent, this, SLOT(OnReaderProgress( vtkObject*, unsigned long) ), 0, 0.0, Qt::DirectConnection );
     reader->Update();
     m_fileProgressEvent->Disconnect( reader );
