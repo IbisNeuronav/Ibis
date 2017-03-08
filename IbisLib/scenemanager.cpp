@@ -414,17 +414,66 @@ void SceneManager::Serialize( Serializer * ser )
     ::Serialize( ser, "ViewBackgroundColor", this->ViewBackgroundColor, 3 );
 
     ser->BeginSection("Views");
-    foreach( View* view, Views.keys() )
-    {
-        QString viewName(view->GetName());
-        ::Serialize( ser, viewName.toUtf8().data(), view );
-    }
+    int numberOfViews = Views.size();
+    int viewID = InvalidId;
+    int type;
+    bool ok = ::Serialize( ser, "NumberOfViews", numberOfViews );
+    QString name;
+
     if (ser->IsReader())
     {
         this->SetCurrentObject(this->GetObjectByID(id));
         this->SetViewBackgroundColor( this->ViewBackgroundColor );
         if( refObjID != SceneManager::InvalidId )
             this->SetReferenceDataObject( this->GetObjectByID(refObjID) );
+        View *view;
+        if( ok ) // new scenes saving newly implemented viewID and restoring user created views
+        {
+            for( int i = 0; i < numberOfViews; i++ )
+            {
+                QString sectionName = QString( "View_%1" ).arg(i);
+                ser->BeginSection( sectionName.toUtf8().data() );
+                ::Serialize( ser, "ViewID", viewID );
+                ::Serialize( ser, "ViewType", type );
+                ::Serialize( ser, "Name", name );
+                view = Views.key( viewID, NULL );
+                if( view != NULL )
+                {
+                    view->Serialize( ser );
+                }
+                else
+                {
+                    view = this->CreateView( type, viewID, name );
+                    view->Serialize( ser );
+                    this->Views.insert( view, viewID );
+                }
+                ser->EndSection();
+            }
+        }
+        else //old scenes, version 6, which always restored only 4 views
+        {
+            foreach( view, Views.keys() )
+            {
+                 QString viewName(view->GetName());
+                ::Serialize( ser, viewName.toUtf8().data(), view );
+            }
+        }
+        return;
+    }
+    // writer
+    int i = 0;
+    foreach( View* view, Views.keys() )
+    {
+        viewID = Views.value(view);
+        type = view->GetType();
+        name = view->GetName();
+        QString sectionName = QString( "View_%1" ).arg(i++);
+        ser->BeginSection( sectionName.toUtf8().data() );
+        ::Serialize( ser, "ViewID", viewID );
+        ::Serialize( ser, "ViewType", type );
+        ::Serialize( ser, "Name", name );
+        view->Serialize( ser );
+        ser->EndSection();
     }
     ser->EndSection();
 }
@@ -1342,7 +1391,7 @@ void SceneManager::ObjectReader( Serializer * ser, bool interactive )
 {
     int i, numberOfSceneObjects = 0;
     int oldId, oldParentId;
-    QString sectionName, className, filePath, objectName;
+    QString sectionName, className, filePath;
     ::Serialize( ser, "NumberOfSceneObjects", numberOfSceneObjects );
     ser->BeginSection("ObjectList");
     SceneObject *parentObject;
@@ -1532,7 +1581,6 @@ void SceneManager::ObjectWriter( Serializer * ser )
     {
         SceneObject * obj = (*it);
         QString sectionName= QString( "ObjectInScene_%1" ).arg(i);
-        QString objectName = QString(obj->GetName());
         QString className = QString(obj->GetClassName());
         ser->BeginSection(sectionName.toUtf8().data());
         QString oldPath = obj->GetFullFileName();
