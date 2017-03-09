@@ -105,7 +105,7 @@ public:
     vtkGetMacro(MainTransverseViewID,int);
     vtkSetMacro(MainTransverseViewID,int);
     View * GetViewByID( int id );
-    View * CreateView( int type, int id, QString name = QString::null );
+    View * CreateView( int type, int id = InvalidId, QString name = QString::null );
     View * GetMain3DView();
     View * GetMainCoronalView();
     View * GetMainSagittalView();
