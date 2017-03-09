@@ -44,6 +44,7 @@ void FrameRateTesterWidget::SetPluginInterface( FrameRateTesterPluginInterface *
 void FrameRateTesterWidget::UpdateUi()
 {
     Q_ASSERT( m_pluginInterface );
+    Q_ASSERT( m_pluginInterface->GetCurrentViewID() != SceneManager::InvalidId );
 
     // Current view combo
     ui->currentViewComboBox->blockSignals( true );
