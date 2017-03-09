@@ -178,33 +178,33 @@ void QuadViewWindow::SetSceneManager( SceneManager * man )
 {
     Q_ASSERT( man );
     View * view;
-    view = man->CreateView( TRANSVERSE_VIEW_TYPE, -2 );
+    view = man->CreateView( TRANSVERSE_VIEW_TYPE, TRANSVERSE_VIEW_ID );
     view->SetName( ViewNames[0] );
     view->SetQtRenderWindow( m_vtkWindows[0] );
     view->SetInteractor( m_vtkWindows[0]->GetInteractor() );
     connect( view, SIGNAL( Modified() ), this, SLOT( Win0NeedsRender() ) );
-    man->SetMainTransverseViewID(-2);
+    man->SetMainTransverseViewID( TRANSVERSE_VIEW_ID );
 
-    view = man->CreateView( THREED_VIEW_TYPE, -3 );
+    view = man->CreateView( THREED_VIEW_TYPE, THREED_VIEW_ID );
     view->SetName( ViewNames[1] );
     view->SetQtRenderWindow( m_vtkWindows[1] );
     view->SetInteractor( m_vtkWindows[1]->GetInteractor() );
     connect( view, SIGNAL( Modified() ), this, SLOT( Win1NeedsRender() ) );
-    man->SetMain3DViewID( -3 );
+    man->SetMain3DViewID( THREED_VIEW_ID );
 
-    view = man->CreateView( CORONAL_VIEW_TYPE, -4 );
+    view = man->CreateView( CORONAL_VIEW_TYPE, CORONAL_VIEW_ID );
     view->SetName( ViewNames[2] );
     view->SetQtRenderWindow( m_vtkWindows[2] );
     view->SetInteractor( m_vtkWindows[2]->GetInteractor() );
     connect( view, SIGNAL( Modified() ), this, SLOT( Win2NeedsRender() ) );
-    man->SetMainCoronalViewID( -4 );
+    man->SetMainCoronalViewID( CORONAL_VIEW_ID );
 
-    view = man->CreateView( SAGITTAL_VIEW_TYPE, -5 );
+    view = man->CreateView( SAGITTAL_VIEW_TYPE, SAGITTAL_VIEW_ID );
     view->SetName( ViewNames[3] );
     view->SetQtRenderWindow( m_vtkWindows[3] );
     view->SetInteractor( m_vtkWindows[3]->GetInteractor() );
     connect( view, SIGNAL( Modified() ), this, SLOT( Win3NeedsRender() ) );
-    man->SetMainSagittalViewID( -5 );
+    man->SetMainSagittalViewID( SAGITTAL_VIEW_ID );
 
     m_sceneManager = man;
 

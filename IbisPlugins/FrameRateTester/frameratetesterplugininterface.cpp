@@ -17,6 +17,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "view.h"
 #include <QTimer>
 #include <QTime>
+#include <QMap>
 
 FrameRateTesterPluginInterface::FrameRateTesterPluginInterface()
 {
@@ -24,7 +25,7 @@ FrameRateTesterPluginInterface::FrameRateTesterPluginInterface()
     m_timer = 0;
     m_lastNumberOfFrames = 0;
     m_lastPeriod = 0.0;
-    m_currentViewIndex = 1;
+    m_currentViewID = THREED_VIEW_ID;
     m_time = new QTime;
     m_accumulatedFrames = 0;
 }
@@ -99,10 +100,9 @@ double FrameRateTesterPluginInterface::GetLastFrameRate()
     return 0.0;
 }
 
-void FrameRateTesterPluginInterface::SetCurrentViewIndex( int index )
+void FrameRateTesterPluginInterface::SetCurrentViewId( int id )
 {
-    Q_ASSERT( index < GetSceneManager()->GetNumberOfViews() && index >= 0 );
-    m_currentViewIndex = index;
+    m_currentViewID = id;
     emit Modified();
 }
 
@@ -112,7 +112,7 @@ void FrameRateTesterPluginInterface::OnTimerTriggered()
         m_time->restart();
 
     // Render
-    GetSceneManager()->GetViewByIndex( m_currentViewIndex )->Render();
+    GetSceneManager()->GetViewByID( m_currentViewID )->Render();
 
     // Increment stats
     m_lastPeriod = ((double)m_time->elapsed()) * 0.001;
@@ -130,10 +130,10 @@ void FrameRateTesterPluginInterface::OnTimerTriggered()
 
 void FrameRateTesterPluginInterface::SetRenderingEnabled( bool enabled )
 {
-    int nbViews = GetSceneManager()->GetNumberOfViews();
-    for( int i = 0; i < nbViews; ++i )
+    QMap<View*, int> allViews = GetSceneManager()->GetAllViews();
+    foreach( int id, allViews.values() )
     {
-        if( i != m_currentViewIndex )
-            GetSceneManager()->GetViewByIndex( i )->SetRenderingEnabled( enabled );
+        if( id != m_currentViewID )
+            GetSceneManager()->GetViewByID( id )->SetRenderingEnabled( enabled );
     }
 }

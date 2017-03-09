@@ -93,8 +93,7 @@ public:
     // is no view of this type. GetOrCreateView() will return
     // a view of type 'type' if there is one, otherwise, it
     // will create one.
-    typedef QMap<View*, int> ViewMap;
-    ViewMap GetAllViews( ) {return this->Views;}
+    QMap<View*, int> GetAllViews( ) {return this->Views;}
     int GetNumberOfViews() { return this->Views.size(); }
     vtkGetMacro(Main3DViewID,int);
     vtkSetMacro(Main3DViewID,int);
@@ -365,6 +364,7 @@ protected:
 
     // Views
     bool m_viewFollowsReferenceObject;
+    typedef QMap<View*, int> ViewMap;
     ViewMap Views;
 
     TripleCutPlaneObject * MainCutPlanes;
