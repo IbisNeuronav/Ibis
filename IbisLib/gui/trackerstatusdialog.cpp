@@ -43,7 +43,7 @@ ToolUI::ToolUI( QWidget * parent )
     this->ToolLayout->addWidget( this->SnapshotButton );
     connect( this->SnapshotButton, SIGNAL(clicked()), this, SLOT(SnapshotButtonClicked()) );
     
-    this->m_toolObjectId = SceneObject::InvalidObjectId;
+    this->m_toolObjectId = SceneManager::InvalidId;
 }
 
 ToolUI::~ToolUI()
@@ -65,7 +65,7 @@ void ToolUI::SetSceneManager( SceneManager * man, int toolObjectId )
 
 void ToolUI::UpdateUI()
 {
-    Q_ASSERT( m_manager && m_toolObjectId != SceneObject::InvalidObjectId );
+    Q_ASSERT( m_manager && m_toolObjectId != SceneManager::InvalidId );
     TrackedSceneObject * toolObject = TrackedSceneObject::SafeDownCast( m_manager->GetObjectByID( m_toolObjectId ) );
     Q_ASSERT( toolObject );
 
@@ -210,7 +210,7 @@ void TrackerStatusDialog::UpdateUI()
 void TrackerStatusDialog::OnNavigationComboBoxActivated( int index )
 {
     Q_ASSERT( m_sceneManager );
-    int newPointerId = GuiUtilities::ObjectIdFromSceneObjectComboBox( m_pointerToolCombo, index );
+    int newPointerId = GuiUtilities::ObjectIdFromObjectComboBox( m_pointerToolCombo, index );
     m_sceneManager->SetNavigationPointerID( newPointerId );
 }
 

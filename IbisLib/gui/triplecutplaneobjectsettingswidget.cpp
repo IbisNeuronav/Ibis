@@ -67,9 +67,9 @@ void TripleCutPlaneObjectSettingsWidget::UpdateUI()
 {
     Q_ASSERT( m_cutPlaneObject );
 
-    ui->sagitalPlaneCheckBox->blockSignals( true );
-    ui->sagitalPlaneCheckBox->setChecked( m_cutPlaneObject->GetViewPlane( 0 ) == 0 ? false : true );
-    ui->sagitalPlaneCheckBox->blockSignals( false );
+    ui->sagittalPlaneCheckBox->blockSignals( true );
+    ui->sagittalPlaneCheckBox->setChecked( m_cutPlaneObject->GetViewPlane( 0 ) == 0 ? false : true );
+    ui->sagittalPlaneCheckBox->blockSignals( false );
     ui->coronalPlaneCheckBox->blockSignals( true );
     ui->coronalPlaneCheckBox->setChecked( m_cutPlaneObject->GetViewPlane( 1 ) == 0 ? false : true );
     ui->coronalPlaneCheckBox->blockSignals( false );
@@ -90,7 +90,7 @@ void TripleCutPlaneObjectSettingsWidget::UpdateUI()
     ui->sliceThicknessSpinBox->blockSignals( false );
 }
 
-void TripleCutPlaneObjectSettingsWidget::on_sagitalPlaneCheckBox_toggled(bool checked)
+void TripleCutPlaneObjectSettingsWidget::on_sagittalPlaneCheckBox_toggled(bool checked)
 {
     m_cutPlaneObject->SetViewPlane( 0, checked ? 1 : 0 );
 }

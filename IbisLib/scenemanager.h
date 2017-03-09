@@ -17,6 +17,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QString>
 #include <QStringList>
 #include <QList>
+#include <QMap>
 #include <QProgressDialog>
 
 #include <vector>
@@ -61,6 +62,7 @@ class SceneManager : public QObject, public vtkObject
 public:
 
     typedef QList< SceneObject* > ObjectList;
+    static const int InvalidId;
 
     static SceneManager * New() { return new SceneManager; }
 
@@ -91,19 +93,30 @@ public:
     // is no view of this type. GetOrCreateView() will return
     // a view of type 'type' if there is one, otherwise, it
     // will create one.
+    typedef QMap<View*, int> ViewMap;
+    ViewMap GetAllViews( ) {return this->Views;}
     int GetNumberOfViews() { return this->Views.size(); }
-    View * GetViewByIndex( int index );
-    View * CreateView( int type, QString name = QString::null );
-    View * GetView( int type );
+    vtkGetMacro(Main3DViewID,int);
+    vtkSetMacro(Main3DViewID,int);
+    vtkGetMacro(MainCoronalViewID,int);
+    vtkSetMacro(MainCoronalViewID,int);
+    vtkGetMacro(MainSagittalViewID,int);
+    vtkSetMacro(MainSagittalViewID,int);
+    vtkGetMacro(MainTransverseViewID,int);
+    vtkSetMacro(MainTransverseViewID,int);
+    View * GetViewByID( int id );
+    View * CreateView( int type, int id = InvalidId, QString name = QString::null );
     View * GetMain3DView();
-    View * GetView( const QString & name );
+    View * GetMainCoronalView();
+    View * GetMainSagittalView();
+    View * GetMainTransverseView();
     View * GetViewFromInteractor( vtkRenderWindowInteractor * interactor );
     void Set3DViewFollowingReferenceVolume( bool follow ) { m_viewFollowsReferenceObject = follow; }
     bool Is3DViewFollowingReferenceVolume() { return m_viewFollowsReferenceObject; }
     void SetViewBackgroundColor( double * color );
     void UpdateBackgroundColor();
     vtkGetVector3Macro( ViewBackgroundColor, double );
-    vtkRenderer *GetViewRenderer(int viewType);
+    vtkRenderer *GetViewRenderer(int viewID);
     void SetRenderingEnabled( bool r );
     double Get3DCameraViewAngle();
     void Set3DCameraViewAngle( double angle );
@@ -339,7 +352,7 @@ protected:
 
     // Description:
     // Allow settin object id when adding object
-    void AddObjectUsingID( SceneObject * object, SceneObject * attachTo = 0, int objID = SceneObject::InvalidObjectId);
+    void AddObjectUsingID( SceneObject * object, SceneObject * attachTo = 0, int objID = SceneManager::InvalidId);
 
     // Description:
     // Recursive function used to setup all objects bellow obj
@@ -352,8 +365,7 @@ protected:
 
     // Views
     bool m_viewFollowsReferenceObject;
-    typedef std::vector<View*> ViewList;
-    ViewList Views;
+    ViewMap Views;
 
     TripleCutPlaneObject * MainCutPlanes;
 
@@ -377,6 +389,11 @@ protected:
     bool LoadingScene;
 
     QString GenericText;
+
+    int Main3DViewID;
+    int MainCoronalViewID;
+    int MainSagittalViewID;
+    int MainTransverseViewID;
 private:
 
     QString SceneDirectory;

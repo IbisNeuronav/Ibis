@@ -80,7 +80,7 @@ PolyDataObject::PolyDataObject()
     this->renderingMode = VTK_SURFACE;
     this->ScalarsVisible = 0;
     this->VertexColorMode = 0;
-    this->ScalarSourceObjectId = SceneObject::InvalidObjectId;
+    this->ScalarSourceObjectId = SceneManager::InvalidId;
     this->Property = vtkProperty::New();
     this->CrossSectionVisible = false;
     this->showTexture = false;
@@ -161,7 +161,7 @@ void PolyDataObject::Serialize( Serializer * ser )
         if( this->ScalarSource )
             this->ScalarSourceObjectId = this->ScalarSource->GetObjectID();
         else
-            this->ScalarSourceObjectId = SceneObject::InvalidObjectId;
+            this->ScalarSourceObjectId = SceneManager::InvalidId;
         clippingPlaneOrientation[0] = GetClippingPlanesOrientation( 0 ) ? 1 : 0;
         clippingPlaneOrientation[1] = GetClippingPlanesOrientation( 1 ) ? 1 : 0;
         clippingPlaneOrientation[2] = GetClippingPlanesOrientation( 2 ) ? 1 : 0;
@@ -632,7 +632,7 @@ void PolyDataObject::InternalPostSceneRead()
     Q_ASSERT( this->GetManager() );
 
     // reconnect to the image object from which scalars are computed
-    if( this->ScalarSourceObjectId != SceneObject::InvalidObjectId )
+    if( this->ScalarSourceObjectId != SceneManager::InvalidId )
     {
         SceneObject * scalarObj = this->GetManager()->GetObjectByID( this->ScalarSourceObjectId );
         ImageObject * scalarImageObj = ImageObject::SafeDownCast( scalarObj );

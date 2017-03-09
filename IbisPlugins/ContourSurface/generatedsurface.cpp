@@ -50,7 +50,7 @@ GeneratedSurface::~GeneratedSurface()
 void GeneratedSurface::Serialize( Serializer * ser )
 {
     PolyDataObject::Serialize(ser);
-    int imageId = SceneObject::InvalidObjectId;
+    int imageId = SceneManager::InvalidId;
     if (m_imageObject)
         imageId = m_imageObject->GetObjectID();
     ::Serialize( ser, "ImageObjectId", imageId );

@@ -176,59 +176,46 @@ QuadViewWindow::~QuadViewWindow()
 #include "QVTKInteractor.h"
 void QuadViewWindow::SetSceneManager( SceneManager * man )
 {
-    if( man )
-    {
-        View * view = man->GetView( ViewNames[0] );
-        if( !view )
-        {
-            view = man->CreateView( TRANSVERSE_VIEW_TYPE );
-            view->SetName( ViewNames[0] );
-        }
-        view->SetQtRenderWindow( m_vtkWindows[0] );
-        view->SetInteractor( m_vtkWindows[0]->GetInteractor() );
-        connect( view, SIGNAL( Modified() ), this, SLOT( Win0NeedsRender() ) );
-        
-        view = man->GetView( ViewNames[1] );
-        if( !view )
-        {
-            view = man->CreateView( THREED_VIEW_TYPE );
-            view->SetName( ViewNames[1] );
-        }
-        view->SetQtRenderWindow( m_vtkWindows[1] );
-        view->SetInteractor( m_vtkWindows[1]->GetInteractor() );
-        connect( view, SIGNAL( Modified() ), this, SLOT( Win1NeedsRender() ) );
-        
-        view = man->GetView( ViewNames[2] );
-        if( !view )
-        {
-            view = man->CreateView( CORONAL_VIEW_TYPE );
-            view->SetName( ViewNames[2] );
-        }
-        view->SetQtRenderWindow( m_vtkWindows[2] );
-        view->SetInteractor( m_vtkWindows[2]->GetInteractor() );
-        connect( view, SIGNAL( Modified() ), this, SLOT( Win2NeedsRender() ) );
-        
-        view = man->GetView( ViewNames[3] );
-        if( !view )
-        {
-            view = man->CreateView( SAGITTAL_VIEW_TYPE );
-            view->SetName( ViewNames[3] );
-        }
-        view->SetQtRenderWindow( m_vtkWindows[3] );
-        view->SetInteractor( m_vtkWindows[3]->GetInteractor() );
-        connect( view, SIGNAL( Modified() ), this, SLOT( Win3NeedsRender() ) );
-        
-        m_sceneManager = man;
+    Q_ASSERT( man );
+    View * view;
+    view = man->CreateView( TRANSVERSE_VIEW_TYPE, -2 );
+    view->SetName( ViewNames[0] );
+    view->SetQtRenderWindow( m_vtkWindows[0] );
+    view->SetInteractor( m_vtkWindows[0]->GetInteractor() );
+    connect( view, SIGNAL( Modified() ), this, SLOT( Win0NeedsRender() ) );
+    man->SetMainTransverseViewID(-2);
 
-        connect( man, SIGNAL(CursorPositionChanged()), this, SLOT(OnCursorMoved()) );
-        OnCursorMoved();
-        
-        connect( man, SIGNAL(ShowGenericLabel(bool)), this, SLOT(OnShowGenericLabel(bool)) );
-        connect( man, SIGNAL(ShowGenericLabelText()), this, SLOT(OnShowGenericLabelText()) );
+    view = man->CreateView( THREED_VIEW_TYPE, -3 );
+    view->SetName( ViewNames[1] );
+    view->SetQtRenderWindow( m_vtkWindows[1] );
+    view->SetInteractor( m_vtkWindows[1]->GetInteractor() );
+    connect( view, SIGNAL( Modified() ), this, SLOT( Win1NeedsRender() ) );
+    man->SetMain3DViewID( -3 );
 
-        m_sceneManager->PreDisplaySetup();
+    view = man->CreateView( CORONAL_VIEW_TYPE, -4 );
+    view->SetName( ViewNames[2] );
+    view->SetQtRenderWindow( m_vtkWindows[2] );
+    view->SetInteractor( m_vtkWindows[2]->GetInteractor() );
+    connect( view, SIGNAL( Modified() ), this, SLOT( Win2NeedsRender() ) );
+    man->SetMainCoronalViewID( -4 );
+
+    view = man->CreateView( SAGITTAL_VIEW_TYPE, -5 );
+    view->SetName( ViewNames[3] );
+    view->SetQtRenderWindow( m_vtkWindows[3] );
+    view->SetInteractor( m_vtkWindows[3]->GetInteractor() );
+    connect( view, SIGNAL( Modified() ), this, SLOT( Win3NeedsRender() ) );
+    man->SetMainSagittalViewID( -5 );
+
+    m_sceneManager = man;
+
+    connect( man, SIGNAL(CursorPositionChanged()), this, SLOT(OnCursorMoved()) );
+    OnCursorMoved();
+
+    connect( man, SIGNAL(ShowGenericLabel(bool)), this, SLOT(OnShowGenericLabel(bool)) );
+    connect( man, SIGNAL(ShowGenericLabelText()), this, SLOT(OnShowGenericLabelText()) );
+
+    m_sceneManager->PreDisplaySetup();
 //        this->PlaceCornerText(); temporarily blocked
-    }
 }
 
 void QuadViewWindow::AddBottomWidget( QWidget * w )
@@ -451,7 +438,7 @@ void QuadViewWindow::Serialize( Serializer * ser )
 
 void QuadViewWindow::PlaceCornerText()
 {
-    View * v = m_sceneManager->GetView( CORONAL_VIEW_TYPE );
+    View * v = m_sceneManager->GetMainCoronalView( );
     vtkRenderer *renderer = v->GetOverlayRenderer();
     vtkCornerAnnotation *ca = vtkCornerAnnotation::New();
     ca->SetText(0, "R");
@@ -462,7 +449,7 @@ void QuadViewWindow::PlaceCornerText()
     renderer->AddViewProp( ca );
     ca->Delete();
 
-    v = m_sceneManager->GetView( TRANSVERSE_VIEW_TYPE );
+    v = m_sceneManager->GetMainTransverseView( );
     renderer = v->GetOverlayRenderer();
     ca = vtkCornerAnnotation::New();
     ca->SetText(0, "R");
@@ -473,7 +460,7 @@ void QuadViewWindow::PlaceCornerText()
     renderer->AddViewProp( ca );
     ca->Delete();
 
-    v = m_sceneManager->GetView( SAGITTAL_VIEW_TYPE );
+    v = m_sceneManager->GetMainSagittalView( );
     renderer = v->GetOverlayRenderer();
     ca = vtkCornerAnnotation::New();
     ca->SetText(0, "A");
@@ -484,7 +471,7 @@ void QuadViewWindow::PlaceCornerText()
     renderer->AddViewProp( ca );
     ca->Delete();
 
-    v = m_sceneManager->GetView(THREED_VIEW_TYPE);
+    v = m_sceneManager->GetMain3DView( );
     renderer = v->GetOverlayRenderer();
     ca = vtkCornerAnnotation::New();
     ca->SetText(0, "I");

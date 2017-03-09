@@ -55,6 +55,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 ObjectSerializationMacro( SceneManager );
 
+const int SceneManager::InvalidId = -1;
+
 SceneManager::SceneManager()
 {
     m_viewFollowsReferenceObject = true;
@@ -63,7 +65,7 @@ SceneManager::SceneManager()
     this->ViewBackgroundColor[2] = 0;
     this->CameraViewAngle3D = 30.0;
     this->SupportedSceneSaveVersion = IBIS_SCENE_SAVE_VERSION;
-    this->NavigationPointerID = SceneObject::InvalidObjectId;
+    this->NavigationPointerID = SceneManager::InvalidId;
     this->IsNavigating = false;
     this->LoadingScene = false;
 
@@ -94,10 +96,9 @@ void SceneManager::Destroy()
 
     this->RemoveObject( this->SceneRoot );
 
-    for( ViewList::iterator it = Views.begin(); it != Views.end(); ++it )
-    {
-        (*it)->Delete();
-    }
+    foreach( View* v, Views.keys() )
+        v->Delete();
+
     Views.clear();
 
     this->Delete();
@@ -400,8 +401,8 @@ void SceneManager::SaveScene( QString & fileName )
 
 void SceneManager::Serialize( Serializer * ser )
 {
-    int id = SceneObject::InvalidObjectId;
-    int refObjID = SceneObject::InvalidObjectId;
+    int id = SceneManager::InvalidId;
+    int refObjID = SceneManager::InvalidId;
     if (!ser->IsReader() && this->CurrentObject)
     {
         id = this->CurrentObject->GetObjectID();
@@ -413,18 +414,66 @@ void SceneManager::Serialize( Serializer * ser )
     ::Serialize( ser, "ViewBackgroundColor", this->ViewBackgroundColor, 3 );
 
     ser->BeginSection("Views");
-    for( ViewList::iterator it = Views.begin(); it != Views.end(); ++it )
-    {
-        View * view  = (*it);
-        QString viewName(view->GetName());
-        ::Serialize( ser, viewName.toUtf8().data(), view );
-    }
+    int numberOfViews = Views.size();
+    int viewID = InvalidId;
+    int type;
+    bool ok = ::Serialize( ser, "NumberOfViews", numberOfViews );
+    QString name;
+
     if (ser->IsReader())
     {
         this->SetCurrentObject(this->GetObjectByID(id));
         this->SetViewBackgroundColor( this->ViewBackgroundColor );
-        if( refObjID != SceneObject::InvalidObjectId )
+        if( refObjID != SceneManager::InvalidId )
             this->SetReferenceDataObject( this->GetObjectByID(refObjID) );
+        View *view;
+        if( ok ) // new scenes saving newly implemented viewID and restoring user created views
+        {
+            for( int i = 0; i < numberOfViews; i++ )
+            {
+                QString sectionName = QString( "View_%1" ).arg(i);
+                ser->BeginSection( sectionName.toUtf8().data() );
+                ::Serialize( ser, "ViewID", viewID );
+                ::Serialize( ser, "ViewType", type );
+                ::Serialize( ser, "Name", name );
+                view = Views.key( viewID, NULL );
+                if( view != NULL )
+                {
+                    view->Serialize( ser );
+                }
+                else
+                {
+                    view = this->CreateView( type, viewID, name );
+                    view->Serialize( ser );
+                    this->Views.insert( view, viewID );
+                }
+                ser->EndSection();
+            }
+        }
+        else //old scenes, version 6, which always restored only 4 views
+        {
+            foreach( view, Views.keys() )
+            {
+                 QString viewName(view->GetName());
+                ::Serialize( ser, viewName.toUtf8().data(), view );
+            }
+        }
+        return;
+    }
+    // writer
+    int i = 0;
+    foreach( View* view, Views.keys() )
+    {
+        viewID = Views.value(view);
+        type = view->GetType();
+        name = view->GetName();
+        QString sectionName = QString( "View_%1" ).arg(i++);
+        ser->BeginSection( sectionName.toUtf8().data() );
+        ::Serialize( ser, "ViewID", viewID );
+        ::Serialize( ser, "ViewType", type );
+        ::Serialize( ser, "Name", name );
+        view->Serialize( ser );
+        ser->EndSection();
     }
     ser->EndSection();
 }
@@ -469,15 +518,14 @@ QWidget * SceneManager::CreateTrackedToolsStatusWidget( QWidget * parent )
     return res;
 }
 
-View * SceneManager::GetViewByIndex( int index )
+View * SceneManager::GetViewByID( int id )
 {
-    Q_ASSERT( index < this->Views.size() && index >= 0 );
-    return this->Views[index];
+    return Views.key( id, NULL );
 }
 
-View * SceneManager::CreateView( int type, QString name )
+View * SceneManager::CreateView( int type, int id, QString name )
 {
-    View * res = this->GetView( type );
+    View * res = this->GetViewByID( id );
 
     if( res )
         return res;
@@ -497,49 +545,38 @@ View * SceneManager::CreateView( int type, QString name )
     double bounds[6] = { -90.0, 91.0, -126.0, 91.0, -72.0, 109.0 };
     res->ResetCamera( bounds );
 
-    this->Views.push_back( res );
+    this->Views.insert( res, id );
 
     return res;
 }
 
-View * SceneManager::GetView( int type )
-{
-    for( ViewList::iterator it = Views.begin(); it != Views.end(); ++it )
-    {
-        if( (*it)->GetType() == type )
-        {
-            return (*it);
-        }
-    }
-    return NULL;
-}
-
-
-// Todo : do something smarter. Main 3D view is not any 3D view!
 View * SceneManager::GetMain3DView()
 {
-    return GetView( THREED_VIEW_TYPE );
+    return Views.key( this->Main3DViewID, NULL );
 }
 
-View * SceneManager::GetView( const QString & name )
+View * SceneManager::GetMainCoronalView()
 {
-    for( ViewList::iterator it = Views.begin(); it != Views.end(); ++it )
-    {
-        if( (*it)->GetName() == name )
-        {
-            return (*it);
-        }
-    }
-    return NULL;
+    return Views.key( this->MainCoronalViewID, NULL );
+}
+
+View * SceneManager::GetMainSagittalView()
+{
+    return Views.key( this->MainSagittalViewID, NULL );
+}
+
+View * SceneManager::GetMainTransverseView()
+{
+    return Views.key( this->MainTransverseViewID, NULL );
 }
 
 View * SceneManager::GetViewFromInteractor( vtkRenderWindowInteractor * interactor )
 {
-    for( ViewList::iterator it = Views.begin(); it != Views.end(); ++it )
+    foreach( View* view, Views.keys() )
     {
-        if( (*it)->GetInteractor() == interactor )
+        if( view->GetInteractor() == interactor )
         {
-            return (*it);
+            return view;
         }
     }
     return NULL;
@@ -550,23 +587,23 @@ void SceneManager::SetViewBackgroundColor( double * color )
     this->ViewBackgroundColor[0] = color[0];
     this->ViewBackgroundColor[1] = color[1];
     this->ViewBackgroundColor[2] = color[2];
-    for( ViewList::iterator it = Views.begin(); it != Views.end(); ++it )
+    foreach( View* view, Views.keys() )
     {
-        (*it)->SetBackgroundColor( color );
+        view->SetBackgroundColor( color );
     }
 }
 
 void SceneManager::UpdateBackgroundColor( )
 {
-    for( ViewList::iterator it = Views.begin(); it != Views.end(); ++it )
+    foreach( View* view, Views.keys() )
     {
-        (*it)->SetBackgroundColor( this->ViewBackgroundColor );
+        view->SetBackgroundColor( this->ViewBackgroundColor );
     }
 }
 
 void SceneManager::AddObject( SceneObject * object, SceneObject * attachTo )
 {
-    this->AddObjectUsingID(object, attachTo, SceneObject::InvalidObjectId);
+    this->AddObjectUsingID(object, attachTo, SceneManager::InvalidId);
 }
 
 void SceneManager::AddObjectUsingID( SceneObject * object, SceneObject * attachTo, int objID )
@@ -587,10 +624,10 @@ void SceneManager::AddObjectUsingID( SceneObject * object, SceneObject * attachT
 
     // Setting object id and manager
     int id = objID;  // if we get a valid id, use it
-    if( id == SceneObject::InvalidObjectId )
+    if( id == SceneManager::InvalidId )
     {
         // if the object has already been assigned an id, keep it
-        if( object->GetObjectID() != SceneObject::InvalidObjectId )
+        if( object->GetObjectID() != SceneManager::InvalidId )
             id = object->GetObjectID();
         else if( object->IsManagedBySystem() )
             id = this->NextSystemObjectID--;
@@ -749,9 +786,9 @@ void SceneManager::RemoveObject( SceneObject * object , bool viewChange)
     }
 
     // Release from all views
-    for( ViewList::iterator it = Views.begin(); it != Views.end(); ++it )
+    foreach( View* view, Views.keys() )
     {
-        object->Release( (*it) );
+        object->Release( view );
     }
 
     // Detach from parent
@@ -883,7 +920,7 @@ void SceneManager::GetAllObjectsOfType( const char * typeName, QList<SceneObject
 
 SceneObject * SceneManager::GetObjectByID( int id )
 {
-    if( id == SceneObject::InvalidObjectId )
+    if( id == SceneManager::InvalidId )
         return 0;
     for( int i = 0; i < this->AllObjects.size(); ++i )
     {
@@ -978,25 +1015,25 @@ void SceneManager::PreDisplaySetup()
 
 void SceneManager::ResetAllCameras()
 {
-    for( ViewList::iterator it = Views.begin(); it != Views.end(); ++it )
+    foreach( View* view, Views.keys() )
     {
-        (*it)->ResetCamera();
+        view->ResetCamera();
     }
 }
 
 void SceneManager::ResetAllCameras( double bounds[6] )
 {
-    for( ViewList::iterator it = Views.begin(); it != Views.end(); ++it )
+    foreach( View* view, Views.keys() )
     {
-        (*it)->ResetCamera( bounds );
+        view->ResetCamera( bounds );
     }
 }
 
 void SceneManager::ZoomAllCameras(double factor)
 {
-    for( ViewList::iterator it = Views.begin(); it != Views.end(); ++it )
+    foreach( View* view, Views.keys() )
     {
-        (*it)->ZoomCamera(factor);
+        view->ZoomCamera(factor);
     }
 }
 
@@ -1021,27 +1058,27 @@ void SceneManager::SetupOneObject( View * v, SceneObject * obj )
 
 void SceneManager::ReleaseAllViews()
 {
-    for( ViewList::iterator it = Views.begin(); it != Views.end(); ++it )
+    foreach( View* view, Views.keys() )
     {
-        (*it)->ReleaseView();
+        view->ReleaseView();
     }
 }
 
 void SceneManager::SetupInAllViews( SceneObject * object )
 {
-    for( ViewList::iterator it = Views.begin(); it != Views.end(); ++it )
+    foreach( View* view, Views.keys() )
     {
-		object->Setup( (*it) );
+        object->Setup( view );
     }
 }
 
 void SceneManager::Set3DInteractorStyle( InteractorStyle style )
 {
     this->InteractorStyle3D = style;
-    for( ViewList::iterator it = Views.begin(); it != Views.end(); ++it )
+    foreach( View* view, Views.keys() )
     {
-        if( (*it)->GetType() == THREED_VIEW_TYPE )
-            AssignInteractorStyleToView( style, (*it) );
+        if( view->GetType() == THREED_VIEW_TYPE )
+            AssignInteractorStyleToView( style, view );
     }
 }
 
@@ -1097,7 +1134,7 @@ void SceneManager::AssignInteractorStyleToView( InteractorStyle style, View * v 
 
 void SceneManager::SetStandardView(STANDARDVIEW type)
 {
-    View * v3d = GetView( THREED_VIEW_TYPE );
+    View * v3d = GetMain3DView();
     if (v3d)
     {
         vtkCamera *camera = v3d->GetRenderer()->GetActiveCamera();
@@ -1171,16 +1208,18 @@ void SceneManager::ReferenceTransformChangedSlot()
 
 
 
-vtkRenderer *SceneManager::GetViewRenderer(int viewType)
+vtkRenderer *SceneManager::GetViewRenderer(int viewID )
 {
-    View *v = this->GetView(viewType);
-    return v->GetRenderer();
+    View *v = Views.key( viewID, NULL );
+    if( v )
+        return v->GetRenderer();
+    return NULL;
 }
 
 void SceneManager::SetRenderingEnabled( bool r )
 {
-    for( int i = 0; i < this->Views.size(); ++i )
-        this->Views[i]->SetRenderingEnabled( r );
+    foreach( View* view, Views.keys() )
+        view->SetRenderingEnabled( r );
 }
 
 double SceneManager::Get3DCameraViewAngle()
@@ -1352,7 +1391,7 @@ void SceneManager::ObjectReader( Serializer * ser, bool interactive )
 {
     int i, numberOfSceneObjects = 0;
     int oldId, oldParentId;
-    QString sectionName, className, filePath, objectName;
+    QString sectionName, className, filePath;
     ::Serialize( ser, "NumberOfSceneObjects", numberOfSceneObjects );
     ser->BeginSection("ObjectList");
     SceneObject *parentObject;
@@ -1366,7 +1405,7 @@ void SceneManager::ObjectReader( Serializer * ser, bool interactive )
         ::Serialize( ser, "ObjectID", oldId );
         ::Serialize( ser, "ParentID", oldParentId );
         parentObject = 0;
-        if( oldParentId != SceneObject::InvalidObjectId ) // only World does not have parent
+        if( oldParentId != SceneManager::InvalidId ) // only World does not have parent
         {
             parentObject = this->GetObjectByID(oldParentId);
             if (!parentObject)
@@ -1537,12 +1576,11 @@ void SceneManager::ObjectWriter( Serializer * ser )
     QList< SceneObject* >::iterator it = listedObjects.begin();
     ser->BeginSection("ObjectList");
     QString newPath;
-    int id, parentId = SceneObject::InvalidObjectId;
+    int id, parentId = SceneManager::InvalidId;
     for(i = 0 ; it != listedObjects.end(); ++it, i++ )
     {
         SceneObject * obj = (*it);
         QString sectionName= QString( "ObjectInScene_%1" ).arg(i);
-        QString objectName = QString(obj->GetName());
         QString className = QString(obj->GetClassName());
         ser->BeginSection(sectionName.toUtf8().data());
         QString oldPath = obj->GetFullFileName();
@@ -1709,7 +1747,7 @@ void SceneManager::SetNavigationPointerID( int id )
 
 PointerObject *SceneManager::GetNavigationPointerObject( )
 {
-    if( this->NavigationPointerID == SceneObject::InvalidObjectId )
+    if( this->NavigationPointerID == SceneManager::InvalidId )
         return 0;
     SceneObject *obj =  this->GetObjectByID( this->NavigationPointerID );
     if( obj )
@@ -1722,10 +1760,10 @@ PointerObject *SceneManager::GetNavigationPointerObject( )
 void SceneManager::ValidatePointerObject()
 {
     int pointerId = this->NavigationPointerID;
-    if( pointerId != SceneObject::InvalidObjectId )
+    if( pointerId != SceneManager::InvalidId )
         if( !GetObjectByID( pointerId ) )
-            pointerId = SceneObject::InvalidObjectId;
-    if( pointerId == SceneObject::InvalidObjectId )
+            pointerId = SceneManager::InvalidId;
+    if( pointerId == SceneManager::InvalidId )
     {
         QList<PointerObject*> allPointers;
         GetAllPointerObjects( allPointers );
