@@ -100,6 +100,7 @@ protected:
     bool OpenItkLabelFile( QList<SceneObject*> & readObjects, QString filename, const QString & dataObjectName = "" );
     bool OpenObjFile     ( QList<SceneObject*> & readObjects, QString filename, const QString & dataObjectName = "" );
     bool OpenWavObjFile  ( QList<SceneObject*> & readObjects, QString filename, const QString & dataObjectName = "" );
+    bool OpenPlyFile     ( QList<SceneObject*> & readObjects, QString filename, const QString & dataObjectName );
     bool OpenVTKFile     ( QList<SceneObject*> & readObjects, QString filename, const QString & dataObjectName = "" );
     bool OpenVTPFile     ( QList<SceneObject*> & readObjects, QString filename, const QString & dataObjectName = "" );
     bool OpenTagFile     ( QList<SceneObject*> & readObjects, QString filename, const QString & dataObjectName = "" );

@@ -38,7 +38,7 @@ set( AutoVtkPath ${IBIS_EXTERNAL_DEPENDENCIES_DIR}/vtk-${IBIS_VTK_LONG_VERSION}/
 find_package(VTK ${IBIS_VTK_LONG_VERSION} EXACT COMPONENTS vtkGUISupportQt vtkRenderingOpenGL vtkRenderingVolumeOpenGL vtkRenderingImage
     vtkRenderingAnnotation vtkImagingStencil vtkImagingStatistics vtkFiltersTexture
     vtkInteractionStyle vtkInteractionWidgets
-    vtkIOXML vtkIOLegacy NO_MODULE
+    vtkIOXML vtkIOLegacy vtkIOPLY NO_MODULE
     PATHS ${AutoVtkPath} )
 include(${VTK_USE_FILE})
 
