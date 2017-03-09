@@ -15,6 +15,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QMap>
 
 class SceneObject;
+class SceneManager;
 class QComboBox;
 
 class GuiUtilities
@@ -48,7 +49,8 @@ public:
         {
             cb->addItem( allObjs.key(id)->GetName(), QVariant( id ) );
             if( id == currentObjectId )
-                cb->setCurrentIndex( index++ );
+                cb->setCurrentIndex( index );
+            index++;
         }
         if( allObjs.size() == 0 )
             cb->addItem( "None", QVariant( SceneManager::InvalidId ) );
@@ -63,6 +65,19 @@ public:
         if( !ok )
             objectId = SceneManager::InvalidId;
         return objectId;
+    }
+
+    static int ObjectComboBoxIndexFromObjectId( QComboBox * cb, int id )
+    {
+        for( int index = 0; index < cb->count(); index++ )
+        {
+            QVariant v = cb->itemData( index );
+            bool ok = false;
+            int objectId = v.toInt( &ok );
+            if( ok  && objectId == id )
+                return index;
+        }
+        return SceneManager::InvalidId;
     }
 };
 

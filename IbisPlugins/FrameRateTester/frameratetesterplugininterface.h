@@ -48,8 +48,8 @@ public:
     double GetLastPeriod() { return m_lastPeriod; }
     double GetLastFrameRate();
 
-    void SetCurrentViewIndex( int index );
-    int GetCurrentViewIndex() { return m_currentViewIndex; }
+    void SetCurrentViewId( int id );
+    int GetCurrentViewID() { return m_currentViewID; }
 
 private slots:
 
@@ -70,7 +70,7 @@ protected:
 
     int m_lastNumberOfFrames;
     double m_lastPeriod;
-    int m_currentViewIndex;
+    int m_currentViewID;
 
     // temp var used when running
     int m_accumulatedFrames;
