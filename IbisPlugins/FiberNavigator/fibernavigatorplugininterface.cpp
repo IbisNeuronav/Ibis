@@ -18,7 +18,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 FiberNavigatorPluginInterface::FiberNavigatorPluginInterface()
 {
     m_settingsWidget = 0;
-    m_fiberObjectId = SceneObject::InvalidObjectId;
+    m_fiberObjectId = SceneManager::InvalidId;
     m_maximas = Maximas();
     m_FA = fractionalAnisotropy();
     m_volumeShape = 0;
@@ -111,7 +111,7 @@ bool FiberNavigatorPluginInterface::WidgetAboutToClose()
     if(obj)
         manager->RemoveObject(obj);
     EnableRoi(false);
-    View * v = this->GetSceneManager()->GetView(THREED_VIEW_TYPE);
+    View * v = this->GetSceneManager()->GetMain3DView();
     v->GetOverlayRenderer()->InteractiveOn();
 
     disconnect( GetSceneManager(), SIGNAL(ObjectAdded(int)), this, SLOT(SceneFinishedLoading()) );
@@ -266,7 +266,7 @@ void FiberNavigatorPluginInterface::SetRoiBounds(
     double bounds[] = {xmin, xmax, ymin, ymax, zmin, zmax};
     m_roi->GetRepresentation()->PlaceWidget(bounds);
 
-    View * v = this->GetSceneManager()->GetView(THREED_VIEW_TYPE);
+    View * v = this->GetSceneManager()->GetMain3DView();
     v->NotifyNeedRender();
 }
 
@@ -280,7 +280,7 @@ void FiberNavigatorPluginInterface::CreateObject()
 {
     SceneManager* manager = GetSceneManager();
     Q_ASSERT(manager);
-    View * v = manager->GetView(THREED_VIEW_TYPE);
+    View * v = manager->GetMain3DView();
     v->GetOverlayRenderer()->InteractiveOff();
 	v->GetOverlayRenderer2()->InteractiveOff();
 
@@ -294,7 +294,7 @@ void FiberNavigatorPluginInterface::CreateObject()
 
 void FiberNavigatorPluginInterface::EnableRoi(bool on)
 {
-    View * v = this->GetSceneManager()->GetView(THREED_VIEW_TYPE);
+    View * v = this->GetSceneManager()->GetMain3DView();
 
     if(on)
     {
@@ -397,7 +397,7 @@ void FiberNavigatorPluginInterface::UpdateFibers(PolyDataObject * obj)
     vtkSmartPointer<vtkActor> actor = vtkSmartPointer<vtkActor>::New();
     actor->SetMapper(mapper);
 
-    View* viewer = sceneManager->GetView(THREED_VIEW_TYPE);
+    View* viewer = sceneManager->GetMain3DView();
     viewer->GetRenderer()->RemoveActor(m_actor);
     viewer->GetRenderer()->AddActor(actor);
     m_actor = actor;

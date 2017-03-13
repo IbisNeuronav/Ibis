@@ -41,9 +41,9 @@ LandmarkRegistrationObject::LandmarkRegistrationObject() : SceneObject()
     m_registrationTransform->SetTargetPoints( m_activeTargetPoints );
     m_backUpTransform = vtkTransform::New();
     m_backUpTransform->Identity();
-    m_sourcePointsID = SceneObject::InvalidObjectId;
-    m_targetPointsID = SceneObject::InvalidObjectId;
-    m_targetObjectID = SceneObject::InvalidObjectId;
+    m_sourcePointsID = SceneManager::InvalidId;
+    m_targetPointsID = SceneManager::InvalidId;
+    m_targetObjectID = SceneManager::InvalidId;
     m_loadingPointStatus = false;
     m_registerRequested = false;
 }
@@ -80,8 +80,8 @@ void LandmarkRegistrationObject::CreateSettingsWidgets( QWidget * parent, QVecto
 void LandmarkRegistrationObject::Serialize( Serializer * ser )
 {
 
-    int sourceId = SceneObject::InvalidObjectId;
-    int targetId = SceneObject::InvalidObjectId;
+    int sourceId = SceneManager::InvalidId;
+    int targetId = SceneManager::InvalidId;
     m_registerRequested = this->IsRegistered();
     SceneObject::Serialize(ser);
     sourceId = m_sourcePoints->GetObjectID();
@@ -318,7 +318,7 @@ void LandmarkRegistrationObject::SetSourcePoints(PointsObject *pts)
     if ( m_sourcePoints )
     {
         m_sourcePoints->SetListable( false );
-        if( m_sourcePoints->GetObjectID() == SceneObject::InvalidObjectId )
+        if( m_sourcePoints->GetObjectID() == SceneManager::InvalidId )
             this->GetManager()->AddObject( m_sourcePoints, this );
         else if( m_sourcePoints->GetParent() != this )
             this->GetManager()->ChangeParent( m_sourcePoints, this, 0);
@@ -355,9 +355,9 @@ void LandmarkRegistrationObject::SetTargetPoints(PointsObject *pts)
     if( m_targetPoints )
     {
         m_targetPoints->SetListable( false );
-        if( m_targetObjectID == SceneObject::InvalidObjectId )
+        if( m_targetObjectID == SceneManager::InvalidId )
             m_targetObjectID = this->GetManager()->GetSceneRoot()->GetObjectID();
-        if( m_targetPoints->GetObjectID() == SceneObject::InvalidObjectId )
+        if( m_targetPoints->GetObjectID() == SceneManager::InvalidId )
             this->GetManager()->AddObject( m_targetPoints, this->GetManager()->GetObjectByID( m_targetObjectID ) );
         else if( m_targetPoints->GetParent() != this->GetManager()->GetObjectByID( m_targetObjectID ) )
             this->GetManager()->ChangeParent( m_targetPoints, this->GetManager()->GetObjectByID( m_targetObjectID ), 0);

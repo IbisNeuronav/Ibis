@@ -12,8 +12,10 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #define __GuiUtilities_h_
 
 #include <QList>
+#include <QMap>
 
 class SceneObject;
+class SceneManager;
 class QComboBox;
 
 class GuiUtilities
@@ -33,18 +35,49 @@ public:
                 cb->setCurrentIndex( i );
         }
         if( allObjs.size() == 0 )
-            cb->addItem( "None", QVariant( SceneObject::InvalidObjectId ) );
+            cb->addItem( "None", QVariant( SceneManager::InvalidId ) );
         cb->blockSignals( false );
     }
 
-    static int ObjectIdFromSceneObjectComboBox( QComboBox * cb, int index )
+    template< class ObjectType >
+    static void UpdateObjectComboBox( QComboBox * cb, QMap<ObjectType*, int> allObjs, int currentObjectId )
+    {
+        cb->blockSignals( true );
+        cb->clear();
+        int index = 0;
+        foreach( int id, allObjs.values() )
+        {
+            cb->addItem( allObjs.key(id)->GetName(), QVariant( id ) );
+            if( id == currentObjectId )
+                cb->setCurrentIndex( index );
+            index++;
+        }
+        if( allObjs.size() == 0 )
+            cb->addItem( "None", QVariant( SceneManager::InvalidId ) );
+        cb->blockSignals( false );
+    }
+
+    static int ObjectIdFromObjectComboBox( QComboBox * cb, int index )
     {
         QVariant v = cb->itemData( index );
         bool ok = false;
         int objectId = v.toInt( &ok );
         if( !ok )
-            objectId = SceneObject::InvalidObjectId;
+            objectId = SceneManager::InvalidId;
         return objectId;
+    }
+
+    static int ObjectComboBoxIndexFromObjectId( QComboBox * cb, int id )
+    {
+        for( int index = 0; index < cb->count(); index++ )
+        {
+            QVariant v = cb->itemData( index );
+            bool ok = false;
+            int objectId = v.toInt( &ok );
+            if( ok  && objectId == id )
+                return index;
+        }
+        return SceneManager::InvalidId;
     }
 };
 

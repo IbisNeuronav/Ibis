@@ -33,14 +33,14 @@ USAcquisitionPluginInterface::USAcquisitionPluginInterface() : m_allowTrackerles
     m_blendingPercent = 0.5;
     m_isMasking = false;
     m_maskingPercent = 1.0;
-    m_currentProbeObjectId = SceneObject::InvalidObjectId;
-    m_currentAcquisitionObjectId = SceneObject::InvalidObjectId;
-    m_currentVolumeObjectId = SceneObject::InvalidObjectId;
+    m_currentProbeObjectId = SceneManager::InvalidId;
+    m_currentAcquisitionObjectId = SceneManager::InvalidId;
+    m_currentVolumeObjectId = SceneManager::InvalidId;
 
     // added content for adding an additional MRI, May 13, 2015 by Xiao
     m_isBlendingVolumes = false;
     m_blendingVolumesPercent = 0.5;
-    m_addedVolumeObjectId = SceneObject::InvalidObjectId;
+    m_addedVolumeObjectId = SceneManager::InvalidId;
 }
 
 USAcquisitionPluginInterface::~USAcquisitionPluginInterface()
@@ -120,8 +120,8 @@ void USAcquisitionPluginInterface::ValidateCurrentAcquisition()
     int initialAcqId = m_currentAcquisitionObjectId;
     SceneManager * man = GetSceneManager();
     if( !man->GetObjectByID( m_currentAcquisitionObjectId ) )
-        m_currentAcquisitionObjectId = SceneObject::InvalidObjectId;
-    if( m_currentAcquisitionObjectId == SceneObject::InvalidObjectId  )
+        m_currentAcquisitionObjectId = SceneManager::InvalidId;
+    if( m_currentAcquisitionObjectId == SceneManager::InvalidId  )
     {
         QList<USAcquisitionObject*> acquisitions;
         man->GetAllUSAcquisitionObjects( acquisitions );
@@ -138,8 +138,8 @@ void USAcquisitionPluginInterface::ValidateCurrentUsProbe()
     int initialProbeId = m_currentProbeObjectId;
     SceneManager * man = GetSceneManager();
     if( !man->GetObjectByID( m_currentProbeObjectId ) )
-        m_currentProbeObjectId = SceneObject::InvalidObjectId;
-    if( m_currentProbeObjectId == SceneObject::InvalidObjectId )
+        m_currentProbeObjectId = SceneManager::InvalidId;
+    if( m_currentProbeObjectId == SceneManager::InvalidId )
     {
         QList<UsProbeObject*> allProbes;
         man->GetAllUsProbeObjects( allProbes );
@@ -167,10 +167,10 @@ void USAcquisitionPluginInterface::ValidateCurrentVolume()
 
     SceneManager * man = GetSceneManager();
     if( !man->GetObjectByID( m_currentVolumeObjectId ) )
-        m_currentVolumeObjectId = SceneObject::InvalidObjectId;
+        m_currentVolumeObjectId = SceneManager::InvalidId;
 
     int newVolumeId = m_currentVolumeObjectId;
-    if( newVolumeId == SceneObject::InvalidObjectId )
+    if( newVolumeId == SceneManager::InvalidId )
     {
         QList<ImageObject*> images;
         man->GetAllImageObjects( images );
@@ -191,10 +191,10 @@ void USAcquisitionPluginInterface::ValidateAddedVolume()
 
     SceneManager * man = GetSceneManager();
     if( !man->GetObjectByID( m_addedVolumeObjectId ) )
-        m_addedVolumeObjectId = SceneObject::InvalidObjectId;
+        m_addedVolumeObjectId = SceneManager::InvalidId;
 
     int newVolumeId = m_addedVolumeObjectId;
-    if( newVolumeId == SceneObject::InvalidObjectId )
+    if( newVolumeId == SceneManager::InvalidId )
     {
         QList<ImageObject*> images;
         man->GetAllImageObjects( images );
@@ -203,7 +203,7 @@ void USAcquisitionPluginInterface::ValidateAddedVolume()
         else if( images.size() > 0 )
             newVolumeId = images[0]->GetObjectID();
         else
-            newVolumeId = SceneObject::InvalidObjectId;
+            newVolumeId = SceneManager::InvalidId;
     }
 
     if( initialVolumeId != newVolumeId )

@@ -16,6 +16,10 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "scenemanager.h"
 #include "vtkqtrenderwindow.h"
 #include <QSize>
+#include <QMap>
+#include <QComboBox>
+#include "view.h"
+#include "guiutilities.h"
 
 FrameRateTesterWidget::FrameRateTesterWidget(QWidget *parent) :
     QWidget(parent),
@@ -40,21 +44,19 @@ void FrameRateTesterWidget::SetPluginInterface( FrameRateTesterPluginInterface *
 void FrameRateTesterWidget::UpdateUi()
 {
     Q_ASSERT( m_pluginInterface );
+    Q_ASSERT( m_pluginInterface->GetCurrentViewID() != SceneManager::InvalidId );
 
     // Current view combo
     ui->currentViewComboBox->blockSignals( true );
     ui->currentViewComboBox->clear();
-    int nbViews = m_pluginInterface->GetSceneManager()->GetNumberOfViews();
-    for( int i = 0; i < nbViews; ++i )
-    {
-        View * v = m_pluginInterface->GetSceneManager()->GetViewByIndex( i );
-        ui->currentViewComboBox->addItem( v->GetName() );
-    }
-    ui->currentViewComboBox->setCurrentIndex( m_pluginInterface->GetCurrentViewIndex() );
+    QMap<View*, int> allViews = m_pluginInterface->GetSceneManager()->GetAllViews();
+    GuiUtilities::UpdateObjectComboBox( ui->currentViewComboBox, allViews, m_pluginInterface->GetCurrentViewID() );
+    int currentIndex = GuiUtilities::ObjectComboBoxIndexFromObjectId( ui->currentViewComboBox, m_pluginInterface->GetCurrentViewID() );
+    ui->currentViewComboBox->setCurrentIndex( currentIndex );
     ui->currentViewComboBox->blockSignals( false );
 
     // View size
-    View * v = m_pluginInterface->GetSceneManager()->GetViewByIndex( m_pluginInterface->GetCurrentViewIndex() );
+    View * v = m_pluginInterface->GetSceneManager()->GetViewByID( m_pluginInterface->GetCurrentViewID() );
     QSize s = v->GetQtRenderWindow()->size();
     ui->windowSizeLabel->setText( QString("Size : %1 x %2").arg( s.width() ).arg( s.height() ) );
 
@@ -83,7 +85,8 @@ void FrameRateTesterWidget::UpdateStats()
 void FrameRateTesterWidget::on_currentViewComboBox_currentIndexChanged(int index)
 {
     Q_ASSERT( m_pluginInterface );
-    m_pluginInterface->SetCurrentViewIndex( index );
+    int currentID = GuiUtilities::ObjectIdFromObjectComboBox( ui->currentViewComboBox, index );
+    m_pluginInterface->SetCurrentViewId( currentID );
 }
 
 void FrameRateTesterWidget::on_periodSpinBox_valueChanged(int arg1)
