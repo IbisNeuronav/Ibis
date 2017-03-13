@@ -10,6 +10,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 #include <iostream>
 #include <unistd.h>
+#include <algorithm>
 #include "scenemanager.h"
 #include "mainwindow.h"
 #include "quadviewwindow.h"
@@ -443,7 +444,7 @@ void SceneManager::Serialize( Serializer * ser )
                 }
                 else
                 {
-                    view = this->CreateView( type, viewID, name );
+                    view = this->CreateView( type, name, viewID );
                     view->Serialize( ser );
                     this->Views.insert( view, viewID );
                 }
@@ -523,15 +524,46 @@ View * SceneManager::GetViewByID( int id )
     return Views.key( id, NULL );
 }
 
-View * SceneManager::CreateView( int type, int id, QString name )
+View * SceneManager::CreateView( int type, QString name, int id )
 {
     View * res = this->GetViewByID( id );
-
     if( res )
         return res;
+    //verify id validity
+    bool idUsed = false;
+    if( id != SceneManager::InvalidId )
+    {
+        foreach( int tmpID, Views.values() )
+        {
+            if( id == tmpID )
+            {
+                idUsed = true;
+                break;
+            }
+        }
+    }
+    int maxID = SceneManager::InvalidId;
+    int finalID = id;
+    if( id == SceneManager::InvalidId || idUsed )
+    {
+        foreach( int tmpID, Views.values() )
+            maxID = std::max( tmpID, maxID );
+        finalID = maxID+1;
+    }
+    // verify name uniqueness
+    QString finalName( name );
+    if( !name.isNull() )
+    {
+        QStringList allNames;
+        foreach( View *v, Views.keys() )
+        {
+            allNames.append( v->GetName() );
+        }
+        finalName = this->FindUniqueName( name, allNames );
+    }
 
     res = View::New();
-    res->SetName( name );
+    res->SetName( finalName );
     res->SetManager( this );
     res->SetType( type );
     if( type == THREED_VIEW_TYPE )
@@ -545,7 +577,7 @@ View * SceneManager::CreateView( int type, int id, QString name )
     double bounds[6] = { -90.0, 91.0, -126.0, 91.0, -72.0, 109.0 };
     res->ResetCamera( bounds );
 
-    this->Views.insert( res, id );
+    this->Views.insert( res, finalID );
 
     return res;
 }
