@@ -438,16 +438,8 @@ void SceneManager::Serialize( Serializer * ser )
                 ::Serialize( ser, "ViewType", type );
                 ::Serialize( ser, "Name", name );
                 view = Views.key( viewID, NULL );
-                if( view != NULL )
-                {
-                    view->Serialize( ser );
-                }
-                else
-                {
-                    view = this->CreateView( type, name, viewID );
-                    view->Serialize( ser );
-                    this->Views.insert( view, viewID );
-                }
+                Q_ASSERT( view );
+                view->Serialize( ser );
                 ser->EndSection();
             }
         }
