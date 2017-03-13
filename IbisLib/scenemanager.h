@@ -96,13 +96,9 @@ public:
     QMap<View*, int> GetAllViews( ) {return this->Views;}
     int GetNumberOfViews() { return this->Views.size(); }
     vtkGetMacro(Main3DViewID,int);
-    vtkSetMacro(Main3DViewID,int);
     vtkGetMacro(MainCoronalViewID,int);
-    vtkSetMacro(MainCoronalViewID,int);
     vtkGetMacro(MainSagittalViewID,int);
-    vtkSetMacro(MainSagittalViewID,int);
     vtkGetMacro(MainTransverseViewID,int);
-    vtkSetMacro(MainTransverseViewID,int);
     View * GetViewByID( int id );
     View * CreateView(int type, QString name = QString::null, int id = InvalidId );
     View * GetMain3DView();
@@ -396,6 +392,11 @@ protected:
     int MainTransverseViewID;
 private:
 
+    friend class QuadViewWindow;
+    vtkSetMacro(Main3DViewID,int);
+    vtkSetMacro(MainCoronalViewID,int);
+    vtkSetMacro(MainSagittalViewID,int);
+    vtkSetMacro(MainTransverseViewID,int);
     QString SceneDirectory;
     QString SceneFile;
     // We declare these to make sure no one is registering or unregistering SceneManager
