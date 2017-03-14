@@ -19,13 +19,16 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "vtkXFMWriter.h"
 #include "vtkTransform.h"
 #include "vtkVideoSource2.h"
+#include "vtkPLYReader.h"
 #include "serializerhelper.h"
 
+#include "application.h"
 #include "scenemanager.h"
 #include "trackedsceneobject.h"
 #include "pointerobject.h"
 #include "usprobeobject.h"
 #include "cameraobject.h"
+#include "polydataobject.h"
 
 #include <QList>
 #include <QFileInfo>
@@ -38,6 +41,7 @@ ToolDescription::ToolDescription() : type( Passive ), use( Generic ), active(0),
     this->videoSourceIndex = 0;
     this->cachedSerialNumber = "";
     this->sceneObject = 0;
+    this->toolModel = 0;
 }
 
 ToolDescription::ToolDescription( const ToolDescription & orig )
@@ -50,6 +54,7 @@ ToolDescription::ToolDescription( const ToolDescription & orig )
     this->romFileName = orig.romFileName;
     this->cachedSerialNumber = orig.cachedSerialNumber;
     this->sceneObject = orig.sceneObject;
+    this->toolModel = orig.toolModel;
 }
 
 void ToolDescription::Serialize( Serializer * serial )
@@ -94,6 +99,20 @@ void ToolDescription::InstanciateSceneObject()
     sceneObject->SetObjectManagedByTracker(true);
     sceneObject->SetCanChangeParent( false );
     sceneObject->SetCanEditTransformManually( false );
+
+    // instanciate tool model if it is available
+    QString toolModelDir = Application::GetInstance().GetConfigDirectory() + "/tool-models";
+    QString modelFileName = toolModelDir + "/" + this->name + ".ply";
+    if( QFile::exists( modelFileName ) )
+    {
+        vtkPLYReader * reader = vtkPLYReader::New();
+        reader->SetFileName( modelFileName.toUtf8().data() );
+        reader->Update();
+        toolModel = PolyDataObject::New();
+        toolModel->SetPolyData( reader->GetOutput() );
+        reader->Delete();
+        toolModel->SetName("3D Model");
+    }
 }
 
 void ToolDescription::ClearSceneObject()
@@ -102,6 +121,11 @@ void ToolDescription::ClearSceneObject()
     {
         sceneObject->Delete();
         sceneObject = 0;
+    }
+    if( toolModel )
+    {
+        toolModel->Delete();
+        toolModel = 0;
     }
 }
 
@@ -367,11 +391,11 @@ void Tracker::SetToolUse( int toolIndex, ToolUse use )
     {
         m_toolVec[ toolIndex ].use = use;
         if( m_toolVec[ toolIndex ].sceneObject &&  m_sceneManager )
-            m_sceneManager->RemoveObject( m_toolVec[ toolIndex ].sceneObject );
+            RemoveToolFromScene( toolIndex );
         m_toolVec[ toolIndex ].ClearSceneObject();
         m_toolVec[ toolIndex ].InstanciateSceneObject();
         if( m_sceneManager && m_toolVec[ toolIndex ].toolPort != -1 )
-            m_sceneManager->AddObject( m_toolVec[ toolIndex ].sceneObject );
+            AddToolToScene( toolIndex );
     }
 }
 
@@ -651,6 +675,8 @@ void Tracker::AddToolToScene( int toolIndex )
 
     m_toolVec[toolIndex].sceneObject->SetHardwareModule( m_hardwareModule );
     m_sceneManager->AddObject( m_toolVec[toolIndex].sceneObject );
+    if( m_toolVec[toolIndex].toolModel )
+        m_sceneManager->AddObject( m_toolVec[toolIndex].toolModel, m_toolVec[toolIndex].sceneObject );
 }
 
 void Tracker::RemoveToolFromScene( int toolIndex )
