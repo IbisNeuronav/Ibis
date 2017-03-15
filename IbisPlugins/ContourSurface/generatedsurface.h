@@ -17,13 +17,10 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "polydataobject.h"
 
 class vtkPolyData;
-class ImageObject;
-class vtkImageData;
 class vtkScalarsToColors;
 class vtkImageAccumulate;
 class SurfaceSettingsWidget;
 class ContourSurfacePluginInterface;
-
 
 
 #define DEFAULT_RADIUS 1.0
@@ -38,15 +35,14 @@ public:
 
     virtual void Serialize( Serializer * ser );
 
-    virtual vtkPolyData * GenerateSurface();
+    virtual bool GenerateSurface();
 
     virtual void CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets);
     SurfaceSettingsWidget * CreateSurfaceSettingsWidget(QWidget * parent);
     void UpdateSettingsWidget();
     void SetPluginInterface( ContourSurfacePluginInterface * interf );
-    bool IsValid() { return m_imageObject != 0; }
-
-    void SetImageObject(ImageObject *obj);
+    bool IsValid();
+    void SetImageObjectID( int id ) { m_imageObjectID = id; }
     double GetContourValue() {return m_contourValue;}
     void SetContourValue(double cv){m_contourValue = cv;}
     int GetReduction() {return m_reductionPercent;}
@@ -67,7 +63,7 @@ public:
 
 protected:
     ContourSurfacePluginInterface * m_pluginInterface;
-    ImageObject *m_imageObject;
+    int m_imageObjectID;
     double m_contourValue;
 
     //Gaussian smoothing of the surface

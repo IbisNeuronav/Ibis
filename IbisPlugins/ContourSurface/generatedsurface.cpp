@@ -19,6 +19,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "vtkScalarsToColors.h"
 #include "vtkTriangleFilter.h"
 #include "vtkDecimatePro.h"
+#include "vtkSmartPointer.h"
 
 #include "generatedsurface.h"
 #include "surfacesettingswidget.h"
@@ -32,8 +33,7 @@ ObjectSerializationMacro( GeneratedSurface );
 
 GeneratedSurface::GeneratedSurface()
 {
-    m_imageObject = 0;
-
+    m_imageObjectID = SceneManager::InvalidId;
     m_contourValue = 0.0;
     m_radius = DEFAULT_RADIUS;
     m_standardDeviation = DEFAULT_STANDARD_DEVIATION;
@@ -43,17 +43,12 @@ GeneratedSurface::GeneratedSurface()
 
 GeneratedSurface::~GeneratedSurface()
 {
-    if (m_imageObject)
-        m_imageObject->UnRegister(this);
 }
 
 void GeneratedSurface::Serialize( Serializer * ser )
 {
     PolyDataObject::Serialize(ser);
-    int imageId = SceneManager::InvalidId;
-    if (m_imageObject)
-        imageId = m_imageObject->GetObjectID();
-    ::Serialize( ser, "ImageObjectId", imageId );
+    ::Serialize( ser, "ImageObjectId", m_imageObjectID );
     ::Serialize( ser, "ContourValue", m_contourValue );
     ::Serialize( ser, "PolygonReductionPercent", m_reductionPercent );
     ::Serialize( ser, "GaussianSmoothing", m_gaussianSmoothing );
@@ -61,57 +56,47 @@ void GeneratedSurface::Serialize( Serializer * ser )
     ::Serialize( ser, "StandardDeviation", m_standardDeviation );
     if( ser->IsReader() )
     {
-        ImageObject *img = ImageObject::SafeDownCast(m_pluginInterface->GetSceneManager()->GetObjectByID( imageId ) );
+        ImageObject *img = ImageObject::SafeDownCast(m_pluginInterface->GetSceneManager()->GetObjectByID( m_imageObjectID ) );
         if ( img )
         {
-            this->SetImageObject( img );
             this->GenerateSurface();
             m_pluginInterface->GetSceneManager()->ChangeParent( this, img, img->GetNumberOfChildren() );
         }
     }
 }
 
-void GeneratedSurface::SetImageObject(ImageObject *obj)
-{
-    if( m_imageObject == obj )
-        return;
-    if (m_imageObject)
-        m_imageObject->UnRegister(this);
-    m_imageObject = obj;
-    if (m_imageObject)
-    {
-        m_imageObject->Register(this);
-    }
-}
-
 vtkImageAccumulate * GeneratedSurface::GetImageHistogram()
 {
-    if (m_imageObject)
-        return m_imageObject->GetHistogramComputer();
+    ImageObject *img = ImageObject::SafeDownCast(m_pluginInterface->GetSceneManager()->GetObjectByID( m_imageObjectID ) );
+    if ( img )
+        return img->GetHistogramComputer();
     return 0;
 }
 
 vtkScalarsToColors * GeneratedSurface::GetImageLut()
 {
-    if (m_imageObject)
-        return m_imageObject->GetLut();
+    ImageObject *img = ImageObject::SafeDownCast(m_pluginInterface->GetSceneManager()->GetObjectByID( m_imageObjectID ) );
+    if ( img )
+        return img->GetLut();
     else
         return 0;
 }
 
 void GeneratedSurface::SetImageLutRange(double range[2])
 {
-    if (m_imageObject)
+    ImageObject *img = ImageObject::SafeDownCast(m_pluginInterface->GetSceneManager()->GetObjectByID( m_imageObjectID ) );
+    if ( img )
     {
-        m_imageObject->GetLut()->SetRange(range);
-        m_imageObject->MarkModified();
+        img->GetLut()->SetRange(range);
+        img->MarkModified();
     }
 }
 
 void GeneratedSurface::GetImageScalarRange(double range[2])
 {
-    if (m_imageObject)
-        m_imageObject->GetImageScalarRange(range);
+    ImageObject *img = ImageObject::SafeDownCast(m_pluginInterface->GetSceneManager()->GetObjectByID( m_imageObjectID ) );
+    if ( img )
+        img->GetImageScalarRange(range);
     else
     {
         range[0] = 0.0;
@@ -119,45 +104,46 @@ void GeneratedSurface::GetImageScalarRange(double range[2])
     }
 }
 
-vtkPolyData * GeneratedSurface::GenerateSurface()
+bool GeneratedSurface::GenerateSurface()
 {
-    vtkMarchingContourFilter *contourExtractor = vtkMarchingContourFilter::New();
-    if (m_gaussianSmoothing)
+    vtkSmartPointer<vtkMarchingContourFilter> contourExtractor = vtkSmartPointer<vtkMarchingContourFilter>::New();
+    ImageObject *img = ImageObject::SafeDownCast(m_pluginInterface->GetSceneManager()->GetObjectByID( m_imageObjectID ) );
+    if ( img )
     {
-        vtkImageGaussianSmooth *GaussianSmooth = vtkImageGaussianSmooth::New();
-        GaussianSmooth->SetInputData(m_imageObject->GetImage());
-        GaussianSmooth->SetStandardDeviation(m_standardDeviation);
-        GaussianSmooth->SetRadiusFactor(m_radius);
-        GaussianSmooth->Update();
-        contourExtractor->SetInputData( GaussianSmooth->GetOutput() );
-        GaussianSmooth->Delete();
-    }
-    else
-    {
-        contourExtractor->SetInputData(m_imageObject->GetImage());
-    }
-    contourExtractor->SetValue( 0, m_contourValue );
-    contourExtractor->Update();
+        if (m_gaussianSmoothing)
+        {
+            vtkSmartPointer<vtkImageGaussianSmooth> GaussianSmooth = vtkSmartPointer<vtkImageGaussianSmooth>::New();
+            GaussianSmooth->SetInputData(img->GetImage());
+            GaussianSmooth->SetStandardDeviation(m_standardDeviation);
+            GaussianSmooth->SetRadiusFactor(m_radius);
+            GaussianSmooth->Update();
+            contourExtractor->SetInputData( GaussianSmooth->GetOutput() );
+        }
+        else
+        {
+            contourExtractor->SetInputData(img->GetImage());
+        }
+        contourExtractor->SetValue( 0, m_contourValue );
+        contourExtractor->Update();
 
-    vtkTriangleFilter *triangleFilter = vtkTriangleFilter::New();
-    triangleFilter->SetInputConnection(contourExtractor->GetOutputPort() );
-    triangleFilter->ReleaseDataFlagOn();
-    triangleFilter->Update();
+        vtkSmartPointer<vtkTriangleFilter> triangleFilter = vtkSmartPointer<vtkTriangleFilter>::New();
+        triangleFilter->SetInputConnection(contourExtractor->GetOutputPort() );
+        triangleFilter->ReleaseDataFlagOn();
+        triangleFilter->Update();
 
-    if( m_reductionPercent > 0 )
-    {
-        vtkDecimatePro *decimate = vtkDecimatePro::New();
-        decimate->SetInputConnection(triangleFilter->GetOutputPort());
-        decimate->SetTargetReduction(m_reductionPercent/100.0);
-        decimate->Update();
-        this->SetPolyData(decimate->GetOutput());
-        decimate->Delete();
+        if( m_reductionPercent > 0 )
+        {
+            vtkSmartPointer<vtkDecimatePro> decimate = vtkSmartPointer<vtkDecimatePro>::New();
+            decimate->SetInputConnection(triangleFilter->GetOutputPort());
+            decimate->SetTargetReduction(m_reductionPercent/100.0);
+            decimate->Update();
+            this->SetPolyData(decimate->GetOutput());
+        }
+        else
+            this->SetPolyData(triangleFilter->GetOutput());
+        return true;
     }
-    else
-        this->SetPolyData(triangleFilter->GetOutput());
-    triangleFilter->Delete();
-    contourExtractor->Delete();
-    return this->PolyData;
+    return false;
 }
 
 void GeneratedSurface::CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets)
@@ -184,4 +170,9 @@ void GeneratedSurface::UpdateSettingsWidget()
 void GeneratedSurface::SetPluginInterface( ContourSurfacePluginInterface * interf )
 {
     m_pluginInterface = interf;
+}
+
+bool GeneratedSurface::IsValid()
+{
+    return ImageObject::SafeDownCast(m_pluginInterface->GetSceneManager()->GetObjectByID( m_imageObjectID ) ) != 0;
 }
