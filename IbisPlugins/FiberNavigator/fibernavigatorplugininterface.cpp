@@ -419,7 +419,7 @@ vtkSmartPointer<vtkTransform> FiberNavigatorPluginInterface::prepareTransformati
 
     dataTransform->Concatenate(sceneManager->GetObjectByID(m_referenceId)->GetWorldTransform());
     dataTransform->Scale(voxelSize);
-    dataTransform->Translate(volumeOrigin);
+    dataTransform->Translate(volumeOrigin[0]/voxelSize[0], volumeOrigin[1]/voxelSize[1], volumeOrigin[2]/voxelSize[2]);
 
     return dataTransform;
 }
