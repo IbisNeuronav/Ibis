@@ -48,8 +48,8 @@ vtkImageData * PolyDataObject::checkerBoardTexture = 0;
 PolyDataObject::PolyDataObject()
 {
     this->PolyData = 0;
-    m_clippingSwitch = vtkPassThrough::New();
-    m_colorSwitch = vtkPassThrough::New();
+    m_clippingSwitch = vtkSmartPointer<vtkPassThrough>::New();
+    m_colorSwitch = vtkSmartPointer<vtkPassThrough>::New();
 
     m_referenceToPolyTransform = vtkTransform::New();
 
@@ -107,8 +107,6 @@ PolyDataObject::PolyDataObject()
 PolyDataObject::~PolyDataObject()
 {
     m_clipper->Delete();
-    m_colorSwitch->Delete();
-    m_clippingSwitch->Delete();
     m_clippingPlanes->Delete();
     m_referenceToPolyTransform->Delete();
 
@@ -119,10 +117,6 @@ PolyDataObject::~PolyDataObject()
         m_cuttingPlane[i]->Delete();
     }
 
-    if( this->PolyData )
-    {
-        this->PolyData->UnRegister( this );
-    }
     this->Property->Delete();
     m_2dProperty->Delete();
     if( this->Texture )
@@ -133,18 +127,17 @@ PolyDataObject::~PolyDataObject()
     this->ProbeFilter->Delete();
 }
 
-void PolyDataObject::SetPolyData( vtkPolyData * poly )
+vtkPolyData * PolyDataObject::GetPolyData()
+{
+    return PolyData.GetPointer();
+}
+
+void PolyDataObject::SetPolyData(vtkSmartPointer<vtkPolyData> poly )
 {
     if( poly == this->PolyData )
         return;
 
-    if( this->PolyData )
-        this->PolyData->UnRegister( this );
     this->PolyData = poly;
-    if( this->PolyData )
-    {
-        this->PolyData->Register( this );
-    }
 
     UpdatePipeline();
 
@@ -219,7 +212,7 @@ void PolyDataObject::SavePolyData( QString &fileName )
 {
     vtkPolyDataWriter *writer = vtkPolyDataWriter::New();
     writer->SetFileName( fileName.toUtf8().data() );
-    writer->SetInputData(this->PolyData);
+    writer->SetInputData(this->PolyData.GetPointer());
     writer->Update();
     writer->Write();
     writer->Delete();
@@ -668,11 +661,11 @@ void PolyDataObject::UpdatePipeline()
     if( !this->PolyData )
         return;
 
-    m_clipper->SetInputData( this->PolyData );
+    m_clipper->SetInputData( this->PolyData.GetPointer() );
     if( IsClippingEnabled() )
         m_clippingSwitch->SetInputConnection( m_clipper->GetOutputPort() );
     else
-        m_clippingSwitch->SetInputData( this->PolyData );
+        m_clippingSwitch->SetInputData( this->PolyData.GetPointer() );
 
     this->ProbeFilter->SetInputConnection( m_clippingSwitch->GetOutputPort() );
     this->TextureMap->SetInputConnection( m_clippingSwitch->GetOutputPort() );

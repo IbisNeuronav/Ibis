@@ -134,8 +134,8 @@ void SceneManager::Init()
 
     // Cut planes
     this->MainCutPlanes = TripleCutPlaneObject::New();
-    this->MainCutPlanes->SetCanChangeParent( false );
     this->MainCutPlanes->SetName( "Image Planes" );
+    this->MainCutPlanes->SetCanChangeParent( false );
     this->MainCutPlanes->SetNameChangeable( false );
     this->MainCutPlanes->SetCanAppendChildren( false );
     this->MainCutPlanes->SetCanEditTransformManually( false );
@@ -163,8 +163,8 @@ void SceneManager::Init()
     axesSource->ComputeNormalsOff();
     axesSource->Update();
     PolyDataObject * axesObject = PolyDataObject::New();
-    axesObject->SetPolyData( axesSource->GetOutput() );
     axesObject->SetName("Axes");
+    axesObject->SetPolyData( axesSource->GetOutput() );
     axesObject->SetScalarsVisible( true );
     axesObject->SetLutIndex( -1 );  // spectral
     axesObject->SetNameChangeable( false );

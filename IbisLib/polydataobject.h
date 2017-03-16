@@ -16,6 +16,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <map>
 #include <QVector>
 #include "vtkProperty.h"
+#include "vtkSmartPointer.h"
 
 class vtkPolyData;
 class vtkTransform;
@@ -50,8 +51,8 @@ public:
     virtual void Export();
     virtual bool IsExportable()  { return true; }
 
-    vtkGetObjectMacro( PolyData, vtkPolyData );
-    void SetPolyData( vtkPolyData * data );
+    vtkPolyData *GetPolyData();
+    void SetPolyData( vtkSmartPointer<vtkPolyData> data );
     
     // Implementation of parent virtual method
     virtual void Setup( View * view );
@@ -121,9 +122,9 @@ protected:
     vtkScalarsToColors * GetCurrentLut();
     void InitializeClippingPlanes();
         
-    vtkPolyData * PolyData;
-    vtkPassThrough * m_clippingSwitch;
-    vtkPassThrough * m_colorSwitch;
+    vtkSmartPointer<vtkPolyData> PolyData;
+    vtkSmartPointer<vtkPassThrough> m_clippingSwitch;
+    vtkSmartPointer<vtkPassThrough> m_colorSwitch;
 
     int LutIndex;
     vtkScalarsToColors * CurrentLut;

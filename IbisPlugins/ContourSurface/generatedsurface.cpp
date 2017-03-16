@@ -39,6 +39,7 @@ GeneratedSurface::GeneratedSurface()
     m_standardDeviation = DEFAULT_STANDARD_DEVIATION;
     m_gaussianSmoothing = false;
     m_reductionPercent = 0;
+    AllowChangeParent = false;
 }
 
 GeneratedSurface::~GeneratedSurface()
