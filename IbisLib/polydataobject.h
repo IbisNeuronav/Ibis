@@ -127,9 +127,9 @@ protected:
     vtkSmartPointer<vtkPassThrough> m_colorSwitch;
 
     int LutIndex;
-    vtkScalarsToColors * CurrentLut;
-    vtkImageData * Texture;
-    vtkDataSetAlgorithm * TextureMap;
+    vtkSmartPointer<vtkScalarsToColors> CurrentLut;
+    vtkSmartPointer<vtkImageData> Texture;
+    vtkSmartPointer<vtkDataSetAlgorithm> TextureMap;
     ImageObject * ScalarSource;
     vtkScalarsToColors * LutBackup;
     vtkProbeFilter * ProbeFilter;
@@ -158,7 +158,7 @@ protected:
     bool m_clippingOn;
     bool m_interacting;
 
-    static vtkImageData * checkerBoardTexture;
+    static vtkSmartPointer<vtkImageData> checkerBoardTexture;
 };
 
 ObjectSerializationHeaderMacro( PolyDataObject );
