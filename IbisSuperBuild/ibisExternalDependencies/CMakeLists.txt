@@ -21,7 +21,7 @@ ExternalProject_Add( ${vtk_name}
                -DQT_QMAKE_EXECUTABLE:PATH=${QT_QMAKE_EXECUTABLE} -DBUILD_TESTING:BOOL=FALSE -DBUILD_SHARED_LIBS:BOOL=FALSE
                -DCMAKE_CXX_FLAGS:STRING=-fPIC -DVTK_QT_VERSION:STRING=5 
 	       -DModule_vtkGUISupportQt:BOOL=ON -DQt5_DIR:PATH=${Qt5_DIR}
-               -DVTK_LEGACY_REMOVE:BOOL=ON )
+               -DVTK_LEGACY_REMOVE:BOOL=ON  -DVTK_DEBUG_LEAKS:BOOL=ON )
 
 # Get and build itk
 set( itk_name itk-${IBIS_ITK_LONG_VERSION} )

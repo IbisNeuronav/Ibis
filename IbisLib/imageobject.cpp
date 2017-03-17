@@ -14,14 +14,11 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "vtkPolyDataMapper.h"
 #include "vtkRenderer.h"
 #include "vtkActor.h"
-#include "vtkImageData.h"
 #include "view.h"
 #include "vtkTransform.h"
-#include "vtkImageAccumulate.h"
 
 #include "vtkGPUVolumeRayCastMapper.h"
 #include "vtkVolume.h"
-#include "vtkVolumeProperty.h"
 #include "vtkPiecewiseFunction.h"
 #include "vtkPiecewiseFunctionLookupTable.h"
 #include "vtkColorTransferFunction.h"
@@ -92,14 +89,14 @@ ImageObject::ImageObject()
     this->ItkLabelImage = 0;
     this->Image = 0;
     this->Lut = 0;
-    this->OutlineFilter = vtkOutlineFilter::New();
+    this->OutlineFilter = vtkSmartPointer<vtkOutlineFilter>::New();
     this->viewOutline = 0;
     this->outlineWasVisible = 0;
 	this->lutIndex = -1;
     this->lutRange[0] = 0.0;
     this->lutRange[1] = 0.0;
     this->intensityFactor = 1.0;
-    this->HistogramComputer = vtkImageAccumulate::New();
+    this->HistogramComputer = vtkSmartPointer<vtkImageAccumulate>::New();
 
     m_showVolumeClippingBox = false;
     m_volumeRenderingBounds[0] = 0.0;
@@ -111,7 +108,7 @@ ImageObject::ImageObject()
 
     // setup default volume properties for vtk volume rendering
     m_vtkVolumeRenderingEnabled = false;
-    m_volumeProperty = vtkVolumeProperty::New();
+    m_volumeProperty = vtkSmartPointer<vtkVolumeProperty>::New();
     m_volumeProperty->SetInterpolationTypeToLinear();
     vtkPiecewiseFunction * scalarOpacity = vtkPiecewiseFunction::New();
     scalarOpacity->AddPoint( 0.0, 0.0 );
@@ -130,14 +127,14 @@ ImageObject::ImageObject()
     transferFunction->Delete();
 
     // Watch volume properties to be able to render when properties change
-    m_volumePropertyWatcher = vtkEventQtSlotConnect::New();
+    m_volumePropertyWatcher = vtkSmartPointer<vtkEventQtSlotConnect>::New();
     m_volumePropertyWatcher->Connect( m_volumeProperty, vtkCommand::ModifiedEvent, this, SLOT(MarkModified()) );
     m_volumePropertyWatcher->Connect( m_volumeProperty->GetScalarOpacity(), vtkCommand::ModifiedEvent, this, SLOT(MarkModified()) );
     m_volumePropertyWatcher->Connect( m_volumeProperty->GetGradientOpacity(), vtkCommand::ModifiedEvent, this, SLOT(MarkModified()) );
     m_volumePropertyWatcher->Connect( m_volumeProperty->GetRGBTransferFunction(), vtkCommand::ModifiedEvent, this, SLOT(MarkModified()) );
 
     // Watch clipping widgets for volume rendering
-    m_volumeClippingBoxWatcher = vtkEventQtSlotConnect::New();
+    m_volumeClippingBoxWatcher = vtkSmartPointer<vtkEventQtSlotConnect> ::New();
 
     m_colorWindow = 1.0;
     m_colorLevel = 0.5;
@@ -147,21 +144,6 @@ ImageObject::ImageObject()
 
 ImageObject::~ImageObject()
 {
-    if( this->Image )
-    {
-        this->Image->UnRegister( this );
-    }
-    if( this->Lut )
-    {
-        this->Lut->Delete();
-    }
-
-    this->OutlineFilter->Delete();
-    this->HistogramComputer->Delete();
-
-    m_volumeProperty->Delete();
-    m_volumePropertyWatcher->Delete();
-    m_volumeClippingBoxWatcher->Delete();
 }
 
 #include "serializerhelper.h"
@@ -342,14 +324,9 @@ void ImageObject::SetImage(vtkImageData * image)
         return;
     }
 
-    if( this->Image )
-    {
-        this->Image->UnRegister( this );
-    }
     this->Image = image;
     if( this->Image )
     {
-        this->Image->Register( this );
         this->Image->GetBounds( m_volumeRenderingBounds );
     }
 
@@ -601,25 +578,24 @@ int ImageObject::GetViewOutline()
 void ImageObject::Setup3DRepresentation( View * view )
 {
     // add an outline to the view to make sure camera includes the whole volume
-    vtkPolyDataMapper * outMapper = vtkPolyDataMapper::New();
+    vtkSmartPointer<vtkPolyDataMapper> outMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
     this->OutlineFilter->Update();
     outMapper->SetInputConnection( this->OutlineFilter->GetOutputPort() );
-    vtkActor * outActor = vtkActor::New();
+    vtkSmartPointer<vtkActor> outActor = vtkSmartPointer<vtkActor>::New();
     outActor->SetMapper( outMapper );
 	outActor->SetUserTransform( this->WorldTransform );
     if( this->viewOutline )
         outActor->VisibilityOn();
     else
         outActor->VisibilityOff();
-    outMapper->Delete();
     view->GetRenderer()->AddActor( outActor );
 
     // vtk volume renderer
-    vtkGPUVolumeRayCastMapper * volumeMapper = vtkGPUVolumeRayCastMapper::New();
+    vtkSmartPointer<vtkGPUVolumeRayCastMapper> volumeMapper = vtkSmartPointer<vtkGPUVolumeRayCastMapper>::New();
     volumeMapper->SetFinalColorLevel( m_colorLevel );
     volumeMapper->SetFinalColorWindow( m_colorWindow );
     volumeMapper->CroppingOn();
-    vtkImageShiftScale * volumeShiftScale = vtkImageShiftScale::New();
+    vtkSmartPointer<vtkImageShiftScale> volumeShiftScale = vtkSmartPointer<vtkImageShiftScale>::New();
     volumeShiftScale->SetOutputScalarTypeToUnsignedChar();
     volumeShiftScale->SetInputData( this->GetImage() );
     double imageScalarRange[2];
@@ -628,17 +604,15 @@ void ImageObject::Setup3DRepresentation( View * view )
     double scale = 255.0 / ( imageScalarRange[1] - imageScalarRange[0] );
     volumeShiftScale->SetScale( scale );
     volumeMapper->SetInputConnection( volumeShiftScale->GetOutputPort() );
-    volumeShiftScale->Delete();
-    vtkVolume * volume = vtkVolume::New();
+    vtkSmartPointer<vtkVolume> volume = vtkSmartPointer<vtkVolume>::New();
     volume->SetMapper( volumeMapper );
-    volumeMapper->Delete();
     volume->SetProperty( m_volumeProperty );
     volume->SetUserTransform( this->WorldTransform );
     volume->SetVisibility( m_vtkVolumeRenderingEnabled ? 1 : 0 );
     view->GetRenderer()->AddVolume( volume );
 
     // clipping box
-    vtkBoxWidget2 * volumeClippingWidget = vtkBoxWidget2::New();
+    vtkSmartPointer<vtkBoxWidget2> volumeClippingWidget = vtkSmartPointer<vtkBoxWidget2>::New();
     volumeClippingWidget->TranslationEnabledOff();
     volumeClippingWidget->RotationEnabledOff();
     volumeClippingWidget->ScalingEnabledOff();
@@ -672,15 +646,12 @@ void ImageObject::Release3DRepresentation( View * view )
 
         // remove outline
 		view->GetRenderer()->RemoveViewProp( perView->outlineActor );
-		perView->outlineActor->Delete();
 
         // remove volume
         view->GetRenderer()->RemoveViewProp( perView->volume );
-        perView->volume->Delete();
 
         // remove volume clipping box
         perView->volumeClippingWidget->SetInteractor( 0 );
-        perView->volumeClippingWidget->Delete();
 
         delete perView;
         this->imageObjectInstances.erase( itAssociations );
@@ -690,12 +661,11 @@ void ImageObject::Release3DRepresentation( View * view )
 void ImageObject::Setup2DRepresentation( int viewType, View * view )
 {
     // add an outline to the view to make sure camera includes the whole volume
-    vtkPolyDataMapper * outMapper = vtkPolyDataMapper::New();
+    vtkSmartPointer<vtkPolyDataMapper> outMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
     this->OutlineFilter->Update();
     outMapper->SetInputConnection(this->OutlineFilter->GetOutputPort() );
-    vtkActor * outActor = vtkActor::New();
+    vtkSmartPointer<vtkActor> outActor = vtkSmartPointer<vtkActor>::New();
     outActor->SetMapper( outMapper );
-    outMapper->Delete();
 
 	view->GetRenderer()->AddActor( outActor );
 
@@ -718,7 +688,6 @@ void ImageObject::Release2DRepresentation( int viewType, View * view )
 
         // delete the vtkAssembly we have
 		view->GetRenderer()->RemoveViewProp( perView->outlineActor );
-		perView->outlineActor->Delete();
 
         delete perView;
         this->imageObjectInstances.erase( itAssociations );
@@ -729,15 +698,7 @@ void ImageObject::SetLut(vtkScalarsToColors *lut)
 {
     if (this->Lut != lut)
     {
-        if (this->Lut != NULL)
-        {
-            this->Lut->UnRegister(0);
-        }
         this->Lut = lut;
-        if (this->Lut != NULL)
-        {
-            this->Lut->Register(0);
-        }
     }
     emit LutChanged( this->GetObjectID() );
     emit Modified();
@@ -909,7 +870,7 @@ void ImageObject::BuildItkToVtkLabelExport()
 
 void ImageObject::BuildVtkImport( itk::VTKImageExportBase * exporter )
 {
-    this->ItkToVtkImporter = vtkImageImport::New();
+    this->ItkToVtkImporter = vtkSmartPointer<vtkImageImport>::New();
     this->ItkToVtkImporter->SetUpdateInformationCallback( exporter->GetUpdateInformationCallback() );
     this->ItkToVtkImporter->SetPipelineModifiedCallback( exporter->GetPipelineModifiedCallback() );
     this->ItkToVtkImporter->SetWholeExtentCallback( exporter->GetWholeExtentCallback() );
