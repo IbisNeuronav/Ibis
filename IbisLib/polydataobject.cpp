@@ -51,23 +51,23 @@ PolyDataObject::PolyDataObject()
     m_clippingSwitch = vtkSmartPointer<vtkPassThrough>::New();
     m_colorSwitch = vtkSmartPointer<vtkPassThrough>::New();
 
-    m_referenceToPolyTransform = vtkTransform::New();
+    m_referenceToPolyTransform = vtkSmartPointer<vtkTransform>::New();
 
     // Clip octant from polydata
     m_clippingOn = false;
     m_interacting = false;
-    m_clippingPlanes = vtkPlanes::New();
+    m_clippingPlanes = vtkSmartPointer<vtkPlanes>::New();
     m_clippingPlanes->SetTransform( m_referenceToPolyTransform );
     InitializeClippingPlanes();
-    m_clipper = vtkClipPolyData::New();
+    m_clipper = vtkSmartPointer<vtkClipPolyData>::New();
     m_clipper->SetClipFunction( m_clippingPlanes );
 
     // Cross section in 2d views
     for( int i = 0; i < 3; ++i )
     {
-        m_cuttingPlane[i] = vtkPlane::New();
+        m_cuttingPlane[i] = vtkSmartPointer<vtkPlane>::New();
         m_cuttingPlane[i]->SetTransform( m_referenceToPolyTransform );
-        m_cutter[i] = vtkCutter::New();
+        m_cutter[i] = vtkSmartPointer<vtkCutter>::New();
         m_cutter[i]->SetInputConnection( m_colorSwitch->GetOutputPort() );
         m_cutter[i]->SetCutFunction( m_cuttingPlane[i]);
     }
@@ -81,12 +81,12 @@ PolyDataObject::PolyDataObject()
     this->ScalarsVisible = 0;
     this->VertexColorMode = 0;
     this->ScalarSourceObjectId = SceneManager::InvalidId;
-    this->Property = vtkProperty::New();
+    this->Property = vtkSmartPointer<vtkProperty>::New();
     this->CrossSectionVisible = false;
     this->showTexture = false;
     this->Texture = 0;
 
-    m_2dProperty = vtkProperty::New();
+    m_2dProperty = vtkSmartPointer<vtkProperty>::New();
     m_2dProperty->SetAmbient( 1.0 );
     m_2dProperty->LightingOff();
 
@@ -100,28 +100,14 @@ PolyDataObject::PolyDataObject()
     // Probe filter ( used to sample scalars from other dataset )
     this->ScalarSource = 0;
     this->LutBackup = 0;
-    this->ProbeFilter = vtkProbeFilter::New();
+    this->ProbeFilter = vtkSmartPointer<vtkProbeFilter>::New();
     this->ProbeFilter->SetInputConnection( m_clippingSwitch->GetOutputPort() );
 }
 
 PolyDataObject::~PolyDataObject()
 {
-    m_clipper->Delete();
-    m_clippingPlanes->Delete();
-    m_referenceToPolyTransform->Delete();
-
-    // Cross section in 2d views
-    for( int i = 0; i < 3; ++i )
-    {
-        m_cutter[i]->Delete();
-        m_cuttingPlane[i]->Delete();
-    }
-
-    this->Property->Delete();
-    m_2dProperty->Delete();
     if( this->ScalarSource )
         this->ScalarSource->UnRegister( this );
-    this->ProbeFilter->Delete();
 }
 
 vtkPolyData * PolyDataObject::GetPolyData()
@@ -230,14 +216,14 @@ void PolyDataObject::Setup( View * view )
 
     if( view->GetType() == THREED_VIEW_TYPE )
     {   
-        actor->SetProperty( this->Property );
+        actor->SetProperty( this->Property.GetPointer() );
         mapper->SetInputConnection( m_colorSwitch->GetOutputPort() );
         actor->SetVisibility( this->ObjectHidden ? 0 : 1 );
         view->GetRenderer( this->RenderLayer )->AddActor( actor );
     }
     else
     {
-        actor->SetProperty( m_2dProperty );
+        actor->SetProperty( m_2dProperty.GetPointer() );
         int plane = (int)(view->GetType());
         mapper->SetInputConnection( m_cutter[plane]->GetOutputPort() );
         actor->SetVisibility( ( IsHidden() && GetCrossSectionVisible() ) ? 1 : 0 );
@@ -554,7 +540,7 @@ void PolyDataObject::OnScalarSourceDeleted()
 
 void PolyDataObject::OnScalarSourceModified()
 {
-    vtkScalarsToColors * newLut = this->ScalarSource->GetLut();
+    vtkSmartPointer<vtkScalarsToColors> newLut = this->ScalarSource->GetLut();
     if( this->LutBackup != newLut )
     {
         this->LutBackup = newLut;

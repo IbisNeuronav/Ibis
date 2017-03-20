@@ -131,10 +131,10 @@ protected:
     vtkSmartPointer<vtkImageData> Texture;
     vtkSmartPointer<vtkDataSetAlgorithm> TextureMap;
     ImageObject * ScalarSource;
-    vtkScalarsToColors * LutBackup;
-    vtkProbeFilter * ProbeFilter;
-    vtkProperty * Property;
-    vtkProperty * m_2dProperty;
+    vtkSmartPointer<vtkScalarsToColors> LutBackup;
+    vtkSmartPointer<vtkProbeFilter> ProbeFilter;
+    vtkSmartPointer<vtkProperty> Property;
+    vtkSmartPointer<vtkProperty> m_2dProperty;
     
     typedef std::map<View*,vtkActor*> PolyDataObjectViewAssociation;
     PolyDataObjectViewAssociation polydataObjectInstances;
@@ -147,14 +147,14 @@ protected:
     int       ScalarSourceObjectId;
 
     // Cross section in 2d views
-    vtkCutter * m_cutter[3];
-    vtkPlane * m_cuttingPlane[3];
+    vtkSmartPointer<vtkCutter> m_cutter[3];
+    vtkSmartPointer<vtkPlane> m_cuttingPlane[3];
     bool CrossSectionVisible;
 
     // Clipping an octant from surface
-    vtkClipPolyData * m_clipper;
-    vtkTransform * m_referenceToPolyTransform;
-    vtkPlanes * m_clippingPlanes;
+    vtkSmartPointer<vtkClipPolyData> m_clipper;
+    vtkSmartPointer<vtkTransform> m_referenceToPolyTransform;
+    vtkSmartPointer<vtkPlanes> m_clippingPlanes;
     bool m_clippingOn;
     bool m_interacting;
 
