@@ -110,6 +110,23 @@ vec4 ComputeGradient( int volIndex, vec3 pos, float gradStep )
     return ret;
 }
 
+vec3 ComputePhong( int volIndex, vec3 pos, float gradStep, vec3 lightPos, vec3 rayDir, float diffuseK, vec3 diffuseColor, float specularK, vec3 specularColor, float specularExp )
+{
+    vec3 n = ComputeGradient( volIndex, pos, gradStep ).rgb;
+    vec3 l = normalize( lightPos - pos );
+    vec3 v = -1.0 * rayDir;
+    float dotNL = dot( n, l );
+    vec3 phong = clamp(dotNL, 0.0, 1.0 ) * diffuseColor * diffuseK;
+
+    if( dotNL > 0.0 )
+    {
+        vec3 h = normalize( l + v );
+        float spectFactor = clamp( dot(n,h), 0.0, 1.0 );
+        phong += specularK * pow( spectFactor, specularExp ) * specularColor;
+    }
+    return phong;
+}
+
 vec3 rgb2hsv(vec3 c)
 {
     vec4 K = vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
