@@ -193,23 +193,22 @@ void PolyDataObject::Export()
 
 void PolyDataObject::SavePolyData( QString &fileName )
 {
-    vtkPolyDataWriter *writer = vtkPolyDataWriter::New();
+    vtkSmartPointer<vtkPolyDataWriter> writer = vtkSmartPointer<vtkPolyDataWriter>::New();
     writer->SetFileName( fileName.toUtf8().data() );
     writer->SetInputData(this->PolyData.GetPointer());
     writer->Update();
     writer->Write();
-    writer->Delete();
 }
 
 void PolyDataObject::Setup( View * view )
 {
     SceneObject::Setup( view );
 
-    vtkPolyDataMapper * mapper = vtkPolyDataMapper::New();
+    vtkSmartPointer<vtkPolyDataMapper> mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
     mapper->SetScalarVisibility( this->ScalarsVisible );
     mapper->UseLookupTableScalarRangeOn();  // make sure mapper doesn't try to modify our color table
 
-    vtkActor * actor = vtkActor::New();
+    vtkSmartPointer<vtkActor> actor = vtkSmartPointer<vtkActor>::New();
     actor->SetMapper( mapper );
     actor->SetUserTransform( this->WorldTransform );
     this->polydataObjectInstances[ view ] = actor;
@@ -219,7 +218,7 @@ void PolyDataObject::Setup( View * view )
         actor->SetProperty( this->Property.GetPointer() );
         mapper->SetInputConnection( m_colorSwitch->GetOutputPort() );
         actor->SetVisibility( this->ObjectHidden ? 0 : 1 );
-        view->GetRenderer( this->RenderLayer )->AddActor( actor );
+        view->GetRenderer( this->RenderLayer )->AddActor( actor.GetPointer() );
     }
     else
     {
@@ -227,9 +226,8 @@ void PolyDataObject::Setup( View * view )
         int plane = (int)(view->GetType());
         mapper->SetInputConnection( m_cutter[plane]->GetOutputPort() );
         actor->SetVisibility( ( IsHidden() && GetCrossSectionVisible() ) ? 1 : 0 );
-        view->GetOverlayRenderer()->AddActor( actor );
+        view->GetOverlayRenderer()->AddActor( actor.GetPointer() );
     }
-    mapper->Delete();
 }
 
 void PolyDataObject::Release( View * view )
@@ -239,12 +237,11 @@ void PolyDataObject::Release( View * view )
     PolyDataObjectViewAssociation::iterator itAssociations = this->polydataObjectInstances.find( view );
     if( itAssociations != this->polydataObjectInstances.end() )
     {
-        vtkActor * actor = (*itAssociations).second;
+        vtkSmartPointer<vtkActor> actor = (*itAssociations).second;
         if( view->GetType() == THREED_VIEW_TYPE )
-            view->GetRenderer( this->RenderLayer )->RemoveViewProp( actor );
+            view->GetRenderer( this->RenderLayer )->RemoveViewProp( actor.GetPointer() );
         else
-            view->GetOverlayRenderer()->RemoveViewProp( actor );
-        actor->Delete();
+            view->GetOverlayRenderer()->RemoveViewProp( actor.GetPointer() );
         this->polydataObjectInstances.erase( itAssociations );
     }
 }
@@ -333,7 +330,7 @@ void PolyDataObject::SetCrossSectionVisible( bool showCrossSection )
     for( ; it != this->polydataObjectInstances.end(); ++it )
     {
         View * v = (*it).first;
-        vtkActor * actor = (*it).second;
+        vtkSmartPointer<vtkActor> actor = (*it).second;
         if( v->GetType() != THREED_VIEW_TYPE )
             actor->SetVisibility( showCrossSection ? 1 : 0 );
     }
@@ -378,8 +375,8 @@ void PolyDataObject::SetTexture( vtkImageData * texImage )
         View * view = (*it).first;
         if( view->GetType() == THREED_VIEW_TYPE )
         {
-            vtkActor * actor = (*it).second;
-            vtkTexture * tex = actor->GetTexture();
+            vtkSmartPointer<vtkActor> actor = (*it).second;
+            vtkSmartPointer<vtkTexture> tex = actor->GetTexture();
             if( tex )
             {
                 if( this->Texture )
@@ -431,7 +428,7 @@ void PolyDataObject::SetShowTexture( bool show )
 
         // Add a vtkTexture to each actor to map the checker board onto object
         View * view = 0;
-        vtkActor * actor = 0;
+        vtkSmartPointer<vtkActor> actor = 0;
         PolyDataObjectViewAssociation::iterator it = this->polydataObjectInstances.begin();
         for( ; it != this->polydataObjectInstances.end(); ++it )
         {
@@ -452,7 +449,7 @@ void PolyDataObject::SetShowTexture( bool show )
     {
         // remove texture from each of the actors
         View * view = 0;
-        vtkActor * actor = 0;
+        vtkSmartPointer<vtkActor> actor = 0;
         PolyDataObjectViewAssociation::iterator it = this->polydataObjectInstances.begin();
         for( ; it != this->polydataObjectInstances.end(); ++it )
         {
@@ -472,11 +469,10 @@ void PolyDataObject::SetTextureFileName( QString filename )
     this->textureFileName = filename;
     if( QFile::exists( filename ) )
     {
-        vtkPNGReader * reader = vtkPNGReader::New();
+        vtkSmartPointer<vtkPNGReader> reader = vtkSmartPointer<vtkPNGReader>::New();
         reader->SetFileName( filename.toUtf8().data() );
         reader->Update();
         this->SetTexture( reader->GetOutput() );
-        reader->Delete();
     }
     else
         this->SetTexture( 0 );
@@ -554,7 +550,7 @@ void PolyDataObject::Hide()
     PolyDataObjectViewAssociation::iterator it = this->polydataObjectInstances.begin();
     for( ; it != this->polydataObjectInstances.end(); ++it )
     {
-        vtkActor * actor = (*it).second;
+        vtkSmartPointer<vtkActor> actor = (*it).second;
         actor->VisibilityOff();
     }
     emit Modified();
@@ -566,7 +562,7 @@ void PolyDataObject::Show()
     for( ; it != this->polydataObjectInstances.end(); ++it )
     {
         View * v = (*it).first;
-        vtkActor * actor = (*it).second;
+        vtkSmartPointer<vtkActor> actor = (*it).second;
         if( v->GetType() == THREED_VIEW_TYPE || GetCrossSectionVisible() )
             actor->VisibilityOn();
     }
@@ -660,7 +656,7 @@ void PolyDataObject::UpdatePipeline()
     PolyDataObjectViewAssociation::iterator it = this->polydataObjectInstances.begin();
     while( it != this->polydataObjectInstances.end() )
     {
-        vtkActor * actor = (*it).second;
+        vtkSmartPointer<vtkActor> actor = (*it).second;
         vtkMapper * mapper = actor->GetMapper();
         mapper->SetScalarVisibility( this->ScalarsVisible );
         if( this->VertexColorMode == 1 && this->ScalarSource )
@@ -696,20 +692,18 @@ vtkScalarsToColors * PolyDataObject::GetCurrentLut()
 
 void PolyDataObject::InitializeClippingPlanes()
 {
-    vtkDoubleArray * clipPlaneNormals = vtkDoubleArray::New();
+    vtkSmartPointer<vtkDoubleArray> clipPlaneNormals = vtkSmartPointer<vtkDoubleArray>::New();
     clipPlaneNormals->SetNumberOfComponents( 3 );
     clipPlaneNormals->SetNumberOfTuples(3);
     clipPlaneNormals->SetTuple3( 0, -1.0, 0.0, 0.0 );
     clipPlaneNormals->SetTuple3( 1, 0.0, -1.0, 0.0 );
     clipPlaneNormals->SetTuple3( 2, 0.0, 0.0, -1.0 );
     m_clippingPlanes->SetNormals( clipPlaneNormals );
-    clipPlaneNormals->Delete();
 
-    vtkPoints * p = vtkPoints::New();
+    vtkSmartPointer<vtkPoints> p = vtkSmartPointer<vtkPoints>::New();
     p->SetNumberOfPoints( 3 );
     p->SetPoint( 0, 0.0, 0.0, 0.0 );
     p->SetPoint( 1, 0.0, 0.0, 0.0 );
     p->SetPoint( 2, 0.0, 0.0, 0.0 );
     m_clippingPlanes->SetPoints( p );
-    p->Delete();
 }

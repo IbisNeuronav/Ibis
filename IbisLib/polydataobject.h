@@ -136,7 +136,7 @@ protected:
     vtkSmartPointer<vtkProperty> Property;
     vtkSmartPointer<vtkProperty> m_2dProperty;
     
-    typedef std::map<View*,vtkActor*> PolyDataObjectViewAssociation;
+    typedef std::map< View*,vtkSmartPointer<vtkActor> > PolyDataObjectViewAssociation;
     PolyDataObjectViewAssociation polydataObjectInstances;
     
     int       renderingMode;  // one of VTK_POINTS, VTK_WIREFRAME or VTK_SURFACE
