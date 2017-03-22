@@ -14,6 +14,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "serializer.h"
 #include <QObject>
 #include "sceneobject.h"
+#include "vtkSmartPointer.h"
 
 class vtkActor;
 class vtkProperty;
@@ -95,17 +96,17 @@ public:
 protected:
 
     int m_pointIndex;
-    vtkSphereSource * m_sphere;
-    vtkCircleWithCrossSource *m_circle;
+    vtkSmartPointer<vtkSphereSource> m_sphere;
+    vtkSmartPointer<vtkCircleWithCrossSource> m_circle;
     bool m_active;
 
     // transforms to keep point aligned in 2D
-    vtkTransform * m_point2DTransform;
-    vtkTransform * m_point3DTransform;
-    vtkTransform * m_invWorldRotTransform;
-    vtkTransform * m_posTransform;
-    vtkTransform * m_labelOffset;
-    vtkTransform * m_labelTransform;
+    vtkSmartPointer<vtkTransform> m_point2DTransform;
+    vtkSmartPointer<vtkTransform> m_point3DTransform;
+    vtkSmartPointer<vtkTransform> m_invWorldRotTransform;
+    vtkSmartPointer<vtkTransform> m_posTransform;
+    vtkSmartPointer<vtkTransform> m_labelOffset;
+    vtkSmartPointer<vtkTransform> m_labelTransform;
 
     virtual void Hide();
     virtual void Show();
@@ -117,18 +118,18 @@ protected:
     {
         PerViewElements();
         ~PerViewElements();
-        vtkActor * pointRepresentationActor;
-        vtkFollower * labelActor;
+        vtkSmartPointer<vtkActor> pointRepresentationActor;
+        vtkSmartPointer<vtkFollower> labelActor;
     };
     typedef std::map< View*, PerViewElements* > PerViewContainer;
     PerViewContainer m_perViewContainer;
 
     // Property used to control the appearance of selected objects and
     // the manipulator in general.
-    vtkProperty *m_property;
+    vtkSmartPointer<vtkProperty> m_property;
 
     // The label
-    vtkVectorText *m_label;
+    vtkSmartPointer<vtkVectorText> m_label;
     double m_labelScale;
     bool m_labelVisible;
 };
