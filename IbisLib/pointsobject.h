@@ -18,6 +18,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "serializer.h"
 #include "pointrepresentation.h"
 #include "vtkPoints.h"
+#include "vtkSmartPointer.h"
 
 class View;
 class vtkActor;
@@ -49,8 +50,13 @@ public:
     virtual void CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets );
 
     static const int InvalidPointIndex;
+    static const int MinRadius;
+    static const int MaxRadius;
+    static const int MinLabelSize;
+    static const int MaxLabelSize;
+
     // actions on the object
-    vtkPoints *GetPoints() { return m_pointCoordinates; }
+    vtkPoints *GetPoints();
     QStringList *GetPointsNames() { return & m_pointNames; }
     QStringList *GetTimeStamps() { return & m_timeStamps; }
     int GetNumberOfPoints() { return m_pointCoordinates->GetNumberOfPoints(); }
@@ -63,10 +69,6 @@ public:
     void MoveCursorToPoint( int index );
 
     // properties
-#define MIN_RADIUS 1
-#define MAX_RADIUS 16
-#define MIN_LABEl_SIZE 6
-#define MAX_LABEL_SIZE 16
     void Set3DRadius( double r );
     double Get3DRadius() { return m_pointRadius3D; }
     void Set2DRadius( double r );
@@ -141,7 +143,7 @@ protected:
 
     //Description
     // structures to hold points coordinates and names
-   vtkPoints *m_pointCoordinates;
+   vtkSmartPointer<vtkPoints> m_pointCoordinates;
    QStringList m_pointNames;
    QStringList m_timeStamps;
    int m_selectedPointIndex;
@@ -166,11 +168,11 @@ private:
    PointList m_pointList;
 
    // Point manipulation with the mouse
-   vtkCellPicker * m_picker;
+   vtkSmartPointer<vtkCellPicker> m_picker;
    int m_movingPointIndex;
 
-   PolyDataObject *m_lineToPointerTip;
-   vtkProperty * m_lineToPointerProperty;
+   vtkSmartPointer<PolyDataObject> m_lineToPointerTip;
+   vtkSmartPointer<vtkProperty> m_lineToPointerProperty;
    double m_lineToPointerColor[3];
 };
 

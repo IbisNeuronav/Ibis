@@ -34,10 +34,14 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 ObjectSerializationMacro( PointsObject );
 
 const int PointsObject::InvalidPointIndex = -1;
+const int PointsObject::MinRadius = 1;
+const int PointsObject::MaxRadius = 16;
+const int PointsObject::MinLabelSize = 6;
+const int PointsObject::MaxLabelSize = 16;
 
 PointsObject::PointsObject() : SceneObject()
 {
-    m_pointCoordinates = vtkPoints::New();
+    m_pointCoordinates = vtkSmartPointer<vtkPoints>::New();
     m_selectedPointIndex = InvalidPointIndex;
     m_pointRadius3D = 2.0;
     m_pointRadius2D = 20.0;
@@ -53,13 +57,13 @@ PointsObject::PointsObject() : SceneObject()
     m_selectedColor[2] = 0.0;
     m_opacity = 1.0;
     m_movingPointIndex = PointsObject::InvalidPointIndex;
-    m_picker = vtkCellPicker::New();
+    m_picker = vtkSmartPointer<vtkCellPicker>::New();
     m_pickable = false;
     m_pickabilityLocked = false;
     m_showLabels = true;
     m_computeDistance = false;
     m_lineToPointerTip = 0;
-    m_lineToPointerProperty = vtkProperty::New();
+    m_lineToPointerProperty = vtkSmartPointer<vtkProperty>::New();
     for ( int i = 0; i < 3; i++ )
         m_lineToPointerColor[i] = 1.0;
     m_lineToPointerProperty->SetColor( m_lineToPointerColor[0], m_lineToPointerColor[1], m_lineToPointerColor[2] );
@@ -67,11 +71,6 @@ PointsObject::PointsObject() : SceneObject()
 
 PointsObject::~PointsObject()
 {
-    m_picker->Delete();
-    m_pointCoordinates->Delete();
-    if( m_lineToPointerTip )
-        m_lineToPointerTip->Delete();
-    m_lineToPointerProperty->Delete();
 }
 
 void PointsObject::Serialize( Serializer * ser )
@@ -399,6 +398,11 @@ void PointsObject::AddPointLocal( double coords[3], QString name, QString timest
     UpdatePointProperties( index );
 }
 
+vtkPoints * PointsObject::GetPoints()
+{
+    return m_pointCoordinates.GetPointer();
+}
+
 void PointsObject::Reset()
 {   
     PointList::iterator it = m_pointList.begin();
@@ -512,10 +516,10 @@ void PointsObject::Set3DRadius( double r )
 {
     if( m_pointRadius3D == r )
         return;
-    if( r < MIN_RADIUS )
-        r = MIN_RADIUS;
-    if( r > MAX_RADIUS )
-        r = MAX_RADIUS;
+    if( r < MinRadius )
+        r = MinRadius;
+    if( r > MaxRadius )
+        r = MaxRadius;
     m_pointRadius3D = r;
     this->UpdatePoints();
 }
@@ -532,10 +536,10 @@ void PointsObject::SetLabelSize( double s )
 {
     if( m_labelSize == s )
         return;
-    if( s < MIN_LABEl_SIZE )
-        s = MIN_LABEl_SIZE;
-    if( s > MAX_LABEL_SIZE )
-        s = MAX_LABEL_SIZE;
+    if( s < MinLabelSize )
+        s = MinLabelSize;
+    if( s > MaxLabelSize )
+        s = MaxLabelSize;
     m_labelSize = s;
     this->UpdatePoints();
 }
@@ -788,7 +792,7 @@ void PointsObject::EnableComputeDistance( bool enable )
     m_computeDistance = enable;
     if( m_computeDistance )
     {
-        m_lineToPointerTip = PolyDataObject::New();
+        m_lineToPointerTip = vtkSmartPointer<PolyDataObject>::New();
         m_lineToPointerTip->SetListable( false );
         m_lineToPointerTip->SetCanEditTransformManually( false );
         m_lineToPointerTip->SetObjectManagedByTracker( true );
@@ -805,7 +809,6 @@ void PointsObject::EnableComputeDistance( bool enable )
     {
         disconnect( &(Application::GetInstance()), SIGNAL(IbisClockTick()), this, SLOT(UpdateDistance()) );
         this->GetManager()->RemoveObject( m_lineToPointerTip );
-        m_lineToPointerTip->Delete();
         m_lineToPointerTip = 0;
     }
 }
