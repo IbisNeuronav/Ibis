@@ -107,10 +107,10 @@ void GeneratedSurface::GetImageScalarRange(double range[2])
 
 bool GeneratedSurface::GenerateSurface()
 {
-    vtkSmartPointer<vtkMarchingContourFilter> contourExtractor = vtkSmartPointer<vtkMarchingContourFilter>::New();
     ImageObject *img = ImageObject::SafeDownCast(m_pluginInterface->GetSceneManager()->GetObjectByID( m_imageObjectID ) );
     if ( img )
     {
+        vtkSmartPointer<vtkMarchingContourFilter> contourExtractor = vtkSmartPointer<vtkMarchingContourFilter>::New();
         if (m_gaussianSmoothing)
         {
             vtkSmartPointer<vtkImageGaussianSmooth> GaussianSmooth = vtkSmartPointer<vtkImageGaussianSmooth>::New();

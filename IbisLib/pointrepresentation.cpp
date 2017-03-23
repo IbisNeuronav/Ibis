@@ -36,10 +36,6 @@ PointRepresentation::PerViewElements::PerViewElements()
 
 PointRepresentation::PerViewElements::~PerViewElements()
 {
-//    if( pointRepresentationActor )
-//        pointRepresentationActor->Delete();
-//    if( labelActor )
-//        labelActor->Delete();
 }
 
 PointRepresentation::PointRepresentation()
@@ -281,9 +277,7 @@ bool PointRepresentation::HasActor( vtkActor * actor )
     while( it != m_perViewContainer.end() )
     {
         PerViewElements * perView = (*it).second;
-        vtkActor *ptActor = perView->pointRepresentationActor.GetPointer();
-//        if( perView->pointRepresentationActor == actor )
-        if( ptActor == actor )
+        if( perView->pointRepresentationActor.GetPointer() == actor )
             return true;
         ++it;
     }
