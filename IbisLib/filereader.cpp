@@ -51,61 +51,41 @@ FileReader::~FileReader()
         delete m_params;
 }
 
+#include <QStringList>
+static QStringList mincConvertPaths = QStringList()
+        << "/usr/bin/mincconvert"
+        << "/usr/local/bin/mincconvert"
+        << "/usr/local/minc/bin/mincconvert"
+        << "/usr/local/mni/minc/bin/mincconvert"
+        << "/opt/minc/bin/mincconvert"
+        << "/opt/minc-itk4/bin/mincconvert";
+
+static QStringList mincCalcPaths = QStringList()
+        << "/usr/bin/minccalc"
+        << "/usr/local/bin/minccalc"
+        << "/usr/local/minc/bin/minccalc"
+        << "/usr/local/mni/minc/bin/minccalc"
+        << "/opt/minc/bin/minccalc"
+        << "/opt/minc-itk4/bin/minccalc";
+
+QString FindExecutable( QStringList & candidatePaths )
+{
+    foreach( QString path, candidatePaths )
+    {
+        QFileInfo info( path );
+        if( info.exists() && info.isExecutable() )
+        {
+            return path;
+        }
+    }
+    return QString("");
+}
+
 bool FileReader::FindMincConverter()
 {
-    //find mincconvert
-    QFile converter("/usr/bin/mincconvert");
-    if( !converter.exists() )
-    {
-        converter.setFileName("/usr/local/bin/mincconvert");
-        if( !converter.exists() )
-        {
-            converter.setFileName("/usr/local/minc/bin/mincconvert");
-            if( !converter.exists() )
-            {
-                converter.setFileName("/usr/local/mni/minc/bin/mincconvert");
-                if( !converter.exists() )
-                {
-                    converter.setFileName("/opt/minc/bin/mincconvert");
-                    if( !converter.exists() )
-                    {
-                        return false;
-                    }
-                }
-            }
-        }
-    }
-    QFileInfo fi(converter);
-    if( fi.isExecutable() )
-    {
-        m_mincconvert.append(fi.absoluteFilePath());
-    }
-    //find minccalc
-    QFile calc("/usr/bin/minccalc");
-    if( !calc.exists() )
-    {
-        calc.setFileName("/usr/local/bin/minccalc");
-        if( !calc.exists() )
-        {
-            calc.setFileName("/usr/local/minc/bin/minccalc");
-            if( !calc.exists() )
-            {
-                calc.setFileName("/usr/local/mni/minc/bin/minccalc");
-                if( !calc.exists() )
-                {
-                    calc.setFileName("/opt/minc/bin/minccalc");
-                }
-            }
-        }
-    }
-    QFileInfo fi1(calc);
-    if( fi1.isExecutable() )
-    {
-        m_minccalc.append(fi1.absoluteFilePath());
-    }
-    if( !m_mincconvert.isEmpty() && !m_minccalc.isEmpty() )
-        return true;
-    return false;
+    m_mincconvert = FindExecutable( mincConvertPaths );
+    m_minccalc = FindExecutable( mincCalcPaths );
+    return ( !m_mincconvert.isEmpty() && !m_minccalc.isEmpty() );
 }
 
 bool FileReader::IsMINC1( QString fileName )
