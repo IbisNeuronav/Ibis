@@ -38,6 +38,16 @@ if( IBIS_BUILD_IGSIO_HARDWARE_MODULE )
 endif()
 
 #================================
+# Configure .desktop files for Linux
+#================================
+set( DesktopFileIconPath ${CMAKE_CURRENT_SOURCE_DIR}/icons/ibis.png )
+set( DesktopFileViewerIconPath ${CMAKE_CURRENT_SOURCE_DIR}/icons/ibis-gray.png )
+set( DesktopFilePath ${CMAKE_CURRENT_BINARY_DIR} )
+set( DesktopFileExec ${DesktopFilePath}/ibis )
+configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/icons/Ibis.desktop.in ${CMAKE_CURRENT_BINARY_DIR}/Ibis.desktop )
+configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/icons/Ibis-viewer.desktop.in ${CMAKE_CURRENT_BINARY_DIR}/Ibis-viewer.desktop )
+
+#================================
 # Define mac osx bundle
 #================================
 if(APPLE)
