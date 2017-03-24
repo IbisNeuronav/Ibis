@@ -1,0 +1,9 @@
+[Desktop Entry]
+Encoding=UTF-8
+Version=${IBIS_MAJOR_VERSION}.${IBIS_MINOR_VERSION}
+Type=Application
+Name=Ibis
+Icon=${DesktopFileIconPath}
+Path=${DesktopFilePath}
+Exec=${DesktopFileExec}
+StartupNotify=false
