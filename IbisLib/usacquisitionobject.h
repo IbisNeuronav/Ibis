@@ -22,16 +22,15 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "imageobject.h"
 #include "usprobeobject.h"
 #include <itkImage.h>
+#include "vtkSmartPointer.h"
 
 class TrackedVideoBuffer;
 class vtkImageData;
-class vtkActor;
 class vtkImageActor;
 class vtkImageMapToColors;
 class vtkImageProperty;
 class vtkAlgorithmOutput;
 class vtkImageStencil;
-class vtkImageMapToColors;
 class vtkImageToImageStencil;
 class vtkPiecewiseFunctionLookupTable;
 class USMask;
@@ -174,24 +173,24 @@ protected:
     PerViewContainer m_perViews;
 
     // Current slice properties
-    USMask                  * m_mask;
-    vtkTransform            * m_currentImageTransform;
-    vtkTransform            * m_sliceTransform;
-    vtkTransform            * m_calibrationTransform;
-    int                       m_sliceLutIndex;
-    vtkImageProperty        * m_sliceProperties;
-    bool                      m_isMaskOn;
-    bool                      m_isDopplerOn;
-    vtkImageToImageStencil  * m_imageStencilSource;
-    vtkImageStencil         * m_sliceStencil;
-    vtkImageStencil         * m_sliceStencilDoppler;
-    vtkImageMapToColors     * m_mapToColors;
-    vtkPiecewiseFunctionLookupTable * m_lut;
-    vtkImageConstantPad     * m_constantPad;
+    USMask                              * m_mask;
+    vtkSmartPointer<vtkTransform>       m_currentImageTransform;
+    vtkSmartPointer<vtkTransform>       m_sliceTransform;
+    vtkSmartPointer<vtkTransform>       m_calibrationTransform;
+    int                                 m_sliceLutIndex;
+    vtkSmartPointer<vtkImageProperty>   m_sliceProperties;
+    bool                                m_isMaskOn;
+    bool                                m_isDopplerOn;
+    vtkSmartPointer<vtkImageToImageStencil> m_imageStencilSource;
+    vtkSmartPointer<vtkImageStencil>    m_sliceStencil;
+    vtkSmartPointer<vtkImageStencil>    m_sliceStencilDoppler;
+    vtkSmartPointer<vtkImageMapToColors> m_mapToColors;
+    vtkSmartPointer<vtkPiecewiseFunctionLookupTable> m_lut;
+    vtkSmartPointer<vtkImageConstantPad> m_constantPad;
 
     // Outputs
-    vtkPassThrough * m_maskedImageOutput;
-    vtkPassThrough * m_unmaskedImageOutput;
+    vtkSmartPointer<vtkPassThrough> m_maskedImageOutput;
+    vtkSmartPointer<vtkPassThrough> m_unmaskedImageOutput;
 
     // Static slices properties
     void SetupAllStaticSlicesInAllViews();
@@ -203,7 +202,7 @@ protected:
     bool               m_staticSlicesEnabled;
     int                m_numberOfStaticSlices;
     int                m_staticSlicesLutIndex;
-    vtkImageProperty * m_staticSlicesProperties;
+    vtkSmartPointer<vtkImageProperty> m_staticSlicesProperties;
 
     // Static slices view-independent data
     void ComputeAllStaticSlicesData();

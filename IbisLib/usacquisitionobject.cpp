@@ -67,56 +67,56 @@ USAcquisitionObject::USAcquisitionObject()
     m_acquisitionType = UsProbeObject::ACQ_B_MODE;
 
     // current slice
-    m_calibrationTransform = vtkTransform::New();
-    m_sliceTransform = vtkTransform::New();
+    m_calibrationTransform = vtkSmartPointer<vtkTransform>::New();
+    m_sliceTransform = vtkSmartPointer<vtkTransform>::New();
     m_sliceTransform->Concatenate( this->WorldTransform );
-    m_currentImageTransform = vtkTransform::New();
+    m_currentImageTransform = vtkSmartPointer<vtkTransform>::New();
     m_sliceTransform->Concatenate( m_currentImageTransform );
     m_sliceTransform->Concatenate( m_calibrationTransform );
-    m_sliceProperties = vtkImageProperty::New();
+    m_sliceProperties = vtkSmartPointer<vtkImageProperty>::New();
     m_sliceLutIndex = 1;         // default to hot metal
-    m_lut = vtkPiecewiseFunctionLookupTable::New();
+    m_lut = vtkSmartPointer<vtkPiecewiseFunctionLookupTable>::New();
     m_lut->SetIntensityFactor( 1.0 );
-    m_mapToColors = vtkImageMapToColors::New();
+    m_mapToColors = vtkSmartPointer<vtkImageMapToColors>::New();
     m_mapToColors->SetLookupTable( m_lut );
     m_mapToColors->SetOutputFormatToRGBA();
     m_mapToColors->SetInputConnection( m_videoBuffer->GetVideoOutputPort() );
 
     m_mask = USMask::New(); // default mask
 
-    m_imageStencilSource = vtkImageToImageStencil::New();
+    m_imageStencilSource = vtkSmartPointer<vtkImageToImageStencil>::New();
     m_imageStencilSource->SetInputData( m_mask->GetMask() );
     m_imageStencilSource->ThresholdByUpper( 128.0 );
     m_imageStencilSource->UpdateWholeExtent();
 
-    m_sliceStencil = vtkImageStencil::New();
+    m_sliceStencil = vtkSmartPointer<vtkImageStencil>::New();
     m_sliceStencil->SetStencilData( m_imageStencilSource->GetOutput() );
     m_sliceStencil->SetInputConnection( m_mapToColors->GetOutputPort() );
     m_sliceStencil->SetBackgroundColor( 1.0, 1.0, 1.0, 0.0 );
 
     m_isMaskOn = true;
 
-    m_constantPad = vtkImageConstantPad::New();
+    m_constantPad = vtkSmartPointer<vtkImageConstantPad>::New();
     m_constantPad->SetConstant(255);
     m_constantPad->SetOutputNumberOfScalarComponents(4);
     m_constantPad->SetInputConnection( m_videoBuffer->GetVideoOutputPort() );
     m_isDopplerOn = false; // default state is B-mode
 
-    m_sliceStencilDoppler = vtkImageStencil::New();
+    m_sliceStencilDoppler = vtkSmartPointer<vtkImageStencil>::New();
     m_sliceStencilDoppler->SetStencilData( m_imageStencilSource->GetOutput() );
     m_sliceStencilDoppler->SetInputConnection( m_constantPad->GetOutputPort() );
     m_sliceStencilDoppler->SetBackgroundColor( 1.0, 1.0, 1.0, 0.0 );
 
     // Outputs
-    m_maskedImageOutput = vtkPassThrough::New();
+    m_maskedImageOutput = vtkSmartPointer<vtkPassThrough>::New();
     m_maskedImageOutput->SetInputConnection( m_sliceStencil->GetOutputPort() );
-    m_unmaskedImageOutput = vtkPassThrough::New();
+    m_unmaskedImageOutput = vtkSmartPointer<vtkPassThrough>::New();
     m_unmaskedImageOutput->SetInputConnection( m_mapToColors->GetOutputPort() );
 
     // static slices
     m_staticSlicesEnabled = false;
     m_numberOfStaticSlices = 2;   // default = first and last
-    m_staticSlicesProperties = vtkImageProperty::New();
+    m_staticSlicesProperties = vtkSmartPointer<vtkImageProperty>::New();
     m_staticSlicesLutIndex = 0;  // default to greyscale
     m_staticSlicesDataNeedUpdate = true;
     m_defaultImageSize[0] = 640;
@@ -127,15 +127,7 @@ USAcquisitionObject::~USAcquisitionObject()
 {
     disconnect(this);
 
-    m_sliceTransform->Delete();
-    m_sliceProperties->Delete();
-    m_staticSlicesProperties->Delete();
-
-    m_sliceStencil->Delete();
-    m_sliceStencilDoppler->Delete();
-    m_mapToColors->Delete();
     m_mask->Delete();
-    m_constantPad->Delete();
     ClearStaticSlicesData();
 
     delete m_videoBuffer;
@@ -1253,4 +1245,3 @@ void USAcquisitionObject::SetStaticSlicesLutIndex( int index )
     staticLut->Delete();
     emit Modified();
 }
-
