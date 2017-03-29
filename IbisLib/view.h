@@ -16,6 +16,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "vtkObject.h"
 #include <qobject.h>
 #include "serializer.h"
+#include "vtkSmartPointer.h"
 
 class vtkInteractorStyle;
 class vtkRenderWindowInteractor;
@@ -156,7 +157,7 @@ protected:
     ViewController * CurrentController;  // this should be 0 if view is not controlled
 
     // Manage mouse and keyboard interaction with sceneobject
-    vtkObjectCallback<View> * InteractionCallback;
+    vtkSmartPointer< vtkObjectCallback<View> > InteractionCallback;
     double Priority;
     typedef std::multimap<double,SceneObject*> InteractionObjectContainer;
     InteractionObjectContainer m_interactionObjects;
