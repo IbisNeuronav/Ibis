@@ -142,6 +142,8 @@ public:
     void SetGenericLabelText( const QString &text ) { GenericText = text; }
     const QString GetGenericLabelText( ) { return GenericText; }
 
+    bool ImportUsAcquisition();
+
 public slots:
 
     void ResetCursorPosition();

@@ -23,14 +23,15 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "usprobeobject.h"
 #include <itkImage.h>
 #include "vtkSmartPointer.h"
+#include "vtkImageActor.h"
+#include "vtkImageMapToColors.h"
+#include "vtkImageStencil.h"
+#include "vtkTransform.h"
 
 class TrackedVideoBuffer;
 class vtkImageData;
-class vtkImageActor;
-class vtkImageMapToColors;
 class vtkImageProperty;
 class vtkAlgorithmOutput;
-class vtkImageStencil;
 class vtkImageToImageStencil;
 class vtkPiecewiseFunctionLookupTable;
 class USMask;
@@ -166,8 +167,8 @@ protected:
     struct PerViewElements
     {
         PerViewElements() : imageSlice(0) {}
-        vtkImageActor * imageSlice;
-        std::vector<vtkImageActor*> staticSlices;
+        vtkSmartPointer<vtkImageActor> imageSlice;
+        std::vector< vtkSmartPointer<vtkImageActor> > staticSlices;
     };
     typedef std::map<View*,PerViewElements> PerViewContainer;
     PerViewContainer m_perViews;
@@ -211,9 +212,9 @@ protected:
     struct PerStaticSlice
     {
         PerStaticSlice() : mapToColors(0), imageStencil(0), transform(0) {}
-        vtkImageMapToColors * mapToColors;
-        vtkImageStencil * imageStencil;
-        vtkTransform * transform;
+        vtkSmartPointer<vtkImageMapToColors> mapToColors;
+        vtkSmartPointer<vtkImageStencil> imageStencil;
+        vtkSmartPointer<vtkTransform> transform;
     };
     std::vector< PerStaticSlice > m_staticSlicesData;
     bool m_staticSlicesDataNeedUpdate;

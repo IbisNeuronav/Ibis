@@ -1797,3 +1797,15 @@ void SceneManager::ValidatePointerObject()
     if( pointerId != this->NavigationPointerID )
         SetNavigationPointerID( pointerId );
 }
+
+bool SceneManager::ImportUsAcquisition()
+{
+    vtkSmartPointer<USAcquisitionObject> acq = vtkSmartPointer<USAcquisitionObject>::New();
+    if( acq->Import() )
+    {
+        this->AddObject( acq );
+        this->SetCurrentObject( acq );
+        return true;
+    }
+    return false;
+}
