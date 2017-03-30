@@ -80,18 +80,18 @@ public:
     void Render();
     void SetRenderingEnabled( bool b );
     
-    vtkGetObjectMacro(Interactor,vtkRenderWindowInteractor);
+    vtkRenderWindowInteractor * GetInteractor();
     void SetInteractor( vtkRenderWindowInteractor * interactor );
     
-    vtkGetObjectMacro(Renderer,vtkRenderer);
-    vtkGetObjectMacro(OverlayRenderer,vtkRenderer);
-    vtkGetObjectMacro(OverlayRenderer2,vtkRenderer);
     vtkRenderer * GetRenderer( int level );
-    
+    vtkRenderer * GetRenderer();
+    vtkRenderer * GetOverlayRenderer();
+    vtkRenderer * GetOverlayRenderer2();
+
     vtkGetObjectMacro(Picker,vtkCellPicker);
     void SetPicker( vtkCellPicker * picker );
     
-    vtkGetObjectMacro(InteractorStyle,vtkInteractorStyle);
+    vtkInteractorStyle * GetInteractorStyle();
     void SetInteractorStyle( vtkInteractorStyle * style );
     
     vtkGetObjectMacro(Manager,SceneManager);
@@ -144,15 +144,15 @@ protected:
     QString Name;
     vtkQtRenderWindow * RenderWindow;
     bool m_renderingEnabled;
-    vtkRenderWindowInteractor * Interactor;
-    vtkRenderer * Renderer;
-    vtkRenderer * OverlayRenderer;
-    vtkRenderer * OverlayRenderer2;
+    vtkSmartPointer<vtkRenderWindowInteractor> Interactor;
+    vtkSmartPointer<vtkRenderer> Renderer;
+    vtkSmartPointer<vtkRenderer> OverlayRenderer;
+    vtkSmartPointer<vtkRenderer> OverlayRenderer2;
     vtkCellPicker * Picker;
-    vtkInteractorStyle * InteractorStyle;
-    vtkEventQtSlotConnect * EventObserver;
+    vtkSmartPointer<vtkInteractorStyle> InteractorStyle;
+    vtkSmartPointer<vtkEventQtSlotConnect> EventObserver;
     SceneManager * Manager;
-    vtkMatrix4x4 * PrevViewingTransform;
+    vtkSmartPointer<vtkMatrix4x4> PrevViewingTransform;
     int Type;
     ViewController * CurrentController;  // this should be 0 if view is not controlled
 
