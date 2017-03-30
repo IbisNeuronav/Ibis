@@ -679,7 +679,7 @@ int TripleCutPlaneObject::GetPlaneIndex( vtkObject * caller )
 {
     for( int i = 0; i < 3; ++i )
     {
-        if( caller == this->Planes[i] )
+        if( caller == this->Planes[i].GetPointer() )
         {
             return i;
         }
