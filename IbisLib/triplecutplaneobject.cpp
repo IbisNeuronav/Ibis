@@ -49,8 +49,8 @@ std::vector< BlendingModeInfo > BlendingModes = FillBlendingModeInfo();
 
 TripleCutPlaneObject::TripleCutPlaneObject()
 {
-    this->PlaneInteractionSlotConnect = vtkEventQtSlotConnect::New();
-    this->PlaneEndInteractionSlotConnect = vtkEventQtSlotConnect::New();
+    this->PlaneInteractionSlotConnect = vtkSmartPointer<vtkEventQtSlotConnect>::New();
+    this->PlaneEndInteractionSlotConnect = vtkSmartPointer<vtkEventQtSlotConnect>::New();
     m_resliceInterpolationType = 1;  // linear interpolation
     m_displayInterpolationType = 1;  // linear interpolation
     for (int i = 0; i < 3; i++)
@@ -67,17 +67,8 @@ TripleCutPlaneObject::TripleCutPlaneObject()
 
 TripleCutPlaneObject::~TripleCutPlaneObject()
 {
-    this->PlaneInteractionSlotConnect->Delete();
-    this->PlaneEndInteractionSlotConnect->Delete();
-
     // Remove planes from the views
     ReleaseAllViews();
-
-    // Delete planes
-    for(int i = 0; i < 3; i++ )
-    {
-        this->Planes[i]->Delete();
-    }
 }
 
 void TripleCutPlaneObject::Serialize( Serializer * ser )
@@ -351,6 +342,12 @@ void TripleCutPlaneObject::PreDisplaySetup()
     this->UpdateAllPlanesVisibility();
 }
 
+vtkMultiImagePlaneWidget * TripleCutPlaneObject::GetPlane( int index )
+{
+    if( index < 3 && index >= 0 )
+        return Planes[index].GetPointer();
+    return 0;
+}
 void TripleCutPlaneObject::ResetPlanes()
 {
     Q_ASSERT( this->GetManager() );
@@ -657,7 +654,7 @@ void TripleCutPlaneObject::CreatePlane( int viewType )
 {
     if( this->Planes[ viewType ] == 0 )
     {
-        this->Planes[viewType] = vtkMultiImagePlaneWidget::New();
+        this->Planes[viewType] = vtkSmartPointer<vtkMultiImagePlaneWidget>::New();
         this->Planes[viewType]->SetPlaneOrientation( viewType );
         this->Planes[viewType]->SetLeftButtonAction( vtkMultiImagePlaneWidget::NO_ACTION );
         this->Planes[viewType]->SetMiddleButtonAction( vtkMultiImagePlaneWidget::NO_ACTION );

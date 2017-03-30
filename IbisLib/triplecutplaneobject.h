@@ -15,7 +15,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "ibistypes.h"
 #include "serializer.h"
 #include "sceneobject.h"
-//#include "view.h"
+#include "vtkSmartPointer.h"
 #include <QColor>
 
 class ImageObject;
@@ -53,7 +53,7 @@ public:
     void RemoveImage(int imageID );
 	void PreDisplaySetup();
 	void ResetPlanes();
-    vtkMultiImagePlaneWidget * GetPlane( int index ) { return (index < 3 && index >= 0) ? Planes[index] : 0; }
+    vtkMultiImagePlaneWidget * GetPlane( int index );
 
 	// Manage plane visibility
 	void SetViewPlane( int planeIndex, int isOn );
@@ -136,15 +136,15 @@ protected:
     std::vector<int> m_sliceMixMode; // per-image
     std::vector<int> m_blendingModeIndices;
 
-	vtkMultiImagePlaneWidget * Planes[3];
+    vtkSmartPointer<vtkMultiImagePlaneWidget> Planes[3];
     int ViewPlanes[3];
     bool CursorVisible;
     int m_resliceInterpolationType;
     int m_displayInterpolationType;
 
 	// callbacks
-	vtkEventQtSlotConnect * PlaneInteractionSlotConnect;
-    vtkEventQtSlotConnect * PlaneEndInteractionSlotConnect;
+    vtkSmartPointer<vtkEventQtSlotConnect> PlaneInteractionSlotConnect;
+    vtkSmartPointer<vtkEventQtSlotConnect> PlaneEndInteractionSlotConnect;
 
     //used only to set planes position in PostRead()
     double m_planePosition[3];
