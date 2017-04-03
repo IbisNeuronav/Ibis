@@ -15,6 +15,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "vtkObject.h"
 #include <vector>
 #include <sstream>
+#include "vtkSmartPointer.h"
 
 class vtkPoints;
 class vtkIntArray;
@@ -44,7 +45,7 @@ public:
     bool IsScalingAllowed();
     void SetScalingAllowed( bool allow );
 
-    vtkGetObjectMacro( RegistrationTransform, vtkLandmarkTransform );
+    vtkLandmarkTransform *GetRegistrationTransform();
 
     // Description:
     // recompute transformation based on current source and
@@ -62,12 +63,12 @@ private:
 
     vtkPoints * SourcePoints;
     vtkPoints * TargetPoints;
-    vtkPoints * FiducialRegistrationError;
-    vtkDoubleArray * FiducialRegistrationErrorMagnitude;
-    vtkDoubleArray * FiducialRegistrationErrorRMS;
+    vtkSmartPointer<vtkPoints> FiducialRegistrationError;
+    vtkSmartPointer<vtkDoubleArray> FiducialRegistrationErrorMagnitude;
+    vtkSmartPointer<vtkDoubleArray> FiducialRegistrationErrorRMS;
     double FinalRMS;
-    vtkLandmarkTransform * InternalTransform;
-    vtkLandmarkTransform * RegistrationTransform;
+    vtkSmartPointer<vtkLandmarkTransform> InternalTransform;
+    vtkSmartPointer<vtkLandmarkTransform> RegistrationTransform;
 
 };
 

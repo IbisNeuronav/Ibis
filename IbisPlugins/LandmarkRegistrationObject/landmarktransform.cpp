@@ -93,13 +93,13 @@ void LandmarkTransform::SetScalingAllowed( bool allow )
 
 void LandmarkTransform::Init()
 {
-    this->FiducialRegistrationError = vtkPoints::New();
-    this->FiducialRegistrationErrorMagnitude = vtkDoubleArray::New();
-    this->FiducialRegistrationErrorRMS = vtkDoubleArray::New();
+    this->FiducialRegistrationError = vtkSmartPointer<vtkPoints>::New();
+    this->FiducialRegistrationErrorMagnitude = vtkSmartPointer<vtkDoubleArray>::New();
+    this->FiducialRegistrationErrorRMS = vtkSmartPointer<vtkDoubleArray>::New();
     this->FinalRMS = 0.0;
-    this->InternalTransform = vtkLandmarkTransform::New();
+    this->InternalTransform = vtkSmartPointer<vtkLandmarkTransform>::New();
     this->InternalTransform->SetModeToRigidBody();
-    this->RegistrationTransform = vtkLandmarkTransform::New();
+    this->RegistrationTransform = vtkSmartPointer<vtkLandmarkTransform>::New();
     this->RegistrationTransform->SetModeToRigidBody();
     this->SourcePoints = 0;
     this->TargetPoints = 0;
@@ -111,11 +111,6 @@ void LandmarkTransform::Clear()
     this->SourcePoints = 0;
     this->TargetPoints->UnRegister(this);
     this->TargetPoints = 0;
-    this->FiducialRegistrationError->Delete();
-    this->FiducialRegistrationErrorMagnitude->Delete();
-    this->FiducialRegistrationErrorRMS->Delete();
-    this->InternalTransform->Delete();
-    this->RegistrationTransform->Delete();
     this->FinalRMS = 0.0;
 }
 
@@ -185,4 +180,9 @@ void LandmarkTransform::Reset()
 {
     this->Clear( );
     this->Init( );
+}
+
+vtkLandmarkTransform * LandmarkTransform::GetRegistrationTransform()
+{
+    return this->RegistrationTransform.GetPointer();
 }
