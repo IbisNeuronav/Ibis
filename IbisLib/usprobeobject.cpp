@@ -78,37 +78,35 @@ UsProbeObject::UsProbeObject()
 
     m_currentCalibrationMatrixIndex = -1;
 
-    m_videoInput = vtkPassThrough::New();
-    m_actorInput = vtkPassThrough::New();
+    m_videoInput = vtkSmartPointer<vtkPassThrough>::New();
+    m_actorInput = vtkSmartPointer<vtkPassThrough>::New();
 
     m_mask = USMask::New(); // mask in use
     m_defaultMask = USMask::New(); // default mask saved in ibis config file
     m_maskOn = false;
 
-    m_sliceProperties = vtkImageProperty::New();
-
     m_lutIndex = 1;         // default to hot metal
-    m_mapToColors = vtkImageMapToColors::New();
+    m_mapToColors = vtkSmartPointer<vtkImageMapToColors>::New();
     m_mapToColors->SetOutputFormatToRGBA();
     m_mapToColors->SetInputConnection( m_videoInput->GetOutputPort() );
     SetCurrentLUTIndex( m_lutIndex );
 
-    m_imageStencilSource = vtkImageToImageStencil::New();
+    m_imageStencilSource = vtkSmartPointer<vtkImageToImageStencil>::New();
     m_imageStencilSource->ThresholdByUpper( 128.0 );
     m_imageStencilSource->SetInputData( m_mask->GetMask() );
     m_imageStencilSource->UpdateWholeExtent();
 
-    m_constantPad = vtkImageConstantPad::New();
+    m_constantPad = vtkSmartPointer<vtkImageConstantPad>::New();
     m_constantPad->SetConstant(255);
     m_constantPad->SetOutputNumberOfScalarComponents(4);
     m_constantPad->SetInputConnection( m_videoInput->GetOutputPort() );
 
-    m_sliceStencil = vtkImageStencil::New();
+    m_sliceStencil = vtkSmartPointer<vtkImageStencil>::New();
     m_sliceStencil->SetStencilData( m_imageStencilSource->GetOutput() );
     m_sliceStencil->SetInputConnection( m_mapToColors->GetOutputPort() );
     m_sliceStencil->SetBackgroundColor( 1.0, 1.0, 1.0, 0.0 );
 
-    m_imageTransform = vtkTransform::New();
+    m_imageTransform = vtkSmartPointer<vtkTransform>::New();
     m_imageTransform->SetInput( GetWorldTransform() );
 
     m_acquisitionType = ACQ_B_MODE;
@@ -118,11 +116,6 @@ UsProbeObject::UsProbeObject()
 
 UsProbeObject::~UsProbeObject()
 {
-    m_sliceProperties->Delete();
-    m_mapToColors->Delete();
-    m_imageStencilSource->Delete();
-    m_sliceStencil->Delete();
-    m_imageTransform->Delete();
     m_mask->Delete();
     m_defaultMask->Delete();
 }
@@ -175,7 +168,7 @@ void UsProbeObject::Setup( View * view )
     {
         PerViewElements pv;
         pv.imageActor = vtkImageActor::New();
-        pv.imageActor->SetUserTransform( m_imageTransform );
+        pv.imageActor->SetUserTransform( m_imageTransform.GetPointer() );
         pv.imageActor->SetVisibility( this->IsHidden() ? 0 : 1 );
         pv.imageActor->GetMapper()->SetInputConnection( m_actorInput->GetOutputPort() );
 
@@ -363,11 +356,10 @@ void UsProbeObject::SetCurrentLUTIndex( int index )
     m_lutIndex = index;
     double range[2] = { 0.0, 255.0 };
     QString slicesLutName = Application::GetLookupTableManager()->GetTemplateLookupTableName( m_lutIndex );
-    vtkPiecewiseFunctionLookupTable * lut = vtkPiecewiseFunctionLookupTable::New();
+    vtkSmartPointer<vtkPiecewiseFunctionLookupTable> lut = vtkSmartPointer<vtkPiecewiseFunctionLookupTable>::New();
     lut->SetIntensityFactor( 1.0 );
-    Application::GetLookupTableManager()->CreateLookupTable( slicesLutName, range, lut );
-    m_mapToColors->SetLookupTable( lut );
-    lut->Delete();
+    Application::GetLookupTableManager()->CreateLookupTable( slicesLutName, range, lut.GetPointer() );
+    m_mapToColors->SetLookupTable( lut.GetPointer() );
     emit Modified();
 }
 
