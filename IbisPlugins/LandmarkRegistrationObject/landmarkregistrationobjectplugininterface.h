@@ -14,6 +14,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QObject>
 #include <QWidget>
 #include "objectplugininterface.h"
+#include "vtkSmartPointer.h"
 
 class LandmarkRegistrationObject;
 
@@ -42,7 +43,7 @@ public:
 
 protected:
 
-    LandmarkRegistrationObject * m_landmarkRegistrationObject;
+    vtkSmartPointer<LandmarkRegistrationObject> m_landmarkRegistrationObject;
 };
 
 #endif //LandmarkRegistrationObjectPluginInterface_H

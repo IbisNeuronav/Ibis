@@ -23,8 +23,6 @@ class vtkDoubleArray;
 class vtkLandmarkTransform;
 class vtkLinearTransform;
 
-#define INVALID_NUMBER 9999
-
 class LandmarkTransform : public vtkObject
 {
 public:
@@ -35,11 +33,11 @@ public:
     LandmarkTransform();
     virtual ~LandmarkTransform();
 
-    void SetSourcePoints(vtkPoints *pts);
-    void SetTargetPoints(vtkPoints *pts);
+    void SetSourcePoints(vtkSmartPointer<vtkPoints> pts);
+    void SetTargetPoints(vtkSmartPointer<vtkPoints> pts);
 
-    double GetFRE(int index);
-    double GetRMS(int index);
+    bool GetFRE(int index , double &fre );
+    bool GetRMS(int index, double &rms );
     double GetFinalRMS() {return this->FinalRMS;}
 
     bool IsScalingAllowed();
@@ -61,8 +59,8 @@ private:
     void Init();
     void Clear();
 
-    vtkPoints * SourcePoints;
-    vtkPoints * TargetPoints;
+    vtkSmartPointer<vtkPoints> SourcePoints;
+    vtkSmartPointer<vtkPoints> TargetPoints;
     vtkSmartPointer<vtkPoints> FiducialRegistrationError;
     vtkSmartPointer<vtkDoubleArray> FiducialRegistrationErrorMagnitude;
     vtkSmartPointer<vtkDoubleArray> FiducialRegistrationErrorRMS;

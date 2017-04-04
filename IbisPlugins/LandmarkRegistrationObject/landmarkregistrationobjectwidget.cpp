@@ -13,6 +13,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "landmarkregistrationobject.h"
 #include "landmarktransform.h"
 #include "pointsobject.h"
+#include "vtkSmartPointer.h"
 #include <QPalette>
 
 LandmarkRegistrationObjectWidget::LandmarkRegistrationObjectWidget(QWidget *parent, const char *name, Qt::WindowFlags f) :
@@ -88,7 +89,7 @@ void LandmarkRegistrationObjectWidget::PointDataChanged(QStandardItem* item)
 void LandmarkRegistrationObjectWidget::UpdateUI()
 {
     Q_ASSERT(m_registrationObject);
-    LandmarkTransform *landmarkTransform = m_registrationObject->GetLandmarkTransform();
+    vtkSmartPointer<LandmarkTransform> landmarkTransform = m_registrationObject->GetLandmarkTransform();
     double rms = landmarkTransform->GetFinalRMS();
 
     disconnect(m_model, SIGNAL(itemChanged(QStandardItem*)), this, SLOT(PointDataChanged(QStandardItem*)));
@@ -115,11 +116,13 @@ void LandmarkRegistrationObjectWidget::UpdateUI()
         target->GetPointCoordinates( idx, coords );
         targetCoords = QString( "%1,%2,%3" ).arg(coords[0]).arg(coords[1]).arg(coords[2]);
         m_model->setData(m_model->index(idx, 2), targetCoords);
-        if ( m_registrationObject->GetPointEnabledStatus(idx) == 1 &&
-             landmarkTransform->GetFRE(activePointsCount) < INVALID_NUMBER )
+        double fre = 0, rms = 0;
+        bool ok = landmarkTransform->GetFRE(activePointsCount, fre);
+        bool ok1 = landmarkTransform->GetRMS(activePointsCount, rms);
+        if ( m_registrationObject->GetPointEnabledStatus(idx) == 1 && ok && ok1 )
         {
-            m_model->setData(m_model->index(idx, 3), QString::number((landmarkTransform->GetFRE(activePointsCount))));
-            m_model->setData(m_model->index(idx, 4), QString::number((landmarkTransform->GetRMS(activePointsCount))));
+            m_model->setData(m_model->index(idx, 3), QString::number((fre)));
+            m_model->setData(m_model->index(idx, 4), QString::number((rms)));
             activePointsCount++;
         }
         else

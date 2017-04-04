@@ -32,14 +32,14 @@ ObjectSerializationMacro( LandmarkRegistrationObject );
 
 LandmarkRegistrationObject::LandmarkRegistrationObject() : SceneObject()
 {
-    m_registrationTransform = LandmarkTransform::New();
+    m_registrationTransform = vtkSmartPointer<LandmarkTransform>::New();
     m_sourcePoints = 0;
     m_targetPoints = 0;
-    m_activeSourcePoints = vtkPoints::New();
-    m_activeTargetPoints = vtkPoints::New();
+    m_activeSourcePoints = vtkSmartPointer<vtkPoints>::New();
+    m_activeTargetPoints = vtkSmartPointer<vtkPoints>::New();
     m_registrationTransform->SetSourcePoints( m_activeSourcePoints );
     m_registrationTransform->SetTargetPoints( m_activeTargetPoints );
-    m_backUpTransform = vtkTransform::New();
+    m_backUpTransform = vtkSmartPointer<vtkTransform>::New();
     m_backUpTransform->Identity();
     m_sourcePointsID = SceneManager::InvalidId;
     m_targetPointsID = SceneManager::InvalidId;
@@ -50,14 +50,10 @@ LandmarkRegistrationObject::LandmarkRegistrationObject() : SceneObject()
 
 LandmarkRegistrationObject::~LandmarkRegistrationObject()
 {
-    m_registrationTransform->Delete();
-    m_backUpTransform->Delete();
     if( m_sourcePoints )
         m_sourcePoints->UnRegister( this );
-    m_activeSourcePoints->Delete();
     if( m_targetPoints )
         m_targetPoints->UnRegister( this );
-    m_activeTargetPoints->Delete();
 }
 
 void LandmarkRegistrationObject::CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets)
@@ -261,8 +257,8 @@ void LandmarkRegistrationObject::WriteTagFile( const QString & filename, bool sa
     writer->SetPointNames( pointNames );
     if( saveEnabledOnly )
     {
-        writer->AddVolume( m_activeSourcePoints, m_sourcePoints->GetName().toUtf8().data() );
-        writer->AddVolume( m_activeTargetPoints, m_targetPoints->GetName().toUtf8().data() );
+        writer->AddVolume( m_activeSourcePoints.GetPointer(), m_sourcePoints->GetName().toUtf8().data() );
+        writer->AddVolume( m_activeTargetPoints.GetPointer(), m_targetPoints->GetName().toUtf8().data() );
     }
     else
     {
@@ -653,4 +649,9 @@ bool LandmarkRegistrationObject::ReadTagFile( )
     this->SelectPoint( 0 );
     this->UpdateLandmarkTransform();
     return true;
+}
+
+int LandmarkRegistrationObject::GetNumberOfActivePoints()
+{
+    return m_activeSourcePoints->GetNumberOfPoints();
 }
