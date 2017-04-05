@@ -102,8 +102,8 @@ void LandmarkRegistrationObjectWidget::UpdateUI()
     QBrush brush(disabled);
     QString sourceCoords;
     QString targetCoords;
-    PointsObject *source = m_registrationObject->GetSourcePoints();
-    PointsObject *target = m_registrationObject->GetTargetPoints();
+    vtkSmartPointer<PointsObject> source = m_registrationObject->GetSourcePoints();
+    vtkSmartPointer<PointsObject> target = m_registrationObject->GetTargetPoints();
     double coords[3];
     int activePointsCount = 0;
     for (int idx = 0; idx < m_registrationObject->GetNumberOfPoints(); idx++)

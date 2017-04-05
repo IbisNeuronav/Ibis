@@ -39,10 +39,10 @@ public:
 
     bool ReadTagFile( );
 
-    void SetSourcePoints( PointsObject *pts );
-    void SetTargetPoints( PointsObject *pts );
-    PointsObject *GetSourcePoints() { return m_sourcePoints; }
-    PointsObject *GetTargetPoints() { return m_targetPoints; }
+    void SetSourcePoints( vtkSmartPointer<PointsObject> pts );
+    void SetTargetPoints( vtkSmartPointer<PointsObject> pts );
+    vtkSmartPointer<PointsObject> GetSourcePoints();
+    vtkSmartPointer<PointsObject> GetTargetPoints();
     QStringList GetPointNames( );
     int  GetNumberOfPoints();
     int  GetNumberOfActivePoints();
@@ -91,9 +91,9 @@ protected:
 
     vtkSmartPointer<LandmarkTransform> m_registrationTransform;
     vtkSmartPointer<vtkTransform> m_backUpTransform;
-    PointsObject *m_sourcePoints;
+    vtkSmartPointer<PointsObject> m_sourcePoints;
     vtkSmartPointer<vtkPoints> m_activeSourcePoints;
-    PointsObject *m_targetPoints;
+    vtkSmartPointer<PointsObject> m_targetPoints;
     vtkSmartPointer<vtkPoints> m_activeTargetPoints;
     QStringList m_activePointNames;
     QVector<int> m_pointEnabledStatus;
