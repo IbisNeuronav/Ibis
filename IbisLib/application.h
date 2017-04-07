@@ -88,6 +88,7 @@ public:
     static Application & GetInstance();
 
     void SetMainWindow( MainWindow * mw );
+    void LoadWindowSettings();
     MainWindow * GetMainWindow() { return m_mainWindow; }
     void AddBottomWidget( QWidget * w );
     void RemoveBottomWidget( QWidget * w );
