@@ -130,6 +130,11 @@ Application::Application( )
 void Application::SetMainWindow( MainWindow * mw )
 {
     m_mainWindow = mw;
+}
+
+void Application::LoadWindowSettings()
+{
+    Q_ASSERT( m_mainWindow );
     QSettings settings( m_appOrganisation, m_appName );
     m_mainWindow->LoadSettings( settings );
 }
