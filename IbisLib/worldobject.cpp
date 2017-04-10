@@ -26,22 +26,14 @@ WorldObject::WorldObject()
 
 WorldObject::~WorldObject()
 {
-    if( this->m_axesObject )
-        this->m_axesObject->UnRegister( this );
 }
 
-void WorldObject::SetAxesObject( PolyDataObject * obj )
+void WorldObject::SetAxesObject(vtkSmartPointer<PolyDataObject> obj )
 {
     if( obj == this->m_axesObject )
         return;
 
-    if( this->m_axesObject )
-        this->m_axesObject->UnRegister( this );
-
     this->m_axesObject = obj;
-
-    if( this->m_axesObject )
-        this->m_axesObject->Register( this );
 }
 
 void WorldObject::SetAxesHidden( bool h )

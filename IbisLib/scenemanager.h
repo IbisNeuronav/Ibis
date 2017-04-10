@@ -12,6 +12,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #define TAG_SCENEMANAGER_H
 
 #include "vtkObject.h"
+#include "vtkSmartPointer.h"
 #include "ibistypes.h"
 #include <QObject>
 #include <QString>
@@ -117,9 +118,6 @@ public:
     void Set3DCameraViewAngle( double angle );
 
     // Description:
-    TripleCutPlaneObject * GetMainImagePlanes() { return this->MainCutPlanes; }
-
-    // Description:
     // Utility functions to transform between reference object space and
     // world space coordinate systems.
     void WorldToReference( double worldPoint[3], double referencePoint[3] );
@@ -216,8 +214,8 @@ public:
 
     // Special root objects
     SceneObject * GetSceneRoot();
-    void SetAxesObject( PolyDataObject * obj );
-    PolyDataObject* GetAxesObject();
+    void SetAxesObject( vtkSmartPointer<PolyDataObject> obj );
+    vtkSmartPointer<PolyDataObject> GetAxesObject();
 
     // Description:
     // Function that is called by a window to using this manager. The
@@ -365,8 +363,6 @@ protected:
     typedef QMap<View*, int> ViewMap;
     ViewMap Views;
 
-    TripleCutPlaneObject * MainCutPlanes;
-
     // Objects
     ObjectList AllObjects;
 
@@ -393,6 +389,8 @@ protected:
     int MainSagittalViewID;
     int MainTransverseViewID;
 private:
+
+    vtkSmartPointer<TripleCutPlaneObject> MainCutPlanes;
 
     friend class QuadViewWindow;
     vtkSetMacro(Main3DViewID,int);

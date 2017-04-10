@@ -80,7 +80,6 @@ SceneManager::~SceneManager()
 {
     m_referenceTransform->Delete();
     m_invReferenceTransform->Delete();
-    this->MainCutPlanes->Delete();
     this->SceneRoot->Delete();
 }
 
@@ -133,7 +132,7 @@ void SceneManager::Init()
     this->SceneRoot->Register(this);
 
     // Cut planes
-    this->MainCutPlanes = TripleCutPlaneObject::New();
+    this->MainCutPlanes = vtkSmartPointer<TripleCutPlaneObject>::New();
     this->MainCutPlanes->SetName( "Image Planes" );
     this->MainCutPlanes->SetCanChangeParent( false );
     this->MainCutPlanes->SetNameChangeable( false );
@@ -142,7 +141,7 @@ void SceneManager::Init()
     this->MainCutPlanes->SetObjectManagedBySystem( true );
     this->MainCutPlanes->SetHidable( false );
     this->MainCutPlanes->SetObjectDeletable(false);
-    AddObject( this->MainCutPlanes, this->SceneRoot );
+    AddObject( this->MainCutPlanes.GetPointer(), this->SceneRoot );
     connect( this->MainCutPlanes, SIGNAL(StartPlaneMoved(int)), this, SLOT(OnStartCutPlaneInteraction()) );
     connect( this->MainCutPlanes, SIGNAL(EndPlaneMove(int)), this, SLOT(OnEndCutPlaneInteraction()) );
     connect( this->MainCutPlanes, SIGNAL(PlaneMoved(int)), this, SLOT(OnCutPlanesPositionChanged()) );
@@ -157,12 +156,12 @@ void SceneManager::Init()
     }
 
     // Axes
-    vtkAxes * axesSource = vtkAxes::New();
+    vtkSmartPointer<vtkAxes> axesSource = vtkSmartPointer<vtkAxes>::New();
     axesSource->SetScaleFactor( 150 );
     axesSource->SymmetricOn();
     axesSource->ComputeNormalsOff();
     axesSource->Update();
-    PolyDataObject * axesObject = PolyDataObject::New();
+    vtkSmartPointer<PolyDataObject> axesObject = vtkSmartPointer<PolyDataObject>::New();
     axesObject->SetName("Axes");
     axesObject->SetPolyData( axesSource->GetOutput() );
     axesObject->SetScalarsVisible( true );
@@ -174,10 +173,8 @@ void SceneManager::Init()
     axesObject->SetListable( false );
     axesObject->SetObjectManagedBySystem(true);
     axesObject->SetHidden( false );
-    this->AddObject( axesObject );
+    this->AddObject( axesObject.GetPointer() );
     this->SetAxesObject( axesObject );
-    axesSource->Delete();
-    axesObject->Delete();
 
     this->SetCurrentObject( this->GetSceneRoot() );
 
@@ -187,7 +184,7 @@ void SceneManager::Init()
 
 void SceneManager::Clear()
 {
-    disconnect( this->GetMainImagePlanes(), SIGNAL(PlaneMoved(int)), this, SLOT(OnCutPlanesPositionChanged()) );
+    disconnect( this->MainCutPlanes, SIGNAL(PlaneMoved(int)), this, SLOT(OnCutPlanesPositionChanged()) );
     disconnect( this, SIGNAL(ReferenceObjectChanged()), this->MainCutPlanes, SLOT(AdjustAllImages()) );
     this->RemoveAllSceneObjects();
     Q_ASSERT_X( AllObjects.size() == 0, "SceneManager::~SceneManager()", "Objects are left in the global list.");
@@ -231,7 +228,6 @@ void SceneManager::InternalClearScene()
 void SceneManager::RemoveAllSceneObjects()
 {
     this->RemoveObject( this->SceneRoot );
-    this->MainCutPlanes->Delete();
     this->MainCutPlanes = 0;
 }
 
@@ -1021,12 +1017,12 @@ SceneObject * SceneManager::GetSceneRoot()
     return this->SceneRoot;
 }
 
-void SceneManager::SetAxesObject( PolyDataObject * obj )
+void SceneManager::SetAxesObject( vtkSmartPointer<PolyDataObject> obj )
 {
     this->SceneRoot->SetAxesObject( obj );
 }
 
-PolyDataObject * SceneManager::GetAxesObject()
+vtkSmartPointer<PolyDataObject> SceneManager::GetAxesObject()
 {
     return this->SceneRoot->GetAxesObject();
 }
@@ -1260,27 +1256,27 @@ void SceneManager::Set3DCameraViewAngle( double angle )
 
 void SceneManager::GetCursorPosition( double pos[3] )
 {
-    this->GetMainImagePlanes()->GetPlanesPosition( pos );
+    this->MainCutPlanes->GetPlanesPosition( pos );
 }
 
 bool SceneManager::IsInPlane( VIEWTYPES planeType, double pos[3] )
 {
-    return this->GetMainImagePlanes()->IsInPlane( planeType, pos );
+    return this->MainCutPlanes->IsInPlane( planeType, pos );
 }
 
 void SceneManager::ResetCursorPosition()
 {
-    this->GetMainImagePlanes()->ResetPlanes();
+    this->MainCutPlanes->ResetPlanes();
 }
 
 void SceneManager::SetCursorWorldPosition( double * pos )
 {
-    this->GetMainImagePlanes()->SetWorldPlanesPosition( pos );
+    this->MainCutPlanes->SetWorldPlanesPosition( pos );
 }
 
 void SceneManager::SetCursorPosition( double * pos )
 {
-    this->GetMainImagePlanes()->SetPlanesPosition( pos );
+    this->MainCutPlanes->SetPlanesPosition( pos );
 }
 
 void SceneManager::OnStartCutPlaneInteraction()
@@ -1496,7 +1492,7 @@ void SceneManager::ObjectReader( Serializer * ser, bool interactive )
             }
             else if (QString::compare(className, QString("TripleCutPlaneObject"), Qt::CaseSensitive) == 0)
             {
-                this->GetMainImagePlanes()->Serialize(ser);
+                this->MainCutPlanes->Serialize(ser);
             }
             else if (QString::compare(className, QString("PointsObject"), Qt::CaseSensitive) == 0)
             {
