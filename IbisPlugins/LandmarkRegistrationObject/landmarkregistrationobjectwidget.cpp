@@ -54,11 +54,7 @@ void LandmarkRegistrationObjectWidget::SetLandmarkRegistrationObject(LandmarkReg
 {
     if (m_registrationObject == obj)
         return;
-    if (m_registrationObject)
-        m_registrationObject->UnRegister(0);
     m_registrationObject = obj;
-    if (m_registrationObject)
-        m_registrationObject->Register(0);
     this->UpdateUI();
 }
 

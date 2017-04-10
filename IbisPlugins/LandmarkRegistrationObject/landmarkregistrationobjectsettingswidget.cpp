@@ -53,10 +53,6 @@ LandmarkRegistrationObjectSettingsWidget::LandmarkRegistrationObjectSettingsWidg
 
 LandmarkRegistrationObjectSettingsWidget::~LandmarkRegistrationObjectSettingsWidget()
 {
-    if (m_registrationObject)
-    {
-        m_registrationObject->UnRegister(0);
-    }
     delete ui;
     delete m_model;
 }
@@ -78,15 +74,7 @@ void LandmarkRegistrationObjectSettingsWidget::SetLandmarkRegistrationObject(Lan
 {
     if (m_registrationObject == obj)
         return;
-    if (m_registrationObject)
-    {
-        m_registrationObject->UnRegister(0);
-    }
     m_registrationObject = obj;
-    if (m_registrationObject)
-    {
-        m_registrationObject->Register(0);
-    }
     this->UpdateUI();
 }
 
@@ -124,6 +112,7 @@ void LandmarkRegistrationObjectSettingsWidget::on_allowScalingCheckBox_toggled( 
 {
     Q_ASSERT( m_registrationObject );
     m_registrationObject->SetAllowScaling( on );
+    this->UpdateUI();
 }
 
 void LandmarkRegistrationObjectSettingsWidget::on_importPushButton_clicked()

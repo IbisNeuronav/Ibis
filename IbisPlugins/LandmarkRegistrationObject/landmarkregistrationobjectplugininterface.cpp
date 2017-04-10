@@ -51,10 +51,10 @@ SceneObject *LandmarkRegistrationObjectPluginInterface::CreateObject()
     m_landmarkRegistrationObject = vtkSmartPointer<LandmarkRegistrationObject>::New();
     m_landmarkRegistrationObject->SetName( "Landmark Registration" );
     manager->AddObject( m_landmarkRegistrationObject.GetPointer() );
-    manager->AddObject( sourcePoints.GetPointer(), m_landmarkRegistrationObject );
+    manager->AddObject( sourcePoints.GetPointer(), m_landmarkRegistrationObject.GetPointer() );
     manager->AddObject( targetPoints.GetPointer(), manager->GetSceneRoot() );
     m_landmarkRegistrationObject->SetTargetObjectID( manager->GetSceneRoot()->GetObjectID() );
     m_landmarkRegistrationObject->SetSourcePoints( sourcePoints.GetPointer() );
     m_landmarkRegistrationObject->SetTargetPoints( targetPoints.GetPointer() );
-    return m_landmarkRegistrationObject;
+    return m_landmarkRegistrationObject.GetPointer();
 }
