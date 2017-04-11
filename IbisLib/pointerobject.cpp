@@ -120,7 +120,7 @@ void PointerObject::ObjectRemovedFromScene()
 
     for (int i = 0; i < PointerPickedPointsObjectList.count(); i++)
     {
-        this->GetManager()->RemoveObject(PointerPickedPointsObjectList.value(i));
+        this->GetManager()->RemoveObject(PointerPickedPointsObjectList.value(i).GetPointer());
     }
     PointerPickedPointsObjectList.clear();
 }
@@ -185,7 +185,7 @@ void PointerObject::CreatePointerPickedPointsObject()
     this->CurrentPointerPickedPointsObject->SetCanAppendChildren(false);
     this->CurrentPointerPickedPointsObject->SetCanChangeParent(false);
     connect(this->CurrentPointerPickedPointsObject, SIGNAL(NameChanged()), this, SLOT(UpdateSettings()));
-    PointerPickedPointsObjectList.append(this->CurrentPointerPickedPointsObject.GetPointer());
+    PointerPickedPointsObjectList.append(this->CurrentPointerPickedPointsObject);
 }
 
 void PointerObject::ManagerAddPointerPickedPointsObject()
@@ -202,7 +202,7 @@ void PointerObject::CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> 
         dlg->SetPointerPickedPointsObject(this->CurrentPointerPickedPointsObject);
     dlg->SetPointer(this);
     dlg->setObjectName("Properties");
-    connect (this, SIGNAL(SettingsChanged()), dlg, SLOT(UpdateSettings()));
+    connect (this, SIGNAL(SettingsChanged()), dlg, SLOT(UpdateUI()));
     widgets->append(dlg);
 }
 
@@ -248,14 +248,14 @@ void PointerObject::RemovePointerPickedPointsObject( int objID )
     PointerPickedPointsObjects::iterator it = PointerPickedPointsObjectList.begin();
     for(; it != PointerPickedPointsObjectList.end(); ++it)
     {
-        obj = (SceneObject*)(*it);
+        obj = (SceneObject*)((*it).GetPointer());
         PointsObject *objectRemoved = 0;
         if (obj->GetObjectID() == objID )
         {
             objectRemoved = PointsObject::SafeDownCast(obj);
-            if( objectRemoved == this->CurrentPointerPickedPointsObject )
+            if( objectRemoved == this->CurrentPointerPickedPointsObject.GetPointer() )
                 this->CurrentPointerPickedPointsObject = 0;
-            PointerPickedPointsObjectList.removeOne(objectRemoved);
+            PointerPickedPointsObjectList.removeOne((*it));
             emit SettingsChanged();
             return;
         }

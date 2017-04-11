@@ -57,7 +57,7 @@ public:
     void ManagerAddPointerPickedPointsObject();
     vtkSmartPointer<PointsObject> GetCurrentPointerPickedPointsObject() {return this->CurrentPointerPickedPointsObject;}
     void SetCurrentPointerPickedPointsObject(vtkSmartPointer<PointsObject> obj) {this->CurrentPointerPickedPointsObject = obj;}
-    const QList<PointsObject* > & GetPointerPickedPointsObjects() { return PointerPickedPointsObjectList; }
+    const QList<vtkSmartPointer<PointsObject> > & GetPointerPickedPointsObjects() { return PointerPickedPointsObjectList; }
 
 public slots:
 
@@ -98,7 +98,7 @@ protected:
     typedef std::map<View*,PerViewElements*> PointerObjectViewAssociation;
     PointerObjectViewAssociation pointerObjectInstances;
 
-    typedef QList <PointsObject* > PointerPickedPointsObjects;
+    typedef QList <vtkSmartPointer<PointsObject> > PointerPickedPointsObjects;
     PointerPickedPointsObjects PointerPickedPointsObjectList;
 };
 

@@ -35,11 +35,12 @@ public:
     void SetPointer(PointerObject *);
     void SetPointerPickedPointsObject(vtkSmartPointer<PointsObject>);
 
+public slots:
+    void UpdateUI();
+
 protected:
     PointerObject *m_pointer;
     vtkSmartPointer<PointsObject> m_pointerPickedPointsObject;
-    typedef QList <PointsObject* > PointerPickedPointsObjects;
-    PointerPickedPointsObjects m_pointerPickedPointsObjectList;
 
     void UpdatePointSetsComboBox();
 
@@ -52,7 +53,6 @@ private slots:
     virtual void on_calibrationMatrixPushButton_toggled( bool on );
     virtual void OnTipCalibrationDialogClosed();
     void OnCalibrationMatrixDialogClosed();
-    void UpdateUI();
 
 private:
 
