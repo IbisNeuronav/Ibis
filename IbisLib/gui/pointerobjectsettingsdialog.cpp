@@ -52,7 +52,7 @@ void PointerObjectSettingsDialog::SetPointer(PointerObject *ptr)
     }
 }
 
-void PointerObjectSettingsDialog::SetPointerPickedPointsObject(PointsObject *pts)
+void PointerObjectSettingsDialog::SetPointerPickedPointsObject(vtkSmartPointer<PointsObject> pts)
 {
     if (pts == m_pointerPickedPointsObject)
         return;
@@ -85,9 +85,10 @@ void PointerObjectSettingsDialog::on_newPointsObjectPushButton_clicked()
     m_pointer->CreatePointerPickedPointsObject();
     this->SetPointerPickedPointsObject(m_pointer->GetCurrentPointerPickedPointsObject());
     m_pointer->ManagerAddPointerPickedPointsObject();
+    this->UpdatePointSetsComboBox();
 }
 
-void PointerObjectSettingsDialog::UpdateSettings()
+void PointerObjectSettingsDialog::UpdateUI()
 {
     Q_ASSERT(m_pointer);
     this->UpdatePointSetsComboBox();
@@ -114,7 +115,7 @@ void PointerObjectSettingsDialog::UpdatePointSetsComboBox()
         for (int i = 0; i < PointerPickedPointsObjectList.count(); i++)
         {
             ui->pointSetsComboBox->addItem(PointerPickedPointsObjectList.value(i)->GetName());
-            if (m_pointerPickedPointsObject == PointerPickedPointsObjectList.value(i))
+            if (m_pointerPickedPointsObject.GetPointer() == PointerPickedPointsObjectList.value(i))
                 currentIndex = i;
         }
         ui->pointSetsComboBox->blockSignals(true);

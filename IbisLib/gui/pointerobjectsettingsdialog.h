@@ -13,6 +13,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include <QWidget>
 #include <QList>
+#include "vtkSmartPointer.h"
 
 class vtkQtMatrixDialog;
 
@@ -32,15 +33,12 @@ public:
     virtual ~PointerObjectSettingsDialog();
 
     void SetPointer(PointerObject *);
-    void SetPointerPickedPointsObject(PointsObject *);
-
-public slots:
-    void UpdateSettings();
+    void SetPointerPickedPointsObject(vtkSmartPointer<PointsObject>);
 
 protected:
     PointerObject *m_pointer;
-    PointsObject *m_pointerPickedPointsObject;
-    typedef QList <PointsObject*> PointerPickedPointsObjects;
+    vtkSmartPointer<PointsObject> m_pointerPickedPointsObject;
+    typedef QList <PointsObject* > PointerPickedPointsObjects;
     PointerPickedPointsObjects m_pointerPickedPointsObjectList;
 
     void UpdatePointSetsComboBox();
@@ -54,6 +52,7 @@ private slots:
     virtual void on_calibrationMatrixPushButton_toggled( bool on );
     virtual void OnTipCalibrationDialogClosed();
     void OnCalibrationMatrixDialogClosed();
+    void UpdateUI();
 
 private:
 

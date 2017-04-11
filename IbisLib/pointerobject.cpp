@@ -38,7 +38,7 @@ PointerObject::PointerObject()
 {
     m_lastTipCalibrationRMS = 0.0;
     m_backupCalibrationRMS = 0.0;
-    m_backupCalibrationMatrix = vtkMatrix4x4::New();
+    m_backupCalibrationMatrix = vtkSmartPointer<vtkMatrix4x4>::New();
 
     m_pointerAxis[0] = 0.0;
     m_pointerAxis[1] = 0.0;
@@ -120,11 +120,9 @@ void PointerObject::ObjectRemovedFromScene()
 
     for (int i = 0; i < PointerPickedPointsObjectList.count(); i++)
     {
-        PointerPickedPointsObjectList.value(i)->Delete();
         this->GetManager()->RemoveObject(PointerPickedPointsObjectList.value(i));
     }
     PointerPickedPointsObjectList.clear();
-    this->CurrentPointerPickedPointsObject = 0;
 }
 
 double * PointerObject::GetTipPosition()
@@ -182,19 +180,18 @@ void PointerObject::CreatePointerPickedPointsObject()
     int n = PointerPickedPointsObjectList.count();
     QString name("PointerPoints");
     name.append(QString::number(n));
-    this->CurrentPointerPickedPointsObject = PointsObject::New();
+    this->CurrentPointerPickedPointsObject = vtkSmartPointer<PointsObject>::New();
     this->CurrentPointerPickedPointsObject->SetName(name);
     this->CurrentPointerPickedPointsObject->SetCanAppendChildren(false);
     this->CurrentPointerPickedPointsObject->SetCanChangeParent(false);
     connect(this->CurrentPointerPickedPointsObject, SIGNAL(NameChanged()), this, SLOT(UpdateSettings()));
-    PointerPickedPointsObjectList.append(this->CurrentPointerPickedPointsObject);
+    PointerPickedPointsObjectList.append(this->CurrentPointerPickedPointsObject.GetPointer());
 }
 
 void PointerObject::ManagerAddPointerPickedPointsObject()
 {
     Q_ASSERT(this->GetManager());
-    this->GetManager()->AddObject( this->CurrentPointerPickedPointsObject );
-    this->GetManager()->SetCurrentObject( this->CurrentPointerPickedPointsObject );
+    this->GetManager()->AddObject( this->CurrentPointerPickedPointsObject.GetPointer() );
 }
 
 void PointerObject::CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets )
@@ -256,8 +253,9 @@ void PointerObject::RemovePointerPickedPointsObject( int objID )
         if (obj->GetObjectID() == objID )
         {
             objectRemoved = PointsObject::SafeDownCast(obj);
+            if( objectRemoved == this->CurrentPointerPickedPointsObject )
+                this->CurrentPointerPickedPointsObject = 0;
             PointerPickedPointsObjectList.removeOne(objectRemoved);
-            objectRemoved->Delete();
             emit SettingsChanged();
             return;
         }
