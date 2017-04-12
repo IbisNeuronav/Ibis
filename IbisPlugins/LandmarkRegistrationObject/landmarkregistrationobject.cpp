@@ -229,7 +229,6 @@ void LandmarkRegistrationObject::WriteTagFile( const QString & filename, bool sa
     std::vector<std::string> pointNames;
     std::vector<std::string> timeStamps;
     QStringList::iterator it;
-    vtkPoints *source, *target;
     if( saveEnabledOnly )
     {
         for( int i = 0; i < m_activePointNames.count(); i++ )
@@ -250,7 +249,7 @@ void LandmarkRegistrationObject::WriteTagFile( const QString & filename, bool sa
             timeStamps.push_back(m_targetPoints->GetTimeStamps()->value(i).toUtf8().data());
     }
 
-    vtkTagWriter * writer = vtkTagWriter::New();
+    vtkSmartPointer<vtkTagWriter> writer = vtkSmartPointer<vtkTagWriter>::New();
     writer->SetFileName( filename.toUtf8().data() );
     writer->SetPointNames( pointNames );
     if( saveEnabledOnly )
@@ -267,16 +266,15 @@ void LandmarkRegistrationObject::WriteTagFile( const QString & filename, bool sa
     }
     writer->SetTimeStamps(timeStamps);
     writer->Write();
-    writer->Delete();
 }
 
 void LandmarkRegistrationObject::WriteXFMFile( const QString & filename )
 {
-    vtkMatrix4x4 *mat = vtkMatrix4x4::New();
+    vtkSmartPointer<vtkMatrix4x4> mat = vtkSmartPointer<vtkMatrix4x4>::New();
     mat->Identity();
     vtkSmartPointer<vtkXFMWriter> writer = vtkSmartPointer<vtkXFMWriter>::New();
     writer->SetFileName( filename.toUtf8().data() );
-    m_registrationTransform->GetRegistrationTransform()->GetMatrix(mat);
+    m_registrationTransform->GetRegistrationTransform()->GetMatrix(mat.GetPointer());
     writer->SetMatrix(mat);
     writer->Write();
 }
