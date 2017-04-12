@@ -685,7 +685,7 @@ vtkScalarsToColors * PolyDataObject::GetCurrentLut()
     vtkSmartPointer<vtkPiecewiseFunctionLookupTable> lut = vtkSmartPointer<vtkPiecewiseFunctionLookupTable>::New();
     double range[2];
     this->PolyData->GetScalarRange( range );
-    Application::GetLookupTableManager()->CreateLookupTable( tableName, range, lut.GetPointer() );
+    Application::GetLookupTableManager()->CreateLookupTable( tableName, range, lut );
     this->CurrentLut = lut;
     return this->CurrentLut.GetPointer();
 }

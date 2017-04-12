@@ -16,7 +16,7 @@ LookupTableManager::LookupTableManager()
 {
 }
 
-void LookupTableManager::CreateLookupTable(const QString tableName, double range[2], vtkPiecewiseFunctionLookupTable * ct )
+void LookupTableManager::CreateLookupTable(const QString tableName, double range[2], vtkSmartPointer<vtkPiecewiseFunctionLookupTable> ct )
 {
     ct->SetScaleToLinear();
     ct->SetRange( range );
@@ -464,7 +464,7 @@ static double labelColors[256][3] = {{0,0,0},
                                         {0.54902,0,0},
                                         {0,0,0}};
 
-void LookupTableManager::CreateLabelLookupTable( vtkLookupTable * lut )
+void LookupTableManager::CreateLabelLookupTable( vtkSmartPointer<vtkLookupTable> lut )
 {
     lut->SetScaleToLinear();
     double newRange[2] = { 0, 255 };  // for label volumes, we assume integer volumes between 0 and 255

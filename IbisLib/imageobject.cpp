@@ -698,7 +698,7 @@ void ImageObject::Release2DRepresentation( int viewType, View * view )
     }
 }
 
-void ImageObject::SetLut(vtkScalarsToColors *lut)
+void ImageObject::SetLut(vtkSmartPointer<vtkScalarsToColors> lut)
 {
     if (this->Lut != lut)
     {
@@ -725,20 +725,18 @@ int ImageObject::ChooseColorTable(int index)
     this->lutIndex = index;
     if( IsLabelImage() )
     {
-        vtkLookupTable * lut = vtkLookupTable::New();
+        vtkSmartPointer<vtkLookupTable> lut = vtkSmartPointer<vtkLookupTable>::New();
         Application::GetLookupTableManager()->CreateLabelLookupTable( lut);
         this->SetLut( lut );
-        lut->Delete();
     }
     else
     {
         QString tableName = Application::GetLookupTableManager()->GetTemplateLookupTableName( this->lutIndex );
 
-        vtkPiecewiseFunctionLookupTable * lut = vtkPiecewiseFunctionLookupTable::New();
+        vtkSmartPointer<vtkPiecewiseFunctionLookupTable> lut = vtkSmartPointer<vtkPiecewiseFunctionLookupTable>::New();
         lut->SetIntensityFactor( this->intensityFactor );
         Application::GetLookupTableManager()->CreateLookupTable( tableName, this->lutRange, lut );
         this->SetLut( lut );
-        lut->Delete();
     }
 
     emit Modified();

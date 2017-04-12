@@ -23,13 +23,13 @@ LinesFactory::LinesFactory()
     m_color[2] = 255;
     m_color[3] = 255;
 
-    m_pts = vtkPoints::New();
-    m_lines = vtkCellArray::New();
-    m_scalars = vtkUnsignedCharArray::New();
+    m_pts = vtkSmartPointer<vtkPoints>::New();
+    m_lines = vtkSmartPointer<vtkCellArray>::New();
+    m_scalars = vtkSmartPointer<vtkUnsignedCharArray>::New();
     m_scalars->SetNumberOfComponents( 4 );
     m_scalars->SetName( "Colors" );
 
-    m_poly = vtkPolyData::New();
+    m_poly = vtkSmartPointer<vtkPolyData>::New();
     m_poly->SetPoints( m_pts );
     m_poly->SetLines( m_lines );
     m_poly->GetPointData()->SetScalars( m_scalars );
@@ -37,10 +37,6 @@ LinesFactory::LinesFactory()
 
 LinesFactory::~LinesFactory()
 {
-    m_pts->Delete();
-    m_lines->Delete();
-    m_scalars->Delete();
-    m_poly->Delete();
 }
 
 void LinesFactory::StartNewSegment()

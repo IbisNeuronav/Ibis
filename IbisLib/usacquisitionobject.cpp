@@ -1146,7 +1146,7 @@ void USAcquisitionObject::SetSliceLutIndex( int index )
     m_sliceLutIndex = index;
     double range[2] = { 0.0, 255.0 };
     QString slicesLutName = Application::GetLookupTableManager()->GetTemplateLookupTableName( m_sliceLutIndex );
-    Application::GetLookupTableManager()->CreateLookupTable( slicesLutName, range, m_lut.GetPointer() );
+    Application::GetLookupTableManager()->CreateLookupTable( slicesLutName, range, m_lut );
     emit Modified();
 }
 

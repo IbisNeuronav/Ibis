@@ -155,7 +155,7 @@ protected:
     void Release2DRepresentation( int i, View * view );
 
 	// Lookup table management
-    void SetLut(vtkScalarsToColors *lut);
+    void SetLut(vtkSmartPointer<vtkScalarsToColors> lut);
 
     // Setup histogram properties after new image is set.
     void SetupHistogramComputer( );
