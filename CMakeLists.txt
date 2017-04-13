@@ -17,6 +17,13 @@ PROJECT( ibis )
 
 INCLUDE(CMakeDependentOption)
 
+#----------------------------------------
+# Tell the compiler to use c++11 which is required with Qt >= 5.7
+#if( Qt5_VERSION VERSION_GREATER 5.7 OR Qt5_VERSION VERSION_EQUAL 5.7 )
+    set( CMAKE_CXX_STANDARD 11 )
+#endif()
+#----------------------------------------
+
 #==================================================================
 # Define a variable to hold the path of automatically compiled
 # dependencies.

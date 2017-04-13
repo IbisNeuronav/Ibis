@@ -20,11 +20,11 @@ using std::string;
 #include <vector>
 using std::vector;
 
-#ifndef isnan
-inline bool isnan(double x) {
-    return x != x;
-}
-#endif
+//#ifndef isnan
+//inline bool isnan(double x) {
+//    return x != x;
+//}
+//#endif
 
 ///////////////////////////////////////////
 fractionalAnisotropy::fractionalAnisotropy( const string &filename )
@@ -65,7 +65,7 @@ bool fractionalAnisotropy::load()
     {
         for( int j( 0 ); j < m_bands; ++j )
         {
-            if(!isnan(pData[j * datasetSize + i]))
+            if(!std::isnan(pData[j * datasetSize + i]))
             {
                 m_fileFloatData[i * m_bands + j] = pData[j * datasetSize + i];
             }
