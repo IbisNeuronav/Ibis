@@ -112,20 +112,20 @@ CameraObject::CameraObject()
     m_videoBuffer = new TrackedVideoBuffer( DefaultImageSize[0], DefaultImageSize[1] );
     SetInputTransform( m_videoBuffer->GetOutputTransform() );
 
-    m_videoInputSwitch = vtkPassThrough::New();
+    m_videoInputSwitch = vtkSmartPointer<vtkPassThrough>::New();
     m_videoInputSwitch->SetInputConnection( m_videoBuffer->GetVideoOutputPort() ); // by default, get input from internal buffer
 
-    m_lensDisplacementTransform = vtkTransform::New();
-    m_opticalCenterTransform = vtkTransform::New();
+    m_lensDisplacementTransform = vtkSmartPointer<vtkTransform>::New();
+    m_opticalCenterTransform = vtkSmartPointer<vtkTransform>::New();
     m_opticalCenterTransform->Concatenate( this->GetWorldTransform() );
-    m_opticalCenterTransform->Concatenate( m_lensDisplacementTransform );
-    m_imageTransform = vtkTransform::New();
-    m_imageTransform->SetInput( m_opticalCenterTransform );
+    m_opticalCenterTransform->Concatenate( m_lensDisplacementTransform.GetPointer() );
+    m_imageTransform = vtkSmartPointer<vtkTransform>::New();
+    m_imageTransform->SetInput( m_opticalCenterTransform.GetPointer() );
 
     m_trackingCamera = false;
     m_intrinsicEditable = false;
     m_extrinsicEditable = false;
-    m_camera = vtkCamera::New();
+    m_camera = vtkSmartPointer<vtkCamera>::New();
     m_imageDistance = 100.0;
     m_globalOpacity = 0.7;
     m_saturation = 1.0;
@@ -150,13 +150,6 @@ CameraObject::CameraObject()
 
 CameraObject::~CameraObject()
 {
-    m_lensDisplacementTransform->Delete();
-    m_opticalCenterTransform->Delete();
-    m_imageTransform->Delete();
-
-    m_camera->Delete();
-    m_cameraPolyData->Delete();
-
     if( m_recordingCamera )
         m_recordingCamera->Delete();
 
@@ -309,17 +302,17 @@ void CameraObject::Setup( View * view )
         perView.cameraBackup = 0;
 
         vtkPolyDataMapper * camMapper = vtkPolyDataMapper::New();
-        camMapper->SetInputData( m_cameraPolyData );
+        camMapper->SetInputData( m_cameraPolyData.GetPointer() );
         perView.cameraActor = vtkActor::New();
         perView.cameraActor->SetMapper( camMapper );
         camMapper->Delete();
-        perView.cameraActor->SetUserTransform( m_opticalCenterTransform );
+        perView.cameraActor->SetUserTransform( m_opticalCenterTransform.GetPointer() );
         view->GetRenderer()->AddActor( perView.cameraActor );
 
         perView.cameraAxesActor = vtkAxesActor::New();
         perView.cameraAxesActor->SetTotalLength( 50, 50, 50 );
         perView.cameraAxesActor->AxisLabelsOff();
-        perView.cameraAxesActor->SetUserTransform( m_opticalCenterTransform );
+        perView.cameraAxesActor->SetUserTransform( m_opticalCenterTransform.GetPointer() );
         view->GetRenderer()->AddActor( perView.cameraAxesActor );
 
         perView.cameraTrackerAxesActor = vtkAxesActor::New();
@@ -329,7 +322,7 @@ void CameraObject::Setup( View * view )
         view->GetRenderer()->AddActor( perView.cameraTrackerAxesActor );
 
         perView.cameraImageActor = vtkSimpleProp3D::New();
-        perView.cameraImageActor->SetUserTransform( m_imageTransform );
+        perView.cameraImageActor->SetUserTransform( m_imageTransform.GetPointer() );
 
         perView.cameraImageMapper = vtkIbisImagePlaneMapper::New();
         perView.cameraImageMapper->SetGlobalOpacity( m_globalOpacity );
@@ -631,9 +624,9 @@ void CameraObject::SetTrackCamera( bool t )
             // Set this camera to control the view
             elem.cameraBackup = v->GetRenderer()->GetActiveCamera();
             elem.cameraBackup->Register( this );
-            v->GetRenderer()->SetActiveCamera( m_camera );
-            v->GetOverlayRenderer()->SetActiveCamera( m_camera );
-            v->GetOverlayRenderer2()->SetActiveCamera( m_camera );
+            v->GetRenderer()->SetActiveCamera( m_camera.GetPointer() );
+            v->GetOverlayRenderer()->SetActiveCamera( m_camera.GetPointer() );
+            v->GetOverlayRenderer2()->SetActiveCamera( m_camera.GetPointer() );
 
             ++it;
         }
@@ -825,7 +818,7 @@ void CameraObject::DrawLine( double x1, double y1, double x2, double y2, double 
         if( v->GetType() == THREED_VIEW_TYPE )
         {
             vtkProp3D * line = SimplePropCreator::CreateLine( start, end, color );
-            line->SetUserTransform( m_imageTransform );
+            line->SetUserTransform( m_imageTransform.GetPointer() );
             GetCurrentRenderer(v)->AddViewProp( line );
             PerViewElements & elem = (*it).second;
             elem.anotations.push_back( line );
@@ -867,7 +860,7 @@ void CameraObject::InternalDrawPath( std::vector< Vec3 > & p3d, double color[4] 
         if( v->GetType() == THREED_VIEW_TYPE )
         {
             vtkProp3D * line = SimplePropCreator::CreatePath( p3d, color );
-            line->SetUserTransform( m_imageTransform );
+            line->SetUserTransform( m_imageTransform.GetPointer() );
             GetCurrentRenderer(v)->AddViewProp( line );
             PerViewElements & elem = (*it).second;
             elem.anotations.push_back( line );
@@ -1008,9 +1001,9 @@ void CameraObject::UpdateVtkCamera()
     m_camera->SetPosition( 0.0, 0.0, 0.0 );
     m_camera->SetFocalPoint( 0.0, 0.0, -m_imageDistance );
     m_camera->SetViewUp( 0, 1, 0 );
-    vtkTransform * wt = m_opticalCenterTransform;
+    vtkSmartPointer<vtkTransform> wt = m_opticalCenterTransform;
     wt->Update();
-    m_camera->ApplyTransform( wt );
+    m_camera->ApplyTransform( wt.GetPointer() );
 }
 
 vtkRenderer * CameraObject::GetCurrentRenderer( View * v )
@@ -1032,7 +1025,7 @@ void CameraObject::SerializeLocalParams( Serializer * ser )
 
 void CameraObject::CreateCameraRepresentation()
 {
-    vtkPoints * pts = vtkPoints::New();
+    vtkSmartPointer<vtkPoints> pts = vtkSmartPointer<vtkPoints>::New();
     pts->InsertNextPoint( 0.0, 0.0, 0.0 );
     pts->InsertNextPoint( -100.0, -100.0, -m_imageDistance );
     pts->InsertNextPoint( 100.0, -100.0, -m_imageDistance );
@@ -1040,15 +1033,13 @@ void CameraObject::CreateCameraRepresentation()
     pts->InsertNextPoint( -100.0, 100.0, -m_imageDistance );
 
     static vtkIdType linesIndex[8][2]= { {0,1}, {0,2}, {0,3}, {0,4}, {1,2}, {2,3}, {3,4}, {4,1} };
-    vtkCellArray * lines = vtkCellArray::New();
+    vtkSmartPointer<vtkCellArray> lines = vtkSmartPointer<vtkCellArray>::New();
     for( int i = 0; i < 8; ++i )
         lines->InsertNextCell( 2, linesIndex[i] );
 
-    m_cameraPolyData = vtkPolyData::New();
+    m_cameraPolyData = vtkSmartPointer<vtkPolyData>::New();
     m_cameraPolyData->SetPoints( pts );
-    pts->Delete();
     m_cameraPolyData->SetLines( lines );
-    lines->Delete();
 }
 
 QString CameraObject::FindNextSnapshotName()
