@@ -20,12 +20,6 @@ using std::string;
 #include <vector>
 using std::vector;
 
-//#ifndef isnan
-//inline bool isnan(double x) {
-//    return x != x;
-//}
-//#endif
-
 ///////////////////////////////////////////
 fractionalAnisotropy::fractionalAnisotropy( const string &filename )
 : m_dataType( 16 ),
