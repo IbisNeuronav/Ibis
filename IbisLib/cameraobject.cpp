@@ -140,7 +140,7 @@ CameraObject::CameraObject()
     m_transparencyRadius[1] = 0.3;
     CreateCameraRepresentation();
 
-    m_recordingCamera = 0;
+    m_isRecording = false;
     m_cachedImageSize[ 0 ] = DefaultImageSize[0];
     m_cachedImageSize[ 1 ] = DefaultImageSize[1];
 
@@ -150,9 +150,6 @@ CameraObject::CameraObject()
 
 CameraObject::~CameraObject()
 {
-    if( m_recordingCamera )
-        m_recordingCamera->Delete();
-
     delete m_videoBuffer;
 }
 
@@ -689,28 +686,28 @@ void CameraObject::ToggleRecording()
 {
     Q_ASSERT( IsDrivenByHardware() );
 
-    if( !m_recordingCamera )
+    if( !m_isRecording )
     {
-        m_recordingCamera = CameraObject::New();
+        m_recordingCamera = vtkSmartPointer<CameraObject>::New();
         m_recordingCamera->SetName( FindNextSnapshotName() );
         m_recordingCamera->SetIntrinsicParams( m_intrinsicParams );
         m_recordingCamera->SetImageDistance( m_imageDistance );
         m_recordingCamera->SetTransparencyCenter( m_transparencyCenter[0], m_transparencyCenter[1] );
         m_recordingCamera->SetTransparencyRadius( m_transparencyRadius[0], m_transparencyRadius[1] );
         m_recordingCamera->SetCalibrationMatrix( GetCalibrationMatrix() );
+        m_isRecording = true;
     }
     else
     {
-        this->GetManager()->AddObject( m_recordingCamera );
-        this->GetManager()->SetCurrentObject( m_recordingCamera );
-        m_recordingCamera->Delete();
-        m_recordingCamera = 0;
+        this->GetManager()->AddObject( m_recordingCamera.GetPointer() );
+        this->GetManager()->SetCurrentObject( m_recordingCamera.GetPointer() );
+        m_isRecording = false;
     }
 }
 
 bool CameraObject::IsRecording()
 {
-    return m_recordingCamera != 0;
+    return m_isRecording;
 }
 
 int CameraObject::GetNumberOfFrames()

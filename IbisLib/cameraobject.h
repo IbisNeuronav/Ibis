@@ -216,7 +216,8 @@ protected:
     vtkSmartPointer<vtkTransform> m_opticalCenterTransform;
 
     // Hold data used for recording
-    CameraObject * m_recordingCamera;
+    vtkSmartPointer<CameraObject> m_recordingCamera;
+    bool m_isRecording;
 
     bool m_trackingCamera;
     int m_cachedImageSize[2];  // used to determine when image size is changed
