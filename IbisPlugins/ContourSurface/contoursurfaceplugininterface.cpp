@@ -21,7 +21,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 ContourSurfacePluginInterface::ContourSurfacePluginInterface()
 {
-    m_generatedSurface = 0;
 }
 
 ContourSurfacePluginInterface::~ContourSurfacePluginInterface()

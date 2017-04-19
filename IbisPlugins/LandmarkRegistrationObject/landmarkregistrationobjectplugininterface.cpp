@@ -23,7 +23,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 LandmarkRegistrationObjectPluginInterface::LandmarkRegistrationObjectPluginInterface()
 {
-    m_landmarkRegistrationObject = 0;
 }
 
 LandmarkRegistrationObjectPluginInterface::~LandmarkRegistrationObjectPluginInterface()

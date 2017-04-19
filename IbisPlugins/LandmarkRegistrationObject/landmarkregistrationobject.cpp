@@ -33,8 +33,6 @@ ObjectSerializationMacro( LandmarkRegistrationObject );
 LandmarkRegistrationObject::LandmarkRegistrationObject() : SceneObject()
 {
     m_registrationTransform = vtkSmartPointer<LandmarkTransform>::New();
-    m_sourcePoints = 0;
-    m_targetPoints = 0;
     m_activeSourcePoints = vtkSmartPointer<vtkPoints>::New();
     m_activeTargetPoints = vtkSmartPointer<vtkPoints>::New();
     m_registrationTransform->SetSourcePoints( m_activeSourcePoints );
