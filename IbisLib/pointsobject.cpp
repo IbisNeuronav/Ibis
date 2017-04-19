@@ -265,7 +265,7 @@ vtkActor * PointsObject::DoPicking( int x, int y, vtkRenderer * ren, double pick
     // For some reason when we try to GetLinearInverse() of the WorldTransform with 2 or more concatenations,
     // we get wron invewrse e.g world is concatenation of: identity, t1, t2 - we get inverse of t1
     // while if we go for the inverse matrix, it is correct
-    vtkMatrix4x4 *inverseMat = vtkMatrix4x4::New();
+    vtkSmartPointer<vtkMatrix4x4> inverseMat = vtkSmartPointer<vtkMatrix4x4>::New();
     this->GetWorldTransform()->GetInverse(inverseMat);
 
     double transformedPoint[4];
@@ -374,7 +374,7 @@ void PointsObject::AddPointLocal( double coords[3], QString name, QString timest
     m_timeStamps.append( timestamp );
 
     // Create point representation
-    PointRepresentation * pr = PointRepresentation::New();
+    vtkSmartPointer<PointRepresentation> pr = vtkSmartPointer<PointRepresentation>::New();
     pr->SetListable( false );
     pr->SetName( name );
     int index = m_pointList.count();
@@ -457,7 +457,7 @@ int PointsObject::FindPoint(vtkActor *actor, double *pos, int viewType)
 
     int n = m_pointList.count();
     double pointPosition[3];
-    PointRepresentation *point;
+    vtkSmartPointer<PointRepresentation> point;
     // first check if 3D actor was picked
     int i = 0;
     while(i < n)
@@ -639,7 +639,7 @@ void PointsObject::RemovePoint(int index)
 void PointsObject::EnableDisablePoint( int index, bool enable )
 {
     Q_ASSERT( index >= 0 && index < m_pointList.count() );
-    PointRepresentation * pt = m_pointList.at( index );
+    vtkSmartPointer<PointRepresentation> pt = m_pointList.at( index );
     pt->SetActive( enable );
     this->UpdatePointProperties( index );
 }
@@ -647,7 +647,7 @@ void PointsObject::EnableDisablePoint( int index, bool enable )
 void PointsObject::UpdatePointProperties( int index )
 {
     Q_ASSERT( index >= 0 && index < m_pointList.count() );
-    PointRepresentation * pt = m_pointList.at( index );
+    vtkSmartPointer<PointRepresentation> pt = m_pointList.at( index );
     pt->SetLabel( m_pointNames.at(index).toUtf8().data() );
     pt->SetPosition( m_pointCoordinates->GetPoint( index ) );
     pt->SetPointSizeIn3D( m_pointRadius3D );

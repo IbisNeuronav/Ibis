@@ -164,7 +164,7 @@ private:
 
    void LineToPointerTip( double selectedPoint[3], double pointerTip[3] );
 
-   typedef QList< PointRepresentation* > PointList;
+   typedef QList< vtkSmartPointer<PointRepresentation> > PointList;
    PointList m_pointList;
 
    // Point manipulation with the mouse

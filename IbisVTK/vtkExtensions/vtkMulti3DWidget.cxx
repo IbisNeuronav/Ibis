@@ -23,8 +23,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 vtkMulti3DWidget::vtkMulti3DWidget()
 {
-    vtkObjectCallback<vtkMulti3DWidget> * callback = vtkObjectCallback<vtkMulti3DWidget>::New();
-    this->Callback = callback;
+    this->Callback = vtkSmartPointer< vtkObjectCallback<vtkMulti3DWidget> >::New();
     this->Callback->SetCallback( this, &vtkMulti3DWidget::ProcessEvents );
 
     this->Interaction = 1;
@@ -239,7 +238,7 @@ void vtkMulti3DWidget::SetInteraction( int interact )
 
 void vtkMulti3DWidget::InternalRemoveInteractor( int index )
 {
-    this->Interactors[ index ]->RemoveObserver( this->Callback );
+    this->Interactors[ index ]->RemoveObserver( this->Callback.GetPointer() );
 }
 
 void vtkMulti3DWidget::AddObservers()
@@ -248,7 +247,7 @@ void vtkMulti3DWidget::AddObservers()
     {
         for( EventIdVec::iterator itEvent = this->EventsObserved.begin(); itEvent != this->EventsObserved.end(); ++itEvent )
         {
-            (*itInt)->AddObserver( (*itEvent), this->Callback, this->Priority );
+            (*itInt)->AddObserver( (*itEvent), this->Callback.GetPointer(), this->Priority );
         }
     }
 }
@@ -258,7 +257,7 @@ void vtkMulti3DWidget::RemoveObservers()
 {
     for( InteractorVec::iterator itInt = this->Interactors.begin(); itInt != this->Interactors.end(); ++itInt )
     {
-        (*itInt)->RemoveObserver( this->Callback );
+        (*itInt)->RemoveObserver( this->Callback.GetPointer() );
     }
 }
 
