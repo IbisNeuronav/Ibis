@@ -30,8 +30,6 @@ ObjectSerializationMacro( PointRepresentation );
 
 PointRepresentation::PerViewElements::PerViewElements()
 {
-    pointRepresentationActor = 0;
-    labelActor = 0;
 }
 
 PointRepresentation::PerViewElements::~PerViewElements()

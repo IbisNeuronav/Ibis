@@ -91,8 +91,6 @@ ImageObject::ImageObject()
     this->ItkImage = 0;
     this->ItkRGBImage = 0;
     this->ItkLabelImage = 0;
-    this->Image = 0;
-    this->Lut = 0;
     this->OutlineFilter = vtkSmartPointer<vtkOutlineFilter>::New();
     this->viewOutline = 0;
     this->outlineWasVisible = 0;

@@ -15,7 +15,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "application.h"
 
 WorldObject::WorldObject()
-    : m_axesObject(0)
 {
     this->Name = QString("World");
     this->ObjectHidden = false;

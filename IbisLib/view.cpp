@@ -39,7 +39,6 @@ View::View()
     this->SetName( DefaultViewNames[THREED_VIEW_TYPE] );
     this->RenderWindow = 0;
     this->m_renderingEnabled = true;
-    this->Interactor = 0;
     this->InteractorStyle = vtkSmartPointer<vtkInteractorStyleTerrain>::New();
     this->Picker = vtkCellPicker::New();
     this->Picker->SetTolerance(0.005); //need some fluff

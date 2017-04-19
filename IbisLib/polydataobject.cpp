@@ -76,7 +76,6 @@ PolyDataObject::PolyDataObject()
     m_cuttingPlane[2]->SetNormal( 0.0, 0.0, 1.0 );
 
     this->LutIndex = 0;
-    this->CurrentLut = 0;
     this->renderingMode = VTK_SURFACE;
     this->ScalarsVisible = 0;
     this->VertexColorMode = 0;
@@ -84,7 +83,6 @@ PolyDataObject::PolyDataObject()
     this->Property = vtkSmartPointer<vtkProperty>::New();
     this->CrossSectionVisible = false;
     this->showTexture = false;
-    this->Texture = 0;
 
     m_2dProperty = vtkSmartPointer<vtkProperty>::New();
     m_2dProperty->SetAmbient( 1.0 );
