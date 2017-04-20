@@ -47,7 +47,6 @@ vtkSmartPointer<vtkImageData> PolyDataObject::checkerBoardTexture = 0;
 
 PolyDataObject::PolyDataObject()
 {
-    this->PolyData = 0;
     m_clippingSwitch = vtkSmartPointer<vtkPassThrough>::New();
     m_colorSwitch = vtkSmartPointer<vtkPassThrough>::New();
 
@@ -57,19 +56,19 @@ PolyDataObject::PolyDataObject()
     m_clippingOn = false;
     m_interacting = false;
     m_clippingPlanes = vtkSmartPointer<vtkPlanes>::New();
-    m_clippingPlanes->SetTransform( m_referenceToPolyTransform );
+    m_clippingPlanes->SetTransform( m_referenceToPolyTransform.GetPointer() );
     InitializeClippingPlanes();
     m_clipper = vtkSmartPointer<vtkClipPolyData>::New();
-    m_clipper->SetClipFunction( m_clippingPlanes );
+    m_clipper->SetClipFunction( m_clippingPlanes.GetPointer() );
 
     // Cross section in 2d views
     for( int i = 0; i < 3; ++i )
     {
         m_cuttingPlane[i] = vtkSmartPointer<vtkPlane>::New();
-        m_cuttingPlane[i]->SetTransform( m_referenceToPolyTransform );
+        m_cuttingPlane[i]->SetTransform( m_referenceToPolyTransform.GetPointer() );
         m_cutter[i] = vtkSmartPointer<vtkCutter>::New();
         m_cutter[i]->SetInputConnection( m_colorSwitch->GetOutputPort() );
-        m_cutter[i]->SetCutFunction( m_cuttingPlane[i]);
+        m_cutter[i]->SetCutFunction( m_cuttingPlane[i].GetPointer());
     }
     m_cuttingPlane[0]->SetNormal( 1.0, 0.0, 0.0 );
     m_cuttingPlane[1]->SetNormal( 0.0, 1.0, 0.0 );
@@ -97,7 +96,6 @@ PolyDataObject::PolyDataObject()
 
     // Probe filter ( used to sample scalars from other dataset )
     this->ScalarSource = 0;
-    this->LutBackup = 0;
     this->ProbeFilter = vtkSmartPointer<vtkProbeFilter>::New();
     this->ProbeFilter->SetInputConnection( m_clippingSwitch->GetOutputPort() );
 }
@@ -207,7 +205,7 @@ void PolyDataObject::Setup( View * view )
     mapper->UseLookupTableScalarRangeOn();  // make sure mapper doesn't try to modify our color table
 
     vtkSmartPointer<vtkActor> actor = vtkSmartPointer<vtkActor>::New();
-    actor->SetMapper( mapper );
+    actor->SetMapper( mapper.GetPointer() );
     actor->SetUserTransform( this->WorldTransform );
     this->polydataObjectInstances[ view ] = actor;
 
@@ -364,7 +362,7 @@ bool PolyDataObject::GetClippingPlanesOrientation( int plane )
 void PolyDataObject::SetTexture( vtkImageData * texImage )
 {
     // standard set code
-    this->Texture = texImage;
+    this->Texture->DeepCopy( texImage );
 
     // update texture in actor
     PolyDataObjectViewAssociation::iterator it = this->polydataObjectInstances.begin();
@@ -534,10 +532,10 @@ void PolyDataObject::OnScalarSourceDeleted()
 
 void PolyDataObject::OnScalarSourceModified()
 {
-    vtkSmartPointer<vtkScalarsToColors> newLut = this->ScalarSource->GetLut();
-    if( this->LutBackup != newLut )
+    vtkScalarsToColors * newLut = this->ScalarSource->GetLut();
+    if( this->LutBackup.GetPointer() != newLut )
     {
-        this->LutBackup = newLut;
+        this->LutBackup->DeepCopy( newLut );
         UpdatePipeline();
     }
     emit Modified();
@@ -696,7 +694,7 @@ void PolyDataObject::InitializeClippingPlanes()
     clipPlaneNormals->SetTuple3( 0, -1.0, 0.0, 0.0 );
     clipPlaneNormals->SetTuple3( 1, 0.0, -1.0, 0.0 );
     clipPlaneNormals->SetTuple3( 2, 0.0, 0.0, -1.0 );
-    m_clippingPlanes->SetNormals( clipPlaneNormals );
+    m_clippingPlanes->SetNormals( clipPlaneNormals.GetPointer() );
 
     vtkSmartPointer<vtkPoints> p = vtkSmartPointer<vtkPoints>::New();
     p->SetNumberOfPoints( 3 );
