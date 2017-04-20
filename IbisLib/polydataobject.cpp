@@ -490,7 +490,7 @@ void PolyDataObject::SetScalarSource( ImageObject * im )
     {
         this->ScalarSource->Register( this );
         this->ProbeFilter->SetSourceData( this->ScalarSource->GetImage() );
-        this->LutBackup = this->ScalarSource->GetLut();
+        this->LutBackup->DeepCopy( this->ScalarSource->GetLut() );
         connect( this->ScalarSource, SIGNAL(RemovingFromScene()), this, SLOT(OnScalarSourceDeleted()) );
         connect( this->ScalarSource, SIGNAL(Modified()), this, SLOT(OnScalarSourceModified()) );
     }
