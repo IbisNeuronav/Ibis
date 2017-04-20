@@ -372,7 +372,7 @@ void PolyDataObject::SetTexture( vtkImageData * texImage )
         if( view->GetType() == THREED_VIEW_TYPE )
         {
             vtkSmartPointer<vtkActor> actor = (*it).second;
-            vtkSmartPointer<vtkTexture> tex = actor->GetTexture();
+            vtkTexture * tex = actor->GetTexture();
             if( tex )
             {
                 if( this->Texture )
@@ -445,7 +445,7 @@ void PolyDataObject::SetShowTexture( bool show )
     {
         // remove texture from each of the actors
         View * view = 0;
-        vtkSmartPointer<vtkActor> actor = 0;
+        vtkSmartPointer<vtkActor> actor;
         PolyDataObjectViewAssociation::iterator it = this->polydataObjectInstances.begin();
         for( ; it != this->polydataObjectInstances.end(); ++it )
         {
