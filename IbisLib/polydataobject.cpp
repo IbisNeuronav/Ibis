@@ -96,6 +96,7 @@ PolyDataObject::PolyDataObject()
 
     // Probe filter ( used to sample scalars from other dataset )
     this->ScalarSource = 0;
+    this->LutBackup = vtkSmartPointer<vtkScalarsToColors>::New();
     this->ProbeFilter = vtkSmartPointer<vtkProbeFilter>::New();
     this->ProbeFilter->SetInputConnection( m_clippingSwitch->GetOutputPort() );
 }
