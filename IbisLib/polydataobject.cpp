@@ -466,6 +466,7 @@ void PolyDataObject::SetShowTexture( bool show )
             }
         }
     }
+    this->UpdatePipeline();
     emit Modified();
 }
 
