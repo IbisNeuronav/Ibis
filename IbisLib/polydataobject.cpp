@@ -43,7 +43,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 ObjectSerializationMacro( PolyDataObject );
 
-vtkSmartPointer<vtkImageData> PolyDataObject::checkerBoardTexture = 0;
+vtkImageData * PolyDataObject::checkerBoardTexture = 0;
 
 PolyDataObject::PolyDataObject()
 {
@@ -82,6 +82,7 @@ PolyDataObject::PolyDataObject()
     this->Property = vtkSmartPointer<vtkProperty>::New();
     this->CrossSectionVisible = false;
     this->showTexture = false;
+    this->Texture = 0;
 
     m_2dProperty = vtkSmartPointer<vtkProperty>::New();
     m_2dProperty->SetAmbient( 1.0 );
@@ -105,6 +106,8 @@ PolyDataObject::~PolyDataObject()
 {
     if( this->ScalarSource )
         this->ScalarSource->UnRegister( this );
+    if( this->Texture )
+        this->Texture->UnRegister( this );
 }
 
 vtkPolyData * PolyDataObject::GetPolyData()
@@ -363,7 +366,11 @@ bool PolyDataObject::GetClippingPlanesOrientation( int plane )
 void PolyDataObject::SetTexture( vtkImageData * texImage )
 {
     // standard set code
-    this->Texture->DeepCopy( texImage );
+    if( this->Texture )
+        this->Texture->UnRegister( this );
+    this->Texture = texImage;
+    if( this->Texture )
+        this->Texture->Register( this );
 
     // update texture in actor
     PolyDataObjectViewAssociation::iterator it = this->polydataObjectInstances.begin();
@@ -377,9 +384,9 @@ void PolyDataObject::SetTexture( vtkImageData * texImage )
             if( tex )
             {
                 if( this->Texture )
-                    tex->SetInputData( this->Texture.GetPointer() );
+                    tex->SetInputData( this->Texture );
                 else
-                    tex->SetInputData( this->checkerBoardTexture.GetPointer() );
+                    tex->SetInputData( this->checkerBoardTexture );
             }
         }
     }
@@ -398,7 +405,7 @@ void PolyDataObject::SetShowTexture( bool show )
         {
             int size = 200;
             int squareSize = 5;
-            this->checkerBoardTexture = vtkSmartPointer<vtkImageData>::New();
+            this->checkerBoardTexture = vtkImageData::New();
             this->checkerBoardTexture->SetDimensions( size, size, 1 );
             this->checkerBoardTexture->AllocateScalars(VTK_UNSIGNED_CHAR, 1);
             unsigned char * row = (unsigned char*) this->checkerBoardTexture->GetScalarPointer();
@@ -419,13 +426,13 @@ void PolyDataObject::SetShowTexture( bool show )
             }
         }
 
-        vtkSmartPointer<vtkImageData> texture = this->Texture;
+        vtkImageData * texture = this->Texture;
         if( !texture )
             texture = this->checkerBoardTexture;
 
         // Add a vtkTexture to each actor to map the checker board onto object
         View * view = 0;
-        vtkSmartPointer<vtkActor> actor = 0;
+        vtkSmartPointer<vtkActor> actor;
         PolyDataObjectViewAssociation::iterator it = this->polydataObjectInstances.begin();
         for( ; it != this->polydataObjectInstances.end(); ++it )
         {
@@ -433,12 +440,13 @@ void PolyDataObject::SetShowTexture( bool show )
             if( view->GetType() == THREED_VIEW_TYPE )
             {
                 actor = (*it).second;
-                vtkSmartPointer<vtkTexture> tex = vtkSmartPointer<vtkTexture>::New();
+                vtkTexture * tex = vtkTexture::New();
                 tex->SetBlendingMode( vtkTexture::VTK_TEXTURE_BLENDING_MODE_MODULATE );
                 tex->InterpolateOff();
                 tex->RepeatOn();
-                tex->SetInputData( texture.GetPointer() );
-                actor->SetTexture( tex.GetPointer() );
+                tex->SetInputData( texture );
+                actor->SetTexture( tex );
+                tex->Delete();
             }
         }
     }
@@ -463,16 +471,19 @@ void PolyDataObject::SetShowTexture( bool show )
 
 void PolyDataObject::SetTextureFileName( QString filename )
 {
-    this->textureFileName = filename;
     if( QFile::exists( filename ) )
     {
         vtkSmartPointer<vtkPNGReader> reader = vtkSmartPointer<vtkPNGReader>::New();
         reader->SetFileName( filename.toUtf8().data() );
         reader->Update();
         this->SetTexture( reader->GetOutput() );
+        this->textureFileName = filename;
     }
     else
+    {
+        this->textureFileName = "";
         this->SetTexture( 0 );
+    }
 }
 
 

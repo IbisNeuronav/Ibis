@@ -402,3 +402,8 @@ void vtkMNIOBJReader::PrintSelf(ostream& os, vtkIndent indent)
     << (this->FileName ? this->FileName : "(none)") << "\n";
 
 }
+
+vtkProperty * vtkMNIOBJReader::GetProperty()
+{
+    return this->Property.GetPointer();
+}

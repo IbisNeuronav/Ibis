@@ -42,7 +42,7 @@ public:
 
     // Description:
     // Return properties of MNI .obj file
-    vtkGetObjectMacro(Property,vtkProperty);
+    vtkProperty * GetProperty();
 
     vtkSetMacro( UseAlpha, bool );
 	
