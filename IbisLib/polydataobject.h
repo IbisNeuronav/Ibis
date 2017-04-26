@@ -158,7 +158,7 @@ protected:
     bool m_clippingOn;
     bool m_interacting;
 
-    static vtkImageData * checkerBoardTexture;
+    static vtkSmartPointer<vtkImageData> checkerBoardTexture;
 };
 
 ObjectSerializationHeaderMacro( PolyDataObject );

@@ -43,7 +43,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 ObjectSerializationMacro( PolyDataObject );
 
-vtkImageData * PolyDataObject::checkerBoardTexture = 0;
+vtkSmartPointer<vtkImageData> PolyDataObject::checkerBoardTexture;
 
 PolyDataObject::PolyDataObject()
 {
@@ -386,7 +386,7 @@ void PolyDataObject::SetTexture( vtkImageData * texImage )
                 if( this->Texture )
                     tex->SetInputData( this->Texture );
                 else
-                    tex->SetInputData( this->checkerBoardTexture );
+                    tex->SetInputData( this->checkerBoardTexture.GetPointer() );
             }
         }
     }
@@ -405,7 +405,7 @@ void PolyDataObject::SetShowTexture( bool show )
         {
             int size = 200;
             int squareSize = 5;
-            this->checkerBoardTexture = vtkImageData::New();
+            this->checkerBoardTexture = vtkSmartPointer<vtkImageData>::New();
             this->checkerBoardTexture->SetDimensions( size, size, 1 );
             this->checkerBoardTexture->AllocateScalars(VTK_UNSIGNED_CHAR, 1);
             unsigned char * row = (unsigned char*) this->checkerBoardTexture->GetScalarPointer();
@@ -428,7 +428,7 @@ void PolyDataObject::SetShowTexture( bool show )
 
         vtkImageData * texture = this->Texture;
         if( !texture )
-            texture = this->checkerBoardTexture;
+            texture = this->checkerBoardTexture.GetPointer();
 
         // Add a vtkTexture to each actor to map the checker board onto object
         View * view = 0;
