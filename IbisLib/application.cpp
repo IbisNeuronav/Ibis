@@ -59,7 +59,6 @@ ApplicationSettings::~ApplicationSettings()
 
 void ApplicationSettings::LoadSettings( QSettings & settings )
 {
-    QRect mainWindowRect( 0, 0, 800, 600 );
     QString workDir(QDir::homePath());
     workDir.append(IBIS_CONFIGURATION_SUBDIRECTORY);
     WorkingDirectory = settings.value( "WorkingDirectory", workDir).toString();
