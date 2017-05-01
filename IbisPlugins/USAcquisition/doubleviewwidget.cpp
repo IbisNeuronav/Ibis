@@ -42,12 +42,11 @@ DoubleViewWidget::DoubleViewWidget( QWidget * parent, Qt::WindowFlags f ) :
 
     // Create the 2 view windows
     vtkRenderWindowInteractor * usInteractor = ui->usImageWindow->GetInteractor();
-    vtkInteractorStyleImage2 * style = vtkInteractorStyleImage2::New();
+    vtkSmartPointer<vtkInteractorStyleImage2> style = vtkSmartPointer<vtkInteractorStyleImage2>::New();
     usInteractor->SetInteractorStyle( style );
-    style->Delete();
 
     m_usRenderer = vtkSmartPointer<vtkRenderer>::New();
-    ui->usImageWindow->GetRenderWindow()->AddRenderer( m_usRenderer );
+    ui->usImageWindow->GetRenderWindow()->AddRenderer( m_usRenderer.GetPointer() );
 
     m_usActor = vtkSmartPointer<vtkImageActor>::New();
     m_usActor->InterpolateOff();
@@ -534,7 +533,7 @@ void DoubleViewWidget::on_maskAlphaSlider_valueChanged( int value )
 
 #include "vtkCamera.h"
 
-void SetDefaultView( vtkImageSlice * actor, vtkRenderer * renderer )
+void SetDefaultView( vtkSmartPointer<vtkImageSlice> actor, vtkSmartPointer<vtkRenderer> renderer )
 {
     actor->Update();
     double *bounds = actor->GetBounds();

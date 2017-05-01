@@ -23,16 +23,15 @@ TrackedVideoBuffer::TrackedVideoBuffer( int w, int h )
     m_defaultImageSize[0] = w;
     m_defaultImageSize[1] = h;
     m_currentFrame = -1;
-    m_videoOutput = vtkImageData::New();
-    m_output = vtkPassThrough::New();
-    m_output->SetInputData( m_videoOutput );
-    m_outputTransform = vtkTransform::New();
+    m_videoOutput = vtkSmartPointer<vtkImageData>::New();
+    m_output = vtkSmartPointer<vtkPassThrough>::New();
+    m_output->SetInputData( m_videoOutput.GetPointer());
+    m_outputTransform = vtkSmartPointer<vtkTransform>::New();
 }
 
 TrackedVideoBuffer::~TrackedVideoBuffer()
 {
     Clear();
-    m_videoOutput->Delete();
 }
 
 void TrackedVideoBuffer::Clear()
@@ -239,3 +238,9 @@ void TrackedVideoBuffer::ReadImages( int nbImages, QString dirName, QProgressDia
     }
     reader->Delete();
 }
+
+vtkImageData *TrackedVideoBuffer:: GetVideoOutput()
+{
+    return m_videoOutput.GetPointer();
+}
+
