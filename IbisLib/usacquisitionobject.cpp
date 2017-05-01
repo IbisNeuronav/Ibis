@@ -811,7 +811,7 @@ bool USAcquisitionObject::GetItkImage(IbisItk3DImageType::Pointer itkOutputImage
     itk::Vector< double, 3 > itkOrigin;
     // set direction cosines
     vtkSmartPointer<vtkMatrix4x4> tmpMat = vtkSmartPointer<vtkMatrix4x4>::New();
-    vtkMatrix4x4::Transpose( sliceMatrix, tmpMat );
+    vtkMatrix4x4::Transpose( sliceMatrix, tmpMat.GetPointer() );
     double step[3], mincStartPoint[3], dirCos[3][3];
     for( int i = 0; i < 3; i++ )
     {

@@ -63,7 +63,7 @@ public:
 private:
 
     void UpdateUi();
-    void VtkToItkImage( vtkImageData * vtkImage, IbisItk3DImageType * itkOutputImage, vtkMatrix4x4* transformMatrix );
+    void VtkToItkImage( vtkImageData * vtkImage, IbisItk3DImageType * itkOutputImage, vtkSmartPointer<vtkMatrix4x4> transformMatrix );
 
     Ui::GPU_VolumeReconstructionWidget * ui;
     Application * m_application;
