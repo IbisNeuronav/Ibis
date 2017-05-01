@@ -74,21 +74,19 @@ vtkPRISMVolumeMapper::vtkPRISMVolumeMapper()
     this->DepthBufferTextureId = 0;
     this->DepthBufferTextureSize[0] = 1;
     this->DepthBufferTextureSize[1] = 1;
-    this->WorldToTextureMatrix = vtkMatrix4x4::New();
+    this->WorldToTextureMatrix = vtkSmartPointer<vtkMatrix4x4>::New();
     this->VolumeShader = 0;
     this->BackfaceShader = 0;
     this->VolumeShaderNeedsUpdate = true;
     this->GlExtensionsLoaded = false;
     this->RenderState = 0;
-    this->ColoredCube = vtkColoredCube::New();
+    this->ColoredCube = vtkSmartPointer<vtkColoredCube>::New();
     this->StopConditionCode = defaultStopConditionCode;
 }
 
 //-----------------------------------------------------------------------------
 vtkPRISMVolumeMapper::~vtkPRISMVolumeMapper()
 {
-    this->WorldToTextureMatrix->Delete();
-    this->ColoredCube->Delete();
 }
 
 
@@ -574,7 +572,7 @@ void vtkPRISMVolumeMapper::UpdateWorldToTextureMatrix( vtkVolume * volume )
       deltas[i] = this->VolumeBounds[ 2 * i + 1 ] - this->VolumeBounds[ 2 * i ];
 
     // Compute Texture to volume
-    vtkMatrix4x4 * textureToVolume = vtkMatrix4x4::New();
+    vtkSmartPointer<vtkMatrix4x4> textureToVolume = vtkSmartPointer<vtkMatrix4x4>::New();
     textureToVolume->Zero();
     textureToVolume->SetElement(0,0,deltas[0]);
     textureToVolume->SetElement(1,1,deltas[1]);
@@ -586,8 +584,7 @@ void vtkPRISMVolumeMapper::UpdateWorldToTextureMatrix( vtkVolume * volume )
 
     // Compute Texture to world
     vtkMatrix4x4 * volumeToWorld = volume->GetMatrix();
-    vtkMatrix4x4 * textureToWorld = vtkMatrix4x4::New();
-    vtkMatrix4x4::Multiply4x4( volumeToWorld, textureToVolume, this->WorldToTextureMatrix );
+    vtkMatrix4x4::Multiply4x4( volumeToWorld, textureToVolume.GetPointer(), this->WorldToTextureMatrix.GetPointer() );
 
     // compute world to texture
     this->WorldToTextureMatrix->Invert();
@@ -850,7 +847,7 @@ bool vtkPRISMVolumeMapper::SetEyeTo3DTextureMatrixVariable( vtkVolume * volume, 
     for( int i = 0; i < 3; ++i )
       deltas[i] = this->VolumeBounds[ 2 * i + 1 ] - this->VolumeBounds[ 2 * i ];
 
-    vtkMatrix4x4 * datasetToTexture = vtkMatrix4x4::New();
+    vtkSmartPointer<vtkMatrix4x4> datasetToTexture = vtkSmartPointer<vtkMatrix4x4>::New();
     datasetToTexture->Zero();
     datasetToTexture->SetElement(0,0,deltas[0]);
     datasetToTexture->SetElement(1,1,deltas[1]);
@@ -863,27 +860,20 @@ bool vtkPRISMVolumeMapper::SetEyeTo3DTextureMatrixVariable( vtkVolume * volume, 
 
     // Compute world to volume
     vtkMatrix4x4 * datasetToWorld = volume->GetMatrix();
-    vtkMatrix4x4 * worldToDataset = vtkMatrix4x4::New();
+    vtkSmartPointer<vtkMatrix4x4> worldToDataset = vtkSmartPointer<vtkMatrix4x4>::New();
     vtkMatrix4x4::Invert( datasetToWorld, worldToDataset );
 
     // Compute world to texture
-    vtkMatrix4x4 * worldToTexture = vtkMatrix4x4::New();
-    vtkMatrix4x4::Multiply4x4( worldToDataset, datasetToTexture, worldToTexture );
+    vtkSmartPointer<vtkMatrix4x4> worldToTexture = vtkSmartPointer<vtkMatrix4x4>::New();
+    vtkMatrix4x4::Multiply4x4( worldToDataset.GetPointer(), datasetToTexture.GetPointer(), worldToTexture.GetPointer() );
 
     // Compute eye to texture
     vtkMatrix4x4 * worldToEye = renderer->GetActiveCamera()->GetViewTransformMatrix();
-    vtkMatrix4x4 * eyeToTexture = vtkMatrix4x4::New();
-    vtkMatrix4x4::Multiply4x4( worldToEye, worldToTexture, eyeToTexture );
+    vtkSmartPointer<vtkMatrix4x4> eyeToTexture = vtkSmartPointer<vtkMatrix4x4>::New();
+    vtkMatrix4x4::Multiply4x4( worldToEye, worldToTexture.GetPointer(), eyeToTexture.GetPointer() );
 
     // Set the matrix with the shader
     bool res = this->VolumeShader->SetVariable( "eyeToTexture", eyeToTexture );
-
-    // cleanup
-    datasetToTexture->Delete();
-    worldToDataset->Delete();
-    worldToTexture->Delete();
-    eyeToTexture->Delete();
-
     return res;
 }
 

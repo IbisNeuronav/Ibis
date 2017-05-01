@@ -31,6 +31,7 @@
 #include "vtkPointData.h"
 #include "vtkCellArray.h"
 #include "vtkOpenGL.h"
+#include "vtkSmartPointer.h"
 
 vtkStandardNewMacro(vtkColoredCube);
 
@@ -208,7 +209,7 @@ void vtkColoredCube::UpdateGeometry( vtkRenderer * ren, vtkMatrix4x4  *mat )
     double far = cam->GetClippingRange()[1];
 
     // Get the inverse of the volume matrix
-    vtkMatrix4x4 * invVolMatrix = vtkMatrix4x4::New();
+    vtkSmartPointer<vtkMatrix4x4> invVolMatrix = vtkSmartPointer<vtkMatrix4x4>::New();
     invVolMatrix->DeepCopy( mat );
     invVolMatrix->Invert();
 

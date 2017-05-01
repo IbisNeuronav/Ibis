@@ -13,6 +13,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef __VolumeRenderingObject_h_
 #define __VolumeRenderingObject_h_
 
+#include "vtkSmartPointer.h"
 #include <map>
 #include "sceneobject.h"
 #include "shadercontrib.h"
@@ -221,7 +222,7 @@ protected:
     typedef std::vector< PerImage * > PerImageContainer;
     PerImageContainer m_perImage;
 
-    vtkEventQtSlotConnect * m_transferFunctionModifiedCallback;
+    vtkSmartPointer<vtkEventQtSlotConnect> m_transferFunctionModifiedCallback;
 
     // For animation
     QTime * m_time;
@@ -231,7 +232,7 @@ protected:
     bool m_showInteractionWidget;
     bool m_pointerTracksInteractionPoints;
     bool m_interactionWidgetLine;
-    vtkEventQtSlotConnect * m_interactionWidgetModifiedCallback;
+    vtkSmartPointer<vtkEventQtSlotConnect> m_interactionWidgetModifiedCallback;
     double m_interactionPoint1[3];
     double m_interactionPoint2[3];
     bool m_pickPos;

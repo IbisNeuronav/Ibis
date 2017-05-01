@@ -193,12 +193,12 @@ VolumeRenderingObject::VolumeRenderingObject()
     m_samplingDistance = 1.0;
     m_time = new QTime;
     m_timerId = -1;
-    m_transferFunctionModifiedCallback = vtkEventQtSlotConnect::New();
+    m_transferFunctionModifiedCallback = vtkSmartPointer<vtkEventQtSlotConnect>::New();
 
     m_showInteractionWidget = false;
     m_pointerTracksInteractionPoints = false;
     m_interactionWidgetLine = false;
-    m_interactionWidgetModifiedCallback = vtkEventQtSlotConnect::New();
+    m_interactionWidgetModifiedCallback = vtkSmartPointer<vtkEventQtSlotConnect>::New();
     m_interactionPoint1[0] = 0.0;
     m_interactionPoint1[1] = 0.0;
     m_interactionPoint1[2] = 0.0;
@@ -286,9 +286,6 @@ VolumeRenderingObject::~VolumeRenderingObject()
     delete m_time;
     if( m_timerId != -1 )
         killTimer( m_timerId );
-
-    m_interactionWidgetModifiedCallback->Delete();
-    m_transferFunctionModifiedCallback->Delete();
 }
 
 void VolumeRenderingObject::Serialize( Serializer * ser )
@@ -418,6 +415,9 @@ void VolumeRenderingObject::Release( View * view )
     perView.sphereWidget->EnabledOff();
     perView.sphereWidget->SetInteractor( 0 );
     perView.sphereWidget->Delete();
+    perView.lineWidget->EnabledOff();
+    perView.lineWidget->SetInteractor( 0 );
+    perView.lineWidget->Delete();
     m_perView.erase( view );
 }
 

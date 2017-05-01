@@ -18,7 +18,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 PRISMVolumeRenderPluginInterface::PRISMVolumeRenderPluginInterface()
 {
-    m_vrObject = VolumeRenderingObject::New();
+    m_vrObject = vtkSmartPointer<VolumeRenderingObject>::New();
     m_vrObject->SetCanChangeParent( false );
     m_vrObject->SetName( "PRISM Volume Render" );
     m_vrObject->SetNameChangeable( false );
@@ -31,12 +31,11 @@ PRISMVolumeRenderPluginInterface::PRISMVolumeRenderPluginInterface()
 
 PRISMVolumeRenderPluginInterface::~PRISMVolumeRenderPluginInterface()
 {
-    m_vrObject->Delete();
 }
 
 SceneObject * PRISMVolumeRenderPluginInterface::GetGlobalObjectInstance()
 {
-    return m_vrObject;
+    return m_vrObject.GetPointer();
 }
 
 void PRISMVolumeRenderPluginInterface::LoadSettings( QSettings & s )
