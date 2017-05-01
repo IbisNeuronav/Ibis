@@ -15,6 +15,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include <QObject>
 #include "toolplugininterface.h"
+#include "vtkSmartPointer.h"
 
 class StereotacticFrameWidget;
 class vtkNShapeCalibrationWidget;
@@ -72,8 +73,8 @@ protected:
     void UpdateLandmarkTransform();
     vtkNShapeCalibrationWidget * m_manipulators[4];
     vtkEventQtSlotConnect * m_manipulatorsCallbacks;
-    vtkTransform * m_frameTransform;
-    vtkTransform * m_adjustmentTransform;
+    vtkSmartPointer<vtkTransform> m_frameTransform;
+    vtkSmartPointer<vtkTransform> m_adjustmentTransform;
     vtkLandmarkTransform * m_landmarkTransform;
     PolyDataObject * m_frameRepresentation;
 
