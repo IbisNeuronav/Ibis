@@ -15,6 +15,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include "Animation.h"
 #include "serializer.h"
+#include "vtkSmartPointer.h"
 
 class vtkColorTransferFunction;
 class vtkPiecewiseFunction;
@@ -33,16 +34,16 @@ public:
     void Serialize( Serializer * ser );
 
     void SetFunctions( vtkColorTransferFunction * color, vtkPiecewiseFunction * opacity );
-    vtkColorTransferFunction * GetColorFunc() { return m_colorFunc; }
-    vtkPiecewiseFunction * GetOpacityFunc() { return m_opacityFunc; }
+    vtkColorTransferFunction * GetColorFunc();
+    vtkPiecewiseFunction * GetOpacityFunc();
     void Interpolate( TransferFunctionKey & keyA, TransferFunctionKey & keyB, double ratio );
 
     int frame;
 
 protected:
 
-    vtkColorTransferFunction * m_colorFunc;
-    vtkPiecewiseFunction * m_opacityFunc;
+    vtkSmartPointer<vtkColorTransferFunction> m_colorFunc;
+    vtkSmartPointer<vtkPiecewiseFunction> m_opacityFunc;
 
 };
 

@@ -35,7 +35,7 @@ DomeRenderer::DomeRenderer()
     m_overrideSize[0] = 1;
     m_overrideSize[1] = 1;
 
-    m_renderCam = vtkOffscreenCamera::New();
+    m_renderCam = vtkSmartPointer<vtkOffscreenCamera>::New();
     m_renderCam->SetViewAngle( 90.0 );   
 }
 

@@ -21,39 +21,37 @@ ObjectSerializationMacro( TransferFunctionKey );
 TransferFunctionKey::TransferFunctionKey()
 {
     frame = 0;
-    m_colorFunc = vtkColorTransferFunction::New();
-    m_opacityFunc = vtkPiecewiseFunction::New();
+    m_colorFunc = vtkSmartPointer<vtkColorTransferFunction>::New();
+    m_opacityFunc = vtkSmartPointer<vtkPiecewiseFunction>::New();
 }
 
 TransferFunctionKey::TransferFunctionKey( const TransferFunctionKey & other )
 {
     frame = other.frame;
-    m_colorFunc = vtkColorTransferFunction::New();
-    m_colorFunc->DeepCopy( other.m_colorFunc );
-    m_opacityFunc = vtkPiecewiseFunction::New();
-    m_opacityFunc->DeepCopy( other.m_opacityFunc );
+    m_colorFunc = vtkSmartPointer<vtkColorTransferFunction>::New();
+    m_colorFunc->DeepCopy( other.m_colorFunc.GetPointer() );
+    m_opacityFunc = vtkSmartPointer<vtkPiecewiseFunction>::New();
+    m_opacityFunc->DeepCopy( other.m_opacityFunc.GetPointer() );
 }
 
 TransferFunctionKey::~TransferFunctionKey()
 {
-    m_colorFunc->Delete();
-    m_opacityFunc->Delete();
 }
 
 void TransferFunctionKey::operator=( const TransferFunctionKey& other )
 {
     frame = other.frame;
-    m_colorFunc = vtkColorTransferFunction::New();
-    m_colorFunc->DeepCopy( other.m_colorFunc );
-    m_opacityFunc = vtkPiecewiseFunction::New();
-    m_opacityFunc->DeepCopy( other.m_opacityFunc );
+    m_colorFunc = vtkSmartPointer<vtkColorTransferFunction>::New();
+    m_colorFunc->DeepCopy( other.m_colorFunc.GetPointer() );
+    m_opacityFunc = vtkSmartPointer<vtkPiecewiseFunction>::New();
+    m_opacityFunc->DeepCopy( other.m_opacityFunc.GetPointer() );
 }
 
 void TransferFunctionKey::Serialize( Serializer * ser )
 {
     ::Serialize( ser, "Frame", frame );
-    ::Serialize( ser, "ColorFunc", m_colorFunc );
-    ::Serialize( ser, "OpacityFunc", m_opacityFunc );
+    ::Serialize( ser, "ColorFunc", m_colorFunc.GetPointer() );
+    ::Serialize( ser, "OpacityFunc", m_opacityFunc.GetPointer() );
 }
 
 void TransferFunctionKey::SetFunctions( vtkColorTransferFunction * color, vtkPiecewiseFunction * opacity )
@@ -133,9 +131,21 @@ void TransferFunctionKey::Interpolate( TransferFunctionKey & keyA, TransferFunct
     }
 }
 
+vtkColorTransferFunction * TransferFunctionKey::GetColorFunc()
+{
+    return m_colorFunc.GetPointer();
+}
+
+vtkPiecewiseFunction * TransferFunctionKey::GetOpacityFunc()
+{
+    return m_opacityFunc.GetPointer();
+}
+
 ObjectSerializationMacro( TFAnimation );
 
 void TFAnimation::Serialize( Serializer * ser )
 {
     ::Serialize( ser, "Keys", m_keys );
 }
+
+

@@ -18,14 +18,12 @@ ObjectSerializationMacro( CameraAnimation );
 
 CameraAnimation::CameraAnimation()
 {
-	m_interpolator = vtkCameraInterpolator::New();
+    m_interpolator = vtkSmartPointer<vtkCameraInterpolator>::New();
 	m_interpolator->SetInterpolationTypeToSpline();
 }
 
 CameraAnimation::~CameraAnimation()
 {
-	if( m_interpolator )
-		m_interpolator->Delete();
 }
 
 void CameraAnimation::AddKeyframe( int frame, vtkCamera * cam )

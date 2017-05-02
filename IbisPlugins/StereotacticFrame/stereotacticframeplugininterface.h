@@ -21,7 +21,6 @@ class StereotacticFrameWidget;
 class vtkNShapeCalibrationWidget;
 class vtkTransform;
 class vtkLandmarkTransform;
-//class vtkAxesActor;
 class PolyDataObject;
 class vtkEventQtSlotConnect;
 class Vec3;

@@ -14,6 +14,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #define __DomeRenderer_h_
 
 #include "vtkRendererDelegate.h"
+#include "vtkSmartPointer.h"
 
 class vtkCamera;
 class GlslShader;
@@ -42,7 +43,7 @@ protected:
     bool SetupFrameBuffer();
     bool ResizeCubeTexture( );
 
-    vtkCamera * m_renderCam;
+    vtkSmartPointer<vtkCamera> m_renderCam;
     GlslShader * m_domeShader;
 
     bool m_isInit;
