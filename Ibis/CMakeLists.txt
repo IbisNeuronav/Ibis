@@ -110,7 +110,7 @@ endif()
 TARGET_LINK_LIBRARIES( ${exec_name} ${PluginLibs} ${PluginExternalLibs} ${HardwareModulesLibs} ${libsToUse} ${QT_LIBRARIES}
                                     ${VTK_LIBRARIES} ${MINC4ITK_LIBRARIES}
                                     ${itkLibsToUse} ${OpenCV_LIBS} ${flycaptureLib} svl ${gpuLibs} )
-qt5_use_modules( ${exec_name} Widgets Xml )
+qt5_use_modules( ${exec_name} ${IbisQtModules} )
 
 #================================
 # Install
