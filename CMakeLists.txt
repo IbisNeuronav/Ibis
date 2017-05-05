@@ -32,9 +32,10 @@ set( IBIS_EXTERNAL_DEPENDENCIES_DIR ${CMAKE_CURRENT_BINARY_DIR}/../ibisExternalD
 #==================================================================
 # Look for QT5 (required)
 #==================================================================
-find_package( Qt5 COMPONENTS Widgets OpenGL Xml REQUIRED )
+find_package( Qt5 COMPONENTS Widgets OpenGL Xml Multimedia REQUIRED )
 include_directories( ${Qt5Widgets_INCLUDE_DIRS} )
 include_directories( ${Qt5Xml_INCLUDE_DIRS} )
+include_directories( ${Qt5Multimedia_INCLUDE_DIRS} )
 
 #==================================================================
 # Look for VTK (required)
