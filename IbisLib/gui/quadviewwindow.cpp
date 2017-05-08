@@ -49,22 +49,24 @@ QuadViewWindow::QuadViewWindow( QWidget* parent, Qt::WindowFlags fl ) : QWidget(
     m_generalLayout->setSpacing( 0 );
 
     // Add a button box at the top of the window. These buttons control view layout and manipulation tools
-    m_buttonBox = new QHBoxLayout();
+    m_toolboxFrame = new QFrame;
+    m_generalLayout->addWidget( m_toolboxFrame );
+
+    m_buttonBox = new QHBoxLayout( m_toolboxFrame );
     m_buttonBox->setContentsMargins( 6, 0, 6, 0 );
     m_buttonBox->setSpacing( 5 );
     m_buttonBox->setObjectName( "ButtonBox" );
-    m_generalLayout->addItem( m_buttonBox );
-    CreateToolButton( "ZoomInButton", ":/Icons/zoom-in.png", "Zoom In", SLOT(ZoomInButtonClicked()) );
-    CreateToolButton( "ZoomOutButton", ":/Icons/zoom-out.png", "Zoom Out", SLOT(ZoomOutButtonClicked()) );
-    CreateToolButton( "ZoomFitButton", ":/Icons/zoom-fit.png", "Zoom To Fit Window", SLOT( ResetCameraButtonClicked() ) );
-    m_expandViewButton = CreateToolButton( "ExpandViewButton", ":/Icons/expand.png", "Expand Current View", SLOT( ExpandViewButtonClicked() ) );
-    CreateToolButton( "ResetPlanesButton", ":/Icons/reset-planes-2.png", "Reset Image Planes to original position", SLOT( ResetPlanesButtonClicked() ) );
-    CreateToolButton( "ViewFront", ":/Icons/front.png", "View Front Side", SLOT( ViewFrontButtonClicked() ));
-    CreateToolButton( "ViewBack", ":/Icons/back.png", "View Back Side", SLOT( ViewBackButtonClicked() ));
-    CreateToolButton( "ViewRight", ":/Icons/right.png", "View Right Side", SLOT( ViewRightButtonClicked() ));
-    CreateToolButton( "ViewLeft", ":/Icons/left.png", "View Left Side", SLOT( ViewLeftButtonClicked() ));
-    CreateToolButton( "ViewBottom", ":/Icons/bottom.png", "View Bottom", SLOT( ViewBottomButtonClicked() ));
-    CreateToolButton( "ViewTop", ":/Icons/top.png", "View Top", SLOT( ViewTopButtonClicked() ));
+    CreateToolButton( m_toolboxFrame, "ZoomInButton", ":/Icons/zoom-in.png", "Zoom In", SLOT(ZoomInButtonClicked()) );
+    CreateToolButton( m_toolboxFrame, "ZoomOutButton", ":/Icons/zoom-out.png", "Zoom Out", SLOT(ZoomOutButtonClicked()) );
+    CreateToolButton( m_toolboxFrame, "ZoomFitButton", ":/Icons/zoom-fit.png", "Zoom To Fit Window", SLOT( ResetCameraButtonClicked() ) );
+    m_expandViewButton = CreateToolButton( m_toolboxFrame, "ExpandViewButton", ":/Icons/expand.png", "Expand Current View", SLOT( ExpandViewButtonClicked() ) );
+    CreateToolButton( m_toolboxFrame, "ResetPlanesButton", ":/Icons/reset-planes-2.png", "Reset Image Planes to original position", SLOT( ResetPlanesButtonClicked() ) );
+    CreateToolButton( m_toolboxFrame, "ViewFront", ":/Icons/front.png", "View Front Side", SLOT( ViewFrontButtonClicked() ));
+    CreateToolButton( m_toolboxFrame, "ViewBack", ":/Icons/back.png", "View Back Side", SLOT( ViewBackButtonClicked() ));
+    CreateToolButton( m_toolboxFrame, "ViewRight", ":/Icons/right.png", "View Right Side", SLOT( ViewRightButtonClicked() ));
+    CreateToolButton( m_toolboxFrame, "ViewLeft", ":/Icons/left.png", "View Left Side", SLOT( ViewLeftButtonClicked() ));
+    CreateToolButton( m_toolboxFrame, "ViewBottom", ":/Icons/bottom.png", "View Bottom", SLOT( ViewBottomButtonClicked() ));
+    CreateToolButton( m_toolboxFrame, "ViewTop", ":/Icons/top.png", "View Top", SLOT( ViewTopButtonClicked() ));
 
     // Create a label to display cursor pos.
     m_buttonBox->addSpacing( 30 );
@@ -109,9 +111,9 @@ QuadViewWindow::QuadViewWindow( QWidget* parent, Qt::WindowFlags fl ) : QWidget(
      m_currentViewWindow = 1; // upper right, 3D window;
 }
 
-QAbstractButton * QuadViewWindow::CreateToolButton( QString name, QString iconPath, QString toolTip, const char * callbackSlot )
+QAbstractButton * QuadViewWindow::CreateToolButton( QWidget * parent, QString name, QString iconPath, QString toolTip, const char * callbackSlot )
 {
-    QPushButton * button = new QPushButton( this );
+    QPushButton * button = new QPushButton( parent );
     button->setObjectName( name );
     button->setIcon( QIcon( iconPath ) );
     button->setIconSize( QSize(30,30) );
@@ -415,6 +417,11 @@ void QuadViewWindow::SetCurrentViewWindow(int index )
             m_vtkWindowFrames[i]->setStyleSheet( "" );
         }
     }
+}
+
+void QuadViewWindow::SetShowToolbar( bool show )
+{
+    m_toolboxFrame->setHidden( !show );
 }
 
 void QuadViewWindow::Serialize( Serializer * ser )
