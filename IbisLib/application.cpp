@@ -327,6 +327,8 @@ void Application::InitHardware()
         m_updateManager->SetUpdatePeriod( (int)( 1000.0 / m_settings.UpdateFrequency )  );
         m_updateManager->Start();
     }
+    else
+        m_viewerOnly = true;
 }
 
 void Application::AddHardwareSettingsMenuEntries( QMenu * menu )

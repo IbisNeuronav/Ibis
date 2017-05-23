@@ -110,7 +110,7 @@ void TrackedVideoSource::SetSyncedTrackerTool( vtkTrackerTool * t )
     m_liveVideoBuffer->SetTrackerTool( t );
 }
 
-void TrackedVideoSource::InitializeVideo()
+bool TrackedVideoSource::InitializeVideo()
 {
     this->ClearVideo();
 
@@ -130,13 +130,15 @@ void TrackedVideoSource::InitializeVideo()
     }
 
     // Initialize with params applied
-    m_source->Initialize();
+    if( !m_source->Initialize() )
+        return false;
 
     // by default, current frame is -1. We want 0.
     m_source->GetBuffer()->Seek( 1 );
 
     if( m_numberOfClients > 0 )
         m_source->Record();
+    return true;
 }
 
 void TrackedVideoSource::ClearVideo()

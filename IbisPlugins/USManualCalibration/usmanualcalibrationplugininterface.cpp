@@ -52,8 +52,8 @@ USManualCalibrationPluginInterface::~USManualCalibrationPluginInterface()
 bool USManualCalibrationPluginInterface::CanRun()
 {
     // This plugin can't run in viewer-only mode. Needs video capture and tracking.
-    //if( m_application->IsViewerOnly() )
-    //    return false;
+    if( this->GetApplication()->IsViewerOnly() )
+        return false;
     return true;
 }
 
