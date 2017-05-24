@@ -878,6 +878,21 @@ void MainWindow::RemoveBottomWidget( QWidget * w )
     m_4Views->RemoveBottomWidget( w );
 }
 
+void MainWindow::SetShowToolbar( bool show )
+{
+    m_4Views->SetShowToolbar( show );
+}
+
+void MainWindow::SetShowLeftPanel( bool show )
+{
+    m_leftFrame->setHidden( !show );
+}
+
+void MainWindow::SetShowRightPanel( bool show )
+{
+    m_rightPanel->setHidden( !show );
+}
+
 void MainWindow::Serialize( Serializer * ser )
 {
     m_4Views->Serialize( ser );

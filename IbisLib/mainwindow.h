@@ -42,6 +42,9 @@ public:
     virtual void Serialize( Serializer * ser );
     void AddBottomWidget( QWidget * w );
     void RemoveBottomWidget( QWidget * w );
+    void SetShowToolbar( bool show );
+    void SetShowLeftPanel( bool show );
+    void SetShowRightPanel( bool show );
 
     void LoadSettings( QSettings & s );
     void SaveSettings( QSettings & s );

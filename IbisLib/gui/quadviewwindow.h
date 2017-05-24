@@ -52,6 +52,7 @@ public:
     void RemoveBottomWidget( QWidget * w );
     void SetExpandedView( bool on );
     void SetCurrentViewWindow( int index );
+    void SetShowToolbar( bool show );
 
 public slots:
 
@@ -84,7 +85,7 @@ public slots:
 
 protected:
 
-    QAbstractButton * CreateToolButton( QString name, QString iconPath, QString toolTip, const char * callbackSlot );
+    QAbstractButton * CreateToolButton( QWidget * parent, QString name, QString iconPath, QString toolTip, const char * callbackSlot );
     void MakeOneView( int index, const char * name );
 
     void WinNeedsRender( int winIndex );
@@ -117,6 +118,7 @@ protected:
 
     QWidget * m_detachedWidget;
 
+    QFrame * m_toolboxFrame;
     QFrame * m_bottomWidgetFrame;
     QVBoxLayout * m_bottomWidgetLayout;
     

@@ -109,7 +109,12 @@ void ToolDescription::InstanciateSceneObject()
         reader->SetFileName( modelFileName.toUtf8().data() );
         reader->Update();
         toolModel = PolyDataObject::New();
+        toolModel->SetNameChangeable( false );
+        toolModel->SetCanChangeParent( false );
+        toolModel->SetObjectManagedBySystem( true );
+        toolModel->SetObjectManagedByTracker( true );
         toolModel->SetPolyData( reader->GetOutput() );
+        toolModel->SetScalarsVisible( true );
         reader->Delete();
         toolModel->SetName("3D Model");
     }
