@@ -90,7 +90,7 @@ private slots:
     void PluginTabClosed( int tabIndex );
     void ObjectPluginsMenuActionTriggered();
     void GeneratePluginsMenuActionTriggered();
-    void MainSplitterMoved( int pos, int index );
+    void MainSplitterMoved(int position, int index );
     void SaveScene(bool);
 
 protected:

@@ -758,7 +758,7 @@ void MainWindow::GeneratePluginsMenuActionTriggered()
     p->Run();
 }
 
-void MainWindow::MainSplitterMoved( int pos, int index )
+void MainWindow::MainSplitterMoved( int position, int index )
 {
     QList<int> sizes = m_mainSplitter->sizes();
     m_leftPanelSize = sizes[0];
