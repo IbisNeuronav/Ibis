@@ -18,6 +18,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "usprobeobject.h"
 #include <QtPlugin>
 #include <QSettings>
+#include <QMessageBox>
 
 const double phantomPoints[16][3] = { { 0, 5, 50 },
 { 50, 5, 50 },
@@ -59,10 +60,17 @@ bool USManualCalibrationPluginInterface::CanRun()
 
 QWidget * USManualCalibrationPluginInterface::CreateFloatingWidget()
 {
-    BuildCalibrationPhantomRepresentation();
-
     // Make sure the us probe is still available and find another one if it is not
     ValidateUsProbe();
+
+    if( m_usProbeObjectId == SceneManager::InvalidId )
+    {
+        QString message( "No valid probe detected." );
+        QMessageBox::critical( 0, "Error", message, 1, 0 );
+        return 0;
+    }
+
+    BuildCalibrationPhantomRepresentation();
 
     USManualCalibrationWidget * calibrationWidget = new USManualCalibrationWidget;
     calibrationWidget->SetPluginInterface( this );

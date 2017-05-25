@@ -65,7 +65,7 @@ public:
 
     void SetSyncedTrackerTool( vtkTrackerTool * t );
 
-    void InitializeVideo();
+    bool InitializeVideo();
     void ClearVideo();
 
     // Description:
