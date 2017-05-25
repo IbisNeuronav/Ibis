@@ -13,6 +13,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include <QObject>
 #include "objectplugininterface.h"
+#include "vtkSmartPointer.h"
 
 class GeneratedSurface;
 
@@ -37,7 +38,7 @@ public:
     virtual bool CanBeActivated();
 
 protected:
-    GeneratedSurface *m_generatedSurface;
+    vtkSmartPointer<GeneratedSurface> m_generatedSurface;
 };
 
 #endif

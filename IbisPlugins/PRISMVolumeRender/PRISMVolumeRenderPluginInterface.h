@@ -13,6 +13,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef __PRISMVolumeRenderPluginInterface_h_
 #define __PRISMVolumeRenderPluginInterface_h_
 
+#include "vtkSmartPointer.h"
 #include <QObject>
 #include "globalobjectplugininterface.h"
 
@@ -39,11 +40,10 @@ public:
     virtual void LoadSettings( QSettings & s );
     virtual void SaveSettings( QSettings & s );
 
-    VolumeRenderingObject * GetVolumeRenderingObjectInstance() { return m_vrObject; }
-
+    VolumeRenderingObject * GetVolumeRenderingObjectInstance();
 protected:
 
-    VolumeRenderingObject * m_vrObject;
+    vtkSmartPointer<VolumeRenderingObject> m_vrObject;
 };
 
 #endif

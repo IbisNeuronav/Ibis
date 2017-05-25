@@ -75,7 +75,7 @@ protected:
     void ChooseLookupTable();
     virtual void InternalPostSceneRead();
 
-    vtkProperty  *  Property;
+    vtkProperty *  Property;
     vtkSmartPointer<vtkPoints>   m_PointCloudArray;
     vtkSmartPointer<vtkPolyData> m_PointsPolydata;
     vtkSmartPointer<vtkVertexGlyphFilter> m_PointCloudGlyphFilter;

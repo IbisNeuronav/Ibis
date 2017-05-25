@@ -17,6 +17,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QtConcurrent/QtConcurrent>
 #include "vnl/algo/vnl_symmetric_eigensystem.h"
 #include "vnl/algo/vnl_real_eigensystem.h"
+#include "vtkSmartPointer.h"
 
 #include "itkImageFileWriter.h"
 
@@ -49,19 +50,19 @@ void GPU_VolumeReconstructionWidget::SetApplication( Application * app )
     UpdateUi();
 }
 
-void GPU_VolumeReconstructionWidget::VtkToItkImage( vtkImageData * vtkInputImage, IbisItk3DImageType * itkOutputImage, vtkMatrix4x4* transformMatrix )
+void GPU_VolumeReconstructionWidget::VtkToItkImage( vtkImageData * vtkInputImage, IbisItk3DImageType * itkOutputImage, vtkSmartPointer<vtkMatrix4x4> transformMatrix )
 {
   int numberOfScalarComponents = vtkInputImage->GetNumberOfScalarComponents();
   vtkImageData *grayImage = vtkInputImage;
   if (numberOfScalarComponents > 1)
   {
-      vtkImageLuminance *luminanceFilter = vtkImageLuminance::New();
+      vtkSmartPointer<vtkImageLuminance> luminanceFilter = vtkSmartPointer<vtkImageLuminance>::New();
       luminanceFilter->SetInputData(vtkInputImage);
       luminanceFilter->Update();
       grayImage = luminanceFilter->GetOutput();
   }
   vtkImageData * image;
-  vtkImageShiftScale *shifter = vtkImageShiftScale::New();
+  vtkSmartPointer<vtkImageShiftScale> shifter = vtkSmartPointer<vtkImageShiftScale>::New();
   if (vtkInputImage->GetScalarType() != VTK_FLOAT)
   {
       shifter->SetOutputScalarType(VTK_FLOAT);
@@ -96,8 +97,8 @@ void GPU_VolumeReconstructionWidget::VtkToItkImage( vtkImageData * vtkInputImage
   itk::Vector< double, 3 > origin;
   itk::Vector< double, 3 > itkOrigin;
   // set direction cosines
-  vtkMatrix4x4 * tmpMat = vtkMatrix4x4::New();
-  vtkMatrix4x4::Transpose( transformMatrix, tmpMat );
+  vtkSmartPointer<vtkMatrix4x4> tmpMat = vtkSmartPointer<vtkMatrix4x4>::New();
+  vtkMatrix4x4::Transpose( transformMatrix.GetPointer(), tmpMat.GetPointer() );
   double step[3], mincStartPoint[3], dirCos[3][3];
   for( int i = 0; i < 3; i++ )
   {
@@ -138,13 +139,13 @@ void GPU_VolumeReconstructionWidget::slot_finished()
     qint64 reconstructionTime = m_ReconstructionTimer.elapsed();
 
     //Add Reconstructed Volume to Scene
-    ImageObject * reconstructedImage = ImageObject::New();
+    vtkSmartPointer<ImageObject> reconstructedImage = vtkSmartPointer<ImageObject>::New();
     reconstructedImage->SetItkImage( m_Reconstructor->GetReconstructedVolume() );
     reconstructedImage->SetName("Reconstructed Volume");
     //reconstructedImage->SetLocalTransform( selectedUSAcquisitionObject->GetLocalTransform() );
 
-    sm->AddObject(reconstructedImage, selectedUSAcquisitionObject->GetParent()->GetParent() );
-    sm->SetCurrentObject( reconstructedImage );
+    sm->AddObject(reconstructedImage.GetPointer(), selectedUSAcquisitionObject->GetParent()->GetParent() );
+    sm->SetCurrentObject( reconstructedImage.GetPointer() );
 
 #ifdef DEBUG
     std::cerr << "Done..." << std::endl;
@@ -205,7 +206,7 @@ void GPU_VolumeReconstructionWidget::on_startButton_clicked()
 #endif    
 
     IbisItk3DImageType::Pointer itkSliceMask = IbisItk3DImageType::New();
-    vtkMatrix4x4 * sliceMaskMatrix = vtkMatrix4x4::New(); // Anka - this is identity, it is not changed in VtkToItkImage(), I do not understand what is it suppose to do?
+    vtkSmartPointer<vtkMatrix4x4> sliceMaskMatrix = vtkSmartPointer<vtkMatrix4x4>::New();
     this->VtkToItkImage( selectedUSAcquisitionObject->GetMask(), itkSliceMask, sliceMaskMatrix  );
 
 #ifdef DEBUG
@@ -225,13 +226,13 @@ void GPU_VolumeReconstructionWidget::on_startButton_clicked()
     //IbisItk3DImageType::Pointer itkSliceImage[nbrOfSlices]; // changed by Xiao, Dec 15, 2014
 
   QVector<IbisItk3DImageType::Pointer> itkSliceImage(nbrOfSlices);
-    vtkMatrix4x4* sliceTransformMatrix[nbrOfSlices];
+    vtkSmartPointer<vtkMatrix4x4> sliceTransformMatrix[nbrOfSlices];
     unsigned int validSliceNo = 0;
     for(unsigned int i=0; i<nbrOfSlices; i++)
     {
       itkSliceImage[i] = IbisItk3DImageType::New();
-      sliceTransformMatrix[i] = vtkMatrix4x4::New();
-      if ( selectedUSAcquisitionObject->GetItkImage(itkSliceImage[i], i, sliceTransformMatrix[i]) )
+      sliceTransformMatrix[i] = vtkSmartPointer<vtkMatrix4x4>::New();
+      if ( selectedUSAcquisitionObject->GetItkImage(itkSliceImage[i], i, sliceTransformMatrix[i].GetPointer()) )
         m_Reconstructor->SetFixedSlice(validSliceNo++, itkSliceImage[i]);
     }
 
@@ -335,8 +336,5 @@ void GPU_VolumeReconstructionWidget::UpdateUi()
       ui->usVolumeSpacingComboBox->addItem( QString("1.0 mm x 1.0 mm x 1.0 mm"), QVariant( 1.0 ) );
       ui->usVolumeSpacingComboBox->addItem( QString("0.5 mm x 0.5 mm x 0.5 mm"), QVariant( 0.5 ) );
     }
- 
-
-
 
 }

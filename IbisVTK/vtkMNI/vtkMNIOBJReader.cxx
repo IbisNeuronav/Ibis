@@ -34,7 +34,7 @@ vtkMNIOBJReader::vtkMNIOBJReader()
 {
     this->SetNumberOfInputPorts(0);
     this->FileName = NULL;
-    this->Property = vtkProperty::New();
+    this->Property = vtkSmartPointer<vtkProperty>::New();
 	this->NbPoints = 0;
 	this->UseAlpha = true;
 }
@@ -45,7 +45,6 @@ vtkMNIOBJReader::~vtkMNIOBJReader()
     {
         delete [] this->FileName;
         this->FileName = NULL;
-        this->Property->Delete();
     }
 }
 
@@ -203,6 +202,7 @@ void vtkMNIOBJReader::ReadLines( FILE * in, vtkPolyData *output )
 	vtkCellArray * cells = vtkCellArray::New();
 	ReadItems( in, cells );
     output->SetLines( cells );
+    cells->Delete();
 }
 
 //------------------------------------------------------------
@@ -278,6 +278,7 @@ void vtkMNIOBJReader::ReadPolygons( FILE * in, vtkPolyData *output )
 	vtkCellArray * indexCells = vtkCellArray::New();
 	ReadItems( in, indexCells );
     output->SetPolys(indexCells);
+    indexCells->Delete();
 }
 
 void vtkMNIOBJReader::ReadPoints( FILE * in, vtkPolyData *output )
@@ -390,6 +391,7 @@ void vtkMNIOBJReader::ReadItems( FILE * in, vtkCellArray * indexCells )
             indexCells->InsertCellPoint(poly_indx);
         }
     }
+    endIndices->Delete();
 }
 
 void vtkMNIOBJReader::PrintSelf(ostream& os, vtkIndent indent)
@@ -399,4 +401,9 @@ void vtkMNIOBJReader::PrintSelf(ostream& os, vtkIndent indent)
     os << indent << "File Name: "
     << (this->FileName ? this->FileName : "(none)") << "\n";
 
+}
+
+vtkProperty * vtkMNIOBJReader::GetProperty()
+{
+    return this->Property.GetPointer();
 }

@@ -49,13 +49,12 @@ std::vector< BlendingModeInfo > BlendingModes = FillBlendingModeInfo();
 
 TripleCutPlaneObject::TripleCutPlaneObject()
 {
-    this->PlaneInteractionSlotConnect = vtkEventQtSlotConnect::New();
-    this->PlaneEndInteractionSlotConnect = vtkEventQtSlotConnect::New();
+    this->PlaneInteractionSlotConnect = vtkSmartPointer<vtkEventQtSlotConnect>::New();
+    this->PlaneEndInteractionSlotConnect = vtkSmartPointer<vtkEventQtSlotConnect>::New();
     m_resliceInterpolationType = 1;  // linear interpolation
     m_displayInterpolationType = 1;  // linear interpolation
     for (int i = 0; i < 3; i++)
     {
-        this->Planes[i] = 0;
         this->ViewPlanes[i] = 1;
         CreatePlane( i );
         m_planePosition[i] = 0.0;
@@ -67,17 +66,8 @@ TripleCutPlaneObject::TripleCutPlaneObject()
 
 TripleCutPlaneObject::~TripleCutPlaneObject()
 {
-    this->PlaneInteractionSlotConnect->Delete();
-    this->PlaneEndInteractionSlotConnect->Delete();
-
     // Remove planes from the views
     ReleaseAllViews();
-
-    // Delete planes
-    for(int i = 0; i < 3; i++ )
-    {
-        this->Planes[i]->Delete();
-    }
 }
 
 void TripleCutPlaneObject::Serialize( Serializer * ser )
@@ -351,6 +341,12 @@ void TripleCutPlaneObject::PreDisplaySetup()
     this->UpdateAllPlanesVisibility();
 }
 
+vtkMultiImagePlaneWidget * TripleCutPlaneObject::GetPlane( int index )
+{
+    if( index < 3 && index >= 0 )
+        return Planes[index].GetPointer();
+    return 0;
+}
 void TripleCutPlaneObject::ResetPlanes()
 {
     Q_ASSERT( this->GetManager() );
@@ -572,7 +568,7 @@ void TripleCutPlaneObject::PlaneEndInteractionEvent( vtkObject * caller, unsigne
 
     this->UpdateOtherPlanesPosition( whichPlane );
 
-    vtkMultiImagePlaneWidget *movingPlane = this->Planes[whichPlane];
+    vtkMultiImagePlaneWidget *movingPlane = this->Planes[whichPlane].GetPointer();
     int currentInteractorIndex = movingPlane->GetCurrentInteractorIndex();
     View *currentView = 0;
     if( currentInteractorIndex > -1 )
@@ -657,7 +653,7 @@ void TripleCutPlaneObject::CreatePlane( int viewType )
 {
     if( this->Planes[ viewType ] == 0 )
     {
-        this->Planes[viewType] = vtkMultiImagePlaneWidget::New();
+        this->Planes[viewType] = vtkSmartPointer<vtkMultiImagePlaneWidget>::New();
         this->Planes[viewType]->SetPlaneOrientation( viewType );
         this->Planes[viewType]->SetLeftButtonAction( vtkMultiImagePlaneWidget::NO_ACTION );
         this->Planes[viewType]->SetMiddleButtonAction( vtkMultiImagePlaneWidget::NO_ACTION );
@@ -671,10 +667,10 @@ void TripleCutPlaneObject::CreatePlane( int viewType )
         this->Planes[viewType]->SetResliceInterpolate( m_resliceInterpolationType );
         this->Planes[viewType]->SetTextureInterpolate( m_displayInterpolationType );
 
-        this->PlaneInteractionSlotConnect->Connect( this->Planes[viewType], vtkCommand::StartInteractionEvent, this, SLOT(PlaneStartInteractionEvent( vtkObject*, unsigned long) ) );
-        this->PlaneInteractionSlotConnect->Connect( this->Planes[viewType], vtkCommand::InteractionEvent, this, SLOT(PlaneInteractionEvent( vtkObject*, unsigned long) ) );
-        this->PlaneInteractionSlotConnect->Connect( this->Planes[viewType], vtkCommand::PlaceWidgetEvent, this, SLOT(PlaneInteractionEvent( vtkObject*, unsigned long) ) );
-        this->PlaneEndInteractionSlotConnect->Connect( this->Planes[viewType], vtkCommand::EndInteractionEvent, this, SLOT(PlaneEndInteractionEvent( vtkObject*, unsigned long) ) );
+        this->PlaneInteractionSlotConnect->Connect( this->Planes[viewType].GetPointer(), vtkCommand::StartInteractionEvent, this, SLOT(PlaneStartInteractionEvent( vtkObject*, unsigned long) ) );
+        this->PlaneInteractionSlotConnect->Connect( this->Planes[viewType].GetPointer(), vtkCommand::InteractionEvent, this, SLOT(PlaneInteractionEvent( vtkObject*, unsigned long) ) );
+        this->PlaneInteractionSlotConnect->Connect( this->Planes[viewType].GetPointer(), vtkCommand::PlaceWidgetEvent, this, SLOT(PlaneInteractionEvent( vtkObject*, unsigned long) ) );
+        this->PlaneEndInteractionSlotConnect->Connect( this->Planes[viewType].GetPointer(), vtkCommand::EndInteractionEvent, this, SLOT(PlaneEndInteractionEvent( vtkObject*, unsigned long) ) );
     }
 }
 
@@ -682,7 +678,7 @@ int TripleCutPlaneObject::GetPlaneIndex( vtkObject * caller )
 {
     for( int i = 0; i < 3; ++i )
     {
-        if( caller == this->Planes[i] )
+        if( caller == this->Planes[i].GetPointer() )
         {
             return i;
         }

@@ -14,6 +14,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QVector>
 #include "sceneobject.h"
 #include "pointsobject.h"
+#include "vtkSmartPointer.h"
 
 class LandmarkTransform;
 class vtkPoints;
@@ -38,14 +39,14 @@ public:
 
     bool ReadTagFile( );
 
-    void SetSourcePoints( PointsObject *pts );
-    void SetTargetPoints( PointsObject *pts );
-    PointsObject *GetSourcePoints() { return m_sourcePoints; }
-    PointsObject *GetTargetPoints() { return m_targetPoints; }
+    void SetSourcePoints( vtkSmartPointer<PointsObject> pts );
+    void SetTargetPoints( vtkSmartPointer<PointsObject> pts );
+    vtkSmartPointer<PointsObject> GetSourcePoints();
+    vtkSmartPointer<PointsObject> GetTargetPoints();
     QStringList GetPointNames( );
     int  GetNumberOfPoints();
-    int  GetNumberOfActivePoints() { return m_activeSourcePoints->GetNumberOfPoints(); }
-    LandmarkTransform *GetLandmarkTransform() { return m_registrationTransform; }
+    int  GetNumberOfActivePoints();
+    vtkSmartPointer<LandmarkTransform> GetLandmarkTransform() { return m_registrationTransform; }
     void UpdateLandmarkTransform();
     void RegisterObject( bool on );
     bool IsRegistered();
@@ -88,12 +89,12 @@ protected:
 
     void EnablePicking( bool e );
 
-    LandmarkTransform *m_registrationTransform;
-    vtkTransform * m_backUpTransform;
-    PointsObject *m_sourcePoints;
-    vtkPoints *m_activeSourcePoints;
-    PointsObject *m_targetPoints;
-    vtkPoints *m_activeTargetPoints;
+    vtkSmartPointer<LandmarkTransform> m_registrationTransform;
+    vtkSmartPointer<vtkTransform> m_backUpTransform;
+    vtkSmartPointer<PointsObject> m_sourcePoints;
+    vtkSmartPointer<vtkPoints> m_activeSourcePoints;
+    vtkSmartPointer<PointsObject> m_targetPoints;
+    vtkSmartPointer<vtkPoints> m_activeTargetPoints;
     QStringList m_activePointNames;
     QVector<int> m_pointEnabledStatus;
     int m_targetObjectID;

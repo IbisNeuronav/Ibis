@@ -30,70 +30,52 @@ ObjectSerializationMacro( PointRepresentation );
 
 PointRepresentation::PerViewElements::PerViewElements()
 {
-    pointRepresentationActor = 0;
-    labelActor = 0;
 }
 
 PointRepresentation::PerViewElements::~PerViewElements()
 {
-    if( pointRepresentationActor )
-        pointRepresentationActor->Delete();
-    if( labelActor )
-        labelActor->Delete();
 }
 
 PointRepresentation::PointRepresentation()
 {
     this->AllowChildren = false;
-    m_property = vtkProperty::New();
+    m_property = vtkSmartPointer<vtkProperty>::New();
     m_property->SetColor(1.0,0.0,0.0);
     m_property->SetAmbient(1);
     m_property->SetLineWidth(1);
-    m_sphere = vtkSphereSource::New();
-    m_circle = vtkCircleWithCrossSource::New();
+    m_sphere = vtkSmartPointer<vtkSphereSource>::New();
+    m_circle = vtkSmartPointer<vtkCircleWithCrossSource>::New();
     m_pointIndex = -1;
     m_active = true;
 
     //label
-    m_label = vtkVectorText::New();
+    m_label = vtkSmartPointer<vtkVectorText>::New();
     m_label->SetText(" ");
     m_labelScale = INITIAL_TAG_LABEL_SCALE;
     m_labelVisible = true;
 
-    m_invWorldRotTransform = vtkTransform::New();
+    m_invWorldRotTransform = vtkSmartPointer<vtkTransform>::New();
 
-    m_posTransform = vtkTransform::New();
+    m_posTransform = vtkSmartPointer<vtkTransform>::New();
 
-    m_point2DTransform = vtkTransform::New();
+    m_point2DTransform = vtkSmartPointer<vtkTransform>::New();
     m_point2DTransform->Concatenate( this->GetWorldTransform() );
-    m_point2DTransform->Concatenate( m_posTransform );
-    m_point2DTransform->Concatenate( m_invWorldRotTransform );
+    m_point2DTransform->Concatenate( m_posTransform.GetPointer() );
+    m_point2DTransform->Concatenate( m_invWorldRotTransform.GetPointer() );
 
-    m_point3DTransform = vtkTransform::New();
+    m_point3DTransform = vtkSmartPointer<vtkTransform>::New();
     m_point3DTransform->Concatenate( this->GetWorldTransform() );
-    m_point3DTransform->Concatenate( m_posTransform );
+    m_point3DTransform->Concatenate( m_posTransform.GetPointer() );
 
-    m_labelOffset = vtkTransform::New();
+    m_labelOffset = vtkSmartPointer<vtkTransform>::New();
 
-    m_labelTransform = vtkTransform::New();
-    m_labelTransform->Concatenate( m_point2DTransform );
-    m_labelTransform->Concatenate( m_labelOffset );
+    m_labelTransform = vtkSmartPointer<vtkTransform>::New();
+    m_labelTransform->Concatenate( m_point2DTransform.GetPointer() );
+    m_labelTransform->Concatenate( m_labelOffset.GetPointer() );
 }
 
 PointRepresentation::~PointRepresentation()
 {
-    m_property->Delete();
-    m_sphere->Delete();
-    m_circle->Delete();
-
-    m_label->Delete();
-
-    m_point2DTransform->Delete();
-    m_point3DTransform->Delete();
-    m_invWorldRotTransform->Delete();
-    m_posTransform->Delete();
-    m_labelOffset->Delete();
-    m_labelTransform->Delete();
 }
 
 void PointRepresentation::Hide()
@@ -131,48 +113,48 @@ void PointRepresentation::Setup( View * view )
     bool visible = !parent->IsHidden();
 
     vtkSmartPointer<vtkPolyDataMapper> mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
-    vtkActor *pointActor = 0;
-    vtkFollower * labelActor = 0;
+    vtkSmartPointer<vtkActor> pointActor;
+    vtkSmartPointer<vtkFollower> labelActor;
 
     // 3D view (THREED_VIEW_TYPE)
     if( view->GetType() == THREED_VIEW_TYPE )
     {
-        pointActor = vtkActor::New();
+        pointActor = vtkSmartPointer<vtkActor>::New();
         m_sphere->SetRadius( size3D );
         mapper->SetInputConnection( m_sphere->GetOutputPort() );
-        pointActor->SetUserTransform( m_point3DTransform );
-        view->GetRenderer()->AddActor( pointActor );
+        pointActor->SetUserTransform( m_point3DTransform.GetPointer() );
+        view->GetRenderer()->AddActor( pointActor.GetPointer() );
 
-        labelActor = vtkFollower::New();
+        labelActor = vtkSmartPointer<vtkFollower>::New();
         vtkSmartPointer<vtkPolyDataMapper> labelMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
         labelMapper->SetInputConnection( m_label->GetOutputPort() );
-        labelActor->SetMapper( labelMapper );
+        labelActor->SetMapper( labelMapper.GetPointer() );
         labelActor->SetScale( m_labelScale, m_labelScale, m_labelScale );
         labelActor->SetCamera( view->GetRenderer()->GetActiveCamera() );
-        labelActor->SetUserTransform( m_labelTransform );
+        labelActor->SetUserTransform( m_labelTransform.GetPointer() );
         labelActor->SetProperty(m_property);
         labelActor->SetVisibility( visible && m_labelVisible ? 1 : 0 );
-        view->GetRenderer()->AddActor(labelActor);
+        view->GetRenderer()->AddActor( labelActor.GetPointer() );
      }
     else //2D views
     {
-        vtkFollower * f = vtkFollower::New();
+        vtkSmartPointer<vtkFollower> f = vtkSmartPointer<vtkFollower>::New();
         pointActor = f;
         m_circle->SetRadius( size2D );
         m_circle->SetResolution( 3 );
         mapper->SetInputConnection( m_circle->GetOutputPort() );
         f->SetCamera( view->GetRenderer()->GetActiveCamera() );
-        f->SetUserTransform( m_point2DTransform );
-        view->GetOverlayRenderer()->AddActor(pointActor);
+        f->SetUserTransform( m_point2DTransform.GetPointer() );
+        view->GetOverlayRenderer()->AddActor(pointActor.GetPointer());
     }
-    pointActor->SetProperty(m_property);
+    pointActor->SetProperty(m_property.GetPointer());
     pointActor->SetPickable( m_active ? 1 : 0 );
     pointActor->DragableOn();
     if( visible )
         pointActor->VisibilityOn();
     else
         pointActor->VisibilityOff();
-    pointActor->SetMapper( mapper );
+    pointActor->SetMapper( mapper.GetPointer() );
     PerViewElements * perView = new PerViewElements;
     perView->pointRepresentationActor = pointActor;
     perView->labelActor = labelActor;
@@ -189,11 +171,11 @@ void PointRepresentation::Release( View * view )
         PerViewElements * perView = (*it).second;
         if( view->GetType() == THREED_VIEW_TYPE )
         {
-            view->GetRenderer()->RemoveActor( perView->pointRepresentationActor );
-            view->GetRenderer()->RemoveActor( perView->labelActor );
+            view->GetRenderer()->RemoveActor( perView->pointRepresentationActor.GetPointer() );
+            view->GetRenderer()->RemoveActor( perView->labelActor.GetPointer() );
         }
         else
-            view->GetOverlayRenderer()->RemoveActor( perView->pointRepresentationActor );
+            view->GetOverlayRenderer()->RemoveActor( perView->pointRepresentationActor.GetPointer() );
         delete perView;
         this->m_perViewContainer.erase( it );
     }
@@ -293,7 +275,7 @@ bool PointRepresentation::HasActor( vtkActor * actor )
     while( it != m_perViewContainer.end() )
     {
         PerViewElements * perView = (*it).second;
-        if( perView->pointRepresentationActor == actor )
+        if( perView->pointRepresentationActor.GetPointer() == actor )
             return true;
         ++it;
     }

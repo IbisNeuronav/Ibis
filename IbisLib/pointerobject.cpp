@@ -38,7 +38,7 @@ PointerObject::PointerObject()
 {
     m_lastTipCalibrationRMS = 0.0;
     m_backupCalibrationRMS = 0.0;
-    m_backupCalibrationMatrix = vtkMatrix4x4::New();
+    m_backupCalibrationMatrix = vtkSmartPointer<vtkMatrix4x4>::New();
 
     m_pointerAxis[0] = 0.0;
     m_pointerAxis[1] = 0.0;
@@ -120,11 +120,9 @@ void PointerObject::ObjectRemovedFromScene()
 
     for (int i = 0; i < PointerPickedPointsObjectList.count(); i++)
     {
-        PointerPickedPointsObjectList.value(i)->Delete();
-        this->GetManager()->RemoveObject(PointerPickedPointsObjectList.value(i));
+        this->GetManager()->RemoveObject(PointerPickedPointsObjectList.value(i).GetPointer());
     }
     PointerPickedPointsObjectList.clear();
-    this->CurrentPointerPickedPointsObject = 0;
 }
 
 double * PointerObject::GetTipPosition()
@@ -182,7 +180,7 @@ void PointerObject::CreatePointerPickedPointsObject()
     int n = PointerPickedPointsObjectList.count();
     QString name("PointerPoints");
     name.append(QString::number(n));
-    this->CurrentPointerPickedPointsObject = PointsObject::New();
+    this->CurrentPointerPickedPointsObject = vtkSmartPointer<PointsObject>::New();
     this->CurrentPointerPickedPointsObject->SetName(name);
     this->CurrentPointerPickedPointsObject->SetCanAppendChildren(false);
     this->CurrentPointerPickedPointsObject->SetCanChangeParent(false);
@@ -193,8 +191,7 @@ void PointerObject::CreatePointerPickedPointsObject()
 void PointerObject::ManagerAddPointerPickedPointsObject()
 {
     Q_ASSERT(this->GetManager());
-    this->GetManager()->AddObject( this->CurrentPointerPickedPointsObject );
-    this->GetManager()->SetCurrentObject( this->CurrentPointerPickedPointsObject );
+    this->GetManager()->AddObject( this->CurrentPointerPickedPointsObject.GetPointer() );
 }
 
 void PointerObject::CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets )
@@ -205,7 +202,7 @@ void PointerObject::CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> 
         dlg->SetPointerPickedPointsObject(this->CurrentPointerPickedPointsObject);
     dlg->SetPointer(this);
     dlg->setObjectName("Properties");
-    connect (this, SIGNAL(SettingsChanged()), dlg, SLOT(UpdateSettings()));
+    connect (this, SIGNAL(SettingsChanged()), dlg, SLOT(UpdateUI()));
     widgets->append(dlg);
 }
 
@@ -251,13 +248,14 @@ void PointerObject::RemovePointerPickedPointsObject( int objID )
     PointerPickedPointsObjects::iterator it = PointerPickedPointsObjectList.begin();
     for(; it != PointerPickedPointsObjectList.end(); ++it)
     {
-        obj = (SceneObject*)(*it);
+        obj = (SceneObject*)((*it).GetPointer());
         PointsObject *objectRemoved = 0;
         if (obj->GetObjectID() == objID )
         {
             objectRemoved = PointsObject::SafeDownCast(obj);
-            PointerPickedPointsObjectList.removeOne(objectRemoved);
-            objectRemoved->Delete();
+            if( objectRemoved == this->CurrentPointerPickedPointsObject.GetPointer() )
+                this->CurrentPointerPickedPointsObject = 0;
+            PointerPickedPointsObjectList.removeOne((*it));
             emit SettingsChanged();
             return;
         }

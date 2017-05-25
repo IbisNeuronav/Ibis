@@ -16,6 +16,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "hardwaremodule.h"
 #include <map>
 #include <QVector>
+#include "vtkSmartPointer.h"
 
 class vtkImageData;
 class vtkMatrix4x4;
@@ -54,9 +55,9 @@ public:
 
     void CreatePointerPickedPointsObject();
     void ManagerAddPointerPickedPointsObject();
-    PointsObject * GetCurrentPointerPickedPointsObject() {return this->CurrentPointerPickedPointsObject;}
-    void SetCurrentPointerPickedPointsObject(PointsObject *obj){this->CurrentPointerPickedPointsObject = obj;}
-    const QList<PointsObject*> & GetPointerPickedPointsObjects() { return PointerPickedPointsObjectList; }
+    vtkSmartPointer<PointsObject> GetCurrentPointerPickedPointsObject() {return this->CurrentPointerPickedPointsObject;}
+    void SetCurrentPointerPickedPointsObject(vtkSmartPointer<PointsObject> obj) {this->CurrentPointerPickedPointsObject = obj;}
+    const QList<vtkSmartPointer<PointsObject> > & GetPointerPickedPointsObjects() { return PointerPickedPointsObjectList; }
 
 public slots:
 
@@ -79,9 +80,9 @@ protected:
 
     double m_lastTipCalibrationRMS;
     double m_backupCalibrationRMS;
-    vtkMatrix4x4 * m_backupCalibrationMatrix;
+    vtkSmartPointer<vtkMatrix4x4> m_backupCalibrationMatrix;
 
-    PointsObject * CurrentPointerPickedPointsObject;
+    vtkSmartPointer<PointsObject> CurrentPointerPickedPointsObject;
 
     double m_pointerAxis[3];
     double m_pointerUpDir[3];
@@ -97,7 +98,7 @@ protected:
     typedef std::map<View*,PerViewElements*> PointerObjectViewAssociation;
     PointerObjectViewAssociation pointerObjectInstances;
 
-    typedef QList <PointsObject*> PointerPickedPointsObjects;
+    typedef QList <vtkSmartPointer<PointsObject> > PointerPickedPointsObjects;
     PointerPickedPointsObjects PointerPickedPointsObjectList;
 };
 

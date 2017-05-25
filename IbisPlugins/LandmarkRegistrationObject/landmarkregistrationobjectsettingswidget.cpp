@@ -17,6 +17,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "pointerobject.h"
 
 #include "vtkPoints.h"
+#include "vtkSmartPointer.h"
 
 #include <QMessageBox>
 #include <QFileDialog>
@@ -52,10 +53,6 @@ LandmarkRegistrationObjectSettingsWidget::LandmarkRegistrationObjectSettingsWidg
 
 LandmarkRegistrationObjectSettingsWidget::~LandmarkRegistrationObjectSettingsWidget()
 {
-    if (m_registrationObject)
-    {
-        m_registrationObject->UnRegister(0);
-    }
     delete ui;
     delete m_model;
 }
@@ -77,15 +74,7 @@ void LandmarkRegistrationObjectSettingsWidget::SetLandmarkRegistrationObject(Lan
 {
     if (m_registrationObject == obj)
         return;
-    if (m_registrationObject)
-    {
-        m_registrationObject->UnRegister(0);
-    }
     m_registrationObject = obj;
-    if (m_registrationObject)
-    {
-        m_registrationObject->Register(0);
-    }
     this->UpdateUI();
 }
 
@@ -123,6 +112,7 @@ void LandmarkRegistrationObjectSettingsWidget::on_allowScalingCheckBox_toggled( 
 {
     Q_ASSERT( m_registrationObject );
     m_registrationObject->SetAllowScaling( on );
+    this->UpdateUI();
 }
 
 void LandmarkRegistrationObjectSettingsWidget::on_importPushButton_clicked()
@@ -271,7 +261,7 @@ void LandmarkRegistrationObjectSettingsWidget::UpdateUI()
         }
     }
     ui->targetComboBox->blockSignals(false);
-    LandmarkTransform *landmarkTransform = m_registrationObject->GetLandmarkTransform();
+    vtkSmartPointer<LandmarkTransform>landmarkTransform = m_registrationObject->GetLandmarkTransform();
     double rms = landmarkTransform->GetFinalRMS();
 
     // Update register button
@@ -305,10 +295,11 @@ void LandmarkRegistrationObjectSettingsWidget::UpdateUI()
     {
         m_model->insertRow(idx);
         m_model->setData(m_model->index(idx, 0), m_registrationObject->GetPointNames().at(idx));
-        if ( m_registrationObject->GetPointEnabledStatus(idx) == 1 &&
-             landmarkTransform->GetFRE(activePointsCount) < INVALID_NUMBER )
+        double fre = 0;
+        bool ok = landmarkTransform->GetFRE(activePointsCount, fre);
+        if ( m_registrationObject->GetPointEnabledStatus(idx) == 1 && ok )
         {
-            m_model->setData(m_model->index(idx, 1), QString::number((landmarkTransform->GetFRE(activePointsCount))));
+            m_model->setData(m_model->index(idx, 1), QString::number((fre)));
             activePointsCount++;
         }
         else

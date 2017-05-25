@@ -21,6 +21,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #define __vtkMNIOBJReader_h
 
 #include "vtkPolyDataAlgorithm.h"
+#include "vtkSmartPointer.h"
 
 class vtkProperty;
 class vtkCellArray;
@@ -41,7 +42,7 @@ public:
 
     // Description:
     // Return properties of MNI .obj file
-    vtkGetObjectMacro(Property,vtkProperty);
+    vtkProperty * GetProperty();
 
     vtkSetMacro( UseAlpha, bool );
 	
@@ -56,7 +57,7 @@ protected:
 
     vtkMNIOBJReader();
     ~vtkMNIOBJReader();
-    vtkProperty * Property;
+    vtkSmartPointer<vtkProperty> Property;
 
     virtual int RequestData(vtkInformation* request, vtkInformationVector** inputVector, vtkInformationVector* outputVector);
 

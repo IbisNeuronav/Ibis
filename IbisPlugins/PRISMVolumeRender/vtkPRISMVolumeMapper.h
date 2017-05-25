@@ -24,6 +24,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #define __vtkPRISMVolumeMapper_h
 
 #include "vtkVolumeMapper.h"
+#include "vtkSmartPointer.h"
 #include <vector>
 #include <string>
 
@@ -141,8 +142,8 @@ protected:
   bool VolumeShaderNeedsUpdate;
   unsigned DepthBufferTextureId;
   int DepthBufferTextureSize[2];
-  vtkMatrix4x4 * WorldToTextureMatrix;
-  vtkColoredCube * ColoredCube;
+  vtkSmartPointer<vtkMatrix4x4> WorldToTextureMatrix;
+  vtkSmartPointer<vtkColoredCube> ColoredCube;
 
   // Extension management
   bool GlExtensionsLoaded;

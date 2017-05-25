@@ -53,12 +53,12 @@ StereotacticFramePluginInterface::StereotacticFramePluginInterface()
     m_manipulatorsOn = true;
     m_3DFrameOn = true;
 
-    m_frameTransform = vtkTransform::New();
-    m_adjustmentTransform = vtkTransform::New();
+    m_frameTransform = vtkSmartPointer<vtkTransform>::New();
+    m_adjustmentTransform = vtkSmartPointer<vtkTransform>::New();
     m_landmarkTransform = vtkLandmarkTransform::New();
     m_landmarkTransform->SetModeToRigidBody();
     m_frameTransform->Concatenate( m_landmarkTransform );
-    m_frameTransform->Concatenate( m_adjustmentTransform );
+    m_frameTransform->Concatenate( m_adjustmentTransform.GetPointer() );
 
     m_frameRepresentation = 0;
     for( int i = 0; i < 4; i++ )
@@ -69,9 +69,7 @@ StereotacticFramePluginInterface::StereotacticFramePluginInterface()
 
 StereotacticFramePluginInterface::~StereotacticFramePluginInterface()
 {
-    m_frameTransform->Delete();
     m_landmarkTransform->Delete();
-    m_adjustmentTransform->Delete();
     for( int i = 0; i < 4; i++ )
         if( m_manipulators[i] )
             m_manipulators[i]->Delete();
@@ -205,10 +203,9 @@ void StereotacticFramePluginInterface::GetCursorFramePosition( double pos[3] )
 
     // transform it into frame space
     double transformedPos[4];
-    vtkMatrix4x4 * mat = vtkMatrix4x4::New();
-    m_frameTransform->GetInverse( mat );
+    vtkSmartPointer<vtkMatrix4x4> mat = vtkSmartPointer<vtkMatrix4x4>::New();
+    m_frameTransform->GetInverse( mat.GetPointer() );
     mat->MultiplyPoint( cursorPos, transformedPos );
-    mat->Delete();
 
     pos[0] = transformedPos[0];
     pos[1] = transformedPos[1];
@@ -226,10 +223,9 @@ void StereotacticFramePluginInterface::SetCursorFromFramePosition( double pos[3]
 
     // transform it into world space
     double transformedPos[4];
-    vtkMatrix4x4 * mat = vtkMatrix4x4::New();
+    vtkSmartPointer<vtkMatrix4x4> mat = vtkSmartPointer<vtkMatrix4x4>::New();
     m_frameTransform->GetMatrix( mat );
     mat->MultiplyPoint( framePos, transformedPos );
-    mat->Delete();
 
     Application::GetSceneManager()->SetCursorPosition(transformedPos);
 }
@@ -295,7 +291,7 @@ void StereotacticFramePluginInterface::Enable3DFrame()
 {
     ImageObject * ref = GetSceneManager()->GetReferenceDataObject();
 
-    vtkPoints * pts = vtkPoints::New();
+    vtkSmartPointer<vtkPoints> pts = vtkSmartPointer<vtkPoints>::New();
 
     for( int i = 0; i < 4; ++i )
         for( int j = 0; j < 4; ++j )
@@ -304,7 +300,7 @@ void StereotacticFramePluginInterface::Enable3DFrame()
             pts->InsertNextPoint( p.Ref() );
         }
 
-    vtkCellArray * lines = vtkCellArray::New();
+    vtkSmartPointer<vtkCellArray> lines = vtkSmartPointer<vtkCellArray>::New();
     for( int i = 0; i < 4; ++i )  // each of the N shapes
         for( int j = 1; j < 4; ++j )  // each segment in the N shape
         {
@@ -314,18 +310,15 @@ void StereotacticFramePluginInterface::Enable3DFrame()
             lines->InsertNextCell( 2, lineIndex );
         }
 
-    vtkPolyData * poly = vtkPolyData::New();
-    poly->SetPoints( pts );
-    pts->Delete();
-    poly->SetLines( lines );
-    lines->Delete();
+    vtkSmartPointer<vtkPolyData> poly = vtkSmartPointer<vtkPolyData>::New();
+    poly->SetPoints( pts.GetPointer() );
+    poly->SetLines( lines.GetPointer() );
 
     m_frameRepresentation = PolyDataObject::New();
     m_frameRepresentation->SetPolyData( poly );
-    poly->Delete();
     m_frameRepresentation->SetListable( false );
     m_frameRepresentation->SetCanEditTransformManually( false );
-    m_frameRepresentation->SetLocalTransform( m_frameTransform );
+    m_frameRepresentation->SetLocalTransform( m_frameTransform.GetPointer() );
 
     GetSceneManager()->AddObject( m_frameRepresentation, ref );
 }
@@ -352,7 +345,7 @@ double alignmentMat[16] = { 0.0, 0.0, 1.0, 0.0,
 void StereotacticFramePluginInterface::ComputeInitialTransform()
 {
     // This is a transform to align spaces of image and frame that have very different conventions
-    vtkTransform * alignmentTransform = vtkTransform::New();
+    vtkSmartPointer<vtkTransform> alignmentTransform = vtkSmartPointer<vtkTransform>::New();
     alignmentTransform->SetMatrix( alignmentMat );
 
     // Now, we compute a translation that centers bounding boxes of image and frame
@@ -393,21 +386,18 @@ void StereotacticFramePluginInterface::ComputeInitialTransform()
 
     Vec3 t = imCenter - frameCenter;
 
-    vtkTransform * translation = vtkTransform::New();
+    vtkSmartPointer<vtkTransform> translation = vtkSmartPointer<vtkTransform>::New();
     translation->Translate( t[0], t[1], t[2] );
 
     m_adjustmentTransform->Identity();
-    m_adjustmentTransform->Concatenate( translation );
-    m_adjustmentTransform->Concatenate( alignmentTransform );
-
-    translation->Delete();
-    alignmentTransform->Delete();
+    m_adjustmentTransform->Concatenate( translation.GetPointer() );
+    m_adjustmentTransform->Concatenate( alignmentTransform.GetPointer() );
 }
 
 void StereotacticFramePluginInterface::UpdateLandmarkTransform()
 {
-    vtkPoints * frameSpacePoints = vtkPoints::New();
-    vtkPoints * imageSpacePoints = vtkPoints::New();
+    vtkSmartPointer<vtkPoints> frameSpacePoints = vtkSmartPointer<vtkPoints>::New();
+    vtkSmartPointer<vtkPoints> imageSpacePoints = vtkSmartPointer<vtkPoints>::New();
 
     // for each n shape in the frame
     for( int nIndex = 0; nIndex < 4; ++nIndex )
@@ -428,10 +418,8 @@ void StereotacticFramePluginInterface::UpdateLandmarkTransform()
         frameSpacePoints->InsertNextPoint( framePoint );
     }
 
-    m_landmarkTransform->SetSourceLandmarks( frameSpacePoints );
-    m_landmarkTransform->SetTargetLandmarks( imageSpacePoints );
+    m_landmarkTransform->SetSourceLandmarks( frameSpacePoints.GetPointer() );
+    m_landmarkTransform->SetTargetLandmarks( imageSpacePoints.GetPointer() );
     m_landmarkTransform->Modified();
     m_frameTransform->Modified(); // this should cause a redisplay of the 3D view since frame object will be modified
-    frameSpacePoints->Delete();
-    imageSpacePoints->Delete();
 }

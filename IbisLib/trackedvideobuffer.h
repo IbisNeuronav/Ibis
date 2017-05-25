@@ -12,6 +12,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #define __TrackedVideoBuffer_h_
 
 #include <QList>
+#include "vtkSmartPointer.h"
 
 class vtkImageData;
 class vtkAlgorithmOutput;
@@ -48,7 +49,7 @@ public:
     vtkMatrix4x4 * GetMatrix( int index );
     vtkImageData * GetImage( int index );
 
-    vtkImageData * GetVideoOutput() { return m_videoOutput; }
+    vtkImageData * GetVideoOutput();
     vtkAlgorithmOutput * GetVideoOutputPort();
     vtkTransform * GetOutputTransform() { return m_outputTransform; }
 
@@ -66,9 +67,9 @@ protected:
     void WriteImages( QString dirName, QProgressDialog * progressDlg = 0 );
     void ReadImages( int nbImages, QString dirName, QProgressDialog * progressDlg = 0 );
 
-    vtkImageData * m_videoOutput;
-    vtkPassThrough * m_output;
-    vtkTransform * m_outputTransform;
+    vtkSmartPointer<vtkImageData> m_videoOutput;
+    vtkSmartPointer<vtkPassThrough> m_output;
+    vtkSmartPointer<vtkTransform> m_outputTransform;
     int m_currentFrame;
     QList< vtkImageData * > m_frames;
     QList< vtkMatrix4x4 * > m_matrices;

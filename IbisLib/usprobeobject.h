@@ -14,6 +14,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "trackedsceneobject.h"
 #include <map>
 #include "hardwaremodule.h"
+#include "vtkSmartPointer.h"
 
 class vtkImageData;
 class vtkImageActor;
@@ -104,17 +105,16 @@ protected:
 
     bool m_maskOn;
     int m_lutIndex;
-    vtkPassThrough         * m_videoInput;
-    vtkPassThrough         * m_actorInput;
+    vtkSmartPointer<vtkPassThrough>         m_videoInput;
+    vtkSmartPointer<vtkPassThrough>         m_actorInput;
     USMask                 * m_mask;
     USMask                 * m_defaultMask;
-    vtkImageProperty       * m_sliceProperties;
-    vtkImageMapToColors    * m_mapToColors;
-    vtkImageToImageStencil * m_imageStencilSource;
-    vtkImageStencil        * m_sliceStencil;
-    vtkImageConstantPad    * m_constantPad;
+    vtkSmartPointer<vtkImageMapToColors>    m_mapToColors;
+    vtkSmartPointer<vtkImageToImageStencil> m_imageStencilSource;
+    vtkSmartPointer<vtkImageStencil>        m_sliceStencil;
+    vtkSmartPointer<vtkImageConstantPad>    m_constantPad;
 
-    vtkTransform           * m_imageTransform;
+    vtkSmartPointer<vtkTransform>           m_imageTransform;
 
     // Calibration matrices for different scale levels
     int m_currentCalibrationMatrixIndex;

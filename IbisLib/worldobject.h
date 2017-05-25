@@ -14,6 +14,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "sceneobject.h"
 #include "ibistypes.h"
 #include <QColor>
+#include "vtkSmartPointer.h"
 
 class PolyDataObject;
 
@@ -30,8 +31,8 @@ public:
     WorldObject();
     virtual ~WorldObject();
 
-    void SetAxesObject( PolyDataObject * obj );
-    PolyDataObject * GetAxesObject() { return m_axesObject; }
+    void SetAxesObject( vtkSmartPointer<PolyDataObject> obj );
+    vtkSmartPointer<PolyDataObject> GetAxesObject() { return m_axesObject; }
 
     // can't set name or allow hidding or delete this type of object
     virtual void SetName( QString name ) {}
@@ -66,7 +67,7 @@ public:
 
 private:
 
-    PolyDataObject * m_axesObject;
+    vtkSmartPointer<PolyDataObject> m_axesObject;
 
 };
 

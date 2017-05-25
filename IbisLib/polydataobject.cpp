@@ -43,55 +43,53 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 ObjectSerializationMacro( PolyDataObject );
 
-vtkImageData * PolyDataObject::checkerBoardTexture = 0;
+vtkSmartPointer<vtkImageData> PolyDataObject::checkerBoardTexture;
 
 PolyDataObject::PolyDataObject()
 {
-    this->PolyData = 0;
-    m_clippingSwitch = vtkPassThrough::New();
-    m_colorSwitch = vtkPassThrough::New();
+    m_clippingSwitch = vtkSmartPointer<vtkPassThrough>::New();
+    m_colorSwitch = vtkSmartPointer<vtkPassThrough>::New();
 
-    m_referenceToPolyTransform = vtkTransform::New();
+    m_referenceToPolyTransform = vtkSmartPointer<vtkTransform>::New();
 
     // Clip octant from polydata
     m_clippingOn = false;
     m_interacting = false;
-    m_clippingPlanes = vtkPlanes::New();
-    m_clippingPlanes->SetTransform( m_referenceToPolyTransform );
+    m_clippingPlanes = vtkSmartPointer<vtkPlanes>::New();
+    m_clippingPlanes->SetTransform( m_referenceToPolyTransform.GetPointer() );
     InitializeClippingPlanes();
-    m_clipper = vtkClipPolyData::New();
-    m_clipper->SetClipFunction( m_clippingPlanes );
+    m_clipper = vtkSmartPointer<vtkClipPolyData>::New();
+    m_clipper->SetClipFunction( m_clippingPlanes.GetPointer() );
 
     // Cross section in 2d views
     for( int i = 0; i < 3; ++i )
     {
-        m_cuttingPlane[i] = vtkPlane::New();
-        m_cuttingPlane[i]->SetTransform( m_referenceToPolyTransform );
-        m_cutter[i] = vtkCutter::New();
+        m_cuttingPlane[i] = vtkSmartPointer<vtkPlane>::New();
+        m_cuttingPlane[i]->SetTransform( m_referenceToPolyTransform.GetPointer() );
+        m_cutter[i] = vtkSmartPointer<vtkCutter>::New();
         m_cutter[i]->SetInputConnection( m_colorSwitch->GetOutputPort() );
-        m_cutter[i]->SetCutFunction( m_cuttingPlane[i]);
+        m_cutter[i]->SetCutFunction( m_cuttingPlane[i].GetPointer());
     }
     m_cuttingPlane[0]->SetNormal( 1.0, 0.0, 0.0 );
     m_cuttingPlane[1]->SetNormal( 0.0, 1.0, 0.0 );
     m_cuttingPlane[2]->SetNormal( 0.0, 0.0, 1.0 );
 
     this->LutIndex = 0;
-    this->CurrentLut = 0;
     this->renderingMode = VTK_SURFACE;
     this->ScalarsVisible = 0;
     this->VertexColorMode = 0;
     this->ScalarSourceObjectId = SceneManager::InvalidId;
-    this->Property = vtkProperty::New();
+    this->Property = vtkSmartPointer<vtkProperty>::New();
     this->CrossSectionVisible = false;
     this->showTexture = false;
     this->Texture = 0;
 
-    m_2dProperty = vtkProperty::New();
+    m_2dProperty = vtkSmartPointer<vtkProperty>::New();
     m_2dProperty->SetAmbient( 1.0 );
     m_2dProperty->LightingOff();
 
     // Texture map filter
-    vtkTextureMapToSphere * map = vtkTextureMapToSphere::New();
+    vtkSmartPointer<vtkTextureMapToSphere> map = vtkSmartPointer<vtkTextureMapToSphere>::New();
     map->AutomaticSphereGenerationOn();
     map->PreventSeamOn();
     map->SetInputConnection( m_clippingSwitch->GetOutputPort() );
@@ -99,52 +97,30 @@ PolyDataObject::PolyDataObject()
 
     // Probe filter ( used to sample scalars from other dataset )
     this->ScalarSource = 0;
-    this->LutBackup = 0;
-    this->ProbeFilter = vtkProbeFilter::New();
+    this->LutBackup = vtkSmartPointer<vtkScalarsToColors>::New();
+    this->ProbeFilter = vtkSmartPointer<vtkProbeFilter>::New();
     this->ProbeFilter->SetInputConnection( m_clippingSwitch->GetOutputPort() );
 }
 
 PolyDataObject::~PolyDataObject()
 {
-    m_clipper->Delete();
-    m_colorSwitch->Delete();
-    m_clippingSwitch->Delete();
-    m_clippingPlanes->Delete();
-    m_referenceToPolyTransform->Delete();
-
-    // Cross section in 2d views
-    for( int i = 0; i < 3; ++i )
-    {
-        m_cutter[i]->Delete();
-        m_cuttingPlane[i]->Delete();
-    }
-
-    if( this->PolyData )
-    {
-        this->PolyData->UnRegister( this );
-    }
-    this->Property->Delete();
-    m_2dProperty->Delete();
-    if( this->Texture )
-        this->Texture->UnRegister( this );
     if( this->ScalarSource )
         this->ScalarSource->UnRegister( this );
-    this->TextureMap->Delete();
-    this->ProbeFilter->Delete();
+    if( this->Texture )
+        this->Texture->UnRegister( this );
 }
 
-void PolyDataObject::SetPolyData( vtkPolyData * poly )
+vtkPolyData * PolyDataObject::GetPolyData()
+{
+    return PolyData.GetPointer();
+}
+
+void PolyDataObject::SetPolyData(vtkSmartPointer<vtkPolyData> poly )
 {
     if( poly == this->PolyData )
         return;
 
-    if( this->PolyData )
-        this->PolyData->UnRegister( this );
     this->PolyData = poly;
-    if( this->PolyData )
-    {
-        this->PolyData->Register( this );
-    }
 
     UpdatePipeline();
 
@@ -217,43 +193,41 @@ void PolyDataObject::Export()
 
 void PolyDataObject::SavePolyData( QString &fileName )
 {
-    vtkPolyDataWriter *writer = vtkPolyDataWriter::New();
+    vtkSmartPointer<vtkPolyDataWriter> writer = vtkSmartPointer<vtkPolyDataWriter>::New();
     writer->SetFileName( fileName.toUtf8().data() );
-    writer->SetInputData(this->PolyData);
+    writer->SetInputData(this->PolyData.GetPointer());
     writer->Update();
     writer->Write();
-    writer->Delete();
 }
 
 void PolyDataObject::Setup( View * view )
 {
     SceneObject::Setup( view );
 
-    vtkPolyDataMapper * mapper = vtkPolyDataMapper::New();
+    vtkSmartPointer<vtkPolyDataMapper> mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
     mapper->SetScalarVisibility( this->ScalarsVisible );
     mapper->UseLookupTableScalarRangeOn();  // make sure mapper doesn't try to modify our color table
 
-    vtkActor * actor = vtkActor::New();
-    actor->SetMapper( mapper );
+    vtkSmartPointer<vtkActor> actor = vtkSmartPointer<vtkActor>::New();
+    actor->SetMapper( mapper.GetPointer() );
     actor->SetUserTransform( this->WorldTransform );
     this->polydataObjectInstances[ view ] = actor;
 
     if( view->GetType() == THREED_VIEW_TYPE )
     {   
-        actor->SetProperty( this->Property );
+        actor->SetProperty( this->Property.GetPointer() );
         mapper->SetInputConnection( m_colorSwitch->GetOutputPort() );
         actor->SetVisibility( this->ObjectHidden ? 0 : 1 );
-        view->GetRenderer( this->RenderLayer )->AddActor( actor );
+        view->GetRenderer( this->RenderLayer )->AddActor( actor.GetPointer() );
     }
     else
     {
-        actor->SetProperty( m_2dProperty );
+        actor->SetProperty( m_2dProperty.GetPointer() );
         int plane = (int)(view->GetType());
         mapper->SetInputConnection( m_cutter[plane]->GetOutputPort() );
         actor->SetVisibility( ( IsHidden() && GetCrossSectionVisible() ) ? 1 : 0 );
-        view->GetOverlayRenderer()->AddActor( actor );
+        view->GetOverlayRenderer()->AddActor( actor.GetPointer() );
     }
-    mapper->Delete();
 }
 
 void PolyDataObject::Release( View * view )
@@ -263,12 +237,11 @@ void PolyDataObject::Release( View * view )
     PolyDataObjectViewAssociation::iterator itAssociations = this->polydataObjectInstances.find( view );
     if( itAssociations != this->polydataObjectInstances.end() )
     {
-        vtkActor * actor = (*itAssociations).second;
+        vtkSmartPointer<vtkActor> actor = (*itAssociations).second;
         if( view->GetType() == THREED_VIEW_TYPE )
-            view->GetRenderer( this->RenderLayer )->RemoveViewProp( actor );
+            view->GetRenderer( this->RenderLayer )->RemoveViewProp( actor.GetPointer() );
         else
-            view->GetOverlayRenderer()->RemoveViewProp( actor );
-        actor->Delete();
+            view->GetOverlayRenderer()->RemoveViewProp( actor.GetPointer() );
         this->polydataObjectInstances.erase( itAssociations );
     }
 }
@@ -322,7 +295,6 @@ void PolyDataObject::SetLutIndex( int index )
     this->LutIndex = index;
     if( this->CurrentLut )
     {
-        this->CurrentLut->Delete();
         this->CurrentLut = 0;
     }
     UpdatePipeline();
@@ -358,7 +330,7 @@ void PolyDataObject::SetCrossSectionVisible( bool showCrossSection )
     for( ; it != this->polydataObjectInstances.end(); ++it )
     {
         View * v = (*it).first;
-        vtkActor * actor = (*it).second;
+        vtkSmartPointer<vtkActor> actor = (*it).second;
         if( v->GetType() != THREED_VIEW_TYPE )
             actor->SetVisibility( showCrossSection ? 1 : 0 );
     }
@@ -407,14 +379,14 @@ void PolyDataObject::SetTexture( vtkImageData * texImage )
         View * view = (*it).first;
         if( view->GetType() == THREED_VIEW_TYPE )
         {
-            vtkActor * actor = (*it).second;
+            vtkSmartPointer<vtkActor> actor = (*it).second;
             vtkTexture * tex = actor->GetTexture();
             if( tex )
             {
                 if( this->Texture )
                     tex->SetInputData( this->Texture );
                 else
-                    tex->SetInputData( this->checkerBoardTexture );
+                    tex->SetInputData( this->checkerBoardTexture.GetPointer() );
             }
         }
     }
@@ -433,7 +405,7 @@ void PolyDataObject::SetShowTexture( bool show )
         {
             int size = 200;
             int squareSize = 5;
-            this->checkerBoardTexture = vtkImageData::New();
+            this->checkerBoardTexture = vtkSmartPointer<vtkImageData>::New();
             this->checkerBoardTexture->SetDimensions( size, size, 1 );
             this->checkerBoardTexture->AllocateScalars(VTK_UNSIGNED_CHAR, 1);
             unsigned char * row = (unsigned char*) this->checkerBoardTexture->GetScalarPointer();
@@ -456,11 +428,11 @@ void PolyDataObject::SetShowTexture( bool show )
 
         vtkImageData * texture = this->Texture;
         if( !texture )
-            texture = this->checkerBoardTexture;
+            texture = this->checkerBoardTexture.GetPointer();
 
         // Add a vtkTexture to each actor to map the checker board onto object
         View * view = 0;
-        vtkActor * actor = 0;
+        vtkSmartPointer<vtkActor> actor;
         PolyDataObjectViewAssociation::iterator it = this->polydataObjectInstances.begin();
         for( ; it != this->polydataObjectInstances.end(); ++it )
         {
@@ -482,7 +454,7 @@ void PolyDataObject::SetShowTexture( bool show )
     {
         // remove texture from each of the actors
         View * view = 0;
-        vtkActor * actor = 0;
+        vtkSmartPointer<vtkActor> actor;
         PolyDataObjectViewAssociation::iterator it = this->polydataObjectInstances.begin();
         for( ; it != this->polydataObjectInstances.end(); ++it )
         {
@@ -494,22 +466,25 @@ void PolyDataObject::SetShowTexture( bool show )
             }
         }
     }
+    this->UpdatePipeline();
     emit Modified();
 }
 
 void PolyDataObject::SetTextureFileName( QString filename )
 {
-    this->textureFileName = filename;
     if( QFile::exists( filename ) )
     {
-        vtkPNGReader * reader = vtkPNGReader::New();
+        vtkSmartPointer<vtkPNGReader> reader = vtkSmartPointer<vtkPNGReader>::New();
         reader->SetFileName( filename.toUtf8().data() );
         reader->Update();
         this->SetTexture( reader->GetOutput() );
-        reader->Delete();
+        this->textureFileName = filename;
     }
     else
+    {
+        this->textureFileName = "";
         this->SetTexture( 0 );
+    }
 }
 
 
@@ -528,7 +503,7 @@ void PolyDataObject::SetScalarSource( ImageObject * im )
     {
         this->ScalarSource->Register( this );
         this->ProbeFilter->SetSourceData( this->ScalarSource->GetImage() );
-        this->LutBackup = this->ScalarSource->GetLut();
+        this->LutBackup->DeepCopy( this->ScalarSource->GetLut() );
         connect( this->ScalarSource, SIGNAL(RemovingFromScene()), this, SLOT(OnScalarSourceDeleted()) );
         connect( this->ScalarSource, SIGNAL(Modified()), this, SLOT(OnScalarSourceModified()) );
     }
@@ -571,9 +546,9 @@ void PolyDataObject::OnScalarSourceDeleted()
 void PolyDataObject::OnScalarSourceModified()
 {
     vtkScalarsToColors * newLut = this->ScalarSource->GetLut();
-    if( this->LutBackup != newLut )
+    if( this->LutBackup.GetPointer() != newLut )
     {
-        this->LutBackup = newLut;
+        this->LutBackup->DeepCopy( newLut );
         UpdatePipeline();
     }
     emit Modified();
@@ -584,7 +559,7 @@ void PolyDataObject::Hide()
     PolyDataObjectViewAssociation::iterator it = this->polydataObjectInstances.begin();
     for( ; it != this->polydataObjectInstances.end(); ++it )
     {
-        vtkActor * actor = (*it).second;
+        vtkSmartPointer<vtkActor> actor = (*it).second;
         actor->VisibilityOff();
     }
     emit Modified();
@@ -596,7 +571,7 @@ void PolyDataObject::Show()
     for( ; it != this->polydataObjectInstances.end(); ++it )
     {
         View * v = (*it).first;
-        vtkActor * actor = (*it).second;
+        vtkSmartPointer<vtkActor> actor = (*it).second;
         if( v->GetType() == THREED_VIEW_TYPE || GetCrossSectionVisible() )
             actor->VisibilityOn();
     }
@@ -668,11 +643,11 @@ void PolyDataObject::UpdatePipeline()
     if( !this->PolyData )
         return;
 
-    m_clipper->SetInputData( this->PolyData );
+    m_clipper->SetInputData( this->PolyData.GetPointer() );
     if( IsClippingEnabled() )
         m_clippingSwitch->SetInputConnection( m_clipper->GetOutputPort() );
     else
-        m_clippingSwitch->SetInputData( this->PolyData );
+        m_clippingSwitch->SetInputData( this->PolyData.GetPointer() );
 
     this->ProbeFilter->SetInputConnection( m_clippingSwitch->GetOutputPort() );
     this->TextureMap->SetInputConnection( m_clippingSwitch->GetOutputPort() );
@@ -690,13 +665,13 @@ void PolyDataObject::UpdatePipeline()
     PolyDataObjectViewAssociation::iterator it = this->polydataObjectInstances.begin();
     while( it != this->polydataObjectInstances.end() )
     {
-        vtkActor * actor = (*it).second;
+        vtkSmartPointer<vtkActor> actor = (*it).second;
         vtkMapper * mapper = actor->GetMapper();
         mapper->SetScalarVisibility( this->ScalarsVisible );
         if( this->VertexColorMode == 1 && this->ScalarSource )
             mapper->SetLookupTable( this->ScalarSource->GetLut() );
         else if ( this->CurrentLut )
-            mapper->SetLookupTable( this->CurrentLut );
+            mapper->SetLookupTable( this->CurrentLut.GetPointer() );
         ++it;
     }
 }
@@ -709,37 +684,35 @@ vtkScalarsToColors * PolyDataObject::GetCurrentLut()
 
     // LUT already exists
     if( this->CurrentLut )
-        return this->CurrentLut;
+        return this->CurrentLut.GetPointer();
 
     // Create a new LUT if needed
     Q_ASSERT( this->GetManager() );
     Q_ASSERT( this->LutIndex < Application::GetLookupTableManager()->GetNumberOfTemplateLookupTables() );
     Q_ASSERT( this->PolyData );
     QString tableName = Application::GetLookupTableManager()->GetTemplateLookupTableName( this->LutIndex );
-    vtkPiecewiseFunctionLookupTable * lut = vtkPiecewiseFunctionLookupTable::New();
+    vtkSmartPointer<vtkPiecewiseFunctionLookupTable> lut = vtkSmartPointer<vtkPiecewiseFunctionLookupTable>::New();
     double range[2];
     this->PolyData->GetScalarRange( range );
     Application::GetLookupTableManager()->CreateLookupTable( tableName, range, lut );
     this->CurrentLut = lut;
-    return this->CurrentLut;
+    return this->CurrentLut.GetPointer();
 }
 
 void PolyDataObject::InitializeClippingPlanes()
 {
-    vtkDoubleArray * clipPlaneNormals = vtkDoubleArray::New();
+    vtkSmartPointer<vtkDoubleArray> clipPlaneNormals = vtkSmartPointer<vtkDoubleArray>::New();
     clipPlaneNormals->SetNumberOfComponents( 3 );
     clipPlaneNormals->SetNumberOfTuples(3);
     clipPlaneNormals->SetTuple3( 0, -1.0, 0.0, 0.0 );
     clipPlaneNormals->SetTuple3( 1, 0.0, -1.0, 0.0 );
     clipPlaneNormals->SetTuple3( 2, 0.0, 0.0, -1.0 );
-    m_clippingPlanes->SetNormals( clipPlaneNormals );
-    clipPlaneNormals->Delete();
+    m_clippingPlanes->SetNormals( clipPlaneNormals.GetPointer() );
 
-    vtkPoints * p = vtkPoints::New();
+    vtkSmartPointer<vtkPoints> p = vtkSmartPointer<vtkPoints>::New();
     p->SetNumberOfPoints( 3 );
     p->SetPoint( 0, 0.0, 0.0, 0.0 );
     p->SetPoint( 1, 0.0, 0.0, 0.0 );
     p->SetPoint( 2, 0.0, 0.0, 0.0 );
     m_clippingPlanes->SetPoints( p );
-    p->Delete();
 }

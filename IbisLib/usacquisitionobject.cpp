@@ -28,8 +28,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "vtkImageLuminance.h"
 #include "vtkMatrix4x4.h"
 #include "vtkMath.h"
-#include "vtkTransform.h"
-#include "vtkImageStencil.h"
 #include "vtkImageToImageStencil.h"
 #include "vtkEventQtSlotConnect.h"
 #include "vtkImageConstantPad.h" // added Mar 2, 2016, Xiao
@@ -37,8 +35,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "vtkRenderer.h"
 #include "vtkActor.h"
 #include "vtkLookupTable.h"
-#include "vtkImageMapToColors.h"
-#include "vtkImageActor.h"
 #include "vtkImageMapper3D.h"
 #include "vtkImageProperty.h"
 #include "vtkLookupTable.h"
@@ -67,56 +63,56 @@ USAcquisitionObject::USAcquisitionObject()
     m_acquisitionType = UsProbeObject::ACQ_B_MODE;
 
     // current slice
-    m_calibrationTransform = vtkTransform::New();
-    m_sliceTransform = vtkTransform::New();
+    m_calibrationTransform = vtkSmartPointer<vtkTransform>::New();
+    m_sliceTransform = vtkSmartPointer<vtkTransform>::New();
     m_sliceTransform->Concatenate( this->WorldTransform );
-    m_currentImageTransform = vtkTransform::New();
+    m_currentImageTransform = vtkSmartPointer<vtkTransform>::New();
     m_sliceTransform->Concatenate( m_currentImageTransform );
     m_sliceTransform->Concatenate( m_calibrationTransform );
-    m_sliceProperties = vtkImageProperty::New();
+    m_sliceProperties = vtkSmartPointer<vtkImageProperty>::New();
     m_sliceLutIndex = 1;         // default to hot metal
-    m_lut = vtkPiecewiseFunctionLookupTable::New();
+    m_lut = vtkSmartPointer<vtkPiecewiseFunctionLookupTable>::New();
     m_lut->SetIntensityFactor( 1.0 );
-    m_mapToColors = vtkImageMapToColors::New();
-    m_mapToColors->SetLookupTable( m_lut );
+    m_mapToColors = vtkSmartPointer<vtkImageMapToColors>::New();
+    m_mapToColors->SetLookupTable( m_lut.GetPointer() );
     m_mapToColors->SetOutputFormatToRGBA();
     m_mapToColors->SetInputConnection( m_videoBuffer->GetVideoOutputPort() );
 
     m_mask = USMask::New(); // default mask
 
-    m_imageStencilSource = vtkImageToImageStencil::New();
+    m_imageStencilSource = vtkSmartPointer<vtkImageToImageStencil>::New();
     m_imageStencilSource->SetInputData( m_mask->GetMask() );
     m_imageStencilSource->ThresholdByUpper( 128.0 );
     m_imageStencilSource->UpdateWholeExtent();
 
-    m_sliceStencil = vtkImageStencil::New();
+    m_sliceStencil = vtkSmartPointer<vtkImageStencil>::New();
     m_sliceStencil->SetStencilData( m_imageStencilSource->GetOutput() );
     m_sliceStencil->SetInputConnection( m_mapToColors->GetOutputPort() );
     m_sliceStencil->SetBackgroundColor( 1.0, 1.0, 1.0, 0.0 );
 
     m_isMaskOn = true;
 
-    m_constantPad = vtkImageConstantPad::New();
+    m_constantPad = vtkSmartPointer<vtkImageConstantPad>::New();
     m_constantPad->SetConstant(255);
     m_constantPad->SetOutputNumberOfScalarComponents(4);
     m_constantPad->SetInputConnection( m_videoBuffer->GetVideoOutputPort() );
     m_isDopplerOn = false; // default state is B-mode
 
-    m_sliceStencilDoppler = vtkImageStencil::New();
+    m_sliceStencilDoppler = vtkSmartPointer<vtkImageStencil>::New();
     m_sliceStencilDoppler->SetStencilData( m_imageStencilSource->GetOutput() );
     m_sliceStencilDoppler->SetInputConnection( m_constantPad->GetOutputPort() );
     m_sliceStencilDoppler->SetBackgroundColor( 1.0, 1.0, 1.0, 0.0 );
 
     // Outputs
-    m_maskedImageOutput = vtkPassThrough::New();
+    m_maskedImageOutput = vtkSmartPointer<vtkPassThrough>::New();
     m_maskedImageOutput->SetInputConnection( m_sliceStencil->GetOutputPort() );
-    m_unmaskedImageOutput = vtkPassThrough::New();
+    m_unmaskedImageOutput = vtkSmartPointer<vtkPassThrough>::New();
     m_unmaskedImageOutput->SetInputConnection( m_mapToColors->GetOutputPort() );
 
     // static slices
     m_staticSlicesEnabled = false;
     m_numberOfStaticSlices = 2;   // default = first and last
-    m_staticSlicesProperties = vtkImageProperty::New();
+    m_staticSlicesProperties = vtkSmartPointer<vtkImageProperty>::New();
     m_staticSlicesLutIndex = 0;  // default to greyscale
     m_staticSlicesDataNeedUpdate = true;
     m_defaultImageSize[0] = 640;
@@ -127,15 +123,7 @@ USAcquisitionObject::~USAcquisitionObject()
 {
     disconnect(this);
 
-    m_sliceTransform->Delete();
-    m_sliceProperties->Delete();
-    m_staticSlicesProperties->Delete();
-
-    m_sliceStencil->Delete();
-    m_sliceStencilDoppler->Delete();
-    m_mapToColors->Delete();
     m_mask->Delete();
-    m_constantPad->Delete();
     ClearStaticSlicesData();
 
     delete m_videoBuffer;
@@ -164,16 +152,16 @@ void USAcquisitionObject::Setup( View * view )
     if( view->GetType() == THREED_VIEW_TYPE )
     {
         PerViewElements elem;
-        elem.imageSlice = vtkImageActor::New();
-        elem.imageSlice->SetUserTransform( m_sliceTransform );
+        elem.imageSlice = vtkSmartPointer<vtkImageActor>::New();
+        elem.imageSlice->SetUserTransform( m_sliceTransform.GetPointer() );
         elem.imageSlice->SetVisibility( !this->IsHidden() && this->GetNumberOfSlices()> 0 ? 1 : 0 );
-        elem.imageSlice->SetProperty( m_sliceProperties );
+        elem.imageSlice->SetProperty( m_sliceProperties.GetPointer() );
         if( m_isMaskOn )
             elem.imageSlice->GetMapper()->SetInputConnection( m_sliceStencil->GetOutputPort() );
         else
             elem.imageSlice->GetMapper()->SetInputConnection( m_mapToColors->GetOutputPort() );
 
-        view->GetRenderer()->AddActor( elem.imageSlice );
+        view->GetRenderer()->AddActor( elem.imageSlice.GetPointer() );
 
         SetupAllStaticSlices( view, elem );
 
@@ -191,8 +179,7 @@ void USAcquisitionObject::Release( View * view )
         View * view = (*it).first;
         vtkRenderer * ren = view->GetRenderer();
         PerViewElements & perView = (*it).second;
-        ren->RemoveActor( perView.imageSlice );
-        perView.imageSlice->Delete();
+        ren->RemoveActor( perView.imageSlice.GetPointer() );
         ReleaseAllStaticSlices( view, perView );
         ++it;
     }
@@ -273,7 +260,7 @@ void USAcquisitionObject::UpdatePipeline()
 
         for( unsigned i = 0; i < perView.staticSlices.size(); ++i ) // don't touch the static for now
         {
-            vtkImageActor * staticActor = perView.staticSlices[i];
+            vtkSmartPointer<vtkImageActor> staticActor = perView.staticSlices[i];
             if( m_isMaskOn )
                 staticActor->GetMapper()->SetInputConnection( m_staticSlicesData[i].imageStencil->GetOutputPort() );//
             else
@@ -287,7 +274,7 @@ void USAcquisitionObject::UpdatePipeline()
 
 void USAcquisitionObject::HideStaticSlices( PerViewElements & perView )
 {
-    std::vector<vtkImageActor*>::iterator it = perView.staticSlices.begin();
+    std::vector< vtkSmartPointer<vtkImageActor> >::iterator it = perView.staticSlices.begin();
     while( it != perView.staticSlices.end() )
     {
         (*it)->VisibilityOff();
@@ -298,7 +285,7 @@ void USAcquisitionObject::HideStaticSlices( PerViewElements & perView )
 
 void USAcquisitionObject::ShowStaticSlices( PerViewElements & perView )
 {
-    std::vector<vtkImageActor*>::iterator it = perView.staticSlices.begin();
+    std::vector< vtkSmartPointer<vtkImageActor> >::iterator it = perView.staticSlices.begin();
     while( it != perView.staticSlices.end() )
     {
         (*it)->VisibilityOn();
@@ -429,10 +416,9 @@ vtkAlgorithmOutput * USAcquisitionObject::GetUnmaskedOutputPort()
 
 void USAcquisitionObject::SetCalibrationMatrix( vtkMatrix4x4 * mat )
 {
-    vtkMatrix4x4 * matCopy = vtkMatrix4x4::New();
+    vtkSmartPointer<vtkMatrix4x4> matCopy = vtkSmartPointer<vtkMatrix4x4>::New();
     matCopy->DeepCopy( mat );
     m_calibrationTransform->SetMatrix( matCopy );
-    matCopy->Delete();
     emit Modified();
 }
 
@@ -470,18 +456,18 @@ void USAcquisitionObject::SetupAllStaticSlices( View * view, PerViewElements & p
     {
         PerStaticSlice & pss = m_staticSlicesData[i];
 
-        vtkImageActor * imageActor = vtkImageActor::New();
+        vtkSmartPointer<vtkImageActor> imageActor = vtkSmartPointer<vtkImageActor>::New();
         if( m_isMaskOn )
             imageActor->GetMapper()->SetInputConnection( pss.imageStencil->GetOutputPort() );
         else
             imageActor->GetMapper()->SetInputConnection( pss.mapToColors->GetOutputPort() );
-        imageActor->SetProperty( m_staticSlicesProperties );
-        imageActor->SetUserTransform( pss.transform );
+        imageActor->SetProperty( m_staticSlicesProperties.GetPointer() );
+        imageActor->SetUserTransform( pss.transform.GetPointer() );
         if( !this->IsHidden() && m_staticSlicesEnabled )
             imageActor->VisibilityOn();
         else
             imageActor->VisibilityOff();
-        view->GetRenderer()->AddActor( imageActor );
+        view->GetRenderer()->AddActor( imageActor.GetPointer() );
 
         perView.staticSlices.push_back( imageActor );
     }
@@ -499,12 +485,12 @@ void USAcquisitionObject::ReleaseAllStaticSlicesInAllViews()
 
 void USAcquisitionObject::ReleaseAllStaticSlices( View * view, PerViewElements & perView )
 {
-    std::vector<vtkImageActor*>::iterator it = perView.staticSlices.begin();
+    std::vector< vtkSmartPointer<vtkImageActor> >::iterator it = perView.staticSlices.begin();
     while( it != perView.staticSlices.end() )
     {
-        vtkImageActor * actor = (*it);
-        view->GetRenderer()->RemoveActor( actor );
-        actor->Delete();
+        vtkSmartPointer<vtkImageActor> actor = (*it);
+        view->GetRenderer()->RemoveActor( actor.GetPointer() );
+        actor = 0; //Anka - not sure
         ++it;
     }
     perView.staticSlices.clear();
@@ -543,39 +529,29 @@ void USAcquisitionObject::ComputeOneStaticSliceData( int sliceIndex )
     vtkMatrix4x4 * sliceUncalibratedMatrix = m_videoBuffer->GetMatrix( sliceIndex );
 
     // Compute the (masked) image
-    pss.mapToColors = vtkImageMapToColors::New();
+    pss.mapToColors = vtkSmartPointer<vtkImageMapToColors>::New();
     pss.mapToColors->SetOutputFormatToRGBA();
     pss.mapToColors->SetInputData( slice );
 
 
-    pss.imageStencil = vtkImageStencil::New();
+    pss.imageStencil = vtkSmartPointer<vtkImageStencil>::New();
     pss.imageStencil->SetStencilData( m_imageStencilSource->GetOutput() );
     pss.imageStencil->SetInputConnection( pss.mapToColors->GetOutputPort() );
     pss.imageStencil->SetBackgroundColor( 1.0, 1.0, 1.0, 0.0 );
 
     // compute the transform of the slice
-    vtkTransform * sliceUncalibratedTransform = vtkTransform::New();
+    vtkSmartPointer<vtkTransform> sliceUncalibratedTransform = vtkSmartPointer<vtkTransform>::New();
     sliceUncalibratedTransform->SetMatrix( sliceUncalibratedMatrix );
-    pss.transform = vtkTransform::New();
+    pss.transform = vtkSmartPointer<vtkTransform>::New();
     pss.transform->Concatenate( this->WorldTransform );
-    pss.transform->Concatenate( sliceUncalibratedTransform );
-    pss.transform->Concatenate( m_calibrationTransform );
+    pss.transform->Concatenate( sliceUncalibratedTransform.GetPointer() );
+    pss.transform->Concatenate( m_calibrationTransform.GetPointer() );
     pss.transform->Update();
     m_staticSlicesData.push_back( pss );
-
-    // cleanup
-    sliceUncalibratedTransform->Delete();
 }
 
 void USAcquisitionObject::ClearStaticSlicesData()
 {
-    for( unsigned i = 0; i < m_staticSlicesData.size(); ++i )
-    {
-        PerStaticSlice & pss = m_staticSlicesData[i];
-        pss.mapToColors->Delete();
-        pss.imageStencil->Delete();
-        pss.transform->Delete();
-    }
     m_staticSlicesData.clear();
 }
 
@@ -591,7 +567,7 @@ bool USAcquisitionObject::LoadFramesFromMINCFile( QStringList & allMINCFiles )
     QProgressDialog * progress = new QProgressDialog("Importing frames", "Cancel", 0, allMINCFiles.count() );
     progress->setAttribute(Qt::WA_DeleteOnClose, true);
     progress->show();
-    ImageObject *img = ImageObject::New();
+    vtkSmartPointer<ImageObject> img = vtkSmartPointer<ImageObject>::New();
     for( int i = 0; i < allMINCFiles.count() && processOK; ++i )
     {
         QFileInfo fi( allMINCFiles.at(i) );
@@ -603,27 +579,23 @@ bool USAcquisitionObject::LoadFramesFromMINCFile( QStringList & allMINCFiles )
             processOK = false;
             break;
         }
-        if ( Application::GetInstance().GetImageDataFromVideoFrame( allMINCFiles.at(i), img ) )
+        if ( Application::GetInstance().GetImageDataFromVideoFrame( allMINCFiles.at(i), img.GetPointer() ) )
         {
             // create full transform and reset image step and origin in order to avoid
             // double translation and scaling and display slices correctly in double view
             double start[3], step[3];
-            vtkImageData *frame = vtkImageData::New();
+            vtkSmartPointer<vtkImageData>frame = vtkSmartPointer<vtkImageData>::New();
             frame->DeepCopy( img->GetImage() );
             frame->GetOrigin(start);
             frame->GetSpacing(step);
-            vtkTransform *localTransform = vtkTransform::New();
+            vtkSmartPointer<vtkTransform> localTransform = vtkSmartPointer<vtkTransform>::New();
             localTransform->SetMatrix(img->GetLocalTransform()->GetMatrix());
             localTransform->Translate(start);
             localTransform->Scale(step);
             frame->SetOrigin(0,0,0);
             frame->SetSpacing(1,1,1);
 
-            m_videoBuffer->AddFrame( frame, localTransform->GetMatrix() );
-            frame->Delete();
-
-            localTransform->Delete();
-
+            m_videoBuffer->AddFrame( frame.GetPointer(), localTransform->GetMatrix() );
             progress->setValue(i);
             qApp->processEvents();
             if ( progress->wasCanceled() )
@@ -635,7 +607,6 @@ bool USAcquisitionObject::LoadFramesFromMINCFile( QStringList & allMINCFiles )
         else // if first file was not read in, the others won't neither
             processOK = false;
     }
-    img->Delete();
     progress->close();
     return processOK;
 }
@@ -798,25 +769,23 @@ bool USAcquisitionObject::GetItkImage(IbisItk3DImageType::Pointer itkOutputImage
     vtkImageData *grayImage = initialImage;
     if (numberOfScalarComponents > 1)
     {
-        vtkImageLuminance *luminanceFilter = vtkImageLuminance::New();
+        vtkSmartPointer<vtkImageLuminance> luminanceFilter = vtkSmartPointer<vtkImageLuminance>::New();
         luminanceFilter->SetInputData(initialImage);
         luminanceFilter->Update();
-        grayImage = luminanceFilter->GetOutput();
+        grayImage->DeepCopy( luminanceFilter->GetOutput() );
     }
-    vtkImageData * image;
-    vtkImageShiftScale *shifter = vtkImageShiftScale::New();
+    vtkImageData * image = initialImage;
     if (initialImage->GetScalarType() != VTK_FLOAT)
     {
+        vtkSmartPointer<vtkImageShiftScale> shifter = vtkSmartPointer<vtkImageShiftScale>::New();
         shifter->SetOutputScalarType(VTK_FLOAT);
         shifter->SetClampOverflow(1);
         shifter->SetInputData(grayImage);
         shifter->SetShift(0);
         shifter->SetScale(1.0);
         shifter->Update();
-        image = shifter->GetOutput();
+        image->DeepCopy( shifter->GetOutput() );
     }
-    else
-        image = initialImage;
 
     image->GetOrigin(org);
     image->GetSpacing(st);
@@ -841,8 +810,8 @@ bool USAcquisitionObject::GetItkImage(IbisItk3DImageType::Pointer itkOutputImage
     itk::Vector< double, 3 > origin;
     itk::Vector< double, 3 > itkOrigin;
     // set direction cosines
-    vtkMatrix4x4 * tmpMat = vtkMatrix4x4::New();
-    vtkMatrix4x4::Transpose( sliceMatrix, tmpMat );
+    vtkSmartPointer<vtkMatrix4x4> tmpMat = vtkSmartPointer<vtkMatrix4x4>::New();
+    vtkMatrix4x4::Transpose( sliceMatrix, tmpMat.GetPointer() );
     double step[3], mincStartPoint[3], dirCos[3][3];
     for( int i = 0; i < 3; i++ )
     {
@@ -868,8 +837,6 @@ bool USAcquisitionObject::GetItkImage(IbisItk3DImageType::Pointer itkOutputImage
     itkOutputImage->Allocate();
     float *itkImageBuffer = itkOutputImage->GetBufferPointer();
     memcpy(itkImageBuffer, image->GetScalarPointer(), numberOfPixels*sizeof(float));
-    tmpMat->Delete();
-    shifter->Delete();
     return true;
 }
 
@@ -925,8 +892,8 @@ void USAcquisitionObject:: GetItkRGBImage(IbisRGBImageType::Pointer itkOutputIma
     itk::Vector< double, 3 > origin;
     itk::Vector< double, 3 > itkOrigin;
     // set direction cosines
-    vtkMatrix4x4 * tmpMat = vtkMatrix4x4::New();
-    vtkMatrix4x4::Transpose( frameMatrix, tmpMat );
+    vtkSmartPointer<vtkMatrix4x4> tmpMat = vtkSmartPointer<vtkMatrix4x4>::New();
+    vtkMatrix4x4::Transpose( frameMatrix.GetPointer(), tmpMat.GetPointer() );
     double step[3], mincStartPoint[3], dirCos[3][3];
     for( int i = 0; i < 3; i++ )
     {
@@ -1107,11 +1074,10 @@ void USAcquisitionObject::ExportTrackedVideoBuffer(QString destDir , bool masked
     {
         QString calibrationTransformFileName( subDirName );
         calibrationTransformFileName.append( "/calibrationTransform.xfm" );
-        vtkXFMWriter * writer = vtkXFMWriter::New();
+        vtkSmartPointer<vtkXFMWriter> writer = vtkSmartPointer<vtkXFMWriter>::New();
         writer->SetFileName( calibrationTransformFileName.toUtf8().data() );
         writer->SetMatrix( m_calibrationTransform->GetMatrix() );
         writer->Write();
-        writer->Delete();
     }
     if( !processOK )
         QMessageBox::warning( 0, "Error: ", "Exporting frames failed.", 1, 0 );
@@ -1136,17 +1102,16 @@ bool USAcquisitionObject::Import()
             calibrationTransformFileName.append( "/calibrationTransform.xfm" );
             if( QFile::exists( calibrationTransformFileName ) )
             {
-                vtkXFMReader *reader = vtkXFMReader::New();
+                vtkSmartPointer<vtkXFMReader> reader = vtkSmartPointer<vtkXFMReader>::New();
                 if( reader->CanReadFile( calibrationTransformFileName.toUtf8() ) )
                 {
-                    vtkMatrix4x4 * mat = vtkMatrix4x4::New();
+                    vtkSmartPointer<vtkMatrix4x4> mat = vtkSmartPointer<vtkMatrix4x4>::New();
                     reader->SetFileName( calibrationTransformFileName.toUtf8() );
-                    reader->SetMatrix( mat );
+                    reader->SetMatrix( mat.GetPointer() );
                     reader->Update();
-                    m_calibrationTransform->SetMatrix( mat );
+                    m_calibrationTransform->SetMatrix( mat.GetPointer() );
                     m_calibrationTransform->Update();
                 }
-                reader->Delete();
             }
         }
     }
@@ -1243,14 +1208,12 @@ void USAcquisitionObject::SetStaticSlicesLutIndex( int index )
     m_staticSlicesLutIndex = index;
     double range[2] = { 0.0, 255.0 };
     QString staticSlicesLutName = Application::GetLookupTableManager()->GetTemplateLookupTableName( m_staticSlicesLutIndex );
-    vtkPiecewiseFunctionLookupTable * staticLut = vtkPiecewiseFunctionLookupTable::New();
+    vtkSmartPointer<vtkPiecewiseFunctionLookupTable> staticLut = vtkSmartPointer<vtkPiecewiseFunctionLookupTable>::New();
     staticLut->SetIntensityFactor( 1.0 );
     Application::GetLookupTableManager()->CreateLookupTable( staticSlicesLutName, range, staticLut );
     for( unsigned i = 0; i < m_staticSlicesData.size(); ++i )
     {
-        m_staticSlicesData[i].mapToColors->SetLookupTable( staticLut );
+        m_staticSlicesData[i].mapToColors->SetLookupTable( staticLut.GetPointer() );
     }
-    staticLut->Delete();
     emit Modified();
 }
-

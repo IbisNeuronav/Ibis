@@ -21,25 +21,22 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 ContourSurfacePluginInterface::ContourSurfacePluginInterface()
 {
-    m_generatedSurface = 0;
 }
 
 ContourSurfacePluginInterface::~ContourSurfacePluginInterface()
 {
-    if( m_generatedSurface )
-        m_generatedSurface ->Delete();
 }
 
 SceneObject *ContourSurfacePluginInterface::CreateObject()
 {
     SceneManager *manager = GetSceneManager();
     Q_ASSERT(manager);
-    m_generatedSurface = GeneratedSurface::New();
+    m_generatedSurface = vtkSmartPointer<GeneratedSurface>::New();
     m_generatedSurface->SetPluginInterface( this );
     if( manager->IsLoadingScene() )
     {
         manager->AddObject(m_generatedSurface);
-        return m_generatedSurface;
+        return m_generatedSurface.GetPointer();
     }
     // If we have a current object we build surface now
     SceneObject *obj = manager->GetCurrentObject();
@@ -49,11 +46,10 @@ SceneObject *ContourSurfacePluginInterface::CreateObject()
         double imageRange[2];
         image->GetImageScalarRange(imageRange);
         double contourValue = imageRange[0]+(imageRange[1]-imageRange[0])/5.0; //the best seems to be 20% of max, tested on Colin27
-        m_generatedSurface->SetImageObject(image);
+        m_generatedSurface->SetImageObjectID( image->GetObjectID() );
         m_generatedSurface->SetContourValue(contourValue);
         m_generatedSurface->SetGaussianSmoothingFlag(true);
-        vtkPolyData *surface = m_generatedSurface->GenerateSurface();
-        if (surface)
+        if ( m_generatedSurface->GenerateSurface() )
         {
             QString surfaceName(image->GetName());
             int n = surfaceName.lastIndexOf('.');
@@ -69,7 +65,7 @@ SceneObject *ContourSurfacePluginInterface::CreateObject()
             manager->AddObject(m_generatedSurface, image);
             manager->SetCurrentObject( m_generatedSurface );
         }
-        return m_generatedSurface;
+        return m_generatedSurface.GetPointer();
     }
     QMessageBox::warning( 0, "Error!", "Current object should be an ImageObject" );
     return NULL;

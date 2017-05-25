@@ -15,6 +15,7 @@ class vtkPolyData;
 class vtkPoints;
 class vtkCellArray;
 class vtkUnsignedCharArray;
+#include "vtkSmartPointer.h"
 
 class LinesFactory
 {
@@ -24,7 +25,7 @@ public:
     LinesFactory();
     ~LinesFactory();
 
-    vtkPolyData * GetPolyData() { return m_poly; }
+    vtkSmartPointer<vtkPolyData> GetPolyData() { return m_poly; }
     void StartNewSegment();
     bool IsStartingSegment() { return m_startSegment; }
     void SetColor( unsigned char r, unsigned char g, unsigned char b, unsigned char a );
@@ -39,10 +40,10 @@ public:
 protected:
 
     bool m_startSegment;
-    vtkPolyData * m_poly;
-    vtkPoints * m_pts;
-    vtkCellArray * m_lines;
-    vtkUnsignedCharArray * m_scalars;
+    vtkSmartPointer<vtkPolyData> m_poly;
+    vtkSmartPointer<vtkPoints> m_pts;
+    vtkSmartPointer<vtkCellArray> m_lines;
+    vtkSmartPointer<vtkUnsignedCharArray> m_scalars;
     unsigned char m_color[4];
 };
 

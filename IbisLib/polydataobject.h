@@ -16,6 +16,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <map>
 #include <QVector>
 #include "vtkProperty.h"
+#include "vtkSmartPointer.h"
 
 class vtkPolyData;
 class vtkTransform;
@@ -50,8 +51,8 @@ public:
     virtual void Export();
     virtual bool IsExportable()  { return true; }
 
-    vtkGetObjectMacro( PolyData, vtkPolyData );
-    void SetPolyData( vtkPolyData * data );
+    vtkPolyData *GetPolyData();
+    void SetPolyData( vtkSmartPointer<vtkPolyData> data );
     
     // Implementation of parent virtual method
     virtual void Setup( View * view );
@@ -121,21 +122,21 @@ protected:
     vtkScalarsToColors * GetCurrentLut();
     void InitializeClippingPlanes();
         
-    vtkPolyData * PolyData;
-    vtkPassThrough * m_clippingSwitch;
-    vtkPassThrough * m_colorSwitch;
+    vtkSmartPointer<vtkPolyData> PolyData;
+    vtkSmartPointer<vtkPassThrough> m_clippingSwitch;
+    vtkSmartPointer<vtkPassThrough> m_colorSwitch;
 
     int LutIndex;
-    vtkScalarsToColors * CurrentLut;
-    vtkImageData * Texture;
-    vtkDataSetAlgorithm * TextureMap;
+    vtkSmartPointer<vtkScalarsToColors> CurrentLut;
+    vtkImageData* Texture;
+    vtkSmartPointer<vtkDataSetAlgorithm> TextureMap;
     ImageObject * ScalarSource;
-    vtkScalarsToColors * LutBackup;
-    vtkProbeFilter * ProbeFilter;
-    vtkProperty * Property;
-    vtkProperty * m_2dProperty;
+    vtkSmartPointer<vtkScalarsToColors> LutBackup;
+    vtkSmartPointer<vtkProbeFilter> ProbeFilter;
+    vtkSmartPointer<vtkProperty> Property;
+    vtkSmartPointer<vtkProperty> m_2dProperty;
     
-    typedef std::map<View*,vtkActor*> PolyDataObjectViewAssociation;
+    typedef std::map< View*,vtkSmartPointer<vtkActor> > PolyDataObjectViewAssociation;
     PolyDataObjectViewAssociation polydataObjectInstances;
     
     int       renderingMode;  // one of VTK_POINTS, VTK_WIREFRAME or VTK_SURFACE
@@ -146,18 +147,18 @@ protected:
     int       ScalarSourceObjectId;
 
     // Cross section in 2d views
-    vtkCutter * m_cutter[3];
-    vtkPlane * m_cuttingPlane[3];
+    vtkSmartPointer<vtkCutter> m_cutter[3];
+    vtkSmartPointer<vtkPlane> m_cuttingPlane[3];
     bool CrossSectionVisible;
 
     // Clipping an octant from surface
-    vtkClipPolyData * m_clipper;
-    vtkTransform * m_referenceToPolyTransform;
-    vtkPlanes * m_clippingPlanes;
+    vtkSmartPointer<vtkClipPolyData> m_clipper;
+    vtkSmartPointer<vtkTransform> m_referenceToPolyTransform;
+    vtkSmartPointer<vtkPlanes> m_clippingPlanes;
     bool m_clippingOn;
     bool m_interacting;
 
-    static vtkImageData * checkerBoardTexture;
+    static vtkSmartPointer<vtkImageData> checkerBoardTexture;
 };
 
 ObjectSerializationHeaderMacro( PolyDataObject );

@@ -16,7 +16,7 @@ ObjectSerializationMacro( USMask );
 
 USMask::USMask()
 {
-    m_mask = vtkImageData::New();
+    m_mask = vtkSmartPointer<vtkImageData>::New();
     m_defaultMaskSize[0] = MASK_WIDTH;
     m_defaultMaskSize[1] = MASK_HEIGHT;
     m_defaultMaskAngles[0] = MASK_ANGLE_LEFT;
@@ -45,7 +45,6 @@ USMask::USMask()
 
 USMask::~USMask()
 {
-    m_mask->Delete();
 }
 
 USMask::USMask( const USMask& usmask )
@@ -130,6 +129,10 @@ void USMask::SetAsDefault()
     m_defaultMaskDepthBottom = m_maskDepthBottom;
 }
 
+vtkImageData * USMask::GetMask()
+{
+    return m_mask.GetPointer();
+}
 void USMask::SetMaskSize( int size[2] )
 {
     m_maskSize[0] = size[0];

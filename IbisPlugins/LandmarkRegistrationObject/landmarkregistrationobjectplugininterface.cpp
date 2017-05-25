@@ -23,26 +23,23 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 LandmarkRegistrationObjectPluginInterface::LandmarkRegistrationObjectPluginInterface()
 {
-    m_landmarkRegistrationObject = 0;
 }
 
 LandmarkRegistrationObjectPluginInterface::~LandmarkRegistrationObjectPluginInterface()
 {
-    if (m_landmarkRegistrationObject)
-        m_landmarkRegistrationObject->Delete();
 }
 
 SceneObject *LandmarkRegistrationObjectPluginInterface::CreateObject()
 {
     SceneManager *manager = GetSceneManager();
     Q_ASSERT(manager);
-    PointsObject *sourcePoints = PointsObject::New();
+    vtkSmartPointer<PointsObject>sourcePoints = vtkSmartPointer<PointsObject>::New();
     sourcePoints->SetName( "RegistrationSourcePoints" );
     sourcePoints->SetListable( false );
     sourcePoints->SetCanChangeParent( false );
     double color[3] = {0.0, 1.0, 0.0};
     sourcePoints->SetSelectedColor(color);
-    PointsObject *targetPoints = PointsObject::New();
+    vtkSmartPointer<PointsObject> targetPoints = vtkSmartPointer<PointsObject>::New();
     targetPoints->SetName( "RegistrationTargetPoints" );
     targetPoints->SetListable( false );
     targetPoints->SetCanChangeParent( true );
@@ -50,15 +47,13 @@ SceneObject *LandmarkRegistrationObjectPluginInterface::CreateObject()
     targetPoints->SetSelectedColor(color1);
     double color2[3] = {0.3, 0.3, 1.0};
     targetPoints->SetDisabledColor(color2);
-    m_landmarkRegistrationObject = LandmarkRegistrationObject::New();
+    m_landmarkRegistrationObject = vtkSmartPointer<LandmarkRegistrationObject>::New();
     m_landmarkRegistrationObject->SetName( "Landmark Registration" );
-    manager->AddObject( m_landmarkRegistrationObject );
-    manager->AddObject( sourcePoints, m_landmarkRegistrationObject );
-    manager->AddObject( targetPoints, manager->GetSceneRoot() );
+    manager->AddObject( m_landmarkRegistrationObject.GetPointer() );
+    manager->AddObject( sourcePoints.GetPointer(), m_landmarkRegistrationObject.GetPointer() );
+    manager->AddObject( targetPoints.GetPointer(), manager->GetSceneRoot() );
     m_landmarkRegistrationObject->SetTargetObjectID( manager->GetSceneRoot()->GetObjectID() );
-    m_landmarkRegistrationObject->SetSourcePoints( sourcePoints );
-    m_landmarkRegistrationObject->SetTargetPoints( targetPoints );
-    sourcePoints->Delete();
-    targetPoints->Delete();
-    return m_landmarkRegistrationObject;
+    m_landmarkRegistrationObject->SetSourcePoints( sourcePoints.GetPointer() );
+    m_landmarkRegistrationObject->SetTargetPoints( targetPoints.GetPointer() );
+    return m_landmarkRegistrationObject.GetPointer();
 }

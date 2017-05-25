@@ -23,7 +23,7 @@ PointPropertiesWidget::PointPropertiesWidget(QWidget *parent) :
     ui->setupUi(this);
     ui->pointRadiusSpinBox->blockSignals(true);
     ui->pointRadiusSpinBox->setMinimum(1);
-    ui->pointRadiusSpinBox->setMaximum(MAX_RADIUS);
+    ui->pointRadiusSpinBox->setMaximum(PointsObject::MaxRadius);
     ui->pointRadiusSpinBox->blockSignals(false);
     ui->pointRadius2DSpinBox->blockSignals(true);
     ui->pointRadius2DSpinBox->setMinimum(1);

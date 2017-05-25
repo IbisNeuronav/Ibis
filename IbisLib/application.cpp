@@ -44,6 +44,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QPushButton>
 #include <QApplication>
 #include <QMenu>
+#include "vtkSmartPointer.h"
 
 Application * Application::m_uniqueInstance = NULL;
 const QString Application::m_appName("ibis");
@@ -569,21 +570,10 @@ bool Application::OpenTransformFile( const char * filename, vtkMatrix4x4 * mat )
     return false;
 }
 
-#include "usacquisitionobject.h"
-
 void Application::ImportUsAcquisition()
 {
-    USAcquisitionObject * acq = USAcquisitionObject::New();
-    if( acq->Import() )
-    {
-        m_sceneManager->AddObject( acq );
-        m_sceneManager->SetCurrentObject( acq );
-    }
-    else
-    {
+    if( !m_sceneManager->ImportUsAcquisition() )
         QMessageBox::warning( m_mainWindow, "ERROR", "Couldn't read image sequence" );
-    }
-    acq->Delete();
 }
 
 void Application::ImportCamera()

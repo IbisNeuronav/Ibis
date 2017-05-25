@@ -16,6 +16,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "Animation.h"
 #include "CameraKey.h"
 #include "serializer.h"
+#include "vtkSmartPointer.h"
 
 class vtkCameraInterpolator;
 class vtkCamera;
@@ -39,7 +40,7 @@ protected:
 	
     void UpdateInterpolator();
 	
-	vtkCameraInterpolator * m_interpolator;
+    vtkSmartPointer<vtkCameraInterpolator> m_interpolator;
 	
 };
 

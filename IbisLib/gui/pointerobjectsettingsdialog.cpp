@@ -52,7 +52,7 @@ void PointerObjectSettingsDialog::SetPointer(PointerObject *ptr)
     }
 }
 
-void PointerObjectSettingsDialog::SetPointerPickedPointsObject(PointsObject *pts)
+void PointerObjectSettingsDialog::SetPointerPickedPointsObject(vtkSmartPointer<PointsObject> pts)
 {
     if (pts == m_pointerPickedPointsObject)
         return;
@@ -74,6 +74,7 @@ void PointerObjectSettingsDialog::on_savePositionPushButton_clicked()
         double *pos = m_pointer->GetTipPosition();
         int index = m_pointerPickedPointsObject->GetNumberOfPoints();
         m_pointerPickedPointsObject->AddPoint(QString::number(index+1), pos);
+        m_pointerPickedPointsObject->MoveCursorToPoint( index );
         if (delayAddObject)
             m_pointer->ManagerAddPointerPickedPointsObject();
     }
@@ -85,9 +86,10 @@ void PointerObjectSettingsDialog::on_newPointsObjectPushButton_clicked()
     m_pointer->CreatePointerPickedPointsObject();
     this->SetPointerPickedPointsObject(m_pointer->GetCurrentPointerPickedPointsObject());
     m_pointer->ManagerAddPointerPickedPointsObject();
+    this->UpdatePointSetsComboBox();
 }
 
-void PointerObjectSettingsDialog::UpdateSettings()
+void PointerObjectSettingsDialog::UpdateUI()
 {
     Q_ASSERT(m_pointer);
     this->UpdatePointSetsComboBox();
@@ -96,7 +98,7 @@ void PointerObjectSettingsDialog::UpdateSettings()
 void PointerObjectSettingsDialog::on_pointSetsComboBox_activated( int index )
 {
     Q_ASSERT(m_pointer);
-    QList <PointsObject*> PointerPickedPointsObjectList = m_pointer->GetPointerPickedPointsObjects();
+    QList <vtkSmartPointer<PointsObject> > PointerPickedPointsObjectList = m_pointer->GetPointerPickedPointsObjects();
     if (index >= 0 && index < PointerPickedPointsObjectList.count())
     {
         m_pointerPickedPointsObject = PointerPickedPointsObjectList.value(index);
@@ -108,7 +110,7 @@ void PointerObjectSettingsDialog::UpdatePointSetsComboBox()
 {
     int currentIndex = 0;
     ui->pointSetsComboBox->clear();
-    QList <PointsObject*> PointerPickedPointsObjectList = m_pointer->GetPointerPickedPointsObjects();
+    QList <vtkSmartPointer<PointsObject> > PointerPickedPointsObjectList = m_pointer->GetPointerPickedPointsObjects();
     if (PointerPickedPointsObjectList.count() > 0)
     {
         for (int i = 0; i < PointerPickedPointsObjectList.count(); i++)

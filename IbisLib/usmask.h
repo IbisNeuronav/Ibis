@@ -13,6 +13,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include <QObject>
 #include <vtkObject.h>
+#include <vtkSmartPointer.h>
 #include <math.h>
 #include "serializer.h"
 
@@ -34,7 +35,7 @@ public:
 
     virtual void Serialize( Serializer * ser );
 
-    vtkImageData *GetMask() { return m_mask; }
+    vtkImageData *GetMask();
 
     void ResetToDefault();
     void SetAsDefault();
@@ -85,7 +86,7 @@ protected:
     double m_defaultMaskDepthBottom;
     double m_defaultMaskAngles[2];
 
-    vtkImageData *m_mask;
+    vtkSmartPointer<vtkImageData> m_mask;
     
     void BuildMask();
 };

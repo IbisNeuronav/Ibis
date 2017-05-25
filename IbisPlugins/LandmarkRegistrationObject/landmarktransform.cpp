@@ -24,51 +24,37 @@ LandmarkTransform::~LandmarkTransform()
     this->Clear();
 }
 
-void LandmarkTransform::SetSourcePoints(vtkPoints *pts)
+void LandmarkTransform::SetSourcePoints(vtkSmartPointer<vtkPoints> pts)
 {
-    if (this->SourcePoints == pts)
-        return;
-    if (this->SourcePoints)
-        this->SourcePoints->UnRegister(this);
-    this->SourcePoints = pts;
-    if (this->SourcePoints)
-    {
-        this->SourcePoints->Register(this);
-    }
+    if (this->SourcePoints != pts)
+        this->SourcePoints = pts;
 }
 
-void LandmarkTransform::SetTargetPoints(vtkPoints *pts)
+void LandmarkTransform::SetTargetPoints(vtkSmartPointer<vtkPoints> pts)
 {
-    if (this->TargetPoints == pts)
-        return;
-    if (this->TargetPoints)
-        this->TargetPoints->UnRegister(this);
-    this->TargetPoints = pts;
-    if (this->TargetPoints)
-    {
-        this->TargetPoints->Register(this);
-    }
+    if (this->TargetPoints != pts)
+        this->TargetPoints = pts;
 }
 
-double LandmarkTransform::GetFRE(int index)
+bool LandmarkTransform::GetFRE(int index, double &fre)
 {
     if( this->SourcePoints->GetNumberOfPoints() > 2 &&
-        this->FiducialRegistrationErrorMagnitude &&
         index < this->FiducialRegistrationErrorMagnitude->GetNumberOfTuples() && index >= 0 )
     {
-        return this->FiducialRegistrationErrorMagnitude->GetValue(index);
+        fre = this->FiducialRegistrationErrorMagnitude->GetValue(index);
+        return true;
     }
-    return INVALID_NUMBER;
+    return false;
 }
 
-double LandmarkTransform::GetRMS(int index)
+bool LandmarkTransform::GetRMS(int index, double &rms)
 {
-    if( this->FiducialRegistrationErrorRMS &&
-        index < this->FiducialRegistrationErrorRMS->GetNumberOfTuples() && index >= 0 )
+    if( index < this->FiducialRegistrationErrorRMS->GetNumberOfTuples() && index >= 0 )
     {
-        return this->FiducialRegistrationErrorRMS->GetValue(index);
+        rms = this->FiducialRegistrationErrorRMS->GetValue(index);
+        return true;
     }
-    return INVALID_NUMBER;
+    return false;
 }
 
 bool LandmarkTransform::IsScalingAllowed()
@@ -93,13 +79,13 @@ void LandmarkTransform::SetScalingAllowed( bool allow )
 
 void LandmarkTransform::Init()
 {
-    this->FiducialRegistrationError = vtkPoints::New();
-    this->FiducialRegistrationErrorMagnitude = vtkDoubleArray::New();
-    this->FiducialRegistrationErrorRMS = vtkDoubleArray::New();
+    this->FiducialRegistrationError = vtkSmartPointer<vtkPoints>::New();
+    this->FiducialRegistrationErrorMagnitude = vtkSmartPointer<vtkDoubleArray>::New();
+    this->FiducialRegistrationErrorRMS = vtkSmartPointer<vtkDoubleArray>::New();
     this->FinalRMS = 0.0;
-    this->InternalTransform = vtkLandmarkTransform::New();
+    this->InternalTransform = vtkSmartPointer<vtkLandmarkTransform>::New();
     this->InternalTransform->SetModeToRigidBody();
-    this->RegistrationTransform = vtkLandmarkTransform::New();
+    this->RegistrationTransform = vtkSmartPointer<vtkLandmarkTransform>::New();
     this->RegistrationTransform->SetModeToRigidBody();
     this->SourcePoints = 0;
     this->TargetPoints = 0;
@@ -107,15 +93,8 @@ void LandmarkTransform::Init()
 
 void LandmarkTransform::Clear()
 {
-    this->SourcePoints->UnRegister(this);
     this->SourcePoints = 0;
-    this->TargetPoints->UnRegister(this);
     this->TargetPoints = 0;
-    this->FiducialRegistrationError->Delete();
-    this->FiducialRegistrationErrorMagnitude->Delete();
-    this->FiducialRegistrationErrorRMS->Delete();
-    this->InternalTransform->Delete();
-    this->RegistrationTransform->Delete();
     this->FinalRMS = 0.0;
 }
 
@@ -133,10 +112,10 @@ bool LandmarkTransform::UpdateRegistrationTransform()
 
 bool LandmarkTransform::InternalUpdate()
 {
-    if (this->SourcePoints && this->SourcePoints->GetNumberOfPoints() > 2 ) // && this->TargetPoints && this->TargetPoints->GetNumberOfPoints() == this->SourcePoints->GetNumberOfPoints())
+    if (this->SourcePoints && this->SourcePoints->GetNumberOfPoints() > 2 )
     {
-        this->InternalTransform->SetSourceLandmarks( SourcePoints );
-        this->InternalTransform->SetTargetLandmarks( TargetPoints );
+        this->InternalTransform->SetSourceLandmarks( SourcePoints.GetPointer() );
+        this->InternalTransform->SetTargetLandmarks( TargetPoints.GetPointer() );
         this->InternalTransform->Update( );
         this->UpdateFRE( );
         return true;
@@ -185,4 +164,9 @@ void LandmarkTransform::Reset()
 {
     this->Clear( );
     this->Init( );
+}
+
+vtkLandmarkTransform * LandmarkTransform::GetRegistrationTransform()
+{
+    return this->RegistrationTransform.GetPointer();
 }

@@ -28,7 +28,6 @@ class vtkQtRenderWindow;
 class QVTKWidget2;
 class QFrame;
 class SceneManager;
-class View;
 class vtkRenderWindowInteractor;
 
 //#define USE_QVTKWIDGET_2

@@ -39,30 +39,29 @@ View::View()
     this->SetName( DefaultViewNames[THREED_VIEW_TYPE] );
     this->RenderWindow = 0;
     this->m_renderingEnabled = true;
-    this->Interactor = 0;
-    this->InteractorStyle = vtkInteractorStyleTerrain::New();
+    this->InteractorStyle = vtkSmartPointer<vtkInteractorStyleTerrain>::New();
     this->Picker = vtkCellPicker::New();
     this->Picker->SetTolerance(0.005); //need some fluff
     this->Picker->PickFromListOn();
     this->Type = THREED_VIEW_TYPE;
-    this->Renderer = vtkRenderer::New();
+    this->Renderer = vtkSmartPointer<vtkRenderer>::New();
     this->Renderer->SetLayer( 0 );
     this->Renderer->GetActiveCamera()->SetPosition( 1, 0, 0 );
     this->Renderer->GetActiveCamera()->SetFocalPoint( 0, 0, 0 );
     this->Renderer->GetActiveCamera()->SetViewUp( 0, 0, 1 );
-    this->OverlayRenderer = vtkRenderer::New();
+    this->OverlayRenderer = vtkSmartPointer<vtkRenderer>::New();
     this->OverlayRenderer->SetLayer( 1 );
     this->OverlayRenderer->SetActiveCamera( this->Renderer->GetActiveCamera() ); // use same camera as main renderer
-    this->OverlayRenderer2 = vtkRenderer::New();
+    this->OverlayRenderer2 = vtkSmartPointer<vtkRenderer>::New();
     this->OverlayRenderer2->SetLayer( 2 );
     this->OverlayRenderer2->SetActiveCamera( this->Renderer->GetActiveCamera() ); // use same camera as main renderer
     this->Manager = 0;
-    this->PrevViewingTransform = vtkMatrix4x4::New();
+    this->PrevViewingTransform = vtkSmartPointer<vtkMatrix4x4>::New();
     this->PrevViewingTransform->Identity();
-    this->EventObserver = vtkEventQtSlotConnect::New();
+    this->EventObserver = vtkSmartPointer<vtkEventQtSlotConnect>::New();
 
     // Callback to observe interaction events
-    this->InteractionCallback = vtkObjectCallback<View>::New();
+    this->InteractionCallback = vtkSmartPointer< vtkObjectCallback<View> >::New();
     this->InteractionCallback->SetCallback( this, &View::ProcessInteractionEvents );
     this->Priority = 2.0;
     m_leftButtonDown = false;
@@ -75,15 +74,8 @@ View::View()
 
 View::~View()
 {
-    this->Interactor->UnRegister( this );
-    this->Renderer->Delete();
-    this->OverlayRenderer->Delete();
-    this->OverlayRenderer2->Delete();
     if( this->Picker )
         this->Picker->Delete();
-    this->InteractorStyle->UnRegister( this );
-    this->PrevViewingTransform->Delete();
-    this->EventObserver->Delete();
 }
 
 void View::Serialize( Serializer * ser )
@@ -142,8 +134,7 @@ void View::SetType( int type )
             this->Renderer->GetActiveCamera()->SetViewUp( 0, 0, 1 ); 
             if (this->InteractorStyle)
             {
-                this->InteractorStyle->Delete();
-                this->InteractorStyle = vtkInteractorStyleImage2::New();
+                this->InteractorStyle = vtkSmartPointer<vtkInteractorStyleImage2>::New();
             }
             this->SetName( DefaultViewNames[SAGITTAL_VIEW_TYPE] );
             break;
@@ -154,8 +145,7 @@ void View::SetType( int type )
             this->Renderer->GetActiveCamera()->SetViewUp( 0, 0, 1 ); 
             if (this->InteractorStyle)
             {
-                this->InteractorStyle->Delete();
-                this->InteractorStyle = vtkInteractorStyleImage2::New();
+                this->InteractorStyle = vtkSmartPointer<vtkInteractorStyleImage2>::New();
             }
             this->SetName( DefaultViewNames[CORONAL_VIEW_TYPE] );
             break;
@@ -166,8 +156,7 @@ void View::SetType( int type )
             this->Renderer->GetActiveCamera()->SetViewUp( 0, 1, 0 ); //nose up
             if (this->InteractorStyle)
             {
-                this->InteractorStyle->Delete();
-                this->InteractorStyle = vtkInteractorStyleImage2::New();
+                this->InteractorStyle = vtkSmartPointer<vtkInteractorStyleImage2>::New();
             }
             this->SetName( DefaultViewNames[TRANSVERSE_VIEW_TYPE] );
             break;
@@ -208,6 +197,11 @@ void View::SetRenderingEnabled( bool b )
         NotifyNeedRender();
 }
 
+vtkRenderWindowInteractor * View::GetInteractor()
+{
+    return this->Interactor.GetPointer();
+}
+
 void View::SetInteractor( vtkRenderWindowInteractor * interactor )
 {
     if( interactor == this->Interactor )
@@ -220,10 +214,8 @@ void View::SetInteractor( vtkRenderWindowInteractor * interactor )
         this->ReleaseAllObjects();
         this->EventObserver->Disconnect( this->Interactor );
         this->EventObserver->Disconnect( this->Interactor->GetRenderWindow() );
-        this->Interactor->UnRegister( this );
     }
     
-    interactor->Register( this );
     this->Interactor = interactor;
     this->SetupAllObjects();
     this->Interactor->SetInteractorStyle( this->InteractorStyle );
@@ -240,16 +232,16 @@ void View::SetInteractor( vtkRenderWindowInteractor * interactor )
     this->Interactor->EnableRenderOff();
     this->EventObserver->Connect( this->Interactor, vtkCommand::RenderEvent, this, SLOT(NotifyNeedRender()) );
 
-    this->Interactor->AddObserver( vtkCommand::KeyPressEvent, this->InteractionCallback, this->Priority );
-    this->Interactor->AddObserver( vtkCommand::LeftButtonPressEvent, this->InteractionCallback, this->Priority );
-    this->Interactor->AddObserver( vtkCommand::LeftButtonReleaseEvent, this->InteractionCallback, this->Priority );
-    this->Interactor->AddObserver( vtkCommand::MiddleButtonPressEvent, this->InteractionCallback, this->Priority );
-    this->Interactor->AddObserver( vtkCommand::MiddleButtonReleaseEvent, this->InteractionCallback, this->Priority );
-    this->Interactor->AddObserver( vtkCommand::RightButtonPressEvent, this->InteractionCallback, this->Priority );
-    this->Interactor->AddObserver( vtkCommand::RightButtonReleaseEvent, this->InteractionCallback, this->Priority );
-    this->Interactor->AddObserver( vtkCommand::MouseWheelForwardEvent, this->InteractionCallback, this->Priority );
-    this->Interactor->AddObserver( vtkCommand::MouseWheelBackwardEvent, this->InteractionCallback, this->Priority );
-    this->Interactor->AddObserver( vtkCommand::MouseMoveEvent, this->InteractionCallback, this->Priority );
+    this->Interactor->AddObserver( vtkCommand::KeyPressEvent, this->InteractionCallback.GetPointer(), this->Priority );
+    this->Interactor->AddObserver( vtkCommand::LeftButtonPressEvent, this->InteractionCallback.GetPointer(), this->Priority );
+    this->Interactor->AddObserver( vtkCommand::LeftButtonReleaseEvent, this->InteractionCallback.GetPointer(), this->Priority );
+    this->Interactor->AddObserver( vtkCommand::MiddleButtonPressEvent, this->InteractionCallback.GetPointer(), this->Priority );
+    this->Interactor->AddObserver( vtkCommand::MiddleButtonReleaseEvent, this->InteractionCallback.GetPointer(), this->Priority );
+    this->Interactor->AddObserver( vtkCommand::RightButtonPressEvent, this->InteractionCallback.GetPointer(), this->Priority );
+    this->Interactor->AddObserver( vtkCommand::RightButtonReleaseEvent, this->InteractionCallback.GetPointer(), this->Priority );
+    this->Interactor->AddObserver( vtkCommand::MouseWheelForwardEvent, this->InteractionCallback.GetPointer(), this->Priority );
+    this->Interactor->AddObserver( vtkCommand::MouseWheelBackwardEvent, this->InteractionCallback.GetPointer(), this->Priority );
+    this->Interactor->AddObserver( vtkCommand::MouseMoveEvent, this->InteractionCallback.GetPointer(), this->Priority );
 }
 
 vtkRenderer * View::GetRenderer( int level )
@@ -267,6 +259,21 @@ vtkRenderer * View::GetRenderer( int level )
     return GetRenderer();
 }
 
+vtkRenderer * View::GetRenderer()
+{
+    return this->Renderer.GetPointer();
+}
+
+vtkRenderer * View::GetOverlayRenderer()
+{
+    return this->OverlayRenderer.GetPointer();
+}
+
+vtkRenderer * View::GetOverlayRenderer2()
+{
+    return this->OverlayRenderer2.GetPointer();
+}
+
 void View::SetManager( SceneManager * manager )
 {
     if( this->Manager )
@@ -282,19 +289,20 @@ void View::SetManager( SceneManager * manager )
 
 void View::SetInteractorStyle( vtkInteractorStyle * style )
 {
-    if( this->InteractorStyle )
-        this->InteractorStyle->UnRegister( this );
-
     this->InteractorStyle = style;
 
     if( this->InteractorStyle )
     {
-        this->InteractorStyle->Register( this );
         if( this->Interactor )
             this->Interactor->SetInteractorStyle( this->InteractorStyle );
     }
 }
-   
+
+vtkInteractorStyle * View::GetInteractorStyle()
+{
+    return this->InteractorStyle.GetPointer();
+}
+
 void View::ReleaseView()
 {
     if( CurrentController )

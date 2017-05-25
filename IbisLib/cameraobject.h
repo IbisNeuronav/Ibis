@@ -17,6 +17,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <map>
 #include <QVector>
 #include "SVL.h"
+#include "vtkSmartPointer.h"
 
 class TrackedVideoBuffer;
 class vtkCamera;
@@ -190,9 +191,9 @@ protected:
 
     void ClearDrawingOneView( View * v, PerViewElements & elem );
 
-    vtkCamera * m_camera;
-    vtkPolyData * m_cameraPolyData;
-    vtkTransform * m_imageTransform;
+    vtkSmartPointer<vtkCamera> m_camera;
+    vtkSmartPointer<vtkPolyData> m_cameraPolyData;
+    vtkSmartPointer<vtkTransform> m_imageTransform;
     CameraIntrinsicParams m_intrinsicParams;
     bool m_intrinsicEditable;
     bool m_extrinsicEditable;
@@ -207,15 +208,15 @@ protected:
     double m_transparencyCenter[2];
     double m_transparencyRadius[2];
 
-    vtkPassThrough * m_videoInputSwitch;
+    vtkSmartPointer<vtkPassThrough> m_videoInputSwitch;
 
     // alternative to m_trackedVideoSource in case we want to show a static image and its transforms
     TrackedVideoBuffer * m_videoBuffer;
-    vtkTransform * m_lensDisplacementTransform;
-    vtkTransform * m_opticalCenterTransform;
+    vtkSmartPointer<vtkTransform> m_lensDisplacementTransform;
+    vtkSmartPointer<vtkTransform> m_opticalCenterTransform;
 
     // Hold data used for recording
-    CameraObject * m_recordingCamera;
+    vtkSmartPointer<CameraObject> m_recordingCamera;
 
     bool m_trackingCamera;
     int m_cachedImageSize[2];  // used to determine when image size is changed
