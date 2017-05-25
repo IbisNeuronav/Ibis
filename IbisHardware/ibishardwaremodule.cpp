@@ -57,11 +57,13 @@ bool IbisHardwareModule::Init()
 
     // Init tracker
     m_tracker->Initialize();
+    if( !m_tracker->IsInitialized() )
+        return false;
 
     // Init video
-    m_trackedVideoSource->InitializeVideo();
+    if( !m_trackedVideoSource->InitializeVideo() )
+        return false;
 
-    // simtodo : don't always return true
     return true;
 }
 
