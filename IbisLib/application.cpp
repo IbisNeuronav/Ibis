@@ -322,8 +322,7 @@ void Application::InitHardware()
     foreach( HardwareModule * module, m_hardwareModules )
         success |= module->Init();
 
-    // Restart the clock if hardware running
-    if( success )
+    if( m_hardwareModules.size() > 0 )
     {
         m_updateManager->SetUpdatePeriod( (int)( 1000.0 / m_settings.UpdateFrequency )  );
         m_updateManager->Start();
