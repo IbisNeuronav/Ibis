@@ -389,17 +389,15 @@ void GPU_RigidRegistrationWidget::UpdateUi()
       ui->initialSigmaComboBox->setCurrentIndex( 1 );
 
       SceneManager * sm = m_application->GetSceneManager();
-      const SceneManager::ObjectList & allObjects = sm->GetAllObjects();
-      for( int i = 0; i < allObjects.size(); ++i )
+      QList< ImageObject* > imObjects;
+      sm->GetAllImageObjects( imObjects );
+      for( int i = 0; i < imObjects.size(); ++i )
       {
-          SceneObject * current = allObjects[i];
+          ImageObject * current = imObjects[i];
           if( current != sm->GetSceneRoot() && current->IsListable() && !current->IsManagedByTracker())
           {
-              if( current->IsA("ImageObject") )
-              {
-                  ui->targetImageComboBox->addItem( current->GetName(), QVariant( current->GetObjectID() ) );
-                  ui->sourceImageComboBox->addItem( current->GetName(), QVariant( current->GetObjectID() ) );
-              }
+              ui->targetImageComboBox->addItem( current->GetName(), QVariant( current->GetObjectID() ) );
+              ui->sourceImageComboBox->addItem( current->GetName(), QVariant( current->GetObjectID() ) );
           }
       }
 

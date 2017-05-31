@@ -42,21 +42,19 @@ SceneObject::SceneObject()
     this->ObjectManagedByTracker = false;
     this->AllowManualTransformEdit = true;
     this->LocalTransform = vtkTransform::New();  // by default, we have a vtkTransform that can be manipulated manually. Could be changed in certain object types.
-    this->WorldTransform = vtkTransform::New();
+    this->WorldTransform = vtkSmartPointer<vtkTransform>::New();
     this->IsModifyingTransform = false;
     this->TransformModified = false;
     this->RenderLayer = 0;
-    this->m_vtkConnections = vtkEventQtSlotConnect::New();
+    this->m_vtkConnections = vtkSmartPointer<vtkEventQtSlotConnect>::New();
     this->m_vtkConnections->Connect( this->LocalTransform, vtkCommand::ModifiedEvent, this, SLOT(NotifyTransformChanged()), 0, 0.0, Qt::DirectConnection );
     this->m_vtkConnections->Connect( this->WorldTransform, vtkCommand::ModifiedEvent, this, SLOT(NotifyTransformChanged()), 0, 0.0, Qt::DirectConnection );
 }
 
 SceneObject::~SceneObject() 
 {
-    this->m_vtkConnections->Delete();
 	if (this->LocalTransform)
 		this->LocalTransform->UnRegister( this );
-	this->WorldTransform->Delete();
 }
 
 void SceneObject::Serialize( Serializer * ser )
@@ -171,6 +169,11 @@ void SceneObject::SetLocalTransform( vtkLinearTransform * localTransform )
     this->m_vtkConnections->Connect( this->LocalTransform, vtkCommand::ModifiedEvent, this, SLOT(NotifyTransformChanged()), 0, 0.0, Qt::DirectConnection );
 
 	UpdateWorldTransform();
+}
+
+vtkTransform * SceneObject::GetWorldTransform()
+{
+    return this->WorldTransform.GetPointer();
 }
 
 void SceneObject::NotifyTransformChanged()
@@ -304,7 +307,7 @@ void SceneObject::UpdateWorldTransform()
 	this->WorldTransform->Identity();
 
 	if( Parent )
-		this->WorldTransform->Concatenate( Parent->WorldTransform );
+        this->WorldTransform->Concatenate( Parent->GetWorldTransform() );
     if( LocalTransform )
         this->WorldTransform->Concatenate( LocalTransform );
 

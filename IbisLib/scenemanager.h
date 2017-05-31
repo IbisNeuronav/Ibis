@@ -270,9 +270,6 @@ public:
     void ObjectWriter( Serializer * ser );
 
     // Description
-    const ObjectList & GetAllObjects() { return AllObjects; }
-
-    // Description
     // returns list of all the user created/added objects with their parents
     int  GetNumberOfUserObjects();
     void GetAllUserObjects(QList<SceneObject*> &);

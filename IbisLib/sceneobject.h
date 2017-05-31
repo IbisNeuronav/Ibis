@@ -12,6 +12,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #define TAG_SCENEOBJECT_H
 
 #include "vtkObject.h"
+#include "vtkSmartPointer.h"
 #include <QObject>
 #include <QString>
 #include <QVector>
@@ -61,7 +62,7 @@ public:
 
     void SetLocalTransform( vtkLinearTransform * localTransform );
     vtkGetObjectMacro( LocalTransform, vtkLinearTransform );
-    vtkGetObjectMacro( WorldTransform, vtkTransform );
+    vtkTransform* GetWorldTransform();
     bool CanEditTransformManually() { return AllowManualTransformEdit; }
     void SetCanEditTransformManually( bool c ) { AllowManualTransformEdit = c; }
 
@@ -175,12 +176,11 @@ protected:
 	//	WorldTransform(Tw) is a concatenation of all transforms affecting the object: Tw = Tp * Tl
 	//  Tp is parent transform.
     virtual void UpdateWorldTransform();
-    vtkTransform * WorldTransform;
     vtkLinearTransform * LocalTransform;
     bool IsModifyingTransform;
     bool TransformModified;
 
-    vtkEventQtSlotConnect * m_vtkConnections;
+    vtkSmartPointer<vtkEventQtSlotConnect> m_vtkConnections;
     
     // The following vector is used to remember which actors were instanciated
     // for every view so we can remove them or add new objects as children
@@ -211,6 +211,7 @@ private:
     friend class SceneManager;
     SceneManager * Manager;
     int ObjectID;
+    vtkSmartPointer<vtkTransform> WorldTransform;
 };
 
 ObjectSerializationHeaderMacro( SceneObject );

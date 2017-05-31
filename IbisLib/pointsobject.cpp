@@ -443,7 +443,7 @@ void PointsObject::MoveCursorToPoint( int index )
     {
         double * pos = m_pointCoordinates->GetPoint( index ); //in PointsObject space
         double worldPos[3];
-        this->WorldTransform->TransformPoint( pos, worldPos );
+        this->GetWorldTransform()->TransformPoint( pos, worldPos );
         this->GetManager()->SetCursorWorldPosition(worldPos);
     }
 }

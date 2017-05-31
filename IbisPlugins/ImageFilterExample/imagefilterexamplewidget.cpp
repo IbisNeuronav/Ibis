@@ -110,11 +110,12 @@ void ImageFilterExampleWidget::UpdateUi()
     if( m_application )
     {
         SceneManager * sm = m_application->GetSceneManager();
-        const SceneManager::ObjectList & allObjects = sm->GetAllObjects();
+        QList<SceneObject*> allObjects;
+        sm->GetAllListableNonTrackedObjects( allObjects );
         for( int i = 0; i < allObjects.size(); ++i )
         {
             SceneObject * current = allObjects[i];
-            if( current != sm->GetSceneRoot() && current->IsListable() )
+            if( current != sm->GetSceneRoot() )
             {
                 vtkTransform * localTransform = vtkTransform::SafeDownCast( current->GetLocalTransform() );
                 if( localTransform && current->CanEditTransformManually() )

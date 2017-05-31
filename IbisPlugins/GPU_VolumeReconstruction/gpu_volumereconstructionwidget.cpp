@@ -302,39 +302,35 @@ void GPU_VolumeReconstructionWidget::on_startButton_clicked()
 
 void GPU_VolumeReconstructionWidget::UpdateUi()
 {
-
-  ui->usAcquisitionComboBox->clear();
-  ui->usSearchRadiusComboBox->clear();
-  ui->usVolumeSpacingComboBox->clear();
-  if( m_application )
+    ui->usAcquisitionComboBox->clear();
+    ui->usSearchRadiusComboBox->clear();
+    ui->usVolumeSpacingComboBox->clear();
+    if( m_application )
     {
-      SceneManager * sm = m_application->GetSceneManager();
-      const SceneManager::ObjectList & allObjects = sm->GetAllObjects();
-      for( int i = 0; i < allObjects.size(); ++i )
+        SceneManager * sm = m_application->GetSceneManager();
+        QList<USAcquisitionObject*> acquisitions;
+        sm->GetAllUSAcquisitionObjects( acquisitions );
+        for( int i = 0; i < acquisitions.size(); ++i )
         {
-          SceneObject * current = allObjects[i];
-          if( current != sm->GetSceneRoot() && current->IsListable() && !current->IsManagedByTracker())
+            USAcquisitionObject * current = acquisitions[i];
+            if( current->IsListable() && !current->IsManagedByTracker())
             {
-              if( current->IsA("USAcquisitionObject") )
-                {
-                  USAcquisitionObject * currentUSAcquisitionObject = USAcquisitionObject::SafeDownCast( current );
-                  ui->usAcquisitionComboBox->addItem( current->GetName(), QVariant( current->GetObjectID() ) );
-                }
+                USAcquisitionObject * currentUSAcquisitionObject = USAcquisitionObject::SafeDownCast( current );
+                ui->usAcquisitionComboBox->addItem( current->GetName(), QVariant( current->GetObjectID() ) );
             }
         }
 
-      if( ui->usAcquisitionComboBox->count() == 0 )
+        if( ui->usAcquisitionComboBox->count() == 0 )
         {
-          ui->usAcquisitionComboBox->addItem( "None", QVariant(-1) );
+            ui->usAcquisitionComboBox->addItem( "None", QVariant(-1) );
         }
 
-      for(unsigned int i=0; i <=3 ; i++)
+        for(unsigned int i=0; i <=3 ; i++)
         {
-          ui->usSearchRadiusComboBox->addItem( QString::number(i) , QVariant(i) );
+            ui->usSearchRadiusComboBox->addItem( QString::number(i) , QVariant(i) );
         }
 
-      ui->usVolumeSpacingComboBox->addItem( QString("1.0 mm x 1.0 mm x 1.0 mm"), QVariant( 1.0 ) );
-      ui->usVolumeSpacingComboBox->addItem( QString("0.5 mm x 0.5 mm x 0.5 mm"), QVariant( 0.5 ) );
+        ui->usVolumeSpacingComboBox->addItem( QString("1.0 mm x 1.0 mm x 1.0 mm"), QVariant( 1.0 ) );
+        ui->usVolumeSpacingComboBox->addItem( QString("0.5 mm x 0.5 mm x 0.5 mm"), QVariant( 0.5 ) );
     }
-
 }
