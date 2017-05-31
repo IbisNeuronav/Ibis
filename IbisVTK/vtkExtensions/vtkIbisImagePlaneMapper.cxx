@@ -280,8 +280,8 @@ void vtkIbisImagePlaneMapper::UpdateTexture()
     GLint internalFormat = GL_RGB;
     if( input->GetNumberOfScalarComponents() == 1 )
     {
-        format = GL_RED;
-        internalFormat = GL_RED;
+        format = GL_LUMINANCE;
+        internalFormat = GL_LUMINANCE;
     }
 
     // Setup the texture
