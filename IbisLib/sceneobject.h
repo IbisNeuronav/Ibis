@@ -61,7 +61,7 @@ public:
     void SetFullFileName( QString FullFileName ) {this->FullFileName = FullFileName;}
 
     void SetLocalTransform( vtkLinearTransform * localTransform );
-    vtkGetObjectMacro( LocalTransform, vtkLinearTransform );
+    vtkLinearTransform *GetLocalTransform();
     vtkTransform* GetWorldTransform();
     bool CanEditTransformManually() { return AllowManualTransformEdit; }
     void SetCanEditTransformManually( bool c ) { AllowManualTransformEdit = c; }
@@ -171,12 +171,8 @@ protected:
     QString DataFileName; // just the name of the file
     QString FullFileName; // name of the data file including full path
 
-	// Transforms affecting the object:
-	//  LocalTransform(Tl) is a local object-space transform
-	//	WorldTransform(Tw) is a concatenation of all transforms affecting the object: Tw = Tp * Tl
-	//  Tp is parent transform.
+    // Transforms properties
     virtual void UpdateWorldTransform();
-    vtkLinearTransform * LocalTransform;
     bool IsModifyingTransform;
     bool TransformModified;
 
@@ -211,6 +207,11 @@ private:
     friend class SceneManager;
     SceneManager * Manager;
     int ObjectID;
+    // Transforms affecting the object:
+    //  LocalTransform(Tl) is a local object-space transform
+    //	WorldTransform(Tw) is a concatenation of all transforms affecting the object: Tw = Tp * Tl
+    //  Tp is parent transform.
+    vtkSmartPointer<vtkLinearTransform> LocalTransform;
     vtkSmartPointer<vtkTransform> WorldTransform;
 };
 

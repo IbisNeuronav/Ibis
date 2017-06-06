@@ -41,20 +41,18 @@ SceneObject::SceneObject()
     this->ObjectListable = true;
     this->ObjectManagedByTracker = false;
     this->AllowManualTransformEdit = true;
-    this->LocalTransform = vtkTransform::New();  // by default, we have a vtkTransform that can be manipulated manually. Could be changed in certain object types.
+    this->LocalTransform = vtkSmartPointer<vtkTransform>::New();  // by default, we have a vtkTransform that can be manipulated manually. Could be changed in certain object types.
     this->WorldTransform = vtkSmartPointer<vtkTransform>::New();
     this->IsModifyingTransform = false;
     this->TransformModified = false;
     this->RenderLayer = 0;
     this->m_vtkConnections = vtkSmartPointer<vtkEventQtSlotConnect>::New();
-    this->m_vtkConnections->Connect( this->LocalTransform, vtkCommand::ModifiedEvent, this, SLOT(NotifyTransformChanged()), 0, 0.0, Qt::DirectConnection );
-    this->m_vtkConnections->Connect( this->WorldTransform, vtkCommand::ModifiedEvent, this, SLOT(NotifyTransformChanged()), 0, 0.0, Qt::DirectConnection );
+    this->m_vtkConnections->Connect( this->LocalTransform.GetPointer(), vtkCommand::ModifiedEvent, this, SLOT(NotifyTransformChanged()), 0, 0.0, Qt::DirectConnection );
+    this->m_vtkConnections->Connect( this->WorldTransform.GetPointer(), vtkCommand::ModifiedEvent, this, SLOT(NotifyTransformChanged()), 0, 0.0, Qt::DirectConnection );
 }
 
 SceneObject::~SceneObject() 
 {
-	if (this->LocalTransform)
-		this->LocalTransform->UnRegister( this );
 }
 
 void SceneObject::Serialize( Serializer * ser )
@@ -148,25 +146,19 @@ void SceneObject::SetDataFileName( QString name )
 
 void SceneObject::SetLocalTransform( vtkLinearTransform * localTransform )
 {
-	if( localTransform == this->LocalTransform )
+    if( localTransform == this->LocalTransform.GetPointer() )
 		return;
 
 	if( this->LocalTransform )
 	{
-        this->m_vtkConnections->Disconnect( this->LocalTransform );
-		this->LocalTransform->UnRegister( this );
-		this->LocalTransform = 0;
+        this->m_vtkConnections->Disconnect( this->LocalTransform.GetPointer() );
 	}
 
     if( localTransform )
     {
-        this->LocalTransform = localTransform;
-        this->LocalTransform->Register(this);
+        this->LocalTransform->GetMatrix()->DeepCopy( localTransform->GetMatrix() );
     }
-    else
-        this->LocalTransform = vtkTransform::New();
-
-    this->m_vtkConnections->Connect( this->LocalTransform, vtkCommand::ModifiedEvent, this, SLOT(NotifyTransformChanged()), 0, 0.0, Qt::DirectConnection );
+    this->m_vtkConnections->Connect( this->LocalTransform.GetPointer(), vtkCommand::ModifiedEvent, this, SLOT(NotifyTransformChanged()), 0, 0.0, Qt::DirectConnection );
 
 	UpdateWorldTransform();
 }
@@ -174,6 +166,11 @@ void SceneObject::SetLocalTransform( vtkLinearTransform * localTransform )
 vtkTransform * SceneObject::GetWorldTransform()
 {
     return this->WorldTransform.GetPointer();
+}
+
+vtkLinearTransform * SceneObject::GetLocalTransform()
+{
+    return this->LocalTransform.GetPointer();
 }
 
 void SceneObject::NotifyTransformChanged()
@@ -308,8 +305,7 @@ void SceneObject::UpdateWorldTransform()
 
 	if( Parent )
         this->WorldTransform->Concatenate( Parent->GetWorldTransform() );
-    if( LocalTransform )
-        this->WorldTransform->Concatenate( LocalTransform );
+    this->WorldTransform->Concatenate( LocalTransform.GetPointer() );
 
     WorldTransformChanged();
 }
