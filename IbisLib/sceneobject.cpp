@@ -149,14 +149,14 @@ void SceneObject::SetLocalTransform( vtkLinearTransform * localTransform )
     if( localTransform == this->LocalTransform.GetPointer() )
 		return;
 
-	if( this->LocalTransform )
-	{
+    if( this->LocalTransform )
+    {
         this->m_vtkConnections->Disconnect( this->LocalTransform.GetPointer() );
-	}
+    }
 
     if( localTransform )
     {
-        this->LocalTransform->GetMatrix()->DeepCopy( localTransform->GetMatrix() );
+        this->LocalTransform = localTransform;
     }
     this->m_vtkConnections->Connect( this->LocalTransform.GetPointer(), vtkCommand::ModifiedEvent, this, SLOT(NotifyTransformChanged()), 0, 0.0, Qt::DirectConnection );
 
