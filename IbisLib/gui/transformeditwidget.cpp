@@ -70,7 +70,7 @@ void TransformEditWidget::UpdateTransform()
         m_selfUpdating = true;
         //m_sceneObject->StartModifyingTransform();
 
-        vtkMatrix4x4 * mat = m_sceneObject->GetLocalTransform()->GetMatrix();
+        vtkMatrix4x4 * mat = m_sceneObject->GetLocalTransform()->GetInput()->GetMatrix();
         double rot[3];
         rot[0] = ui->rotateXSpinBox->value();
         rot[1] = ui->rotateYSpinBox->value();
