@@ -70,7 +70,7 @@ void TransformEditWidget::UpdateTransform()
         m_selfUpdating = true;
         //m_sceneObject->StartModifyingTransform();
 
-        vtkMatrix4x4 * mat = m_sceneObject->GetLocalTransform()->GetMatrix();
+        vtkMatrix4x4 * mat = m_sceneObject->GetLocalTransform()->GetInput()->GetMatrix();
         double rot[3];
         rot[0] = ui->rotateXSpinBox->value();
         rot[1] = ui->rotateYSpinBox->value();
@@ -95,7 +95,7 @@ void TransformEditWidget::UpdateUi()
         BlockSpinboxSignals(true);
         EnableSpinBoxes(false);
 
-        vtkLinearTransform * localTransform = m_sceneObject->GetLocalTransform();
+        vtkTransform * localTransform = m_sceneObject->GetLocalTransform();
         if( !localTransform )
         {
             EnableSpinBoxes( false );
@@ -122,6 +122,14 @@ void TransformEditWidget::UpdateUi()
             ui->rotateYSpinBox->setValue( r[1] );
             ui->rotateZSpinBox->setValue( r[2] );
 
+            ui->IdentityPushButton->blockSignals( true );
+            vtkTransform * tDown = vtkTransform::SafeDownCast( localTransform->GetInput() );
+            bool readOnly = tDown == 0;
+            if( readOnly )
+                ui->IdentityPushButton->setEnabled( false );
+            else
+                ui->IdentityPushButton->setEnabled( true );
+            ui->IdentityPushButton->blockSignals( false );
         }
         BlockSpinboxSignals(false);
     }
@@ -145,17 +153,17 @@ void TransformEditWidget::EditMatrixButtonToggled( bool isOn )
     {
         Q_ASSERT_X( m_sceneObject, "TransformEditWidget::EditMatrixButtonToggled", "Can't call this function without setting SceneObject." );
 
-        vtkLinearTransform * t = m_sceneObject->GetLocalTransform();
+        vtkTransform * t = m_sceneObject->GetLocalTransform();
         if( t )
         {
-            vtkTransform * tDown = vtkTransform::SafeDownCast( t );
+            vtkTransform * tDown = vtkTransform::SafeDownCast( t->GetInput() );
             bool readOnly = tDown == 0;
             QString dialogTitle = m_sceneObject->GetName();
             dialogTitle += ": Local Matrix";
             m_matrixDialog = new vtkQtMatrixDialog( readOnly, 0 );
             m_matrixDialog->setWindowTitle( dialogTitle );
             m_matrixDialog->setAttribute( Qt::WA_DeleteOnClose );
-            m_matrixDialog->SetMatrix( t->GetMatrix() );
+            m_matrixDialog->SetMatrix( t->GetInput()->GetMatrix() );
             m_matrixDialog->show();
             connect( m_matrixDialog, SIGNAL(Modified()), m_sceneObject, SLOT(NotifyTransformChanged()) );
             connect( m_matrixDialog, SIGNAL(Modified()), this, SLOT(UpdateUi()) );
@@ -206,7 +214,7 @@ void TransformEditWidget::SetIdentityButtonClicked()
 {
     if( m_sceneObject )
     {
-        vtkTransform * transform = vtkTransform::SafeDownCast (m_sceneObject->GetLocalTransform() );
+        vtkTransform * transform = vtkTransform::SafeDownCast (m_sceneObject->GetLocalTransform()->GetInput() );
         if( transform )
         {
             transform->Identity();

@@ -63,8 +63,8 @@ void LandmarkRegistrationObject::CreateSettingsWidgets( QWidget * parent, QVecto
     }
     connect( this, SIGNAL(Modified()), props, SLOT(UpdateUI()) );
     widgets->append(props);
-    if( !this->IsRegistered() )
-        m_backUpTransform->DeepCopy(this->LocalTransform);
+    if( !this->IsRegistered() && this->GetLocalTransform()->GetInput() )
+        m_backUpTransform->DeepCopy(this->GetLocalTransform()->GetInput() );
 }
 
 void LandmarkRegistrationObject::Serialize( Serializer * ser )
@@ -563,7 +563,7 @@ void LandmarkRegistrationObject::RegisterObject( bool on )
 
 bool LandmarkRegistrationObject::IsRegistered()
 {
-    if( m_registrationTransform->GetRegistrationTransform() == this->GetLocalTransform() )
+    if( m_registrationTransform->GetRegistrationTransform() == this->GetLocalTransform()->GetInput() )
         return true;
     return false;
 }
