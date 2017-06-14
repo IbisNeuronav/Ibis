@@ -12,7 +12,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include "vtkSimpleProp3D.h"
 #include "vtkSimpleMapper3D.h"
-#include "vtkLinearTransform.h"
 #include "vtkMatrix4x4.h"
 #include "vtkObjectFactory.h"
 #include "vtkRenderer.h"

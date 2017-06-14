@@ -755,7 +755,7 @@ void PointsObject::ComputeDistanceFromSelectedPointToPointerTip()
         pointPos[i] = pos2[i];
     }
     double tmpPos[3];
-    vtkLinearTransform * transform = this->GetLocalTransform();
+    vtkTransform * transform = this->GetLocalTransform();
     transform->TransformPoint( pointPos, tmpPos );
     // convert to world
     double worldCoords[3];

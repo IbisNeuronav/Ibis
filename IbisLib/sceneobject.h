@@ -23,7 +23,6 @@ class vtkRenderer;
 class vtkAssembly;
 class vtkProp3D;
 class View;
-class vtkLinearTransform;
 class vtkTransform;
 class vtkMatrix4x4;
 class QWidget;
