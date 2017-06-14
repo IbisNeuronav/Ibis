@@ -122,6 +122,10 @@ void LandmarkRegistrationObject::Serialize( Serializer * ser )
         filename1.append("/LandmarkRegistration.xfm");
         this->WriteXFMFile(filename1);
     }
+    // LandmarkRegistrationObject cannot be manually trensformed, previously, the flag AllowManualTransformEdit
+    // was not used and in the old scenes it was set to default value true
+    // now, we use that flag to disallow manual changes in registration transform
+    this->SetCanEditTransformManually( false );
 }
 
 void LandmarkRegistrationObject::PostSceneRead()
