@@ -44,6 +44,7 @@ LandmarkRegistrationObject::LandmarkRegistrationObject() : SceneObject()
     m_targetObjectID = SceneManager::InvalidId;
     m_loadingPointStatus = false;
     m_registerRequested = false;
+    m_isRegistered = false;
 }
 
 LandmarkRegistrationObject::~LandmarkRegistrationObject()
@@ -64,7 +65,7 @@ void LandmarkRegistrationObject::CreateSettingsWidgets( QWidget * parent, QVecto
     connect( this, SIGNAL(Modified()), props, SLOT(UpdateUI()) );
     widgets->append(props);
     if( !this->IsRegistered() )
-        m_backUpTransform->DeepCopy(this->LocalTransform);
+        m_backUpTransform->DeepCopy(this->GetLocalTransform() );
 }
 
 void LandmarkRegistrationObject::Serialize( Serializer * ser )
@@ -553,19 +554,16 @@ void LandmarkRegistrationObject::RegisterObject( bool on )
     if( on )
     {
         m_registrationTransform->UpdateRegistrationTransform();
-        this->SetLocalTransform(m_registrationTransform->GetRegistrationTransform());
+        vtkSmartPointer<vtkTransform> tmpTrans = vtkSmartPointer<vtkTransform>::New();
+        tmpTrans->GetMatrix()->DeepCopy(m_registrationTransform->GetRegistrationTransform()->GetMatrix() );
+        this->SetLocalTransform(tmpTrans);
+        m_isRegistered = true;
     }
     else
     {
         this->SetLocalTransform(m_backUpTransform);
+        m_isRegistered = false;
     }
-}
-
-bool LandmarkRegistrationObject::IsRegistered()
-{
-    if( m_registrationTransform->GetRegistrationTransform() == this->GetLocalTransform() )
-        return true;
-    return false;
 }
 
 void LandmarkRegistrationObject::SetAllowScaling( bool on )

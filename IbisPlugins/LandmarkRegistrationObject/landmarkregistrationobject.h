@@ -49,7 +49,8 @@ public:
     vtkSmartPointer<LandmarkTransform> GetLandmarkTransform() { return m_registrationTransform; }
     void UpdateLandmarkTransform();
     void RegisterObject( bool on );
-    bool IsRegistered();
+//    bool IsRegistered();
+    bool IsRegistered() { return m_isRegistered; }
     void SetAllowScaling( bool on );
     bool IsScalingAllowed();
     int  GetTargetObjectID() { return m_targetObjectID; }
@@ -104,6 +105,7 @@ protected:
 private:
     int m_sourcePointsID; // needed for saving/loading scene
     int m_targetPointsID;
+    bool m_isRegistered;
 };
 
 ObjectSerializationHeaderMacro( LandmarkRegistrationObject );
