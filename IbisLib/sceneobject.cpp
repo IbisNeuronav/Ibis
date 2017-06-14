@@ -312,7 +312,7 @@ void SceneObject::UpdateWorldTransform()
 	this->WorldTransform->Identity();
 
 	if( Parent )
-		this->WorldTransform->Concatenate( Parent->WorldTransform );
+        this->WorldTransform->Concatenate( Parent->WorldTransform.GetPointer() );
     if( LocalTransform )
         this->WorldTransform->Concatenate( LocalTransform );
 
