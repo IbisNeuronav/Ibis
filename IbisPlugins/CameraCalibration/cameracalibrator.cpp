@@ -13,7 +13,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "cameracalibrator.h"
 #include "cameraobject.h"
 #include "application.h"
-#include "vtkLinearTransform.h"
 #include "vtkImageData.h"
 #include "vtkMatrix4x4.h"
 #include "vtkMatrix4x4Operators.h"
