@@ -49,7 +49,6 @@ SceneObject *LandmarkRegistrationObjectPluginInterface::CreateObject()
     targetPoints->SetDisabledColor(color2);
     m_landmarkRegistrationObject = vtkSmartPointer<LandmarkRegistrationObject>::New();
     m_landmarkRegistrationObject->SetName( "Landmark Registration" );
-    m_landmarkRegistrationObject->SetCanEditTransformManually( false );
     manager->AddObject( m_landmarkRegistrationObject.GetPointer() );
     manager->AddObject( sourcePoints.GetPointer(), m_landmarkRegistrationObject.GetPointer() );
     manager->AddObject( targetPoints.GetPointer(), manager->GetSceneRoot() );

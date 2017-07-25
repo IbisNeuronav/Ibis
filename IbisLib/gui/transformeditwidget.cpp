@@ -95,7 +95,7 @@ void TransformEditWidget::UpdateUi()
         BlockSpinboxSignals(true);
         EnableSpinBoxes(false);
 
-        vtkTransform * localTransform = m_sceneObject->GetLocalTransform();
+        vtkLinearTransform * localTransform = m_sceneObject->GetLocalTransform();
         if( !localTransform )
         {
             EnableSpinBoxes( false );
@@ -121,6 +121,7 @@ void TransformEditWidget::UpdateUi()
             ui->rotateXSpinBox->setValue( r[0] );
             ui->rotateYSpinBox->setValue( r[1] );
             ui->rotateZSpinBox->setValue( r[2] );
+
         }
         BlockSpinboxSignals(false);
     }
@@ -144,10 +145,11 @@ void TransformEditWidget::EditMatrixButtonToggled( bool isOn )
     {
         Q_ASSERT_X( m_sceneObject, "TransformEditWidget::EditMatrixButtonToggled", "Can't call this function without setting SceneObject." );
 
-        vtkTransform * t = m_sceneObject->GetLocalTransform();
+        vtkLinearTransform * t = m_sceneObject->GetLocalTransform();
         if( t )
         {
-            bool readOnly = !m_sceneObject->CanEditTransformManually();
+            vtkTransform * tDown = vtkTransform::SafeDownCast( t );
+            bool readOnly = tDown == 0;
             QString dialogTitle = m_sceneObject->GetName();
             dialogTitle += ": Local Matrix";
             m_matrixDialog = new vtkQtMatrixDialog( readOnly, 0 );

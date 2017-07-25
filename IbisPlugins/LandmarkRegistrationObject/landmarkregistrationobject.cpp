@@ -18,6 +18,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "view.h"
 #include "vtkPoints.h"
 #include "vtkLandmarkTransform.h"
+#include "vtkLinearTransform.h"
 #include "vtkTransform.h"
 #include "vtkTagWriter.h"
 #include "vtkXFMWriter.h"
@@ -43,7 +44,6 @@ LandmarkRegistrationObject::LandmarkRegistrationObject() : SceneObject()
     m_targetObjectID = SceneManager::InvalidId;
     m_loadingPointStatus = false;
     m_registerRequested = false;
-    m_isRegistered = false;
 }
 
 LandmarkRegistrationObject::~LandmarkRegistrationObject()
@@ -64,7 +64,7 @@ void LandmarkRegistrationObject::CreateSettingsWidgets( QWidget * parent, QVecto
     connect( this, SIGNAL(Modified()), props, SLOT(UpdateUI()) );
     widgets->append(props);
     if( !this->IsRegistered() )
-        m_backUpTransform->DeepCopy(this->GetLocalTransform() );
+        m_backUpTransform->DeepCopy(this->LocalTransform);
 }
 
 void LandmarkRegistrationObject::Serialize( Serializer * ser )
@@ -121,10 +121,6 @@ void LandmarkRegistrationObject::Serialize( Serializer * ser )
         filename1.append("/LandmarkRegistration.xfm");
         this->WriteXFMFile(filename1);
     }
-    // LandmarkRegistrationObject cannot be manually trensformed, previously, the flag AllowManualTransformEdit
-    // was not used and in the old scenes it was set to default value true
-    // now, we use that flag to disallow manual changes in registration transform
-    this->SetCanEditTransformManually( false );
 }
 
 void LandmarkRegistrationObject::PostSceneRead()
@@ -557,16 +553,19 @@ void LandmarkRegistrationObject::RegisterObject( bool on )
     if( on )
     {
         m_registrationTransform->UpdateRegistrationTransform();
-        vtkSmartPointer<vtkTransform> tmpTrans = vtkSmartPointer<vtkTransform>::New();
-        tmpTrans->GetMatrix()->DeepCopy(m_registrationTransform->GetRegistrationTransform()->GetMatrix() );
-        this->SetLocalTransform(tmpTrans.GetPointer());
-        m_isRegistered = true;
+        this->SetLocalTransform(m_registrationTransform->GetRegistrationTransform());
     }
     else
     {
         this->SetLocalTransform(m_backUpTransform);
-        m_isRegistered = false;
     }
+}
+
+bool LandmarkRegistrationObject::IsRegistered()
+{
+    if( m_registrationTransform->GetRegistrationTransform() == this->GetLocalTransform() )
+        return true;
+    return false;
 }
 
 void LandmarkRegistrationObject::SetAllowScaling( bool on )

@@ -585,7 +585,7 @@ void ImageObject::Setup3DRepresentation( View * view )
     outMapper->SetInputConnection( this->OutlineFilter->GetOutputPort() );
     vtkSmartPointer<vtkActor> outActor = vtkSmartPointer<vtkActor>::New();
     outActor->SetMapper( outMapper );
-    outActor->SetUserTransform( this->GetWorldTransform() );
+	outActor->SetUserTransform( this->WorldTransform );
     if( this->viewOutline )
         outActor->VisibilityOn();
     else
@@ -609,7 +609,7 @@ void ImageObject::Setup3DRepresentation( View * view )
     vtkSmartPointer<vtkVolume> volume = vtkSmartPointer<vtkVolume>::New();
     volume->SetMapper( volumeMapper );
     volume->SetProperty( m_volumeProperty );
-    volume->SetUserTransform( this->GetWorldTransform() );
+    volume->SetUserTransform( this->WorldTransform );
     volume->SetVisibility( m_vtkVolumeRenderingEnabled ? 1 : 0 );
     view->GetRenderer()->AddVolume( volume );
 

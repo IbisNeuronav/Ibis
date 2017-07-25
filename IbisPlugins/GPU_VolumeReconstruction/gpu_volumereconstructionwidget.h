@@ -23,6 +23,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "imageobject.h"
 #include "usacquisitionobject.h"
 #include "vtkTransform.h"
+#include "vtkLinearTransform.h"
 #include "vtkMatrix4x4.h"
 
 #include "vtkImageData.h"

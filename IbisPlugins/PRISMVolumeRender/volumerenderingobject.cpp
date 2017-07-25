@@ -356,7 +356,7 @@ void VolumeRenderingObject::Setup( View * view )
 
         perView.volumeActor = vtkVolume::New();
         perView.volumeActor->SetMapper( perView.volumeMapper );
-        perView.volumeActor->SetUserTransform( this->GetWorldTransform() );
+        perView.volumeActor->SetUserTransform( this->WorldTransform );
         UpdateMapper( perView );
 
         perView.sphereWidget = vtkHandleWidget::New();
