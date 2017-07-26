@@ -26,6 +26,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #define __vtkMulti3DWidget_h
 
 
+#include "vtkSmartPointer.h"
 #include "vtkMultiInteractorObserver.h"
 #include <vector>
 
@@ -186,7 +187,7 @@ protected:
     int FindPokedRenderer( vtkRenderWindowInteractor * interactor, int x, int y );
 
     // Callback used to observe the interactors
-    vtkObjectCallback<vtkMulti3DWidget> * Callback;
+    vtkSmartPointer< vtkObjectCallback<vtkMulti3DWidget> > Callback;
 
     // Event observed
     typedef std::vector<unsigned long> EventIdVec;
