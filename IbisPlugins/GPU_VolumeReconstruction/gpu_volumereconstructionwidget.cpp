@@ -17,7 +17,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QtConcurrent/QtConcurrent>
 #include "vnl/algo/vnl_symmetric_eigensystem.h"
 #include "vnl/algo/vnl_real_eigensystem.h"
-#include "vtkSmartPointer.h"
 
 #include "itkImageFileWriter.h"
 

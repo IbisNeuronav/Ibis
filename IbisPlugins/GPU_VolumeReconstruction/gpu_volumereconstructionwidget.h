@@ -30,6 +30,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "vtkImageShiftScale.h"
 #include "vtkImageLuminance.h"
 #include "vtkMath.h"
+#include "vtkSmartPointer.h"
 
 #include "itkGPUVolumeReconstruction.h"
 #include "itkEuler3DTransform.h"
