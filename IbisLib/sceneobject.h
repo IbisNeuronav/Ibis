@@ -202,7 +202,7 @@ protected:
     bool ObjectListable;
     bool AllowManualTransformEdit;
     bool ObjectManagedByTracker;
-    int RenderLayer;  // This is an hint to determine which layer of renderer we draw on
+    int RenderLayer;  // This is a hint to determine which layer of renderer we draw on
 
 private:
 
