@@ -12,7 +12,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #define DOUBLEVIEWWIDGET_H
 
 #include <QWidget>
-#include "vtkSmartPointer.h"
 
 namespace Ui {
 class DoubleViewWidget;
@@ -78,25 +77,26 @@ private:
 
     USAcquisitionPluginInterface * m_pluginInterface;
 
-    vtkSmartPointer<vtkImageResliceToColors> m_reslice;
-    vtkSmartPointer<vtkImageResliceToColors> m_reslice2;
-    vtkSmartPointer<vtkImageMask> m_imageMask;
+    vtkImageResliceToColors * m_reslice;
+    vtkImageResliceToColors * m_reslice2;
+    vtkImageMask * m_imageMask;
 
-    vtkSmartPointer<vtkImageStack> m_mriActor;
-    vtkSmartPointer<vtkImageActor> m_vol1Slice;
-    vtkSmartPointer<vtkImageActor> m_vol2Slice;
-    vtkSmartPointer<vtkImageActor> m_usSlice;
-    vtkSmartPointer<vtkRenderer> m_mriRenderer;
-    vtkSmartPointer<vtkRenderer> m_usRenderer;
-    vtkSmartPointer<vtkImageActor> m_usActor;
+    vtkImageStack * m_mriActor;
+    vtkImageActor * m_vol1Slice;
+    vtkImageActor * m_vol2Slice;
+    vtkImageActor * m_usSlice;
+    vtkRenderer * m_mriRenderer;
+
+    vtkRenderer * m_usRenderer;
+    vtkImageActor * m_usActor;
 
     Ui::DoubleViewWidget *ui;
 
     // For red cross when probe is out of view?
-    vtkSmartPointer<vtkActor> m_usLine1Actor;
-    vtkSmartPointer<vtkActor> m_usLine2Actor;
-    vtkSmartPointer<vtkActor> m_mriLine1Actor;
-    vtkSmartPointer<vtkActor> m_mriLine2Actor;
+    vtkActor * m_usLine1Actor;
+    vtkActor * m_usLine2Actor;
+    vtkActor * m_mriLine1Actor;
+    vtkActor * m_mriLine2Actor;
 };
 
 #endif
