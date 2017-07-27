@@ -18,7 +18,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "hardwaremodule.h"
 #include "guiutilities.h"
 
-#include <QMessageBox>
 #include "QVTKWidget.h"
 #include "vtkRenderWindowInteractor.h"
 #include "vtkInteractorStyleImage2.h"
@@ -42,80 +41,61 @@ DoubleViewWidget::DoubleViewWidget( QWidget * parent, Qt::WindowFlags f ) :
 
     // Create the 2 view windows
     vtkRenderWindowInteractor * usInteractor = ui->usImageWindow->GetInteractor();
-    vtkInteractorStyleImage2 * style = vtkInteractorStyleImage2::New();
+    vtkSmartPointer<vtkInteractorStyleImage2> style = vtkSmartPointer<vtkInteractorStyleImage2>::New();
     usInteractor->SetInteractorStyle( style );
-    style->Delete();
 
-    m_usRenderer= vtkRenderer::New();
-    ui->usImageWindow->GetRenderWindow()->AddRenderer( m_usRenderer );
+    m_usRenderer = vtkSmartPointer<vtkRenderer>::New();
+    ui->usImageWindow->GetRenderWindow()->AddRenderer( m_usRenderer.GetPointer() );
 
-    m_usActor = vtkImageActor::New();
+    m_usActor = vtkSmartPointer<vtkImageActor>::New();
     m_usActor->InterpolateOff();
     m_usActor->VisibilityOff();   // invisible until there is a valid input
-    m_usRenderer->AddActor( m_usActor );
+    m_usRenderer->AddActor( m_usActor.GetPointer() );
 
-    m_reslice = vtkImageResliceToColors::New();  // set up the reslice
+    m_reslice = vtkSmartPointer<vtkImageResliceToColors>::New();  // set up the reslice
     m_reslice->SetInterpolationModeToLinear( );
     m_reslice->SetOutputExtent(0, ui->usImageWindow->width()-1, 0, ui->usImageWindow->height()-1, 0, 1);
     m_reslice->SetOutputSpacing( 1.0, 1.0, 1.0 );
     m_reslice->SetOutputOrigin( 0.0, 0.0, 0.0 );
 
     // put one more for the second MRI
-    m_reslice2 = vtkImageResliceToColors::New();  // set up the reslice2
+    m_reslice2 = vtkSmartPointer<vtkImageResliceToColors>::New();  // set up the reslice2
     m_reslice2->SetInterpolationModeToLinear( );
     m_reslice2->SetOutputExtent(0, ui->usImageWindow->width()-1, 0, ui->usImageWindow->height()-1, 0, 1);
     m_reslice2->SetOutputSpacing( 1.0, 1.0, 1.0 );
     m_reslice2->SetOutputOrigin( 0.0, 0.0, 0.0 );
 
-    m_imageMask = vtkImageMask::New();
+    m_imageMask = vtkSmartPointer<vtkImageMask>::New();
     m_imageMask->SetInputConnection( m_reslice->GetOutputPort() );
 
-    m_vol1Slice = vtkImageActor::New();
+    m_vol1Slice = vtkSmartPointer<vtkImageActor>::New();
     m_vol1Slice->GetMapper()->SetInputConnection( m_reslice->GetOutputPort() );
     m_vol1Slice->GetProperty()->SetLayerNumber( 0 );
-    m_vol2Slice = vtkImageActor::New();
+    m_vol2Slice = vtkSmartPointer<vtkImageActor>::New();
     m_vol2Slice->GetMapper()->SetInputConnection( m_reslice2->GetOutputPort() );
     m_vol2Slice->GetProperty()->SetLayerNumber( 1 );
     m_vol2Slice->VisibilityOff();
-    m_usSlice = vtkImageActor::New();
+    m_usSlice = vtkSmartPointer<vtkImageActor>::New();
     m_usSlice->GetProperty()->SetLayerNumber( 2 );
     m_usSlice->VisibilityOff();
-    m_mriActor = vtkImageStack::New();
-    m_mriActor->AddImage( m_vol1Slice );
-    m_mriActor->AddImage( m_vol2Slice );
-    m_mriActor->AddImage( m_usSlice );
+    m_mriActor = vtkSmartPointer<vtkImageStack>::New();
+    m_mriActor->AddImage( m_vol1Slice.GetPointer() );
+    m_mriActor->AddImage( m_vol2Slice.GetPointer() );
+    m_mriActor->AddImage( m_usSlice.GetPointer() );
 
-    m_mriRenderer = vtkRenderer::New();
-    ui->mriImageWindow->GetRenderWindow()->AddRenderer( m_mriRenderer ); // is this for one MRI or for two?
-    m_mriRenderer->AddActor( m_mriActor );
+    m_mriRenderer = vtkSmartPointer<vtkRenderer>::New();
+    ui->mriImageWindow->GetRenderWindow()->AddRenderer( m_mriRenderer.GetPointer() ); // is this for one MRI or for two?
+    m_mriRenderer->AddActor( m_mriActor.GetPointer() );
 
     vtkRenderWindowInteractor * mriInteractor = ui->mriImageWindow->GetInteractor();
-    vtkInteractorStyleImage2 * style2 = vtkInteractorStyleImage2::New();
-    mriInteractor->SetInteractorStyle( style2 );
-    style2->Delete();
+    vtkSmartPointer<vtkInteractorStyleImage2> style2 = vtkSmartPointer<vtkInteractorStyleImage2>::New();
+    mriInteractor->SetInteractorStyle( style2.GetPointer() );
 
     this->MakeCrossLinesToShowProbeIsOutOfView();
 }
 
 DoubleViewWidget::~DoubleViewWidget()
 {
-    m_usRenderer->Delete();
-    m_mriRenderer->Delete();
-    m_reslice->Delete();
-    m_reslice2->Delete();
-    m_usActor->Delete();
-    m_imageMask->Delete();
-
-    m_mriActor->Delete();
-    m_vol1Slice->Delete();
-    m_vol2Slice->Delete();
-    m_usSlice->Delete();
-
-    m_usLine1Actor->Delete();
-    m_usLine2Actor->Delete();
-    m_mriLine1Actor->Delete();
-    m_mriLine2Actor->Delete();
-
     delete ui;
 }
 
@@ -346,7 +326,7 @@ void DoubleViewWidget::UpdateInputs()
     }
 
     // Compute slicing transform
-    vtkTransform * concat = vtkTransform::New();
+    vtkSmartPointer<vtkTransform> concat = vtkSmartPointer<vtkTransform>::New();
     concat->Identity();
     if( im )
         concat->SetInput( im->GetWorldTransform()->GetLinearInverse() );
@@ -354,11 +334,10 @@ void DoubleViewWidget::UpdateInputs()
     {
         concat->Concatenate( usTransform );
     }
-    m_reslice->SetResliceTransform( concat );
-    concat->Delete();
+    m_reslice->SetResliceTransform( concat.GetPointer() );
 
     // Compute slice transform for the second MRI
-    vtkTransform * concat2 = vtkTransform::New();
+    vtkSmartPointer<vtkTransform> concat2 = vtkSmartPointer<vtkTransform>::New();
     concat2->Identity();
     if( im2 )
         concat2->SetInput( im2->GetWorldTransform()->GetLinearInverse() );
@@ -366,8 +345,7 @@ void DoubleViewWidget::UpdateInputs()
     {
         concat2->Concatenate( usTransform );
     }
-    m_reslice2->SetResliceTransform( concat2 );
-    concat2->Delete();
+    m_reslice2->SetResliceTransform( concat2.GetPointer() );
 
     this->SetDefaultViews();
     this->UpdateUi();
@@ -400,7 +378,6 @@ void DoubleViewWidget::UpdatePipelineConnections()
     m_usSlice->GetProperty()->SetOpacity( m_pluginInterface->GetBlendingPercent() );
 }
 
-#include "vtkSmartPointer.h"
 #include "vtkLineSource.h"
 #include "vtkPolyDataMapper.h"
 #include "vtkProperty.h"
@@ -441,12 +418,12 @@ void DoubleViewWidget::MakeCrossLinesToShowProbeIsOutOfView()
     vtkSmartPointer<vtkPolyDataMapper> mapper1 = vtkSmartPointer<vtkPolyDataMapper>::New();
     mapper1->SetInputConnection(line1->GetOutputPort(0));
 
-    m_usLine1Actor = vtkActor::New();
-    m_usLine1Actor->SetMapper(mapper1);
+    m_usLine1Actor = vtkSmartPointer<vtkActor>::New();
+    m_usLine1Actor->SetMapper( mapper1.GetPointer() );
     m_usLine1Actor->GetProperty()->SetLineWidth(4.0);
     m_usLine1Actor->GetProperty()->SetColor(1, 0, 0);
     m_usLine1Actor->SetVisibility(0);
-    m_usRenderer->AddViewProp(m_usLine1Actor);
+    m_usRenderer->AddViewProp( m_usLine1Actor.GetPointer() );
 
     double p3[3], p4[3];
     p3[0] = 0.0;
@@ -462,12 +439,12 @@ void DoubleViewWidget::MakeCrossLinesToShowProbeIsOutOfView()
     vtkSmartPointer<vtkPolyDataMapper> mapper2 = vtkSmartPointer<vtkPolyDataMapper>::New();
     mapper2->SetInputConnection(line2->GetOutputPort(0));
 
-    m_usLine2Actor = vtkActor::New();
-    m_usLine2Actor->SetMapper(mapper2);
+    m_usLine2Actor = vtkSmartPointer<vtkActor>::New();
+    m_usLine2Actor->SetMapper( mapper2.GetPointer() );
     m_usLine2Actor->GetProperty()->SetLineWidth(4.0);
     m_usLine2Actor->GetProperty()->SetColor(1, 0, 0);
     m_usLine2Actor->SetVisibility(0);
-    m_usRenderer->AddViewProp(m_usLine2Actor);
+    m_usRenderer->AddViewProp( m_usLine2Actor.GetPointer() );
 
 
     p2[0] = (double)ui->mriImageWindow->width();
@@ -480,12 +457,12 @@ void DoubleViewWidget::MakeCrossLinesToShowProbeIsOutOfView()
     vtkSmartPointer<vtkPolyDataMapper> mapper3 = vtkSmartPointer<vtkPolyDataMapper>::New();
     mapper3->SetInputConnection(line3->GetOutputPort(0));
 
-    m_mriLine1Actor = vtkActor::New();
-    m_mriLine1Actor->SetMapper(mapper3);
+    m_mriLine1Actor = vtkSmartPointer<vtkActor>::New();
+    m_mriLine1Actor->SetMapper( mapper3.GetPointer() );
     m_mriLine1Actor->GetProperty()->SetLineWidth(4.0);
     m_mriLine1Actor->GetProperty()->SetColor(1, 0, 0);
     m_mriLine1Actor->SetVisibility(0);
-    m_mriRenderer->AddViewProp(m_mriLine1Actor);
+    m_mriRenderer->AddViewProp( m_mriLine1Actor.GetPointer() );
 
     p3[0] = 0.0;
     p3[1] = (double)ui->mriImageWindow->height();
@@ -500,12 +477,12 @@ void DoubleViewWidget::MakeCrossLinesToShowProbeIsOutOfView()
     vtkSmartPointer<vtkPolyDataMapper> mapper4 = vtkSmartPointer<vtkPolyDataMapper>::New();
     mapper4->SetInputConnection(line4->GetOutputPort(0));
 
-    m_mriLine2Actor = vtkActor::New();
-    m_mriLine2Actor->SetMapper(mapper4);
+    m_mriLine2Actor = vtkSmartPointer<vtkActor>::New();
+    m_mriLine2Actor->SetMapper( mapper4.GetPointer() );
     m_mriLine2Actor->GetProperty()->SetLineWidth(4.0);
     m_mriLine2Actor->GetProperty()->SetColor(1, 0, 0);
     m_mriLine2Actor->SetVisibility(0);
-    m_mriRenderer->AddViewProp(m_mriLine2Actor);
+    m_mriRenderer->AddViewProp( m_mriLine2Actor.GetPointer() );
 }
 
 void DoubleViewWidget::on_blendCheckBox_toggled( bool checked )
@@ -555,7 +532,7 @@ void DoubleViewWidget::on_maskAlphaSlider_valueChanged( int value )
 
 #include "vtkCamera.h"
 
-void SetDefaultView( vtkImageSlice * actor, vtkRenderer * renderer )
+void SetDefaultView( vtkSmartPointer<vtkImageSlice> actor, vtkSmartPointer<vtkRenderer> renderer )
 {
     actor->Update();
     double *bounds = actor->GetBounds();
