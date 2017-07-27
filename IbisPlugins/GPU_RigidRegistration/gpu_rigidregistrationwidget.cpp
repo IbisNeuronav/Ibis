@@ -101,7 +101,7 @@ public:
       ItkRigidTransformType::OffsetType offset = 
         itkTransform->GetOffset();
     
-      vtkSmartPointer<vtkMatrix4x4> localMatrix_inv = vtkSmartPointer<vtkMatrix4x4>::New();
+      vtkMatrix4x4 * localMatrix_inv = vtkMatrix4x4::New();
 
       for(unsigned int i=0; i<3; i++ )
         {
@@ -115,25 +115,29 @@ public:
        }
       localMatrix_inv->Invert();
        
-      vtkSmartPointer<vtkMatrix4x4> targetLocalMatrix = vtkSmartPointer<vtkMatrix4x4>::New();
+      vtkMatrix4x4 * targetLocalMatrix = vtkMatrix4x4::New();
       targetImageVtktransform->GetMatrix( targetLocalMatrix );
        
-      vtkSmartPointer<vtkMatrix4x4> finalMatrix = vtkSmartPointer<vtkMatrix4x4>::New();
+      vtkMatrix4x4 * finalMatrix = vtkMatrix4x4::New();
        
       if( transformObject->GetParent() )
         {
         vtkTransform * parentVtktransform = vtkTransform::SafeDownCast( transformObject->GetParent()->GetWorldTransform() );
         Q_ASSERT_X( parentVtktransform, "GPU_RigidRegistrationWidget::on_startButton_clicked()", "Invalid transform" );
-        vtkSmartPointer<vtkMatrix4x4> parentWorldMatrix = vtkSmartPointer<vtkMatrix4x4>::New();
-        parentVtktransform->GetInverse( parentWorldMatrix.GetPointer() );
-        finalMatrix->Multiply4x4( parentWorldMatrix.GetPointer(), localMatrix_inv.GetPointer(), localMatrix_inv.GetPointer() );
+        vtkMatrix4x4 * parentWorldMatrix = vtkMatrix4x4::New();
+        parentVtktransform->GetInverse( parentWorldMatrix );
+        finalMatrix->Multiply4x4( parentWorldMatrix, localMatrix_inv, localMatrix_inv );
+        parentWorldMatrix->Delete();
         }
 
-      finalMatrix->Multiply4x4( localMatrix_inv.GetPointer(), targetLocalMatrix.GetPointer(), finalMatrix.GetPointer() );
-      vtktransform->SetMatrix( finalMatrix.GetPointer() );
+      finalMatrix->Multiply4x4( localMatrix_inv, targetLocalMatrix, finalMatrix );
+      vtktransform->SetMatrix( finalMatrix );
       vtktransform->Modified();
       transformObject->FinishModifyingTransform();
 
+      localMatrix_inv->Delete();
+      targetLocalMatrix->Delete();
+      finalMatrix->Delete();
      }    
   }
 
