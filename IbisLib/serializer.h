@@ -622,11 +622,13 @@ template< class K, class V > bool Serialize( Serializer * serial, const char * a
             QString elemName = QString( "Element_%1" ).arg(i);
             std::pair<K,V> nextValue;
             if( !serial->IsReader() )
+            {
                 nextValue = *it;
+                ++it;
+            }
             Serialize( serial, elemName.toUtf8().data(), nextValue );
             if( serial->IsReader() )
                 value[ nextValue.first ] = nextValue.second;
-            ++it;
         }
 
         serial->EndSection();
