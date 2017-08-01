@@ -64,7 +64,7 @@ void LandmarkRegistrationObject::CreateSettingsWidgets( QWidget * parent, QVecto
     connect( this, SIGNAL(Modified()), props, SLOT(UpdateUI()) );
     widgets->append(props);
     if( !this->IsRegistered() )
-        m_backUpTransform->DeepCopy(this->LocalTransform);
+        m_backUpTransform->DeepCopy(this->GetLocalTransform());
 }
 
 void LandmarkRegistrationObject::Serialize( Serializer * ser )
@@ -557,7 +557,7 @@ void LandmarkRegistrationObject::RegisterObject( bool on )
     }
     else
     {
-        this->SetLocalTransform(m_backUpTransform);
+        this->SetLocalTransform(m_backUpTransform.GetPointer());
     }
 }
 
