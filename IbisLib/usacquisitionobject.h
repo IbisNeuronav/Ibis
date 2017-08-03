@@ -120,7 +120,6 @@ public:
     int GetStaticSlicesLutIndex() { return m_staticSlicesLutIndex; }
     void SetStaticSlicesLutIndex( int index );
 
-    int GetMaxNumberOfSlices();
     vtkImageData *GetMask();
 
     bool IsRecording() { return m_isRecording; }
