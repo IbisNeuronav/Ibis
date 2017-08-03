@@ -96,8 +96,8 @@ void GPU_VolumeReconstructionWidget::VtkToItkImage( vtkImageData * vtkInputImage
   itk::Vector< double, 3 > origin;
   itk::Vector< double, 3 > itkOrigin;
   // set direction cosines
-  vtkSmartPointer<vtkMatrix4x4> tmpMat = vtkSmartPointer<vtkMatrix4x4>::New();
-  vtkMatrix4x4::Transpose( transformMatrix.GetPointer(), tmpMat.GetPointer() );
+  vtkMatrix4x4 *tmpMat = vtkMatrix4x4::New();
+  vtkMatrix4x4::Transpose( transformMatrix.GetPointer(), tmpMat );
   double step[3], mincStartPoint[3], dirCos[3][3];
   for( int i = 0; i < 3; i++ )
   {
@@ -123,6 +123,7 @@ void GPU_VolumeReconstructionWidget::VtkToItkImage( vtkImageData * vtkInputImage
   itkOutputImage->Allocate();
   float *itkImageBuffer = itkOutputImage->GetBufferPointer();
   memcpy(itkImageBuffer, image->GetScalarPointer(), numberOfPixels*sizeof(float));
+  tmpMat->Delete();
 }
 
 void GPU_VolumeReconstructionWidget::slot_finished()

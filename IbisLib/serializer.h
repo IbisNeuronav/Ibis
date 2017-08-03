@@ -312,7 +312,7 @@ public:
             if( !variableValueString.isNull() )
             {
                 value = variableValueString.toInt() == 0? false:true;
-                return true;
+                return value;
             }
         }
         return false;

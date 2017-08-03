@@ -683,7 +683,6 @@ void USAcquisitionObject::Serialize( Serializer * ser )
         // is no longer the case, so we have to enforce what is read in scene object.
         this->SetObjectManagedBySystem(false);
         this->SetObjectDeletable(true);
-        this->SetCanChangeParent(true);
     }
     ::Serialize( ser, "AcquisitionType", acquisitionType );
     ::Serialize( ser, "UsDepth", m_usDepth );
