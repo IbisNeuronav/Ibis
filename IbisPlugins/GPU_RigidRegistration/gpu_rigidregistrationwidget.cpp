@@ -13,8 +13,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QComboBox>
 #include <QMessageBox>
 #include "vnl/algo/vnl_symmetric_eigensystem.h"
-#include "vnl/algo/vnl_real_eigensystem.h"#include
-#include <vtkSmartPointer.h>
+#include "vnl/algo/vnl_real_eigensystem.h"
+#include "vtkSmartPointer.h"
 
 class CommandIterationUpdateOpenCL : public itk::Command
 {
@@ -103,7 +103,6 @@ public:
     
       vtkSmartPointer<vtkMatrix4x4> localMatrix_inv = vtkSmartPointer<vtkMatrix4x4>::New();
 
-
       for(unsigned int i=0; i<3; i++ )
         {
         for(unsigned int j=0; j<3; j++ )
@@ -134,6 +133,7 @@ public:
       vtktransform->SetMatrix( finalMatrix.GetPointer() );
       vtktransform->Modified();
       transformObject->FinishModifyingTransform();
+
      }    
   }
 

@@ -22,16 +22,16 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "imageobject.h"
 #include "usprobeobject.h"
 #include <itkImage.h>
-#include "vtkSmartPointer.h"
-#include "vtkImageActor.h"
-#include "vtkImageMapToColors.h"
-#include "vtkImageStencil.h"
-#include "vtkTransform.h"
 
 class TrackedVideoBuffer;
 class vtkImageData;
+class vtkActor;
+class vtkImageActor;
+class vtkImageMapToColors;
 class vtkImageProperty;
 class vtkAlgorithmOutput;
+class vtkImageStencil;
+class vtkImageMapToColors;
 class vtkImageToImageStencil;
 class vtkPiecewiseFunctionLookupTable;
 class USMask;
@@ -120,6 +120,7 @@ public:
     int GetStaticSlicesLutIndex() { return m_staticSlicesLutIndex; }
     void SetStaticSlicesLutIndex( int index );
 
+    int GetMaxNumberOfSlices();
     vtkImageData *GetMask();
 
     bool IsRecording() { return m_isRecording; }
@@ -166,31 +167,31 @@ protected:
     struct PerViewElements
     {
         PerViewElements() : imageSlice(0) {}
-        vtkSmartPointer<vtkImageActor> imageSlice;
-        std::vector< vtkSmartPointer<vtkImageActor> > staticSlices;
+        vtkImageActor * imageSlice;
+        std::vector<vtkImageActor*> staticSlices;
     };
     typedef std::map<View*,PerViewElements> PerViewContainer;
     PerViewContainer m_perViews;
 
     // Current slice properties
-    USMask                              * m_mask;
-    vtkSmartPointer<vtkTransform>       m_currentImageTransform;
-    vtkSmartPointer<vtkTransform>       m_sliceTransform;
-    vtkSmartPointer<vtkTransform>       m_calibrationTransform;
-    int                                 m_sliceLutIndex;
-    vtkSmartPointer<vtkImageProperty>   m_sliceProperties;
-    bool                                m_isMaskOn;
-    bool                                m_isDopplerOn;
+    USMask                  * m_mask;
+    vtkTransform            * m_currentImageTransform;
+    vtkTransform            * m_sliceTransform;
+    vtkTransform            * m_calibrationTransform;
+    int                       m_sliceLutIndex;
+    vtkSmartPointer<vtkImageProperty>       m_sliceProperties;
+    bool                      m_isMaskOn;
+    bool                      m_isDopplerOn;
     vtkSmartPointer<vtkImageToImageStencil> m_imageStencilSource;
-    vtkSmartPointer<vtkImageStencil>    m_sliceStencil;
-    vtkSmartPointer<vtkImageStencil>    m_sliceStencilDoppler;
-    vtkSmartPointer<vtkImageMapToColors> m_mapToColors;
+    vtkSmartPointer<vtkImageStencil>        m_sliceStencil;
+    vtkSmartPointer<vtkImageStencil>        m_sliceStencilDoppler;
+    vtkSmartPointer<vtkImageMapToColors>    m_mapToColors;
     vtkSmartPointer<vtkPiecewiseFunctionLookupTable> m_lut;
-    vtkSmartPointer<vtkImageConstantPad> m_constantPad;
+    vtkSmartPointer<vtkImageConstantPad>    m_constantPad;
 
     // Outputs
-    vtkSmartPointer<vtkPassThrough> m_maskedImageOutput;
-    vtkSmartPointer<vtkPassThrough> m_unmaskedImageOutput;
+    vtkSmartPointer<vtkPassThrough>     m_maskedImageOutput;
+    vtkSmartPointer<vtkPassThrough>     m_unmaskedImageOutput;
 
     // Static slices properties
     void SetupAllStaticSlicesInAllViews();
@@ -211,9 +212,9 @@ protected:
     struct PerStaticSlice
     {
         PerStaticSlice() : mapToColors(0), imageStencil(0), transform(0) {}
-        vtkSmartPointer<vtkImageMapToColors> mapToColors;
-        vtkSmartPointer<vtkImageStencil> imageStencil;
-        vtkSmartPointer<vtkTransform> transform;
+        vtkImageMapToColors * mapToColors;
+        vtkImageStencil * imageStencil;
+        vtkTransform * transform;
     };
     std::vector< PerStaticSlice > m_staticSlicesData;
     bool m_staticSlicesDataNeedUpdate;
