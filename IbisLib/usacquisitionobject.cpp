@@ -68,10 +68,10 @@ USAcquisitionObject::USAcquisitionObject()
 
     // current slice
     m_calibrationTransform = vtkTransform::New();
-    m_sliceTransform = vtkTransform::New();
+    m_sliceTransform = vtkSmartPointer<vtkTransform>::New();
     m_sliceTransform->Concatenate( this->WorldTransform );
-    m_currentImageTransform = vtkTransform::New();
-    m_sliceTransform->Concatenate( m_currentImageTransform );
+    m_currentImageTransform = vtkSmartPointer<vtkTransform>::New();
+    m_sliceTransform->Concatenate( m_currentImageTransform.GetPointer() );
     m_sliceTransform->Concatenate( m_calibrationTransform );
     m_sliceProperties = vtkSmartPointer<vtkImageProperty>::New();
     m_sliceLutIndex = 1;         // default to hot metal
@@ -127,9 +127,7 @@ USAcquisitionObject::~USAcquisitionObject()
 {
     disconnect(this);
 
-    m_currentImageTransform->Delete();
     m_calibrationTransform->Delete();
-    m_sliceTransform->Delete();
 
     m_mask->Delete();
     ClearStaticSlicesData();
@@ -161,7 +159,7 @@ void USAcquisitionObject::Setup( View * view )
     {
         PerViewElements elem;
         elem.imageSlice = vtkImageActor::New();
-        elem.imageSlice->SetUserTransform( m_sliceTransform );
+        elem.imageSlice->SetUserTransform( m_sliceTransform.GetPointer() );
         elem.imageSlice->SetVisibility( !this->IsHidden() && this->GetNumberOfSlices()> 0 ? 1 : 0 );
         elem.imageSlice->SetProperty( m_sliceProperties.GetPointer() );
         if( m_isMaskOn )
@@ -444,7 +442,7 @@ vtkImageData * USAcquisitionObject::GetVideoOutput()
 
 vtkTransform * USAcquisitionObject::GetTransform()
 {
-    return m_sliceTransform;
+    return m_sliceTransform.GetPointer();
 }
 
 void USAcquisitionObject::SetupAllStaticSlicesInAllViews()
@@ -791,9 +789,9 @@ bool USAcquisitionObject::GetItkImage(IbisItk3DImageType::Pointer itkOutputImage
     initialImage->GetSpacing(st);
     int numberOfScalarComponents = initialImage->GetNumberOfScalarComponents();
     vtkImageData *grayImage = initialImage;
+    vtkImageLuminance *luminanceFilter = vtkImageLuminance::New();
     if (numberOfScalarComponents > 1)
     {
-        vtkImageLuminance *luminanceFilter = vtkImageLuminance::New();
         luminanceFilter->SetInputData(initialImage);
         luminanceFilter->Update();
         grayImage = luminanceFilter->GetOutput();
@@ -865,6 +863,7 @@ bool USAcquisitionObject::GetItkImage(IbisItk3DImageType::Pointer itkOutputImage
     memcpy(itkImageBuffer, image->GetScalarPointer(), numberOfPixels*sizeof(float));
     tmpMat->Delete();
     shifter->Delete();
+    luminanceFilter->Delete();
     return true;
 }
 

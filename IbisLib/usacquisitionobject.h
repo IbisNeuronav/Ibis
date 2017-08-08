@@ -175,8 +175,8 @@ protected:
 
     // Current slice properties
     USMask                  * m_mask;
-    vtkTransform            * m_currentImageTransform;
-    vtkTransform            * m_sliceTransform;
+    vtkSmartPointer<vtkTransform>   m_currentImageTransform;
+    vtkSmartPointer<vtkTransform>   m_sliceTransform;
     vtkTransform            * m_calibrationTransform;
     int                       m_sliceLutIndex;
     vtkSmartPointer<vtkImageProperty>       m_sliceProperties;
