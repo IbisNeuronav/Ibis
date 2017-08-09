@@ -67,12 +67,12 @@ USAcquisitionObject::USAcquisitionObject()
     m_acquisitionType = UsProbeObject::ACQ_B_MODE;
 
     // current slice
-    m_calibrationTransform = vtkTransform::New();
+    m_calibrationTransform = vtkSmartPointer<vtkTransform>::New();
     m_sliceTransform = vtkSmartPointer<vtkTransform>::New();
     m_sliceTransform->Concatenate( this->WorldTransform );
     m_currentImageTransform = vtkSmartPointer<vtkTransform>::New();
     m_sliceTransform->Concatenate( m_currentImageTransform.GetPointer() );
-    m_sliceTransform->Concatenate( m_calibrationTransform );
+    m_sliceTransform->Concatenate( m_calibrationTransform.GetPointer() );
     m_sliceProperties = vtkSmartPointer<vtkImageProperty>::New();
     m_sliceLutIndex = 1;         // default to hot metal
     m_lut = vtkSmartPointer<vtkPiecewiseFunctionLookupTable>::New();
@@ -126,8 +126,6 @@ USAcquisitionObject::USAcquisitionObject()
 USAcquisitionObject::~USAcquisitionObject()
 {
     disconnect(this);
-
-    m_calibrationTransform->Delete();
 
     m_mask->Delete();
     ClearStaticSlicesData();
@@ -432,7 +430,7 @@ void USAcquisitionObject::SetCalibrationMatrix( vtkMatrix4x4 * mat )
 
 vtkTransform * USAcquisitionObject::GetCalibrationTransform()
 {
-    return m_calibrationTransform;
+    return m_calibrationTransform.GetPointer();
 }
 
 vtkImageData * USAcquisitionObject::GetVideoOutput()
@@ -553,7 +551,7 @@ void USAcquisitionObject::ComputeOneStaticSliceData( int sliceIndex )
     pss.transform = vtkTransform::New();
     pss.transform->Concatenate( this->WorldTransform );
     pss.transform->Concatenate( sliceUncalibratedTransform );
-    pss.transform->Concatenate( m_calibrationTransform );
+    pss.transform->Concatenate( m_calibrationTransform.GetPointer() );
     pss.transform->Update();
     m_staticSlicesData.push_back( pss );
 

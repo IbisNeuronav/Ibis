@@ -20,8 +20,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include "itkImageFileWriter.h"
 
-#include <QVector> // added by xiao
-
 GPU_VolumeReconstructionWidget::GPU_VolumeReconstructionWidget(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::GPU_VolumeReconstructionWidget),
@@ -223,9 +221,8 @@ void GPU_VolumeReconstructionWidget::on_startButton_clicked()
     std::cerr << "Constructing m_Reconstructor...DONE" << std::endl;
 #endif
 
-    //IbisItk3DImageType::Pointer itkSliceImage[nbrOfSlices]; // changed by Xiao, Dec 15, 2014
+    IbisItk3DImageType::Pointer itkSliceImage[nbrOfSlices];
 
-  QVector<IbisItk3DImageType::Pointer> itkSliceImage(nbrOfSlices);
     vtkSmartPointer<vtkMatrix4x4> sliceTransformMatrix[nbrOfSlices];
     unsigned int validSliceNo = 0;
     for(unsigned int i=0; i<nbrOfSlices; i++)

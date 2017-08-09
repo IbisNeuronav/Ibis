@@ -177,7 +177,7 @@ protected:
     USMask                  * m_mask;
     vtkSmartPointer<vtkTransform>   m_currentImageTransform;
     vtkSmartPointer<vtkTransform>   m_sliceTransform;
-    vtkTransform            * m_calibrationTransform;
+    vtkSmartPointer<vtkTransform>   m_calibrationTransform;
     int                       m_sliceLutIndex;
     vtkSmartPointer<vtkImageProperty>       m_sliceProperties;
     bool                      m_isMaskOn;
