@@ -477,10 +477,21 @@ GPUVolumeReconstruction< TImage >
   cl_image_format mask_image_format;
   mask_image_format.image_channel_order = CL_R;
   mask_image_format.image_channel_data_type = CL_UNSIGNED_INT8;    
-  cl_mem inputImageMaskGPUBuffer = clCreateImage2D(m_Context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, 
-                      &(mask_image_format), 
-                      m_FixedSliceMask->GetLargestPossibleRegion().GetSize()[0], m_FixedSliceMask->GetLargestPossibleRegion().GetSize()[1],
-                       0, maskValues, &errid);
+  cl_image_desc desc;
+  desc.image_type = CL_MEM_OBJECT_IMAGE2D;
+  desc.image_width = m_FixedSliceMask->GetLargestPossibleRegion().GetSize()[0];
+  desc.image_height = m_FixedSliceMask->GetLargestPossibleRegion().GetSize()[1];
+  desc.image_depth = 0;
+  desc.image_array_size = 0;
+  desc.image_row_pitch = 0;
+  desc.image_slice_pitch = 0;
+  desc.num_mip_levels = 0;
+  desc.num_samples = 0;
+  desc.buffer = NULL;
+  cl_mem inputImageMaskGPUBuffer = clCreateImage(   m_Context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
+                                                    &(mask_image_format),
+                                                    &desc,
+                                                    maskValues, &errid);
   OpenCLCheckError(errid, __FILE__, __LINE__, ITK_LOCATION);
   
 
@@ -537,9 +548,21 @@ GPUVolumeReconstruction< TImage >
     cl_image_format gpu_image_format;
     gpu_image_format.image_channel_order = CL_R;
     gpu_image_format.image_channel_data_type = CL_FLOAT;    
-    cl_mem inputImageGPUBuffer = clCreateImage3D(m_Context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, 
-                        &(gpu_image_format), imgSize[0], imgSize[1], imgSize[2],
-                         0, 0, (void *)allSlicesPixels, &errid);
+    cl_image_desc desc;
+    desc.image_type = CL_MEM_OBJECT_IMAGE3D;
+    desc.image_width = imgSize[0];
+    desc.image_height = imgSize[1];
+    desc.image_depth = imgSize[2];
+    desc.image_array_size = 0;
+    desc.image_row_pitch = 0;
+    desc.image_slice_pitch = 0;
+    desc.num_mip_levels = 0;
+    desc.num_samples = 0;
+    desc.buffer = NULL;
+    cl_mem inputImageGPUBuffer = clCreateImage(   m_Context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
+                                                    &(gpu_image_format),
+                                                    &desc,
+                                                    (void *)allSlicesPixels, &errid);
     OpenCLCheckError(errid, __FILE__, __LINE__, ITK_LOCATION);
 
     memcpy((void*)&allMatrices[12], (void *)&m_VolumeIndexToSliceIndexMatrices[12*sliceCntr], 12*sizeof(InternalRealType)*nbrOfSlicesToProcess);    

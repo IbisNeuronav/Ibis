@@ -224,13 +224,12 @@ void GPU_VolumeReconstructionWidget::on_startButton_clicked()
     IbisItk3DImageType::Pointer itkSliceImage[nbrOfSlices];
 
     vtkSmartPointer<vtkMatrix4x4> sliceTransformMatrix[nbrOfSlices];
-    unsigned int validSliceNo = 0;
     for(unsigned int i=0; i<nbrOfSlices; i++)
     {
       itkSliceImage[i] = IbisItk3DImageType::New();
       sliceTransformMatrix[i] = vtkSmartPointer<vtkMatrix4x4>::New();
       if ( selectedUSAcquisitionObject->GetItkImage(itkSliceImage[i], i, sliceTransformMatrix[i].GetPointer()) )
-        m_Reconstructor->SetFixedSlice(validSliceNo++, itkSliceImage[i]);
+        m_Reconstructor->SetFixedSlice(i, itkSliceImage[i]);
     }
 
      //Construct ITK Matrix corresponding to VTK Local Matrix
