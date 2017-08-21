@@ -52,7 +52,7 @@ public:
     virtual bool IsExportable()  { return true; }
 
     vtkPolyData *GetPolyData();
-    void SetPolyData( vtkSmartPointer<vtkPolyData> data );
+    void SetPolyData( vtkPolyData *data );
     
     // Implementation of parent virtual method
     virtual void Setup( View * view );
@@ -122,7 +122,7 @@ protected:
     vtkScalarsToColors * GetCurrentLut();
     void InitializeClippingPlanes();
         
-    vtkSmartPointer<vtkPolyData> PolyData;
+    vtkPolyData *PolyData;
     vtkSmartPointer<vtkPassThrough> m_clippingSwitch;
     vtkSmartPointer<vtkPassThrough> m_colorSwitch;
 

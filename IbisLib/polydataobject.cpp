@@ -104,6 +104,8 @@ PolyDataObject::PolyDataObject()
 
 PolyDataObject::~PolyDataObject()
 {
+    if( this->PolyData )
+        this->PolyData->UnRegister( this );
     if( this->ScalarSource )
         this->ScalarSource->UnRegister( this );
     if( this->Texture )
@@ -112,15 +114,21 @@ PolyDataObject::~PolyDataObject()
 
 vtkPolyData * PolyDataObject::GetPolyData()
 {
-    return PolyData.GetPointer();
+    return PolyData;
 }
 
-void PolyDataObject::SetPolyData(vtkSmartPointer<vtkPolyData> poly )
+void PolyDataObject::SetPolyData(vtkPolyData *poly )
 {
     if( poly == this->PolyData )
         return;
 
+    if( this->PolyData )
+        this->PolyData->UnRegister( this );
     this->PolyData = poly;
+    if( this->PolyData )
+    {
+        this->PolyData->Register( this );
+    }
 
     UpdatePipeline();
 
@@ -195,7 +203,7 @@ void PolyDataObject::SavePolyData( QString &fileName )
 {
     vtkSmartPointer<vtkPolyDataWriter> writer = vtkSmartPointer<vtkPolyDataWriter>::New();
     writer->SetFileName( fileName.toUtf8().data() );
-    writer->SetInputData(this->PolyData.GetPointer());
+    writer->SetInputData(this->PolyData);
     writer->Update();
     writer->Write();
 }
@@ -643,11 +651,11 @@ void PolyDataObject::UpdatePipeline()
     if( !this->PolyData )
         return;
 
-    m_clipper->SetInputData( this->PolyData.GetPointer() );
+    m_clipper->SetInputData( this->PolyData );
     if( IsClippingEnabled() )
         m_clippingSwitch->SetInputConnection( m_clipper->GetOutputPort() );
     else
-        m_clippingSwitch->SetInputData( this->PolyData.GetPointer() );
+        m_clippingSwitch->SetInputData( this->PolyData );
 
     this->ProbeFilter->SetInputConnection( m_clippingSwitch->GetOutputPort() );
     this->TextureMap->SetInputConnection( m_clippingSwitch->GetOutputPort() );
