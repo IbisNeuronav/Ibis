@@ -74,6 +74,7 @@ PolyDataObject::PolyDataObject()
     m_cuttingPlane[1]->SetNormal( 0.0, 1.0, 0.0 );
     m_cuttingPlane[2]->SetNormal( 0.0, 0.0, 1.0 );
 
+    this->PolyData = 0;
     this->LutIndex = 0;
     this->renderingMode = VTK_SURFACE;
     this->ScalarsVisible = 0;
