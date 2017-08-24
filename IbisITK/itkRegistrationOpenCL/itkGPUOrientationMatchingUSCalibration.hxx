@@ -1163,9 +1163,6 @@ GPUOrientationMatchingUSCalibration< TFixedImage, TMovingImage >
 
 
     // In OpenCL 1.2, clCreateImage3D is deprecated and must be replaced with clCreateImage
-    // However, OSX doesn't support OpenCL < 1.2 anymore and Linux NVidia drivers don't support
-    // OpenCL > 1.1 (and 1.1 doesn't have clCreateImage), so we need to have a special case.
-#if defined(__APPLE__)
   cl_image_desc image_desc;
   image_desc.image_type = CL_MEM_OBJECT_IMAGE3D;
   image_desc.image_width = imgSize[0];
@@ -1180,13 +1177,6 @@ GPUOrientationMatchingUSCalibration< TFixedImage, TMovingImage >
   m_MovingImageGradientGPUImage = clCreateImage(m_Context,
                                                 CL_MEM_READ_ONLY, &(gpu_gradient_image_format),
                                                 &(image_desc), m_cpuMovingGradientImageBuffer, &errid);
-#else
-
-  m_MovingImageGradientGPUImage = clCreateImage3D(m_Context,
-                                                  CL_MEM_READ_ONLY, &(gpu_gradient_image_format),
-                                                  imgSize[0], imgSize[1], imgSize[2],
-                                                  0, 0, m_cpuMovingGradientImageBuffer, &errid);
-#endif
 
   OpenCLCheckError(errid, __FILE__, __LINE__, ITK_LOCATION);
 

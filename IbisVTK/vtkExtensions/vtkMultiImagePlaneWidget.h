@@ -97,7 +97,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "vtkMulti3DWidget.h"
 #include <vector>
 #include "vtkMatrix4x4.h"
-#include "vtkSmartPointer.h"
 
 class vtkActor;
 class vtkCellPicker;
@@ -107,6 +106,7 @@ class vtkImageMapToColors;
 class vtkImageReslice;
 class vtkScalarsToColors;
 class vtkLookupTable;
+class vtkMatrix4x4;
 class vtkPlaneSource;
 class vtkPoints;
 class vtkPolyData;
@@ -517,7 +517,7 @@ protected:
 	PerVolumeObjectsVec Inputs;
 
     vtkImageData * BoundingImage;
-    vtkSmartPointer<vtkTransform> BoundingTransform;
+    vtkTransform * BoundingTransform;
 
 	int GetPerVolumeIndex( vtkImageData * volume );
 

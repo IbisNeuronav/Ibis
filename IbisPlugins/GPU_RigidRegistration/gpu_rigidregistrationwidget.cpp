@@ -116,7 +116,7 @@ public:
       localMatrix_inv->Invert();
        
       vtkSmartPointer<vtkMatrix4x4> targetLocalMatrix = vtkSmartPointer<vtkMatrix4x4>::New();
-      targetImageVtktransform->GetMatrix( targetLocalMatrix );
+      targetImageVtktransform->GetMatrix( targetLocalMatrix.GetPointer() );
        
       vtkSmartPointer<vtkMatrix4x4> finalMatrix = vtkSmartPointer<vtkMatrix4x4>::New();
        

@@ -17,11 +17,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QtConcurrent/QtConcurrent>
 #include "vnl/algo/vnl_symmetric_eigensystem.h"
 #include "vnl/algo/vnl_real_eigensystem.h"
-#include "vtkSmartPointer.h"
 
 #include "itkImageFileWriter.h"
-
-#include <QVector> // added by xiao
 
 GPU_VolumeReconstructionWidget::GPU_VolumeReconstructionWidget(QWidget *parent) :
     QWidget(parent),
@@ -97,8 +94,8 @@ void GPU_VolumeReconstructionWidget::VtkToItkImage( vtkImageData * vtkInputImage
   itk::Vector< double, 3 > origin;
   itk::Vector< double, 3 > itkOrigin;
   // set direction cosines
-  vtkSmartPointer<vtkMatrix4x4> tmpMat = vtkSmartPointer<vtkMatrix4x4>::New();
-  vtkMatrix4x4::Transpose( transformMatrix.GetPointer(), tmpMat.GetPointer() );
+  vtkMatrix4x4 *tmpMat = vtkMatrix4x4::New();
+  vtkMatrix4x4::Transpose( transformMatrix.GetPointer(), tmpMat );
   double step[3], mincStartPoint[3], dirCos[3][3];
   for( int i = 0; i < 3; i++ )
   {
@@ -124,6 +121,7 @@ void GPU_VolumeReconstructionWidget::VtkToItkImage( vtkImageData * vtkInputImage
   itkOutputImage->Allocate();
   float *itkImageBuffer = itkOutputImage->GetBufferPointer();
   memcpy(itkImageBuffer, image->GetScalarPointer(), numberOfPixels*sizeof(float));
+  tmpMat->Delete();
 }
 
 void GPU_VolumeReconstructionWidget::slot_finished()
@@ -223,17 +221,15 @@ void GPU_VolumeReconstructionWidget::on_startButton_clicked()
     std::cerr << "Constructing m_Reconstructor...DONE" << std::endl;
 #endif
 
-    //IbisItk3DImageType::Pointer itkSliceImage[nbrOfSlices]; // changed by Xiao, Dec 15, 2014
+    IbisItk3DImageType::Pointer itkSliceImage[nbrOfSlices];
 
-  QVector<IbisItk3DImageType::Pointer> itkSliceImage(nbrOfSlices);
     vtkSmartPointer<vtkMatrix4x4> sliceTransformMatrix[nbrOfSlices];
-    unsigned int validSliceNo = 0;
     for(unsigned int i=0; i<nbrOfSlices; i++)
     {
       itkSliceImage[i] = IbisItk3DImageType::New();
       sliceTransformMatrix[i] = vtkSmartPointer<vtkMatrix4x4>::New();
       if ( selectedUSAcquisitionObject->GetItkImage(itkSliceImage[i], i, sliceTransformMatrix[i].GetPointer()) )
-        m_Reconstructor->SetFixedSlice(validSliceNo++, itkSliceImage[i]);
+        m_Reconstructor->SetFixedSlice(i, itkSliceImage[i]);
     }
 
      //Construct ITK Matrix corresponding to VTK Local Matrix

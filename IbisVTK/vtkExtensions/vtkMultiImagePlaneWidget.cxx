@@ -82,7 +82,7 @@ vtkMultiImagePlaneWidget::vtkMultiImagePlaneWidget() : vtkMulti3DWidget()
     this->CurrentImageValue        = VTK_FLOAT_MAX;
     this->MarginSelectMode         = 8;
     this->BoundingImage            = 0;
-    this->BoundingTransform        = vtkSmartPointer<vtkTransform>::New();
+    this->BoundingTransform        = vtkTransform::New();
 
     // Represent the plane's outline geometry
     //
@@ -181,6 +181,8 @@ vtkMultiImagePlaneWidget::~vtkMultiImagePlaneWidget()
 
     if( this->BoundingImage )
         this->BoundingImage->UnRegister( this );
+    if( this->BoundingTransform  )
+        this->BoundingTransform->UnRegister( this );
 }
 
 template< class T >
@@ -212,13 +214,13 @@ void vtkMultiImagePlaneWidget::ClearActors()
 void vtkMultiImagePlaneWidget::SetActorsTransforms()
 {
     for( int i = 0; i < this->PlaneOutlineActors.size(); ++i )
-        this->PlaneOutlineActors[i]->SetUserTransform( this->BoundingTransform.GetPointer() );
+        this->PlaneOutlineActors[i]->SetUserTransform( this->BoundingTransform );
     for( int i = 0; i < this->TexturePlaneActors.size(); ++i )
-        this->TexturePlaneActors[i]->SetUserTransform( this->BoundingTransform.GetPointer() );
+        this->TexturePlaneActors[i]->SetUserTransform( this->BoundingTransform );
     for( int i = 0; i < this->CursorActors.size(); ++i )
-        this->CursorActors[i]->SetUserTransform( this->BoundingTransform.GetPointer() );
+        this->CursorActors[i]->SetUserTransform( this->BoundingTransform );
     for( int i = 0; i < this->MarginActors.size(); ++i )
-        this->MarginActors[i]->SetUserTransform( this->BoundingTransform.GetPointer() );
+        this->MarginActors[i]->SetUserTransform( this->BoundingTransform );
 }
 
 void vtkMultiImagePlaneWidget::GetTextureCoordName( std::string & name, int index )
@@ -252,7 +254,7 @@ void vtkMultiImagePlaneWidget::InternalAddRenderer( vtkRenderer * ren, vtkAssemb
     mapper->SetResolveCoincidentTopologyToPolygonOffset();
     actor->SetMapper( mapper );
     actor->PickableOff();
-    actor->SetUserTransform( this->BoundingTransform.GetPointer() );
+    actor->SetUserTransform( this->BoundingTransform );
     this->PlaneOutlineMappers.push_back( mapper );
     this->PlaneOutlineActors.push_back( actor );
 
@@ -262,7 +264,7 @@ void vtkMultiImagePlaneWidget::InternalAddRenderer( vtkRenderer * ren, vtkAssemb
     vtkActor * texturePlaneActor = vtkActor::New();
     mapper->SetInputConnection(this->TexturePlaneCoords->GetOutputPort());
     texturePlaneActor->SetMapper( mapper );
-    texturePlaneActor->SetUserTransform( this->BoundingTransform.GetPointer() );
+    texturePlaneActor->SetUserTransform( this->BoundingTransform );
     vtkProperty * properties = texturePlaneActor->GetProperty();
     properties->SetColor( 0.0, 0.0, 0.0 );
     properties->SetAmbient( 1.0 );
@@ -289,7 +291,7 @@ void vtkMultiImagePlaneWidget::InternalAddRenderer( vtkRenderer * ren, vtkAssemb
     mapper->SetResolveCoincidentTopologyToPolygonOffset();
     actor->SetMapper( mapper );
     actor->PickableOff();
-    actor->SetUserTransform( this->BoundingTransform.GetPointer() );
+    actor->SetUserTransform( this->BoundingTransform );
     this->CursorMappers.push_back( mapper );
     this->CursorActors.push_back( actor );
 
@@ -301,7 +303,7 @@ void vtkMultiImagePlaneWidget::InternalAddRenderer( vtkRenderer * ren, vtkAssemb
     actor->SetMapper( mapper );
     actor->PickableOff();
     actor->VisibilityOff();
-    actor->SetUserTransform( this->BoundingTransform.GetPointer() );
+    actor->SetUserTransform( this->BoundingTransform );
     this->MarginMappers.push_back( mapper );
     this->MarginActors.push_back( actor );
 
@@ -1159,7 +1161,7 @@ int vtkMultiImagePlaneWidget::AddInput( vtkImageData * in, vtkScalarsToColors * 
     resliceTransform->SetInput( t );
     resliceTransform->Inverse();
     if( this->BoundingTransform )
-        resliceTransform->Concatenate( this->BoundingTransform.GetPointer() );
+        resliceTransform->Concatenate( this->BoundingTransform );
     resliceTransform->Delete();
 
 	inObjects.ColorMap = vtkImageMapToColors::New();
@@ -1255,17 +1257,20 @@ void vtkMultiImagePlaneWidget::ClearAllInputs()
 
 void vtkMultiImagePlaneWidget::SetBoundingVolume( vtkImageData * boundingImage, vtkTransform * boundingTransform )
 {
-    if( boundingImage == this->BoundingImage && boundingTransform == this->BoundingTransform.GetPointer() )
+    if( boundingImage == this->BoundingImage && boundingTransform == this->BoundingTransform )
         return;
 
     if( this->BoundingImage )
     {
         this->BoundingImage->UnRegister( this );
+        this->BoundingTransform->UnRegister( this );
     }
     this->BoundingImage = boundingImage;
-    this->BoundingTransform->DeepCopy( boundingTransform );
+    this->BoundingTransform = boundingTransform;
     if( this->BoundingImage )
         this->BoundingImage->Register( this );
+    if( this->BoundingTransform )
+        this->BoundingTransform->Register( this );
 
     // Premultiply all input volumes's transform with bounding volume's transform.
     for( int im = 0; im < this->Inputs.size(); ++ im )
