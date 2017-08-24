@@ -69,7 +69,7 @@ USAcquisitionObject::USAcquisitionObject()
     // current slice
     m_calibrationTransform = vtkSmartPointer<vtkTransform>::New();
     m_sliceTransform = vtkSmartPointer<vtkTransform>::New();
-    m_sliceTransform->Concatenate( this->WorldTransform );
+    m_sliceTransform->Concatenate( this->GetWorldTransform() );
     m_currentImageTransform = vtkSmartPointer<vtkTransform>::New();
     m_sliceTransform->Concatenate( m_currentImageTransform.GetPointer() );
     m_sliceTransform->Concatenate( m_calibrationTransform.GetPointer() );
@@ -549,7 +549,7 @@ void USAcquisitionObject::ComputeOneStaticSliceData( int sliceIndex )
     vtkTransform * sliceUncalibratedTransform = vtkTransform::New();
     sliceUncalibratedTransform->SetMatrix( sliceUncalibratedMatrix );
     pss.transform = vtkTransform::New();
-    pss.transform->Concatenate( this->WorldTransform );
+    pss.transform->Concatenate( this->GetWorldTransform() );
     pss.transform->Concatenate( sliceUncalibratedTransform );
     pss.transform->Concatenate( m_calibrationTransform.GetPointer() );
     pss.transform->Update();

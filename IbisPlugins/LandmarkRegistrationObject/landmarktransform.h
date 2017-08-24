@@ -21,7 +21,6 @@ class vtkPoints;
 class vtkIntArray;
 class vtkDoubleArray;
 class vtkLandmarkTransform;
-class vtkLinearTransform;
 
 class LandmarkTransform : public vtkObject
 {

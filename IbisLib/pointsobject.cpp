@@ -443,7 +443,7 @@ void PointsObject::MoveCursorToPoint( int index )
     {
         double * pos = m_pointCoordinates->GetPoint( index ); //in PointsObject space
         double worldPos[3];
-        this->WorldTransform->TransformPoint( pos, worldPos );
+        this->GetWorldTransform()->TransformPoint( pos, worldPos );
         this->GetManager()->SetCursorWorldPosition(worldPos);
     }
 }
@@ -755,7 +755,7 @@ void PointsObject::ComputeDistanceFromSelectedPointToPointerTip()
         pointPos[i] = pos2[i];
     }
     double tmpPos[3];
-    vtkLinearTransform * transform = this->GetLocalTransform();
+    vtkTransform * transform = this->GetLocalTransform();
     transform->TransformPoint( pointPos, tmpPos );
     // convert to world
     double worldCoords[3];
