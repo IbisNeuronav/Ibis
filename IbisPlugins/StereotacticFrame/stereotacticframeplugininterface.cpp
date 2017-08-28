@@ -315,7 +315,7 @@ void StereotacticFramePluginInterface::Enable3DFrame()
     poly->SetLines( lines.GetPointer() );
 
     m_frameRepresentation = PolyDataObject::New();
-    m_frameRepresentation->SetPolyData( poly );
+    m_frameRepresentation->SetPolyData( poly.GetPointer() );
     m_frameRepresentation->SetListable( false );
     m_frameRepresentation->SetCanEditTransformManually( false );
     m_frameRepresentation->SetLocalTransform( m_frameTransform.GetPointer() );

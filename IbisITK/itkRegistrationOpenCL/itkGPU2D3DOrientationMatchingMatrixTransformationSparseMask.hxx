@@ -1057,10 +1057,21 @@ GPU2D3DOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingIm
   gpu_gradient_image_format.image_channel_order = CL_RGBA;
   gpu_gradient_image_format.image_channel_data_type = CL_FLOAT;
 
-  m_MovingImageGradientGPUImage = clCreateImage3D(m_Context,
-                                  CL_MEM_READ_ONLY, &(gpu_gradient_image_format),
-                                  imgSize[0], imgSize[1], imgSize[2],
-                                  0, 0, m_cpuMovingGradientImageBuffer, &errid);
+  cl_image_desc desc;
+  desc.image_type = CL_MEM_OBJECT_IMAGE3D;
+  desc.image_width = imgSize[0];
+  desc.image_height = imgSize[1];
+  desc.image_depth = imgSize[2];
+  desc.image_array_size = 0;
+  desc.image_row_pitch = 0;
+  desc.image_slice_pitch = 0;
+  desc.num_mip_levels = 0;
+  desc.num_samples = 0;
+  desc.buffer = NULL;
+
+  m_MovingImageGradientGPUImage = clCreateImage(m_Context,
+                                  CL_MEM_READ_ONLY, &(gpu_gradient_image_format), &desc,
+                                   m_cpuMovingGradientImageBuffer, &errid);
   OpenCLCheckError(errid, __FILE__, __LINE__, ITK_LOCATION);
 
   size_t origin[3] = {0, 0, 0};

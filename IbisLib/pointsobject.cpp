@@ -830,7 +830,7 @@ void PointsObject::LineToPointerTip( double selectedPoint[3], double pointerTip[
     linesPolyData->SetPoints(points);
     linesPolyData->SetLines(cells);
 
-    m_lineToPointerTip->SetPolyData( linesPolyData );
+    m_lineToPointerTip->SetPolyData( linesPolyData.GetPointer() );
     emit Modified();
 }
 
