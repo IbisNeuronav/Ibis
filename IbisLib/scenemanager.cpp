@@ -374,6 +374,10 @@ void SceneManager::SaveScene( QString & fileName )
     writer.Start();
     writer.BeginSection("SaveScene");
     QString version(IBIS_SCENE_SAVE_VERSION);
+    QString hash = Application::GetInstance().GetGitHashShort();
+    QString ibisVersion = Application::GetInstance().GetVersionString();
+    ::Serialize( &writer, "IbisVersion",  ibisVersion );
+    ::Serialize( &writer, "IbisRevision",  hash );
     ::Serialize( &writer, "Version", version);
     ::Serialize( &writer, "NextObjectID", this->NextObjectID);
     this->UpdateProgress(1);
