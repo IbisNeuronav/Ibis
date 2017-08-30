@@ -98,6 +98,7 @@ public:
 
     // Return itk image of a given frame
     bool GetItkImage(IbisItk3DImageType::Pointer itkOutputImage, int frameNo, vtkMatrix4x4* sliceMatrix);
+    bool GetItkImage(IbisItk3DImageType::Pointer itkOutputImage, int frameNo, bool masked, bool useCalibratedTransform = false, vtkMatrix4x4 *relativeMatrix = 0  );
     void GetItkRGBImage(IbisRGBImageType::Pointer itkOutputImage, int frameNo, bool masked, bool useCalibratedTransform = false, vtkMatrix4x4 *relativeMatrix = 0 );
 
     // Display of current slice
