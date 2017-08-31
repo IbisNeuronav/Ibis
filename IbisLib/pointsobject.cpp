@@ -614,7 +614,6 @@ void PointsObject::RemovePoint(int index)
     // Update point representations
     if( GetManager() )
         GetManager()->RemoveObject( m_pointList[index] );
-    m_pointList[index]->Delete();
     m_pointList.removeAt( index );
     for( int i = 0; i < m_pointList.size(); ++i )
         m_pointList[i]->SetPointIndex( i );
@@ -716,7 +715,7 @@ void PointsObject::ObjectAddedToScene()
     // add all point representations to scene
     for( int i = 0; i < m_pointList.size(); ++i )
     {
-        GetManager()->AddObject( m_pointList[i], this );
+        GetManager()->AddObject( m_pointList[i].GetPointer(), this );
     }
 
     connect( this->GetManager(), SIGNAL(CurrentObjectChanged()), this, SLOT(OnCurrentObjectChanged()) );
@@ -732,7 +731,7 @@ void PointsObject::ObjectAboutToBeRemovedFromScene()
     // remove all point representations to scene
     for( int i = 0; i < m_pointList.size(); ++i )
     {
-        GetManager()->RemoveObject( m_pointList[i] );
+        GetManager()->RemoveObject( m_pointList[i].GetPointer() );
     }
 
     disconnect( this->GetManager(), SIGNAL(CurrentObjectChanged()), this, SLOT(OnCurrentObjectChanged()) );
