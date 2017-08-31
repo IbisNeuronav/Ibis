@@ -481,6 +481,7 @@ QString AnimatePluginInterface::GetAnimatedParamName( int paramIndex )
         return QString("Transfer func");
     if( paramIndex == 2 )
         return QString("Min Cam Dist");
+    return QString("None");
 }
 
 int AnimatePluginInterface::GetNumberOfKeys( int paramIndex )
@@ -491,6 +492,7 @@ int AnimatePluginInterface::GetNumberOfKeys( int paramIndex )
         return m_tfAnim->GetNumberOfKeys();
     if( paramIndex == 2 )
         return m_minCamDistanceAnim->GetNumberOfKeys();
+    return -1;
 }
 
 int AnimatePluginInterface::GetFrameForKey( int paramIndex, int keyIndex )
@@ -501,6 +503,7 @@ int AnimatePluginInterface::GetFrameForKey( int paramIndex, int keyIndex )
         return m_tfAnim->GetFrameForKey( keyIndex );
     if( paramIndex == 2 )
         return m_minCamDistanceAnim->GetFrameForKey( keyIndex );
+    return -1;
 }
 
 int AnimatePluginInterface::GetKeyForFrame( int paramIndex, int frame )
@@ -511,6 +514,7 @@ int AnimatePluginInterface::GetKeyForFrame( int paramIndex, int frame )
         return m_tfAnim->GetKeyForFrame( frame );
     if( paramIndex == 2 )
         return m_minCamDistanceAnim->GetKeyForFrame( frame );
+    return -1;
 }
 
 void AnimatePluginInterface::TimerCallback()
