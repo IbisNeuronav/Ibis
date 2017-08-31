@@ -865,6 +865,129 @@ bool USAcquisitionObject::GetItkImage(IbisItk3DImageType::Pointer itkOutputImage
     return true;
 }
 
+bool USAcquisitionObject::GetItkImage(IbisItk3DLabelType::Pointer itkOutputImage, int frameNo, bool masked, bool useCalibratedTransform, vtkMatrix4x4 *relativeMatrix )
+{
+    Q_ASSERT_X(itkOutputImage, "USAcquisitionObject::GetItkImage()", "itkOutputImage must be allocated before this call");
+
+    int currentFrame = m_videoBuffer->GetCurrentFrame();
+    vtkImageData * initialImage = m_videoBuffer->GetImage( frameNo );
+
+    double org[3], st[3];
+    initialImage->GetOrigin(org);
+    initialImage->GetSpacing(st);
+    vtkSmartPointer<vtkMatrix4x4> frameMatrix = vtkSmartPointer<vtkMatrix4x4>::New();
+    frameMatrix->Identity();
+    vtkSmartPointer<vtkMatrix4x4> calibratedFrameMatrix = vtkSmartPointer<vtkMatrix4x4>::New();
+    calibratedFrameMatrix->Identity();
+    vtkMatrix4x4::Multiply4x4( m_videoBuffer->GetMatrix( frameNo ), m_calibrationTransform->GetMatrix(), calibratedFrameMatrix );
+    if( relativeMatrix )
+    {
+        if( useCalibratedTransform )
+        {
+            vtkMatrix4x4::Multiply4x4( relativeMatrix, calibratedFrameMatrix, frameMatrix );
+        }
+        else
+            vtkMatrix4x4::Multiply4x4( relativeMatrix, m_videoBuffer->GetMatrix( frameNo ), frameMatrix );
+    }
+    else
+    {
+        if( useCalibratedTransform )
+        {
+            frameMatrix->DeepCopy( calibratedFrameMatrix );
+        }
+        else
+            frameMatrix->DeepCopy( m_videoBuffer->GetMatrix( frameNo ) );
+    }
+    int numberOfScalarComponents = initialImage->GetNumberOfScalarComponents();
+    vtkImageData *grayImage = initialImage;
+    vtkImageLuminance *luminanceFilter = vtkImageLuminance::New();
+    if (numberOfScalarComponents > 1)
+    {
+        luminanceFilter->SetInputData(initialImage);
+        luminanceFilter->Update();
+        grayImage = luminanceFilter->GetOutput();
+    }
+    vtkImageData * image;
+    vtkImageShiftScale *shifter = vtkImageShiftScale::New();
+    if (initialImage->GetScalarType() != VTK_UNSIGNED_CHAR)
+    {
+        shifter->SetOutputScalarType(VTK_UNSIGNED_CHAR);
+        shifter->SetClampOverflow(1);
+        shifter->SetInputData(grayImage);
+        shifter->SetShift(0);
+        shifter->SetScale(1.0);
+        shifter->Update();
+        image = shifter->GetOutput();
+    }
+    else
+        image = initialImage;
+
+    image->GetOrigin(org);
+    image->GetSpacing(st);
+    int * dimensions = initialImage->GetDimensions();
+    IbisItk3DLabelType::SizeType  size;
+    IbisItk3DLabelType::IndexType start;
+    IbisItk3DLabelType::RegionType region;
+    const long unsigned int numberOfPixels =  dimensions[0] * dimensions[1] * dimensions[2];
+    double imageOrigin[3];
+    image->GetOrigin(imageOrigin);
+    for (int i = 0; i < 3; i++)
+    {
+        size[i] = dimensions[i];
+    }
+
+    start.Fill(0);
+    region.SetIndex( start );
+    region.SetSize( size );
+    itkOutputImage->SetRegions(region);
+
+    itk::Matrix< double, 3,3 > dirCosine;
+    itk::Vector< double, 3 > origin;
+    itk::Vector< double, 3 > itkOrigin;
+    // set direction cosines
+    vtkMatrix4x4 * tmpMat = vtkMatrix4x4::New();
+    vtkMatrix4x4::Transpose( frameMatrix, tmpMat );
+    double step[3], mincStartPoint[3], dirCos[3][3];
+    for( int i = 0; i < 3; i++ )
+    {
+        step[i] = vtkMath::Dot( (*tmpMat)[i], (*tmpMat)[i] );
+        step[i] = sqrt( step[i] );
+        for( int j = 0; j < 3; j++ )
+        {
+            dirCos[i][j] = (*tmpMat)[i][j] / step[i];
+            dirCosine[j][i] = dirCos[i][j];
+        }
+    }
+
+    double rotation[3][3];
+    vtkMath::Transpose3x3( dirCos, rotation );
+    vtkMath::LinearSolve3x3( rotation, (*tmpMat)[3], mincStartPoint );
+
+    for( int i = 0; i < 3; i++ )
+        origin[i] =  mincStartPoint[i];
+    itkOrigin = dirCosine * origin;
+    itkOutputImage->SetSpacing(step);
+    itkOutputImage->SetOrigin(itkOrigin);
+    itkOutputImage->SetDirection(dirCosine);
+    itkOutputImage->Allocate();
+    unsigned char *itkImageBuffer = itkOutputImage->GetBufferPointer();
+    if( masked )
+    {
+        vtkSmartPointer<vtkImageStencil> sliceStencil = vtkSmartPointer<vtkImageStencil>::New();
+        sliceStencil->SetStencilData( m_imageStencilSource->GetOutput() );
+        sliceStencil->SetInputData( image );
+        sliceStencil->SetBackgroundColor( 1.0, 1.0, 1.0, 0.0 );
+        sliceStencil->Update();
+        memcpy(itkImageBuffer, sliceStencil->GetOutput()->GetScalarPointer(), numberOfPixels*sizeof(unsigned char));
+    }
+    else
+        memcpy(itkImageBuffer, image->GetScalarPointer(), numberOfPixels*sizeof(unsigned char));
+    tmpMat->Delete();
+    shifter->Delete();
+    luminanceFilter->Delete();
+    return true;
+}
+
 // GetItkRGBImage is used only to convert captured video frames to itk images that will be then exported using itk image writer
 // we export only uncalibrated matrices
 void USAcquisitionObject:: GetItkRGBImage(IbisRGBImageType::Pointer itkOutputImage, int frameNo, bool masked , bool useCalibratedTransform, vtkMatrix4x4* relativeMatrix )
@@ -1055,42 +1178,101 @@ void USAcquisitionObject::ExportTrackedVideoBuffer(QString destDir , bool masked
         processOK = true;
 
         int sequenceNumber = 0; // make sure to number output files sequentially
-        this->ConvertVtkImagesToItkRGBImages( masked, useCalibratedTransform, relativeToID );
-        itk::ImageFileWriter< IbisRGBImageType >::Pointer mincWriter = itk::ImageFileWriter<IbisRGBImageType>::New();
-        for( int i = 0; i < numberOfFrames && processOK; i++ )
+        int nbComp = m_videoBuffer->GetFrameNumberOfComponents();
+        if( nbComp == 1 )
         {
-            QString Number( QString::number( ++sequenceNumber ));
-            int numLength = Number.length();
-            QString numberedFileName(partFileName);
-            numberedFileName += '.';
-            for(int j = 0; j < 5 - numLength; j++)
+            vtkMatrix4x4 *relativeToMatrix = 0;
+            if( relativeToID  != SceneManager::InvalidId )
             {
-                numberedFileName += "0";
+                SceneObject *relativeTo = this->GetManager()->GetObjectByID( relativeToID );
+                Q_ASSERT( relativeTo );
+                relativeToMatrix = relativeTo->GetWorldTransform()->GetLinearInverse()->GetMatrix();
             }
-
-            numberedFileName += Number;
-            numberedFileName += ".mnc";
-            mincWriter->SetFileName(numberedFileName.toUtf8().data());
-
-            mincWriter->SetInput( m_itkRGBImages[i] );
-
-            try
+            itk::ImageFileWriter< IbisItk3DLabelType >::Pointer mincWriter = itk::ImageFileWriter<IbisItk3DLabelType>::New();
+            for( int i = 0; i < numberOfFrames && processOK; i++ )
             {
-                mincWriter->Update();
+                QString Number( QString::number( ++sequenceNumber ));
+                int numLength = Number.length();
+                QString numberedFileName(partFileName);
+                numberedFileName += '.';
+                for(int j = 0; j < 5 - numLength; j++)
+                {
+                    numberedFileName += "0";
+                }
+
+                numberedFileName += Number;
+                numberedFileName += ".mnc";
+                mincWriter->SetFileName(numberedFileName.toUtf8().data());
+
+                IbisItk3DLabelType::Pointer itkSliceImage;
+
+                itkSliceImage = IbisItk3DLabelType::New();
+                if ( !this->GetItkImage(itkSliceImage, i,  masked,  useCalibratedTransform, relativeToMatrix ) )
+                {
+                    processOK = false;
+                    break;
+                 }
+                mincWriter->SetInput( itkSliceImage );
+
+                try
+                {
+                    mincWriter->Update();
+                }
+                catch(itk::ExceptionObject & exp)
+                {
+                    std::cerr << "Exception caught!" << std::endl;
+                    std::cerr << exp << std::endl;
+                    processOK = false;
+                    break;
+                }
+                progress->setValue(i);
+                qApp->processEvents();
+                if ( progress->wasCanceled() )
+                {
+                    QMessageBox::information(0, tr("Exporting frames"), tr("Process cancelled"), 1, 0);
+                    processOK = false;
+                }
             }
-            catch(itk::ExceptionObject & exp)
+        }
+        else
+        {
+            this->ConvertVtkImagesToItkRGBImages( masked, useCalibratedTransform, relativeToID );
+            itk::ImageFileWriter< IbisRGBImageType >::Pointer mincWriter = itk::ImageFileWriter<IbisRGBImageType>::New();
+            for( int i = 0; i < numberOfFrames && processOK; i++ )
             {
-                std::cerr << "Exception caught!" << std::endl;
-                std::cerr << exp << std::endl;
-                processOK = false;
-                break;
-            }
-            progress->setValue(i);
-            qApp->processEvents();
-            if ( progress->wasCanceled() )
-            {
-                QMessageBox::information(0, tr("Exporting frames"), tr("Process cancelled"), 1, 0);
-                processOK = false;
+                QString Number( QString::number( ++sequenceNumber ));
+                int numLength = Number.length();
+                QString numberedFileName(partFileName);
+                numberedFileName += '.';
+                for(int j = 0; j < 5 - numLength; j++)
+                {
+                    numberedFileName += "0";
+                }
+
+                numberedFileName += Number;
+                numberedFileName += ".mnc";
+                mincWriter->SetFileName(numberedFileName.toUtf8().data());
+
+                mincWriter->SetInput( m_itkRGBImages[i] );
+
+                try
+                {
+                    mincWriter->Update();
+                }
+                catch(itk::ExceptionObject & exp)
+                {
+                    std::cerr << "Exception caught!" << std::endl;
+                    std::cerr << exp << std::endl;
+                    processOK = false;
+                    break;
+                }
+                progress->setValue(i);
+                qApp->processEvents();
+                if ( progress->wasCanceled() )
+                {
+                    QMessageBox::information(0, tr("Exporting frames"), tr("Process cancelled"), 1, 0);
+                    processOK = false;
+                }
             }
         }
         progress->close();

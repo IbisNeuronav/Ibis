@@ -108,6 +108,7 @@ public:
 
     // Info on version
     QString GetFullVersionString();
+    QString GetVersionString();
     static QString GetConfigDirectory();
     static QString GetGitHashShort();
 

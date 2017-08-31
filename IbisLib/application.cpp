@@ -362,6 +362,14 @@ QString Application::GetFullVersionString()
     return version;
 }
 
+QString Application::GetVersionString()
+{
+    QString versionQualifier( IBIS_VERSION_QUALIFIER );
+    QString version;
+    version = QString("%1.%2.%3  %4").arg(IBIS_MAJOR_VERSION).arg(IBIS_MINOR_VERSION).arg(IBIS_PATCH_VERSION).arg(versionQualifier);
+    return version;
+}
+
 QString Application::GetConfigDirectory()
 {
     QString configDir = QDir::homePath() + "/" + IBIS_CONFIGURATION_SUBDIRECTORY + "/";
