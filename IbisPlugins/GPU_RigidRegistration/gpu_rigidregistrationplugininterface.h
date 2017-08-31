@@ -9,7 +9,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
 // Thanks to Dante De Nigris for writing this class
-#ifndef __GPU_RigidRegistrationPluginInterfacee_h_
+#ifndef __GPU_RigidRegistrationPluginInterface_h_
 #define __GPU_RigidRegistrationPluginInterface_h_
 
 #include <QObject>
