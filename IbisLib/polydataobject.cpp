@@ -219,7 +219,7 @@ void PolyDataObject::Setup( View * view )
 
     vtkSmartPointer<vtkActor> actor = vtkSmartPointer<vtkActor>::New();
     actor->SetMapper( mapper.GetPointer() );
-    actor->SetUserTransform( this->WorldTransform );
+    actor->SetUserTransform( this->GetWorldTransform() );
     this->polydataObjectInstances[ view ] = actor;
 
     if( view->GetType() == THREED_VIEW_TYPE )

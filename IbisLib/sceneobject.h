@@ -16,13 +16,13 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QString>
 #include <QVector>
 #include "serializer.h"
+#include "vtkSmartPointer.h"
 
 class vtkRenderWindowInteractor;
 class vtkRenderer;
 class vtkAssembly;
 class vtkProp3D;
 class View;
-class vtkLinearTransform;
 class vtkTransform;
 class vtkMatrix4x4;
 class QWidget;
@@ -59,9 +59,9 @@ public:
     QString GetFullFileName() { return this->FullFileName; }
     void SetFullFileName( QString FullFileName ) {this->FullFileName = FullFileName;}
 
-    void SetLocalTransform( vtkLinearTransform * localTransform );
-    vtkGetObjectMacro( LocalTransform, vtkLinearTransform );
-    vtkGetObjectMacro( WorldTransform, vtkTransform );
+    void SetLocalTransform(vtkTransform *localTransform );
+    vtkTransform *GetLocalTransform( );
+    vtkTransform *GetWorldTransform( );
     bool CanEditTransformManually() { return AllowManualTransformEdit; }
     void SetCanEditTransformManually( bool c ) { AllowManualTransformEdit = c; }
 
@@ -170,17 +170,12 @@ protected:
     QString DataFileName; // just the name of the file
     QString FullFileName; // name of the data file including full path
 
-	// Transforms affecting the object:
-	//  LocalTransform(Tl) is a local object-space transform
-	//	WorldTransform(Tw) is a concatenation of all transforms affecting the object: Tw = Tp * Tl
-	//  Tp is parent transform.
+    // Transforms:
     virtual void UpdateWorldTransform();
-    vtkTransform * WorldTransform;
-    vtkLinearTransform * LocalTransform;
     bool IsModifyingTransform;
     bool TransformModified;
 
-    vtkEventQtSlotConnect * m_vtkConnections;
+    vtkSmartPointer<vtkEventQtSlotConnect> m_vtkConnections;
     
     // The following vector is used to remember which actors were instanciated
     // for every view so we can remove them or add new objects as children
@@ -211,6 +206,12 @@ private:
     friend class SceneManager;
     SceneManager * Manager;
     int ObjectID;
+    // Transforms affecting the object:
+    //  LocalTransform(Tl) is a local object-space transform
+    //	WorldTransform(Tw) is a concatenation of all transforms affecting the object: Tw = Tp * Tl
+    //  Tp is parent transform.
+    vtkSmartPointer<vtkTransform> WorldTransform;
+    vtkTransform  * LocalTransform;
 };
 
 ObjectSerializationHeaderMacro( SceneObject );
