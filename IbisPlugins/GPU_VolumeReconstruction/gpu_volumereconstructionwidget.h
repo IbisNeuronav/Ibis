@@ -35,7 +35,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "itkGPUVolumeReconstruction.h"
 #include "itkEuler3DTransform.h"
 
-typedef itk::GPUVolumeReconstruction<IbisItk3DImageType>
+typedef itk::GPUVolumeReconstruction<IbisItkFloat3ImageType>
                                                     VolumeReconstructionType;
 typedef VolumeReconstructionType::Pointer           VolumeReconstructionPointer;
 
@@ -64,7 +64,7 @@ public:
 private:
 
     void UpdateUi();
-    void VtkToItkImage( vtkImageData * vtkImage, IbisItk3DImageType * itkOutputImage, vtkSmartPointer<vtkMatrix4x4> transformMatrix );
+    void VtkToItkImage( vtkImageData * vtkImage, IbisItkFloat3ImageType * itkOutputImage, vtkSmartPointer<vtkMatrix4x4> transformMatrix );
 
     Ui::GPU_VolumeReconstructionWidget * ui;
     Application * m_application;

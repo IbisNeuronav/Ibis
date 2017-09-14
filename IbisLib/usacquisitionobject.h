@@ -38,7 +38,7 @@ class USMask;
 class vtkImageConstantPad;
 class vtkPassThrough;
 
-typedef itk::Image<float,3> IbisItk3DImageType;
+typedef itk::Image<float,3> IbisItkFloat3ImageType;
 
 #define ACQ_COLOR_RGB           "RGB"
 #define ACQ_COLOR_GRAYSCALE     "Grayscale"
@@ -97,8 +97,8 @@ public:
     void SetFrameAndMaskSize( int width, int height );
 
     // Return itk image of a given frame
-    bool GetItkImage(IbisItk3DImageType::Pointer itkOutputImage, int frameNo, vtkMatrix4x4* sliceMatrix);
-    bool GetItkImage(IbisItk3DLabelType::Pointer itkOutputImage, int frameNo, bool masked, bool useCalibratedTransform = false, vtkMatrix4x4 *relativeMatrix = 0  );
+    bool GetItkImage(IbisItkFloat3ImageType::Pointer itkOutputImage, int frameNo, vtkMatrix4x4* sliceMatrix);
+    bool GetItkImage(IbisItkUnsignedChar3ImageType::Pointer itkOutputImage, int frameNo, bool masked, bool useCalibratedTransform = false, vtkMatrix4x4 *relativeMatrix = 0  );
     void GetItkRGBImage(IbisRGBImageType::Pointer itkOutputImage, int frameNo, bool masked, bool useCalibratedTransform = false, vtkMatrix4x4 *relativeMatrix = 0 );
 
     // Display of current slice

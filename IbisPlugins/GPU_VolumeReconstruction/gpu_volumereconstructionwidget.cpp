@@ -47,7 +47,7 @@ void GPU_VolumeReconstructionWidget::SetApplication( Application * app )
     UpdateUi();
 }
 
-void GPU_VolumeReconstructionWidget::VtkToItkImage( vtkImageData * vtkInputImage, IbisItk3DImageType * itkOutputImage, vtkSmartPointer<vtkMatrix4x4> transformMatrix )
+void GPU_VolumeReconstructionWidget::VtkToItkImage( vtkImageData * vtkInputImage, IbisItkFloat3ImageType * itkOutputImage, vtkSmartPointer<vtkMatrix4x4> transformMatrix )
 {
   int numberOfScalarComponents = vtkInputImage->GetNumberOfScalarComponents();
   vtkImageData *grayImage = vtkInputImage;
@@ -74,9 +74,9 @@ void GPU_VolumeReconstructionWidget::VtkToItkImage( vtkImageData * vtkInputImage
       image = vtkInputImage;  
 
   int * dimensions = vtkInputImage->GetDimensions();
-  IbisItk3DImageType::SizeType  size;
-  IbisItk3DImageType::IndexType start;
-  IbisItk3DImageType::RegionType region;
+  IbisItkFloat3ImageType::SizeType  size;
+  IbisItkFloat3ImageType::IndexType start;
+  IbisItkFloat3ImageType::RegionType region;
   const long unsigned int numberOfPixels =  dimensions[0] * dimensions[1] * dimensions[2];
   double imageOrigin[3];
   image->GetOrigin(imageOrigin);
@@ -203,7 +203,7 @@ void GPU_VolumeReconstructionWidget::on_startButton_clicked()
     std::cerr << "US Acquisition Object with " << nbrOfSlices << " slices." << std::endl;
 #endif    
 
-    IbisItk3DImageType::Pointer itkSliceMask = IbisItk3DImageType::New();
+    IbisItkFloat3ImageType::Pointer itkSliceMask = IbisItkFloat3ImageType::New();
     vtkSmartPointer<vtkMatrix4x4> sliceMaskMatrix = vtkSmartPointer<vtkMatrix4x4>::New();
     this->VtkToItkImage( selectedUSAcquisitionObject->GetMask(), itkSliceMask, sliceMaskMatrix  );
 
@@ -221,12 +221,12 @@ void GPU_VolumeReconstructionWidget::on_startButton_clicked()
     std::cerr << "Constructing m_Reconstructor...DONE" << std::endl;
 #endif
 
-    IbisItk3DImageType::Pointer itkSliceImage[nbrOfSlices];
+    IbisItkFloat3ImageType::Pointer itkSliceImage[nbrOfSlices];
 
     vtkSmartPointer<vtkMatrix4x4> sliceTransformMatrix[nbrOfSlices];
     for(unsigned int i=0; i<nbrOfSlices; i++)
     {
-      itkSliceImage[i] = IbisItk3DImageType::New();
+      itkSliceImage[i] = IbisItkFloat3ImageType::New();
       sliceTransformMatrix[i] = vtkSmartPointer<vtkMatrix4x4>::New();
       if ( selectedUSAcquisitionObject->GetItkImage(itkSliceImage[i], i, sliceTransformMatrix[i].GetPointer()) )
         m_Reconstructor->SetFixedSlice(i, itkSliceImage[i]);

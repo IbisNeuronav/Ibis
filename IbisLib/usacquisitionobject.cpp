@@ -770,7 +770,7 @@ vtkImageData * USAcquisitionObject::GetMask()
 // GetItkImage in release 2.3.1 is used only in GPU Volume Reconstruction and is not meant for general application
 // It uses calibrated slice matrix
 // We should write a special function converting vtk to itk image
-bool USAcquisitionObject::GetItkImage(IbisItk3DImageType::Pointer itkOutputImage, int frameNo,
+bool USAcquisitionObject::GetItkImage(IbisItkFloat3ImageType::Pointer itkOutputImage, int frameNo,
      vtkMatrix4x4 * sliceMatrix)
 {
     Q_ASSERT_X(itkOutputImage, "USAcquisitionObject::GetItkImage()", "itkOutputImage must be allocated before this call");
@@ -812,9 +812,9 @@ bool USAcquisitionObject::GetItkImage(IbisItk3DImageType::Pointer itkOutputImage
     image->GetOrigin(org);
     image->GetSpacing(st);
     int * dimensions = initialImage->GetDimensions();
-    IbisItk3DImageType::SizeType  size;
-    IbisItk3DImageType::IndexType start;
-    IbisItk3DImageType::RegionType region;
+    IbisItkFloat3ImageType::SizeType  size;
+    IbisItkFloat3ImageType::IndexType start;
+    IbisItkFloat3ImageType::RegionType region;
     const long unsigned int numberOfPixels =  dimensions[0] * dimensions[1] * dimensions[2];
     double imageOrigin[3];
     image->GetOrigin(imageOrigin);
@@ -865,7 +865,7 @@ bool USAcquisitionObject::GetItkImage(IbisItk3DImageType::Pointer itkOutputImage
     return true;
 }
 
-bool USAcquisitionObject::GetItkImage(IbisItk3DLabelType::Pointer itkOutputImage, int frameNo, bool masked, bool useCalibratedTransform, vtkMatrix4x4 *relativeMatrix )
+bool USAcquisitionObject::GetItkImage(IbisItkUnsignedChar3ImageType::Pointer itkOutputImage, int frameNo, bool masked, bool useCalibratedTransform, vtkMatrix4x4 *relativeMatrix )
 {
     Q_ASSERT_X(itkOutputImage, "USAcquisitionObject::GetItkImage()", "itkOutputImage must be allocated before this call");
 
@@ -925,9 +925,9 @@ bool USAcquisitionObject::GetItkImage(IbisItk3DLabelType::Pointer itkOutputImage
     image->GetOrigin(org);
     image->GetSpacing(st);
     int * dimensions = initialImage->GetDimensions();
-    IbisItk3DLabelType::SizeType  size;
-    IbisItk3DLabelType::IndexType start;
-    IbisItk3DLabelType::RegionType region;
+    IbisItkUnsignedChar3ImageType::SizeType  size;
+    IbisItkUnsignedChar3ImageType::IndexType start;
+    IbisItkUnsignedChar3ImageType::RegionType region;
     const long unsigned int numberOfPixels =  dimensions[0] * dimensions[1] * dimensions[2];
     double imageOrigin[3];
     image->GetOrigin(imageOrigin);
@@ -1022,9 +1022,9 @@ void USAcquisitionObject:: GetItkRGBImage(IbisRGBImageType::Pointer itkOutputIma
     int numberOfScalarComponents = image->GetNumberOfScalarComponents();
 
     int * dimensions = image->GetDimensions();
-    IbisItk3DImageType::SizeType  size;
-    IbisItk3DImageType::IndexType start;
-    IbisItk3DImageType::RegionType region;
+    IbisItkFloat3ImageType::SizeType  size;
+    IbisItkFloat3ImageType::IndexType start;
+    IbisItkFloat3ImageType::RegionType region;
     const long unsigned int numberOfPixels =  dimensions[0] * dimensions[1] * dimensions[2];
     for (int i = 0; i < 3; i++)
     {
@@ -1188,7 +1188,7 @@ void USAcquisitionObject::ExportTrackedVideoBuffer(QString destDir , bool masked
                 Q_ASSERT( relativeTo );
                 relativeToMatrix = relativeTo->GetWorldTransform()->GetLinearInverse()->GetMatrix();
             }
-            itk::ImageFileWriter< IbisItk3DLabelType >::Pointer mincWriter = itk::ImageFileWriter<IbisItk3DLabelType>::New();
+            itk::ImageFileWriter< IbisItkUnsignedChar3ImageType >::Pointer mincWriter = itk::ImageFileWriter<IbisItkUnsignedChar3ImageType>::New();
             for( int i = 0; i < numberOfFrames && processOK; i++ )
             {
                 QString Number( QString::number( ++sequenceNumber ));
@@ -1204,9 +1204,9 @@ void USAcquisitionObject::ExportTrackedVideoBuffer(QString destDir , bool masked
                 numberedFileName += ".mnc";
                 mincWriter->SetFileName(numberedFileName.toUtf8().data());
 
-                IbisItk3DLabelType::Pointer itkSliceImage;
+                IbisItkUnsignedChar3ImageType::Pointer itkSliceImage;
 
-                itkSliceImage = IbisItk3DLabelType::New();
+                itkSliceImage = IbisItkUnsignedChar3ImageType::New();
                 if ( !this->GetItkImage(itkSliceImage, i,  masked,  useCalibratedTransform, relativeToMatrix ) )
                 {
                     processOK = false;

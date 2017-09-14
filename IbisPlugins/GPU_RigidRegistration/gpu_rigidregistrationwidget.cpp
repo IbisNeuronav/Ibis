@@ -193,8 +193,8 @@ void GPU_RigidRegistrationWidget::on_startButton_clicked()
     Q_ASSERT_X( targetImageObject, "GPU_RigidRegistrationWidget::on_startButton_clicked()", "Invalid target object" );
     vtkTransform * targetVtkTransform = vtkTransform::SafeDownCast( targetImageObject->GetWorldTransform() );
 
-    IbisItk3DImageType::Pointer itkSourceImage = sourceImageObject->GetItkImage();
-    IbisItk3DImageType::Pointer itkTargetImage = targetImageObject->GetItkImage();
+    IbisItkFloat3ImageType::Pointer itkSourceImage = sourceImageObject->GetItkImage();
+    IbisItkFloat3ImageType::Pointer itkTargetImage = targetImageObject->GetItkImage();
 
 
     QElapsedTimer timer;

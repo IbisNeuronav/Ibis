@@ -397,7 +397,7 @@ void FileReader::PrintMetadata(itk::MetaDataDictionary &dict)
 bool FileReader::OpenItkFile( QList<SceneObject*> & readObjects, QString filename, const QString & dataObjectName )
 {
     // try to read
-    typedef itk::ImageFileReader< IbisItk3DImageType > ReaderType;
+    typedef itk::ImageFileReader< IbisItkFloat3ImageType > ReaderType;
     ReaderType::Pointer reader = ReaderType::New();
     reader->SetFileName(filename.toUtf8().data());
 
@@ -412,7 +412,7 @@ bool FileReader::OpenItkFile( QList<SceneObject*> & readObjects, QString filenam
     // Update progress. simtodo : do something smarter. Itk minc reader doesn't seem to support progress.
     ReaderProgress( .5 );
 
-    IbisItk3DImageType::Pointer itkImage = reader->GetOutput();
+    IbisItkFloat3ImageType::Pointer itkImage = reader->GetOutput();
     ImageObject * image = ImageObject::New();
     image->SetItkImage( itkImage );
 
@@ -430,7 +430,7 @@ bool FileReader::OpenItkFile( QList<SceneObject*> & readObjects, QString filenam
 bool FileReader::OpenItkLabelFile( QList<SceneObject*> & readObjects, QString filename, const QString & dataObjectName )
 {
     // try to read
-    typedef itk::ImageFileReader< IbisItk3DLabelType > ReaderType;
+    typedef itk::ImageFileReader< IbisItkUnsignedChar3ImageType > ReaderType;
     ReaderType::Pointer reader = ReaderType::New();
     reader->SetFileName( filename.toUtf8().data() );
 
@@ -445,7 +445,7 @@ bool FileReader::OpenItkLabelFile( QList<SceneObject*> & readObjects, QString fi
     // Update progress. simtodo : do something smarter. Itk minc reader doesn't seem to support progress.
     ReaderProgress( .5 );
 
-    IbisItk3DLabelType::Pointer itkImage = reader->GetOutput();
+    IbisItkUnsignedChar3ImageType::Pointer itkImage = reader->GetOutput();
     ImageObject * image = ImageObject::New();
     image->SetItkLabelImage( itkImage );
 

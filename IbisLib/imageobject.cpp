@@ -9,7 +9,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
 #include <sstream>
-#include "imageobject.h"
+//#include "imageobject.h"
 #include "vtkOutlineFilter.h"
 #include "vtkPolyDataMapper.h"
 #include "vtkRenderer.h"
@@ -37,6 +37,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "imageobjectvolumesettingswidget.h"
 #include "scenemanager.h"
 #include "lookuptablemanager.h"
+#include "imageobject.h"
 #include <QMessageBox>
 
 ObjectSerializationMacro( ImageObject );
@@ -45,36 +46,36 @@ ObjectSerializationMacro( ImageObject );
 
 const int ImageObject::NumberOfBinsInHistogram = 256;
 
-template< class TInputImage >
-IbisItkVTKImageExport< TInputImage >::IbisItkVTKImageExport()
-{
-    for( int i = 0; i < 3; ++i )
-        vtkOrigin[ i ] = 0.0;
-}
+//template< class TInputImage >
+//IbisItkVTKImageExport< TInputImage >::IbisItkVTKImageExport()
+//{
+//    for( int i = 0; i < 3; ++i )
+//        vtkOrigin[ i ] = 0.0;
+//}
 
-template< class TInputImage >
-double * IbisItkVTKImageExport< TInputImage >::OriginCallback()
-{
-    // run base class
-    double * orig = itk::VTKImageExport< TInputImage >::OriginCallback();
+//template< class TInputImage >
+//double * IbisItkVTKImageExport< TInputImage >::OriginCallback()
+//{
+//    // run base class
+//    double * orig = itk::VTKImageExport< TInputImage >::OriginCallback();
 
-    // Get inverse of the dir cosine matrix
-    InputImagePointer input = this->GetInput();
-    itk::Matrix< double, 3, 3 > dir_cos = input->GetDirection();
-    vnl_matrix_fixed< double, 3, 3 > inv_dir_cos = dir_cos.GetTranspose();
+//    // Get inverse of the dir cosine matrix
+//    InputImagePointer input = this->GetInput();
+//    itk::Matrix< double, 3, 3 > dir_cos = input->GetDirection();
+//    vnl_matrix_fixed< double, 3, 3 > inv_dir_cos = dir_cos.GetTranspose();
 
-    // Transform the origin back to the way vtk sees it
-    vnl_vector_fixed< double, 3 > origin;
-    vnl_vector_fixed< double, 3 > o_origin;
-    for( int j = 0; j < 3; j++ )
-        o_origin[ j ] = orig[ j ];
-    origin = inv_dir_cos * o_origin;
+//    // Transform the origin back to the way vtk sees it
+//    vnl_vector_fixed< double, 3 > origin;
+//    vnl_vector_fixed< double, 3 > o_origin;
+//    for( int j = 0; j < 3; j++ )
+//        o_origin[ j ] = orig[ j ];
+//    origin = inv_dir_cos * o_origin;
 
-    for( int i = 0; i < 3; ++i )
-        vtkOrigin[ i ] = origin[ i ];
+//    for( int i = 0; i < 3; ++i )
+//        vtkOrigin[ i ] = origin[ i ];
 
-    return vtkOrigin;
-}
+//    return vtkOrigin;
+//}
 
 ImageObject::PerViewElements::PerViewElements()
 {
@@ -142,10 +143,13 @@ ImageObject::ImageObject()
     m_colorLevel = 0.5;
     m_autoSampleDistance = true;
     m_sampleDistance = 1.0;
+
+    this->ItktovtkConverter = IbisItkVtkConverter::New();
 }
 
 ImageObject::~ImageObject()
 {
+    this->ItktovtkConverter->Delete();
 }
 
 #include "serializerhelper.h"
@@ -243,10 +247,13 @@ bool ImageObject::IsLabelImage()
     return false;
 }
 
-void ImageObject::SetItkImage( IbisItk3DImageType::Pointer image )
+void ImageObject::SetItkImage( IbisItkFloat3ImageType::Pointer image )
 {
     if( !this->ItkToVtkExporter )
-        BuildItkToVtkExport();
+    {
+        this->ItkToVtkExporter = this->ItktovtkConverter->GetItktoVtkExporter();
+        this->ItkToVtkImporter = this->ItktovtkConverter->GetVtkImageImporter();
+    }
     this->ItkImage = image;
     if( this->ItkImage )
     {
@@ -271,7 +278,10 @@ void ImageObject::SetItkImage( IbisItk3DImageType::Pointer image )
 void ImageObject::SetItkImage( IbisRGBImageType::Pointer image )
 {
     if( !this->ItkRGBImageToVtkExporter )
-        BuildItkRGBImageToVtkExport();
+    {
+        this->ItkRGBImageToVtkExporter = this->ItktovtkConverter->GetItkRGBImageExporter();
+        this->ItkToVtkImporter = this->ItktovtkConverter->GetVtkImageImporter();
+    }
     this->ItkRGBImage = image;
     if( this->ItkRGBImage )
     {
@@ -293,11 +303,13 @@ void ImageObject::SetItkImage( IbisRGBImageType::Pointer image )
     }
 }
 
-
-void ImageObject::SetItkLabelImage( IbisItk3DLabelType::Pointer image )
+void ImageObject::SetItkLabelImage( IbisItkUnsignedChar3ImageType::Pointer image )
 {
     if( !this->ItkToVtkLabelExporter )
-        BuildItkToVtkLabelExport();
+    {
+        this->ItkToVtkLabelExporter = this->ItktovtkConverter->GetItkUnsignedChar3ExporterType();
+        this->ItkToVtkImporter = this->ItktovtkConverter->GetVtkImageImporter();
+    }
     this->ItkLabelImage = image;
     if( this->ItkLabelImage )
     {
@@ -849,48 +861,48 @@ void ImageObject::ShowMincInfo()
     w->show();
 }
 
-void ImageObject::BuildItkToVtkExport()
-{
-    this->ItkToVtkExporter = ItkExporterType::New();
-    BuildVtkImport( this->ItkToVtkExporter );
-}
+//void ImageObject::BuildItkToVtkExport()
+//{
+//    this->ItkToVtkExporter = ItkExporterType::New();
+//    BuildVtkImport( this->ItkToVtkExporter );
+//}
 
-void ImageObject::BuildItkRGBImageToVtkExport()
-{
-    this->ItkRGBImageToVtkExporter = ItkRGBImageExporterType::New();
-    BuildVtkImport( this->ItkRGBImageToVtkExporter );
-}
+//void ImageObject::BuildItkRGBImageToVtkExport()
+//{
+//    this->ItkRGBImageToVtkExporter = ItkRGBImageExporterType::New();
+//    BuildVtkImport( this->ItkRGBImageToVtkExporter );
+//}
 
 
-void ImageObject::BuildItkToVtkLabelExport()
-{
-    this->ItkToVtkLabelExporter = ItkLabelExporterType::New();
-    BuildVtkImport( this->ItkToVtkLabelExporter );
-}
+//void ImageObject::BuildItkToVtkLabelExport()
+//{
+//    this->ItkToVtkLabelExporter = IbisItkUnsignedChar3ExporterType::New();
+//    BuildVtkImport( this->ItkToVtkLabelExporter );
+//}
 
-void ImageObject::BuildVtkImport( itk::VTKImageExportBase * exporter )
-{
-    this->ItkToVtkImporter = vtkSmartPointer<vtkImageImport>::New();
-    this->ItkToVtkImporter->SetUpdateInformationCallback( exporter->GetUpdateInformationCallback() );
-    this->ItkToVtkImporter->SetPipelineModifiedCallback( exporter->GetPipelineModifiedCallback() );
-    this->ItkToVtkImporter->SetWholeExtentCallback( exporter->GetWholeExtentCallback() );
-    this->ItkToVtkImporter->SetSpacingCallback( exporter->GetSpacingCallback() );
-    this->ItkToVtkImporter->SetOriginCallback( exporter->GetOriginCallback() );
-    this->ItkToVtkImporter->SetScalarTypeCallback( exporter->GetScalarTypeCallback() );
-    this->ItkToVtkImporter->SetNumberOfComponentsCallback( exporter->GetNumberOfComponentsCallback() );
-    this->ItkToVtkImporter->SetPropagateUpdateExtentCallback( exporter->GetPropagateUpdateExtentCallback() );
-    this->ItkToVtkImporter->SetUpdateDataCallback( exporter->GetUpdateDataCallback() );
-    this->ItkToVtkImporter->SetDataExtentCallback( exporter->GetDataExtentCallback() );
-    this->ItkToVtkImporter->SetBufferPointerCallback( exporter->GetBufferPointerCallback() );
-    this->ItkToVtkImporter->SetCallbackUserData( exporter->GetCallbackUserData() );
-}
+//void ImageObject::BuildVtkImport( itk::VTKImageExportBase * exporter )
+//{
+//    this->ItkToVtkImporter = vtkSmartPointer<vtkImageImport>::New();
+//    this->ItkToVtkImporter->SetUpdateInformationCallback( exporter->GetUpdateInformationCallback() );
+//    this->ItkToVtkImporter->SetPipelineModifiedCallback( exporter->GetPipelineModifiedCallback() );
+//    this->ItkToVtkImporter->SetWholeExtentCallback( exporter->GetWholeExtentCallback() );
+//    this->ItkToVtkImporter->SetSpacingCallback( exporter->GetSpacingCallback() );
+//    this->ItkToVtkImporter->SetOriginCallback( exporter->GetOriginCallback() );
+//    this->ItkToVtkImporter->SetScalarTypeCallback( exporter->GetScalarTypeCallback() );
+//    this->ItkToVtkImporter->SetNumberOfComponentsCallback( exporter->GetNumberOfComponentsCallback() );
+//    this->ItkToVtkImporter->SetPropagateUpdateExtentCallback( exporter->GetPropagateUpdateExtentCallback() );
+//    this->ItkToVtkImporter->SetUpdateDataCallback( exporter->GetUpdateDataCallback() );
+//    this->ItkToVtkImporter->SetDataExtentCallback( exporter->GetDataExtentCallback() );
+//    this->ItkToVtkImporter->SetBufferPointerCallback( exporter->GetBufferPointerCallback() );
+//    this->ItkToVtkImporter->SetCallbackUserData( exporter->GetCallbackUserData() );
+//}
 
 //generic file writer
 void ImageObject::SaveImageData(QString &name)
 {
     if( this->ItkImage )
     {
-        itk::ImageFileWriter< IbisItk3DImageType >::Pointer mincWriter = itk::ImageFileWriter<IbisItk3DImageType>::New();
+        itk::ImageFileWriter< IbisItkFloat3ImageType >::Pointer mincWriter = itk::ImageFileWriter<IbisItkFloat3ImageType>::New();
         mincWriter->SetFileName(name.toUtf8().data());
 
         mincWriter->SetInput(this->ItkImage);
