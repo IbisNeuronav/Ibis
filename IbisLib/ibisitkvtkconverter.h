@@ -34,28 +34,25 @@ typedef IbisItkVTKImageExport< IbisItkUnsignedChar3ImageType > IbisItkUnsignedCh
 
 
 class vtkImageImport;
+class vtkImageData;
 
 class IbisItkVtkConverter : public vtkObject
 {
 public:
     static IbisItkVtkConverter * New() { return new IbisItkVtkConverter; }
 
-    vtkTypeMacro(IbisItkVtkConverter,vtkObject);
+    vtkTypeMacro(IbisItkVtkConverter,vtkObject)
 
     IbisItkVtkConverter();
      virtual ~IbisItkVtkConverter();
 
-    ItkExporterType::Pointer GetItktoVtkExporter();
-    ItkRGBImageExporterType::Pointer GetItkRGBImageExporter();
-    IbisItkUnsignedChar3ExporterType::Pointer GetItkUnsignedChar3ExporterType();
-    vtkImageImport *GetVtkImageImporter();
+    vtkImageData *ConvertItkFloat3ImageToVtkImage( IbisItkFloat3ImageType::Pointer img );
+    vtkImageData *ConvertItkRGBImageToVtkImage( IbisRGBImageType::Pointer img );
+    vtkImageData *ConvertItkUnsignedChar3ImageToVtkImage( IbisItkUnsignedChar3ImageType::Pointer img );
 
 protected:
-    void BuildItkToVtkExport();
-    void BuildItkRGBImageToVtkExport();
-    void BuildItkToVtkUnsignedChar3Export();
-    void BuildVtkImport( itk::VTKImageExportBase * exporter );
 
+    void BuildVtkImport( itk::VTKImageExportBase * exporter );
 
     ItkExporterType::Pointer ItkToVtkExporter;
     ItkRGBImageExporterType::Pointer ItkRGBImageToVtkExporter;

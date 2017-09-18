@@ -249,17 +249,10 @@ bool ImageObject::IsLabelImage()
 
 void ImageObject::SetItkImage( IbisItkFloat3ImageType::Pointer image )
 {
-    if( !this->ItkToVtkExporter )
-    {
-        this->ItkToVtkExporter = this->ItktovtkConverter->GetItktoVtkExporter();
-        this->ItkToVtkImporter = this->ItktovtkConverter->GetVtkImageImporter();
-    }
     this->ItkImage = image;
     if( this->ItkImage )
     {
-        this->ItkToVtkExporter->SetInput( this->ItkImage );
-        this->ItkToVtkImporter->Update();
-        this->SetImage( this->ItkToVtkImporter->GetOutput() );
+        this->SetImage( this->ItktovtkConverter->ConvertItkFloat3ImageToVtkImage( this->ItkImage ) );
 
         // Use itk image's dir cosines as the local transform for this image
         itk::Matrix< double, 3, 3 > dirCosines = this->ItkImage->GetDirection();
@@ -277,17 +270,10 @@ void ImageObject::SetItkImage( IbisItkFloat3ImageType::Pointer image )
 
 void ImageObject::SetItkImage( IbisRGBImageType::Pointer image )
 {
-    if( !this->ItkRGBImageToVtkExporter )
-    {
-        this->ItkRGBImageToVtkExporter = this->ItktovtkConverter->GetItkRGBImageExporter();
-        this->ItkToVtkImporter = this->ItktovtkConverter->GetVtkImageImporter();
-    }
     this->ItkRGBImage = image;
     if( this->ItkRGBImage )
     {
-        this->ItkRGBImageToVtkExporter->SetInput( this->ItkRGBImage );
-        this->ItkToVtkImporter->Update();
-        this->SetImage( this->ItkToVtkImporter->GetOutput() );
+        this->SetImage( this->ItktovtkConverter->ConvertItkRGBImageToVtkImage( this->ItkRGBImage ) );
 
         // Use itk image's dir cosines as the local transform for this image
         itk::Matrix< double, 3, 3 > dirCosines = this->ItkRGBImage->GetDirection();
@@ -305,17 +291,10 @@ void ImageObject::SetItkImage( IbisRGBImageType::Pointer image )
 
 void ImageObject::SetItkLabelImage( IbisItkUnsignedChar3ImageType::Pointer image )
 {
-    if( !this->ItkToVtkLabelExporter )
-    {
-        this->ItkToVtkLabelExporter = this->ItktovtkConverter->GetItkUnsignedChar3ExporterType();
-        this->ItkToVtkImporter = this->ItktovtkConverter->GetVtkImageImporter();
-    }
     this->ItkLabelImage = image;
     if( this->ItkLabelImage )
     {
-        this->ItkToVtkLabelExporter->SetInput( this->ItkLabelImage );
-        this->ItkToVtkImporter->Update();
-        this->SetImage( this->ItkToVtkImporter->GetOutput() );
+        this->SetImage( this->ItktovtkConverter->ConvertItkUnsignedChar3ImageToVtkImage( this->ItkLabelImage ) );
 
         // Use itk image's dir cosines as the local transform for this image
         itk::Matrix< double, 3, 3 > dirCosines = this->ItkLabelImage->GetDirection();
@@ -349,18 +328,6 @@ void ImageObject::SetImage(vtkImageData * image)
     this->HistogramComputer->SetInputData( this->Image );
     SetupHistogramComputer();
     this->OutlineFilter->SetInputData( this->Image );
-}
-
-// simtodo : this shouldn't be needed, but calling Modified only on itk image
-// doesn't seem to be enough to update the voxels in the vtk image.
-void ImageObject::ForceUpdatePixels()
-{
-    if( this->ItkImage )
-    {
-        this->ItkImage->Modified();
-        this->ItkToVtkExporter->Modified();
-        this->ItkToVtkImporter->Modified();
-    }
 }
 
 //================================================================================
@@ -861,42 +828,6 @@ void ImageObject::ShowMincInfo()
     w->show();
 }
 
-//void ImageObject::BuildItkToVtkExport()
-//{
-//    this->ItkToVtkExporter = ItkExporterType::New();
-//    BuildVtkImport( this->ItkToVtkExporter );
-//}
-
-//void ImageObject::BuildItkRGBImageToVtkExport()
-//{
-//    this->ItkRGBImageToVtkExporter = ItkRGBImageExporterType::New();
-//    BuildVtkImport( this->ItkRGBImageToVtkExporter );
-//}
-
-
-//void ImageObject::BuildItkToVtkLabelExport()
-//{
-//    this->ItkToVtkLabelExporter = IbisItkUnsignedChar3ExporterType::New();
-//    BuildVtkImport( this->ItkToVtkLabelExporter );
-//}
-
-//void ImageObject::BuildVtkImport( itk::VTKImageExportBase * exporter )
-//{
-//    this->ItkToVtkImporter = vtkSmartPointer<vtkImageImport>::New();
-//    this->ItkToVtkImporter->SetUpdateInformationCallback( exporter->GetUpdateInformationCallback() );
-//    this->ItkToVtkImporter->SetPipelineModifiedCallback( exporter->GetPipelineModifiedCallback() );
-//    this->ItkToVtkImporter->SetWholeExtentCallback( exporter->GetWholeExtentCallback() );
-//    this->ItkToVtkImporter->SetSpacingCallback( exporter->GetSpacingCallback() );
-//    this->ItkToVtkImporter->SetOriginCallback( exporter->GetOriginCallback() );
-//    this->ItkToVtkImporter->SetScalarTypeCallback( exporter->GetScalarTypeCallback() );
-//    this->ItkToVtkImporter->SetNumberOfComponentsCallback( exporter->GetNumberOfComponentsCallback() );
-//    this->ItkToVtkImporter->SetPropagateUpdateExtentCallback( exporter->GetPropagateUpdateExtentCallback() );
-//    this->ItkToVtkImporter->SetUpdateDataCallback( exporter->GetUpdateDataCallback() );
-//    this->ItkToVtkImporter->SetDataExtentCallback( exporter->GetDataExtentCallback() );
-//    this->ItkToVtkImporter->SetBufferPointerCallback( exporter->GetBufferPointerCallback() );
-//    this->ItkToVtkImporter->SetCallbackUserData( exporter->GetCallbackUserData() );
-//}
-
 //generic file writer
 void ImageObject::SaveImageData(QString &name)
 {
@@ -948,7 +879,7 @@ vtkScalarsToColors * ImageObject::GetLut()
 
 vtkImageData* ImageObject::GetImage( )
 {
-    return Image.GetPointer();
+    return Image;
 }
 
 vtkImageAccumulate * ImageObject::GetHistogramComputer()

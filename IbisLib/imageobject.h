@@ -93,7 +93,6 @@ public:
     IbisRGBImageType::Pointer GetItkRGBImage() { return this->ItkRGBImage; }
     IbisItkUnsignedChar3ImageType::Pointer GetItkLabelImage() { return this->ItkLabelImage; }
     void SetImage( vtkImageData * image );
-    void ForceUpdatePixels();
     
     // Implementation of parent virtual method
     virtual void ObjectAddedToScene();
@@ -162,21 +161,12 @@ protected:
     // Setup histogram properties after new image is set.
     void SetupHistogramComputer( );
 
-//    void BuildItkToVtkExport();
-//    void BuildItkRGBImageToVtkExport();
-//    void BuildItkToVtkLabelExport();
-//    void BuildVtkImport( itk::VTKImageExportBase * exporter );
-
     IbisItkVtkConverter *ItktovtkConverter;
     IbisItkFloat3ImageType::Pointer ItkImage;
-    ItkExporterType::Pointer ItkToVtkExporter;
     IbisRGBImageType::Pointer ItkRGBImage;
-    ItkRGBImageExporterType::Pointer ItkRGBImageToVtkExporter;
     IbisItkUnsignedChar3ImageType::Pointer ItkLabelImage;
-    IbisItkUnsignedChar3ExporterType::Pointer ItkToVtkLabelExporter;
-    vtkSmartPointer<vtkImageImport> ItkToVtkImporter;
 
-    vtkSmartPointer<vtkImageData> Image;
+    vtkImageData* Image;
     vtkSmartPointer<vtkScalarsToColors> Lut;
     vtkSmartPointer<vtkOutlineFilter> OutlineFilter;
     static const int NumberOfBinsInHistogram;

@@ -1,5 +1,6 @@
 #include "ibisitkvtkconverter.h"
 #include "vtkImageImport.h"
+#include "vtkImageData.h"
 
 template< class TInputImage >
 IbisItkVTKImageExport< TInputImage >::IbisItkVTKImageExport()
@@ -43,46 +44,31 @@ IbisItkVtkConverter::~IbisItkVtkConverter()
     this->ItkToVtkImporter->Delete();
 }
 
-ItkExporterType::Pointer IbisItkVtkConverter::GetItktoVtkExporter()
-{
-    this->BuildItkToVtkExport();
-    return this->ItkToVtkExporter;
-}
-
-ItkRGBImageExporterType::Pointer IbisItkVtkConverter::GetItkRGBImageExporter()
-{
-    this->BuildItkRGBImageToVtkExport();
-    return this->ItkRGBImageToVtkExporter;
-}
-
-IbisItkUnsignedChar3ExporterType::Pointer IbisItkVtkConverter::GetItkUnsignedChar3ExporterType()
-{
-    this->BuildItkToVtkUnsignedChar3Export();
-    return this->ItkToVtkUnsignedChar3lExporter;
-}
-
-vtkImageImport * IbisItkVtkConverter::GetVtkImageImporter()
-{
-    return this->ItkToVtkImporter;
-}
-
-void IbisItkVtkConverter::BuildItkToVtkExport()
+vtkImageData * IbisItkVtkConverter::ConvertItkFloat3ImageToVtkImage( IbisItkFloat3ImageType::Pointer img )
 {
     this->ItkToVtkExporter = ItkExporterType::New();
     BuildVtkImport( this->ItkToVtkExporter );
+    this->ItkToVtkExporter->SetInput( img );
+    this->ItkToVtkImporter->Update();
+    return this->ItkToVtkImporter->GetOutput();
 }
 
-void IbisItkVtkConverter::BuildItkRGBImageToVtkExport()
+vtkImageData * IbisItkVtkConverter::ConvertItkRGBImageToVtkImage( IbisRGBImageType::Pointer img )
 {
     this->ItkRGBImageToVtkExporter = ItkRGBImageExporterType::New();
     BuildVtkImport( this->ItkRGBImageToVtkExporter );
+    this->ItkRGBImageToVtkExporter->SetInput( img );
+    this->ItkToVtkImporter->Update();
+    return this->ItkToVtkImporter->GetOutput();
 }
 
-
-void IbisItkVtkConverter::BuildItkToVtkUnsignedChar3Export()
+vtkImageData * IbisItkVtkConverter::ConvertItkUnsignedChar3ImageToVtkImage( IbisItkUnsignedChar3ImageType::Pointer img )
 {
     this->ItkToVtkUnsignedChar3lExporter = IbisItkUnsignedChar3ExporterType::New();
     BuildVtkImport( this->ItkToVtkUnsignedChar3lExporter );
+    this->ItkToVtkUnsignedChar3lExporter->SetInput( img );
+    this->ItkToVtkImporter->Update();
+    return this->ItkToVtkImporter->GetOutput();
 }
 
 void IbisItkVtkConverter::BuildVtkImport( itk::VTKImageExportBase * exporter )
