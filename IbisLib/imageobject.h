@@ -40,31 +40,6 @@ class vtkImageAccumulate;
 class vtkVolumeProperty;
 class vtkImageData;
 
-//typedef itk::RGBPixel< unsigned char > RGBPixelType;
-//typedef itk::Image< RGBPixelType, 3 > IbisRGBImageType;
-//typedef itk::Image<float,3> IbisItkFloat3ImageType;
-//typedef itk::Image < unsigned char,3 > IbisItkUnsignedChar3ImageType;
-//typedef itk::ImageRegionIterator< IbisItkFloat3ImageType > IbisItk3DImageIteratorType;
-
-// Reimplement origin callback from itk::VTKImageExport to take dir cosines into account correctly
-//template< class TInputImage >
-//class IbisItkVTKImageExport : public itk::VTKImageExport< TInputImage >
-//{
-//public:
-//    typedef IbisItkVTKImageExport<TInputImage>   Self;
-//    typedef itk::SmartPointer< Self >            Pointer;
-//    typedef TInputImage InputImageType;
-//    itkNewMacro(Self);
-//protected:
-//    typedef typename InputImageType::Pointer    InputImagePointer;
-//    IbisItkVTKImageExport();
-//    double * OriginCallback() override;
-//    double vtkOrigin[3];
-//};
-//typedef IbisItkVTKImageExport< IbisItkFloat3ImageType > ItkExporterType;
-//typedef IbisItkVTKImageExport< IbisRGBImageType > ItkRGBImageExporterType;
-//typedef IbisItkVTKImageExport< IbisItkUnsignedChar3ImageType > IbisItkUnsignedChar3ExporterType;
-
 class ImageObject : public SceneObject
 {
     

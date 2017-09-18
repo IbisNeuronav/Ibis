@@ -46,37 +46,6 @@ ObjectSerializationMacro( ImageObject );
 
 const int ImageObject::NumberOfBinsInHistogram = 256;
 
-//template< class TInputImage >
-//IbisItkVTKImageExport< TInputImage >::IbisItkVTKImageExport()
-//{
-//    for( int i = 0; i < 3; ++i )
-//        vtkOrigin[ i ] = 0.0;
-//}
-
-//template< class TInputImage >
-//double * IbisItkVTKImageExport< TInputImage >::OriginCallback()
-//{
-//    // run base class
-//    double * orig = itk::VTKImageExport< TInputImage >::OriginCallback();
-
-//    // Get inverse of the dir cosine matrix
-//    InputImagePointer input = this->GetInput();
-//    itk::Matrix< double, 3, 3 > dir_cos = input->GetDirection();
-//    vnl_matrix_fixed< double, 3, 3 > inv_dir_cos = dir_cos.GetTranspose();
-
-//    // Transform the origin back to the way vtk sees it
-//    vnl_vector_fixed< double, 3 > origin;
-//    vnl_vector_fixed< double, 3 > o_origin;
-//    for( int j = 0; j < 3; j++ )
-//        o_origin[ j ] = orig[ j ];
-//    origin = inv_dir_cos * o_origin;
-
-//    for( int i = 0; i < 3; ++i )
-//        vtkOrigin[ i ] = origin[ i ];
-
-//    return vtkOrigin;
-//}
-
 ImageObject::PerViewElements::PerViewElements()
 {
     this->outlineActor = 0;
@@ -252,7 +221,7 @@ void ImageObject::SetItkImage( IbisItkFloat3ImageType::Pointer image )
     this->ItkImage = image;
     if( this->ItkImage )
     {
-        this->SetImage( this->ItktovtkConverter->ConvertItkFloat3ImageToVtkImage( this->ItkImage ) );
+        this->SetImage( this->ItktovtkConverter->ConvertItkImageToVtkImage( this->ItkImage ) );
 
         // Use itk image's dir cosines as the local transform for this image
         itk::Matrix< double, 3, 3 > dirCosines = this->ItkImage->GetDirection();
@@ -273,7 +242,7 @@ void ImageObject::SetItkImage( IbisRGBImageType::Pointer image )
     this->ItkRGBImage = image;
     if( this->ItkRGBImage )
     {
-        this->SetImage( this->ItktovtkConverter->ConvertItkRGBImageToVtkImage( this->ItkRGBImage ) );
+        this->SetImage( this->ItktovtkConverter->ConvertItkImageToVtkImage( this->ItkRGBImage ) );
 
         // Use itk image's dir cosines as the local transform for this image
         itk::Matrix< double, 3, 3 > dirCosines = this->ItkRGBImage->GetDirection();
@@ -294,7 +263,7 @@ void ImageObject::SetItkLabelImage( IbisItkUnsignedChar3ImageType::Pointer image
     this->ItkLabelImage = image;
     if( this->ItkLabelImage )
     {
-        this->SetImage( this->ItktovtkConverter->ConvertItkUnsignedChar3ImageToVtkImage( this->ItkLabelImage ) );
+        this->SetImage( this->ItktovtkConverter->ConvertItkImageToVtkImage( this->ItkLabelImage ) );
 
         // Use itk image's dir cosines as the local transform for this image
         itk::Matrix< double, 3, 3 > dirCosines = this->ItkLabelImage->GetDirection();
