@@ -767,102 +767,16 @@ vtkImageData * USAcquisitionObject::GetMask()
     return m_mask->GetMask();
 }
 
-// GetItkImage in release 2.3.1 is used only in GPU Volume Reconstruction and is not meant for general application
-// It uses calibrated slice matrix
-// We should write a special function converting vtk to itk image
-bool USAcquisitionObject::GetItkImage(IbisItkFloat3ImageType::Pointer itkOutputImage, int frameNo,
-     vtkMatrix4x4 * sliceMatrix)
+void USAcquisitionObject::GetFrameData(int index, vtkImageData *slice, vtkMatrix4x4 *calibratedSliceMatrix )
 {
-    Q_ASSERT_X(itkOutputImage, "USAcquisitionObject::GetItkImage()", "itkOutputImage must be allocated before this call");
-    Q_ASSERT_X(sliceMatrix, "USAcquisitionObject::GetItkImage()", "sliceMatrix must be allocated before this callL");
-
+    Q_ASSERT_X((index >= 0 && index < m_videoBuffer->GetNumberOfFrames()), "USAcquisitionObject::GetFrameData()", "index out of range");
+    Q_ASSERT_X(calibratedSliceMatrix, "USAcquisitionObject::GetFrameData()", "sliceMatrix must be allocated before this callL");
+    Q_ASSERT_X(slice, "USAcquisitionObject::GetFrameData()", "slice must be allocated before this callL");
     int currentFrame = m_videoBuffer->GetCurrentFrame();
-    this->SetCurrentFrame(frameNo);
-    sliceMatrix->DeepCopy( m_sliceTransform->GetMatrix() );
+    this->SetCurrentFrame(index);
+    calibratedSliceMatrix->DeepCopy( m_sliceTransform->GetMatrix() );
     this->SetCurrentFrame(currentFrame);
-    vtkImageData * initialImage = m_videoBuffer->GetImage( frameNo );
-
-    double org[3], st[3];
-    initialImage->GetOrigin(org);
-    initialImage->GetSpacing(st);
-    int numberOfScalarComponents = initialImage->GetNumberOfScalarComponents();
-    vtkImageData *grayImage = initialImage;
-    vtkImageLuminance *luminanceFilter = vtkImageLuminance::New();
-    if (numberOfScalarComponents > 1)
-    {
-        luminanceFilter->SetInputData(initialImage);
-        luminanceFilter->Update();
-        grayImage = luminanceFilter->GetOutput();
-    }
-    vtkImageData * image;
-    vtkImageShiftScale *shifter = vtkImageShiftScale::New();
-    if (initialImage->GetScalarType() != VTK_FLOAT)
-    {
-        shifter->SetOutputScalarType(VTK_FLOAT);
-        shifter->SetClampOverflow(1);
-        shifter->SetInputData(grayImage);
-        shifter->SetShift(0);
-        shifter->SetScale(1.0);
-        shifter->Update();
-        image = shifter->GetOutput();
-    }
-    else
-        image = initialImage;
-
-    image->GetOrigin(org);
-    image->GetSpacing(st);
-    int * dimensions = initialImage->GetDimensions();
-    IbisItkFloat3ImageType::SizeType  size;
-    IbisItkFloat3ImageType::IndexType start;
-    IbisItkFloat3ImageType::RegionType region;
-    const long unsigned int numberOfPixels =  dimensions[0] * dimensions[1] * dimensions[2];
-    double imageOrigin[3];
-    image->GetOrigin(imageOrigin);
-    for (int i = 0; i < 3; i++)
-    {
-        size[i] = dimensions[i];
-    }
-
-    start.Fill(0);
-    region.SetIndex( start );
-    region.SetSize( size );
-    itkOutputImage->SetRegions(region);
-
-    itk::Matrix< double, 3,3 > dirCosine;
-    itk::Vector< double, 3 > origin;
-    itk::Vector< double, 3 > itkOrigin;
-    // set direction cosines
-    vtkMatrix4x4 * tmpMat = vtkMatrix4x4::New();
-    vtkMatrix4x4::Transpose( sliceMatrix, tmpMat );
-    double step[3], mincStartPoint[3], dirCos[3][3];
-    for( int i = 0; i < 3; i++ )
-    {
-        step[i] = vtkMath::Dot( (*tmpMat)[i], (*tmpMat)[i] );
-        step[i] = sqrt( step[i] );
-        for( int j = 0; j < 3; j++ )
-        {
-            dirCos[i][j] = (*tmpMat)[i][j] / step[i];
-            dirCosine[j][i] = dirCos[i][j];
-        }
-    }
-
-    double rotation[3][3];
-    vtkMath::Transpose3x3( dirCos, rotation );
-    vtkMath::LinearSolve3x3( rotation, (*tmpMat)[3], mincStartPoint );
-
-    for( int i = 0; i < 3; i++ )
-        origin[i] =  mincStartPoint[i];
-    itkOrigin = dirCosine * origin;
-    itkOutputImage->SetSpacing(step);
-    itkOutputImage->SetOrigin(itkOrigin);
-    itkOutputImage->SetDirection(dirCosine);
-    itkOutputImage->Allocate();
-    float *itkImageBuffer = itkOutputImage->GetBufferPointer();
-    memcpy(itkImageBuffer, image->GetScalarPointer(), numberOfPixels*sizeof(float));
-    tmpMat->Delete();
-    shifter->Delete();
-    luminanceFilter->Delete();
-    return true;
+    slice->DeepCopy( m_videoBuffer->GetImage( index ) );
 }
 
 bool USAcquisitionObject::GetItkImage(IbisItkUnsignedChar3ImageType::Pointer itkOutputImage, int frameNo, bool masked, bool useCalibratedTransform, vtkMatrix4x4 *relativeMatrix )

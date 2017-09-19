@@ -96,8 +96,10 @@ public:
 
     void SetFrameAndMaskSize( int width, int height );
 
+    // Return frame data
+    void GetFrameData(int index, vtkImageData *img, vtkMatrix4x4 *mat );
+
     // Return itk image of a given frame
-    bool GetItkImage(IbisItkFloat3ImageType::Pointer itkOutputImage, int frameNo, vtkMatrix4x4* sliceMatrix);
     bool GetItkImage(IbisItkUnsignedChar3ImageType::Pointer itkOutputImage, int frameNo, bool masked, bool useCalibratedTransform = false, vtkMatrix4x4 *relativeMatrix = 0  );
     void GetItkRGBImage(IbisRGBImageType::Pointer itkOutputImage, int frameNo, bool masked, bool useCalibratedTransform = false, vtkMatrix4x4 *relativeMatrix = 0 );
 

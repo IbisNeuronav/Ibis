@@ -2,6 +2,9 @@
 #include "vtkImageImport.h"
 #include "vtkImageData.h"
 #include "vtkTransform.h"
+#include "vtkImageShiftScale.h"
+#include "vtkImageLuminance.h"
+#include "vtkMath.h"
 
 template< class TInputImage >
 IbisItkVTKImageExport< TInputImage >::IbisItkVTKImageExport()
@@ -42,7 +45,8 @@ IbisItkVtkConverter::IbisItkVtkConverter()
 
 IbisItkVtkConverter::~IbisItkVtkConverter()
 {
-    this->ItkToVtkImporter->Delete();
+    if( ItkToVtkImporter )
+        this->ItkToVtkImporter->Delete();
 }
 
 vtkImageData * IbisItkVtkConverter::ConvertItkImageToVtkImage(IbisItkFloat3ImageType::Pointer img , vtkTransform *tr = 0)
@@ -105,4 +109,84 @@ void IbisItkVtkConverter::GetImageTransformFromDirectionCosines(itk::Matrix< dou
             rotMat->SetElement( i, j, dirCosines( i, j ) );
     tr->SetMatrix( rotMat );
     rotMat->Delete();
+}
+
+bool IbisItkVtkConverter::ConvertVtkImageToItkImage( IbisItkFloat3ImageType::Pointer itkOutputImage, vtkImageData *slice, vtkMatrix4x4 *calibratedSliceMatrix)
+{
+    if(! itkOutputImage )
+        return false;
+
+    int numberOfScalarComponents = slice->GetNumberOfScalarComponents();
+    vtkImageData *grayImage = slice;
+    vtkImageLuminance *luminanceFilter = vtkImageLuminance::New();
+    if (numberOfScalarComponents > 1)
+    {
+        luminanceFilter->SetInputData(slice);
+        luminanceFilter->Update();
+        grayImage = luminanceFilter->GetOutput();
+    }
+    vtkImageData * image = grayImage;
+    vtkImageShiftScale *shifter = vtkImageShiftScale::New();
+    if (slice->GetScalarType() != VTK_FLOAT)
+    {
+        shifter->SetOutputScalarType(VTK_FLOAT);
+        shifter->SetClampOverflow(1);
+        shifter->SetInputData(grayImage);
+        shifter->SetShift(0);
+        shifter->SetScale(1.0);
+        shifter->Update();
+        image = shifter->GetOutput();
+    }
+
+    int * dimensions = slice->GetDimensions();
+    IbisItkFloat3ImageType::SizeType  size;
+    IbisItkFloat3ImageType::IndexType start;
+    IbisItkFloat3ImageType::RegionType region;
+    const long unsigned int numberOfPixels =  dimensions[0] * dimensions[1] * dimensions[2];
+    for (int i = 0; i < 3; i++)
+    {
+        size[i] = dimensions[i];
+    }
+
+    start.Fill(0);
+    region.SetIndex( start );
+    region.SetSize( size );
+    itkOutputImage->SetRegions(region);
+
+    itk::Matrix< double, 3,3 > dirCosine;
+    itk::Vector< double, 3 > origin;
+    itk::Vector< double, 3 > itkOrigin;
+    // set direction cosines
+    vtkMatrix4x4 * tmpMat = vtkMatrix4x4::New();
+    vtkMatrix4x4::Transpose( calibratedSliceMatrix, tmpMat );
+    double step[3], mincStartPoint[3], dirCos[3][3];
+    for( int i = 0; i < 3; i++ )
+    {
+        step[i] = vtkMath::Dot( (*tmpMat)[i], (*tmpMat)[i] );
+        step[i] = sqrt( step[i] );
+        for( int j = 0; j < 3; j++ )
+        {
+            dirCos[i][j] = (*tmpMat)[i][j] / step[i];
+            dirCosine[j][i] = dirCos[i][j];
+        }
+    }
+
+    double rotation[3][3];
+    vtkMath::Transpose3x3( dirCos, rotation );
+    vtkMath::LinearSolve3x3( rotation, (*tmpMat)[3], mincStartPoint );
+
+    for( int i = 0; i < 3; i++ )
+        origin[i] =  mincStartPoint[i];
+    itkOrigin = dirCosine * origin;
+    itkOutputImage->SetSpacing(step);
+    itkOutputImage->SetOrigin(itkOrigin);
+    itkOutputImage->SetDirection(dirCosine);
+    itkOutputImage->Allocate();
+    float *itkImageBuffer = itkOutputImage->GetBufferPointer();
+    memcpy(itkImageBuffer, image->GetScalarPointer(), numberOfPixels*sizeof(float));
+    tmpMat->Delete();
+    shifter->Delete();
+    luminanceFilter->Delete();
+    return true;
+
 }

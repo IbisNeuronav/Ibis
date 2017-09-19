@@ -159,6 +159,7 @@ void GPU_VolumeReconstructionWidget::slot_finished()
 }
 
 
+#include "ibisitkvtkconverter.h"
 void GPU_VolumeReconstructionWidget::on_startButton_clicked()
 {
     // Make sure all params have been specified
@@ -223,12 +224,14 @@ void GPU_VolumeReconstructionWidget::on_startButton_clicked()
 
     IbisItkFloat3ImageType::Pointer itkSliceImage[nbrOfSlices];
 
-    vtkSmartPointer<vtkMatrix4x4> sliceTransformMatrix[nbrOfSlices];
+    vtkSmartPointer<vtkMatrix4x4> sliceTransformMatrix = vtkSmartPointer<vtkMatrix4x4>::New() ;
+    vtkSmartPointer<vtkImageData> slice = vtkSmartPointer<vtkImageData>::New();
+    vtkSmartPointer<IbisItkVtkConverter> converter = vtkSmartPointer<IbisItkVtkConverter>::New();
     for(unsigned int i=0; i<nbrOfSlices; i++)
     {
       itkSliceImage[i] = IbisItkFloat3ImageType::New();
-      sliceTransformMatrix[i] = vtkSmartPointer<vtkMatrix4x4>::New();
-      if ( selectedUSAcquisitionObject->GetItkImage(itkSliceImage[i], i, sliceTransformMatrix[i].GetPointer()) )
+      selectedUSAcquisitionObject->GetFrameData( i, slice.GetPointer(), sliceTransformMatrix.GetPointer() );
+      if( converter->ConvertVtkImageToItkImage( itkSliceImage[i], slice, sliceTransformMatrix ) )
         m_Reconstructor->SetFixedSlice(i, itkSliceImage[i]);
     }
 
