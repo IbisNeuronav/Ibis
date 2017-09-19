@@ -35,7 +35,7 @@ typedef IbisItkVTKImageExport< IbisItkUnsignedChar3ImageType > IbisItkUnsignedCh
 
 class vtkImageImport;
 class vtkImageData;
-class vtkMatrix4x4;
+class vtkTransform;
 
 class IbisItkVtkConverter : public vtkObject
 {
@@ -47,11 +47,10 @@ public:
     IbisItkVtkConverter();
      virtual ~IbisItkVtkConverter();
 
-    vtkImageData *ConvertItkImageToVtkImage( IbisItkFloat3ImageType::Pointer img );
-    vtkImageData *ConvertItkImageToVtkImage( IbisRGBImageType::Pointer img );
-    vtkImageData *ConvertItkImageToVtkImage( IbisItkUnsignedChar3ImageType::Pointer img );
+    vtkImageData *ConvertItkImageToVtkImage( IbisItkFloat3ImageType::Pointer img, vtkTransform *tr );
+    vtkImageData *ConvertItkImageToVtkImage(IbisRGBImageType::Pointer img , vtkTransform *tr);
+    vtkImageData *ConvertItkImageToVtkImage( IbisItkUnsignedChar3ImageType::Pointer img, vtkTransform *tr );
 
-//    template< class T > void GetImageTransform( T img, vtkMatrix4x4 *mat );
 
 protected:
 
@@ -61,6 +60,9 @@ protected:
     ItkRGBImageExporterType::Pointer ItkRGBImageToVtkExporter;
     IbisItkUnsignedChar3ExporterType::Pointer ItkToVtkUnsignedChar3lExporter;
     vtkImageImport *ItkToVtkImporter;
+
+private:
+    void GetImageTransformFromDirectionCosines( itk::Matrix< double, 3, 3 > dirCosines, vtkTransform *tr );
 
 };
 

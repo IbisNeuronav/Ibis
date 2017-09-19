@@ -1,7 +1,7 @@
 #include "ibisitkvtkconverter.h"
 #include "vtkImageImport.h"
 #include "vtkImageData.h"
-#include "vtkMatrix4x4.h"
+#include "vtkTransform.h"
 
 template< class TInputImage >
 IbisItkVTKImageExport< TInputImage >::IbisItkVTKImageExport()
@@ -45,39 +45,36 @@ IbisItkVtkConverter::~IbisItkVtkConverter()
     this->ItkToVtkImporter->Delete();
 }
 
-//template< class T > void IbisItkVtkConverter::GetImageTransform( T img, vtkMatrix4x4 *mat )
-//{
-//    itk::Matrix< double, 3, 3 > dirCosines = img->GetDirection();
-//    vtkMatrix4x4 * rotMat = vtkMatrix4x4::New();
-//    for( unsigned i = 0; i < 3; ++i )
-//        for( unsigned j = 0; j < 3; ++j )
-//            mat->SetElement( i, j, dirCosines( i, j ) );
-//}
-
-vtkImageData * IbisItkVtkConverter::ConvertItkImageToVtkImage( IbisItkFloat3ImageType::Pointer img )
+vtkImageData * IbisItkVtkConverter::ConvertItkImageToVtkImage(IbisItkFloat3ImageType::Pointer img , vtkTransform *tr = 0)
 {
     this->ItkToVtkExporter = ItkExporterType::New();
     BuildVtkImport( this->ItkToVtkExporter );
     this->ItkToVtkExporter->SetInput( img );
     this->ItkToVtkImporter->Update();
+    if( tr )
+        this->GetImageTransformFromDirectionCosines( img->GetDirection(), tr );
     return this->ItkToVtkImporter->GetOutput();
 }
 
-vtkImageData * IbisItkVtkConverter::ConvertItkImageToVtkImage( IbisRGBImageType::Pointer img )
+vtkImageData * IbisItkVtkConverter::ConvertItkImageToVtkImage( IbisRGBImageType::Pointer img, vtkTransform *tr = 0 )
 {
     this->ItkRGBImageToVtkExporter = ItkRGBImageExporterType::New();
     BuildVtkImport( this->ItkRGBImageToVtkExporter );
     this->ItkRGBImageToVtkExporter->SetInput( img );
     this->ItkToVtkImporter->Update();
+    if( tr )
+        this->GetImageTransformFromDirectionCosines( img->GetDirection(), tr );
     return this->ItkToVtkImporter->GetOutput();
 }
 
-vtkImageData * IbisItkVtkConverter::ConvertItkImageToVtkImage( IbisItkUnsignedChar3ImageType::Pointer img )
+vtkImageData * IbisItkVtkConverter::ConvertItkImageToVtkImage(IbisItkUnsignedChar3ImageType::Pointer img , vtkTransform *tr = 0)
 {
     this->ItkToVtkUnsignedChar3lExporter = IbisItkUnsignedChar3ExporterType::New();
     BuildVtkImport( this->ItkToVtkUnsignedChar3lExporter );
     this->ItkToVtkUnsignedChar3lExporter->SetInput( img );
     this->ItkToVtkImporter->Update();
+    if( tr )
+        this->GetImageTransformFromDirectionCosines( img->GetDirection(), tr );
     return this->ItkToVtkImporter->GetOutput();
 }
 
@@ -96,4 +93,16 @@ void IbisItkVtkConverter::BuildVtkImport( itk::VTKImageExportBase * exporter )
     this->ItkToVtkImporter->SetDataExtentCallback( exporter->GetDataExtentCallback() );
     this->ItkToVtkImporter->SetBufferPointerCallback( exporter->GetBufferPointerCallback() );
     this->ItkToVtkImporter->SetCallbackUserData( exporter->GetCallbackUserData() );
+}
+
+#include <assert.h>
+void IbisItkVtkConverter::GetImageTransformFromDirectionCosines(itk::Matrix< double, 3, 3 > dirCosines, vtkTransform *tr )
+{
+    assert( tr != 0 );
+    vtkMatrix4x4 * rotMat = vtkMatrix4x4::New();
+    for( unsigned i = 0; i < 3; ++i )
+        for( unsigned j = 0; j < 3; ++j )
+            rotMat->SetElement( i, j, dirCosines( i, j ) );
+    tr->SetMatrix( rotMat );
+    rotMat->Delete();
 }

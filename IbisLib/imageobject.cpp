@@ -221,18 +221,9 @@ void ImageObject::SetItkImage( IbisItkFloat3ImageType::Pointer image )
     this->ItkImage = image;
     if( this->ItkImage )
     {
-        this->SetImage( this->ItktovtkConverter->ConvertItkImageToVtkImage( this->ItkImage ) );
-
-        // Use itk image's dir cosines as the local transform for this image
-        itk::Matrix< double, 3, 3 > dirCosines = this->ItkImage->GetDirection();
-        vtkMatrix4x4 * rotMat = vtkMatrix4x4::New();
-        for( unsigned i = 0; i < 3; ++i )
-            for( unsigned j = 0; j < 3; ++j )
-                rotMat->SetElement( i, j, dirCosines( i, j ) );
         vtkTransform * rotTrans = vtkTransform::New();
-        rotTrans->SetMatrix( rotMat );
+        this->SetImage( this->ItktovtkConverter->ConvertItkImageToVtkImage( this->ItkImage, rotTrans ) );
         this->SetLocalTransform( rotTrans );
-        rotMat->Delete();
         rotTrans->Delete();
     }
 }
@@ -242,18 +233,9 @@ void ImageObject::SetItkImage( IbisRGBImageType::Pointer image )
     this->ItkRGBImage = image;
     if( this->ItkRGBImage )
     {
-        this->SetImage( this->ItktovtkConverter->ConvertItkImageToVtkImage( this->ItkRGBImage ) );
-
-        // Use itk image's dir cosines as the local transform for this image
-        itk::Matrix< double, 3, 3 > dirCosines = this->ItkRGBImage->GetDirection();
-        vtkMatrix4x4 * rotMat = vtkMatrix4x4::New();
-        for( unsigned i = 0; i < 3; ++i )
-            for( unsigned j = 0; j < 3; ++j )
-                rotMat->SetElement( i, j, dirCosines( i, j ) );
         vtkTransform * rotTrans = vtkTransform::New();
-        rotTrans->SetMatrix( rotMat );
+        this->SetImage( this->ItktovtkConverter->ConvertItkImageToVtkImage( this->ItkRGBImage, rotTrans ) );
         this->SetLocalTransform( rotTrans );
-        rotMat->Delete();
         rotTrans->Delete();
     }
 }
@@ -263,18 +245,9 @@ void ImageObject::SetItkLabelImage( IbisItkUnsignedChar3ImageType::Pointer image
     this->ItkLabelImage = image;
     if( this->ItkLabelImage )
     {
-        this->SetImage( this->ItktovtkConverter->ConvertItkImageToVtkImage( this->ItkLabelImage ) );
-
-        // Use itk image's dir cosines as the local transform for this image
-        itk::Matrix< double, 3, 3 > dirCosines = this->ItkLabelImage->GetDirection();
-        vtkMatrix4x4 * rotMat = vtkMatrix4x4::New();
-        for( unsigned i = 0; i < 3; ++i )
-            for( unsigned j = 0; j < 3; ++j )
-                rotMat->SetElement( i, j, dirCosines( i, j ) );
         vtkTransform * rotTrans = vtkTransform::New();
-        rotTrans->SetMatrix( rotMat );
+        this->SetImage( this->ItktovtkConverter->ConvertItkImageToVtkImage( this->ItkLabelImage, rotTrans ) );
         this->SetLocalTransform( rotTrans );
-        rotMat->Delete();
         rotTrans->Delete();
     }
 }
