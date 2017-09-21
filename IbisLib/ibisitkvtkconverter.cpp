@@ -5,6 +5,7 @@
 #include "vtkImageShiftScale.h"
 #include "vtkImageLuminance.h"
 #include "vtkMath.h"
+#include "vtkSmartPointer.h"
 
 template< class TInputImage >
 IbisItkVTKImageExport< TInputImage >::IbisItkVTKImageExport()
@@ -117,7 +118,7 @@ bool IbisItkVtkConverter::ConvertVtkImageToItkImage( IbisItkFloat3ImageType::Poi
         return false;
     int numberOfScalarComponents = img->GetNumberOfScalarComponents();
     vtkImageData *grayImage = img;
-    vtkImageLuminance *luminanceFilter = vtkImageLuminance::New();
+    vtkSmartPointer<vtkImageLuminance> luminanceFilter = vtkSmartPointer<vtkImageLuminance>::New();
     if (numberOfScalarComponents > 1)
     {
         luminanceFilter->SetInputData(img);
@@ -125,7 +126,7 @@ bool IbisItkVtkConverter::ConvertVtkImageToItkImage( IbisItkFloat3ImageType::Poi
         grayImage = luminanceFilter->GetOutput();
     }
     vtkImageData * image = grayImage;
-    vtkImageShiftScale *shifter = vtkImageShiftScale::New();
+    vtkSmartPointer<vtkImageShiftScale> shifter = vtkSmartPointer<vtkImageShiftScale>::New();
     if (img->GetScalarType() != VTK_FLOAT)
     {
         shifter->SetOutputScalarType(VTK_FLOAT);
@@ -156,7 +157,7 @@ bool IbisItkVtkConverter::ConvertVtkImageToItkImage( IbisItkFloat3ImageType::Poi
     itk::Vector< double, 3 > origin;
     itk::Vector< double, 3 > itkOrigin;
     // set direction cosines
-    vtkMatrix4x4 * tmpMat = vtkMatrix4x4::New();
+    vtkSmartPointer<vtkMatrix4x4> tmpMat = vtkSmartPointer<vtkMatrix4x4>::New();
     vtkMatrix4x4::Transpose( imageMatrix, tmpMat );
     double step[3], mincStartPoint[3], dirCos[3][3];
     for( int i = 0; i < 3; i++ )
@@ -183,9 +184,6 @@ bool IbisItkVtkConverter::ConvertVtkImageToItkImage( IbisItkFloat3ImageType::Poi
     itkOutputImage->Allocate();
     float *itkImageBuffer = itkOutputImage->GetBufferPointer();
     memcpy(itkImageBuffer, image->GetScalarPointer(), numberOfPixels*sizeof(float));
-    tmpMat->Delete();
-    shifter->Delete();
-    luminanceFilter->Delete();
     return true;
 }
 
@@ -213,7 +211,7 @@ bool IbisItkVtkConverter::ConvertVtkImageToItkImage( IbisRGBImageType::Pointer i
     itk::Vector< double, 3 > origin;
     itk::Vector< double, 3 > itkOrigin;
     // set direction cosines
-    vtkMatrix4x4 * tmpMat = vtkMatrix4x4::New();
+    vtkSmartPointer<vtkMatrix4x4> tmpMat = vtkSmartPointer<vtkMatrix4x4>::New();
     vtkMatrix4x4::Transpose( imageMatrix, tmpMat );
     double step[3], mincStartPoint[3], dirCos[3][3];
     for( int i = 0; i < 3; i++ )
@@ -241,7 +239,6 @@ bool IbisItkVtkConverter::ConvertVtkImageToItkImage( IbisRGBImageType::Pointer i
     itkOutputImage->Allocate();
     RGBPixelType *itkImageBuffer = itkOutputImage->GetBufferPointer();
     memcpy(itkImageBuffer, image->GetScalarPointer(), numberOfPixels*sizeof(RGBPixelType));
-    tmpMat->Delete();
     return true;
 }
 
@@ -269,7 +266,7 @@ bool IbisItkVtkConverter::ConvertVtkImageToItkImage( IbisItkUnsignedChar3ImageTy
     itk::Vector< double, 3 > origin;
     itk::Vector< double, 3 > itkOrigin;
     // set direction cosines
-    vtkMatrix4x4 * tmpMat = vtkMatrix4x4::New();
+    vtkSmartPointer<vtkMatrix4x4> tmpMat = vtkSmartPointer<vtkMatrix4x4>::New();
     vtkMatrix4x4::Transpose( imageMatrix, tmpMat );
     double step[3], mincStartPoint[3], dirCos[3][3];
     for( int i = 0; i < 3; i++ )
@@ -296,6 +293,5 @@ bool IbisItkVtkConverter::ConvertVtkImageToItkImage( IbisItkUnsignedChar3ImageTy
     itkOutputImage->Allocate();
     unsigned char *itkImageBuffer = itkOutputImage->GetBufferPointer();
     memcpy(itkImageBuffer, image->GetScalarPointer(), numberOfPixels*sizeof(unsigned char));
-    tmpMat->Delete();
     return true;
 }
