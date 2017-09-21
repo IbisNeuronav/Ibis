@@ -100,8 +100,8 @@ public:
     void GetFrameData(int index, vtkImageData *img, vtkMatrix4x4 *mat );
 
     // Return itk image of a given frame
-    bool GetItkImage(IbisItkUnsignedChar3ImageType::Pointer itkOutputImage, int frameNo, bool masked, bool useCalibratedTransform = false, vtkMatrix4x4 *relativeMatrix = 0  );
-    void GetItkRGBImage(IbisRGBImageType::Pointer itkOutputImage, int frameNo, bool masked, bool useCalibratedTransform = false, vtkMatrix4x4 *relativeMatrix = 0 );
+    void GetItkImage(IbisItkUnsignedChar3ImageType::Pointer itkOutputImage, int frameNo, bool masked, bool useCalibratedTransform = false, int relativeToObjectID = SceneManager::InvalidId );
+    void GetItkRGBImage(IbisRGBImageType::Pointer itkOutputImage, int frameNo, bool masked, bool useCalibratedTransform = false, int relativeToObjectID = SceneManager::InvalidId );
 
     // Display of current slice
     int GetSliceWidth();
@@ -222,10 +222,7 @@ protected:
     std::vector< PerStaticSlice > m_staticSlicesData;
     bool m_staticSlicesDataNeedUpdate;
 
-    std::vector< IbisRGBImageType::Pointer > m_itkRGBImages;
-
     void Save( );
-    void ConvertVtkImagesToItkRGBImages(bool masked = false, bool useCalibratedTransform = false, int relativeToID = SceneManager::InvalidId );
 };
 
 ObjectSerializationHeaderMacro( USAcquisitionObject );

@@ -111,23 +111,22 @@ void IbisItkVtkConverter::GetImageTransformFromDirectionCosines(itk::Matrix< dou
     rotMat->Delete();
 }
 
-bool IbisItkVtkConverter::ConvertVtkImageToItkImage( IbisItkFloat3ImageType::Pointer itkOutputImage, vtkImageData *slice, vtkMatrix4x4 *calibratedSliceMatrix)
+bool IbisItkVtkConverter::ConvertVtkImageToItkImage( IbisItkFloat3ImageType::Pointer itkOutputImage, vtkImageData *img, vtkMatrix4x4 *imageMatrix)
 {
-    if(! itkOutputImage )
+    if( !itkOutputImage )
         return false;
-
-    int numberOfScalarComponents = slice->GetNumberOfScalarComponents();
-    vtkImageData *grayImage = slice;
+    int numberOfScalarComponents = img->GetNumberOfScalarComponents();
+    vtkImageData *grayImage = img;
     vtkImageLuminance *luminanceFilter = vtkImageLuminance::New();
     if (numberOfScalarComponents > 1)
     {
-        luminanceFilter->SetInputData(slice);
+        luminanceFilter->SetInputData(img);
         luminanceFilter->Update();
         grayImage = luminanceFilter->GetOutput();
     }
     vtkImageData * image = grayImage;
     vtkImageShiftScale *shifter = vtkImageShiftScale::New();
-    if (slice->GetScalarType() != VTK_FLOAT)
+    if (img->GetScalarType() != VTK_FLOAT)
     {
         shifter->SetOutputScalarType(VTK_FLOAT);
         shifter->SetClampOverflow(1);
@@ -138,7 +137,7 @@ bool IbisItkVtkConverter::ConvertVtkImageToItkImage( IbisItkFloat3ImageType::Poi
         image = shifter->GetOutput();
     }
 
-    int * dimensions = slice->GetDimensions();
+    int * dimensions = img->GetDimensions();
     IbisItkFloat3ImageType::SizeType  size;
     IbisItkFloat3ImageType::IndexType start;
     IbisItkFloat3ImageType::RegionType region;
@@ -158,7 +157,7 @@ bool IbisItkVtkConverter::ConvertVtkImageToItkImage( IbisItkFloat3ImageType::Poi
     itk::Vector< double, 3 > itkOrigin;
     // set direction cosines
     vtkMatrix4x4 * tmpMat = vtkMatrix4x4::New();
-    vtkMatrix4x4::Transpose( calibratedSliceMatrix, tmpMat );
+    vtkMatrix4x4::Transpose( imageMatrix, tmpMat );
     double step[3], mincStartPoint[3], dirCos[3][3];
     for( int i = 0; i < 3; i++ )
     {
@@ -188,5 +187,115 @@ bool IbisItkVtkConverter::ConvertVtkImageToItkImage( IbisItkFloat3ImageType::Poi
     shifter->Delete();
     luminanceFilter->Delete();
     return true;
+}
 
+bool IbisItkVtkConverter::ConvertVtkImageToItkImage( IbisRGBImageType::Pointer itkOutputImage, vtkImageData *image, vtkMatrix4x4 *imageMatrix)
+{
+    if( !itkOutputImage )
+        return false;
+
+    int * dimensions = image->GetDimensions();
+    IbisItkFloat3ImageType::SizeType  size;
+    IbisItkFloat3ImageType::IndexType start;
+    IbisItkFloat3ImageType::RegionType region;
+    const long unsigned int numberOfPixels =  dimensions[0] * dimensions[1] * dimensions[2];
+    for (int i = 0; i < 3; i++)
+    {
+        size[i] = dimensions[i];
+    }
+
+    start.Fill(0);
+    region.SetIndex( start );
+    region.SetSize( size );
+    itkOutputImage->SetRegions(region);
+
+    itk::Matrix< double, 3,3 > dirCosine;
+    itk::Vector< double, 3 > origin;
+    itk::Vector< double, 3 > itkOrigin;
+    // set direction cosines
+    vtkMatrix4x4 * tmpMat = vtkMatrix4x4::New();
+    vtkMatrix4x4::Transpose( imageMatrix, tmpMat );
+    double step[3], mincStartPoint[3], dirCos[3][3];
+    for( int i = 0; i < 3; i++ )
+    {
+        step[i] = vtkMath::Dot( (*tmpMat)[i], (*tmpMat)[i] );
+        step[i] = sqrt( step[i] );
+        for( int j = 0; j < 3; j++ )
+        {
+            dirCos[i][j] = (*tmpMat)[i][j] / step[i];
+            dirCosine[j][i] = dirCos[i][j];
+        }
+    }
+
+    double rotation[3][3];
+    vtkMath::Transpose3x3( dirCos, rotation );
+    vtkMath::LinearSolve3x3( rotation, (*tmpMat)[3], mincStartPoint );
+
+    for( int i = 0; i < 3; i++ )
+        origin[i] =  mincStartPoint[i];
+    itkOrigin = dirCosine * origin;
+    itkOutputImage->SetSpacing(step);
+    itkOutputImage->SetOrigin(itkOrigin);
+    itkOutputImage->SetDirection(dirCosine);
+
+    itkOutputImage->Allocate();
+    RGBPixelType *itkImageBuffer = itkOutputImage->GetBufferPointer();
+    memcpy(itkImageBuffer, image->GetScalarPointer(), numberOfPixels*sizeof(RGBPixelType));
+    tmpMat->Delete();
+    return true;
+}
+
+bool IbisItkVtkConverter::ConvertVtkImageToItkImage( IbisItkUnsignedChar3ImageType::Pointer itkOutputImage, vtkImageData *image, vtkMatrix4x4 *imageMatrix )
+{
+    if( !itkOutputImage )
+        return false;
+
+    IbisItkUnsignedChar3ImageType::SizeType  size;
+    IbisItkUnsignedChar3ImageType::IndexType start;
+    IbisItkUnsignedChar3ImageType::RegionType region;
+    int * dimensions = image->GetDimensions();
+    const long unsigned int numberOfPixels =  dimensions[0] * dimensions[1] * dimensions[2];
+    for (int i = 0; i < 3; i++)
+    {
+        size[i] = dimensions[i];
+    }
+
+    start.Fill(0);
+    region.SetIndex( start );
+    region.SetSize( size );
+    itkOutputImage->SetRegions(region);
+
+    itk::Matrix< double, 3,3 > dirCosine;
+    itk::Vector< double, 3 > origin;
+    itk::Vector< double, 3 > itkOrigin;
+    // set direction cosines
+    vtkMatrix4x4 * tmpMat = vtkMatrix4x4::New();
+    vtkMatrix4x4::Transpose( imageMatrix, tmpMat );
+    double step[3], mincStartPoint[3], dirCos[3][3];
+    for( int i = 0; i < 3; i++ )
+    {
+        step[i] = vtkMath::Dot( (*tmpMat)[i], (*tmpMat)[i] );
+        step[i] = sqrt( step[i] );
+        for( int j = 0; j < 3; j++ )
+        {
+            dirCos[i][j] = (*tmpMat)[i][j] / step[i];
+            dirCosine[j][i] = dirCos[i][j];
+        }
+    }
+
+    double rotation[3][3];
+    vtkMath::Transpose3x3( dirCos, rotation );
+    vtkMath::LinearSolve3x3( rotation, (*tmpMat)[3], mincStartPoint );
+
+    for( int i = 0; i < 3; i++ )
+        origin[i] =  mincStartPoint[i];
+    itkOrigin = dirCosine * origin;
+    itkOutputImage->SetSpacing(step);
+    itkOutputImage->SetOrigin(itkOrigin);
+    itkOutputImage->SetDirection(dirCosine);
+    itkOutputImage->Allocate();
+    unsigned char *itkImageBuffer = itkOutputImage->GetBufferPointer();
+    memcpy(itkImageBuffer, image->GetScalarPointer(), numberOfPixels*sizeof(unsigned char));
+    tmpMat->Delete();
+    return true;
 }

@@ -52,7 +52,9 @@ public:
     vtkImageData *ConvertItkImageToVtkImage(IbisRGBImageType::Pointer img , vtkTransform *tr);
     vtkImageData *ConvertItkImageToVtkImage( IbisItkUnsignedChar3ImageType::Pointer img, vtkTransform *tr );
 
-    bool ConvertVtkImageToItkImage( IbisItkFloat3ImageType::Pointer itkOutputImage, vtkImageData *slice, vtkMatrix4x4 *calibratedSliceMatrix);
+    bool ConvertVtkImageToItkImage( IbisItkFloat3ImageType::Pointer itkOutputImage, vtkImageData *image, vtkMatrix4x4 *imageMatrix );
+    bool ConvertVtkImageToItkImage( IbisRGBImageType::Pointer itkOutputImage, vtkImageData *image, vtkMatrix4x4 *imageMatrix );
+    bool ConvertVtkImageToItkImage( IbisItkUnsignedChar3ImageType::Pointer itkOutputImage, vtkImageData *image, vtkMatrix4x4 *imageMatrix );
 
 protected:
 
