@@ -38,8 +38,6 @@ class USMask;
 class vtkImageConstantPad;
 class vtkPassThrough;
 
-typedef itk::Image<float,3> IbisItkFloat3ImageType;
-
 #define ACQ_COLOR_RGB           "RGB"
 #define ACQ_COLOR_GRAYSCALE     "Grayscale"
 #define ACQ_BASE_DIR            "acquisitions"

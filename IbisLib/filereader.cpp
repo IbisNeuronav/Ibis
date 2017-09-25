@@ -26,7 +26,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "imageobject.h"
 #include "polydataobject.h"
 #include "pointsobject.h"
-#include "ibisitkvtkconverter.h"
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
