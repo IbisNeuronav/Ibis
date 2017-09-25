@@ -62,7 +62,6 @@ public:
     
     vtkImageData* GetImage( );
     void SetItkImage( IbisItkFloat3ImageType::Pointer image );  // for all others
-    void SetItkImage( IbisRGBImageType::Pointer image );  // for RGB images
     void SetItkLabelImage( IbisItkUnsignedChar3ImageType::Pointer image );  // for labels
     IbisItkFloat3ImageType::Pointer GetItkImage() { return this->ItkImage; }
     IbisRGBImageType::Pointer GetItkRGBImage() { return this->ItkRGBImage; }

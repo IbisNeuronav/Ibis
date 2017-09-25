@@ -9,7 +9,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
 #include <sstream>
-//#include "imageobject.h"
 #include "vtkOutlineFilter.h"
 #include "vtkPolyDataMapper.h"
 #include "vtkRenderer.h"
@@ -223,18 +222,6 @@ void ImageObject::SetItkImage( IbisItkFloat3ImageType::Pointer image )
     {
         vtkTransform * rotTrans = vtkTransform::New();
         this->SetImage( this->ItktovtkConverter->ConvertItkImageToVtkImage( this->ItkImage, rotTrans ) );
-        this->SetLocalTransform( rotTrans );
-        rotTrans->Delete();
-    }
-}
-
-void ImageObject::SetItkImage( IbisRGBImageType::Pointer image )
-{
-    this->ItkRGBImage = image;
-    if( this->ItkRGBImage )
-    {
-        vtkTransform * rotTrans = vtkTransform::New();
-        this->SetImage( this->ItktovtkConverter->ConvertItkImageToVtkImage( this->ItkRGBImage, rotTrans ) );
         this->SetLocalTransform( rotTrans );
         rotTrans->Delete();
     }
