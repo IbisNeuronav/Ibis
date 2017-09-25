@@ -509,9 +509,10 @@ void Application::OpenFiles( OpenFileParams * params, bool addToScene )
     m_progressDialogUpdateTimer = 0;
 }
 
-bool Application::GetImageDataFromVideoFrame(QString fileName, ImageObject *img )
+bool Application::GetImageDataFromVideoFrame(QString fileName, vtkImageData *img, vtkMatrix4x4 *mat )
 {
     Q_ASSERT(img);
+    Q_ASSERT(mat);
     m_fileReader = new FileReader;
     QFileInfo fi( fileName );
     if( !(fi.isReadable()) )
@@ -521,7 +522,7 @@ bool Application::GetImageDataFromVideoFrame(QString fileName, ImageObject *img 
         QMessageBox::critical( 0, "Error", message, 1, 0 );
         return false;
     }
-    bool ok = m_fileReader->GetFrameDataFromMINCFile( fileName, img );
+    bool ok = m_fileReader->GetFrameDataFromMINCFile( fileName, img, mat );
     delete m_fileReader;
     return ok;
 }

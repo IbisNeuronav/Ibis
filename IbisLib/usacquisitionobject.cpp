@@ -583,7 +583,6 @@ bool USAcquisitionObject::LoadFramesFromMINCFile( QStringList & allMINCFiles )
     QProgressDialog * progress = new QProgressDialog("Importing frames", "Cancel", 0, allMINCFiles.count() );
     progress->setAttribute(Qt::WA_DeleteOnClose, true);
     progress->show();
-    ImageObject *img = ImageObject::New();
     for( int i = 0; i < allMINCFiles.count() && processOK; ++i )
     {
         QFileInfo fi( allMINCFiles.at(i) );
@@ -595,26 +594,23 @@ bool USAcquisitionObject::LoadFramesFromMINCFile( QStringList & allMINCFiles )
             processOK = false;
             break;
         }
-        if ( Application::GetInstance().GetImageDataFromVideoFrame( allMINCFiles.at(i), img ) )
+        vtkSmartPointer<vtkImageData> frame = vtkSmartPointer<vtkImageData>::New();
+        vtkSmartPointer<vtkMatrix4x4> mat = vtkSmartPointer<vtkMatrix4x4>::New();
+        if ( Application::GetInstance().GetImageDataFromVideoFrame( allMINCFiles.at(i), frame.GetPointer(), mat.GetPointer() ) )
         {
             // create full transform and reset image step and origin in order to avoid
             // double translation and scaling and display slices correctly in double view
             double start[3], step[3];
-            vtkImageData *frame = vtkImageData::New();
-            frame->DeepCopy( img->GetImage() );
-            frame->GetOrigin(start);
-            frame->GetSpacing(step);
-            vtkTransform *localTransform = vtkTransform::New();
-            localTransform->SetMatrix(img->GetLocalTransform()->GetMatrix());
-            localTransform->Translate(start);
-            localTransform->Scale(step);
+            frame->GetOrigin( start );
+            frame->GetSpacing( step );
+            vtkSmartPointer<vtkTransform> localTransform = vtkSmartPointer<vtkTransform>::New();
+            localTransform->SetMatrix( mat.GetPointer() );
+            localTransform->Translate( start );
+            localTransform->Scale( step );
             frame->SetOrigin(0,0,0);
             frame->SetSpacing(1,1,1);
 
-            m_videoBuffer->AddFrame( frame, localTransform->GetMatrix() );
-            frame->Delete();
-
-            localTransform->Delete();
+            m_videoBuffer->AddFrame( frame.GetPointer(), localTransform->GetMatrix() );
 
             progress->setValue(i);
             qApp->processEvents();
@@ -627,7 +623,6 @@ bool USAcquisitionObject::LoadFramesFromMINCFile( QStringList & allMINCFiles )
         else // if first file was not read in, the others won't neither
             processOK = false;
     }
-    img->Delete();
     progress->close();
     return processOK;
 }
@@ -859,8 +854,6 @@ void USAcquisitionObject::GetItkImage(IbisItkUnsignedChar3ImageType::Pointer itk
     converter->ConvertVtkImageToItkImage( itkOutputImage, imageToConvert, frameMatrix );
 }
 
-// GetItkRGBImage is used only to convert captured video frames to itk images that will be then exported using itk image writer
-// we export only uncalibrated matrices
 void USAcquisitionObject:: GetItkRGBImage(IbisRGBImageType::Pointer itkOutputImage, int frameNo, bool masked , bool useCalibratedTransform, int relativeToObjectID )
 {
     Q_ASSERT_X(itkOutputImage, "USAcquisitionObject::GetItkImage()", "itkOutputImage must be allocated before this call");

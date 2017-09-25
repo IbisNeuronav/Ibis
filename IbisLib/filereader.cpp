@@ -19,10 +19,14 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "vtkDataObjectReader.h"
 #include "vtkStructuredPointsReader.h"
 #include "vtkErrorCode.h"
+#include "vtkImageData.h"
+#include "vtkTransform.h"
+#include "vtkSmartPointer.h"
 #include "vtkEventQtSlotConnect.h"
 #include "imageobject.h"
 #include "polydataobject.h"
 #include "pointsobject.h"
+#include "ibisitkvtkconverter.h"
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
@@ -363,6 +367,7 @@ bool FileReader::OpenFile( QList<SceneObject*> & readObjects, QString filename, 
 #include "vtkIntArray.h"
 #include "vtkDoubleArray.h"
 #include "stringtools.h"
+#include "ibisitkvtkconverter.h"
 #include <string>
 #include <typeinfo>
 #include <QString>
@@ -657,9 +662,10 @@ bool FileReader::OpenTagFile( QList<SceneObject*> & readObjects, QString filenam
 }
 
 
-bool FileReader::GetFrameDataFromMINCFile(QString filename, ImageObject *img )
+bool FileReader::GetFrameDataFromMINCFile(QString filename, vtkImageData *img , vtkMatrix4x4 *mat )
 {
     Q_ASSERT(img);
+    Q_ASSERT(mat);
     QString fileToRead( filename );
     QString fileMINC2;
     if( this->IsMINC1( filename ) )
@@ -667,10 +673,46 @@ bool FileReader::GetFrameDataFromMINCFile(QString filename, ImageObject *img )
         if( this->ConvertMINC1toMINC2( filename, fileMINC2, true ) )
             fileToRead = fileMINC2;
     }
+
+    IOBasePointer io = itk::ImageIOFactory::CreateImageIO(fileToRead.toUtf8().data(), itk::ImageIOFactory::ReadMode );
+
+    if(!io)
+      throw itk::ExceptionObject("Unsupported image file type");
+
+    io->SetFileName((fileToRead.toUtf8().data()));
+    io->ReadImageInformation();
+
+    size_t nc = io->GetNumberOfComponents();
+
+    IbisItkVtkConverter *ItktovtkConverter = IbisItkVtkConverter::New();
+    vtkSmartPointer<vtkTransform> tr = vtkSmartPointer<vtkTransform>::New();
+    if( nc == 1 )
+    {
+        typedef itk::ImageFileReader< IbisItkUnsignedChar3ImageType > ReaderType;
+        ReaderType::Pointer reader = ReaderType::New();
+        reader->SetFileName( fileToRead.toUtf8().data() );
+
+        try
+        {
+            reader->Update();
+        }
+        catch( itk::ExceptionObject & err )
+        {
+            return false;
+        }
+
+        IbisItkUnsignedChar3ImageType::Pointer itkImage = reader->GetOutput();
+        vtkImageData * tmpImg = ItktovtkConverter->ConvertItkImageToVtkImage( itkImage, tr );
+        img->DeepCopy( tmpImg);
+        mat->DeepCopy( tr->GetMatrix( ) );
+        ItktovtkConverter->Delete();
+        return true;
+    }
+
     // try to read
     typedef itk::ImageFileReader< IbisRGBImageType > ReaderType;
     ReaderType::Pointer reader = ReaderType::New();
-    reader->SetFileName( filename.toUtf8().data() );
+    reader->SetFileName( fileToRead.toUtf8().data() );
 
     try
     {
@@ -682,7 +724,10 @@ bool FileReader::GetFrameDataFromMINCFile(QString filename, ImageObject *img )
     }
 
     IbisRGBImageType::Pointer itkImage = reader->GetOutput();
-    img->SetItkImage( itkImage );
+    vtkImageData * tmpImg = ItktovtkConverter->ConvertItkImageToVtkImage( itkImage, tr );
+    img->DeepCopy( tmpImg);
+    mat->DeepCopy( tr->GetMatrix( ) );
+    ItktovtkConverter->Delete();
     return true;
 }
 
