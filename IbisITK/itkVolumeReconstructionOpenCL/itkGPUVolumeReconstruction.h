@@ -15,6 +15,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include "itkObject.h"
 #include "itkOpenCLUtil.h"
+#include <itkImage.h>
 
 #include "vnl/vnl_matrix_fixed.h"
 #include "vnl/vnl_inverse.h"
