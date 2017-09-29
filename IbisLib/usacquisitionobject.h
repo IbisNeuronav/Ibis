@@ -38,8 +38,6 @@ class USMask;
 class vtkImageConstantPad;
 class vtkPassThrough;
 
-typedef itk::Image<float,3> IbisItk3DImageType;
-
 #define ACQ_COLOR_RGB           "RGB"
 #define ACQ_COLOR_GRAYSCALE     "Grayscale"
 #define ACQ_BASE_DIR            "acquisitions"
@@ -96,10 +94,12 @@ public:
 
     void SetFrameAndMaskSize( int width, int height );
 
+    // Return frame data
+    void GetFrameData(int index, vtkImageData *img, vtkMatrix4x4 *mat );
+
     // Return itk image of a given frame
-    bool GetItkImage(IbisItk3DImageType::Pointer itkOutputImage, int frameNo, vtkMatrix4x4* sliceMatrix);
-    bool GetItkImage(IbisItk3DLabelType::Pointer itkOutputImage, int frameNo, bool masked, bool useCalibratedTransform = false, vtkMatrix4x4 *relativeMatrix = 0  );
-    void GetItkRGBImage(IbisRGBImageType::Pointer itkOutputImage, int frameNo, bool masked, bool useCalibratedTransform = false, vtkMatrix4x4 *relativeMatrix = 0 );
+    void GetItkImage(IbisItkUnsignedChar3ImageType::Pointer itkOutputImage, int frameNo, bool masked, bool useCalibratedTransform = false, int relativeToObjectID = SceneManager::InvalidId );
+    void GetItkRGBImage(IbisRGBImageType::Pointer itkOutputImage, int frameNo, bool masked, bool useCalibratedTransform = false, int relativeToObjectID = SceneManager::InvalidId );
 
     // Display of current slice
     int GetSliceWidth();
@@ -220,10 +220,7 @@ protected:
     std::vector< PerStaticSlice > m_staticSlicesData;
     bool m_staticSlicesDataNeedUpdate;
 
-    std::vector< IbisRGBImageType::Pointer > m_itkRGBImages;
-
     void Save( );
-    void ConvertVtkImagesToItkRGBImages(bool masked = false, bool useCalibratedTransform = false, int relativeToID = SceneManager::InvalidId );
 };
 
 ObjectSerializationHeaderMacro( USAcquisitionObject );

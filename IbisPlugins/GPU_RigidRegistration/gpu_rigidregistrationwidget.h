@@ -32,11 +32,11 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "itkSPSAOptimizer.h"
 #include "itkCMAEvolutionStrategyOptimizer.h"
 
-typedef itk::ImageDuplicator< IbisItk3DImageType >  DuplicatorType;
+typedef itk::ImageDuplicator< IbisItkFloat3ImageType >  DuplicatorType;
 
 typedef itk::CMAEvolutionStrategyOptimizer            OptimizerType;
 
-typedef itk::GPU3DRigidSimilarityMetric<IbisItk3DImageType,IbisItk3DImageType>
+typedef itk::GPU3DRigidSimilarityMetric<IbisItkFloat3ImageType,IbisItkFloat3ImageType>
                                                     GPUCostFunctionType;
 typedef GPUCostFunctionType::Pointer                GPUCostFunctionPointer;
 

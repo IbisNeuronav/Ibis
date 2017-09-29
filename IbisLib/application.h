@@ -40,6 +40,7 @@ class QProgressDialog;
 class QTimer;
 class QDialog;
 class vtkMatrix4x4;
+class vtkImageData;
 class MainWindow;
 class ImageObject;
 class PointsObject;
@@ -145,7 +146,7 @@ public:
     void ImportCamera();
 
     // Getting data from files
-    bool GetImageDataFromVideoFrame(QString fileName, ImageObject *img );
+    bool GetImageDataFromVideoFrame(QString fileName, vtkImageData *img , vtkMatrix4x4 *mat );
     bool GetPointsFromTagFile(QString fileName, PointsObject *pts1, PointsObject *pts2 );
 
     // Useful modal dialog

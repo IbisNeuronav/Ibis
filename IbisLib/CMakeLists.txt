@@ -33,6 +33,7 @@ SET( IBISLIB_SRC
                      simplepropcreator.cpp
                      ibismath.cpp
                      ibisplugin.cpp
+                     ibisitkvtkconverter.cpp
                      gui/aboutbicigns.cpp
                      gui/aboutpluginswidget.cpp
                      gui/trackerstatusdialog.cpp
@@ -74,6 +75,7 @@ SET( IBISLIB_HDR
                      linesfactory.h
                      simplepropcreator.h
                      ibismath.h
+                     ibisitkvtkconverter.h
                      gui/guiutilities.h )
 
 SET( IBISLIB_HDR_MOC

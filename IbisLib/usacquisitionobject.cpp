@@ -583,7 +583,6 @@ bool USAcquisitionObject::LoadFramesFromMINCFile( QStringList & allMINCFiles )
     QProgressDialog * progress = new QProgressDialog("Importing frames", "Cancel", 0, allMINCFiles.count() );
     progress->setAttribute(Qt::WA_DeleteOnClose, true);
     progress->show();
-    ImageObject *img = ImageObject::New();
     for( int i = 0; i < allMINCFiles.count() && processOK; ++i )
     {
         QFileInfo fi( allMINCFiles.at(i) );
@@ -595,26 +594,23 @@ bool USAcquisitionObject::LoadFramesFromMINCFile( QStringList & allMINCFiles )
             processOK = false;
             break;
         }
-        if ( Application::GetInstance().GetImageDataFromVideoFrame( allMINCFiles.at(i), img ) )
+        vtkSmartPointer<vtkImageData> frame = vtkSmartPointer<vtkImageData>::New();
+        vtkSmartPointer<vtkMatrix4x4> mat = vtkSmartPointer<vtkMatrix4x4>::New();
+        if ( Application::GetInstance().GetImageDataFromVideoFrame( allMINCFiles.at(i), frame.GetPointer(), mat.GetPointer() ) )
         {
             // create full transform and reset image step and origin in order to avoid
             // double translation and scaling and display slices correctly in double view
             double start[3], step[3];
-            vtkImageData *frame = vtkImageData::New();
-            frame->DeepCopy( img->GetImage() );
-            frame->GetOrigin(start);
-            frame->GetSpacing(step);
-            vtkTransform *localTransform = vtkTransform::New();
-            localTransform->SetMatrix(img->GetLocalTransform()->GetMatrix());
-            localTransform->Translate(start);
-            localTransform->Scale(step);
+            frame->GetOrigin( start );
+            frame->GetSpacing( step );
+            vtkSmartPointer<vtkTransform> localTransform = vtkSmartPointer<vtkTransform>::New();
+            localTransform->SetMatrix( mat.GetPointer() );
+            localTransform->Translate( start );
+            localTransform->Scale( step );
             frame->SetOrigin(0,0,0);
             frame->SetSpacing(1,1,1);
 
-            m_videoBuffer->AddFrame( frame, localTransform->GetMatrix() );
-            frame->Delete();
-
-            localTransform->Delete();
+            m_videoBuffer->AddFrame( frame.GetPointer(), localTransform->GetMatrix() );
 
             progress->setValue(i);
             qApp->processEvents();
@@ -627,7 +623,6 @@ bool USAcquisitionObject::LoadFramesFromMINCFile( QStringList & allMINCFiles )
         else // if first file was not read in, the others won't neither
             processOK = false;
     }
-    img->Delete();
     progress->close();
     return processOK;
 }
@@ -767,127 +762,45 @@ vtkImageData * USAcquisitionObject::GetMask()
     return m_mask->GetMask();
 }
 
-// GetItkImage in release 2.3.1 is used only in GPU Volume Reconstruction and is not meant for general application
-// It uses calibrated slice matrix
-// We should write a special function converting vtk to itk image
-bool USAcquisitionObject::GetItkImage(IbisItk3DImageType::Pointer itkOutputImage, int frameNo,
-     vtkMatrix4x4 * sliceMatrix)
+void USAcquisitionObject::GetFrameData(int index, vtkImageData *slice, vtkMatrix4x4 *calibratedSliceMatrix )
 {
-    Q_ASSERT_X(itkOutputImage, "USAcquisitionObject::GetItkImage()", "itkOutputImage must be allocated before this call");
-    Q_ASSERT_X(sliceMatrix, "USAcquisitionObject::GetItkImage()", "sliceMatrix must be allocated before this callL");
-
+    Q_ASSERT_X((index >= 0 && index < m_videoBuffer->GetNumberOfFrames()), "USAcquisitionObject::GetFrameData()", "index out of range");
+    Q_ASSERT_X(calibratedSliceMatrix, "USAcquisitionObject::GetFrameData()", "sliceMatrix must be allocated before this callL");
+    Q_ASSERT_X(slice, "USAcquisitionObject::GetFrameData()", "slice must be allocated before this callL");
     int currentFrame = m_videoBuffer->GetCurrentFrame();
-    this->SetCurrentFrame(frameNo);
-    sliceMatrix->DeepCopy( m_sliceTransform->GetMatrix() );
+    this->SetCurrentFrame(index);
+    calibratedSliceMatrix->DeepCopy( m_sliceTransform->GetMatrix() );
     this->SetCurrentFrame(currentFrame);
-    vtkImageData * initialImage = m_videoBuffer->GetImage( frameNo );
-
-    double org[3], st[3];
-    initialImage->GetOrigin(org);
-    initialImage->GetSpacing(st);
-    int numberOfScalarComponents = initialImage->GetNumberOfScalarComponents();
-    vtkImageData *grayImage = initialImage;
-    vtkImageLuminance *luminanceFilter = vtkImageLuminance::New();
-    if (numberOfScalarComponents > 1)
-    {
-        luminanceFilter->SetInputData(initialImage);
-        luminanceFilter->Update();
-        grayImage = luminanceFilter->GetOutput();
-    }
-    vtkImageData * image;
-    vtkImageShiftScale *shifter = vtkImageShiftScale::New();
-    if (initialImage->GetScalarType() != VTK_FLOAT)
-    {
-        shifter->SetOutputScalarType(VTK_FLOAT);
-        shifter->SetClampOverflow(1);
-        shifter->SetInputData(grayImage);
-        shifter->SetShift(0);
-        shifter->SetScale(1.0);
-        shifter->Update();
-        image = shifter->GetOutput();
-    }
-    else
-        image = initialImage;
-
-    image->GetOrigin(org);
-    image->GetSpacing(st);
-    int * dimensions = initialImage->GetDimensions();
-    IbisItk3DImageType::SizeType  size;
-    IbisItk3DImageType::IndexType start;
-    IbisItk3DImageType::RegionType region;
-    const long unsigned int numberOfPixels =  dimensions[0] * dimensions[1] * dimensions[2];
-    double imageOrigin[3];
-    image->GetOrigin(imageOrigin);
-    for (int i = 0; i < 3; i++)
-    {
-        size[i] = dimensions[i];
-    }
-
-    start.Fill(0);
-    region.SetIndex( start );
-    region.SetSize( size );
-    itkOutputImage->SetRegions(region);
-
-    itk::Matrix< double, 3,3 > dirCosine;
-    itk::Vector< double, 3 > origin;
-    itk::Vector< double, 3 > itkOrigin;
-    // set direction cosines
-    vtkMatrix4x4 * tmpMat = vtkMatrix4x4::New();
-    vtkMatrix4x4::Transpose( sliceMatrix, tmpMat );
-    double step[3], mincStartPoint[3], dirCos[3][3];
-    for( int i = 0; i < 3; i++ )
-    {
-        step[i] = vtkMath::Dot( (*tmpMat)[i], (*tmpMat)[i] );
-        step[i] = sqrt( step[i] );
-        for( int j = 0; j < 3; j++ )
-        {
-            dirCos[i][j] = (*tmpMat)[i][j] / step[i];
-            dirCosine[j][i] = dirCos[i][j];
-        }
-    }
-
-    double rotation[3][3];
-    vtkMath::Transpose3x3( dirCos, rotation );
-    vtkMath::LinearSolve3x3( rotation, (*tmpMat)[3], mincStartPoint );
-
-    for( int i = 0; i < 3; i++ )
-        origin[i] =  mincStartPoint[i];
-    itkOrigin = dirCosine * origin;
-    itkOutputImage->SetSpacing(step);
-    itkOutputImage->SetOrigin(itkOrigin);
-    itkOutputImage->SetDirection(dirCosine);
-    itkOutputImage->Allocate();
-    float *itkImageBuffer = itkOutputImage->GetBufferPointer();
-    memcpy(itkImageBuffer, image->GetScalarPointer(), numberOfPixels*sizeof(float));
-    tmpMat->Delete();
-    shifter->Delete();
-    luminanceFilter->Delete();
-    return true;
+    slice->DeepCopy( m_videoBuffer->GetImage( index ) );
 }
 
-bool USAcquisitionObject::GetItkImage(IbisItk3DLabelType::Pointer itkOutputImage, int frameNo, bool masked, bool useCalibratedTransform, vtkMatrix4x4 *relativeMatrix )
+void USAcquisitionObject::GetItkImage(IbisItkUnsignedChar3ImageType::Pointer itkOutputImage, int frameNo, bool masked, bool useCalibratedTransform, int relativeToObjectID )
 {
     Q_ASSERT_X(itkOutputImage, "USAcquisitionObject::GetItkImage()", "itkOutputImage must be allocated before this call");
 
-    int currentFrame = m_videoBuffer->GetCurrentFrame();
-    vtkImageData * initialImage = m_videoBuffer->GetImage( frameNo );
-
-    double org[3], st[3];
-    initialImage->GetOrigin(org);
-    initialImage->GetSpacing(st);
+    // prepare transform
     vtkSmartPointer<vtkMatrix4x4> frameMatrix = vtkSmartPointer<vtkMatrix4x4>::New();
     frameMatrix->Identity();
     vtkSmartPointer<vtkMatrix4x4> calibratedFrameMatrix = vtkSmartPointer<vtkMatrix4x4>::New();
     calibratedFrameMatrix->Identity();
     vtkMatrix4x4::Multiply4x4( m_videoBuffer->GetMatrix( frameNo ), m_calibrationTransform->GetMatrix(), calibratedFrameMatrix );
-    if( relativeMatrix )
+
+    vtkMatrix4x4 *relativeToMatrix = 0;
+    if( relativeToObjectID  != SceneManager::InvalidId )
+    {
+        SceneObject *relativeTo = this->GetManager()->GetObjectByID( relativeToObjectID );
+        Q_ASSERT( relativeTo );
+        relativeToMatrix = relativeTo->GetWorldTransform()->GetLinearInverse()->GetMatrix();
+    }
+
+    if( relativeToMatrix )
     {
         if( useCalibratedTransform )
         {
-            vtkMatrix4x4::Multiply4x4( relativeMatrix, calibratedFrameMatrix, frameMatrix );
+            vtkMatrix4x4::Multiply4x4( relativeToMatrix, calibratedFrameMatrix, frameMatrix );
         }
         else
-            vtkMatrix4x4::Multiply4x4( relativeMatrix, m_videoBuffer->GetMatrix( frameNo ), frameMatrix );
+            vtkMatrix4x4::Multiply4x4( relativeToMatrix, m_videoBuffer->GetMatrix( frameNo ), frameMatrix );
     }
     else
     {
@@ -898,9 +811,12 @@ bool USAcquisitionObject::GetItkImage(IbisItk3DLabelType::Pointer itkOutputImage
         else
             frameMatrix->DeepCopy( m_videoBuffer->GetMatrix( frameNo ) );
     }
+
+    //prepare image
+    vtkImageData * initialImage = m_videoBuffer->GetImage( frameNo );
     int numberOfScalarComponents = initialImage->GetNumberOfScalarComponents();
     vtkImageData *grayImage = initialImage;
-    vtkImageLuminance *luminanceFilter = vtkImageLuminance::New();
+    vtkSmartPointer<vtkImageLuminance> luminanceFilter = vtkSmartPointer<vtkImageLuminance>::New();
     if (numberOfScalarComponents > 1)
     {
         luminanceFilter->SetInputData(initialImage);
@@ -908,7 +824,7 @@ bool USAcquisitionObject::GetItkImage(IbisItk3DLabelType::Pointer itkOutputImage
         grayImage = luminanceFilter->GetOutput();
     }
     vtkImageData * image;
-    vtkImageShiftScale *shifter = vtkImageShiftScale::New();
+    vtkSmartPointer<vtkImageShiftScale> shifter = vtkSmartPointer<vtkImageShiftScale>::New();
     if (initialImage->GetScalarType() != VTK_UNSIGNED_CHAR)
     {
         shifter->SetOutputScalarType(VTK_UNSIGNED_CHAR);
@@ -922,92 +838,47 @@ bool USAcquisitionObject::GetItkImage(IbisItk3DLabelType::Pointer itkOutputImage
     else
         image = initialImage;
 
-    image->GetOrigin(org);
-    image->GetSpacing(st);
-    int * dimensions = initialImage->GetDimensions();
-    IbisItk3DLabelType::SizeType  size;
-    IbisItk3DLabelType::IndexType start;
-    IbisItk3DLabelType::RegionType region;
-    const long unsigned int numberOfPixels =  dimensions[0] * dimensions[1] * dimensions[2];
-    double imageOrigin[3];
-    image->GetOrigin(imageOrigin);
-    for (int i = 0; i < 3; i++)
-    {
-        size[i] = dimensions[i];
-    }
-
-    start.Fill(0);
-    region.SetIndex( start );
-    region.SetSize( size );
-    itkOutputImage->SetRegions(region);
-
-    itk::Matrix< double, 3,3 > dirCosine;
-    itk::Vector< double, 3 > origin;
-    itk::Vector< double, 3 > itkOrigin;
-    // set direction cosines
-    vtkMatrix4x4 * tmpMat = vtkMatrix4x4::New();
-    vtkMatrix4x4::Transpose( frameMatrix, tmpMat );
-    double step[3], mincStartPoint[3], dirCos[3][3];
-    for( int i = 0; i < 3; i++ )
-    {
-        step[i] = vtkMath::Dot( (*tmpMat)[i], (*tmpMat)[i] );
-        step[i] = sqrt( step[i] );
-        for( int j = 0; j < 3; j++ )
-        {
-            dirCos[i][j] = (*tmpMat)[i][j] / step[i];
-            dirCosine[j][i] = dirCos[i][j];
-        }
-    }
-
-    double rotation[3][3];
-    vtkMath::Transpose3x3( dirCos, rotation );
-    vtkMath::LinearSolve3x3( rotation, (*tmpMat)[3], mincStartPoint );
-
-    for( int i = 0; i < 3; i++ )
-        origin[i] =  mincStartPoint[i];
-    itkOrigin = dirCosine * origin;
-    itkOutputImage->SetSpacing(step);
-    itkOutputImage->SetOrigin(itkOrigin);
-    itkOutputImage->SetDirection(dirCosine);
-    itkOutputImage->Allocate();
-    unsigned char *itkImageBuffer = itkOutputImage->GetBufferPointer();
+    vtkSmartPointer<vtkImageStencil> sliceStencil = vtkSmartPointer<vtkImageStencil>::New();
+    vtkImageData * imageToConvert = image;
     if( masked )
     {
-        vtkSmartPointer<vtkImageStencil> sliceStencil = vtkSmartPointer<vtkImageStencil>::New();
         sliceStencil->SetStencilData( m_imageStencilSource->GetOutput() );
         sliceStencil->SetInputData( image );
         sliceStencil->SetBackgroundColor( 1.0, 1.0, 1.0, 0.0 );
         sliceStencil->Update();
-        memcpy(itkImageBuffer, sliceStencil->GetOutput()->GetScalarPointer(), numberOfPixels*sizeof(unsigned char));
+        imageToConvert = sliceStencil->GetOutput();
     }
-    else
-        memcpy(itkImageBuffer, image->GetScalarPointer(), numberOfPixels*sizeof(unsigned char));
-    tmpMat->Delete();
-    shifter->Delete();
-    luminanceFilter->Delete();
-    return true;
+
+    //convert to ITK image
+    IbisItkVtkConverter *converter = IbisItkVtkConverter::New();
+    converter->ConvertVtkImageToItkImage( itkOutputImage, imageToConvert, frameMatrix );
 }
 
-// GetItkRGBImage is used only to convert captured video frames to itk images that will be then exported using itk image writer
-// we export only uncalibrated matrices
-void USAcquisitionObject:: GetItkRGBImage(IbisRGBImageType::Pointer itkOutputImage, int frameNo, bool masked , bool useCalibratedTransform, vtkMatrix4x4* relativeMatrix )
+void USAcquisitionObject:: GetItkRGBImage(IbisRGBImageType::Pointer itkOutputImage, int frameNo, bool masked , bool useCalibratedTransform, int relativeToObjectID )
 {
     Q_ASSERT_X(itkOutputImage, "USAcquisitionObject::GetItkImage()", "itkOutputImage must be allocated before this call");
 
-    vtkImageData * image = m_videoBuffer->GetImage( frameNo );
+    // prepare transform
     vtkSmartPointer<vtkMatrix4x4> frameMatrix = vtkSmartPointer<vtkMatrix4x4>::New();
     frameMatrix->Identity();
     vtkSmartPointer<vtkMatrix4x4> calibratedFrameMatrix = vtkSmartPointer<vtkMatrix4x4>::New();
     calibratedFrameMatrix->Identity();
     vtkMatrix4x4::Multiply4x4( m_videoBuffer->GetMatrix( frameNo ), m_calibrationTransform->GetMatrix(), calibratedFrameMatrix );
-    if( relativeMatrix )
+    vtkMatrix4x4 *relativeToMatrix = 0;
+    if( relativeToObjectID  != SceneManager::InvalidId )
+    {
+        SceneObject *relativeTo = this->GetManager()->GetObjectByID( relativeToObjectID );
+        Q_ASSERT( relativeTo );
+        relativeToMatrix = relativeTo->GetWorldTransform()->GetLinearInverse()->GetMatrix();
+    }
+    if( relativeToMatrix )
     {
         if( useCalibratedTransform )
         {
-            vtkMatrix4x4::Multiply4x4( relativeMatrix, calibratedFrameMatrix, frameMatrix );
+            vtkMatrix4x4::Multiply4x4( relativeToMatrix, calibratedFrameMatrix, frameMatrix );
         }
         else
-            vtkMatrix4x4::Multiply4x4( relativeMatrix, m_videoBuffer->GetMatrix( frameNo ), frameMatrix );
+            vtkMatrix4x4::Multiply4x4( relativeToMatrix, m_videoBuffer->GetMatrix( frameNo ), frameMatrix );
     }
     else
     {
@@ -1019,87 +890,25 @@ void USAcquisitionObject:: GetItkRGBImage(IbisRGBImageType::Pointer itkOutputIma
             frameMatrix->DeepCopy( m_videoBuffer->GetMatrix( frameNo ) );
     }
 
-    int numberOfScalarComponents = image->GetNumberOfScalarComponents();
-
-    int * dimensions = image->GetDimensions();
-    IbisItk3DImageType::SizeType  size;
-    IbisItk3DImageType::IndexType start;
-    IbisItk3DImageType::RegionType region;
-    const long unsigned int numberOfPixels =  dimensions[0] * dimensions[1] * dimensions[2];
-    for (int i = 0; i < 3; i++)
-    {
-        size[i] = dimensions[i];
-    }
-
-    start.Fill(0);
-    region.SetIndex( start );
-    region.SetSize( size );
-    itkOutputImage->SetRegions(region);
-
-    itk::Matrix< double, 3,3 > dirCosine;
-    itk::Vector< double, 3 > origin;
-    itk::Vector< double, 3 > itkOrigin;
-    // set direction cosines
-    vtkMatrix4x4 * tmpMat = vtkMatrix4x4::New();
-    vtkMatrix4x4::Transpose( frameMatrix, tmpMat );
-    double step[3], mincStartPoint[3], dirCos[3][3];
-    for( int i = 0; i < 3; i++ )
-    {
-        step[i] = vtkMath::Dot( (*tmpMat)[i], (*tmpMat)[i] );
-        step[i] = sqrt( step[i] );
-        for( int j = 0; j < 3; j++ )
-        {
-            dirCos[i][j] = (*tmpMat)[i][j] / step[i];
-            dirCosine[j][i] = dirCos[i][j];
-        }
-    }
-
-    double rotation[3][3];
-    vtkMath::Transpose3x3( dirCos, rotation );
-    vtkMath::LinearSolve3x3( rotation, (*tmpMat)[3], mincStartPoint );
-
-    for( int i = 0; i < 3; i++ )
-        origin[i] =  mincStartPoint[i];
-    itkOrigin = dirCosine * origin;
-    itkOutputImage->SetSpacing(step);
-    itkOutputImage->SetOrigin(itkOrigin);
-    itkOutputImage->SetDirection(dirCosine);
-
-    itkOutputImage->Allocate();
-    RGBPixelType *itkImageBuffer = itkOutputImage->GetBufferPointer();
+    //prepare image
+    vtkImageData * image = m_videoBuffer->GetImage( frameNo );
+    vtkSmartPointer<vtkImageStencil> sliceStencil = vtkSmartPointer<vtkImageStencil>::New();
+    vtkImageData * imageToConvert = image;
     if( masked )
     {
-        vtkSmartPointer<vtkImageStencil> sliceStencil = vtkSmartPointer<vtkImageStencil>::New();
         sliceStencil->SetStencilData( m_imageStencilSource->GetOutput() );
         sliceStencil->SetInputData( image );
         sliceStencil->SetBackgroundColor( 1.0, 1.0, 1.0, 0.0 );
         sliceStencil->Update();
-        memcpy(itkImageBuffer, sliceStencil->GetOutput()->GetScalarPointer(), numberOfPixels*sizeof(RGBPixelType));
+        imageToConvert = sliceStencil->GetOutput();
     }
-    else
-        memcpy(itkImageBuffer, image->GetScalarPointer(), numberOfPixels*sizeof(RGBPixelType));
+
+    //convert to ITK image
+    IbisItkVtkConverter *converter = IbisItkVtkConverter::New();
+    converter->ConvertVtkImageToItkImage( itkOutputImage, imageToConvert, frameMatrix );
 }
 
 #include <itkImageFileWriter.h>
-
-void USAcquisitionObject::ConvertVtkImagesToItkRGBImages(bool masked, bool useCalibratedTransform, int relativeToID )
-{
-    m_itkRGBImages.clear();
-    int numberOfFrames = m_videoBuffer->GetNumberOfFrames();
-    for( int i = 0; i < numberOfFrames; i++ )
-    {
-        IbisRGBImageType::Pointer itkOutputImage = IbisRGBImageType::New();
-        if( relativeToID  != SceneManager::InvalidId )
-        {
-            SceneObject *relativeTo = this->GetManager()->GetObjectByID( relativeToID );
-            Q_ASSERT( relativeTo );
-            this->GetItkRGBImage( itkOutputImage, i, masked, useCalibratedTransform, relativeTo->GetWorldTransform()->GetLinearInverse()->GetMatrix() );
-        }
-        else
-            this->GetItkRGBImage( itkOutputImage, i, masked, useCalibratedTransform );
-        m_itkRGBImages.push_back( itkOutputImage );
-    }
-}
 
 void USAcquisitionObject::Export()
 {
@@ -1181,14 +990,7 @@ void USAcquisitionObject::ExportTrackedVideoBuffer(QString destDir , bool masked
         int nbComp = m_videoBuffer->GetFrameNumberOfComponents();
         if( nbComp == 1 )
         {
-            vtkMatrix4x4 *relativeToMatrix = 0;
-            if( relativeToID  != SceneManager::InvalidId )
-            {
-                SceneObject *relativeTo = this->GetManager()->GetObjectByID( relativeToID );
-                Q_ASSERT( relativeTo );
-                relativeToMatrix = relativeTo->GetWorldTransform()->GetLinearInverse()->GetMatrix();
-            }
-            itk::ImageFileWriter< IbisItk3DLabelType >::Pointer mincWriter = itk::ImageFileWriter<IbisItk3DLabelType>::New();
+            itk::ImageFileWriter< IbisItkUnsignedChar3ImageType >::Pointer mincWriter = itk::ImageFileWriter<IbisItkUnsignedChar3ImageType>::New();
             for( int i = 0; i < numberOfFrames && processOK; i++ )
             {
                 QString Number( QString::number( ++sequenceNumber ));
@@ -1204,16 +1006,9 @@ void USAcquisitionObject::ExportTrackedVideoBuffer(QString destDir , bool masked
                 numberedFileName += ".mnc";
                 mincWriter->SetFileName(numberedFileName.toUtf8().data());
 
-                IbisItk3DLabelType::Pointer itkSliceImage;
-
-                itkSliceImage = IbisItk3DLabelType::New();
-                if ( !this->GetItkImage(itkSliceImage, i,  masked,  useCalibratedTransform, relativeToMatrix ) )
-                {
-                    processOK = false;
-                    break;
-                 }
+                IbisItkUnsignedChar3ImageType::Pointer itkSliceImage = IbisItkUnsignedChar3ImageType::New();
+                this->GetItkImage(itkSliceImage, i,  masked,  useCalibratedTransform, relativeToID );
                 mincWriter->SetInput( itkSliceImage );
-
                 try
                 {
                     mincWriter->Update();
@@ -1236,7 +1031,6 @@ void USAcquisitionObject::ExportTrackedVideoBuffer(QString destDir , bool masked
         }
         else
         {
-            this->ConvertVtkImagesToItkRGBImages( masked, useCalibratedTransform, relativeToID );
             itk::ImageFileWriter< IbisRGBImageType >::Pointer mincWriter = itk::ImageFileWriter<IbisRGBImageType>::New();
             for( int i = 0; i < numberOfFrames && processOK; i++ )
             {
@@ -1253,7 +1047,9 @@ void USAcquisitionObject::ExportTrackedVideoBuffer(QString destDir , bool masked
                 numberedFileName += ".mnc";
                 mincWriter->SetFileName(numberedFileName.toUtf8().data());
 
-                mincWriter->SetInput( m_itkRGBImages[i] );
+                IbisRGBImageType::Pointer itkSliceImage = IbisRGBImageType::New();
+                this->GetItkRGBImage(itkSliceImage, i,  masked,  useCalibratedTransform, relativeToID );
+                mincWriter->SetInput( itkSliceImage );
 
                 try
                 {

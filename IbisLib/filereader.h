@@ -20,6 +20,8 @@ class SceneManager;
 class SceneObject;
 class vtkEventQtSlotConnect;
 class vtkObject;
+class vtkImageData;
+class vtkMatrix4x4;
 class ImageObject;
 class PointsObject;
 
@@ -82,7 +84,7 @@ public:
     bool FindMincConverter();
     bool IsMINC1( QString fileName );
     bool ConvertMINC1toMINC2(QString &inputileName, QString &outputileName , bool isVideoFrame = false );
-    bool GetFrameDataFromMINCFile(QString filename, ImageObject *img);
+    bool GetFrameDataFromMINCFile(QString filename, vtkImageData *img , vtkMatrix4x4 *mat );
     bool GetPointsDataFromTagFile( QString filename, PointsObject *pts1, PointsObject *pts2 );
 
 private slots:

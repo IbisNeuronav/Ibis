@@ -62,8 +62,8 @@ void ImageFilterExampleWidget::on_startButton_clicked()
     ImageObject * targetImageObject = ImageObject::SafeDownCast( sm->GetObjectByID( targetImageObjectId ) );
     Q_ASSERT_X( targetImageObject, "ImageFilterExampleWidget::on_startButton_clicked()", "Invalid target object" );
 
-    IbisItk3DImageType::Pointer itkSourceImage = sourceImageObject->GetItkImage();
-    IbisItk3DImageType::Pointer itkTargetImage = targetImageObject->GetItkImage();
+    IbisItkFloat3ImageType::Pointer itkSourceImage = sourceImageObject->GetItkImage();
+    IbisItkFloat3ImageType::Pointer itkTargetImage = targetImageObject->GetItkImage();
 
     //====================================================================================
     // -----------------------     TODO    ---------------------------------------
