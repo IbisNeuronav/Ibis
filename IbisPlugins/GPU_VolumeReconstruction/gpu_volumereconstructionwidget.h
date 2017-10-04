@@ -17,19 +17,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QFutureWatcher>
 
 #include "ui_gpu_volumereconstructionwidget.h"
-#include "application.h"
-#include "scenemanager.h"
-#include "sceneobject.h"
-#include "imageobject.h"
-#include "usacquisitionobject.h"
-#include "vtkTransform.h"
-#include "vtkLinearTransform.h"
-#include "vtkMatrix4x4.h"
 
-#include "vtkImageData.h"
-#include "vtkImageShiftScale.h"
-#include "vtkImageLuminance.h"
-#include "vtkMath.h"
+#include "ibisitkvtkconverter.h"
 #include "vtkSmartPointer.h"
 
 #include "itkGPUVolumeReconstruction.h"
@@ -64,7 +53,6 @@ public:
 private:
 
     void UpdateUi();
-    void VtkToItkImage( vtkImageData * vtkImage, IbisItkFloat3ImageType * itkOutputImage, vtkSmartPointer<vtkMatrix4x4> transformMatrix );
 
     Ui::GPU_VolumeReconstructionWidget * ui;
     Application * m_application;
