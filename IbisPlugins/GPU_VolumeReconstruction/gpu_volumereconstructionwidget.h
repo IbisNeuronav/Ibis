@@ -17,18 +17,10 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QFutureWatcher>
 
 #include "ui_gpu_volumereconstructionwidget.h"
+#include "gpu_volumereconstruction.h"
 
 #include "ibisitkvtkconverter.h"
 #include "vtkSmartPointer.h"
-
-#include "itkGPUVolumeReconstruction.h"
-#include "itkEuler3DTransform.h"
-
-typedef itk::GPUVolumeReconstruction<IbisItkFloat3ImageType>
-                                                    VolumeReconstructionType;
-typedef VolumeReconstructionType::Pointer           VolumeReconstructionPointer;
-
-typedef itk::Euler3DTransform<float>                ItkRigidTransformType;
 
 class Application;
 
@@ -36,7 +28,6 @@ namespace Ui
 {
     class GPU_VolumeReconstructionWidget;
 }
-
 
 class GPU_VolumeReconstructionWidget : public QWidget
 {
@@ -59,6 +50,7 @@ private:
     QFutureWatcher<void>        m_futureWatcher;
     VolumeReconstructionPointer m_Reconstructor;
     QElapsedTimer               m_ReconstructionTimer;
+    GPU_VolumeReconstruction   * m_VolumeReconstructor;
 
 private slots:
 

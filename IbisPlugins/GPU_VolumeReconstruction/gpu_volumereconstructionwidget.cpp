@@ -28,6 +28,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "vtkMatrix4x4.h"
 
 #include "itkImageFileWriter.h"
+#include "ibisitkvtkconverter.h"
 
 GPU_VolumeReconstructionWidget::GPU_VolumeReconstructionWidget(QWidget *parent) :
     QWidget(parent),
@@ -42,12 +43,14 @@ GPU_VolumeReconstructionWidget::GPU_VolumeReconstructionWidget(QWidget *parent) 
     ui->progressBar->hide();
     connect(&this->m_futureWatcher, SIGNAL(finished()), this, SLOT(slot_finished()));
 
+    m_VolumeReconstructor = GPU_VolumeReconstruction::New();
     UpdateUi();
 }
 
 GPU_VolumeReconstructionWidget::~GPU_VolumeReconstructionWidget()
 {
     delete ui;
+    m_VolumeReconstructor->Delete();
 }
 
 void GPU_VolumeReconstructionWidget::SetApplication( Application * app )
@@ -71,7 +74,7 @@ void GPU_VolumeReconstructionWidget::slot_finished()
 
     //Add Reconstructed Volume to Scene
     vtkSmartPointer<ImageObject> reconstructedImage = vtkSmartPointer<ImageObject>::New();
-    reconstructedImage->SetItkImage( m_Reconstructor->GetReconstructedVolume() );
+    reconstructedImage->SetItkImage( m_VolumeReconstructor->GetReconstructor()->GetReconstructedVolume() );
     reconstructedImage->SetName("Reconstructed Volume");
     //reconstructedImage->SetLocalTransform( selectedUSAcquisitionObject->GetLocalTransform() );
 
@@ -88,11 +91,10 @@ void GPU_VolumeReconstructionWidget::slot_finished()
 
     ui->progressBar->hide();
 
-    m_Reconstructor = 0; // Destroy Object.
+
+    m_VolumeReconstructor->DestroyReconstructor();
 }
 
-
-#include "ibisitkvtkconverter.h"
 void GPU_VolumeReconstructionWidget::on_startButton_clicked()
 {
     // Make sure all params have been specified
@@ -145,12 +147,12 @@ void GPU_VolumeReconstructionWidget::on_startButton_clicked()
 #ifdef DEBUG
     std::cerr << "Constructing m_Reconstructor..." << std::endl;
 #endif
-    m_Reconstructor = VolumeReconstructionType::New();
-    m_Reconstructor->SetNumberOfSlices( nbrOfSlices );
-    m_Reconstructor->SetFixedSliceMask( itkSliceMask );
-    m_Reconstructor->SetUSSearchRadius( usSearchRadius );
-    m_Reconstructor->SetVolumeSpacing( usVolumeSpacing );
-    m_Reconstructor->SetKernelStdDev( usVolumeSpacing/2.0 );
+    m_VolumeReconstructor->CreateReconstructor();
+    m_VolumeReconstructor->SetNumberOfSlices( nbrOfSlices );
+    m_VolumeReconstructor->SetFixedSliceMask( itkSliceMask );
+    m_VolumeReconstructor->SetUSSearchRadius( usSearchRadius );
+    m_VolumeReconstructor->SetVolumeSpacing( usVolumeSpacing );
+    m_VolumeReconstructor->SetKernelStdDev( usVolumeSpacing/2.0 );
 
 #ifdef DEBUG
     std::cerr << "Constructing m_Reconstructor...DONE" << std::endl;
@@ -165,7 +167,7 @@ void GPU_VolumeReconstructionWidget::on_startButton_clicked()
       itkSliceImage[i] = IbisItkFloat3ImageType::New();
       selectedUSAcquisitionObject->GetFrameData( i, slice.GetPointer(), sliceTransformMatrix.GetPointer() );
       if( converter->ConvertVtkImageToItkImage( itkSliceImage[i], slice.GetPointer(), sliceTransformMatrix.GetPointer() ) )
-          m_Reconstructor->SetFixedSlice(i, itkSliceImage[i]);
+          m_VolumeReconstructor->SetFixedSlice(i, itkSliceImage[i]);
     }
 
      //Construct ITK Matrix corresponding to VTK Local Matrix
@@ -221,13 +223,12 @@ void GPU_VolumeReconstructionWidget::on_startButton_clicked()
     itkTransform->SetCenter(center);
     itkTransform->SetParameters(params);
 
-
-    m_Reconstructor->SetTransform( itkTransform );
+    m_VolumeReconstructor->SetTransform( itkTransform );
 #ifdef DEBUG
     std::cerr << "Starting reconstruction..." << std::endl;
 #endif   
 
-    QFuture<void> future = QtConcurrent::run(m_Reconstructor.GetPointer(), &VolumeReconstructionType::ReconstructVolume);
+    QFuture<void> future = QtConcurrent::run(m_VolumeReconstructor->GetReconstructor().GetPointer(), &VolumeReconstructionType::ReconstructVolume);
     this->m_futureWatcher.setFuture(future);
 
 }

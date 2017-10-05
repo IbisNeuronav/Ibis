@@ -35,6 +35,9 @@ public:
 
     QWidget * CreateFloatingWidget();
 
+protected:
+
+    GPU_VolumeReconstructionWidget * m_volumeReconstructionWidget;
 };
 
 #endif

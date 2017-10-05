@@ -2,8 +2,10 @@
 set( PluginSrc
         gpu_volumereconstructionplugininterface.cpp
         gpu_volumereconstructionwidget.cpp
+        gpu_volumereconstruction.cpp
         FutureWatcher.cpp
 )
+set( PluginHdr gpu_volumereconstructionwidget.h gpu_volumereconstruction.h gpu_volumereconstructionplugininterface.h )
 set( PluginHdrMoc gpu_volumereconstructionwidget.h gpu_volumereconstructionplugininterface.h )
 set( PluginUi gpu_volumereconstructionwidget.ui )
 

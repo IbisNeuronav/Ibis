@@ -18,6 +18,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 GPU_VolumeReconstructionPluginInterface::GPU_VolumeReconstructionPluginInterface()
 {
+    m_volumeReconstructionWidget = 0;
 }
 
 GPU_VolumeReconstructionPluginInterface::~GPU_VolumeReconstructionPluginInterface()
@@ -33,6 +34,7 @@ QWidget * GPU_VolumeReconstructionPluginInterface::CreateFloatingWidget()
 {
     GPU_VolumeReconstructionWidget * widget = new GPU_VolumeReconstructionWidget;
     widget->SetApplication( GetApplication() );
+    widget->setAttribute( Qt::WA_DeleteOnClose, true );
     return widget;
 }
 
