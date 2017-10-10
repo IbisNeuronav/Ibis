@@ -1,6 +1,7 @@
 #ifndef GPU_VOLUMERECONSTRUCTION_H
 #define GPU_VOLUMERECONSTRUCTION_H
 
+#include <QThread>
 #include "vtkObject.h"
 #include "imageobject.h"
 #include "vtkSmartPointer.h"
@@ -16,8 +17,10 @@ typedef itk::GPUVolumeReconstruction<IbisItkFloat3ImageType>
                                                     VolumeReconstructionType;
 typedef VolumeReconstructionType::Pointer           VolumeReconstructionPointer;
 
-class GPU_VolumeReconstruction : public vtkObject
+class GPU_VolumeReconstruction : public QThread, public vtkObject
 {
+    Q_OBJECT
+
 public:
 
     static GPU_VolumeReconstruction * New() { return new GPU_VolumeReconstruction; }
@@ -29,7 +32,7 @@ public:
     void CreateReconstructor();
     void DestroyReconstructor();
 
-    VolumeReconstructionPointer GetReconstructor() { return m_VolReconstructor; }
+    IbisItkFloat3ImageType::Pointer GetReconstructedImage() { return m_reconstructedImage; }
     void SetNumberOfSlices( unsigned int nbrOfSlices );
     void SetFixedSliceMask( IbisItkFloat3ImageType::Pointer itkSliceMask );
     void SetUSSearchRadius( unsigned int usSearchRadius );
@@ -38,9 +41,12 @@ public:
     void SetFixedSlice( unsigned int index, IbisItkFloat3ImageType::Pointer itkSliceImage );
     void SetTransform( ItkRigidTransformType::Pointer itkTransform );
 
+
 protected:
 
+    void run();
     VolumeReconstructionPointer m_VolReconstructor;
+    IbisItkFloat3ImageType::Pointer m_reconstructedImage;
 
 };
 

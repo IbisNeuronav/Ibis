@@ -41,7 +41,6 @@ GPU_VolumeReconstructionWidget::GPU_VolumeReconstructionWidget(QWidget *parent) 
     ui->progressBar->setMinimum(0);
     ui->progressBar->setMaximum(0);
     ui->progressBar->hide();
-    connect(&this->m_futureWatcher, SIGNAL(finished()), this, SLOT(slot_finished()));
 
     m_VolumeReconstructor = GPU_VolumeReconstruction::New();
     UpdateUi();
@@ -59,8 +58,7 @@ void GPU_VolumeReconstructionWidget::SetApplication( Application * app )
     UpdateUi();
 }
 
-
-void GPU_VolumeReconstructionWidget::slot_finished()
+void GPU_VolumeReconstructionWidget::FinishReconstruction()
 {
     int usAcquisitionObjectId = ui->usAcquisitionComboBox->itemData( ui->usAcquisitionComboBox->currentIndex() ).toInt();
 
@@ -74,9 +72,8 @@ void GPU_VolumeReconstructionWidget::slot_finished()
 
     //Add Reconstructed Volume to Scene
     vtkSmartPointer<ImageObject> reconstructedImage = vtkSmartPointer<ImageObject>::New();
-    reconstructedImage->SetItkImage( m_VolumeReconstructor->GetReconstructor()->GetReconstructedVolume() );
+    reconstructedImage->SetItkImage( m_VolumeReconstructor->GetReconstructedImage() );
     reconstructedImage->SetName("Reconstructed Volume");
-    //reconstructedImage->SetLocalTransform( selectedUSAcquisitionObject->GetLocalTransform() );
 
     sm->AddObject(reconstructedImage, selectedUSAcquisitionObject->GetParent()->GetParent() );
     sm->SetCurrentObject( reconstructedImage );
@@ -228,9 +225,9 @@ void GPU_VolumeReconstructionWidget::on_startButton_clicked()
     std::cerr << "Starting reconstruction..." << std::endl;
 #endif   
 
-    QFuture<void> future = QtConcurrent::run(m_VolumeReconstructor->GetReconstructor().GetPointer(), &VolumeReconstructionType::ReconstructVolume);
-    this->m_futureWatcher.setFuture(future);
-
+    m_VolumeReconstructor->start();
+    m_VolumeReconstructor->wait();
+    this->FinishReconstruction();
 }
 
 void GPU_VolumeReconstructionWidget::UpdateUi()

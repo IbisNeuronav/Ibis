@@ -1,3 +1,4 @@
+#include <QApplication>
 #include "gpu_volumereconstruction.h"
 #include "scenemanager.h"
 #include "sceneobject.h"
@@ -66,4 +67,10 @@ void GPU_VolumeReconstruction::SetFixedSlice( unsigned int index, IbisItkFloat3I
 void GPU_VolumeReconstruction::SetTransform( ItkRigidTransformType::Pointer itkTransform )
 {
     m_VolReconstructor->SetTransform( itkTransform );
+}
+
+void GPU_VolumeReconstruction::run()
+{
+    m_VolReconstructor->ReconstructVolume();
+    m_reconstructedImage = m_VolReconstructor->GetReconstructedVolume();
 }
