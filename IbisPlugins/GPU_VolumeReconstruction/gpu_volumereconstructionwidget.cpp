@@ -14,7 +14,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QComboBox>
 #include <QMessageBox>
 #include <QApplication>
-#include <QtConcurrent/QtConcurrent>
 #include "vnl/algo/vnl_symmetric_eigensystem.h"
 #include "vnl/algo/vnl_real_eigensystem.h"
 

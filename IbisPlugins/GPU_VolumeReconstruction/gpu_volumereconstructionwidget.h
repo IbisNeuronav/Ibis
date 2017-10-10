@@ -53,7 +53,6 @@ private:
 private slots:
 
     void on_startButton_clicked();
-
 };
 
 #endif

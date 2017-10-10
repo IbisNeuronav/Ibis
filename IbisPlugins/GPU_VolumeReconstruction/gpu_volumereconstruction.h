@@ -41,13 +41,11 @@ public:
     void SetFixedSlice( unsigned int index, IbisItkFloat3ImageType::Pointer itkSliceImage );
     void SetTransform( ItkRigidTransformType::Pointer itkTransform );
 
-
 protected:
 
     void run();
     VolumeReconstructionPointer m_VolReconstructor;
     IbisItkFloat3ImageType::Pointer m_reconstructedImage;
-
 };
 
 #endif // GPU_VOLUMERECONSTRUCTION_H
