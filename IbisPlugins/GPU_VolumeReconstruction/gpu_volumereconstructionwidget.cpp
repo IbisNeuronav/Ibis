@@ -14,6 +14,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QComboBox>
 #include <QMessageBox>
 #include <QApplication>
+#include <QProgressBar>
 #include "vnl/algo/vnl_symmetric_eigensystem.h"
 #include "vnl/algo/vnl_real_eigensystem.h"
 
@@ -27,7 +28,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "vtkMatrix4x4.h"
 
 #include "itkImageFileWriter.h"
-#include "ibisitkvtkconverter.h"
 
 GPU_VolumeReconstructionWidget::GPU_VolumeReconstructionWidget(QWidget *parent) :
     QWidget(parent),
@@ -36,10 +36,6 @@ GPU_VolumeReconstructionWidget::GPU_VolumeReconstructionWidget(QWidget *parent) 
 {
     ui->setupUi(this);    
     setWindowTitle( "US Volume Reconstruction with GPU" );
-
-    ui->progressBar->setMinimum(0);
-    ui->progressBar->setMaximum(0);
-    ui->progressBar->hide();
 
     m_VolumeReconstructor = GPU_VolumeReconstruction::New();
     UpdateUi();
@@ -85,9 +81,6 @@ void GPU_VolumeReconstructionWidget::FinishReconstruction()
     QString feedbackString = QString("Volume Reconstruction finished in %1 secs").arg(qreal(reconstructionTime)/1000.0);
     ui->userFeedbackLabel->setText(feedbackString);
 
-    ui->progressBar->hide();
-
-
     m_VolumeReconstructor->DestroyReconstructor();
 }
 
@@ -119,8 +112,11 @@ void GPU_VolumeReconstructionWidget::on_startButton_clicked()
         return;
     }
 
-    ui->progressBar->show();
-    ui->progressBar->repaint();
+    QProgressBar *progress = new QProgressBar(this);
+    progress->setMaximum(0);
+    progress->setMinimum(0);
+    ui->verticalLayout->addWidget( progress );
+    progress->show();
     ui->userFeedbackLabel->setText(QString("Processing..(patience is a virtue)"));
     ui->userFeedbackLabel->repaint();
     QApplication::flush();
@@ -135,17 +131,12 @@ void GPU_VolumeReconstructionWidget::on_startButton_clicked()
     std::cerr << "US Acquisition Object with " << nbrOfSlices << " slices." << std::endl;
 #endif    
 
-    IbisItkFloat3ImageType::Pointer itkSliceMask = IbisItkFloat3ImageType::New();
-    vtkSmartPointer<vtkMatrix4x4> sliceMaskMatrix = vtkSmartPointer<vtkMatrix4x4>::New();
-    vtkSmartPointer<IbisItkVtkConverter> converter = vtkSmartPointer<IbisItkVtkConverter>::New();
-    converter->ConvertVtkImageToItkImage( itkSliceMask, selectedUSAcquisitionObject->GetMask(), sliceMaskMatrix.GetPointer());
-
 #ifdef DEBUG
     std::cerr << "Constructing m_Reconstructor..." << std::endl;
 #endif
     m_VolumeReconstructor->CreateReconstructor();
     m_VolumeReconstructor->SetNumberOfSlices( nbrOfSlices );
-    m_VolumeReconstructor->SetFixedSliceMask( itkSliceMask );
+    m_VolumeReconstructor->SetFixedSliceMask( selectedUSAcquisitionObject->GetMask() );
     m_VolumeReconstructor->SetUSSearchRadius( usSearchRadius );
     m_VolumeReconstructor->SetVolumeSpacing( usVolumeSpacing );
     m_VolumeReconstructor->SetKernelStdDev( usVolumeSpacing/2.0 );
@@ -154,72 +145,16 @@ void GPU_VolumeReconstructionWidget::on_startButton_clicked()
     std::cerr << "Constructing m_Reconstructor...DONE" << std::endl;
 #endif
 
-    IbisItkFloat3ImageType::Pointer itkSliceImage[nbrOfSlices];
-
     vtkSmartPointer<vtkMatrix4x4> sliceTransformMatrix = vtkSmartPointer<vtkMatrix4x4>::New() ;
     vtkSmartPointer<vtkImageData> slice = vtkSmartPointer<vtkImageData>::New();
     for(unsigned int i=0; i<nbrOfSlices; i++)
     {
-      itkSliceImage[i] = IbisItkFloat3ImageType::New();
       selectedUSAcquisitionObject->GetFrameData( i, slice.GetPointer(), sliceTransformMatrix.GetPointer() );
-      if( converter->ConvertVtkImageToItkImage( itkSliceImage[i], slice.GetPointer(), sliceTransformMatrix.GetPointer() ) )
-          m_VolumeReconstructor->SetFixedSlice(i, itkSliceImage[i]);
+      m_VolumeReconstructor->SetFixedSlice(i, slice.GetPointer(), sliceTransformMatrix.GetPointer() );
     }
 
      //Construct ITK Matrix corresponding to VTK Local Matrix
-    vtkMatrix4x4 * localMatrix =  selectedUSAcquisitionObject->GetLocalTransform()->GetMatrix();
-    ItkRigidTransformType::Pointer itkTransform = ItkRigidTransformType::New();
-    ItkRigidTransformType::OffsetType offset;
-    vnl_matrix<double> M(3,3);
-    for(unsigned int i=0; i<3; i++ )
-     {
-     for(unsigned int j=0; j<3; j++ )
-       {
-        M[i][j] = localMatrix->GetElement(i,j);
-       }
-      offset[i] = localMatrix->GetElement(i,3);
-      }
-
-    double angleX, angleY, angleZ;
-    angleX = vcl_asin(M[2][1]);
-    double A = vcl_cos(angleX);
-    if( vcl_fabs(A) > 0.00005 )
-      {
-      double x = M[2][2] / A;
-      double y = -M[2][0] / A;
-      angleY = vcl_atan2(y, x);
-
-      x = M[1][1] / A;
-      y = -M[0][1] / A;
-      angleZ = vcl_atan2(y, x);
-      }
-    else
-      {
-      angleZ = 0;
-      double x = M[0][0];
-      double y = M[1][0];
-      angleY = vcl_atan2(y, x);
-      }
-
-    ItkRigidTransformType::ParametersType params = ItkRigidTransformType::ParametersType(6);
-    params[0] = angleX; params[1] = angleY; params[2] = angleZ;
-
-    ItkRigidTransformType::CenterType center;
-    center.Fill(0.0);
-
-    for( unsigned int i = 0; i < 3; i++ )
-      {
-      params[i+3] = offset[i] - center[i];
-      for( unsigned int j = 0; j < 3; j++ )
-        {
-        params[i+3] += M[i][j] * center[j];
-        }
-      }
-
-    itkTransform->SetCenter(center);
-    itkTransform->SetParameters(params);
-
-    m_VolumeReconstructor->SetTransform( itkTransform );
+    m_VolumeReconstructor->SetTransform( selectedUSAcquisitionObject->GetLocalTransform()->GetMatrix() );
 #ifdef DEBUG
     std::cerr << "Starting reconstruction..." << std::endl;
 #endif   
@@ -227,6 +162,7 @@ void GPU_VolumeReconstructionWidget::on_startButton_clicked()
     m_VolumeReconstructor->start();
     m_VolumeReconstructor->wait();
     this->FinishReconstruction();
+    delete progress;
 }
 
 void GPU_VolumeReconstructionWidget::UpdateUi()

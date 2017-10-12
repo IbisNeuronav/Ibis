@@ -34,12 +34,12 @@ public:
 
     IbisItkFloat3ImageType::Pointer GetReconstructedImage() { return m_reconstructedImage; }
     void SetNumberOfSlices( unsigned int nbrOfSlices );
-    void SetFixedSliceMask( IbisItkFloat3ImageType::Pointer itkSliceMask );
+    void SetFixedSliceMask( vtkImageData *mask );
     void SetUSSearchRadius( unsigned int usSearchRadius );
     void SetVolumeSpacing( float usVolumeSpacing );
     void SetKernelStdDev( float stdDev );
-    void SetFixedSlice( unsigned int index, IbisItkFloat3ImageType::Pointer itkSliceImage );
-    void SetTransform( ItkRigidTransformType::Pointer itkTransform );
+    void SetFixedSlice( int index, vtkImageData *slice, vtkMatrix4x4 *sliceTransformMatrix );
+    void SetTransform( vtkMatrix4x4 *transformMatrix );
 
 protected:
 

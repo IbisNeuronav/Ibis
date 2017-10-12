@@ -31,6 +31,8 @@ class vtkAlgorithmOutput;
 class vtkTransform;
 class vtkImageStack;
 
+//#define TEST
+
 class DoubleViewWidget : public QWidget
 {
     Q_OBJECT
@@ -54,6 +56,10 @@ private slots:
     void UpdateUi();
     void UpdateCurrentFrameUi();
     void UpdateViews();
+
+#ifdef TEST
+    void on_volumeButton_clicked();
+#endif
 
     void on_blendCheckBox_toggled(bool checked);
     void on_opacitySlider_1_valueChanged(int value);

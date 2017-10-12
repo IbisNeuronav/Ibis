@@ -503,6 +503,13 @@
       </widget>
      </item>
      <item>
+      <widget class="QPushButton" name="volumeButton">
+       <property name="text">
+        <string>Volume</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <spacer name="horizontalSpacer_4">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
