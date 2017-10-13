@@ -320,7 +320,10 @@ void Application::InitHardware()
     // Init hardware
     bool success = false;
     foreach( HardwareModule * module, m_hardwareModules )
+    {
+        module->SetApplication( this );
         success |= module->Init();
+    }
 
     if( m_hardwareModules.size() > 0 )
     {
