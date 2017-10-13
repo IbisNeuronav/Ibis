@@ -10,6 +10,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 // Thanks to Dante De Nigris for writing this class
 
+#include "gpu_volumereconstructionplugininterface.h"
 #include "gpu_volumereconstructionwidget.h"
 #include <QComboBox>
 #include <QMessageBox>
@@ -32,12 +33,17 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 GPU_VolumeReconstructionWidget::GPU_VolumeReconstructionWidget(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::GPU_VolumeReconstructionWidget),
-    m_application(0)
+    m_pluginInterface(0)
 {
     ui->setupUi(this);    
     setWindowTitle( "US Volume Reconstruction with GPU" );
 
     m_VolumeReconstructor = GPU_VolumeReconstruction::New();
+}
+
+void GPU_VolumeReconstructionWidget::SetPluginInterface( GPU_VolumeReconstructionPluginInterface *ifc )
+{
+    m_pluginInterface = ifc;
     UpdateUi();
 }
 
@@ -47,17 +53,11 @@ GPU_VolumeReconstructionWidget::~GPU_VolumeReconstructionWidget()
     m_VolumeReconstructor->Delete();
 }
 
-void GPU_VolumeReconstructionWidget::SetApplication( Application * app )
-{
-    m_application = app;
-    UpdateUi();
-}
-
 void GPU_VolumeReconstructionWidget::FinishReconstruction()
 {
     int usAcquisitionObjectId = ui->usAcquisitionComboBox->itemData( ui->usAcquisitionComboBox->currentIndex() ).toInt();
 
-    SceneManager * sm = m_application->GetSceneManager();
+    SceneManager * sm = m_pluginInterface->GetSceneManager();
 
     // Get US Acquisition Object
     USAcquisitionObject * selectedUSAcquisitionObject = USAcquisitionObject::SafeDownCast( sm->GetObjectByID( usAcquisitionObjectId) );
@@ -95,7 +95,7 @@ void GPU_VolumeReconstructionWidget::on_startButton_clicked()
         return;
     }
 
-    SceneManager * sm = m_application->GetSceneManager();
+    SceneManager * sm = m_pluginInterface->GetSceneManager();
     // Get US Acquisition Object
     USAcquisitionObject * selectedUSAcquisitionObject = USAcquisitionObject::SafeDownCast( sm->GetObjectByID( usAcquisitionObjectId) );
     Q_ASSERT_X( selectedUSAcquisitionObject, "GPU_VolumeReconstructionWidget::on_startButton_clicked()", "Invalid target US object" );
@@ -171,35 +171,31 @@ void GPU_VolumeReconstructionWidget::UpdateUi()
   ui->usAcquisitionComboBox->clear();
   ui->usSearchRadiusComboBox->clear();
   ui->usVolumeSpacingComboBox->clear();
-  if( m_application )
+  SceneManager * sm = m_pluginInterface->GetSceneManager();
+  const SceneManager::ObjectList & allObjects = sm->GetAllObjects();
+  for( int i = 0; i < allObjects.size(); ++i )
     {
-      SceneManager * sm = m_application->GetSceneManager();
-      const SceneManager::ObjectList & allObjects = sm->GetAllObjects();
-      for( int i = 0; i < allObjects.size(); ++i )
+      SceneObject * current = allObjects[i];
+      if( current != sm->GetSceneRoot() && current->IsListable() && !current->IsManagedByTracker())
         {
-          SceneObject * current = allObjects[i];
-          if( current != sm->GetSceneRoot() && current->IsListable() && !current->IsManagedByTracker())
+          if( current->IsA("USAcquisitionObject") )
             {
-              if( current->IsA("USAcquisitionObject") )
-                {
-                  USAcquisitionObject * currentUSAcquisitionObject = USAcquisitionObject::SafeDownCast( current );
-                  ui->usAcquisitionComboBox->addItem( current->GetName(), QVariant( current->GetObjectID() ) );
-                }
+              USAcquisitionObject * currentUSAcquisitionObject = USAcquisitionObject::SafeDownCast( current );
+              ui->usAcquisitionComboBox->addItem( current->GetName(), QVariant( current->GetObjectID() ) );
             }
         }
-
-      if( ui->usAcquisitionComboBox->count() == 0 )
-        {
-          ui->usAcquisitionComboBox->addItem( "None", QVariant(-1) );
-        }
-
-      for(unsigned int i=0; i <=3 ; i++)
-        {
-          ui->usSearchRadiusComboBox->addItem( QString::number(i) , QVariant(i) );
-        }
-
-      ui->usVolumeSpacingComboBox->addItem( QString("1.0 mm x 1.0 mm x 1.0 mm"), QVariant( 1.0 ) );
-      ui->usVolumeSpacingComboBox->addItem( QString("0.5 mm x 0.5 mm x 0.5 mm"), QVariant( 0.5 ) );
     }
 
+  if( ui->usAcquisitionComboBox->count() == 0 )
+    {
+      ui->usAcquisitionComboBox->addItem( "None", QVariant(-1) );
+    }
+
+  for(unsigned int i=0; i <=3 ; i++)
+    {
+      ui->usSearchRadiusComboBox->addItem( QString::number(i) , QVariant(i) );
+    }
+
+  ui->usVolumeSpacingComboBox->addItem( QString("1.0 mm x 1.0 mm x 1.0 mm"), QVariant( 1.0 ) );
+  ui->usVolumeSpacingComboBox->addItem( QString("0.5 mm x 0.5 mm x 0.5 mm"), QVariant( 0.5 ) );
 }

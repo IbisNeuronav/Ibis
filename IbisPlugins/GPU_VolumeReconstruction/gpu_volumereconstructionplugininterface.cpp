@@ -12,7 +12,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include "gpu_volumereconstructionplugininterface.h"
 #include "gpu_volumereconstructionwidget.h"
-#include "application.h"
 #include <QtPlugin>
 
 
@@ -33,7 +32,7 @@ bool GPU_VolumeReconstructionPluginInterface::CanRun()
 QWidget * GPU_VolumeReconstructionPluginInterface::CreateFloatingWidget()
 {
     GPU_VolumeReconstructionWidget * widget = new GPU_VolumeReconstructionWidget;
-    widget->SetApplication( GetApplication() );
+    widget->SetPluginInterface( this );
     widget->setAttribute( Qt::WA_DeleteOnClose, true );
     return widget;
 }

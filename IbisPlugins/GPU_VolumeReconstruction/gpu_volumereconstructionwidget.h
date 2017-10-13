@@ -21,7 +21,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "ibisitkvtkconverter.h"
 #include "vtkSmartPointer.h"
 
-class Application;
+class GPU_VolumeReconstructionPluginInterface;
 
 namespace Ui
 {
@@ -38,7 +38,7 @@ public:
     explicit GPU_VolumeReconstructionWidget(QWidget *parent = 0);
     ~GPU_VolumeReconstructionWidget();
 
-    void SetApplication( Application * app );
+    void SetPluginInterface( GPU_VolumeReconstructionPluginInterface *ifc );
 
 private:
 
@@ -46,9 +46,9 @@ private:
     void FinishReconstruction();
 
     Ui::GPU_VolumeReconstructionWidget * ui;
-    Application * m_application;
     QElapsedTimer               m_ReconstructionTimer;
     GPU_VolumeReconstruction   * m_VolumeReconstructor;
+    GPU_VolumeReconstructionPluginInterface *m_pluginInterface;
 
 private slots:
 
