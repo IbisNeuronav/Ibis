@@ -58,10 +58,6 @@ public:
     virtual bool IsCalibratingTip( PointerObject * p ) = 0;
     virtual void StopTipCalibration( PointerObject * p ) = 0;
 
-protected:
-
-    Application * m_application;
-
 };
 
 #endif
