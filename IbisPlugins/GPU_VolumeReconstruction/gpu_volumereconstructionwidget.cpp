@@ -16,6 +16,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QMessageBox>
 #include <QApplication>
 #include <QProgressBar>
+#include <QTimer>
 #include "vnl/algo/vnl_symmetric_eigensystem.h"
 #include "vnl/algo/vnl_real_eigensystem.h"
 
@@ -37,6 +38,10 @@ GPU_VolumeReconstructionWidget::GPU_VolumeReconstructionWidget(QWidget *parent) 
 {
     ui->setupUi(this);    
     setWindowTitle( "US Volume Reconstruction with GPU" );
+
+    ui->progressBar->setMinimum(0);
+    ui->progressBar->setMaximum(0);
+    ui->progressBar->hide();
 
     m_VolumeReconstructor = GPU_VolumeReconstruction::New();
 }
@@ -82,6 +87,7 @@ void GPU_VolumeReconstructionWidget::FinishReconstruction()
     ui->userFeedbackLabel->setText(feedbackString);
 
     m_VolumeReconstructor->DestroyReconstructor();
+    ui->progressBar->hide();
 }
 
 void GPU_VolumeReconstructionWidget::on_startButton_clicked()
@@ -112,11 +118,8 @@ void GPU_VolumeReconstructionWidget::on_startButton_clicked()
         return;
     }
 
-    QProgressBar *progress = new QProgressBar(this);
-    progress->setMaximum(0);
-    progress->setMinimum(0);
-    ui->verticalLayout->addWidget( progress );
-    progress->show();
+    ui->progressBar->show();
+    ui->progressBar->repaint();
     ui->userFeedbackLabel->setText(QString("Processing..(patience is a virtue)"));
     ui->userFeedbackLabel->repaint();
     QApplication::flush();
@@ -124,6 +127,9 @@ void GPU_VolumeReconstructionWidget::on_startButton_clicked()
     unsigned int usSearchRadius = ui->usSearchRadiusComboBox->itemData( ui->usSearchRadiusComboBox->currentIndex() ).toInt();
     float usVolumeSpacing = ui->usVolumeSpacingComboBox->itemData( ui->usVolumeSpacingComboBox->currentIndex() ).toFloat();
 
+    QTimer *progressTimer = new QTimer( this );
+    connect( progressTimer, SIGNAL(timeout()), SLOT(UpdateProgress()) );
+    progressTimer->start( 100 );
     m_ReconstructionTimer.start();
 
 #ifdef DEBUG
@@ -162,7 +168,8 @@ void GPU_VolumeReconstructionWidget::on_startButton_clicked()
     m_VolumeReconstructor->start();
     m_VolumeReconstructor->wait();
     this->FinishReconstruction();
-    delete progress;
+    progressTimer->stop();
+    delete progressTimer;
 }
 
 void GPU_VolumeReconstructionWidget::UpdateUi()
@@ -198,4 +205,9 @@ void GPU_VolumeReconstructionWidget::UpdateUi()
 
   ui->usVolumeSpacingComboBox->addItem( QString("1.0 mm x 1.0 mm x 1.0 mm"), QVariant( 1.0 ) );
   ui->usVolumeSpacingComboBox->addItem( QString("0.5 mm x 0.5 mm x 0.5 mm"), QVariant( 0.5 ) );
+}
+
+void GPU_VolumeReconstructionWidget::UpdateProgress()
+{
+    QApplication::processEvents();
 }

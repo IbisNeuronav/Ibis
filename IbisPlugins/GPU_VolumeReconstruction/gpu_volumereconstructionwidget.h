@@ -53,6 +53,7 @@ private:
 private slots:
 
     void on_startButton_clicked();
+    void UpdateProgress();
 };
 
 #endif
