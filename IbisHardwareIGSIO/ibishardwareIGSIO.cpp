@@ -43,12 +43,11 @@ void IbisHardwareIGSIO::AddSettingsMenuEntries( QMenu * menu )
     menu->addAction( tr("&IGSIO Settings"), this, SLOT( OpenSettingsWidget() ) );
 }
 
-bool IbisHardwareIGSIO::Init()
+void IbisHardwareIGSIO::Init()
 {
     m_logicController = new qIGTLIOLogicController;
     m_logic = vtkSmartPointer<igtlio::Logic>::New();
     m_logicController->setLogic( m_logic );
-    return true;
 }
 
 void IbisHardwareIGSIO::Update()

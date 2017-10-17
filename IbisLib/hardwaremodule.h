@@ -37,7 +37,7 @@ public:
     virtual IbisPluginTypes GetPluginType() { return IbisPluginTypeHardwareModule; }
 
     virtual void AddSettingsMenuEntries( QMenu * menu ) {}
-    virtual bool Init() = 0;
+    virtual void Init() = 0;
     virtual void Update() = 0;
     virtual bool ShutDown() = 0;
 

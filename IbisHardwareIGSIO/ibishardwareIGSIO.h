@@ -42,7 +42,7 @@ public:
 
     // Implementation of the HardwareModule interface
     virtual void AddSettingsMenuEntries( QMenu * menu );
-    virtual bool Init();
+    virtual void Init();
     virtual void Update();
     virtual bool ShutDown();
 
