@@ -46,7 +46,7 @@ void IbisHardwareModule::AddSettingsMenuEntries( QMenu * menu )
 }
 
 // Implementation of the HardwareModule interface
-bool IbisHardwareModule::Init()
+void IbisHardwareModule::Init()
 {
     // Create the tracker if it doesn't exist. Otherwise, make sure tracking is stopped
     m_tracker->SetSceneManager( GetSceneManager() );
@@ -57,14 +57,9 @@ bool IbisHardwareModule::Init()
 
     // Init tracker
     m_tracker->Initialize();
-    if( !m_tracker->IsInitialized() )
-        return false;
 
     // Init video
-    if( !m_trackedVideoSource->InitializeVideo() )
-        return false;
-
-    return true;
+    m_trackedVideoSource->InitializeVideo();
 }
 
 void IbisHardwareModule::Update()

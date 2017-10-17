@@ -318,9 +318,8 @@ void Application::InitHardware()
     m_updateManager->Stop();
 
     // Init hardware
-    bool success = false;
     foreach( HardwareModule * module, m_hardwareModules )
-        success |= module->Init();
+        module->Init();
 
     if( m_hardwareModules.size() > 0 )
     {
