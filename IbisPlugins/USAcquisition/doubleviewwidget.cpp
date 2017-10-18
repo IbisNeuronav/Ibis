@@ -689,8 +689,7 @@ void DoubleViewWidget::on_volumeButton_clicked()
 
      //Construct ITK Matrix corresponding to VTK Local Matrix
     reconstructor->SetTransform( acq->GetLocalTransform()->GetMatrix() );
-    reconstructor->start();
-    reconstructor->wait();
+    reconstructor->ReconstructVolume();
 
     vtkSmartPointer<ImageObject> reconstructedImage = vtkSmartPointer<ImageObject>::New();
     reconstructedImage->SetItkImage( reconstructor->GetReconstructedImage() );

@@ -5,7 +5,7 @@ set( PluginSrc
         gpu_volumereconstruction.cpp
 )
 set( PluginHdr gpu_volumereconstructionwidget.h gpu_volumereconstruction.h gpu_volumereconstructionplugininterface.h )
-set( PluginHdrMoc gpu_volumereconstruction.h gpu_volumereconstructionwidget.h gpu_volumereconstructionplugininterface.h )
+set( PluginHdrMoc gpu_volumereconstructionwidget.h gpu_volumereconstructionplugininterface.h )
 set( PluginUi gpu_volumereconstructionwidget.ui )
 
 IF( NOT OPENCL_FOUND )

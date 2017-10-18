@@ -1,4 +1,3 @@
-#include <QApplication>
 #include "gpu_volumereconstruction.h"
 #include "ibisitkvtkconverter.h"
 #include "scenemanager.h"
@@ -129,7 +128,7 @@ void GPU_VolumeReconstruction::SetTransform( vtkMatrix4x4 *transformMatrix )
     m_VolReconstructor->SetTransform( itkTransform );
 }
 
-void GPU_VolumeReconstruction::run()
+void GPU_VolumeReconstruction::ReconstructVolume()
 {
     m_VolReconstructor->ReconstructVolume();
     m_reconstructedImage = m_VolReconstructor->GetReconstructedVolume();

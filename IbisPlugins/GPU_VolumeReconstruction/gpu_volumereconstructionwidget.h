@@ -14,6 +14,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #define __GPU_VolumeReconstructionWidget_h_
 #include <QWidget>
 #include <QtGui>
+#include <QFutureWatcher>
 
 #include "ui_gpu_volumereconstructionwidget.h"
 #include "gpu_volumereconstruction.h"
@@ -43,9 +44,10 @@ public:
 private:
 
     void UpdateUi();
-    void FinishReconstruction();
 
     Ui::GPU_VolumeReconstructionWidget * ui;
+    QFutureWatcher<void>        m_futureWatcher;
+    VolumeReconstructionPointer m_Reconstructor;
     QElapsedTimer               m_ReconstructionTimer;
     GPU_VolumeReconstruction   * m_VolumeReconstructor;
     GPU_VolumeReconstructionPluginInterface *m_pluginInterface;
@@ -53,7 +55,8 @@ private:
 private slots:
 
     void on_startButton_clicked();
-    void UpdateProgress();
+    void slot_finished();
+
 };
 
 #endif

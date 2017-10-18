@@ -14,9 +14,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "gpu_volumereconstructionwidget.h"
 #include <QComboBox>
 #include <QMessageBox>
-#include <QApplication>
-#include <QProgressBar>
-#include <QTimer>
+#include <QtConcurrent/QtConcurrent>
 #include "vnl/algo/vnl_symmetric_eigensystem.h"
 #include "vnl/algo/vnl_real_eigensystem.h"
 
@@ -42,6 +40,7 @@ GPU_VolumeReconstructionWidget::GPU_VolumeReconstructionWidget(QWidget *parent) 
     ui->progressBar->setMinimum(0);
     ui->progressBar->setMaximum(0);
     ui->progressBar->hide();
+    connect(&this->m_futureWatcher, SIGNAL(finished()), this, SLOT(slot_finished()));
 
     m_VolumeReconstructor = GPU_VolumeReconstruction::New();
 }
@@ -58,7 +57,7 @@ GPU_VolumeReconstructionWidget::~GPU_VolumeReconstructionWidget()
     m_VolumeReconstructor->Delete();
 }
 
-void GPU_VolumeReconstructionWidget::FinishReconstruction()
+void GPU_VolumeReconstructionWidget::slot_finished()
 {
     int usAcquisitionObjectId = ui->usAcquisitionComboBox->itemData( ui->usAcquisitionComboBox->currentIndex() ).toInt();
 
@@ -72,7 +71,7 @@ void GPU_VolumeReconstructionWidget::FinishReconstruction()
 
     //Add Reconstructed Volume to Scene
     vtkSmartPointer<ImageObject> reconstructedImage = vtkSmartPointer<ImageObject>::New();
-    reconstructedImage->SetItkImage( m_VolumeReconstructor->GetReconstructedImage() );
+    reconstructedImage->SetItkImage( m_VolumeReconstructor->GetReconstructor()->GetReconstructedVolume() );
     reconstructedImage->SetName("Reconstructed Volume");
 
     sm->AddObject(reconstructedImage, selectedUSAcquisitionObject->GetParent()->GetParent() );
@@ -86,8 +85,9 @@ void GPU_VolumeReconstructionWidget::FinishReconstruction()
     QString feedbackString = QString("Volume Reconstruction finished in %1 secs").arg(qreal(reconstructionTime)/1000.0);
     ui->userFeedbackLabel->setText(feedbackString);
 
-    m_VolumeReconstructor->DestroyReconstructor();
     ui->progressBar->hide();
+
+    m_VolumeReconstructor->DestroyReconstructor();
 }
 
 void GPU_VolumeReconstructionWidget::on_startButton_clicked()
@@ -127,9 +127,6 @@ void GPU_VolumeReconstructionWidget::on_startButton_clicked()
     unsigned int usSearchRadius = ui->usSearchRadiusComboBox->itemData( ui->usSearchRadiusComboBox->currentIndex() ).toInt();
     float usVolumeSpacing = ui->usVolumeSpacingComboBox->itemData( ui->usVolumeSpacingComboBox->currentIndex() ).toFloat();
 
-    QTimer *progressTimer = new QTimer( this );
-    connect( progressTimer, SIGNAL(timeout()), SLOT(UpdateProgress()) );
-    progressTimer->start( 100 );
     m_ReconstructionTimer.start();
 
 #ifdef DEBUG
@@ -165,11 +162,8 @@ void GPU_VolumeReconstructionWidget::on_startButton_clicked()
     std::cerr << "Starting reconstruction..." << std::endl;
 #endif   
 
-    m_VolumeReconstructor->start();
-    m_VolumeReconstructor->wait();
-    this->FinishReconstruction();
-    progressTimer->stop();
-    delete progressTimer;
+    QFuture<void> future = QtConcurrent::run(m_VolumeReconstructor->GetReconstructor().GetPointer(), &VolumeReconstructionType::ReconstructVolume);
+    this->m_futureWatcher.setFuture(future);
 }
 
 void GPU_VolumeReconstructionWidget::UpdateUi()
@@ -205,9 +199,4 @@ void GPU_VolumeReconstructionWidget::UpdateUi()
 
   ui->usVolumeSpacingComboBox->addItem( QString("1.0 mm x 1.0 mm x 1.0 mm"), QVariant( 1.0 ) );
   ui->usVolumeSpacingComboBox->addItem( QString("0.5 mm x 0.5 mm x 0.5 mm"), QVariant( 0.5 ) );
-}
-
-void GPU_VolumeReconstructionWidget::UpdateProgress()
-{
-    QApplication::processEvents();
 }
