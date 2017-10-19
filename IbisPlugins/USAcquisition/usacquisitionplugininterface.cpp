@@ -9,7 +9,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
 #include "usacquisitionplugininterface.h"
-#include "application.h"
 #include "sceneobject.h"
 #include "usacquisitionobject.h"
 #include "usprobeobject.h"

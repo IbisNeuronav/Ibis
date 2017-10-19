@@ -10,7 +10,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 #include "landmarkregistrationobjectplugininterface.h"
 #include "landmarkregistrationobject.h"
-#include "application.h"
 #include "scenemanager.h"
 #include "pointsobject.h"
 #include <QtPlugin>

@@ -472,7 +472,6 @@ int PointsObject::FindPoint(vtkActor *actor, double *pos, int viewType)
     if( viewType == THREED_VIEW_TYPE )
         return InvalidPointIndex;
     // Now see if any of 2D actors are picked
-    ApplicationSettings * settings = Application::GetInstance().GetSettings();
     vtkTransform * wt = this->GetWorldTransform();
     double worldPicked[3], worldPt[3];
     wt->TransformPoint( pos, worldPicked );

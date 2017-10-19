@@ -9,7 +9,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
 #include "contoursurfaceplugininterface.h"
-#include "application.h"
 #include "imageobject.h"
 #include "sceneobject.h"
 #include "scenemanager.h"

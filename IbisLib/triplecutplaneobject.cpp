@@ -12,7 +12,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "view.h"
 #include "imageobject.h"
 #include "scenemanager.h"
-#include "application.h"
 #include "triplecutplaneobjectsettingswidget.h"
 #include "vtkMultiImagePlaneWidget.h"
 #include <vtkAssembly.h>
