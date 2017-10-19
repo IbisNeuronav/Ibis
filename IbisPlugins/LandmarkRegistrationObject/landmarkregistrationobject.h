@@ -18,7 +18,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 class LandmarkTransform;
 class vtkPoints;
-class SceneManager;
 
 class LandmarkRegistrationObject : public SceneObject
 {

@@ -12,7 +12,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include "PRISMVolumeRenderPluginInterface.h"
 #include "volumerenderingobject.h"
-#include "scenemanager.h"
+
 #include <QSettings>
 
 PRISMVolumeRenderPluginInterface::PRISMVolumeRenderPluginInterface()
