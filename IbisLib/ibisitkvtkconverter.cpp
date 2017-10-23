@@ -157,7 +157,7 @@ bool IbisItkVtkConverter::ConvertVtkImageToItkImage( IbisItkFloat3ImageType::Poi
     itk::Vector< double, 3 > origin;
     itk::Vector< double, 3 > itkOrigin;
     // set direction cosines
-    vtkSmartPointer<vtkMatrix4x4> tmpMat = vtkSmartPointer<vtkMatrix4x4>::New();
+    vtkMatrix4x4 *tmpMat = vtkMatrix4x4::New();
     vtkMatrix4x4::Transpose( imageMatrix, tmpMat );
     double step[3], mincStartPoint[3], dirCos[3][3];
     for( int i = 0; i < 3; i++ )
@@ -174,6 +174,7 @@ bool IbisItkVtkConverter::ConvertVtkImageToItkImage( IbisItkFloat3ImageType::Poi
     double rotation[3][3];
     vtkMath::Transpose3x3( dirCos, rotation );
     vtkMath::LinearSolve3x3( rotation, (*tmpMat)[3], mincStartPoint );
+    tmpMat->Delete();
 
     for( int i = 0; i < 3; i++ )
         origin[i] =  mincStartPoint[i];
@@ -211,7 +212,7 @@ bool IbisItkVtkConverter::ConvertVtkImageToItkImage( IbisRGBImageType::Pointer i
     itk::Vector< double, 3 > origin;
     itk::Vector< double, 3 > itkOrigin;
     // set direction cosines
-    vtkSmartPointer<vtkMatrix4x4> tmpMat = vtkSmartPointer<vtkMatrix4x4>::New();
+    vtkMatrix4x4 *tmpMat = vtkMatrix4x4::New();
     vtkMatrix4x4::Transpose( imageMatrix, tmpMat );
     double step[3], mincStartPoint[3], dirCos[3][3];
     for( int i = 0; i < 3; i++ )
@@ -228,6 +229,7 @@ bool IbisItkVtkConverter::ConvertVtkImageToItkImage( IbisRGBImageType::Pointer i
     double rotation[3][3];
     vtkMath::Transpose3x3( dirCos, rotation );
     vtkMath::LinearSolve3x3( rotation, (*tmpMat)[3], mincStartPoint );
+    tmpMat->Delete();
 
     for( int i = 0; i < 3; i++ )
         origin[i] =  mincStartPoint[i];
@@ -266,7 +268,7 @@ bool IbisItkVtkConverter::ConvertVtkImageToItkImage( IbisItkUnsignedChar3ImageTy
     itk::Vector< double, 3 > origin;
     itk::Vector< double, 3 > itkOrigin;
     // set direction cosines
-    vtkSmartPointer<vtkMatrix4x4> tmpMat = vtkSmartPointer<vtkMatrix4x4>::New();
+    vtkMatrix4x4 *tmpMat = vtkMatrix4x4::New();
     vtkMatrix4x4::Transpose( imageMatrix, tmpMat );
     double step[3], mincStartPoint[3], dirCos[3][3];
     for( int i = 0; i < 3; i++ )
@@ -283,6 +285,7 @@ bool IbisItkVtkConverter::ConvertVtkImageToItkImage( IbisItkUnsignedChar3ImageTy
     double rotation[3][3];
     vtkMath::Transpose3x3( dirCos, rotation );
     vtkMath::LinearSolve3x3( rotation, (*tmpMat)[3], mincStartPoint );
+    tmpMat->Delete();
 
     for( int i = 0; i < 3; i++ )
         origin[i] =  mincStartPoint[i];
