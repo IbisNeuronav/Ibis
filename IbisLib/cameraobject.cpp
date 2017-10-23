@@ -1033,8 +1033,8 @@ void CameraObject::CreateCameraRepresentation()
         lines->InsertNextCell( 2, linesIndex[i] );
 
     m_cameraPolyData = vtkSmartPointer<vtkPolyData>::New();
-    m_cameraPolyData->SetPoints( pts );
-    m_cameraPolyData->SetLines( lines );
+    m_cameraPolyData->SetPoints( pts.GetPointer() );
+    m_cameraPolyData->SetLines( lines.GetPointer() );
 }
 
 QString CameraObject::FindNextSnapshotName()
