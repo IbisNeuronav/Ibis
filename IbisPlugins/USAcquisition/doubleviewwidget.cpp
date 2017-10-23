@@ -657,6 +657,9 @@ void DoubleViewWidget::on_m_exportButton_clicked()
 }
 
 #ifdef TEST
+//In order to run this code, set dependency on GPU_VolumeRevonstruction plugin in ibis/IbisPlugins/USAcquisition/declare-plugin.cmake
+//DeclarePlugin( USAcquisition YES DEPENDS GPU_VolumeReconstruction DESCRIPTION "This plugin is used to record a US acquisition and visualize the acquisition together with a similar slice of a volume" )
+
 #include "application.h"
 #include "imageobject.h"
 #include "gpu_volumereconstructionplugininterface.h"
