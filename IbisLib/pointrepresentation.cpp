@@ -132,7 +132,7 @@ void PointRepresentation::Setup( View * view )
         labelActor->SetScale( m_labelScale, m_labelScale, m_labelScale );
         labelActor->SetCamera( view->GetRenderer()->GetActiveCamera() );
         labelActor->SetUserTransform( m_labelTransform.GetPointer() );
-        labelActor->SetProperty(m_property);
+        labelActor->SetProperty(m_property.GetPointer());
         labelActor->SetVisibility( visible && m_labelVisible ? 1 : 0 );
         view->GetRenderer()->AddActor( labelActor.GetPointer() );
      }

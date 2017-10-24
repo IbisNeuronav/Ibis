@@ -166,7 +166,7 @@ void PointerObject::CancelTipCalibration()
 {
     GetHardwareModule()->StopTipCalibration( this );
     m_lastTipCalibrationRMS = m_backupCalibrationRMS;
-    SetCalibrationMatrix( m_backupCalibrationMatrix );
+    SetCalibrationMatrix( m_backupCalibrationMatrix.GetPointer() );
 }
 
 void PointerObject::StopTipCalibration()
@@ -184,7 +184,7 @@ void PointerObject::CreatePointerPickedPointsObject()
     this->CurrentPointerPickedPointsObject->SetName(name);
     this->CurrentPointerPickedPointsObject->SetCanAppendChildren(false);
     this->CurrentPointerPickedPointsObject->SetCanChangeParent(false);
-    connect(this->CurrentPointerPickedPointsObject, SIGNAL(NameChanged()), this, SLOT(UpdateSettings()));
+    connect(this->CurrentPointerPickedPointsObject.GetPointer(), SIGNAL(NameChanged()), this, SLOT(UpdateSettings()));
     PointerPickedPointsObjectList.append(this->CurrentPointerPickedPointsObject);
 }
 

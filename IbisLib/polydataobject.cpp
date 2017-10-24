@@ -723,5 +723,5 @@ void PolyDataObject::InitializeClippingPlanes()
     p->SetPoint( 0, 0.0, 0.0, 0.0 );
     p->SetPoint( 1, 0.0, 0.0, 0.0 );
     p->SetPoint( 2, 0.0, 0.0, 0.0 );
-    m_clippingPlanes->SetPoints( p );
+    m_clippingPlanes->SetPoints( p.GetPointer() );
 }

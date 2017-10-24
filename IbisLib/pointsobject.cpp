@@ -403,24 +403,6 @@ vtkPoints * PointsObject::GetPoints()
     return m_pointCoordinates.GetPointer();
 }
 
-void PointsObject::Reset()
-{   
-    PointList::iterator it = m_pointList.begin();
-    for(; it != m_pointList.end(); ++it)
-    {
-        this->GetManager()->RemoveObject( (*it ) );
-        (*it)->Delete();
-    }
-    m_pointList.clear();
-
-
-    m_pointCoordinates->Reset();
-    m_pointNames.clear();
-    m_timeStamps.clear();
-
-    emit Modified();
-}
-
 void PointsObject::SetSelectedPoint( int index )
 {
     // Set selected point
@@ -601,7 +583,7 @@ void PointsObject::RemovePoint(int index)
 
     // Clear local data about the point
     vtkPoints *tmpPoints = vtkPoints::New();
-    tmpPoints->DeepCopy( m_pointCoordinates );
+    tmpPoints->DeepCopy( m_pointCoordinates.GetPointer() );
     m_pointCoordinates->Reset();
     for( int i = 0; i < tmpPoints->GetNumberOfPoints(); ++i )
         if( i != index )

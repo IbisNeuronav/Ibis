@@ -63,7 +63,6 @@ public:
     void AddPoint( const QString &name, double coords[3] );
     void SetPickable( bool p ) { m_pickable = p; }
     void SetPickabilityLocked( bool c ) { m_pickabilityLocked = c; }
-    void Reset();
     int GetSelectedPointIndex() { return m_selectedPointIndex; }
     void SetSelectedPoint( int index );
     void MoveCursorToPoint( int index );

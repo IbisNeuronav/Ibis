@@ -142,10 +142,10 @@ void SceneManager::Init()
     this->MainCutPlanes->SetHidable( false );
     this->MainCutPlanes->SetObjectDeletable(false);
     AddObject( this->MainCutPlanes.GetPointer(), this->SceneRoot );
-    connect( this->MainCutPlanes, SIGNAL(StartPlaneMoved(int)), this, SLOT(OnStartCutPlaneInteraction()) );
-    connect( this->MainCutPlanes, SIGNAL(EndPlaneMove(int)), this, SLOT(OnEndCutPlaneInteraction()) );
-    connect( this->MainCutPlanes, SIGNAL(PlaneMoved(int)), this, SLOT(OnCutPlanesPositionChanged()) );
-    connect( this, SIGNAL(ReferenceObjectChanged()), this->MainCutPlanes, SLOT(AdjustAllImages()) );
+    connect( this->MainCutPlanes.GetPointer(), SIGNAL(StartPlaneMoved(int)), this, SLOT(OnStartCutPlaneInteraction()) );
+    connect( this->MainCutPlanes.GetPointer(), SIGNAL(EndPlaneMove(int)), this, SLOT(OnEndCutPlaneInteraction()) );
+    connect( this->MainCutPlanes.GetPointer(), SIGNAL(PlaneMoved(int)), this, SLOT(OnCutPlanesPositionChanged()) );
+    connect( this, SIGNAL(ReferenceObjectChanged()), this->MainCutPlanes.GetPointer(), SLOT(AdjustAllImages()) );
 
     // Add all global objects from plugins
     QList<SceneObject*> globalObjects;
@@ -1803,8 +1803,8 @@ bool SceneManager::ImportUsAcquisition()
     vtkSmartPointer<USAcquisitionObject> acq = vtkSmartPointer<USAcquisitionObject>::New();
     if( acq->Import() )
     {
-        this->AddObject( acq );
-        this->SetCurrentObject( acq );
+        this->AddObject( acq.GetPointer() );
+        this->SetCurrentObject( acq.GetPointer() );
         return true;
     }
     return false;
