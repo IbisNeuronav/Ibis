@@ -51,9 +51,9 @@ void GPU_VolumeReconstructionWidget::VtkToItkImage( vtkImageData * vtkInputImage
 {
   int numberOfScalarComponents = vtkInputImage->GetNumberOfScalarComponents();
   vtkImageData *grayImage = vtkInputImage;
+  vtkSmartPointer<vtkImageLuminance> luminanceFilter = vtkSmartPointer<vtkImageLuminance>::New();
   if (numberOfScalarComponents > 1)
   {
-      vtkSmartPointer<vtkImageLuminance> luminanceFilter = vtkSmartPointer<vtkImageLuminance>::New();
       luminanceFilter->SetInputData(vtkInputImage);
       luminanceFilter->Update();
       grayImage = luminanceFilter->GetOutput();
@@ -231,7 +231,7 @@ void GPU_VolumeReconstructionWidget::on_startButton_clicked()
     {
       itkSliceImage[i] = IbisItkFloat3ImageType::New();
       selectedUSAcquisitionObject->GetFrameData( i, slice.GetPointer(), sliceTransformMatrix.GetPointer() );
-      if( converter->ConvertVtkImageToItkImage( itkSliceImage[i], slice, sliceTransformMatrix ) )
+      if( converter->ConvertVtkImageToItkImage( itkSliceImage[i], slice.GetPointer(), sliceTransformMatrix.GetPointer() ) )
         m_Reconstructor->SetFixedSlice(i, itkSliceImage[i]);
     }
 

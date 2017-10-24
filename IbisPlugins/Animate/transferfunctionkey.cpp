@@ -66,8 +66,8 @@ void TransferFunctionKey::Interpolate( TransferFunctionKey & keyA, TransferFunct
     m_colorFunc->RemoveAllPoints();
     int keyASize = keyA.m_colorFunc->GetSize();
     int keyBSize = keyB.m_colorFunc->GetSize();
-    vtkColorTransferFunction * colA = keyA.m_colorFunc;
-    vtkColorTransferFunction * colB = keyB.m_colorFunc;
+    vtkColorTransferFunction * colA = keyA.m_colorFunc.GetPointer();
+    vtkColorTransferFunction * colB = keyB.m_colorFunc.GetPointer();
     for( int i = 0; i < keyASize || i < keyBSize; ++i )
     {
         if( i < keyASize && i < keyBSize )

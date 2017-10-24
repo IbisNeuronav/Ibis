@@ -84,7 +84,7 @@ DoubleViewWidget::DoubleViewWidget( QWidget * parent, Qt::WindowFlags f ) :
     m_mriActor->AddImage( m_usSlice.GetPointer() );
 
     m_mriRenderer = vtkSmartPointer<vtkRenderer>::New();
-    ui->mriImageWindow->GetRenderWindow()->AddRenderer( m_mriRenderer.GetPointer() ); // is this for one MRI or for two?
+    ui->mriImageWindow->GetRenderWindow()->AddRenderer( m_mriRenderer.GetPointer() );
     m_mriRenderer->AddActor( m_mriActor.GetPointer() );
 
     vtkRenderWindowInteractor * mriInteractor = ui->mriImageWindow->GetInteractor();

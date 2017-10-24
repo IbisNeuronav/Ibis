@@ -53,7 +53,7 @@ SceneObject *LandmarkRegistrationObjectPluginInterface::CreateObject()
     manager->AddObject( sourcePoints.GetPointer(), m_landmarkRegistrationObject.GetPointer() );
     manager->AddObject( targetPoints.GetPointer(), manager->GetSceneRoot() );
     m_landmarkRegistrationObject->SetTargetObjectID( manager->GetSceneRoot()->GetObjectID() );
-    m_landmarkRegistrationObject->SetSourcePoints( sourcePoints.GetPointer() );
-    m_landmarkRegistrationObject->SetTargetPoints( targetPoints.GetPointer() );
+    m_landmarkRegistrationObject->SetSourcePoints( sourcePoints );
+    m_landmarkRegistrationObject->SetTargetPoints( targetPoints );
     return m_landmarkRegistrationObject.GetPointer();
 }

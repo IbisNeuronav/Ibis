@@ -206,7 +206,7 @@ void DomeRenderer::Render( vtkRenderer * r )
     dir[2] = focalPt[2] - pos[2];
     double dist = vtkMath::Normalize( dir );
 
-     r->SetActiveCamera( m_renderCam );
+     r->SetActiveCamera( m_renderCam.GetPointer() );
 
     // Determine a set of clipping planes that works for all views
     double resClipping[2] = { 0.0, 1.0 };

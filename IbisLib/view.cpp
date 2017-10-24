@@ -204,7 +204,7 @@ vtkRenderWindowInteractor * View::GetInteractor()
 
 void View::SetInteractor( vtkRenderWindowInteractor * interactor )
 {
-    if( interactor == this->Interactor )
+    if( interactor == this->Interactor.GetPointer() )
     {
         return;
     }
@@ -220,9 +220,9 @@ void View::SetInteractor( vtkRenderWindowInteractor * interactor )
     this->SetupAllObjects();
     this->Interactor->SetInteractorStyle( this->InteractorStyle );
     this->Interactor->GetRenderWindow()->SetNumberOfLayers( 3 );
-    this->Interactor->GetRenderWindow()->AddRenderer( this->Renderer );
-    this->Interactor->GetRenderWindow()->AddRenderer( this->OverlayRenderer );
-    this->Interactor->GetRenderWindow()->AddRenderer( this->OverlayRenderer2 );
+    this->Interactor->GetRenderWindow()->AddRenderer( this->Renderer.GetPointer() );
+    this->Interactor->GetRenderWindow()->AddRenderer( this->OverlayRenderer.GetPointer() );
+    this->Interactor->GetRenderWindow()->AddRenderer( this->OverlayRenderer2.GetPointer() );
 
     // Add observer to know when the window starts rendering ( to reset clipping range )
     this->EventObserver->Connect( this->Interactor->GetRenderWindow(), vtkCommand::StartEvent, this, SLOT(WindowStartsRendering()) );
@@ -527,7 +527,7 @@ void View::ReferenceTransformChanged()
 
             vtkTransform * refTransform = obj->GetWorldTransform();
             t->SetInput( refTransform );
-            t->Concatenate( this->PrevViewingTransform );
+            t->Concatenate( this->PrevViewingTransform.GetPointer() );
 
             vtkCamera * cam = this->Renderer->GetActiveCamera();
             cam->ApplyTransform( t );

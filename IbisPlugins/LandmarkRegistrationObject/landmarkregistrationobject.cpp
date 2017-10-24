@@ -59,7 +59,7 @@ void LandmarkRegistrationObject::CreateSettingsWidgets( QWidget * parent, QVecto
     props->setObjectName( "Properties" );
     if( m_sourcePoints )
     {
-        connect( m_sourcePoints, SIGNAL(Modified()), props, SLOT(UpdateUI()) );
+        connect( m_sourcePoints.GetPointer(), SIGNAL(Modified()), props, SLOT(UpdateUI()) );
     }
     connect( this, SIGNAL(Modified()), props, SLOT(UpdateUI()) );
     widgets->append(props);
@@ -178,7 +178,7 @@ void LandmarkRegistrationObject::ObjectAddedToScene()
 void LandmarkRegistrationObject::ObjectAboutToBeRemovedFromScene()
 {
     // m_targetPoints is not a child of LandmarkRegistrationObject, it has to be removed explicitly
-    GetManager()->RemoveObject( m_targetPoints );
+    GetManager()->RemoveObject( m_targetPoints.GetPointer() );
     disconnect( GetManager(), SIGNAL(CurrentObjectChanged()), this, SLOT(CurrentObjectChanged()));
 }
 
@@ -311,7 +311,7 @@ void LandmarkRegistrationObject::SetSourcePoints( vtkSmartPointer<PointsObject> 
     {
         m_sourcePoints->SetListable( false );
         if( m_sourcePoints->GetObjectID() == SceneManager::InvalidId )
-            this->GetManager()->AddObject( m_sourcePoints, this );
+            this->GetManager()->AddObject( m_sourcePoints.GetPointer(), this );
         else if( m_sourcePoints->GetParent() != this )
             this->GetManager()->ChangeParent( m_sourcePoints, this, 0);
         if ( !m_loadingPointStatus )
@@ -325,10 +325,10 @@ void LandmarkRegistrationObject::SetSourcePoints( vtkSmartPointer<PointsObject> 
             m_sourcePoints->SetPickable( true );
         m_activeSourcePoints->Reset();
         m_activeSourcePoints->DeepCopy( m_sourcePoints->GetPoints() );
-        connect( m_sourcePoints, SIGNAL(PointAdded()), this, SLOT(PointAdded()) );
-        connect( m_sourcePoints, SIGNAL(PointRemoved(int)), this, SLOT(PointRemoved(int)) );
-        connect( m_sourcePoints, SIGNAL(PointsChanged()), this, SLOT(Update()) );
-        disconnect( this->GetManager(), SIGNAL(CurrentObjectChanged()), m_sourcePoints, SLOT(OnCurrentObjectChanged()) );
+        connect( m_sourcePoints.GetPointer(), SIGNAL(PointAdded()), this, SLOT(PointAdded()) );
+        connect( m_sourcePoints.GetPointer(), SIGNAL(PointRemoved(int)), this, SLOT(PointRemoved(int)) );
+        connect( m_sourcePoints.GetPointer(), SIGNAL(PointsChanged()), this, SLOT(Update()) );
+        disconnect( this->GetManager(), SIGNAL(CurrentObjectChanged()), m_sourcePoints.GetPointer(), SLOT(OnCurrentObjectChanged()) );
         m_sourcePointsID = m_sourcePoints->GetObjectID();
     }
 }
@@ -339,7 +339,7 @@ void LandmarkRegistrationObject::SetTargetPoints(vtkSmartPointer<PointsObject> p
 
     if( m_targetPoints )
     {
-        this->GetManager()->RemoveObject( m_targetPoints );
+        this->GetManager()->RemoveObject( m_targetPoints.GetPointer() );
     }
     m_targetPoints = pts;
     if( m_targetPoints )
@@ -625,8 +625,8 @@ bool LandmarkRegistrationObject::ReadTagFile( )
     }
     if (filename.isNull() || filename.isEmpty())
         return false;
-    PointsObject *src = PointsObject::New();
-    PointsObject *trgt = PointsObject::New();
+    vtkSmartPointer<PointsObject> src = vtkSmartPointer<PointsObject>::New();
+    vtkSmartPointer<PointsObject> trgt = vtkSmartPointer<PointsObject>::New();
     bool ok = Application::GetInstance().GetPointsFromTagFile( filename, src, trgt );
     if( ! ok )
         return false;
