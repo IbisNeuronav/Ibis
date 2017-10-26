@@ -69,6 +69,7 @@ void SceneObject::Serialize( Serializer * ser )
     bool nameChangeable = true;
     bool objectListable = true;
     bool allowManualTransformEdit = true;
+    local = this->LocalTransform->GetMatrix();
 
     if( !ser->IsReader())
     {
@@ -81,10 +82,7 @@ void SceneObject::Serialize( Serializer * ser )
         nameChangeable = this->NameChangeable;
         objectListable = this->ObjectListable;
         allowManualTransformEdit = this->AllowManualTransformEdit;
-        local = this->LocalTransform->GetMatrix();
     }
-    else
-        local = vtkMatrix4x4::New();
     ::Serialize( ser, "ObjectName", this->Name );
     ::Serialize( ser, "AllowChildren", allowChildren);
     ::Serialize( ser, "AllowChangeParent", allowChangeParent);
@@ -110,11 +108,7 @@ void SceneObject::Serialize( Serializer * ser )
         this->SetListable(objectListable);
         this->SetCanEditTransformManually(allowManualTransformEdit);
         this->UpdateWorldTransform();
-        vtkTransform *temp = vtkTransform::New();
-        temp->SetMatrix(local);
-        this->SetLocalTransform(temp);
-        local->Delete();
-        temp->Delete();
+        this->GetLocalTransform()->Update();
     }
 }
 
