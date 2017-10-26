@@ -106,8 +106,8 @@ void SceneObject::Serialize( Serializer * ser )
         this->SetNameChangeable(nameChangeable);
         this->SetListable(objectListable);
         this->SetCanEditTransformManually(allowManualTransformEdit);
-        this->UpdateWorldTransform();
         this->GetLocalTransform()->Update();
+        this->UpdateWorldTransform();
     }
 }
 
