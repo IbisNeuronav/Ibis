@@ -59,7 +59,7 @@ SceneObject::~SceneObject()
 
 void SceneObject::Serialize( Serializer * ser )
 {
-    vtkMatrix4x4 * local = 0;
+    vtkMatrix4x4 * local = this->LocalTransform->GetMatrix();
     bool allowChildren = true;
     bool allowChangeParent = true;
     bool objectManagedBySystem = false;
@@ -69,7 +69,6 @@ void SceneObject::Serialize( Serializer * ser )
     bool nameChangeable = true;
     bool objectListable = true;
     bool allowManualTransformEdit = true;
-    local = this->LocalTransform->GetMatrix();
 
     if( !ser->IsReader())
     {
