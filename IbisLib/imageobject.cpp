@@ -99,7 +99,7 @@ ImageObject::ImageObject()
 
     // Watch volume properties to be able to render when properties change
     m_volumePropertyWatcher = vtkSmartPointer<vtkEventQtSlotConnect>::New();
-    m_volumePropertyWatcher->Connect( m_volumeProperty.GetPointer(), vtkCommand::ModifiedEvent, this, SLOT(MarkModified()) );
+    m_volumePropertyWatcher->Connect( m_volumeProperty, vtkCommand::ModifiedEvent, this, SLOT(MarkModified()) );
     m_volumePropertyWatcher->Connect( m_volumeProperty->GetScalarOpacity(), vtkCommand::ModifiedEvent, this, SLOT(MarkModified()) );
     m_volumePropertyWatcher->Connect( m_volumeProperty->GetGradientOpacity(), vtkCommand::ModifiedEvent, this, SLOT(MarkModified()) );
     m_volumePropertyWatcher->Connect( m_volumeProperty->GetRGBTransferFunction(), vtkCommand::ModifiedEvent, this, SLOT(MarkModified()) );
@@ -433,7 +433,7 @@ void ImageObject::UpdateVolumeRenderingParamsInMapper()
             mapper->SetFinalColorWindow( m_colorWindow );
             mapper->SetCroppingRegionPlanes( m_volumeRenderingBounds );
 
-            SetVolumeClippingEnabled( pv->volumeClippingWidget.GetPointer(), !IsHidden() && m_showVolumeClippingBox );
+            SetVolumeClippingEnabled( pv->volumeClippingWidget, !IsHidden() && m_showVolumeClippingBox );
         }
         ++it;
     }
@@ -533,7 +533,7 @@ void ImageObject::Setup3DRepresentation( View * view )
     boxRep->InsideOutOn();
     boxRep->OutlineCursorWiresOff();
 
-    m_volumeClippingBoxWatcher->Connect( volumeClippingWidget.GetPointer(), vtkCommand::InteractionEvent, this, SLOT(OnVolumeClippingBoxModified(vtkObject*)) );
+    m_volumeClippingBoxWatcher->Connect( volumeClippingWidget, vtkCommand::InteractionEvent, this, SLOT(OnVolumeClippingBoxModified(vtkObject*)) );
 
 
     // Add the actors to the map of instances we keep
@@ -555,10 +555,10 @@ void ImageObject::Release3DRepresentation( View * view )
         PerViewElements * perView = (*itAssociations).second;
 
         // remove outline
-        view->GetRenderer()->RemoveViewProp( perView->outlineActor.GetPointer() );
+        view->GetRenderer()->RemoveViewProp( perView->outlineActor );
 
         // remove volume
-        view->GetRenderer()->RemoveViewProp( perView->volume.GetPointer() );
+        view->GetRenderer()->RemoveViewProp( perView->volume );
 
         // remove volume clipping box
         perView->volumeClippingWidget->SetInteractor( 0 );
@@ -798,12 +798,12 @@ void ImageObject::SaveImageData(QString &name)
 
 vtkVolumeProperty * ImageObject::GetVolumeProperty()
 {
-    return m_volumeProperty.GetPointer();
+    return m_volumeProperty;
 }
 
 vtkScalarsToColors * ImageObject::GetLut()
 {
-    return Lut.GetPointer();
+    return Lut;
 }
 
 vtkImageData* ImageObject::GetImage( )
@@ -813,7 +813,7 @@ vtkImageData* ImageObject::GetImage( )
 
 vtkImageAccumulate * ImageObject::GetHistogramComputer()
 {
-    return HistogramComputer.GetPointer();
+    return HistogramComputer;
 }
 
 

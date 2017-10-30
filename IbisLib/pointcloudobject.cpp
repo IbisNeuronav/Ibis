@@ -38,10 +38,10 @@ PointCloudObject::PointCloudObject()
 
     this->m_PointCloudArray =  vtkSmartPointer<vtkPoints>::New();
     this->m_PointsPolydata = vtkSmartPointer<vtkPolyData>::New();
-    this->m_PointsPolydata->SetPoints(m_PointCloudArray.GetPointer());
+    this->m_PointsPolydata->SetPoints(m_PointCloudArray);
 
     this->m_PointCloudGlyphFilter = vtkVertexGlyphFilter::New();
-    this->m_PointCloudGlyphFilter->SetInputData(m_PointsPolydata.GetPointer());
+    this->m_PointCloudGlyphFilter->SetInputData(m_PointsPolydata);
 
 
 }
@@ -93,7 +93,7 @@ void PointCloudObject::Export()
     this->SetFullFileName(saveName);
     vtkSmartPointer<vtkPolyDataWriter> writer1 = vtkSmartPointer<vtkPolyDataWriter>::New();
     writer1->SetFileName( saveName.toUtf8().data() );
-    writer1->SetInputData(this->m_PointsPolydata.GetPointer());
+    writer1->SetInputData(this->m_PointsPolydata);
     writer1->Update();
     writer1->Write();
 }

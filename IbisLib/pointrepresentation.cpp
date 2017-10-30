@@ -60,18 +60,18 @@ PointRepresentation::PointRepresentation()
 
     m_point2DTransform = vtkSmartPointer<vtkTransform>::New();
     m_point2DTransform->Concatenate( this->GetWorldTransform() );
-    m_point2DTransform->Concatenate( m_posTransform.GetPointer() );
-    m_point2DTransform->Concatenate( m_invWorldRotTransform.GetPointer() );
+    m_point2DTransform->Concatenate( m_posTransform );
+    m_point2DTransform->Concatenate( m_invWorldRotTransform );
 
     m_point3DTransform = vtkSmartPointer<vtkTransform>::New();
     m_point3DTransform->Concatenate( this->GetWorldTransform() );
-    m_point3DTransform->Concatenate( m_posTransform.GetPointer() );
+    m_point3DTransform->Concatenate( m_posTransform );
 
     m_labelOffset = vtkSmartPointer<vtkTransform>::New();
 
     m_labelTransform = vtkSmartPointer<vtkTransform>::New();
-    m_labelTransform->Concatenate( m_point2DTransform.GetPointer() );
-    m_labelTransform->Concatenate( m_labelOffset.GetPointer() );
+    m_labelTransform->Concatenate( m_point2DTransform );
+    m_labelTransform->Concatenate( m_labelOffset );
 }
 
 PointRepresentation::~PointRepresentation()
@@ -122,19 +122,19 @@ void PointRepresentation::Setup( View * view )
         pointActor = vtkSmartPointer<vtkActor>::New();
         m_sphere->SetRadius( size3D );
         mapper->SetInputConnection( m_sphere->GetOutputPort() );
-        pointActor->SetUserTransform( m_point3DTransform.GetPointer() );
-        view->GetRenderer()->AddActor( pointActor.GetPointer() );
+        pointActor->SetUserTransform( m_point3DTransform );
+        view->GetRenderer()->AddActor( pointActor );
 
         labelActor = vtkSmartPointer<vtkFollower>::New();
         vtkSmartPointer<vtkPolyDataMapper> labelMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
         labelMapper->SetInputConnection( m_label->GetOutputPort() );
-        labelActor->SetMapper( labelMapper.GetPointer() );
+        labelActor->SetMapper( labelMapper );
         labelActor->SetScale( m_labelScale, m_labelScale, m_labelScale );
         labelActor->SetCamera( view->GetRenderer()->GetActiveCamera() );
-        labelActor->SetUserTransform( m_labelTransform.GetPointer() );
-        labelActor->SetProperty(m_property.GetPointer());
+        labelActor->SetUserTransform( m_labelTransform );
+        labelActor->SetProperty(m_property);
         labelActor->SetVisibility( visible && m_labelVisible ? 1 : 0 );
-        view->GetRenderer()->AddActor( labelActor.GetPointer() );
+        view->GetRenderer()->AddActor( labelActor );
      }
     else //2D views
     {
@@ -144,17 +144,17 @@ void PointRepresentation::Setup( View * view )
         m_circle->SetResolution( 3 );
         mapper->SetInputConnection( m_circle->GetOutputPort() );
         f->SetCamera( view->GetRenderer()->GetActiveCamera() );
-        f->SetUserTransform( m_point2DTransform.GetPointer() );
-        view->GetOverlayRenderer()->AddActor(pointActor.GetPointer());
+        f->SetUserTransform( m_point2DTransform );
+        view->GetOverlayRenderer()->AddActor(pointActor);
     }
-    pointActor->SetProperty(m_property.GetPointer());
+    pointActor->SetProperty(m_property);
     pointActor->SetPickable( m_active ? 1 : 0 );
     pointActor->DragableOn();
     if( visible )
         pointActor->VisibilityOn();
     else
         pointActor->VisibilityOff();
-    pointActor->SetMapper( mapper.GetPointer() );
+    pointActor->SetMapper( mapper );
     PerViewElements * perView = new PerViewElements;
     perView->pointRepresentationActor = pointActor;
     perView->labelActor = labelActor;
@@ -171,11 +171,11 @@ void PointRepresentation::Release( View * view )
         PerViewElements * perView = (*it).second;
         if( view->GetType() == THREED_VIEW_TYPE )
         {
-            view->GetRenderer()->RemoveActor( perView->pointRepresentationActor.GetPointer() );
-            view->GetRenderer()->RemoveActor( perView->labelActor.GetPointer() );
+            view->GetRenderer()->RemoveActor( perView->pointRepresentationActor );
+            view->GetRenderer()->RemoveActor( perView->labelActor );
         }
         else
-            view->GetOverlayRenderer()->RemoveActor( perView->pointRepresentationActor.GetPointer() );
+            view->GetOverlayRenderer()->RemoveActor( perView->pointRepresentationActor );
         delete perView;
         this->m_perViewContainer.erase( it );
     }
@@ -275,7 +275,7 @@ bool PointRepresentation::HasActor( vtkActor * actor )
     while( it != m_perViewContainer.end() )
     {
         PerViewElements * perView = (*it).second;
-        if( perView->pointRepresentationActor.GetPointer() == actor )
+        if( perView->pointRepresentationActor == actor )
             return true;
         ++it;
     }

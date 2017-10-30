@@ -400,7 +400,7 @@ void PointsObject::AddPointLocal( double coords[3], QString name, QString timest
 
 vtkPoints * PointsObject::GetPoints()
 {
-    return m_pointCoordinates.GetPointer();
+    return m_pointCoordinates;
 }
 
 void PointsObject::SetSelectedPoint( int index )
@@ -583,7 +583,7 @@ void PointsObject::RemovePoint(int index)
 
     // Clear local data about the point
     vtkPoints *tmpPoints = vtkPoints::New();
-    tmpPoints->DeepCopy( m_pointCoordinates.GetPointer() );
+    tmpPoints->DeepCopy( m_pointCoordinates );
     m_pointCoordinates->Reset();
     for( int i = 0; i < tmpPoints->GetNumberOfPoints(); ++i )
         if( i != index )
@@ -696,7 +696,7 @@ void PointsObject::ObjectAddedToScene()
     // add all point representations to scene
     for( int i = 0; i < m_pointList.size(); ++i )
     {
-        GetManager()->AddObject( m_pointList[i].GetPointer(), this );
+        GetManager()->AddObject( m_pointList[i], this );
     }
 
     connect( this->GetManager(), SIGNAL(CurrentObjectChanged()), this, SLOT(OnCurrentObjectChanged()) );
@@ -712,7 +712,7 @@ void PointsObject::ObjectAboutToBeRemovedFromScene()
     // remove all point representations to scene
     for( int i = 0; i < m_pointList.size(); ++i )
     {
-        GetManager()->RemoveObject( m_pointList[i].GetPointer() );
+        GetManager()->RemoveObject( m_pointList[i] );
     }
 
     disconnect( this->GetManager(), SIGNAL(CurrentObjectChanged()), this, SLOT(OnCurrentObjectChanged()) );
@@ -810,7 +810,7 @@ void PointsObject::LineToPointerTip( double selectedPoint[3], double pointerTip[
     linesPolyData->SetPoints(points);
     linesPolyData->SetLines(cells);
 
-    m_lineToPointerTip->SetPolyData( linesPolyData.GetPointer() );
+    m_lineToPointerTip->SetPolyData( linesPolyData );
     emit Modified();
 }
 

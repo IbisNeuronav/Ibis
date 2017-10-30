@@ -141,11 +141,11 @@ void SceneManager::Init()
     this->MainCutPlanes->SetObjectManagedBySystem( true );
     this->MainCutPlanes->SetHidable( false );
     this->MainCutPlanes->SetObjectDeletable(false);
-    AddObject( this->MainCutPlanes.GetPointer(), this->SceneRoot );
-    connect( this->MainCutPlanes.GetPointer(), SIGNAL(StartPlaneMoved(int)), this, SLOT(OnStartCutPlaneInteraction()) );
-    connect( this->MainCutPlanes.GetPointer(), SIGNAL(EndPlaneMove(int)), this, SLOT(OnEndCutPlaneInteraction()) );
-    connect( this->MainCutPlanes.GetPointer(), SIGNAL(PlaneMoved(int)), this, SLOT(OnCutPlanesPositionChanged()) );
-    connect( this, SIGNAL(ReferenceObjectChanged()), this->MainCutPlanes.GetPointer(), SLOT(AdjustAllImages()) );
+    AddObject( this->MainCutPlanes, this->SceneRoot );
+    connect( this->MainCutPlanes, SIGNAL(StartPlaneMoved(int)), this, SLOT(OnStartCutPlaneInteraction()) );
+    connect( this->MainCutPlanes, SIGNAL(EndPlaneMove(int)), this, SLOT(OnEndCutPlaneInteraction()) );
+    connect( this->MainCutPlanes, SIGNAL(PlaneMoved(int)), this, SLOT(OnCutPlanesPositionChanged()) );
+    connect( this, SIGNAL(ReferenceObjectChanged()), this->MainCutPlanes, SLOT(AdjustAllImages()) );
 
     // Add all global objects from plugins
     QList<SceneObject*> globalObjects;
@@ -173,7 +173,7 @@ void SceneManager::Init()
     axesObject->SetListable( false );
     axesObject->SetObjectManagedBySystem(true);
     axesObject->SetHidden( false );
-    this->AddObject( axesObject.GetPointer() );
+    this->AddObject( axesObject );
     this->SetAxesObject( axesObject );
 
     this->SetCurrentObject( this->GetSceneRoot() );
@@ -1803,8 +1803,8 @@ bool SceneManager::ImportUsAcquisition()
     vtkSmartPointer<USAcquisitionObject> acq = vtkSmartPointer<USAcquisitionObject>::New();
     if( acq->Import() )
     {
-        this->AddObject( acq.GetPointer() );
-        this->SetCurrentObject( acq.GetPointer() );
+        this->AddObject( acq );
+        this->SetCurrentObject( acq );
         return true;
     }
     return false;
