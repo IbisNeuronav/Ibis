@@ -25,7 +25,7 @@ TrackedVideoBuffer::TrackedVideoBuffer( int w, int h )
     m_currentFrame = -1;
     m_videoOutput = vtkSmartPointer<vtkImageData>::New();
     m_output = vtkSmartPointer<vtkPassThrough>::New();
-    m_output->SetInputData( m_videoOutput.GetPointer());
+    m_output->SetInputData( m_videoOutput);
     m_outputTransform = vtkSmartPointer<vtkTransform>::New();
 }
 
@@ -241,6 +241,6 @@ void TrackedVideoBuffer::ReadImages( int nbImages, QString dirName, QProgressDia
 
 vtkImageData *TrackedVideoBuffer:: GetVideoOutput()
 {
-    return m_videoOutput.GetPointer();
+    return m_videoOutput;
 }
 

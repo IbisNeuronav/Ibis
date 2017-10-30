@@ -340,12 +340,6 @@ void TripleCutPlaneObject::PreDisplaySetup()
     this->UpdateAllPlanesVisibility();
 }
 
-vtkMultiImagePlaneWidget * TripleCutPlaneObject::GetPlane( int index )
-{
-    if( index < 3 && index >= 0 )
-        return Planes[index].GetPointer();
-    return 0;
-}
 void TripleCutPlaneObject::ResetPlanes()
 {
     Q_ASSERT( this->GetManager() );
@@ -567,7 +561,7 @@ void TripleCutPlaneObject::PlaneEndInteractionEvent( vtkObject * caller, unsigne
 
     this->UpdateOtherPlanesPosition( whichPlane );
 
-    vtkMultiImagePlaneWidget *movingPlane = this->Planes[whichPlane].GetPointer();
+    vtkMultiImagePlaneWidget *movingPlane = this->Planes[whichPlane];
     int currentInteractorIndex = movingPlane->GetCurrentInteractorIndex();
     View *currentView = 0;
     if( currentInteractorIndex > -1 )
@@ -666,10 +660,10 @@ void TripleCutPlaneObject::CreatePlane( int viewType )
         this->Planes[viewType]->SetResliceInterpolate( m_resliceInterpolationType );
         this->Planes[viewType]->SetTextureInterpolate( m_displayInterpolationType );
 
-        this->PlaneInteractionSlotConnect->Connect( this->Planes[viewType].GetPointer(), vtkCommand::StartInteractionEvent, this, SLOT(PlaneStartInteractionEvent( vtkObject*, unsigned long) ) );
-        this->PlaneInteractionSlotConnect->Connect( this->Planes[viewType].GetPointer(), vtkCommand::InteractionEvent, this, SLOT(PlaneInteractionEvent( vtkObject*, unsigned long) ) );
-        this->PlaneInteractionSlotConnect->Connect( this->Planes[viewType].GetPointer(), vtkCommand::PlaceWidgetEvent, this, SLOT(PlaneInteractionEvent( vtkObject*, unsigned long) ) );
-        this->PlaneEndInteractionSlotConnect->Connect( this->Planes[viewType].GetPointer(), vtkCommand::EndInteractionEvent, this, SLOT(PlaneEndInteractionEvent( vtkObject*, unsigned long) ) );
+        this->PlaneInteractionSlotConnect->Connect( this->Planes[viewType], vtkCommand::StartInteractionEvent, this, SLOT(PlaneStartInteractionEvent( vtkObject*, unsigned long) ) );
+        this->PlaneInteractionSlotConnect->Connect( this->Planes[viewType], vtkCommand::InteractionEvent, this, SLOT(PlaneInteractionEvent( vtkObject*, unsigned long) ) );
+        this->PlaneInteractionSlotConnect->Connect( this->Planes[viewType], vtkCommand::PlaceWidgetEvent, this, SLOT(PlaneInteractionEvent( vtkObject*, unsigned long) ) );
+        this->PlaneEndInteractionSlotConnect->Connect( this->Planes[viewType], vtkCommand::EndInteractionEvent, this, SLOT(PlaneEndInteractionEvent( vtkObject*, unsigned long) ) );
     }
 }
 

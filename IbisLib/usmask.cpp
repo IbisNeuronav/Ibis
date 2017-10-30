@@ -131,7 +131,7 @@ void USMask::SetAsDefault()
 
 vtkImageData * USMask::GetMask()
 {
-    return m_mask.GetPointer();
+    return m_mask;
 }
 void USMask::SetMaskSize( int size[2] )
 {
