@@ -34,8 +34,8 @@ SceneObject *ContourSurfacePluginInterface::CreateObject()
     m_generatedSurface->SetPluginInterface( this );
     if( manager->IsLoadingScene() )
     {
-        manager->AddObject(m_generatedSurface.GetPointer());
-        return m_generatedSurface.GetPointer();
+        manager->AddObject(m_generatedSurface);
+        return m_generatedSurface;
     }
     // If we have a current object we build surface now
     SceneObject *obj = manager->GetCurrentObject();
@@ -61,10 +61,10 @@ SceneObject *ContourSurfacePluginInterface::CreateObject()
             surfaceName.append(QString::number(image->GetNumberOfChildren()));
             m_generatedSurface->SetName(surfaceName);
             m_generatedSurface->SetScalarsVisible(0);
-            manager->AddObject(m_generatedSurface.GetPointer(), image);
-            manager->SetCurrentObject( m_generatedSurface.GetPointer() );
+            manager->AddObject(m_generatedSurface, image);
+            manager->SetCurrentObject( m_generatedSurface );
         }
-        return m_generatedSurface.GetPointer();
+        return m_generatedSurface;
     }
     QMessageBox::warning( 0, "Error!", "Current object should be an ImageObject" );
     return NULL;
