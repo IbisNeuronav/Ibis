@@ -116,7 +116,7 @@ public:
       localMatrix_inv->Invert();
        
       vtkSmartPointer<vtkMatrix4x4> targetLocalMatrix = vtkSmartPointer<vtkMatrix4x4>::New();
-      targetImageVtktransform->GetMatrix( targetLocalMatrix.GetPointer() );
+      targetImageVtktransform->GetMatrix( targetLocalMatrix );
        
       vtkSmartPointer<vtkMatrix4x4> finalMatrix = vtkSmartPointer<vtkMatrix4x4>::New();
        
@@ -125,12 +125,12 @@ public:
         vtkTransform * parentVtktransform = vtkTransform::SafeDownCast( transformObject->GetParent()->GetWorldTransform() );
         Q_ASSERT_X( parentVtktransform, "GPU_RigidRegistrationWidget::on_startButton_clicked()", "Invalid transform" );
         vtkSmartPointer<vtkMatrix4x4> parentWorldMatrix = vtkSmartPointer<vtkMatrix4x4>::New();
-        parentVtktransform->GetInverse( parentWorldMatrix.GetPointer() );
-        finalMatrix->Multiply4x4( parentWorldMatrix.GetPointer(), localMatrix_inv.GetPointer(), localMatrix_inv.GetPointer() );
+        parentVtktransform->GetInverse( parentWorldMatrix );
+        finalMatrix->Multiply4x4( parentWorldMatrix, localMatrix_inv, localMatrix_inv );
         }
 
-      finalMatrix->Multiply4x4( localMatrix_inv.GetPointer(), targetLocalMatrix.GetPointer(), finalMatrix.GetPointer() );
-      vtktransform->SetMatrix( finalMatrix.GetPointer() );
+      finalMatrix->Multiply4x4( localMatrix_inv, targetLocalMatrix, finalMatrix );
+      vtktransform->SetMatrix( finalMatrix );
       vtktransform->Modified();
       transformObject->FinishModifyingTransform();
 
@@ -232,10 +232,10 @@ void GPU_RigidRegistrationWidget::on_startButton_clicked()
 
     /* Initialize Transform */
     vtkSmartPointer<vtkMatrix4x4> localMatrix = vtkSmartPointer<vtkMatrix4x4>::New();
-    sourceVtkTransform->GetInverse(localMatrix.GetPointer());
+    sourceVtkTransform->GetInverse(localMatrix);
   
     vtkSmartPointer<vtkMatrix4x4> finalMatrix = vtkSmartPointer<vtkMatrix4x4>::New();
-    finalMatrix->Multiply4x4( targetVtkTransform->GetMatrix(), localMatrix.GetPointer(), finalMatrix.GetPointer());
+    finalMatrix->Multiply4x4( targetVtkTransform->GetMatrix(), localMatrix, finalMatrix);
 
     ItkRigidTransformType::OffsetType offset;
  
