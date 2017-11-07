@@ -59,7 +59,7 @@ void LandmarkRegistrationObject::CreateSettingsWidgets( QWidget * parent, QVecto
     props->setObjectName( "Properties" );
     if( m_sourcePoints )
     {
-        connect( m_sourcePoints.GetPointer(), SIGNAL(Modified()), props, SLOT(UpdateUI()) );
+        connect( m_sourcePoints, SIGNAL(Modified()), props, SLOT(UpdateUI()) );
     }
     connect( this, SIGNAL(Modified()), props, SLOT(UpdateUI()) );
     widgets->append(props);
@@ -323,10 +323,10 @@ void LandmarkRegistrationObject::SetSourcePoints( vtkSmartPointer<PointsObject> 
             m_sourcePoints->SetPickable( true );
         m_activeSourcePoints->Reset();
         m_activeSourcePoints->DeepCopy( m_sourcePoints->GetPoints() );
-        connect( m_sourcePoints.GetPointer(), SIGNAL(PointAdded()), this, SLOT(PointAdded()) );
-        connect( m_sourcePoints.GetPointer(), SIGNAL(PointRemoved(int)), this, SLOT(PointRemoved(int)) );
-        connect( m_sourcePoints.GetPointer(), SIGNAL(PointsChanged()), this, SLOT(Update()) );
-        disconnect( this->GetManager(), SIGNAL(CurrentObjectChanged()), m_sourcePoints.GetPointer(), SLOT(OnCurrentObjectChanged()) );
+        connect( m_sourcePoints, SIGNAL(PointAdded()), this, SLOT(PointAdded()) );
+        connect( m_sourcePoints, SIGNAL(PointRemoved(int)), this, SLOT(PointRemoved(int)) );
+        connect( m_sourcePoints, SIGNAL(PointsChanged()), this, SLOT(Update()) );
+        disconnect( this->GetManager(), SIGNAL(CurrentObjectChanged()), m_sourcePoints, SLOT(OnCurrentObjectChanged()) );
         m_sourcePointsID = m_sourcePoints->GetObjectID();
     }
 }
@@ -635,7 +635,6 @@ bool LandmarkRegistrationObject::ReadTagFile( )
         return false;
     }
     this->SetSourcePoints( src );
-    src->Delete();
     if( trgt->GetNumberOfPoints() > 0 )
     {
         this->SetTargetPoints( trgt);
@@ -644,7 +643,6 @@ bool LandmarkRegistrationObject::ReadTagFile( )
     {
         this->UpdateTargetPoints();
     }
-    trgt->Delete();
     this->SelectPoint( 0 );
     this->UpdateLandmarkTransform();
     return true;
