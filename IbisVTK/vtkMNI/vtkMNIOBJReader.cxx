@@ -405,5 +405,5 @@ void vtkMNIOBJReader::PrintSelf(ostream& os, vtkIndent indent)
 
 vtkProperty * vtkMNIOBJReader::GetProperty()
 {
-    return this->Property.GetPointer();
+    return this->Property;
 }

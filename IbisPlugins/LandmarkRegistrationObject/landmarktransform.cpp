@@ -114,8 +114,8 @@ bool LandmarkTransform::InternalUpdate()
 {
     if (this->SourcePoints && this->SourcePoints->GetNumberOfPoints() > 2 )
     {
-        this->InternalTransform->SetSourceLandmarks( SourcePoints.GetPointer() );
-        this->InternalTransform->SetTargetLandmarks( TargetPoints.GetPointer() );
+        this->InternalTransform->SetSourceLandmarks( SourcePoints );
+        this->InternalTransform->SetTargetLandmarks( TargetPoints );
         this->InternalTransform->Update( );
         this->UpdateFRE( );
         return true;
@@ -168,5 +168,5 @@ void LandmarkTransform::Reset()
 
 vtkLandmarkTransform * LandmarkTransform::GetRegistrationTransform()
 {
-    return this->RegistrationTransform.GetPointer();
+    return this->RegistrationTransform;
 }

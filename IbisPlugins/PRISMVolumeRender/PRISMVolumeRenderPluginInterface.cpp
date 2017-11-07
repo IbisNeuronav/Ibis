@@ -34,7 +34,7 @@ PRISMVolumeRenderPluginInterface::~PRISMVolumeRenderPluginInterface()
 
 SceneObject * PRISMVolumeRenderPluginInterface::GetGlobalObjectInstance()
 {
-    return m_vrObject.GetPointer();
+    return m_vrObject;
 }
 
 void PRISMVolumeRenderPluginInterface::LoadSettings( QSettings & s )

@@ -95,7 +95,7 @@ void GPU_VolumeReconstructionWidget::VtkToItkImage( vtkImageData * vtkInputImage
   itk::Vector< double, 3 > itkOrigin;
   // set direction cosines
   vtkMatrix4x4 *tmpMat = vtkMatrix4x4::New();
-  vtkMatrix4x4::Transpose( transformMatrix.GetPointer(), tmpMat );
+  vtkMatrix4x4::Transpose( transformMatrix, tmpMat );
   double step[3], mincStartPoint[3], dirCos[3][3];
   for( int i = 0; i < 3; i++ )
   {
@@ -142,8 +142,8 @@ void GPU_VolumeReconstructionWidget::slot_finished()
     reconstructedImage->SetName("Reconstructed Volume");
     //reconstructedImage->SetLocalTransform( selectedUSAcquisitionObject->GetLocalTransform() );
 
-    sm->AddObject(reconstructedImage.GetPointer(), selectedUSAcquisitionObject->GetParent()->GetParent() );
-    sm->SetCurrentObject( reconstructedImage.GetPointer() );
+    sm->AddObject(reconstructedImage, selectedUSAcquisitionObject->GetParent()->GetParent() );
+    sm->SetCurrentObject( reconstructedImage );
 
 #ifdef DEBUG
     std::cerr << "Done..." << std::endl;
@@ -230,8 +230,8 @@ void GPU_VolumeReconstructionWidget::on_startButton_clicked()
     for(unsigned int i=0; i<nbrOfSlices; i++)
     {
       itkSliceImage[i] = IbisItkFloat3ImageType::New();
-      selectedUSAcquisitionObject->GetFrameData( i, slice.GetPointer(), sliceTransformMatrix.GetPointer() );
-      if( converter->ConvertVtkImageToItkImage( itkSliceImage[i], slice.GetPointer(), sliceTransformMatrix.GetPointer() ) )
+      selectedUSAcquisitionObject->GetFrameData( i, slice, sliceTransformMatrix );
+      if( converter->ConvertVtkImageToItkImage( itkSliceImage[i], slice, sliceTransformMatrix ) )
         m_Reconstructor->SetFixedSlice(i, itkSliceImage[i]);
     }
 

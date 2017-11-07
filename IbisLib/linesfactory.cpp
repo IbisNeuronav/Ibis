@@ -30,9 +30,9 @@ LinesFactory::LinesFactory()
     m_scalars->SetName( "Colors" );
 
     m_poly = vtkSmartPointer<vtkPolyData>::New();
-    m_poly->SetPoints( m_pts.GetPointer() );
-    m_poly->SetLines( m_lines.GetPointer() );
-    m_poly->GetPointData()->SetScalars( m_scalars.GetPointer());
+    m_poly->SetPoints( m_pts );
+    m_poly->SetLines( m_lines );
+    m_poly->GetPointData()->SetScalars( m_scalars );
 }
 
 LinesFactory::~LinesFactory()

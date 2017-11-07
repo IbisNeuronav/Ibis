@@ -58,7 +58,7 @@ StereotacticFramePluginInterface::StereotacticFramePluginInterface()
     m_landmarkTransform = vtkLandmarkTransform::New();
     m_landmarkTransform->SetModeToRigidBody();
     m_frameTransform->Concatenate( m_landmarkTransform );
-    m_frameTransform->Concatenate( m_adjustmentTransform.GetPointer() );
+    m_frameTransform->Concatenate( m_adjustmentTransform );
 
     m_frameRepresentation = 0;
     for( int i = 0; i < 4; i++ )
@@ -204,7 +204,7 @@ void StereotacticFramePluginInterface::GetCursorFramePosition( double pos[3] )
     // transform it into frame space
     double transformedPos[4];
     vtkSmartPointer<vtkMatrix4x4> mat = vtkSmartPointer<vtkMatrix4x4>::New();
-    m_frameTransform->GetInverse( mat.GetPointer() );
+    m_frameTransform->GetInverse( mat );
     mat->MultiplyPoint( cursorPos, transformedPos );
 
     pos[0] = transformedPos[0];
@@ -311,14 +311,14 @@ void StereotacticFramePluginInterface::Enable3DFrame()
         }
 
     vtkSmartPointer<vtkPolyData> poly = vtkSmartPointer<vtkPolyData>::New();
-    poly->SetPoints( pts.GetPointer() );
-    poly->SetLines( lines.GetPointer() );
+    poly->SetPoints( pts );
+    poly->SetLines( lines );
 
     m_frameRepresentation = PolyDataObject::New();
-    m_frameRepresentation->SetPolyData( poly.GetPointer() );
+    m_frameRepresentation->SetPolyData( poly );
     m_frameRepresentation->SetListable( false );
     m_frameRepresentation->SetCanEditTransformManually( false );
-    m_frameRepresentation->SetLocalTransform( m_frameTransform.GetPointer() );
+    m_frameRepresentation->SetLocalTransform( m_frameTransform );
 
     GetSceneManager()->AddObject( m_frameRepresentation, ref );
 }
@@ -390,8 +390,8 @@ void StereotacticFramePluginInterface::ComputeInitialTransform()
     translation->Translate( t[0], t[1], t[2] );
 
     m_adjustmentTransform->Identity();
-    m_adjustmentTransform->Concatenate( translation.GetPointer() );
-    m_adjustmentTransform->Concatenate( alignmentTransform.GetPointer() );
+    m_adjustmentTransform->Concatenate( translation );
+    m_adjustmentTransform->Concatenate( alignmentTransform );
 }
 
 void StereotacticFramePluginInterface::UpdateLandmarkTransform()
@@ -418,8 +418,8 @@ void StereotacticFramePluginInterface::UpdateLandmarkTransform()
         frameSpacePoints->InsertNextPoint( framePoint );
     }
 
-    m_landmarkTransform->SetSourceLandmarks( frameSpacePoints.GetPointer() );
-    m_landmarkTransform->SetTargetLandmarks( imageSpacePoints.GetPointer() );
+    m_landmarkTransform->SetSourceLandmarks( frameSpacePoints );
+    m_landmarkTransform->SetTargetLandmarks( imageSpacePoints );
     m_landmarkTransform->Modified();
     m_frameTransform->Modified(); // this should cause a redisplay of the 3D view since frame object will be modified
 }
