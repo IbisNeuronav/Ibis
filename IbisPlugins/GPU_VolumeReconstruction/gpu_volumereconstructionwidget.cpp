@@ -152,8 +152,8 @@ void GPU_VolumeReconstructionWidget::on_startButton_clicked()
     vtkSmartPointer<vtkImageData> slice = vtkSmartPointer<vtkImageData>::New();
     for(unsigned int i=0; i<nbrOfSlices; i++)
     {
-      selectedUSAcquisitionObject->GetFrameData( i, slice.GetPointer(), sliceTransformMatrix.GetPointer() );
-      m_VolumeReconstructor->SetFixedSlice(i, slice.GetPointer(), sliceTransformMatrix.GetPointer() );
+      selectedUSAcquisitionObject->GetFrameData( i, slice, sliceTransformMatrix );
+      m_VolumeReconstructor->SetFixedSlice(i, slice, sliceTransformMatrix );
     }
 
      //Construct ITK Matrix corresponding to VTK Local Matrix
