@@ -118,9 +118,9 @@ CameraObject::CameraObject()
     m_lensDisplacementTransform = vtkSmartPointer<vtkTransform>::New();
     m_opticalCenterTransform = vtkSmartPointer<vtkTransform>::New();
     m_opticalCenterTransform->Concatenate( this->GetWorldTransform() );
-    m_opticalCenterTransform->Concatenate( m_lensDisplacementTransform.GetPointer() );
+    m_opticalCenterTransform->Concatenate( m_lensDisplacementTransform );
     m_imageTransform = vtkSmartPointer<vtkTransform>::New();
-    m_imageTransform->SetInput( m_opticalCenterTransform.GetPointer() );
+    m_imageTransform->SetInput( m_opticalCenterTransform );
 
     m_trackingCamera = false;
     m_intrinsicEditable = false;
@@ -298,17 +298,17 @@ void CameraObject::Setup( View * view )
         perView.cameraBackup = 0;
 
         vtkPolyDataMapper * camMapper = vtkPolyDataMapper::New();
-        camMapper->SetInputData( m_cameraPolyData.GetPointer() );
+        camMapper->SetInputData( m_cameraPolyData );
         perView.cameraActor = vtkActor::New();
         perView.cameraActor->SetMapper( camMapper );
         camMapper->Delete();
-        perView.cameraActor->SetUserTransform( m_opticalCenterTransform.GetPointer() );
+        perView.cameraActor->SetUserTransform( m_opticalCenterTransform );
         view->GetRenderer()->AddActor( perView.cameraActor );
 
         perView.cameraAxesActor = vtkAxesActor::New();
         perView.cameraAxesActor->SetTotalLength( 50, 50, 50 );
         perView.cameraAxesActor->AxisLabelsOff();
-        perView.cameraAxesActor->SetUserTransform( m_opticalCenterTransform.GetPointer() );
+        perView.cameraAxesActor->SetUserTransform( m_opticalCenterTransform );
         view->GetRenderer()->AddActor( perView.cameraAxesActor );
 
         perView.cameraTrackerAxesActor = vtkAxesActor::New();
@@ -318,7 +318,7 @@ void CameraObject::Setup( View * view )
         view->GetRenderer()->AddActor( perView.cameraTrackerAxesActor );
 
         perView.cameraImageActor = vtkSimpleProp3D::New();
-        perView.cameraImageActor->SetUserTransform( m_imageTransform.GetPointer() );
+        perView.cameraImageActor->SetUserTransform( m_imageTransform );
 
         perView.cameraImageMapper = vtkIbisImagePlaneMapper::New();
         perView.cameraImageMapper->SetGlobalOpacity( m_globalOpacity );
@@ -620,9 +620,9 @@ void CameraObject::SetTrackCamera( bool t )
             // Set this camera to control the view
             elem.cameraBackup = v->GetRenderer()->GetActiveCamera();
             elem.cameraBackup->Register( this );
-            v->GetRenderer()->SetActiveCamera( m_camera.GetPointer() );
-            v->GetOverlayRenderer()->SetActiveCamera( m_camera.GetPointer() );
-            v->GetOverlayRenderer2()->SetActiveCamera( m_camera.GetPointer() );
+            v->GetRenderer()->SetActiveCamera( m_camera );
+            v->GetOverlayRenderer()->SetActiveCamera( m_camera );
+            v->GetOverlayRenderer2()->SetActiveCamera( m_camera );
 
             ++it;
         }
@@ -697,8 +697,8 @@ void CameraObject::ToggleRecording()
     }
     else
     {
-        this->GetManager()->AddObject( m_recordingCamera.GetPointer() );
-        this->GetManager()->SetCurrentObject( m_recordingCamera.GetPointer() );
+        this->GetManager()->AddObject( m_recordingCamera );
+        this->GetManager()->SetCurrentObject( m_recordingCamera );
         m_recordingCamera = 0;
     }
 }
@@ -813,7 +813,7 @@ void CameraObject::DrawLine( double x1, double y1, double x2, double y2, double 
         if( v->GetType() == THREED_VIEW_TYPE )
         {
             vtkProp3D * line = SimplePropCreator::CreateLine( start, end, color );
-            line->SetUserTransform( m_imageTransform.GetPointer() );
+            line->SetUserTransform( m_imageTransform );
             GetCurrentRenderer(v)->AddViewProp( line );
             PerViewElements & elem = (*it).second;
             elem.anotations.push_back( line );
@@ -855,7 +855,7 @@ void CameraObject::InternalDrawPath( std::vector< Vec3 > & p3d, double color[4] 
         if( v->GetType() == THREED_VIEW_TYPE )
         {
             vtkProp3D * line = SimplePropCreator::CreatePath( p3d, color );
-            line->SetUserTransform( m_imageTransform.GetPointer() );
+            line->SetUserTransform( m_imageTransform );
             GetCurrentRenderer(v)->AddViewProp( line );
             PerViewElements & elem = (*it).second;
             elem.anotations.push_back( line );
@@ -998,7 +998,7 @@ void CameraObject::UpdateVtkCamera()
     m_camera->SetViewUp( 0, 1, 0 );
     vtkSmartPointer<vtkTransform> wt = m_opticalCenterTransform;
     wt->Update();
-    m_camera->ApplyTransform( wt.GetPointer() );
+    m_camera->ApplyTransform( wt );
 }
 
 vtkRenderer * CameraObject::GetCurrentRenderer( View * v )

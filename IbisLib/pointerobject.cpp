@@ -120,7 +120,7 @@ void PointerObject::ObjectRemovedFromScene()
 
     for (int i = 0; i < PointerPickedPointsObjectList.count(); i++)
     {
-        this->GetManager()->RemoveObject(PointerPickedPointsObjectList.value(i).GetPointer());
+        this->GetManager()->RemoveObject(PointerPickedPointsObjectList.value(i));
     }
     PointerPickedPointsObjectList.clear();
 }
@@ -191,7 +191,7 @@ void PointerObject::CreatePointerPickedPointsObject()
 void PointerObject::ManagerAddPointerPickedPointsObject()
 {
     Q_ASSERT(this->GetManager());
-    this->GetManager()->AddObject( this->CurrentPointerPickedPointsObject.GetPointer() );
+    this->GetManager()->AddObject( this->CurrentPointerPickedPointsObject );
 }
 
 void PointerObject::CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets )
@@ -248,7 +248,7 @@ void PointerObject::RemovePointerPickedPointsObject( int objID )
     PointerPickedPointsObjects::iterator it = PointerPickedPointsObjectList.begin();
     for(; it != PointerPickedPointsObjectList.end(); ++it)
     {
-        obj = (SceneObject*)((*it).GetPointer());
+        obj = (SceneObject*)((*it));
         PointsObject *objectRemoved = 0;
         if (obj->GetObjectID() == objID )
         {

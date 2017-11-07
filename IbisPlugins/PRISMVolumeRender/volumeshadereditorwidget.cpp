@@ -12,7 +12,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include "volumeshadereditorwidget.h"
 #include "ui_volumeshadereditorwidget.h"
-#include "scenemanager.h"
 #include "volumerenderingobject.h"
 #include "imageobject.h"
 

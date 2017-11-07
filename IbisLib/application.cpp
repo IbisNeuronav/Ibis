@@ -44,7 +44,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QPushButton>
 #include <QApplication>
 #include <QMenu>
-#include "vtkSmartPointer.h"
 
 Application * Application::m_uniqueInstance = NULL;
 const QString Application::m_appName("ibis");

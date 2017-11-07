@@ -141,7 +141,7 @@ void SceneManager::Init()
     this->MainCutPlanes->SetObjectManagedBySystem( true );
     this->MainCutPlanes->SetHidable( false );
     this->MainCutPlanes->SetObjectDeletable(false);
-    AddObject( this->MainCutPlanes.GetPointer(), this->SceneRoot );
+    AddObject( this->MainCutPlanes, this->SceneRoot );
     connect( this->MainCutPlanes, SIGNAL(StartPlaneMoved(int)), this, SLOT(OnStartCutPlaneInteraction()) );
     connect( this->MainCutPlanes, SIGNAL(EndPlaneMove(int)), this, SLOT(OnEndCutPlaneInteraction()) );
     connect( this->MainCutPlanes, SIGNAL(PlaneMoved(int)), this, SLOT(OnCutPlanesPositionChanged()) );
@@ -173,7 +173,7 @@ void SceneManager::Init()
     axesObject->SetListable( false );
     axesObject->SetObjectManagedBySystem(true);
     axesObject->SetHidden( false );
-    this->AddObject( axesObject.GetPointer() );
+    this->AddObject( axesObject );
     this->SetAxesObject( axesObject );
 
     this->SetCurrentObject( this->GetSceneRoot() );

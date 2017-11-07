@@ -32,7 +32,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "view.h"
 #include "vtkRenderWindow.h"
 #include "vtkCornerAnnotation.h"
-#include "application.h"
 
 ObjectSerializationMacro( QuadViewWindow );
 

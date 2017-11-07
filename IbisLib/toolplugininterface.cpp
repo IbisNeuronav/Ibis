@@ -10,7 +10,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 #include "toolplugininterface.h"
 #include <QSettings>
-#include "application.h"
 
 ObjectSerializationMacro( ToolPluginInterface );
 

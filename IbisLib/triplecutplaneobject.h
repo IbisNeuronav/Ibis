@@ -53,7 +53,6 @@ public:
     void RemoveImage(int imageID );
 	void PreDisplaySetup();
 	void ResetPlanes();
-    vtkMultiImagePlaneWidget * GetPlane( int index );
 
 	// Manage plane visibility
 	void SetViewPlane( int planeIndex, int isOn );

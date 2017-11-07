@@ -10,7 +10,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 #include "landmarkregistrationobjectplugininterface.h"
 #include "landmarkregistrationobject.h"
-#include "application.h"
 #include "scenemanager.h"
 #include "pointsobject.h"
 #include <QtPlugin>
@@ -50,11 +49,11 @@ SceneObject *LandmarkRegistrationObjectPluginInterface::CreateObject()
     m_landmarkRegistrationObject = vtkSmartPointer<LandmarkRegistrationObject>::New();
     m_landmarkRegistrationObject->SetName( "Landmark Registration" );
     m_landmarkRegistrationObject->SetCanEditTransformManually( false );
-    manager->AddObject( m_landmarkRegistrationObject.GetPointer() );
-    manager->AddObject( sourcePoints.GetPointer(), m_landmarkRegistrationObject.GetPointer() );
-    manager->AddObject( targetPoints.GetPointer(), manager->GetSceneRoot() );
+    manager->AddObject( m_landmarkRegistrationObject );
+    manager->AddObject( sourcePoints, m_landmarkRegistrationObject );
+    manager->AddObject( targetPoints, manager->GetSceneRoot() );
     m_landmarkRegistrationObject->SetTargetObjectID( manager->GetSceneRoot()->GetObjectID() );
-    m_landmarkRegistrationObject->SetSourcePoints( sourcePoints.GetPointer() );
-    m_landmarkRegistrationObject->SetTargetPoints( targetPoints.GetPointer() );
-    return m_landmarkRegistrationObject.GetPointer();
+    m_landmarkRegistrationObject->SetSourcePoints( sourcePoints );
+    m_landmarkRegistrationObject->SetTargetPoints( targetPoints );
+    return m_landmarkRegistrationObject;
 }

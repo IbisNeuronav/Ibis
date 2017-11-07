@@ -71,14 +71,14 @@ USAcquisitionObject::USAcquisitionObject()
     m_sliceTransform = vtkSmartPointer<vtkTransform>::New();
     m_sliceTransform->Concatenate( this->GetWorldTransform() );
     m_currentImageTransform = vtkSmartPointer<vtkTransform>::New();
-    m_sliceTransform->Concatenate( m_currentImageTransform.GetPointer() );
-    m_sliceTransform->Concatenate( m_calibrationTransform.GetPointer() );
+    m_sliceTransform->Concatenate( m_currentImageTransform );
+    m_sliceTransform->Concatenate( m_calibrationTransform );
     m_sliceProperties = vtkSmartPointer<vtkImageProperty>::New();
     m_sliceLutIndex = 1;         // default to hot metal
     m_lut = vtkSmartPointer<vtkPiecewiseFunctionLookupTable>::New();
     m_lut->SetIntensityFactor( 1.0 );
     m_mapToColors = vtkSmartPointer<vtkImageMapToColors>::New();
-    m_mapToColors->SetLookupTable( m_lut.GetPointer() );
+    m_mapToColors->SetLookupTable( m_lut );
     m_mapToColors->SetOutputFormatToRGBA();
     m_mapToColors->SetInputConnection( m_videoBuffer->GetVideoOutputPort() );
 
@@ -157,9 +157,9 @@ void USAcquisitionObject::Setup( View * view )
     {
         PerViewElements elem;
         elem.imageSlice = vtkImageActor::New();
-        elem.imageSlice->SetUserTransform( m_sliceTransform.GetPointer() );
+        elem.imageSlice->SetUserTransform( m_sliceTransform );
         elem.imageSlice->SetVisibility( !this->IsHidden() && this->GetNumberOfSlices()> 0 ? 1 : 0 );
-        elem.imageSlice->SetProperty( m_sliceProperties.GetPointer() );
+        elem.imageSlice->SetProperty( m_sliceProperties );
         if( m_isMaskOn )
             elem.imageSlice->GetMapper()->SetInputConnection( m_sliceStencil->GetOutputPort() );
         else
@@ -430,7 +430,7 @@ void USAcquisitionObject::SetCalibrationMatrix( vtkMatrix4x4 * mat )
 
 vtkTransform * USAcquisitionObject::GetCalibrationTransform()
 {
-    return m_calibrationTransform.GetPointer();
+    return m_calibrationTransform;
 }
 
 vtkImageData * USAcquisitionObject::GetVideoOutput()
@@ -440,7 +440,7 @@ vtkImageData * USAcquisitionObject::GetVideoOutput()
 
 vtkTransform * USAcquisitionObject::GetTransform()
 {
-    return m_sliceTransform.GetPointer();
+    return m_sliceTransform;
 }
 
 void USAcquisitionObject::SetupAllStaticSlicesInAllViews()
@@ -467,7 +467,7 @@ void USAcquisitionObject::SetupAllStaticSlices( View * view, PerViewElements & p
             imageActor->GetMapper()->SetInputConnection( pss.imageStencil->GetOutputPort() );
         else
             imageActor->GetMapper()->SetInputConnection( pss.mapToColors->GetOutputPort() );
-        imageActor->SetProperty( m_staticSlicesProperties.GetPointer() );
+        imageActor->SetProperty( m_staticSlicesProperties );
         imageActor->SetUserTransform( pss.transform );
         if( !this->IsHidden() && m_staticSlicesEnabled )
             imageActor->VisibilityOn();
@@ -551,7 +551,7 @@ void USAcquisitionObject::ComputeOneStaticSliceData( int sliceIndex )
     pss.transform = vtkTransform::New();
     pss.transform->Concatenate( this->GetWorldTransform() );
     pss.transform->Concatenate( sliceUncalibratedTransform );
-    pss.transform->Concatenate( m_calibrationTransform.GetPointer() );
+    pss.transform->Concatenate( m_calibrationTransform );
     pss.transform->Update();
     m_staticSlicesData.push_back( pss );
 
@@ -596,7 +596,7 @@ bool USAcquisitionObject::LoadFramesFromMINCFile( QStringList & allMINCFiles )
         }
         vtkSmartPointer<vtkImageData> frame = vtkSmartPointer<vtkImageData>::New();
         vtkSmartPointer<vtkMatrix4x4> mat = vtkSmartPointer<vtkMatrix4x4>::New();
-        if ( Application::GetInstance().GetImageDataFromVideoFrame( allMINCFiles.at(i), frame.GetPointer(), mat.GetPointer() ) )
+        if ( Application::GetInstance().GetImageDataFromVideoFrame( allMINCFiles.at(i), frame, mat ) )
         {
             // create full transform and reset image step and origin in order to avoid
             // double translation and scaling and display slices correctly in double view
@@ -604,13 +604,13 @@ bool USAcquisitionObject::LoadFramesFromMINCFile( QStringList & allMINCFiles )
             frame->GetOrigin( start );
             frame->GetSpacing( step );
             vtkSmartPointer<vtkTransform> localTransform = vtkSmartPointer<vtkTransform>::New();
-            localTransform->SetMatrix( mat.GetPointer() );
+            localTransform->SetMatrix( mat );
             localTransform->Translate( start );
             localTransform->Scale( step );
             frame->SetOrigin(0,0,0);
             frame->SetSpacing(1,1,1);
 
-            m_videoBuffer->AddFrame( frame.GetPointer(), localTransform->GetMatrix() );
+            m_videoBuffer->AddFrame( frame, localTransform->GetMatrix() );
 
             progress->setValue(i);
             qApp->processEvents();
@@ -1151,7 +1151,7 @@ void USAcquisitionObject::SetSliceLutIndex( int index )
     m_sliceLutIndex = index;
     double range[2] = { 0.0, 255.0 };
     QString slicesLutName = Application::GetLookupTableManager()->GetTemplateLookupTableName( m_sliceLutIndex );
-    Application::GetLookupTableManager()->CreateLookupTable( slicesLutName, range, m_lut.GetPointer() );
+    Application::GetLookupTableManager()->CreateLookupTable( slicesLutName, range, m_lut );
     emit Modified();
 }
 

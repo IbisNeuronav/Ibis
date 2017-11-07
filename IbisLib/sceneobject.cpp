@@ -48,7 +48,7 @@ SceneObject::SceneObject()
     this->RenderLayer = 0;
     this->m_vtkConnections = vtkSmartPointer<vtkEventQtSlotConnect>::New();
     this->m_vtkConnections->Connect( this->LocalTransform, vtkCommand::ModifiedEvent, this, SLOT(NotifyTransformChanged()), 0, 0.0, Qt::DirectConnection );
-    this->m_vtkConnections->Connect( this->WorldTransform.GetPointer(), vtkCommand::ModifiedEvent, this, SLOT(NotifyTransformChanged()), 0, 0.0, Qt::DirectConnection );
+    this->m_vtkConnections->Connect( this->WorldTransform, vtkCommand::ModifiedEvent, this, SLOT(NotifyTransformChanged()), 0, 0.0, Qt::DirectConnection );
 }
 
 SceneObject::~SceneObject() 
@@ -59,7 +59,7 @@ SceneObject::~SceneObject()
 
 void SceneObject::Serialize( Serializer * ser )
 {
-    vtkMatrix4x4 * local = 0;
+    vtkMatrix4x4 * local = this->LocalTransform->GetMatrix();
     bool allowChildren = true;
     bool allowChangeParent = true;
     bool objectManagedBySystem = false;
@@ -81,10 +81,7 @@ void SceneObject::Serialize( Serializer * ser )
         nameChangeable = this->NameChangeable;
         objectListable = this->ObjectListable;
         allowManualTransformEdit = this->AllowManualTransformEdit;
-        local = this->LocalTransform->GetMatrix();
     }
-    else
-        local = vtkMatrix4x4::New();
     ::Serialize( ser, "ObjectName", this->Name );
     ::Serialize( ser, "AllowChildren", allowChildren);
     ::Serialize( ser, "AllowChangeParent", allowChangeParent);
@@ -109,12 +106,8 @@ void SceneObject::Serialize( Serializer * ser )
         this->SetNameChangeable(nameChangeable);
         this->SetListable(objectListable);
         this->SetCanEditTransformManually(allowManualTransformEdit);
+        this->GetLocalTransform()->Update();
         this->UpdateWorldTransform();
-        vtkTransform *temp = vtkTransform::New();
-        temp->SetMatrix(local);
-        this->SetLocalTransform(temp);
-        local->Delete();
-        temp->Delete();
     }
 }
 
@@ -178,7 +171,7 @@ vtkTransform * SceneObject::GetLocalTransform( )
 
 vtkTransform * SceneObject::GetWorldTransform( )
 {
-    return this->WorldTransform.GetPointer();
+    return this->WorldTransform;
 }
 
 void SceneObject::NotifyTransformChanged()
@@ -312,7 +305,7 @@ void SceneObject::UpdateWorldTransform()
 	this->WorldTransform->Identity();
 
 	if( Parent )
-        this->WorldTransform->Concatenate( Parent->WorldTransform.GetPointer() );
+        this->WorldTransform->Concatenate( Parent->WorldTransform );
     if( LocalTransform )
         this->WorldTransform->Concatenate( LocalTransform );
 

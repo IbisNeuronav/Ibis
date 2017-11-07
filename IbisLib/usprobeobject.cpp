@@ -168,7 +168,7 @@ void UsProbeObject::Setup( View * view )
     {
         PerViewElements pv;
         pv.imageActor = vtkImageActor::New();
-        pv.imageActor->SetUserTransform( m_imageTransform.GetPointer() );
+        pv.imageActor->SetUserTransform( m_imageTransform );
         pv.imageActor->SetVisibility( this->IsHidden() ? 0 : 1 );
         pv.imageActor->GetMapper()->SetInputConnection( m_actorInput->GetOutputPort() );
 
@@ -359,7 +359,7 @@ void UsProbeObject::SetCurrentLUTIndex( int index )
     vtkSmartPointer<vtkPiecewiseFunctionLookupTable> lut = vtkSmartPointer<vtkPiecewiseFunctionLookupTable>::New();
     lut->SetIntensityFactor( 1.0 );
     Application::GetLookupTableManager()->CreateLookupTable( slicesLutName, range, lut );
-    m_mapToColors->SetLookupTable( lut.GetPointer() );
+    m_mapToColors->SetLookupTable( lut );
     emit Modified();
 }
 

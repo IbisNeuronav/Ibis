@@ -555,7 +555,7 @@ void ImageObject::Release3DRepresentation( View * view )
         PerViewElements * perView = (*itAssociations).second;
 
         // remove outline
-		view->GetRenderer()->RemoveViewProp( perView->outlineActor );
+        view->GetRenderer()->RemoveViewProp( perView->outlineActor );
 
         // remove volume
         view->GetRenderer()->RemoveViewProp( perView->volume );
@@ -798,12 +798,12 @@ void ImageObject::SaveImageData(QString &name)
 
 vtkVolumeProperty * ImageObject::GetVolumeProperty()
 {
-    return m_volumeProperty.GetPointer();
+    return m_volumeProperty;
 }
 
 vtkScalarsToColors * ImageObject::GetLut()
 {
-    return Lut.GetPointer();
+    return Lut;
 }
 
 vtkImageData* ImageObject::GetImage( )
@@ -813,7 +813,7 @@ vtkImageData* ImageObject::GetImage( )
 
 vtkImageAccumulate * ImageObject::GetHistogramComputer()
 {
-    return HistogramComputer.GetPointer();
+    return HistogramComputer;
 }
 
 

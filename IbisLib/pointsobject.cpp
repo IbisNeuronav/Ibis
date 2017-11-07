@@ -400,25 +400,7 @@ void PointsObject::AddPointLocal( double coords[3], QString name, QString timest
 
 vtkPoints * PointsObject::GetPoints()
 {
-    return m_pointCoordinates.GetPointer();
-}
-
-void PointsObject::Reset()
-{   
-    PointList::iterator it = m_pointList.begin();
-    for(; it != m_pointList.end(); ++it)
-    {
-        this->GetManager()->RemoveObject( (*it ) );
-        (*it)->Delete();
-    }
-    m_pointList.clear();
-
-
-    m_pointCoordinates->Reset();
-    m_pointNames.clear();
-    m_timeStamps.clear();
-
-    emit Modified();
+    return m_pointCoordinates;
 }
 
 void PointsObject::SetSelectedPoint( int index )
@@ -472,7 +454,6 @@ int PointsObject::FindPoint(vtkActor *actor, double *pos, int viewType)
     if( viewType == THREED_VIEW_TYPE )
         return InvalidPointIndex;
     // Now see if any of 2D actors are picked
-    ApplicationSettings * settings = Application::GetInstance().GetSettings();
     vtkTransform * wt = this->GetWorldTransform();
     double worldPicked[3], worldPt[3];
     wt->TransformPoint( pos, worldPicked );
@@ -715,7 +696,7 @@ void PointsObject::ObjectAddedToScene()
     // add all point representations to scene
     for( int i = 0; i < m_pointList.size(); ++i )
     {
-        GetManager()->AddObject( m_pointList[i].GetPointer(), this );
+        GetManager()->AddObject( m_pointList[i], this );
     }
 
     connect( this->GetManager(), SIGNAL(CurrentObjectChanged()), this, SLOT(OnCurrentObjectChanged()) );
@@ -731,7 +712,7 @@ void PointsObject::ObjectAboutToBeRemovedFromScene()
     // remove all point representations to scene
     for( int i = 0; i < m_pointList.size(); ++i )
     {
-        GetManager()->RemoveObject( m_pointList[i].GetPointer() );
+        GetManager()->RemoveObject( m_pointList[i] );
     }
 
     disconnect( this->GetManager(), SIGNAL(CurrentObjectChanged()), this, SLOT(OnCurrentObjectChanged()) );
@@ -829,7 +810,7 @@ void PointsObject::LineToPointerTip( double selectedPoint[3], double pointerTip[
     linesPolyData->SetPoints(points);
     linesPolyData->SetLines(cells);
 
-    m_lineToPointerTip->SetPolyData( linesPolyData.GetPointer() );
+    m_lineToPointerTip->SetPolyData( linesPolyData );
     emit Modified();
 }
 
