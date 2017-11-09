@@ -177,6 +177,9 @@ void LandmarkRegistrationObject::ObjectAddedToScene()
 
 void LandmarkRegistrationObject::ObjectAboutToBeRemovedFromScene()
 {
+    // m_targetPoints is not a child of LandmarkRegistrationObject, it has to be removed explicitly
+    if( m_targetPoints )
+        GetManager()->RemoveObject( m_targetPoints );
     disconnect( GetManager(), SIGNAL(CurrentObjectChanged()), this, SLOT(CurrentObjectChanged()));
 }
 
