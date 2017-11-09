@@ -451,6 +451,7 @@ void SceneManager::Serialize( Serializer * ser )
                 ::Serialize( ser, viewName.toUtf8().data(), view );
             }
         }
+        ser->EndSection();
         return;
     }
     // writer
