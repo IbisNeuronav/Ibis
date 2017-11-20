@@ -32,6 +32,10 @@ class vtkTransform;
 class vtkImageStack;
 
 //#define TEST
+//to test volume reconstruction from USAcquisition plugin add dependency to declare-plugin.cmake
+//DeclarePlugin( USAcquisition YES DEPENDS GPU_VolumeReconstruction DESCRIPTION "This plugin is used to record a US acquisition and visualize the acquisition together with a similar slice of a volume" )
+// add include directories to CMakeLists.txt
+//include_directories( ${ITK_VOLUME_RECONSTRUCTION_OPENCL_KERNEL_INCLUDE_DIR} ${ITK_VOLUME_RECONSTRUCTION_OPENCL_INCLUDE_DIR} ${OPENCL_INCLUDE_DIRS} )
 
 class DoubleViewWidget : public QWidget
 {
