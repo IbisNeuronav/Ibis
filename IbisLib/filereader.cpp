@@ -41,7 +41,6 @@ FileReader::FileReader(QObject *parent)
 {
     m_currentFileIndex = 0;
     m_progress = 0.0;
-    m_fileProgressEvent = 0;
     m_selfAllocParams = false;
     m_params = 0;
     m_fileProgressEvent = vtkEventQtSlotConnect::New();

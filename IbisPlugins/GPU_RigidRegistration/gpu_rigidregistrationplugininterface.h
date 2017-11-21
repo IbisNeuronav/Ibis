@@ -26,6 +26,8 @@ class GPU_RigidRegistrationPluginInterface : public QObject, public ToolPluginIn
 
 public:
 
+    vtkTypeMacro( GPU_RigidRegistrationPluginInterface, ToolPluginInterface );
+
     GPU_RigidRegistrationPluginInterface();
     ~GPU_RigidRegistrationPluginInterface();
     virtual QString GetPluginName() { return QString("GPU_RigidRegistration"); }

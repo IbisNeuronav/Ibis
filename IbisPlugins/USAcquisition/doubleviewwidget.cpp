@@ -39,6 +39,11 @@ DoubleViewWidget::DoubleViewWidget( QWidget * parent, Qt::WindowFlags f ) :
 {
     ui->setupUi(this);
 
+    ui->volumeButton->hide();
+#ifdef TEST
+    ui->volumeButton->show();
+#endif
+
     // Create the 2 view windows
     vtkRenderWindowInteractor * usInteractor = ui->usImageWindow->GetInteractor();
     vtkSmartPointer<vtkInteractorStyleImage2> style = vtkSmartPointer<vtkInteractorStyleImage2>::New();
@@ -650,3 +655,50 @@ void DoubleViewWidget::on_m_exportButton_clicked()
     acq->Export();
     this->setEnabled( true );
 }
+
+#ifdef TEST
+//In order to run this code, set dependency on GPU_VolumeRevonstruction plugin in ibis/IbisPlugins/USAcquisition/declare-plugin.cmake
+//DeclarePlugin( USAcquisition YES DEPENDS GPU_VolumeReconstruction DESCRIPTION "This plugin is used to record a US acquisition and visualize the acquisition together with a similar slice of a volume" )
+
+#include "application.h"
+#include "imageobject.h"
+#include "gpu_volumereconstructionplugininterface.h"
+#include "gpu_volumereconstruction.h"
+void DoubleViewWidget::on_volumeButton_clicked()
+{
+    ToolPluginInterface * toolPlugin = m_pluginInterface->GetApplication()->GetToolPluginByName( "GPU_VolumeReconstruction");
+    if( !toolPlugin )
+        return;
+    GPU_VolumeReconstructionPluginInterface *volumeReconstructorPlugin = GPU_VolumeReconstructionPluginInterface::SafeDownCast( toolPlugin );
+    Q_ASSERT( volumeReconstructorPlugin );
+    GPU_VolumeReconstruction *reconstructor = GPU_VolumeReconstruction::New();
+
+    USAcquisitionObject * acq = m_pluginInterface->GetCurrentAcquisition();
+    Q_ASSERT( acq );
+    int nbrOfSlices = acq->GetNumberOfSlices();
+    reconstructor->CreateReconstructor();
+    reconstructor->SetNumberOfSlices( nbrOfSlices );
+    reconstructor->SetFixedSliceMask( acq->GetMask() );
+    reconstructor->SetUSSearchRadius( 3 );
+    reconstructor->SetVolumeSpacing( 1 );
+    reconstructor->SetKernelStdDev( 0.5 );
+    vtkSmartPointer<vtkMatrix4x4> sliceTransformMatrix = vtkSmartPointer<vtkMatrix4x4>::New() ;
+    vtkSmartPointer<vtkImageData> slice = vtkSmartPointer<vtkImageData>::New();
+    for(int i = 0; i < nbrOfSlices; i++)
+    {
+        acq->GetFrameData( i, slice.GetPointer(), sliceTransformMatrix.GetPointer() );
+        reconstructor->SetFixedSlice(i, slice.GetPointer(), sliceTransformMatrix.GetPointer() );
+    }
+
+     //Construct ITK Matrix corresponding to VTK Local Matrix
+    reconstructor->SetTransform( acq->GetLocalTransform()->GetMatrix() );
+    reconstructor->ReconstructVolume();
+
+    vtkSmartPointer<ImageObject> reconstructedImage = vtkSmartPointer<ImageObject>::New();
+    reconstructedImage->SetItkImage( reconstructor->GetReconstructedImage() );
+    reconstructedImage->SetName("Reconstructed Volume");
+    m_pluginInterface->GetSceneManager()->AddObject(reconstructedImage.GetPointer(), acq->GetParent()->GetParent() );
+    m_pluginInterface->GetSceneManager()->SetCurrentObject( reconstructedImage.GetPointer() );
+
+}
+#endif

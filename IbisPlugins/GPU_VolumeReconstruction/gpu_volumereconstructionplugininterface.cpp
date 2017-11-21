@@ -12,12 +12,12 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include "gpu_volumereconstructionplugininterface.h"
 #include "gpu_volumereconstructionwidget.h"
-#include "application.h"
 #include <QtPlugin>
 
 
 GPU_VolumeReconstructionPluginInterface::GPU_VolumeReconstructionPluginInterface()
 {
+    m_volumeReconstructionWidget = 0;
 }
 
 GPU_VolumeReconstructionPluginInterface::~GPU_VolumeReconstructionPluginInterface()
@@ -26,16 +26,14 @@ GPU_VolumeReconstructionPluginInterface::~GPU_VolumeReconstructionPluginInterfac
 
 bool GPU_VolumeReconstructionPluginInterface::CanRun()
 {
-    // This plugin can't run in viewer-only mode. Needs video capture and tracking.
-    //if( m_application->IsViewerOnly() )
-    //    return false;
     return true;
 }
 
 QWidget * GPU_VolumeReconstructionPluginInterface::CreateFloatingWidget()
 {
     GPU_VolumeReconstructionWidget * widget = new GPU_VolumeReconstructionWidget;
-    widget->SetApplication( GetApplication() );
+    widget->SetPluginInterface( this );
+    widget->setAttribute( Qt::WA_DeleteOnClose, true );
     return widget;
 }
 

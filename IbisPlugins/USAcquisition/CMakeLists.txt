@@ -1,3 +1,5 @@
+include_directories( ${GPU_VolumeReconstructionIncludeDir} )
+
 # define sources
 set( PluginSrc usacquisitionplugininterface.cpp doubleviewwidget.cpp )
 set( PluginHdrMoc usacquisitionplugininterface.h doubleviewwidget.h )

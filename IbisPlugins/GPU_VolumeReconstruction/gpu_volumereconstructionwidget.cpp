@@ -10,20 +10,29 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 // Thanks to Dante De Nigris for writing this class
 
+#include "gpu_volumereconstructionplugininterface.h"
 #include "gpu_volumereconstructionwidget.h"
 #include <QComboBox>
 #include <QMessageBox>
-#include <QApplication>
 #include <QtConcurrent/QtConcurrent>
 #include "vnl/algo/vnl_symmetric_eigensystem.h"
 #include "vnl/algo/vnl_real_eigensystem.h"
+
+#include "application.h"
+#include "scenemanager.h"
+#include "sceneobject.h"
+#include "imageobject.h"
+#include "usacquisitionobject.h"
+#include "vtkImageData.h"
+#include "vtkTransform.h"
+#include "vtkMatrix4x4.h"
 
 #include "itkImageFileWriter.h"
 
 GPU_VolumeReconstructionWidget::GPU_VolumeReconstructionWidget(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::GPU_VolumeReconstructionWidget),
-    m_application(0)
+    m_pluginInterface(0)
 {
     ui->setupUi(this);    
     setWindowTitle( "US Volume Reconstruction with GPU" );
@@ -33,102 +42,26 @@ GPU_VolumeReconstructionWidget::GPU_VolumeReconstructionWidget(QWidget *parent) 
     ui->progressBar->hide();
     connect(&this->m_futureWatcher, SIGNAL(finished()), this, SLOT(slot_finished()));
 
+    m_VolumeReconstructor = GPU_VolumeReconstruction::New();
+}
+
+void GPU_VolumeReconstructionWidget::SetPluginInterface( GPU_VolumeReconstructionPluginInterface *ifc )
+{
+    m_pluginInterface = ifc;
     UpdateUi();
 }
 
 GPU_VolumeReconstructionWidget::~GPU_VolumeReconstructionWidget()
 {
     delete ui;
-}
-
-void GPU_VolumeReconstructionWidget::SetApplication( Application * app )
-{
-    m_application = app;
-    UpdateUi();
-}
-
-void GPU_VolumeReconstructionWidget::VtkToItkImage( vtkImageData * vtkInputImage, IbisItkFloat3ImageType * itkOutputImage, vtkSmartPointer<vtkMatrix4x4> transformMatrix )
-{
-  int numberOfScalarComponents = vtkInputImage->GetNumberOfScalarComponents();
-  vtkImageData *grayImage = vtkInputImage;
-  vtkSmartPointer<vtkImageLuminance> luminanceFilter = vtkSmartPointer<vtkImageLuminance>::New();
-  if (numberOfScalarComponents > 1)
-  {
-      luminanceFilter->SetInputData(vtkInputImage);
-      luminanceFilter->Update();
-      grayImage = luminanceFilter->GetOutput();
-  }
-  vtkImageData * image;
-  vtkSmartPointer<vtkImageShiftScale> shifter = vtkSmartPointer<vtkImageShiftScale>::New();
-  if (vtkInputImage->GetScalarType() != VTK_FLOAT)
-  {
-      shifter->SetOutputScalarType(VTK_FLOAT);
-      shifter->SetClampOverflow(1);
-      shifter->SetInputData(grayImage);
-      shifter->SetShift(0);
-      shifter->SetScale(1.0);
-      shifter->Update();
-      image = shifter->GetOutput();
-  }
-  else
-      image = vtkInputImage;  
-
-  int * dimensions = vtkInputImage->GetDimensions();
-  IbisItkFloat3ImageType::SizeType  size;
-  IbisItkFloat3ImageType::IndexType start;
-  IbisItkFloat3ImageType::RegionType region;
-  const long unsigned int numberOfPixels =  dimensions[0] * dimensions[1] * dimensions[2];
-  double imageOrigin[3];
-  image->GetOrigin(imageOrigin);
-  for (int i = 0; i < 3; i++)
-  {
-      size[i] = dimensions[i];
-  }
-
-  start.Fill(0);
-  region.SetIndex( start );
-  region.SetSize( size );
-  itkOutputImage->SetRegions(region);
-
-  itk::Matrix< double, 3,3 > dirCosine;
-  itk::Vector< double, 3 > origin;
-  itk::Vector< double, 3 > itkOrigin;
-  // set direction cosines
-  vtkMatrix4x4 *tmpMat = vtkMatrix4x4::New();
-  vtkMatrix4x4::Transpose( transformMatrix, tmpMat );
-  double step[3], mincStartPoint[3], dirCos[3][3];
-  for( int i = 0; i < 3; i++ )
-  {
-      step[i] = vtkMath::Dot( (*tmpMat)[i], (*tmpMat)[i] );
-      step[i] = sqrt( step[i] );
-      for( int j = 0; j < 3; j++ )
-      {
-          dirCos[i][j] = (*tmpMat)[i][j] / step[i];
-          dirCosine[j][i] = dirCos[i][j];
-      }
-  }
-
-  double rotation[3][3];
-  vtkMath::Transpose3x3( dirCos, rotation );
-  vtkMath::LinearSolve3x3( rotation, (*tmpMat)[3], mincStartPoint );
-
-  for( int i = 0; i < 3; i++ )
-      origin[i] =  mincStartPoint[i];
-  itkOrigin = dirCosine * origin;
-  itkOutputImage->SetSpacing(step);
-  itkOutputImage->SetOrigin(itkOrigin);
-  itkOutputImage->SetDirection(dirCosine);
-  itkOutputImage->Allocate();
-  float *itkImageBuffer = itkOutputImage->GetBufferPointer();
-  memcpy(itkImageBuffer, image->GetScalarPointer(), numberOfPixels*sizeof(float));
-  tmpMat->Delete();
+    m_VolumeReconstructor->Delete();
 }
 
 void GPU_VolumeReconstructionWidget::slot_finished()
 {
     int usAcquisitionObjectId = ui->usAcquisitionComboBox->itemData( ui->usAcquisitionComboBox->currentIndex() ).toInt();
 
-    SceneManager * sm = m_application->GetSceneManager();
+    SceneManager * sm = m_pluginInterface->GetSceneManager();
 
     // Get US Acquisition Object
     USAcquisitionObject * selectedUSAcquisitionObject = USAcquisitionObject::SafeDownCast( sm->GetObjectByID( usAcquisitionObjectId) );
@@ -138,9 +71,8 @@ void GPU_VolumeReconstructionWidget::slot_finished()
 
     //Add Reconstructed Volume to Scene
     vtkSmartPointer<ImageObject> reconstructedImage = vtkSmartPointer<ImageObject>::New();
-    reconstructedImage->SetItkImage( m_Reconstructor->GetReconstructedVolume() );
+    reconstructedImage->SetItkImage( m_VolumeReconstructor->GetReconstructor()->GetReconstructedVolume() );
     reconstructedImage->SetName("Reconstructed Volume");
-    //reconstructedImage->SetLocalTransform( selectedUSAcquisitionObject->GetLocalTransform() );
 
     sm->AddObject(reconstructedImage, selectedUSAcquisitionObject->GetParent()->GetParent() );
     sm->SetCurrentObject( reconstructedImage );
@@ -155,11 +87,9 @@ void GPU_VolumeReconstructionWidget::slot_finished()
 
     ui->progressBar->hide();
 
-    m_Reconstructor = 0; // Destroy Object.
+    m_VolumeReconstructor->DestroyReconstructor();
 }
 
-
-#include "ibisitkvtkconverter.h"
 void GPU_VolumeReconstructionWidget::on_startButton_clicked()
 {
     // Make sure all params have been specified
@@ -171,7 +101,7 @@ void GPU_VolumeReconstructionWidget::on_startButton_clicked()
         return;
     }
 
-    SceneManager * sm = m_application->GetSceneManager();
+    SceneManager * sm = m_pluginInterface->GetSceneManager();
     // Get US Acquisition Object
     USAcquisitionObject * selectedUSAcquisitionObject = USAcquisitionObject::SafeDownCast( sm->GetObjectByID( usAcquisitionObjectId) );
     Q_ASSERT_X( selectedUSAcquisitionObject, "GPU_VolumeReconstructionWidget::on_startButton_clicked()", "Invalid target US object" );
@@ -204,99 +134,36 @@ void GPU_VolumeReconstructionWidget::on_startButton_clicked()
     std::cerr << "US Acquisition Object with " << nbrOfSlices << " slices." << std::endl;
 #endif    
 
-    IbisItkFloat3ImageType::Pointer itkSliceMask = IbisItkFloat3ImageType::New();
-    vtkSmartPointer<vtkMatrix4x4> sliceMaskMatrix = vtkSmartPointer<vtkMatrix4x4>::New();
-    this->VtkToItkImage( selectedUSAcquisitionObject->GetMask(), itkSliceMask, sliceMaskMatrix  );
-
 #ifdef DEBUG
     std::cerr << "Constructing m_Reconstructor..." << std::endl;
 #endif
-    m_Reconstructor = VolumeReconstructionType::New();
-    m_Reconstructor->SetNumberOfSlices( nbrOfSlices );
-    m_Reconstructor->SetFixedSliceMask( itkSliceMask );
-    m_Reconstructor->SetUSSearchRadius( usSearchRadius );
-    m_Reconstructor->SetVolumeSpacing( usVolumeSpacing );
-    m_Reconstructor->SetKernelStdDev( usVolumeSpacing/2.0 );
+    m_VolumeReconstructor->CreateReconstructor();
+    m_VolumeReconstructor->SetNumberOfSlices( nbrOfSlices );
+    m_VolumeReconstructor->SetFixedSliceMask( selectedUSAcquisitionObject->GetMask() );
+    m_VolumeReconstructor->SetUSSearchRadius( usSearchRadius );
+    m_VolumeReconstructor->SetVolumeSpacing( usVolumeSpacing );
+    m_VolumeReconstructor->SetKernelStdDev( usVolumeSpacing/2.0 );
 
 #ifdef DEBUG
     std::cerr << "Constructing m_Reconstructor...DONE" << std::endl;
 #endif
 
-    IbisItkFloat3ImageType::Pointer itkSliceImage[nbrOfSlices];
-
     vtkSmartPointer<vtkMatrix4x4> sliceTransformMatrix = vtkSmartPointer<vtkMatrix4x4>::New() ;
     vtkSmartPointer<vtkImageData> slice = vtkSmartPointer<vtkImageData>::New();
-    vtkSmartPointer<IbisItkVtkConverter> converter = vtkSmartPointer<IbisItkVtkConverter>::New();
     for(unsigned int i=0; i<nbrOfSlices; i++)
     {
-      itkSliceImage[i] = IbisItkFloat3ImageType::New();
       selectedUSAcquisitionObject->GetFrameData( i, slice, sliceTransformMatrix );
-      if( converter->ConvertVtkImageToItkImage( itkSliceImage[i], slice, sliceTransformMatrix ) )
-        m_Reconstructor->SetFixedSlice(i, itkSliceImage[i]);
+      m_VolumeReconstructor->SetFixedSlice(i, slice, sliceTransformMatrix );
     }
 
      //Construct ITK Matrix corresponding to VTK Local Matrix
-    vtkMatrix4x4 * localMatrix =  selectedUSAcquisitionObject->GetLocalTransform()->GetMatrix();
-    ItkRigidTransformType::Pointer itkTransform = ItkRigidTransformType::New();
-    ItkRigidTransformType::OffsetType offset;
-    vnl_matrix<double> M(3,3);
-    for(unsigned int i=0; i<3; i++ )
-     {
-     for(unsigned int j=0; j<3; j++ )
-       {
-        M[i][j] = localMatrix->GetElement(i,j);
-       }
-      offset[i] = localMatrix->GetElement(i,3);
-      }
-
-    double angleX, angleY, angleZ;
-    angleX = vcl_asin(M[2][1]);
-    double A = vcl_cos(angleX);
-    if( vcl_fabs(A) > 0.00005 )
-      {
-      double x = M[2][2] / A;
-      double y = -M[2][0] / A;
-      angleY = vcl_atan2(y, x);
-
-      x = M[1][1] / A;
-      y = -M[0][1] / A;
-      angleZ = vcl_atan2(y, x);
-      }
-    else
-      {
-      angleZ = 0;
-      double x = M[0][0];
-      double y = M[1][0];
-      angleY = vcl_atan2(y, x);
-      }
-
-    ItkRigidTransformType::ParametersType params = ItkRigidTransformType::ParametersType(6);
-    params[0] = angleX; params[1] = angleY; params[2] = angleZ;
-
-    ItkRigidTransformType::CenterType center;
-    center.Fill(0.0);
-
-    for( unsigned int i = 0; i < 3; i++ )
-      {
-      params[i+3] = offset[i] - center[i];
-      for( unsigned int j = 0; j < 3; j++ )
-        {
-        params[i+3] += M[i][j] * center[j];
-        }
-      }
-
-    itkTransform->SetCenter(center);
-    itkTransform->SetParameters(params);
-
-
-    m_Reconstructor->SetTransform( itkTransform );
+    m_VolumeReconstructor->SetTransform( selectedUSAcquisitionObject->GetLocalTransform()->GetMatrix() );
 #ifdef DEBUG
     std::cerr << "Starting reconstruction..." << std::endl;
 #endif   
 
-    QFuture<void> future = QtConcurrent::run(m_Reconstructor.GetPointer(), &VolumeReconstructionType::ReconstructVolume);
+    QFuture<void> future = QtConcurrent::run(m_VolumeReconstructor->GetReconstructor().GetPointer(), &VolumeReconstructionType::ReconstructVolume);
     this->m_futureWatcher.setFuture(future);
-
 }
 
 void GPU_VolumeReconstructionWidget::UpdateUi()
@@ -305,35 +172,31 @@ void GPU_VolumeReconstructionWidget::UpdateUi()
   ui->usAcquisitionComboBox->clear();
   ui->usSearchRadiusComboBox->clear();
   ui->usVolumeSpacingComboBox->clear();
-  if( m_application )
+  SceneManager * sm = m_pluginInterface->GetSceneManager();
+  const SceneManager::ObjectList & allObjects = sm->GetAllObjects();
+  for( int i = 0; i < allObjects.size(); ++i )
     {
-      SceneManager * sm = m_application->GetSceneManager();
-      const SceneManager::ObjectList & allObjects = sm->GetAllObjects();
-      for( int i = 0; i < allObjects.size(); ++i )
+      SceneObject * current = allObjects[i];
+      if( current != sm->GetSceneRoot() && current->IsListable() && !current->IsManagedByTracker())
         {
-          SceneObject * current = allObjects[i];
-          if( current != sm->GetSceneRoot() && current->IsListable() && !current->IsManagedByTracker())
+          if( current->IsA("USAcquisitionObject") )
             {
-              if( current->IsA("USAcquisitionObject") )
-                {
-                  USAcquisitionObject * currentUSAcquisitionObject = USAcquisitionObject::SafeDownCast( current );
-                  ui->usAcquisitionComboBox->addItem( current->GetName(), QVariant( current->GetObjectID() ) );
-                }
+              USAcquisitionObject * currentUSAcquisitionObject = USAcquisitionObject::SafeDownCast( current );
+              ui->usAcquisitionComboBox->addItem( current->GetName(), QVariant( current->GetObjectID() ) );
             }
         }
-
-      if( ui->usAcquisitionComboBox->count() == 0 )
-        {
-          ui->usAcquisitionComboBox->addItem( "None", QVariant(-1) );
-        }
-
-      for(unsigned int i=0; i <=3 ; i++)
-        {
-          ui->usSearchRadiusComboBox->addItem( QString::number(i) , QVariant(i) );
-        }
-
-      ui->usVolumeSpacingComboBox->addItem( QString("1.0 mm x 1.0 mm x 1.0 mm"), QVariant( 1.0 ) );
-      ui->usVolumeSpacingComboBox->addItem( QString("0.5 mm x 0.5 mm x 0.5 mm"), QVariant( 0.5 ) );
     }
 
+  if( ui->usAcquisitionComboBox->count() == 0 )
+    {
+      ui->usAcquisitionComboBox->addItem( "None", QVariant(-1) );
+    }
+
+  for(unsigned int i=0; i <=3 ; i++)
+    {
+      ui->usSearchRadiusComboBox->addItem( QString::number(i) , QVariant(i) );
+    }
+
+  ui->usVolumeSpacingComboBox->addItem( QString("1.0 mm x 1.0 mm x 1.0 mm"), QVariant( 1.0 ) );
+  ui->usVolumeSpacingComboBox->addItem( QString("0.5 mm x 0.5 mm x 0.5 mm"), QVariant( 0.5 ) );
 }

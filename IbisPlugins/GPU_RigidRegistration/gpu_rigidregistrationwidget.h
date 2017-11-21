@@ -45,7 +45,7 @@ typedef  GPUCostFunctionType::GPUMetricPointer      GPUMetricPointer;
 
 typedef itk::Euler3DTransform<double>                ItkRigidTransformType;
 
-class Application;
+class GPU_RigidRegistrationPluginInterface;
 
 namespace Ui
 {
@@ -63,7 +63,7 @@ public:
     explicit GPU_RigidRegistrationWidget(QWidget *parent = 0);
     ~GPU_RigidRegistrationWidget();
 
-    void SetApplication( Application * app );
+    void SetPluginInterface( GPU_RigidRegistrationPluginInterface * ifc );
 
 private:
 
@@ -72,7 +72,7 @@ private:
     void updateTagsDistance();
 
     Ui::GPU_RigidRegistrationWidget * ui;
-    Application * m_application;
+    GPU_RigidRegistrationPluginInterface * m_pluginInterface;
     bool          m_OptimizationRunning;
 
 private slots:
@@ -80,12 +80,6 @@ private slots:
     void on_startButton_clicked();
     void on_sourceImageComboBox_activated(int index);
     void on_debugCheckBox_clicked();
-
-//    void on_targetImageComboBox_activated(int index);
-//    void on_transformObjectComboBox_activated(int index);
-
-//    void on_mriTagsComboBox_activated(int index);
-//    void on_usTagsComboBox_activated(int index);
 
 protected:
     void closeEvent(QCloseEvent *event)

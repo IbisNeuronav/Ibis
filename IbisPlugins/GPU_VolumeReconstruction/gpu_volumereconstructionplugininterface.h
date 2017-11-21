@@ -27,6 +27,8 @@ class GPU_VolumeReconstructionPluginInterface : public QObject, public ToolPlugi
 
 public:
 
+    vtkTypeMacro( GPU_VolumeReconstructionPluginInterface, ToolPluginInterface );
+
     GPU_VolumeReconstructionPluginInterface();
     ~GPU_VolumeReconstructionPluginInterface();
     virtual QString GetPluginName() { return QString("GPU_VolumeReconstruction"); }
@@ -35,6 +37,9 @@ public:
 
     QWidget * CreateFloatingWidget();
 
+protected:
+
+    GPU_VolumeReconstructionWidget * m_volumeReconstructionWidget;
 };
 
 #endif
