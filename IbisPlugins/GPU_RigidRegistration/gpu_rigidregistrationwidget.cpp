@@ -10,6 +10,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 // Thanks to Dante De Nigris for writing this class
 #include "gpu_rigidregistrationwidget.h"
+#include "gpu_rigidregistrationplugininterface.h"
 #include <QComboBox>
 #include <QMessageBox>
 #include "vnl/algo/vnl_symmetric_eigensystem.h"
@@ -143,7 +144,7 @@ public:
 GPU_RigidRegistrationWidget::GPU_RigidRegistrationWidget(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::GPU_RigidRegistrationWidget),
-    m_application(0),
+    m_pluginInterface(0),
     m_OptimizationRunning(false)
 {
     ui->setupUi(this);
@@ -153,7 +154,6 @@ GPU_RigidRegistrationWidget::GPU_RigidRegistrationWidget(QWidget *parent) :
     connect(ui->populationSizeDial, SIGNAL(valueChanged(int)), ui->populationSizeValueLabel, SLOT(setNum(int)));
     connect(ui->debugCheckBox, SIGNAL(stateChanged(int)), this, SLOT(on_debugCheckBox_clicked()));
     ui->registrationOutputTextEdit->hide();
-    UpdateUi();
 
 }
 
@@ -162,11 +162,9 @@ GPU_RigidRegistrationWidget::~GPU_RigidRegistrationWidget()
     delete ui;
 }
 
-
-
-void GPU_RigidRegistrationWidget::SetApplication( Application * app )
+void GPU_RigidRegistrationWidget::SetPluginInterface( GPU_RigidRegistrationPluginInterface * ifc )
 {
-    m_application = app;
+    m_pluginInterface = ifc;
     UpdateUi();
 }
 
@@ -184,7 +182,7 @@ void GPU_RigidRegistrationWidget::on_startButton_clicked()
     }
 
     // Get input images
-    SceneManager * sm = m_application->GetSceneManager();
+    SceneManager * sm = m_pluginInterface->GetSceneManager();
     ImageObject * sourceImageObject = ImageObject::SafeDownCast( sm->GetObjectByID( sourceImageObjectId ) );
     Q_ASSERT_X( sourceImageObject, "GPU_RigidRegistrationWidget::on_startButton_clicked()", "Invalid source object" );
     vtkTransform * sourceVtkTransform = vtkTransform::SafeDownCast( sourceImageObject->GetWorldTransform() );
@@ -323,7 +321,7 @@ void GPU_RigidRegistrationWidget::on_startButton_clicked()
 
 
     CommandIterationUpdateOpenCL::Pointer observer = CommandIterationUpdateOpenCL::New();
-    observer->SetApplication( m_application );
+    observer->SetApplication( m_pluginInterface->GetApplication() );
     observer->SetTransformObjectID( transformObjectId );
     observer->SetTargetImageObjectID( targetImageObjectId );
     observer->SetDebug(debug);
@@ -331,11 +329,6 @@ void GPU_RigidRegistrationWidget::on_startButton_clicked()
 
     if(debug)
       std::cout << "Starting registration..." << std::endl;
-
-//    Qt::WindowFlags originalFlags = windowFlags() ;
-//    Qt::WindowFlags flags = windowFlags() ;
-//    flags &= ~Qt::WindowCloseButtonHint ;
-//    setWindowFlags( Qt::Tool | Qt::WindowTitleHint| Qt::CustomizeWindowHint ) ;
 
     m_OptimizationRunning = true;
     try
@@ -370,110 +363,75 @@ void GPU_RigidRegistrationWidget::UpdateUi()
   ui->sourceImageComboBox->clear();
   ui->targetImageComboBox->clear();
   ui->transformObjectComboBox->clear();
-//  ui->usTagsComboBox->clear();
-//  ui->mriTagsComboBox->clear();
-  if( m_application )
+  //Set Parameters First
+  ui->percentileComboBox->addItem( "0.6", QVariant( 0.6 ) );
+  ui->percentileComboBox->addItem( "0.7", QVariant( 0.7 ) );
+  ui->percentileComboBox->addItem( "0.8", QVariant( 0.8 ) );
+  ui->percentileComboBox->addItem( "0.9", QVariant( 0.9 ) );
+  ui->percentileComboBox->setCurrentIndex( 2 );
+
+  ui->initialSigmaComboBox->addItem( "0.1", QVariant( 0.1 ) );
+  ui->initialSigmaComboBox->addItem( "1.0", QVariant( 1.0 ) );
+  ui->initialSigmaComboBox->addItem( "2.0", QVariant( 2.0 ) );
+  ui->initialSigmaComboBox->addItem( "4.0", QVariant( 4.0 ) );
+  ui->initialSigmaComboBox->addItem( "8.0", QVariant( 8.0 ) );
+  ui->initialSigmaComboBox->setCurrentIndex( 1 );
+
+  SceneManager * sm = m_pluginInterface->GetSceneManager();
+  const SceneManager::ObjectList & allObjects = sm->GetAllObjects();
+  for( int i = 0; i < allObjects.size(); ++i )
   {
-      //Set Parameters First
-      ui->percentileComboBox->addItem( "0.6", QVariant( 0.6 ) );
-      ui->percentileComboBox->addItem( "0.7", QVariant( 0.7 ) );
-      ui->percentileComboBox->addItem( "0.8", QVariant( 0.8 ) );
-      ui->percentileComboBox->addItem( "0.9", QVariant( 0.9 ) );
-      ui->percentileComboBox->setCurrentIndex( 2 );
-
-      ui->initialSigmaComboBox->addItem( "0.1", QVariant( 0.1 ) );
-      ui->initialSigmaComboBox->addItem( "1.0", QVariant( 1.0 ) );
-      ui->initialSigmaComboBox->addItem( "2.0", QVariant( 2.0 ) );
-      ui->initialSigmaComboBox->addItem( "4.0", QVariant( 4.0 ) );
-      ui->initialSigmaComboBox->addItem( "8.0", QVariant( 8.0 ) );
-      ui->initialSigmaComboBox->setCurrentIndex( 1 );
-
-      SceneManager * sm = m_application->GetSceneManager();
-      const SceneManager::ObjectList & allObjects = sm->GetAllObjects();
-      for( int i = 0; i < allObjects.size(); ++i )
+      SceneObject * current = allObjects[i];
+      if( current != sm->GetSceneRoot() && current->IsListable() && !current->IsManagedByTracker())
       {
-          SceneObject * current = allObjects[i];
-          if( current != sm->GetSceneRoot() && current->IsListable() && !current->IsManagedByTracker())
+          if( current->IsA("ImageObject") )
           {
-              if( current->IsA("ImageObject") )
-              {
-                  ui->targetImageComboBox->addItem( current->GetName(), QVariant( current->GetObjectID() ) );
-                  ui->sourceImageComboBox->addItem( current->GetName(), QVariant( current->GetObjectID() ) );
-              }
+              ui->targetImageComboBox->addItem( current->GetName(), QVariant( current->GetObjectID() ) );
+              ui->sourceImageComboBox->addItem( current->GetName(), QVariant( current->GetObjectID() ) );
           }
       }
-
-      if( ui->targetImageComboBox->count() == 0 )
-        {
-          ui->targetImageComboBox->addItem( "None", QVariant(-1) );
-        }
-      // else
-      //   {
-      //     int targetId = ui->targetImageComboBox->itemData( ui->targetImageComboBox->currentIndex() ).toInt();
-      //     SceneObject * targetParentObject = SceneObject::SafeDownCast( sm->GetObjectByID( targetId )->GetParent() );          
-      //     for(unsigned int i=0; i < targetParentObject->GetNumberOfChildren(); i++)
-      //     {
-      //         if( targetParentObject->GetChild(i)->inherits("PointsObject") )
-      //         {
-      //             ui->usTagsComboBox->addItem( targetParentObject->GetChild(i)->GetName(), QVariant( targetParentObject->GetChild(i)->GetObjectID() ) );
-      //         }
-      //     }
-      //   }
-
-      // if( ui->usTagsComboBox->count() == 0 )
-      //     ui->usTagsComboBox->addItem( "None", QVariant(-1) );
-
-
-      if( ui->sourceImageComboBox->count() == 0 )
-      {
-          ui->sourceImageComboBox->addItem( "None", QVariant(-1) );        
-      }
-      else
-      {
-          int sourceId = ui->sourceImageComboBox->itemData( ui->sourceImageComboBox->currentIndex() ).toInt();
-          ImageObject * sourceImageObject = ImageObject::SafeDownCast( sm->GetObjectByID( sourceId ) );
-
-          if( sourceImageObject->CanEditTransformManually() )
-          {
-              ui->transformObjectComboBox->addItem( sourceImageObject->GetName(), QVariant( sourceId ) );
-          }
-          if(sourceImageObject->GetParent() )
-          {
-              if(sourceImageObject->GetParent()->CanEditTransformManually())
-                  ui->transformObjectComboBox->addItem( sourceImageObject->GetParent()->GetName(), QVariant( sourceImageObject->GetParent()->GetObjectID() ) );
-          }
-      }
-
-
-      if( ui->transformObjectComboBox->count() == 0 )
-        {
-          ui->transformObjectComboBox->addItem( "None", QVariant(-1) );
-        }
-      // else
-      //   {
-      //     int transformId = ui->transformObjectComboBox->itemData( ui->transformObjectComboBox->currentIndex() ).toInt();
-      //     SceneObject * transformObject = SceneObject::SafeDownCast( sm->GetObjectByID( transformId ) );          
-      //     for(unsigned int i=0; i < transformObject->GetNumberOfChildren(); i++)
-      //       {
-      //         if( transformObject->GetChild(i)->inherits("PointsObject") )
-      //           {
-      //             ui->mriTagsComboBox->addItem( transformObject->GetChild(i)->GetName(), QVariant( transformObject->GetChild(i)->GetObjectID() ) );
-      //           }
-      //       }
-      //   }
-      // if( ui->mriTagsComboBox->count() == 0 )
-      //     ui->mriTagsComboBox->addItem( "None", QVariant(-1) );
   }
 
+  if( ui->targetImageComboBox->count() == 0 )
+    {
+      ui->targetImageComboBox->addItem( "None", QVariant(-1) );
+    }
+
+
+  if( ui->sourceImageComboBox->count() == 0 )
+  {
+      ui->sourceImageComboBox->addItem( "None", QVariant(-1) );
+  }
+  else
+  {
+      int sourceId = ui->sourceImageComboBox->itemData( ui->sourceImageComboBox->currentIndex() ).toInt();
+      ImageObject * sourceImageObject = ImageObject::SafeDownCast( sm->GetObjectByID( sourceId ) );
+
+      if( sourceImageObject->CanEditTransformManually() )
+      {
+          ui->transformObjectComboBox->addItem( sourceImageObject->GetName(), QVariant( sourceId ) );
+      }
+      if(sourceImageObject->GetParent() )
+      {
+          if(sourceImageObject->GetParent()->CanEditTransformManually())
+              ui->transformObjectComboBox->addItem( sourceImageObject->GetParent()->GetName(), QVariant( sourceImageObject->GetParent()->GetObjectID() ) );
+      }
+  }
+
+
+  if( ui->transformObjectComboBox->count() == 0 )
+    {
+      ui->transformObjectComboBox->addItem( "None", QVariant(-1) );
+    }
 }
 
 void GPU_RigidRegistrationWidget::on_sourceImageComboBox_activated(int index)
 {  
   int sourceId = ui->sourceImageComboBox->itemData( ui->sourceImageComboBox->currentIndex() ).toInt();
-  if( m_application && sourceId != -1)
+  if( sourceId != -1)
   {
       ui->transformObjectComboBox->clear();    
-      SceneManager * sm = m_application->GetSceneManager();
+      SceneManager * sm = m_pluginInterface->GetSceneManager();
       ImageObject * sourceImageObject = ImageObject::SafeDownCast( sm->GetObjectByID( sourceId ) );
       ui->transformObjectComboBox->addItem( sourceImageObject->GetName(), QVariant( sourceId ) );
       if(sourceImageObject->GetParent() )
@@ -484,109 +442,6 @@ void GPU_RigidRegistrationWidget::on_sourceImageComboBox_activated(int index)
 
   }
 }
-
-//void GPU_RigidRegistrationWidget::on_targetImageComboBox_activated(int index)
-//{
-//    ui->usTagsComboBox->clear();
-//    int targetId = ui->targetImageComboBox->itemData( ui->targetImageComboBox->currentIndex() ).toInt();
-////    if( m_application && targetId != -1 )
-////    {
-////        SceneManager * sm = m_application->GetSceneManager();
-////        SceneObject * targetParentObject = SceneObject::SafeDownCast( sm->GetObjectByID( targetId )->GetParent() );
-////        for(unsigned int i=0; i < targetParentObject->GetNumberOfChildren(); i++)
-////        {
-////            if( targetParentObject->GetChild(i)->inherits("PointsObject") )
-////            {
-////                ui->usTagsComboBox->addItem( targetParentObject->GetChild(i)->GetName(), QVariant( targetParentObject->GetChild(i)->GetObjectID() ) );
-////            }
-////        }
-
-////    }
-////    if( ui->usTagsComboBox->count() == 0 )
-////        ui->usTagsComboBox->addItem( "None", QVariant(-1) );
-
-//}
-
-//void GPU_RigidRegistrationWidget::on_transformObjectComboBox_activated(int index)
-//{
-////    ui->mriTagsComboBox->clear();
-////    int transformId = ui->transformObjectComboBox->itemData( ui->transformObjectComboBox->currentIndex() ).toInt();
-////    if( m_application && transformId != -1)
-////    {
-////        SceneManager * sm = m_application->GetSceneManager();
-////        SceneObject * transformObject = SceneObject::SafeDownCast( sm->GetObjectByID( transformId ) );
-////        for(unsigned int i=0; i < transformObject->GetNumberOfChildren(); i++)
-////        {
-////            if( transformObject->GetChild(i)->inherits("PointsObject") )
-////            {
-////                ui->mriTagsComboBox->addItem( transformObject->GetChild(i)->GetName(), QVariant( transformObject->GetChild(i)->GetObjectID() ) );
-////            }
-////        }
-////    }
-////    if( ui->mriTagsComboBox->count() == 0 )
-////        ui->mriTagsComboBox->addItem( "None", QVariant(-1) );
-//}
-
-
-//void GPU_RigidRegistrationWidget::on_mriTagsComboBox_activated(int index)
-//{
-//  this->updateTagsDistance();
-//}
-
-//void GPU_RigidRegistrationWidget::on_usTagsComboBox_activated(int index)
-//{
-//  this->updateTagsDistance();
-//}
-
-//void GPU_RigidRegistrationWidget::updateTagsDistance()
-//{
-//  int usTagsId = ui->usTagsComboBox->itemData( ui->usTagsComboBox->currentIndex() ).toInt();
-//  int mriTagsId = ui->mriTagsComboBox->itemData( ui->mriTagsComboBox->currentIndex() ).toInt();
-
-//  if( usTagsId == -1 || mriTagsId == -1 )
-//  {
-//     ui->tagsDistanceValue->setText("N/A");
-//     return;
-//  }
-
-//  if( m_application )
-//  {
-//      SceneManager * sm = m_application->GetSceneManager();
-//      PointsObject * usTagsObject = PointsObject::SafeDownCast( sm->GetObjectByID( usTagsId ) );
-//      PointsObject * mriTagsObject = PointsObject::SafeDownCast( sm->GetObjectByID( mriTagsId ) );
-
-//      vtkTransform * vtktransform = vtkTransform::SafeDownCast( mriTagsObject->GetWorldTransform() );
-
-//      ui->tagsDistanceValue->setText("..under construction");
-
-//      double meanDistance = 0;
-//      for(unsigned int n=0; n < usTagsObject->GetNumberOfPoints(); n++)
-//        {
-//          double usPoint[3];
-//          usTagsObject->GetPoint(n)->GetPosition(usPoint);
-
-//          double mriPoint[3];
-//          mriTagsObject->GetPoint(n)->GetPosition(mriPoint);
-
-//          double mriTransPoint[3];
-//          vtktransform->TransformPoint(mriPoint, mriTransPoint);
-
-//          double distance = 0;
-//          distance += pow(usPoint[0]-mriTransPoint[0],2.0);
-//          distance += pow(usPoint[1]-mriTransPoint[1],2.0);
-//          distance += pow(usPoint[2]-mriTransPoint[2],2.0);
-//          distance = sqrt(distance);
-
-//          meanDistance += distance;
-//        }
-//      meanDistance /= usTagsObject->GetNumberOfPoints();
-
-//      ui->tagsDistanceValue->setText(QString::number(meanDistance));
-//  }
-
-//}
-
-
 
 void GPU_RigidRegistrationWidget::on_debugCheckBox_clicked()
 {
