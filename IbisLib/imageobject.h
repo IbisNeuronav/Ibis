@@ -20,11 +20,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include "ibisitkvtkconverter.h"
 
-//#include "itkVTKImageExport.h"
-//#include <itkImageRegionIterator.h>
-//#include <itkImage.h>
-//#include "itkRGBPixel.h"
-
 class vtkRenderer;
 class vtkRenderWindowInteractor;
 class vtkOutlineFilter;

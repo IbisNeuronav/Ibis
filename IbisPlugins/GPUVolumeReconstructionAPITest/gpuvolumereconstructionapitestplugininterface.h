@@ -9,33 +9,31 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
 // Thanks to Dante De Nigris for writing this class
-#ifndef __GPU_RigidRegistrationPluginInterface_h_
-#define __GPU_RigidRegistrationPluginInterface_h_
+
+#ifndef __GPUVolumeReconstructionAPITestPluginInterface_h_
+#define __GPUVolumeReconstructionAPITestPluginInterface_h_
 
 #include <QObject>
 #include "toolplugininterface.h"
 
-class GPU_RigidRegistrationWidget;
 
-class GPU_RigidRegistrationPluginInterface : public QObject, public ToolPluginInterface
+class GPUVolumeReconstructionAPITestPluginInterface : public QObject, public ToolPluginInterface
 {
 
     Q_OBJECT
     Q_INTERFACES(IbisPlugin)
-    Q_PLUGIN_METADATA(IID "Ibis.GPU_RigidRegistrationPluginInterface" )
+    Q_PLUGIN_METADATA(IID "Ibis._GPUVolumeReconstructionAPITestPluginInterface" )
 
 public:
 
-    vtkTypeMacro( GPU_RigidRegistrationPluginInterface, ToolPluginInterface );
+    vtkTypeMacro( GPUVolumeReconstructionAPITestPluginInterface, ToolPluginInterface );
 
-    GPU_RigidRegistrationPluginInterface();
-    ~GPU_RigidRegistrationPluginInterface();
-    virtual QString GetPluginName() { return QString("GPU_RigidRegistration"); }
+    GPUVolumeReconstructionAPITestPluginInterface();
+    ~GPUVolumeReconstructionAPITestPluginInterface();
+    virtual QString GetPluginName() { return QString("GPUVolumeReconstructionAPITest"); }
     bool CanRun();
-    QString GetMenuEntryString() { return QString("Rigid Registration With GPU"); }
-
+    QString GetMenuEntryString() { return QString("No GUI US Volume Reconstruction"); }
     QWidget * CreateFloatingWidget();
-
 };
 
 #endif
