@@ -30,6 +30,7 @@ LandmarkRegistrationObjectPluginInterface::~LandmarkRegistrationObjectPluginInte
 
 SceneObject *LandmarkRegistrationObjectPluginInterface::CreateObject()
 {
+    m_landmarkRegistrationObject = 0;
     SceneManager *manager = GetSceneManager();
     Q_ASSERT(manager);
     vtkSmartPointer<PointsObject>sourcePoints = vtkSmartPointer<PointsObject>::New();
