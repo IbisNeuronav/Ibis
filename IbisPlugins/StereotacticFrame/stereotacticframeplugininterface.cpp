@@ -244,6 +244,11 @@ void StereotacticFramePluginInterface::OnManipulatorsModified()
 
 void StereotacticFramePluginInterface::OnReferenceTransformChanged()
 {
+    if( m_frameRepresentation )
+    {
+        Disable3DFrame();
+        DisableManipulators();
+    }
     Initialize();
 }
 
@@ -321,6 +326,7 @@ void StereotacticFramePluginInterface::Enable3DFrame()
     m_frameRepresentation->SetLocalTransform( m_frameTransform );
 
     GetSceneManager()->AddObject( m_frameRepresentation, ref );
+    m_frameRepresentation->Modified();
 }
 
 void StereotacticFramePluginInterface::Disable3DFrame()
