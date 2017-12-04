@@ -52,9 +52,6 @@ USManualCalibrationPluginInterface::~USManualCalibrationPluginInterface()
 
 bool USManualCalibrationPluginInterface::CanRun()
 {
-    // This plugin can't run in viewer-only mode. Needs video capture and tracking.
-    //if( m_application->IsViewerOnly() )
-    //    return false;
     return true;
 }
 
@@ -83,7 +80,14 @@ QWidget * USManualCalibrationPluginInterface::CreateFloatingWidget()
 
 bool USManualCalibrationPluginInterface::WidgetAboutToClose()
 {
-    // simtodo : remove calibration phantom object from scene?
+    if( m_landmarkRegistrationObjectId != SceneManager::InvalidId )
+    {
+        this->GetSceneManager()->RemoveObject( this->GetSceneManager()->GetObjectByID( m_landmarkRegistrationObjectId ) );
+        m_calibrationPhantomObjectId = SceneManager::InvalidId;
+        m_phantomRegSourcePointsId = SceneManager::InvalidId;
+        m_phantomRegTargetPointsId = SceneManager::InvalidId;
+        m_landmarkRegistrationObjectId = SceneManager::InvalidId;
+    }
     return true;
 }
 
@@ -170,6 +174,8 @@ void USManualCalibrationPluginInterface::StartPhantomRegistration()
     const char * pointNames[4] = { "One", "Two", "Three", "Four" };
     double pointCoords[4][3] = { { 2.5, 2.5, 48.0 }, { 2.5, 47.5, 48 }, { 47.5, 2.5, 48 }, {  47.5, 47.5, 48 } };
 
+    if( m_calibrationPhantomObjectId == SceneManager::InvalidId )
+        BuildCalibrationPhantomRepresentation();
     SceneObject * phantomObject = GetSceneManager()->GetObjectByID( m_calibrationPhantomObjectId );
 
     // Add source and target points to scene
@@ -183,6 +189,7 @@ void USManualCalibrationPluginInterface::StartPhantomRegistration()
         GetSceneManager()->AddObject( sourcePoints, phantomObject );
         for( int i = 0; i < 4; ++i )
             sourcePoints->AddPoint( pointNames[i], pointCoords[i] );
+        m_phantomRegSourcePointsId = sourcePoints->GetObjectID();
     }
 
     PointsObject * targetPoints = PointsObject::SafeDownCast( GetSceneManager()->GetObjectByID( m_phantomRegTargetPointsId ) );
@@ -195,6 +202,7 @@ void USManualCalibrationPluginInterface::StartPhantomRegistration()
         GetSceneManager()->AddObject( targetPoints );
         for( int i = 0; i < 4; ++i )
             targetPoints->AddPoint( pointNames[i], pointCoords[i] );
+        m_phantomRegTargetPointsId = targetPoints->GetObjectID();
     }
 
     // Setup data in landmark registration plugin
@@ -207,7 +215,6 @@ void USManualCalibrationPluginInterface::StartPhantomRegistration()
     Q_ASSERT( regObj );
     regObj->SetSourcePoints( sourcePoints );
     regObj->SetTargetPoints( targetPoints );
-    BuildCalibrationPhantomRepresentation();    // make sure phantom representation is there
 
     GetSceneManager()->ChangeParent( phantomObject, regObj, 0 );
     regObj->SelectPoint( 0 );
