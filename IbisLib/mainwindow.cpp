@@ -208,7 +208,6 @@ MainWindow::MainWindow( QWidget * parent )
     Application::GetSceneManager()->UpdateBackgroundColor();
 
     UpdateMainSplitter();
-    Application::GetInstance().SetMainWindow(this);
 
     // -----------------------------------------
     // Create UI elements from the plugins
