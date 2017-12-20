@@ -22,7 +22,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <stdlib.h>
 #include <string.h>
 #include <iostream>
-#include <strstream>
+#include <sstream>
 
 #include <fcntl.h>              /* low-level i/o */
 #include <unistd.h>
@@ -700,7 +700,7 @@ int vtkV4L2VideoSource2::ListAvailableInput()
         }
         else
         {
-            std::ostrstream description;
+            std::ostringstream description;
             description << "Type: " << endl;
             if( input.type == V4L2_INPUT_TYPE_TUNER )
                 description << "V4L2_INPUT_TYPE_TUNER";
@@ -815,7 +815,7 @@ int vtkV4L2VideoSource2::ListAvailableInput()
             {
                 vtkV4L2VideoInput * inputDesc = vtkV4L2VideoInput::New();
                 inputDesc->SetName( (char*)(input.name) );
-                inputDesc->SetDescription( description.str() );
+                inputDesc->SetDescription( description.str().data() );
                 inputDesc->SetIndex( index );
                 this->AvailableInputs.push_back( inputDesc );
             }
@@ -895,7 +895,7 @@ int vtkV4L2VideoSource2::ListAvailableStandard()
     CLEAR(vidStandard);
     while( 0 == xioctl ( this->VideoDev, VIDIOC_ENUMSTD, &vidStandard ) )
     {
-        std::strstream description;
+        std::stringstream description;
         description << "standard: ";
         if( vidStandard.id == V4L2_STD_PAL_B )
             description << "V4L2_STD_PAL_B";
@@ -963,7 +963,7 @@ int vtkV4L2VideoSource2::ListAvailableStandard()
 
         vtkV4L2VideoStandard * newStd = vtkV4L2VideoStandard::New();
         newStd->SetName( (char*)(vidStandard.name) );
-        newStd->SetDescription( description.str() );
+        newStd->SetDescription( description.str().data() );
         newStd->Standard = vidStandard.id;
 
         this->AvailableStandards.push_back( newStd );
