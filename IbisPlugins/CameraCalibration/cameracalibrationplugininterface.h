@@ -13,7 +13,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef __CameraCalibrationPluginInterface_h_
 #define __CameraCalibrationPluginInterface_h_
 
-#include <QObject>
 #include "toolplugininterface.h"
 #include "opencv2/opencv.hpp"
 #include "SVL.h"
@@ -29,7 +28,7 @@ class vtkMatrix4x4;
 class vtkImageData;
 class vtkProp3D;
 
-class CameraCalibrationPluginInterface : public QObject, public ToolPluginInterface
+class CameraCalibrationPluginInterface : public ToolPluginInterface
 {
 
     Q_OBJECT
@@ -114,7 +113,6 @@ public slots:
 signals:
 
     void CameraCalibrationWidgetClosedSignal();
-    void Modified();
 
 protected:
 

@@ -37,7 +37,7 @@ void FrameRateTesterWidget::SetPluginInterface( FrameRateTesterPluginInterface *
 {
     m_pluginInterface = pi;
     connect( m_pluginInterface, SIGNAL(PeriodicSignal()), this, SLOT(UpdateStats()) );
-    connect( m_pluginInterface, SIGNAL(Modified()), this, SLOT(UpdateUi()) );
+    connect( m_pluginInterface, SIGNAL(PluginModified()), this, SLOT(UpdateUi()) );
     UpdateUi();
 }
 

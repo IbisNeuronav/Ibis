@@ -14,12 +14,11 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #define __PRISMVolumeRenderPluginInterface_h_
 
 #include "vtkSmartPointer.h"
-#include <QObject>
 #include "globalobjectplugininterface.h"
 
 class VolumeRenderingObject;
 
-class PRISMVolumeRenderPluginInterface : public QObject, public GlobalObjectPluginInterface
+class PRISMVolumeRenderPluginInterface : public GlobalObjectPluginInterface
 {
 
     Q_OBJECT

@@ -13,14 +13,13 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef __FrameRateTesterPluginInterface_h_
 #define __FrameRateTesterPluginInterface_h_
 
-#include <QObject>
 #include "toolplugininterface.h"
 
 //class vtkEventQtSlotConnect;
 class QTimer;
 class QTime;
 
-class FrameRateTesterPluginInterface : public QObject, public ToolPluginInterface
+class FrameRateTesterPluginInterface : public ToolPluginInterface
 {
 
     Q_OBJECT
@@ -57,7 +56,6 @@ private slots:
 
 signals:
 
-    void Modified();
     void PeriodicSignal();
 
 protected:

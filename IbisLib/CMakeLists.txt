@@ -64,7 +64,6 @@ SET( IBISLIB_SRC
 SET( IBISLIB_HDR
                      trackedvideobuffer.h
                      ibistypes.h
-                     ibisplugin.h
                      serializer.h 
                      serializerhelper.h
                      ibisconfig.h
@@ -83,6 +82,7 @@ SET( IBISLIB_HDR_MOC
                          application.h
                          mainwindow.h
                          scenemanager.h
+                         ibisplugin.h
                          filereader.h
                          sceneobject.h
                          trackedsceneobject.h

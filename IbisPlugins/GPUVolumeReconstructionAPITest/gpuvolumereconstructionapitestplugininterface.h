@@ -13,11 +13,10 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef __GPUVolumeReconstructionAPITestPluginInterface_h_
 #define __GPUVolumeReconstructionAPITestPluginInterface_h_
 
-#include <QObject>
 #include "toolplugininterface.h"
 
 
-class GPUVolumeReconstructionAPITestPluginInterface : public QObject, public ToolPluginInterface
+class GPUVolumeReconstructionAPITestPluginInterface : public ToolPluginInterface
 {
 
     Q_OBJECT

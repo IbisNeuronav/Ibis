@@ -168,7 +168,7 @@ void CameraCalibrationPluginInterface::SetCurrentCameraObjectId( int id )
         m_currentCameraObjectId = id;
         m_cameraCalibrator->ClearCalibrationData();
     }
-    emit Modified();
+    emit PluginModified();
 }
 
 bool CameraCalibrationPluginInterface::HasValidCamera()
@@ -300,7 +300,7 @@ void CameraCalibrationPluginInterface::DoCalibration()
         }
         UpdateCameraViewsObjects();
 
-        emit Modified();
+        emit PluginModified();
     }
 }
 
@@ -355,7 +355,7 @@ void CameraCalibrationPluginInterface::SetCalibrationGridWidth( int width )
     m_calibrationGridWidth = width;
     BuildCalibrationGridRepresentation();
     InitializeCameraCalibrator();
-    emit Modified();
+    emit PluginModified();
 }
 
 void CameraCalibrationPluginInterface::SetCalibrationGridHeight( int height )
@@ -363,7 +363,7 @@ void CameraCalibrationPluginInterface::SetCalibrationGridHeight( int height )
     m_calibrationGridHeight = height;
     BuildCalibrationGridRepresentation();
     InitializeCameraCalibrator();
-    emit Modified();
+    emit PluginModified();
 }
 
 void CameraCalibrationPluginInterface::SetCalibrationGridSquareSize( double size )
@@ -371,7 +371,7 @@ void CameraCalibrationPluginInterface::SetCalibrationGridSquareSize( double size
     m_calibrationGridCellSize = size;
     BuildCalibrationGridRepresentation();
     InitializeCameraCalibrator();
-    emit Modified();
+    emit PluginModified();
 }
 
 void CameraCalibrationPluginInterface::ShowAllCapturedViews()
@@ -449,7 +449,7 @@ void CameraCalibrationPluginInterface::ValidateCurrentCamera()
     }
 
     SetCurrentCameraObjectId( newCameraId );
-    emit Modified();
+    emit PluginModified();
 }
 
 void CameraCalibrationPluginInterface::InitializeCameraCalibrator()
@@ -483,10 +483,10 @@ void CameraCalibrationPluginInterface::BuildCalibrationGridRepresentation()
             pts->InsertNextPoint( x - m_calibrationGridCellSize, y, 0.0 );
             pts->InsertNextPoint( x - m_calibrationGridCellSize, y - m_calibrationGridCellSize, 0.0 );
             pts->InsertNextPoint( x, y - m_calibrationGridCellSize, 0.0 );
-            colors->InsertNextTupleValue( cellColor );
-            colors->InsertNextTupleValue( cellColor );
-            colors->InsertNextTupleValue( cellColor );
-            colors->InsertNextTupleValue( cellColor );
+            colors->InsertNextTypedTuple( cellColor );
+            colors->InsertNextTypedTuple( cellColor );
+            colors->InsertNextTypedTuple( cellColor );
+            colors->InsertNextTypedTuple( cellColor );
             vtkIdType cellQuad[4];
             vtkIdType current = row * ( m_calibrationGridWidth + 1 ) + col;
             cellQuad[0] = current * 4;

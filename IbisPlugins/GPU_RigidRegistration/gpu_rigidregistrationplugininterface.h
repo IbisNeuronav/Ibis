@@ -12,12 +12,11 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef __GPU_RigidRegistrationPluginInterface_h_
 #define __GPU_RigidRegistrationPluginInterface_h_
 
-#include <QObject>
 #include "toolplugininterface.h"
 
 class GPU_RigidRegistrationWidget;
 
-class GPU_RigidRegistrationPluginInterface : public QObject, public ToolPluginInterface
+class GPU_RigidRegistrationPluginInterface : public ToolPluginInterface
 {
 
     Q_OBJECT
