@@ -85,7 +85,7 @@ void TrackedSceneObject::Hide()
         actor->VisibilityOff();
         ++it;
     }
-    emit Modified();
+    emit ObjectModified();
 }
 
 void TrackedSceneObject::Show()
@@ -97,7 +97,7 @@ void TrackedSceneObject::Show()
         actor->VisibilityOn();
         ++it;
     }
-    emit Modified();
+    emit ObjectModified();
 }
 
 void TrackedSceneObject::Serialize( Serializer * ser )
@@ -121,13 +121,13 @@ void TrackedSceneObject::SerializeTracked( Serializer * ser )
 void TrackedSceneObject::SetState( TrackerToolState state )
 {
     m_state = state;
-    emit Modified();
+    emit ObjectModified();
 }
 
 void TrackedSceneObject::SetInputMatrix( vtkMatrix4x4 * m )
 {
     m_transform->SetMatrix( m );
-    emit Modified();
+    emit ObjectModified();
 }
 
 void TrackedSceneObject::SetInputTransform( vtkTransform * t )
@@ -138,7 +138,7 @@ void TrackedSceneObject::SetInputTransform( vtkTransform * t )
 void TrackedSceneObject::SetCalibrationMatrix( vtkMatrix4x4 * mat )
 {
     m_calibrationTransform->SetMatrix( mat );
-    emit Modified();
+    emit ObjectModified();
 }
 
 vtkMatrix4x4 * TrackedSceneObject::GetCalibrationMatrix()

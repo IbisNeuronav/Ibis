@@ -141,7 +141,7 @@ public:
 signals:
 
     void NameChanged();
-    void Modified();
+    void ObjectModified();
     void RemovingFromScene();
     void WorldTransformChangedSignal();
     void FinishedReading();

@@ -59,9 +59,9 @@ void LandmarkRegistrationObject::CreateSettingsWidgets( QWidget * parent, QVecto
     props->setObjectName( "Properties" );
     if( m_sourcePoints )
     {
-        connect( m_sourcePoints, SIGNAL(Modified()), props, SLOT(UpdateUI()) );
+        connect( m_sourcePoints, SIGNAL(ObjectModified()), props, SLOT(UpdateUI()) );
     }
-    connect( this, SIGNAL(Modified()), props, SLOT(UpdateUI()) );
+    connect( this, SIGNAL(ObjectModified()), props, SLOT(UpdateUI()) );
     widgets->append(props);
     if( !this->IsRegistered() )
         m_backUpTransform->DeepCopy(this->GetLocalTransform() );
@@ -458,7 +458,7 @@ void LandmarkRegistrationObject::PointAdded( )
         m_targetPoints->AddPoint( QString::number(m_targetPoints->GetNumberOfPoints()+1), coords );
         m_activeTargetPoints->InsertNextPoint(m_targetPoints->GetPointCoordinates( m_targetPoints->GetNumberOfPoints()-1));
     }
-    emit Modified();
+    emit ObjectModified();
 }
 
 void LandmarkRegistrationObject::PointRemoved( int index )
@@ -483,7 +483,7 @@ void LandmarkRegistrationObject::PointRemoved( int index )
     this->UpdateLandmarkTransform();
     if( m_sourcePoints->GetNumberOfPoints() > 0 )
         this->SelectPoint( 0 );
-    emit Modified();
+    emit ObjectModified();
 }
 
 void LandmarkRegistrationObject::EnablePicking( bool enable )
@@ -549,7 +549,7 @@ void LandmarkRegistrationObject::Update()
     this->UpdateLandmarkTransform();
     m_targetPoints->SetSelectedPoint( m_sourcePoints->GetSelectedPointIndex() );
 
-    emit Modified();
+    emit ObjectModified();
 }
 
 void LandmarkRegistrationObject::RegisterObject( bool on )

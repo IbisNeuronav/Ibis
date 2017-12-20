@@ -512,7 +512,7 @@ void View::SetViewAngle( double angle )
 void View::NotifyNeedRender()
 {
     if( m_renderingEnabled )
-        emit Modified();
+        emit ViewModified();
 }
 
 void View::ReferenceTransformChanged()

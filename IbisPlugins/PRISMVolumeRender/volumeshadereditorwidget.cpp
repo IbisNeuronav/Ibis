@@ -32,7 +32,7 @@ VolumeShaderEditorWidget::~VolumeShaderEditorWidget()
 void VolumeShaderEditorWidget::SetVolumeRenderer( VolumeRenderingObject * ren, int volumeIndex )
 {
     m_volumeRenderer = ren;
-    connect( m_volumeRenderer, SIGNAL(Modified()), this, SLOT(VolumeRendererModifiedSlot()));
+    connect( m_volumeRenderer, SIGNAL(ObjectModified()), this, SLOT(VolumeRendererModifiedSlot()));
     m_volumeIndex = volumeIndex;
     m_backupShaderTypeName = GetCurrentShaderTypeName();
     m_backupShaderCode = GetShaderCode();

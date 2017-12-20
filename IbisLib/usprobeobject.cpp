@@ -211,7 +211,7 @@ void UsProbeObject::Hide()
         RemoveClient();
         ++it;
     }
-    emit Modified();
+    emit ObjectModified();
 }
 
 void UsProbeObject::Show()
@@ -225,7 +225,7 @@ void UsProbeObject::Show()
         AddClient();
         ++it;
     }
-    emit Modified();
+    emit ObjectModified();
 }
 
 int UsProbeObject::GetVideoImageWidth()
@@ -360,7 +360,7 @@ void UsProbeObject::SetCurrentLUTIndex( int index )
     lut->SetIntensityFactor( 1.0 );
     Application::GetLookupTableManager()->CreateLookupTable( slicesLutName, range, lut );
     m_mapToColors->SetLookupTable( lut );
-    emit Modified();
+    emit ObjectModified();
 }
 
 void UsProbeObject::OnUpdate()
@@ -372,14 +372,14 @@ void UsProbeObject::OnUpdate()
     //std::cout << "origin: ( " << orig[0] << ", " << orig[1] << ", " << orig[2] << " )" << std::endl;
     //double * spacing = videoImage->GetSpacing();
     //std::cout << "spacing: ( " << spacing[0] << ", " << spacing[1] << ", " << spacing[2] << " )" << std::endl;
-    emit Modified();
+    emit ObjectModified();
 }
 
 void UsProbeObject::UpdateMask()
 {
     m_imageStencilSource->Update();
     m_mapToColors->Update();
-    emit Modified();
+    emit ObjectModified();
 }
 
 void UsProbeObject::UpdatePipeline()

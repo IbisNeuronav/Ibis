@@ -34,7 +34,7 @@ public:
     HardwareModule() {}
     virtual ~HardwareModule() {}
 
-    virtual IbisPluginTypes GetPluginType() { return IbisPluginTypeHardwareModule; }
+    virtual IbisPluginTypes GetPluginType() VTK_OVERRIDE { return IbisPluginTypeHardwareModule; }
 
     virtual void AddSettingsMenuEntries( QMenu * menu ) {}
     virtual void Init() = 0;

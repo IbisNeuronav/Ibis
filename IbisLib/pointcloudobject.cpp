@@ -65,7 +65,7 @@ void PointCloudObject::Serialize( Serializer * ser )
         this->SetColor(this->m_Color);
         this->SetOpacity(this->m_Opacity);
         this->UpdateSettingsWidget();
-        emit Modified();
+        emit ObjectModified();
     }
 }
 
@@ -115,7 +115,7 @@ void PointCloudObject::Setup( View * view )
 
         actor->GetMapper()->SetInputConnection(m_PointCloudGlyphFilter->GetOutputPort());
 
-        connect( this, SIGNAL( Modified() ), view, SLOT( NotifyNeedRender() ) );
+        connect( this, SIGNAL( ObjectModified() ), view, SLOT( NotifyNeedRender() ) );
         this->GetProperty()->GetColor(this->m_Color);
 
     }
@@ -129,7 +129,7 @@ void PointCloudObject::SetPointCloudArray(vtkPoints * pointCloudArray)
         m_PointCloudArray->InsertNextPoint (pointCloudArray->GetPoint(i));
     }
     this->m_PointsPolydata->SetPoints(m_PointCloudArray);
-    emit Modified();
+    emit ObjectModified();
 
 }
 
@@ -138,7 +138,7 @@ void PointCloudObject::SetColor(double color[3])
     for (int i = 0; i < 3; i++)
         this->m_Color[i] = color[i];
     this->Property->SetColor(this->m_Color);
-    emit Modified();
+    emit ObjectModified();
 }
 
 void PointCloudObject::Release( View * view )
@@ -182,7 +182,7 @@ void PointCloudObject::SetOpacity( double opacity )
 
     this->Property->SetOpacity( this->m_Opacity );
 
-    emit Modified();
+    emit ObjectModified();
 }
 
 void PointCloudObject::Hide()
