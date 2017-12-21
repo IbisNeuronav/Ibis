@@ -74,7 +74,7 @@ void ImageObjectSettingsDialog::SetImageObject( ImageObject * obj )
 
         this->UpdateUI();
 
-        connect( m_imageObject, SIGNAL(Modified()), this, SLOT(UpdateUI()) );
+        connect( m_imageObject, SIGNAL(ObjectModified()), this, SLOT(UpdateUI()) );
    }
 }
 

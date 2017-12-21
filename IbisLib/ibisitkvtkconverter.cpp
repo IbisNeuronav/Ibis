@@ -112,6 +112,14 @@ void IbisItkVtkConverter::GetImageTransformFromDirectionCosines(itk::Matrix< dou
     rotMat->Delete();
 }
 
+void GetMatRow( vtkMatrix4x4 * mat, int rowIndex, double row[4] )
+{
+    row[0] = mat->GetElement( rowIndex, 0 );
+    row[1] = mat->GetElement( rowIndex, 1 );
+    row[2] = mat->GetElement( rowIndex, 2 );
+    row[3] = mat->GetElement( rowIndex, 3 );
+}
+
 bool IbisItkVtkConverter::ConvertVtkImageToItkImage( IbisItkFloat3ImageType::Pointer itkOutputImage, vtkImageData *img, vtkMatrix4x4 *imageMatrix)
 {
     if( !itkOutputImage )
@@ -162,18 +170,22 @@ bool IbisItkVtkConverter::ConvertVtkImageToItkImage( IbisItkFloat3ImageType::Poi
     double step[3], mincStartPoint[3], dirCos[3][3];
     for( int i = 0; i < 3; i++ )
     {
-        step[i] = vtkMath::Dot( (*tmpMat)[i], (*tmpMat)[i] );
+        double row[4];
+        GetMatRow( tmpMat, i, row );
+        step[i] = vtkMath::Dot( row, row );
         step[i] = sqrt( step[i] );
         for( int j = 0; j < 3; j++ )
         {
-            dirCos[i][j] = (*tmpMat)[i][j] / step[i];
+            dirCos[i][j] = tmpMat->GetElement( i, j ) / step[i];
             dirCosine[j][i] = dirCos[i][j];
         }
     }
 
     double rotation[3][3];
     vtkMath::Transpose3x3( dirCos, rotation );
-    vtkMath::LinearSolve3x3( rotation, (*tmpMat)[3], mincStartPoint );
+    double row3[4];
+    GetMatRow( tmpMat, 3, row3 );
+    vtkMath::LinearSolve3x3( rotation, row3, mincStartPoint );
     tmpMat->Delete();
 
     for( int i = 0; i < 3; i++ )
@@ -217,18 +229,22 @@ bool IbisItkVtkConverter::ConvertVtkImageToItkImage( IbisRGBImageType::Pointer i
     double step[3], mincStartPoint[3], dirCos[3][3];
     for( int i = 0; i < 3; i++ )
     {
-        step[i] = vtkMath::Dot( (*tmpMat)[i], (*tmpMat)[i] );
+        double row[4];
+        GetMatRow( tmpMat, i, row );
+        step[i] = vtkMath::Dot( row, row );
         step[i] = sqrt( step[i] );
         for( int j = 0; j < 3; j++ )
         {
-            dirCos[i][j] = (*tmpMat)[i][j] / step[i];
+            dirCos[i][j] = tmpMat->GetElement( i, j ) / step[i];
             dirCosine[j][i] = dirCos[i][j];
         }
     }
 
     double rotation[3][3];
     vtkMath::Transpose3x3( dirCos, rotation );
-    vtkMath::LinearSolve3x3( rotation, (*tmpMat)[3], mincStartPoint );
+    double row3[4];
+    GetMatRow( tmpMat, 3, row3 );
+    vtkMath::LinearSolve3x3( rotation, row3, mincStartPoint );
     tmpMat->Delete();
 
     for( int i = 0; i < 3; i++ )
@@ -273,18 +289,22 @@ bool IbisItkVtkConverter::ConvertVtkImageToItkImage( IbisItkUnsignedChar3ImageTy
     double step[3], mincStartPoint[3], dirCos[3][3];
     for( int i = 0; i < 3; i++ )
     {
-        step[i] = vtkMath::Dot( (*tmpMat)[i], (*tmpMat)[i] );
+        double row[4];
+        GetMatRow( tmpMat, i, row );
+        step[i] = vtkMath::Dot( row, row );
         step[i] = sqrt( step[i] );
         for( int j = 0; j < 3; j++ )
         {
-            dirCos[i][j] = (*tmpMat)[i][j] / step[i];
+            dirCos[i][j] = tmpMat->GetElement( i, j ) / step[i];
             dirCosine[j][i] = dirCos[i][j];
         }
     }
 
     double rotation[3][3];
     vtkMath::Transpose3x3( dirCos, rotation );
-    vtkMath::LinearSolve3x3( rotation, (*tmpMat)[3], mincStartPoint );
+    double row3[4];
+    GetMatRow( tmpMat, 3, row3 );
+    vtkMath::LinearSolve3x3( rotation, row3, mincStartPoint );
     tmpMat->Delete();
 
     for( int i = 0; i < 3; i++ )

@@ -33,7 +33,7 @@ PointerCalibrationDialog::~PointerCalibrationDialog()
 void PointerCalibrationDialog::SetPointer( PointerObject * p )
 {
     m_pointer = p;
-    connect( m_pointer, SIGNAL(Modified()), this, SLOT(update()) );
+    connect( m_pointer, SIGNAL(ObjectModified()), this, SLOT(update()) );
     Update();
 }
 

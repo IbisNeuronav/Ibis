@@ -45,7 +45,7 @@ void VolumeRenderingObjectSettingsWidget::SetVolumeRenderingObject( VolumeRender
     if( this->m_vr )
     {
         connect( m_vr, SIGNAL(FinishedReading()), this, SLOT(UpdateUI()) );
-        connect( m_vr, SIGNAL(Modified()), this, SLOT(UpdateUI()) );
+        connect( m_vr, SIGNAL(ObjectModified()), this, SLOT(UpdateUI()) );
         connect( m_vr, SIGNAL(VolumeSlotModified()), this, SLOT(VolumeSlotModified()) );
         UpdateUI();
     }

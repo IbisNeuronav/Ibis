@@ -13,12 +13,11 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef __ImageFilterExamplePluginInterface_h_
 #define __ImageFilterExamplePluginInterface_h_
 
-#include <QObject>
 #include "toolplugininterface.h"
 
 class ImageFilterExampleWidget;
 
-class ImageFilterExamplePluginInterface : public QObject, public ToolPluginInterface
+class ImageFilterExamplePluginInterface : public ToolPluginInterface
 {
 
     Q_OBJECT

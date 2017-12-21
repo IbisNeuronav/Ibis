@@ -21,8 +21,10 @@ class SceneManager;
 class QSettings;
 
 
-class IbisPlugin : public vtkObject
+class IbisPlugin : public QObject, public vtkObject
 {
+
+    Q_OBJECT
 
 public:
 
@@ -35,6 +37,10 @@ public:
     virtual IbisPluginTypes GetPluginType() = 0;
     QString GetPluginTypeAsString();
     virtual QString GetPluginDescription();
+
+signals:
+
+    void PluginModified();
 
 protected:
 

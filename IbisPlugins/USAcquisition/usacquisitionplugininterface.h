@@ -11,7 +11,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef USACQUISITIONPLUGININTERFACE_H
 #define USACQUISITIONPLUGININTERFACE_H
 
-#include <QObject>
 #include <QWidget>
 #include "toolplugininterface.h"
 #include "serializer.h"
@@ -21,7 +20,7 @@ class UsProbeObject;
 class DoubleViewWidget;
 class ImageObject;
 
-class USAcquisitionPluginInterface : public QObject, public ToolPluginInterface
+class USAcquisitionPluginInterface : public ToolPluginInterface
 {
 
     Q_OBJECT

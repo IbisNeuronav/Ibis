@@ -13,7 +13,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef __StereotacticFramePluginInterface_h_
 #define __StereotacticFramePluginInterface_h_
 
-#include <QObject>
 #include "toolplugininterface.h"
 #include "vtkSmartPointer.h"
 
@@ -25,7 +24,7 @@ class PolyDataObject;
 class vtkEventQtSlotConnect;
 class Vec3;
 
-class StereotacticFramePluginInterface : public QObject, public ToolPluginInterface
+class StereotacticFramePluginInterface : public ToolPluginInterface
 {
 
     Q_OBJECT

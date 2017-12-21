@@ -83,7 +83,7 @@ void SingleViewWindow::SetSceneManager( SceneManager * man )
     {
         View * view = man->CreateView( THREED_VIEW_TYPE );
         view->SetInteractor( m_vtkWindow->GetInteractor() );
-        connect( view, SIGNAL( Modified() ), this, SLOT( WinNeedsRender() ) );
+        connect( view, SIGNAL( ViewModified() ), this, SLOT( WinNeedsRender() ) );
         
         this->m_sceneManager->Register( 0 );
         

@@ -159,12 +159,12 @@ void PointRepresentation::Setup( View * view )
     perView->pointRepresentationActor = pointActor;
     perView->labelActor = labelActor;
     m_perViewContainer[view] = perView;
-    connect( this, SIGNAL(Modified()), view, SLOT(NotifyNeedRender()) );
+    connect( this, SIGNAL(ObjectModified()), view, SLOT(NotifyNeedRender()) );
 }
 
 void PointRepresentation::Release( View * view )
 {
-    disconnect( this, SIGNAL(Modified()), view, SLOT(NotifyNeedRender()) );
+    disconnect( this, SIGNAL(ObjectModified()), view, SLOT(NotifyNeedRender()) );
     PerViewContainer::iterator it = m_perViewContainer.find( view );
     if( it != m_perViewContainer.end() )
     {

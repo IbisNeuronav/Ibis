@@ -13,7 +13,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef __AnimatePluginInterface_h_
 #define __AnimatePluginInterface_h_
 
-#include <QObject>
 #include "toolplugininterface.h"
 #include "vtkPRISMVolumeMapper.h"
 
@@ -37,7 +36,7 @@ public:
 };
 
 
-class AnimatePluginInterface : public QObject, public ToolPluginInterface
+class AnimatePluginInterface : public ToolPluginInterface
 {
 
     Q_OBJECT
