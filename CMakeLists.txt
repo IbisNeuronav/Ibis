@@ -33,7 +33,10 @@ set( IBIS_EXTERNAL_DEPENDENCIES_DIR ${CMAKE_CURRENT_BINARY_DIR}/../ibisExternalD
 option( IBIS_USE_QT_MULTIMEDIA "Find and link with the Multimedia module in Qt. This is not required by Ibis but may be used by some plugins." OFF )
 set( IbisQtModules Widgets OpenGL Xml )
 if( IBIS_USE_QT_MULTIMEDIA )
-    set( IbisQtModules ${IbisQtModules} Multimedia )
+    list( APPEND IbisQtModules Multimedia )
+endif()
+if(UNIX AND NOT APPLE)
+    list( APPEND IbisQtModules X11Extras )
 endif()
 find_package( Qt5 COMPONENTS ${IbisQtModules} REQUIRED )
 
