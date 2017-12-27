@@ -205,8 +205,8 @@ void vtkColoredCube::UpdateGeometry( vtkRenderer * ren, vtkMatrix4x4  *mat )
 
     // Update near/far planes normal and position
     vtkCamera * cam = ren->GetActiveCamera();
-    double near = cam->GetClippingRange()[0];
-    double far = cam->GetClippingRange()[1];
+    double camNear = cam->GetClippingRange()[0];
+    double camFar = cam->GetClippingRange()[1];
 
     // Get the inverse of the volume matrix
     vtkSmartPointer<vtkMatrix4x4> invVolMatrix = vtkSmartPointer<vtkMatrix4x4>::New();
@@ -232,19 +232,19 @@ void vtkColoredCube::UpdateGeometry( vtkRenderer * ren, vtkMatrix4x4  *mat )
     // offset calculation stolen from vtkOpenGLVolumeRaycastMapper : choose arbitrary
     // offset. if the offset is larger than the distance between near and far point,
     // it will not work, in this case we pick a fraction of the near-far distance.
-    double distNearFar = far - near;
+    double distNearFar = camFar - camNear;
     double offset = 0.001; // some arbitrary small value.
     if( offset >= distNearFar)
       offset = distNearFar / 1000.0;
-    near += offset;
-    far -= offset;
+    camNear += offset;
+    camFar -= offset;
 
     // Compute near plane
     double nearOrigin[3] = { 0.0, 0.0, 0.0 };
     double nearNormal[3] = { 1.0, 0.0, 0.0 };
     for( int i = 0; i < 3; ++i )
     {
-        nearOrigin[i] = pos[i] + dir[i] * near;
+        nearOrigin[i] = pos[i] + dir[i] * camNear;
         nearNormal[i] = dir[i];
     }
     AllPlanes->GetItem(6)->SetOrigin( nearOrigin );
@@ -255,7 +255,7 @@ void vtkColoredCube::UpdateGeometry( vtkRenderer * ren, vtkMatrix4x4  *mat )
     double farNormal[3] = { 1.0, 0.0, 0.0 };
     for( int i = 0; i < 3; ++i )
     {
-        farOrigin[i] = pos[i] + dir[i] * far;
+        farOrigin[i] = pos[i] + dir[i] * camFar;
         farNormal[i] = -dir[i];
     }
     AllPlanes->GetItem(7)->SetOrigin( farOrigin );

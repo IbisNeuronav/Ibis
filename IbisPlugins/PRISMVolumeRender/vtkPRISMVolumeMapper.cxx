@@ -195,9 +195,9 @@ void vtkPRISMVolumeMapper::Render( vtkRenderer * ren, vtkVolume * vol )
 
     this->UpdateDepthBufferTexture( renderSize[0], renderSize[1] );
 
-    GLboolean isMultisampleEnabled = glIsEnabled( GL_MULTISAMPLE );
+    GLboolean isMultisampleEnabled = glIsEnabled( vtkgl::MULTISAMPLE );
     if( isMultisampleEnabled )
-        glDisable( GL_MULTISAMPLE );
+        glDisable(vtkgl::MULTISAMPLE );
 
     // Setup volume matrix. Usually, this should be done by the 3D prop, but
     // it seems like it is not the case for volume props.
@@ -254,27 +254,27 @@ void vtkPRISMVolumeMapper::Render( vtkRenderer * ren, vtkVolume * vol )
     glColor4d( 1.0, 1.0, 1.0, 1.0 );
 
     // Bind back texture in texture unit 0
-    vtkgl::ActiveTexture( GL_TEXTURE0 );
+    vtkgl::ActiveTexture( vtkgl::TEXTURE0 );
     glEnable( vtkgl::TEXTURE_RECTANGLE_ARB );
     glBindTexture( vtkgl::TEXTURE_RECTANGLE_ARB, BackfaceTexture->GetTexId() );
 
     // Bind depth texture in texture unit 1
-    vtkgl::ActiveTexture( GL_TEXTURE1 );
+    vtkgl::ActiveTexture( vtkgl::TEXTURE1 );
     glEnable( vtkgl::TEXTURE_RECTANGLE_ARB );
     glBindTexture( vtkgl::TEXTURE_RECTANGLE_ARB, DepthBufferTextureId );
 
     // Bind all volumes and their respective transfer functions to texture units starting at 1
     for( unsigned i = 0; i < VolumesInfo.size(); ++i )
     {
-        vtkgl::ActiveTexture( GL_TEXTURE2 + 2 * i );
+        vtkgl::ActiveTexture(vtkgl::TEXTURE2 + 2 * i );
         glEnable( GL_TEXTURE_1D );
         glBindTexture( GL_TEXTURE_1D, VolumesInfo[i].TranferFunctionTextureId );
 
-        vtkgl::ActiveTexture( GL_TEXTURE2 + 2 * i + 1 );
-        glEnable( GL_TEXTURE_3D );
-        glBindTexture( GL_TEXTURE_3D, VolumesInfo[i].VolumeTextureId );
-        glTexParameteri( GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, VolumesInfo[i].linearSampling ? GL_LINEAR : GL_NEAREST );
-        glTexParameteri( GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, VolumesInfo[i].linearSampling ? GL_LINEAR : GL_NEAREST );
+        vtkgl::ActiveTexture( vtkgl::TEXTURE2 + 2 * i + 1 );
+        glEnable( vtkgl::TEXTURE_3D );
+        glBindTexture( vtkgl::TEXTURE_3D, VolumesInfo[i].VolumeTextureId );
+        glTexParameteri( vtkgl::TEXTURE_3D, GL_TEXTURE_MIN_FILTER, VolumesInfo[i].linearSampling ? GL_LINEAR : GL_NEAREST );
+        glTexParameteri( vtkgl::TEXTURE_3D, GL_TEXTURE_MAG_FILTER, VolumesInfo[i].linearSampling ? GL_LINEAR : GL_NEAREST );
     }
 
     // Setup ray-tracer shader program and render front of cube
@@ -351,29 +351,29 @@ void vtkPRISMVolumeMapper::Render( vtkRenderer * ren, vtkVolume * vol )
     // Unbind all volume and transfer function textures
     for( unsigned i = 0; i < VolumesInfo.size(); ++i )
     {
-        vtkgl::ActiveTexture( GL_TEXTURE2 + 2 * i );
+        vtkgl::ActiveTexture( vtkgl::TEXTURE2 + 2 * i );
         glBindTexture( GL_TEXTURE_1D, 0 );
         glDisable( GL_TEXTURE_1D );
 
-        vtkgl::ActiveTexture( GL_TEXTURE2 + 2 * i + 1 );
-        glBindTexture( GL_TEXTURE_3D, 0 );
-        glDisable( GL_TEXTURE_3D );
+        vtkgl::ActiveTexture( vtkgl::TEXTURE2 + 2 * i + 1 );
+        glBindTexture( vtkgl::TEXTURE_3D, 0 );
+        glDisable( vtkgl::TEXTURE_3D );
     }
 
     // unbind depth texture in tex unit 1
-    vtkgl::ActiveTexture( GL_TEXTURE1 );
+    vtkgl::ActiveTexture( vtkgl::TEXTURE1 );
     glBindTexture( vtkgl::TEXTURE_RECTANGLE_ARB, 0 );
     glDisable( vtkgl::TEXTURE_RECTANGLE_ARB );
 
     // unbind back texture in tex unit 0
-    vtkgl::ActiveTexture( GL_TEXTURE0 );
+    vtkgl::ActiveTexture( vtkgl::TEXTURE0 );
     glBindTexture( vtkgl::TEXTURE_RECTANGLE_ARB, 0 );
     glDisable( vtkgl::TEXTURE_RECTANGLE_ARB );
 
     VolumeShader->UseProgram( false );
 
     if( isMultisampleEnabled )
-        glEnable( GL_MULTISAMPLE );
+        glEnable( vtkgl::MULTISAMPLE );
 
     // retrieve enable state for blend, lighting and depth test
     glPopAttrib();
@@ -592,10 +592,10 @@ void vtkPRISMVolumeMapper::UpdateWorldToTextureMatrix( vtkVolume * volume )
 
 int vtkPRISMVolumeMapper::IsTextureSizeSupported( int size[3] )
 {
-    glTexImage3D( GL_PROXY_TEXTURE_3D, 0, GL_LUMINANCE, size[0], size[1], size[2], 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, NULL );
+    vtkgl::TexImage3D( vtkgl::PROXY_TEXTURE_3D, 0, GL_LUMINANCE, size[0], size[1], size[2], 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, NULL );
 
     GLint width;
-    glGetTexLevelParameteriv( GL_PROXY_TEXTURE_3D, 0, GL_TEXTURE_WIDTH, &width );
+    glGetTexLevelParameteriv( vtkgl::PROXY_TEXTURE_3D, 0, GL_TEXTURE_WIDTH, &width );
 
     if( width != 0 )
         return 1;
@@ -687,17 +687,17 @@ int vtkPRISMVolumeMapper::UpdateVolumes( )
         }
 
         // Transfer the input volume to the RGBA volume
-        glEnable( GL_TEXTURE_3D );
+        glEnable( vtkgl::TEXTURE_3D );
         if( pv.VolumeTextureId == 0 )
             glGenTextures( 1, &pv.VolumeTextureId );
-        glBindTexture( GL_TEXTURE_3D, pv.VolumeTextureId );
+        glBindTexture( vtkgl::TEXTURE_3D, pv.VolumeTextureId );
         //glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         //glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexImage3D( GL_TEXTURE_3D, 0, internalFormat, dim[0], dim[1], dim[2], 0, GL_LUMINANCE, glScalarType, input->GetScalarPointer() );
-        glBindTexture( GL_TEXTURE_3D, 0 );
-        glDisable( GL_TEXTURE_3D );
+        glTexParameteri( vtkgl::TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri( vtkgl::TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        vtkgl::TexImage3D( vtkgl::TEXTURE_3D, 0, internalFormat, dim[0], dim[1], dim[2], 0, GL_LUMINANCE, glScalarType, input->GetScalarPointer() );
+        glBindTexture( vtkgl::TEXTURE_3D, 0 );
+        glDisable( vtkgl::TEXTURE_3D );
 
         if( glGetError() != GL_NO_ERROR )
         {

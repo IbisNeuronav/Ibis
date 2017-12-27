@@ -309,7 +309,7 @@ void VolumeRenderingObject::Serialize( Serializer * ser )
     ::Serialize( ser, "ImageSlots", m_perImage );
     if( ser->IsReader() )
     {
-        ImportCustomShaders( ser->GetCurrentDirectory(), rayInitShaderTypeName, stopConditionShaderTypeName );
+        ImportCustomShaders( ser->GetSerializationDirectory(), rayInitShaderTypeName, stopConditionShaderTypeName );
         SetRayInitShaderTypeByName( rayInitShaderTypeName );
         SetStopConditionShaderTypeByName( stopConditionShaderTypeName );
         UpdateShaderContributionTypeIndices();
@@ -317,7 +317,7 @@ void VolumeRenderingObject::Serialize( Serializer * ser )
         UpdateInteractionWidgetVisibility();
     }
     else
-        SaveCustomShaders( ser->GetCurrentDirectory() );
+        SaveCustomShaders( ser->GetSerializationDirectory() );
 }
 
 void VolumeRenderingObject::Clear()

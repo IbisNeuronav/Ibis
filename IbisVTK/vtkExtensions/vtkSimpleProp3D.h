@@ -37,7 +37,7 @@ public:
   void PrintSelf(ostream& os, vtkIndent indent) override;
 
   // Description:
-  // Creates a Volume with the following defaults: origin(0,0,0) 
+  // Creates a Volume with the following defaults: origin(0,0,0)
   // position=(0,0,0) scale=1 visibility=1 pickable=1 dragable=1
   // orientation=(0,0,0).
   static vtkSimpleProp3D *New();
@@ -52,7 +52,7 @@ public:
   void Update();
 
   // Description:
-  // Get the bounds - either all six at once 
+  // Get the bounds - either all six at once
   // (xmin, xmax, ymin, ymax, zmin, zmax) or one at a time.
   double *GetBounds() override;
   void GetBounds(double bounds[6]) { this->vtkProp3D::GetBounds( bounds ); };
@@ -64,8 +64,8 @@ public:
   double GetMaxZBound();
 
   // Description:
-  // Return the mtime of anything that would cause the rendered image to 
-  // appear differently. Usually this involves checking the mtime of the 
+  // Return the mtime of anything that would cause the rendered image to
+  // appear differently. Usually this involves checking the mtime of the
   // prop plus anything else it depends on such as properties, mappers,
   // etc.
   unsigned long GetRedrawMTime() override;
@@ -108,11 +108,10 @@ protected:
   ~vtkSimpleProp3D();
 
   vtkSimpleMapper3D      * Mapper;
-  
+
 private:
   vtkSimpleProp3D(const vtkSimpleProp3D&);  // Not implemented.
   void operator=(const vtkSimpleProp3D&);  // Not implemented.
 };
 
 #endif
-

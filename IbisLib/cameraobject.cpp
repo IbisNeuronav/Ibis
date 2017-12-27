@@ -159,7 +159,7 @@ void CameraObject::Serialize( Serializer * ser )
     TrackedSceneObject::Serialize( ser );
     SerializeLocalParams( ser );
 
-    QString dataDirName = GetSceneDataDirectoryForThisObject( ser->GetCurrentDirectory() );
+    QString dataDirName = GetSceneDataDirectoryForThisObject( ser->GetSerializationDirectory() );
     m_videoBuffer->Serialize( ser, dataDirName );
 
     if (ser->IsReader())

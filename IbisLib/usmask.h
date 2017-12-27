@@ -14,7 +14,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QObject>
 #include <vtkObject.h>
 #include <vtkSmartPointer.h>
-#include <math.h>
+#include "ibismath.h"
 #include "serializer.h"
 
 class vtkImageData;
@@ -62,8 +62,8 @@ public:
 #define MASK_ORIGIN_Y       448.0
 #define MASK_CROP_LEFT       50.0
 #define MASK_CROP_RIGHT     540.0
-#define MASK_ANGLE_LEFT     -M_PI_4
-#define MASK_ANGLE_RIGHT    -M_PI_4
+#define MASK_ANGLE_LEFT     (-IbisMath::pi4)
+#define MASK_ANGLE_RIGHT    (-IbisMath::pi4)
 #define MASK_DEPTH_TOP       24.0  // as In Xiao's code ?
 #define MASK_DEPTH_BOTTOM   400.0
 

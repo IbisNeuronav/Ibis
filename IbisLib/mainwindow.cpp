@@ -49,7 +49,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 ObjectSerializationMacro( MainWindow );
 
-const QString MainWindow::m_appName( tr("Intraoperative Brain Imaging System") );
+const QString MainWindow::m_appName( "Intraoperative Brain Imaging System" );
 
 MainWindow::MainWindow( QWidget * parent )
     : QMainWindow( parent )
@@ -523,7 +523,7 @@ void MainWindow::SaveScene(bool asFile)
     if (asFile || sceneDir.isEmpty() )
     {
         QString initialFile = manager->GetSceneDirectory() + "/scene.xml";
-        fileName = Application::GetInstance().GetSaveFileName( tr("Save Scene"), initialFile, tr("xml file (*.xml)") );
+        fileName = Application::GetInstance().GetFileNameSave( tr("Save Scene"), initialFile, tr("xml file (*.xml)") );
         if (!fileName.isEmpty())
         {
             QFileInfo info( fileName );
@@ -560,7 +560,7 @@ void MainWindow::fileLoadScene()
         workingDir = QDir::homePath();
     }
 
-    QString fileName = Application::GetInstance().GetOpenFileName( tr("Load Scene"), workingDir, tr("Scene files (*.xml)") );
+    QString fileName = Application::GetInstance().GetFileNameOpen( tr("Load Scene"), workingDir, tr("Scene files (*.xml)") );
 
     if( !fileName.isEmpty() )
     {

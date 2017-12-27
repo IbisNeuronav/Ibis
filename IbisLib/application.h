@@ -154,8 +154,8 @@ public:
     bool GetPointsFromTagFile(QString fileName, PointsObject *pts1, PointsObject *pts2 );
 
     // Useful modal dialog
-    QString GetOpenFileName( const QString & caption = QString(), const QString & dir = QString(), const QString & filter = QString() );
-    QString GetSaveFileName( const QString & caption = QString(), const QString & dir = QString(), const QString & filter = QString() );
+    QString GetFileNameOpen( const QString & caption = QString(), const QString & dir = QString(), const QString & filter = QString() );
+    QString GetFileNameSave( const QString & caption = QString(), const QString & dir = QString(), const QString & filter = QString() );
     QString GetExistingDirectory( const QString & caption = QString(), const QString & dir = QString() );
     bool GetOpenFileSequence( QStringList & filenames, QString extension, const QString & caption, const QString & dir, const QString & filter );
     int LaunchModalDialog( QDialog * d );
