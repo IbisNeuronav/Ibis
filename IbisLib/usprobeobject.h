@@ -40,7 +40,7 @@ public:
     UsProbeObject();
     virtual ~UsProbeObject();
 
-    virtual void SerializeTracked( Serializer * ser );
+    virtual void SerializeTracked( Serializer * ser ) override;
 
     void AddClient();
     void RemoveClient();
@@ -50,9 +50,9 @@ public:
     USMask *GetMask() { return m_mask; }
 
     // Implementation of standard SceneObject method
-    virtual void Setup( View * view );
-    virtual void Release( View * view );
-    virtual void CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets);
+    virtual void Setup( View * view ) override;
+    virtual void Release( View * view ) override;
+    virtual void CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets) override;
 
     void SetVideoInputConnection( vtkAlgorithmOutput * port );
     void SetVideoInputData( vtkImageData * image );
@@ -98,10 +98,10 @@ private slots:
 
 protected:
 
-    void ObjectAddedToScene();
-    void ObjectRemovedFromScene();
-    virtual void Hide();
-    virtual void Show();
+    void ObjectAddedToScene() override;
+    void ObjectRemovedFromScene() override;
+    virtual void Hide() override;
+    virtual void Show() override;
 
     bool m_maskOn;
     int m_lutIndex;

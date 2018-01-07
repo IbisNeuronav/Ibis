@@ -27,7 +27,7 @@ class vtkOBJReader2 : public vtkPolyDataAlgorithm
 public:
   static vtkOBJReader2 *New();
   vtkTypeMacro(vtkOBJReader2,vtkPolyDataAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   // Description:
   // Specify file name of Wavefront .obj file.
@@ -38,7 +38,7 @@ protected:
   vtkOBJReader2();
   ~vtkOBJReader2();
   
-  int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *);
+  int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *) override;
 
   char *FileName;
 private:

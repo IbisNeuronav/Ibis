@@ -41,13 +41,13 @@ public:
     virtual ~PointsObject();
 
     // overwritten SceneObject methods
-    virtual void Serialize( Serializer * ser );
-    virtual void Export();
-    virtual bool IsExportable()  { return true; }
-    virtual void Setup( View * view );
-    virtual void Release( View * view );
+    virtual void Serialize( Serializer * ser ) override;
+    virtual void Export() override;
+    virtual bool IsExportable()  override { return true; }
+    virtual void Setup( View * view ) override;
+    virtual void Release( View * view ) override;
 
-    virtual void CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets );
+    virtual void CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets ) override;
 
     static const int InvalidPointIndex;
     static const int MinRadius;
@@ -124,21 +124,21 @@ public slots:
 protected:
 
     vtkActor * DoPicking( int x, int y, vtkRenderer * ren, double pickedPoint[3] );
-    virtual bool OnLeftButtonPressed( View * v, int x, int y, unsigned modifiers );
-    virtual bool OnLeftButtonReleased( View * v, int x, int y, unsigned modifiers );
-    virtual bool OnRightButtonPressed( View * v, int x, int y, unsigned modifiers );
-    virtual bool OnMouseMoved( View * v, int x, int y, unsigned modifiers );
+    virtual bool OnLeftButtonPressed( View * v, int x, int y, unsigned modifiers ) override;
+    virtual bool OnLeftButtonReleased( View * v, int x, int y, unsigned modifiers ) override;
+    virtual bool OnRightButtonPressed( View * v, int x, int y, unsigned modifiers ) override;
+    virtual bool OnMouseMoved( View * v, int x, int y, unsigned modifiers ) override;
 
     void AddPointLocal( double coords[3], QString name = QString(), QString timestamp = QString() );
     int FindPoint(vtkActor *actor, double *pos, int viewType );
 
-    virtual void Hide();
-    virtual void Show();
+    virtual void Hide() override;
+    virtual void Show() override;
     void UpdatePoints();
 
     // SceneObject overrides
-    virtual void ObjectAddedToScene();
-    virtual void ObjectAboutToBeRemovedFromScene();
+    virtual void ObjectAddedToScene() override;
+    virtual void ObjectAboutToBeRemovedFromScene() override;
 
     //Description
     // structures to hold points coordinates and names

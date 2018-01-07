@@ -38,10 +38,10 @@ public:
     virtual ~PointerObject();
     
     // Implementation of parent virtual method
-    virtual void Setup( View * view );
-    virtual void Release( View * view );
+    virtual void Setup( View * view ) override;
+    virtual void Release( View * view ) override;
 
-    virtual void CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets);
+    virtual void CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets) override;
 
     double * GetTipPosition();
     void GetMainAxisPosition( double pos[3] );
@@ -73,10 +73,10 @@ private slots:
 
 protected:
 
-    virtual void Hide();
-    virtual void Show();
-    void ObjectAddedToScene();
-    void ObjectRemovedFromScene();
+    virtual void Hide() override;
+    virtual void Show() override;
+    void ObjectAddedToScene() override;
+    void ObjectRemovedFromScene() override;
 
     double m_lastTipCalibrationRMS;
     double m_backupCalibrationRMS;

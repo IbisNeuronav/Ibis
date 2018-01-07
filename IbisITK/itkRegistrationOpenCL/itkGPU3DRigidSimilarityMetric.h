@@ -57,7 +57,7 @@ public:
     m_EulerTransform = EulerTransformType::New();
     }
 
-  double GetValue( const ParametersType & parameters ) const
+  double GetValue( const ParametersType & parameters ) const override
     {
    	if(!m_GPUMetric)
    		itkExceptionMacro(<<"GPUMetric has not been set!");
@@ -91,12 +91,12 @@ public:
     }  
 
   void GetDerivative( const ParametersType & parameters,
-                            DerivativeType & derivative ) const
+                            DerivativeType & derivative ) const override
     {
     	derivative.fill(0);
     }
 
-  unsigned int GetNumberOfParameters(void) const
+  unsigned int GetNumberOfParameters(void) const override
     {
     return SpaceDimension;
     }

@@ -39,13 +39,13 @@ public:
   static vtkPiecewiseFunctionLookupTable *New();
 
   vtkTypeMacro(vtkPiecewiseFunctionLookupTable,vtkLookupTable);
-  void PrintSelf(ostream& os, vtkIndent indent);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   void SetIntensityFactor( double f );
 
   // Description:
   // Force the lookup table to regenerate.
-  virtual void ForceBuild();
+  virtual void ForceBuild() override;
 
   void AddColorPoint( float value, float r, float g, float b );
   void AddAlphaPoint( float value, float alpha );

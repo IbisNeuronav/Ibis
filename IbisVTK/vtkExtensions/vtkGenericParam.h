@@ -82,12 +82,12 @@ public:
                 return (int)i;
         return -1;
     }
-    virtual void GetParamValues( vtkGenericParamValues & v )
+    virtual void GetParamValues( vtkGenericParamValues & v ) override
     {
         v.SetParamName( GetParamName() );
         v.AddItem( "CurrentChoice", GetCurrentChoice() );
     }
-    virtual void SetParamValues( vtkGenericParamValues & v )
+    virtual void SetParamValues( vtkGenericParamValues & v ) override
     {
         std::string choice( v.GetItemValue( 0 ) );
         SetCurrentChoice( choice.c_str() );

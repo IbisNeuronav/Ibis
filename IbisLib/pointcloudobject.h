@@ -42,18 +42,18 @@ public:
     PointCloudObject();
     virtual ~PointCloudObject();
 
-    virtual void Serialize( Serializer * ser );
-    virtual void Export();
-    virtual bool IsExportable()  { return true; }
+    virtual void Serialize( Serializer * ser ) override;
+    virtual void Export() override;
+    virtual bool IsExportable()  override { return true; }
 
     // Implementation of parent virtual method
-    virtual void Setup( View * view );
-    virtual void Release( View * view );
+    virtual void Setup( View * view ) override;
+    virtual void Release( View * view ) override;
 
-    virtual void Hide();
-    virtual void Show();
+    virtual void Hide() override;
+    virtual void Show() override;
 
-    virtual void CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets);
+    virtual void CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets) override;
 
     double GetOpacity() { return this->m_Opacity; }
     void SetOpacity( double opacity );
@@ -73,7 +73,7 @@ protected:
 
     void UpdateMapperPipeline();
     void ChooseLookupTable();
-    virtual void InternalPostSceneRead();
+    virtual void InternalPostSceneRead() override;
 
     vtkProperty *  Property;
     vtkSmartPointer<vtkPoints>   m_PointCloudArray;
