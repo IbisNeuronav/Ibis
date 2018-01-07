@@ -32,7 +32,7 @@ public:
     virtual ~ToolPluginInterface() {}
 
     // Implementation of IbisPlugin interface
-    IbisPluginTypes GetPluginType() { return IbisPluginTypeTool; }
+    IbisPluginTypes GetPluginType()  override { return IbisPluginTypeTool; }
 
     virtual void Serialize( Serializer * serializer );
 
@@ -73,8 +73,8 @@ public:
     
 protected:
 
-    virtual void PluginTypeLoadSettings( QSettings & s );
-    virtual void PluginTypeSaveSettings( QSettings & s );
+    virtual void PluginTypeLoadSettings( QSettings & s ) override;
+    virtual void PluginTypeSaveSettings( QSettings & s ) override;
 
     Settings m_settings;
 

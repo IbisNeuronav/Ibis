@@ -32,7 +32,7 @@ public:
 
     vtkSetStringMacro(FileName);
     virtual int CanReadFile( const char * fname );
-    virtual void Update();
+    virtual void Update() override;
     
     char * GetReferenceDataFileName();
     vtkMatrix4x4 * GetSavedTransform();
@@ -44,7 +44,7 @@ public:
     std::vector<std::string> & GetVolumeNames() { return VolumeNames; }
     std::vector<std::string> & GetTimeStamps() { return TimeStamps; }
 
-    virtual void PrintSelf(ostream &os, vtkIndent indent);
+    virtual void PrintSelf(ostream &os, vtkIndent indent) override;
 
 //BTX
 protected:

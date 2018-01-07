@@ -53,7 +53,7 @@ class vtkMultiInteractorObserver : public vtkObject
 public:
     
   vtkTypeMacro(vtkMultiInteractorObserver,vtkObject);
-  void PrintSelf(ostream& os, vtkIndent indent);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   // Description:
   // Methods for turning the interactor observer on and off, and determining

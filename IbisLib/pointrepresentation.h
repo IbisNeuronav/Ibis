@@ -39,8 +39,8 @@ public:
     PointRepresentation();
     virtual ~PointRepresentation();
 
-    virtual void Setup( View * view );
-    virtual void Release( View * view );
+    virtual void Setup( View * view ) override;
+    virtual void Release( View * view ) override;
 
     void CreatePointRepresentation();
 
@@ -108,10 +108,10 @@ protected:
     vtkSmartPointer<vtkTransform> m_labelOffset;
     vtkSmartPointer<vtkTransform> m_labelTransform;
 
-    virtual void Hide();
-    virtual void Show();
+    virtual void Hide() override;
+    virtual void Show() override;
 
-    void InternalWorldTransformChanged();
+    void InternalWorldTransformChanged() override;
     void UpdateAllTransforms();
 
     struct PerViewElements

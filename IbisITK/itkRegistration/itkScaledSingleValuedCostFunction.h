@@ -58,7 +58,7 @@ namespace itk
     /** Divide the parameters by the scales and call the GetValue routine
      * of the unscaled cost function.
      */
-    virtual MeasureType GetValue( const ParametersType & parameters ) const;
+    virtual MeasureType GetValue( const ParametersType & parameters ) const override;
 
     /** Divide the parameters by the scales, call the GetDerivative routine
      * of the unscaled cost function and divide the resulting derivative by
@@ -66,16 +66,16 @@ namespace itk
      */
     virtual void GetDerivative(
       const ParametersType & parameters,
-      DerivativeType & derivative ) const;
+      DerivativeType & derivative ) const override;
 
     /** Same procedure as in GetValue and GetDerivative. */
     virtual void GetValueAndDerivative(
       const ParametersType & parameters,
       MeasureType & value,
-      DerivativeType & derivative ) const;
+      DerivativeType & derivative ) const override;
 
     /** Ask the UnscaledCostFunction how many parameters it has. */
-    virtual unsigned int GetNumberOfParameters( void ) const;
+    virtual unsigned int GetNumberOfParameters( void ) const override;
 
     /** Set the cost function that needs scaling. */
     itkSetObjectMacro( UnscaledCostFunction, Superclass );
@@ -126,7 +126,7 @@ namespace itk
     virtual ~ScaledSingleValuedCostFunction() {};
 
     /** PrintSelf. */
-    void PrintSelf( std::ostream & os, Indent indent ) const;
+    void PrintSelf( std::ostream & os, Indent indent ) const override;
 
   private:
 

@@ -65,9 +65,9 @@ public:
 
     void SetUsProbe( UsProbeObject * probe );
 
-    virtual void Serialize( Serializer * serializer );
-    virtual void Export();
-    virtual bool IsExportable()  { return true; }
+    virtual void Serialize( Serializer * serializer ) override;
+    virtual void Export() override;
+    virtual bool IsExportable()  override { return true; }
 
     bool Import();
     void    SetBaseDirectory(QString dir) {m_baseDirectory = dir;}
@@ -76,9 +76,9 @@ public:
     bool    LoadFramesFromMINCFile( QStringList & allMINCFiles );
     bool    LoadFramesFromMINCFile( Serializer * ser );
 
-    virtual void CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets);
-    virtual void Setup( View * view );
-    virtual void Release( View * view );
+    virtual void CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets) override;
+    virtual void Setup( View * view ) override;
+    virtual void Release( View * view ) override;
 
 
     bool IsUsingMask() { return m_isMaskOn; }
@@ -148,9 +148,9 @@ private slots:
 
 protected:
 
-    virtual void Hide();
-    virtual void Show();
-    void ObjectAddedToScene();
+    virtual void Hide() override;
+    virtual void Show() override;
+    void ObjectAddedToScene() override;
     void UpdatePipeline();
     bool m_isRecording;
     QString             m_baseDirectory;

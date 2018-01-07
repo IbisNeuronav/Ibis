@@ -37,21 +37,21 @@ public:
 	virtual ~TripleCutPlaneObject();
 
     // SceneObject implementation
-    virtual void Serialize( Serializer * ser );
-    virtual void PostSceneRead();
-    virtual void Setup( View * view );
-    virtual void Release( View * view );
-    virtual void ReleaseAllViews();
+    virtual void Serialize( Serializer * ser ) override;
+    virtual void PostSceneRead() override;
+    virtual void Setup( View * view ) override;
+    virtual void Release( View * view ) override;
+    virtual void ReleaseAllViews() override;
 
-    virtual QWidget * CreateSettingsDialog( QWidget * parent );
-    virtual void CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets) {}
+    virtual QWidget * CreateSettingsDialog( QWidget * parent ) override;
+    virtual void CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets) override {}
 
     // Original code
     int GetNumberOfImages() { return Images.size(); }
     ImageObject * GetImage( int index );
     void AddImage( int imageID);
     void RemoveImage(int imageID );
-	void PreDisplaySetup();
+    void PreDisplaySetup() override;
 	void ResetPlanes();
 
 	// Manage plane visibility
@@ -106,7 +106,7 @@ public slots:
     void UpdateLut( int imageID );
     void ObjectAddedSlot( int objectId );
     void ObjectRemovedSlot(int objectId );
-    virtual void MarkModified();
+    virtual void MarkModified() override;
     void SetImageHidden(int imageID );
 
 signals:
@@ -116,8 +116,8 @@ signals:
 
 protected:
 
-    virtual void ObjectAddedToScene();
-    virtual void ObjectRemovedFromScene();
+    virtual void ObjectAddedToScene() override;
+    virtual void ObjectRemovedFromScene() override;
     View * Get3DView();
 	void Setup3DRepresentation( View * view );
 	void Release3DRepresentation( View * view );

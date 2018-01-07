@@ -33,7 +33,7 @@ public:
     virtual void SetMatrix(vtkMatrix4x4 *mat);
     virtual int CanReadFile( const char * fname );
     
-    void PrintSelf(ostream &os, vtkIndent indent);
+    void PrintSelf(ostream &os, vtkIndent indent) override;
 
 //BTX
 protected:

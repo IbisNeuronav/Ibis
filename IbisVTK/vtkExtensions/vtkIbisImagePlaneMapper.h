@@ -41,16 +41,16 @@ public:
     // WARNING: INTERNAL METHOD - NOT INTENDED FOR GENERAL USE
     // DO NOT USE THIS METHOD OUTSIDE OF THE RENDERING PROCESS
     // Do the actual rendering
-    virtual int HasTranslucentPolygonalGeometry() { return 1; }
-    virtual int RenderTranslucentPolygonalGeometry( vtkRenderer *ren, vtkSimpleProp3D * prop );
-    void ReleaseGraphicsResources(vtkWindow *);
-    virtual unsigned long int GetRedrawMTime();
+    virtual int HasTranslucentPolygonalGeometry() override { return 1; }
+    virtual int RenderTranslucentPolygonalGeometry( vtkRenderer *ren, vtkSimpleProp3D * prop ) override;
+    void ReleaseGraphicsResources(vtkWindow *) override;
+    virtual unsigned long int GetRedrawMTime() override;
 
     // Description:
     // Return bounding box (array of six doubles) of data expressed as
     // (xmin,xmax, ymin,ymax, zmin,zmax).
-    virtual double *GetBounds();
-    virtual void GetBounds(double bounds[6])
+    virtual double *GetBounds() override;
+    virtual void GetBounds(double bounds[6]) override
       { this->vtkAbstractMapper3D::GetBounds(bounds); };
 
     void SetGlobalOpacity( double opacity );
@@ -69,7 +69,7 @@ protected:
     vtkIbisImagePlaneMapper();
     ~vtkIbisImagePlaneMapper();
 
-    virtual int FillInputPortInformation(int, vtkInformation*);
+    virtual int FillInputPortInformation(int, vtkInformation*) override;
     void LoadOpenGLExtensions( vtkRenderWindow * window );
     void UpdateTexture();
     bool UpdateShader();

@@ -402,8 +402,8 @@ private:
     // We declare these to make sure no one is registering or unregistering SceneManager
     // since SceneManager should have only one instance and be deleted at the end
     // by the unique instance of Application.
-    virtual void Register(vtkObjectBase* o);
-    virtual void UnRegister(vtkObjectBase* o);
+    virtual void Register(vtkObjectBase* o) override;
+    virtual void UnRegister(vtkObjectBase* o) override;
 };
 
 ObjectSerializationHeaderMacro( SceneManager );

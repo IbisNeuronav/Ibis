@@ -47,18 +47,18 @@ public:
     PolyDataObject();
     virtual ~PolyDataObject();
     
-    virtual void Serialize( Serializer * ser );
-    virtual void Export();
-    virtual bool IsExportable()  { return true; }
+    virtual void Serialize( Serializer * ser ) override;
+    virtual void Export() override;
+    virtual bool IsExportable()  override { return true; }
 
     vtkPolyData *GetPolyData();
     void SetPolyData( vtkPolyData *data );
     
     // Implementation of parent virtual method
-    virtual void Setup( View * view );
-    virtual void Release( View * view );
+    virtual void Setup( View * view ) override;
+    virtual void Release( View * view ) override;
 
-    virtual void CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets);
+    virtual void CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets) override;
 
     int GetRenderingMode() { return this->renderingMode; }
     void SetRenderingMode( int mode );
@@ -110,11 +110,11 @@ signals:
 protected:
 
     // SceneObject overrides
-    virtual void Hide();
-    virtual void Show();
-    virtual void ObjectAddedToScene();
-    virtual void ObjectAboutToBeRemovedFromScene();
-    virtual void InternalPostSceneRead();
+    virtual void Hide() override;
+    virtual void Show() override;
+    virtual void ObjectAddedToScene() override;
+    virtual void ObjectAboutToBeRemovedFromScene() override;
+    virtual void InternalPostSceneRead() override;
 
     void UpdateClippingPlanes();
     void UpdateCuttingPlane();

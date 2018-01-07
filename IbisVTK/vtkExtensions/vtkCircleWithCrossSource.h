@@ -32,7 +32,7 @@ public:
 
     static vtkCircleWithCrossSource *New();
     vtkTypeMacro(vtkCircleWithCrossSource,vtkPolyDataAlgorithm);
-    void PrintSelf(ostream& os, vtkIndent indent);
+    void PrintSelf(ostream& os, vtkIndent indent) override;
 
     // Description:
     // The circle will be approximated with Resolution

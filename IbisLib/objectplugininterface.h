@@ -28,7 +28,7 @@ public:
     virtual ~ObjectPluginInterface() {}
 
     // Implementation of IbisPlugin interface
-    IbisPluginTypes GetPluginType() { return IbisPluginTypeObject; }
+    IbisPluginTypes GetPluginType() override { return IbisPluginTypeObject; }
     
     virtual QString GetMenuEntryString() = 0;
     virtual SceneObject * CreateObject() = 0;

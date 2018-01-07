@@ -48,9 +48,9 @@ public:
     ImageObject();
     virtual ~ImageObject();
     
-    virtual void Serialize( Serializer * ser );
-    virtual void Export();
-    virtual bool IsExportable()  { return true; }
+    virtual void Serialize( Serializer * ser ) override;
+    virtual void Export() override;
+    virtual bool IsExportable()  override { return true; }
     void SaveImageData(QString &name);
 
     bool IsLabelImage();
@@ -64,10 +64,10 @@ public:
     void SetImage( vtkImageData * image );
     
     // Implementation of parent virtual method
-    virtual void ObjectAddedToScene();
-    virtual void Setup( View * view );
-    virtual void Release( View * view );
-    virtual void CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets);
+    virtual void ObjectAddedToScene() override;
+    virtual void Setup( View * view ) override;
+    virtual void Release( View * view ) override;
+    virtual void CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets) override;
 
     void SetViewOutline( int isOn );
     int GetViewOutline();
@@ -116,8 +116,8 @@ protected slots:
 
 protected:
     
-    virtual void Hide();
-    virtual void Show();
+    virtual void Hide() override;
+    virtual void Show() override;
     void SetupInCutPlanes();
     void Setup3DRepresentation( View * view );
     void Release3DRepresentation( View * view );
