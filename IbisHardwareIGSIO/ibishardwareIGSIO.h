@@ -20,6 +20,7 @@ namespace  igtlio {
 class QMenu;
 class qIGTLIOLogicController;
 class qIGTLIOClientWidget;
+class PlusServerInterface;
 
 
 class IbisHardwareIGSIO : public HardwareModule
@@ -38,30 +39,37 @@ public:
     ~IbisHardwareIGSIO();
 
     // Implementation of IbisPlugin interface
-    virtual QString GetPluginName() { return QString("IbisHardwareIGSIO"); }
+    virtual QString GetPluginName() override { return QString("IbisHardwareIGSIO"); }
+
+    // Load/Save settings
+    virtual void LoadSettings( QSettings & s ) override;
+    virtual void SaveSettings( QSettings & s ) override;
 
     // Implementation of the HardwareModule interface
-    virtual void AddSettingsMenuEntries( QMenu * menu );
-    virtual void Init();
-    virtual void Update();
-    virtual bool ShutDown();
+    virtual void AddSettingsMenuEntries( QMenu * menu ) override;
+    virtual void Init() override;
+    virtual void Update() override;
+    virtual bool ShutDown() override;
 
-    virtual void AddToolObjectsToScene();
-    virtual void RemoveToolObjectsFromScene();
+    // Launch a Plus server and connect
+    bool LaunchAndConnectLocal();
 
-    virtual vtkTransform * GetReferenceTransform();
+    virtual void AddToolObjectsToScene() override;
+    virtual void RemoveToolObjectsFromScene() override;
 
-    virtual bool IsTransformFrozen( TrackedSceneObject * obj );
-    virtual void FreezeTransform( TrackedSceneObject * obj, int nbSamples );
-    virtual void UnFreezeTransform( TrackedSceneObject * obj );
+    virtual vtkTransform * GetReferenceTransform() override;
 
-    virtual void AddTrackedVideoClient( TrackedSceneObject * obj );
-    virtual void RemoveTrackedVideoClient( TrackedSceneObject * obj);
+    virtual bool IsTransformFrozen( TrackedSceneObject * obj ) override;
+    virtual void FreezeTransform( TrackedSceneObject * obj, int nbSamples ) override;
+    virtual void UnFreezeTransform( TrackedSceneObject * obj ) override;
 
-    virtual void StartTipCalibration( PointerObject * p );
-    virtual double DoTipCalibration( PointerObject * p, vtkMatrix4x4 * calibMat );
-    virtual bool IsCalibratingTip( PointerObject * p );
-    virtual void StopTipCalibration( PointerObject * p );
+    virtual void AddTrackedVideoClient( TrackedSceneObject * obj ) override;
+    virtual void RemoveTrackedVideoClient( TrackedSceneObject * obj) override;
+
+    virtual void StartTipCalibration( PointerObject * p ) override;
+    virtual double DoTipCalibration( PointerObject * p, vtkMatrix4x4 * calibMat ) override;
+    virtual bool IsCalibratingTip( PointerObject * p ) override;
+    virtual void StopTipCalibration( PointerObject * p ) override;
 
 private slots:
 
@@ -76,6 +84,11 @@ protected:
     bool ModuleHasDevice( igtlio::DevicePointer device );
     TrackedSceneObject * InstanciateSceneObjectFromDevice( igtlio::DevicePointer device );
 
+    // Plus server exec and config paths
+    QString m_plusServerExec;
+    QString m_plusConfigDir;
+    QString m_plusLastConfigFile;
+
     struct Tool
     {
         TrackedSceneObject * sceneObject;
@@ -85,6 +98,7 @@ protected:
     toolList m_tools;
 
     vtkSmartPointer<igtlio::Logic> m_logic;
+    vtkSmartPointer<PlusServerInterface> m_plusLauncher;
     qIGTLIOLogicController * m_logicController;
     qIGTLIOClientWidget * m_clientWidget;
 };

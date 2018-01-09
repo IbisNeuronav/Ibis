@@ -17,6 +17,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "cameraobject.h"
 #include <QDir>
 #include <QMenu>
+#include <QSettings>
 #include "igtlioLogic.h"
 #include "qIGTLIOLogicController.h"
 #include "qIGTLIOClientWidget.h"
@@ -26,16 +27,42 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include "igtlioImageConverter.h"
 #include "igtlioTransformConverter.h"
+#include "plusserverinterface.h"
+
+static const QString DefaultPlusConfigDirectory = Application::GetConfigDirectory() + QString("PlusToolkit/");
+static const QString DefaultPlusConfigFilesDirectory = DefaultPlusConfigDirectory + QString("ConfigFiles/");
+static const QString PlusToolkitPathsFilename = DefaultPlusConfigDirectory + QString("plus-toolkit-paths.txt");
 
 IbisHardwareIGSIO::IbisHardwareIGSIO()
 {
     m_logicController = 0;
     m_logic = 0;
     m_clientWidget = 0;
+    m_plusLauncher = 0;
+    m_plusConfigDir = DefaultPlusConfigFilesDirectory;
+
+    // Look for the Plus Toolkit path
+    if( QFile::exists( PlusToolkitPathsFilename ) )
+    {
+        QFile pathFile( PlusToolkitPathsFilename );
+        pathFile.open( QIODevice::ReadOnly | QIODevice::Text );
+        QTextStream pathIn( &pathFile );
+        pathIn >> m_plusServerExec;
+    }
 }
 
 IbisHardwareIGSIO::~IbisHardwareIGSIO()
 {
+}
+
+void IbisHardwareIGSIO::LoadSettings( QSettings & s )
+{
+    m_plusLastConfigFile = s.value( "LastConfigFile", "" ).toString();
+}
+
+void IbisHardwareIGSIO::SaveSettings( QSettings & s )
+{
+    s.setValue( "LastConfigFile", m_plusLastConfigFile );
 }
 
 void IbisHardwareIGSIO::AddSettingsMenuEntries( QMenu * menu )
@@ -48,6 +75,16 @@ void IbisHardwareIGSIO::Init()
     m_logicController = new qIGTLIOLogicController;
     m_logic = vtkSmartPointer<igtlio::Logic>::New();
     m_logicController->setLogic( m_logic );
+
+    // Temporarily encode config file until we have gui to do it
+    m_plusLastConfigFile = "PlusDeviceSet_OpenIGTLinkCommandsTest.xml";
+
+    // Make sure we have a valid config file before trying to launch a server
+    QFileInfo configInfo( m_plusConfigDir + m_plusLastConfigFile );
+    if( configInfo.exists() && configInfo.isReadable() )
+    {
+        LaunchAndConnectLocal();
+    }
 }
 
 void IbisHardwareIGSIO::Update()
@@ -93,6 +130,28 @@ bool IbisHardwareIGSIO::ShutDown()
     }
 
     return true;
+}
+
+bool IbisHardwareIGSIO::LaunchAndConnectLocal()
+{   
+    // First try to launch a server
+    if( !m_plusLauncher )
+    {
+        m_plusLauncher = vtkSmartPointer<PlusServerInterface>::New();
+        m_plusLauncher->SetServerExecutable( m_plusServerExec );
+    }
+    QString plusConfiFile = m_plusConfigDir + m_plusLastConfigFile;
+    bool didLaunch = m_plusLauncher->StartServer( plusConfiFile );
+    if( !didLaunch )
+    {
+        QString msg = QString("Coulnd't launch the Plus Server to communicate with hardware: %1").arg( m_plusLauncher->GetLastErrorMessage() );
+        GetApplication()->Warning("Error", msg);
+        return false;
+    }
+
+    // Now, try to connect to it. By default the connector tries local host with port where server is listening
+    m_logic->CreateConnector();
+    m_logic->GetConnector( 0 )->Start();
 }
 
 vtkTransform * IbisHardwareIGSIO::GetReferenceTransform()
