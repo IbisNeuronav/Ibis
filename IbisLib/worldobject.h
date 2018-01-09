@@ -35,11 +35,11 @@ public:
     vtkSmartPointer<PolyDataObject> GetAxesObject() { return m_axesObject; }
 
     // can't set name or allow hidding or delete this type of object
-    virtual void SetName( QString name ) {}
-    virtual void SetNameChangeable( bool c ) {}
+    virtual void SetName( QString name ) override {}
+    virtual void SetNameChangeable( bool c ) override {}
     virtual void SetHidden( bool h ) { }
-    virtual void SetHidable( bool h ) {}
-    virtual void SetObjectDeletable( bool d ) {}
+    virtual void SetHidable( bool h ) override {}
+    virtual void SetObjectDeletable( bool d ) override {}
 
     void SetAxesHidden( bool h );
     bool AxesHidden();
@@ -62,8 +62,8 @@ public:
     void SetUpdateFrequency( double fps );
     double GetUpdateFrequency();
 
-    virtual QWidget * CreateSettingsDialog( QWidget * parent );
-    virtual void CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets) {}
+    virtual QWidget * CreateSettingsDialog( QWidget * parent ) override;
+    virtual void CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets) override {}
 
 private:
 

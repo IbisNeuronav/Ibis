@@ -34,7 +34,7 @@ class vtkSimpleProp3D : public vtkProp3D
 public:
 
   vtkTypeMacro(vtkSimpleProp3D,vtkProp3D);
-  void PrintSelf(ostream& os, vtkIndent indent);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   // Description:
   // Creates a Volume with the following defaults: origin(0,0,0) 
@@ -54,7 +54,7 @@ public:
   // Description:
   // Get the bounds - either all six at once 
   // (xmin, xmax, ymin, ymax, zmin, zmax) or one at a time.
-  double *GetBounds();
+  double *GetBounds() override;
   void GetBounds(double bounds[6]) { this->vtkProp3D::GetBounds( bounds ); };
   double GetMinXBound();
   double GetMaxXBound();
@@ -68,11 +68,11 @@ public:
   // appear differently. Usually this involves checking the mtime of the 
   // prop plus anything else it depends on such as properties, mappers,
   // etc.
-  unsigned long GetRedrawMTime();
+  unsigned long GetRedrawMTime() override;
 
   // Description:
   // Shallow copy of this vtkSimpleProp3D. Overloads the virtual vtkProp method.
-  void ShallowCopy(vtkProp *prop);
+  void ShallowCopy(vtkProp *prop) override;
 
   // Description:
   // WARNING: INTERNAL METHOD - NOT INTENDED FOR GENERAL USE
@@ -89,18 +89,18 @@ public:
   // The last method is to render any 2D annotation or overlays.
   // Each of these methods return an integer value indicating
   // whether or not this render method was applied to this data.
-  virtual int RenderOpaqueGeometry( vtkViewport * );
-  virtual int HasTranslucentPolygonalGeometry();
-  virtual int RenderTranslucentPolygonalGeometry( vtkViewport * );
-  virtual int RenderVolumetricGeometry( vtkViewport * );
-  virtual int RenderOverlay( vtkViewport *);
+  virtual int RenderOpaqueGeometry( vtkViewport * ) override;
+  virtual int HasTranslucentPolygonalGeometry() override;
+  virtual int RenderTranslucentPolygonalGeometry( vtkViewport * ) override;
+  virtual int RenderVolumetricGeometry( vtkViewport * ) override;
+  virtual int RenderOverlay( vtkViewport *) override;
 
   // Description:
   // WARNING: INTERNAL METHOD - NOT INTENDED FOR GENERAL USE
   // Release any graphics resources that are being consumed by this volume.
   // The parameter window could be used to determine which graphic
   // resources to release.
-  void ReleaseGraphicsResources(vtkWindow *);
+  void ReleaseGraphicsResources(vtkWindow *) override;
 
 protected:
 

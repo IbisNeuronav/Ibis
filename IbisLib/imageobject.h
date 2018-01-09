@@ -18,10 +18,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <map>
 #include <QVector>
 
-#include "itkVTKImageExport.h"
-#include <itkImageRegionIterator.h>
-#include <itkImage.h>
-#include "itkRGBPixel.h"
+#include "ibisitkvtkconverter.h"
 
 class vtkRenderer;
 class vtkRenderWindowInteractor;
@@ -38,31 +35,6 @@ class vtkImageAccumulate;
 class vtkVolumeProperty;
 class vtkImageData;
 
-typedef itk::RGBPixel< unsigned char > RGBPixelType;
-typedef itk::Image< RGBPixelType, 3 > IbisRGBImageType;
-typedef itk::Image<float,3> IbisItk3DImageType;
-typedef itk::Image < unsigned char,3 > IbisItk3DLabelType;
-typedef itk::ImageRegionIterator< IbisItk3DImageType > IbisItk3DImageIteratorType;
-
-// Reimplement origin callback from itk::VTKImageExport to take dir cosines into account correctly
-template< class TInputImage >
-class IbisItkVTKImageExport : public itk::VTKImageExport< TInputImage >
-{
-public:
-    typedef IbisItkVTKImageExport<TInputImage>   Self;
-    typedef itk::SmartPointer< Self >            Pointer;
-    typedef TInputImage InputImageType;
-    itkNewMacro(Self);
-protected:
-    typedef typename InputImageType::Pointer    InputImagePointer;
-    IbisItkVTKImageExport();
-    double * OriginCallback();
-    double vtkOrigin[3];
-};
-typedef IbisItkVTKImageExport< IbisItk3DImageType > ItkExporterType;
-typedef IbisItkVTKImageExport< IbisRGBImageType > ItkRGBImageExporterType;
-typedef IbisItkVTKImageExport< IbisItk3DLabelType > ItkLabelExporterType;
-
 class ImageObject : public SceneObject
 {
     
@@ -76,28 +48,26 @@ public:
     ImageObject();
     virtual ~ImageObject();
     
-    virtual void Serialize( Serializer * ser );
-    virtual void Export();
-    virtual bool IsExportable()  { return true; }
+    virtual void Serialize( Serializer * ser ) override;
+    virtual void Export() override;
+    virtual bool IsExportable()  override { return true; }
     void SaveImageData(QString &name);
 
     bool IsLabelImage();
     
     vtkImageData* GetImage( );
-    void SetItkImage( IbisItk3DImageType::Pointer image );  // for all others
-    void SetItkImage( IbisRGBImageType::Pointer image );  // for RGB images
-    void SetItkLabelImage( IbisItk3DLabelType::Pointer image );  // for labels
-    IbisItk3DImageType::Pointer GetItkImage() { return this->ItkImage; }
+    void SetItkImage( IbisItkFloat3ImageType::Pointer image );  // for all others
+    void SetItkLabelImage( IbisItkUnsignedChar3ImageType::Pointer image );  // for labels
+    IbisItkFloat3ImageType::Pointer GetItkImage() { return this->ItkImage; }
     IbisRGBImageType::Pointer GetItkRGBImage() { return this->ItkRGBImage; }
-    IbisItk3DLabelType::Pointer GetItkLabelImage() { return this->ItkLabelImage; }
+    IbisItkUnsignedChar3ImageType::Pointer GetItkLabelImage() { return this->ItkLabelImage; }
     void SetImage( vtkImageData * image );
-    void ForceUpdatePixels();
     
     // Implementation of parent virtual method
-    virtual void ObjectAddedToScene();
-    virtual void Setup( View * view );
-    virtual void Release( View * view );
-    virtual void CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets);
+    virtual void ObjectAddedToScene() override;
+    virtual void Setup( View * view ) override;
+    virtual void Release( View * view ) override;
+    virtual void CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets) override;
 
     void SetViewOutline( int isOn );
     int GetViewOutline();
@@ -146,8 +116,8 @@ protected slots:
 
 protected:
     
-    virtual void Hide();
-    virtual void Show();
+    virtual void Hide() override;
+    virtual void Show() override;
     void SetupInCutPlanes();
     void Setup3DRepresentation( View * view );
     void Release3DRepresentation( View * view );
@@ -160,20 +130,12 @@ protected:
     // Setup histogram properties after new image is set.
     void SetupHistogramComputer( );
 
-    void BuildItkToVtkExport();
-    void BuildItkRGBImageToVtkExport();
-    void BuildItkToVtkLabelExport();
-    void BuildVtkImport( itk::VTKImageExportBase * exporter );
-
-    IbisItk3DImageType::Pointer ItkImage;
-    ItkExporterType::Pointer ItkToVtkExporter;
+    IbisItkVtkConverter *ItktovtkConverter;
+    IbisItkFloat3ImageType::Pointer ItkImage;
     IbisRGBImageType::Pointer ItkRGBImage;
-    ItkRGBImageExporterType::Pointer ItkRGBImageToVtkExporter;
-    IbisItk3DLabelType::Pointer ItkLabelImage;
-    ItkLabelExporterType::Pointer ItkToVtkLabelExporter;
-    vtkSmartPointer<vtkImageImport> ItkToVtkImporter;
+    IbisItkUnsignedChar3ImageType::Pointer ItkLabelImage;
 
-    vtkSmartPointer<vtkImageData> Image;
+    vtkImageData* Image;
     vtkSmartPointer<vtkScalarsToColors> Lut;
     vtkSmartPointer<vtkOutlineFilter> OutlineFilter;
     static const int NumberOfBinsInHistogram;

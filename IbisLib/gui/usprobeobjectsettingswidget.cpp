@@ -55,7 +55,7 @@ void UsProbeObjectSettingsWidget::SetUsProbeObject( UsProbeObject * probeObject 
     Q_ASSERT( probeObject );
     m_usProbeObject = probeObject;
 
-    connect( m_usProbeObject, SIGNAL( Modified() ), this, SLOT( UpdateToolStatus() ) );
+    connect( m_usProbeObject, SIGNAL( ObjectModified() ), this, SLOT( UpdateToolStatus() ) );
 
     this->UpdateToolStatus();
     this->UpdateDepth();

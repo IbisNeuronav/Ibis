@@ -9,7 +9,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
 #include "usacquisitionplugininterface.h"
-#include "application.h"
 #include "sceneobject.h"
 #include "usacquisitionobject.h"
 #include "usprobeobject.h"
@@ -264,14 +263,14 @@ void USAcquisitionPluginInterface::SetCurrentVolumeObjectId( int id )
     if( prev )
     {
         disconnect( prev, SIGNAL(LutChanged(int)), this, SLOT(LutChanged(int)) );
-        disconnect( prev, SIGNAL(Modified()), this, SLOT(OnImageChanged()));
+        disconnect( prev, SIGNAL(ObjectModified()), this, SLOT(OnImageChanged()));
     }
     m_currentVolumeObjectId = id;
     ImageObject * im = ImageObject::SafeDownCast( GetSceneManager()->GetObjectByID( id ) );
     if( im )
     {
         connect( im, SIGNAL(LutChanged(int)), this, SLOT(LutChanged(int)) );
-        connect( im, SIGNAL(Modified()), this, SLOT(OnImageChanged()));
+        connect( im, SIGNAL(ObjectModified()), this, SLOT(OnImageChanged()));
     }
 }
 
@@ -281,14 +280,14 @@ void USAcquisitionPluginInterface::SetAddedVolumeObjectId( int id )
     if( prev )
     {
         disconnect( prev, SIGNAL(LutChanged(int)), this, SLOT(LutChanged(int)) );
-        disconnect( prev, SIGNAL(Modified()), this, SLOT(OnImageChanged()));
+        disconnect( prev, SIGNAL(ObjectModified()), this, SLOT(OnImageChanged()));
     }
     m_addedVolumeObjectId = id;
     ImageObject * im = ImageObject::SafeDownCast( GetSceneManager()->GetObjectByID( id ) );
     if( im )
     {
         connect( im, SIGNAL(LutChanged(int)), this, SLOT(LutChanged(int)) );
-        connect( im, SIGNAL(Modified()), this, SLOT(OnImageChanged()));
+        connect( im, SIGNAL(ObjectModified()), this, SLOT(OnImageChanged()));
     }
 }
 

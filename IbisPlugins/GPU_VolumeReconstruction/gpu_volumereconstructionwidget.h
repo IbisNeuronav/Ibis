@@ -17,37 +17,17 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QFutureWatcher>
 
 #include "ui_gpu_volumereconstructionwidget.h"
-#include "application.h"
-#include "scenemanager.h"
-#include "sceneobject.h"
-#include "imageobject.h"
-#include "usacquisitionobject.h"
-#include "vtkTransform.h"
-#include "vtkLinearTransform.h"
-#include "vtkMatrix4x4.h"
+#include "gpu_volumereconstruction.h"
 
-#include "vtkImageData.h"
-#include "vtkImageShiftScale.h"
-#include "vtkImageLuminance.h"
-#include "vtkMath.h"
+#include "ibisitkvtkconverter.h"
 #include "vtkSmartPointer.h"
 
-#include "itkGPUVolumeReconstruction.h"
-#include "itkEuler3DTransform.h"
-
-typedef itk::GPUVolumeReconstruction<IbisItk3DImageType>
-                                                    VolumeReconstructionType;
-typedef VolumeReconstructionType::Pointer           VolumeReconstructionPointer;
-
-typedef itk::Euler3DTransform<float>                ItkRigidTransformType;
-
-class Application;
+class GPU_VolumeReconstructionPluginInterface;
 
 namespace Ui
 {
     class GPU_VolumeReconstructionWidget;
 }
-
 
 class GPU_VolumeReconstructionWidget : public QWidget
 {
@@ -59,18 +39,18 @@ public:
     explicit GPU_VolumeReconstructionWidget(QWidget *parent = 0);
     ~GPU_VolumeReconstructionWidget();
 
-    void SetApplication( Application * app );
+    void SetPluginInterface( GPU_VolumeReconstructionPluginInterface *ifc );
 
 private:
 
     void UpdateUi();
-    void VtkToItkImage( vtkImageData * vtkImage, IbisItk3DImageType * itkOutputImage, vtkSmartPointer<vtkMatrix4x4> transformMatrix );
 
     Ui::GPU_VolumeReconstructionWidget * ui;
-    Application * m_application;
     QFutureWatcher<void>        m_futureWatcher;
     VolumeReconstructionPointer m_Reconstructor;
     QElapsedTimer               m_ReconstructionTimer;
+    GPU_VolumeReconstruction   * m_VolumeReconstructor;
+    GPU_VolumeReconstructionPluginInterface *m_pluginInterface;
 
 private slots:
 

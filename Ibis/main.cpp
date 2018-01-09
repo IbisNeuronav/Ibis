@@ -45,19 +45,20 @@ int main( int argc, char** argv )
     // Tell the application to load files specified on the command line immediately after startup
     Application::GetInstance().SetInitialDataFiles( cmdArgs.GetDataFilesToLoad() );
 
+    // Load plugins
+    Application::GetInstance().LoadPlugins();
+
     // Initialize Hardware if not in viewer-only mode
     if( !cmdArgs.GetViewerOnly() )
     {
         Application::GetInstance().InitHardware();
     }
 
-    // Application is initialized properly. Now we can load plugins
-    Application::GetInstance().LoadPlugins();
-
     // Create main window
     MainWindow * mw = new MainWindow( 0 );
     mw->setAttribute( Qt::WA_DeleteOnClose );
     mw->show();
+    Application::GetInstance().SetMainWindow( mw );
     Application::GetInstance().LoadWindowSettings();
     a.connect( &a, SIGNAL( lastWindowClosed() ), &a, SLOT( quit() ) );
     a.connect( &a, SIGNAL( aboutToQuit() ), &Application::GetInstance(), SLOT( SaveSettings() ) );

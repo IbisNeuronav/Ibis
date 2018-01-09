@@ -38,8 +38,6 @@ class USMask;
 class vtkImageConstantPad;
 class vtkPassThrough;
 
-typedef itk::Image<float,3> IbisItk3DImageType;
-
 #define ACQ_COLOR_RGB           "RGB"
 #define ACQ_COLOR_GRAYSCALE     "Grayscale"
 #define ACQ_BASE_DIR            "acquisitions"
@@ -67,9 +65,9 @@ public:
 
     void SetUsProbe( UsProbeObject * probe );
 
-    virtual void Serialize( Serializer * serializer );
-    virtual void Export();
-    virtual bool IsExportable()  { return true; }
+    virtual void Serialize( Serializer * serializer ) override;
+    virtual void Export() override;
+    virtual bool IsExportable()  override { return true; }
 
     bool Import();
     void    SetBaseDirectory(QString dir) {m_baseDirectory = dir;}
@@ -78,9 +76,9 @@ public:
     bool    LoadFramesFromMINCFile( QStringList & allMINCFiles );
     bool    LoadFramesFromMINCFile( Serializer * ser );
 
-    virtual void CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets);
-    virtual void Setup( View * view );
-    virtual void Release( View * view );
+    virtual void CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets) override;
+    virtual void Setup( View * view ) override;
+    virtual void Release( View * view ) override;
 
 
     bool IsUsingMask() { return m_isMaskOn; }
@@ -96,9 +94,12 @@ public:
 
     void SetFrameAndMaskSize( int width, int height );
 
+    // Return frame data
+    void GetFrameData(int index, vtkImageData *img, vtkMatrix4x4 *mat );
+
     // Return itk image of a given frame
-    bool GetItkImage(IbisItk3DImageType::Pointer itkOutputImage, int frameNo, vtkMatrix4x4* sliceMatrix);
-    void GetItkRGBImage(IbisRGBImageType::Pointer itkOutputImage, int frameNo, bool masked, bool useCalibratedTransform = false, vtkMatrix4x4 *relativeMatrix = 0 );
+    void GetItkImage(IbisItkUnsignedChar3ImageType::Pointer itkOutputImage, int frameNo, bool masked, bool useCalibratedTransform = false, int relativeToObjectID = SceneManager::InvalidId );
+    void GetItkRGBImage(IbisRGBImageType::Pointer itkOutputImage, int frameNo, bool masked, bool useCalibratedTransform = false, int relativeToObjectID = SceneManager::InvalidId );
 
     // Display of current slice
     int GetSliceWidth();
@@ -147,9 +148,9 @@ private slots:
 
 protected:
 
-    virtual void Hide();
-    virtual void Show();
-    void ObjectAddedToScene();
+    virtual void Hide() override;
+    virtual void Show() override;
+    void ObjectAddedToScene() override;
     void UpdatePipeline();
     bool m_isRecording;
     QString             m_baseDirectory;
@@ -219,10 +220,7 @@ protected:
     std::vector< PerStaticSlice > m_staticSlicesData;
     bool m_staticSlicesDataNeedUpdate;
 
-    std::vector< IbisRGBImageType::Pointer > m_itkRGBImages;
-
     void Save( );
-    void ConvertVtkImagesToItkRGBImages(bool masked = false, bool useCalibratedTransform = false, int relativeToID = SceneManager::InvalidId );
 };
 
 ObjectSerializationHeaderMacro( USAcquisitionObject );

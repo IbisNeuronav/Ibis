@@ -18,7 +18,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "view.h"
 #include "vtkPoints.h"
 #include "vtkLandmarkTransform.h"
-#include "vtkLinearTransform.h"
 #include "vtkTransform.h"
 #include "vtkTagWriter.h"
 #include "vtkXFMWriter.h"
@@ -44,6 +43,7 @@ LandmarkRegistrationObject::LandmarkRegistrationObject() : SceneObject()
     m_targetObjectID = SceneManager::InvalidId;
     m_loadingPointStatus = false;
     m_registerRequested = false;
+    m_isRegistered = false;
 }
 
 LandmarkRegistrationObject::~LandmarkRegistrationObject()
@@ -59,12 +59,12 @@ void LandmarkRegistrationObject::CreateSettingsWidgets( QWidget * parent, QVecto
     props->setObjectName( "Properties" );
     if( m_sourcePoints )
     {
-        connect( m_sourcePoints, SIGNAL(Modified()), props, SLOT(UpdateUI()) );
+        connect( m_sourcePoints, SIGNAL(ObjectModified()), props, SLOT(UpdateUI()) );
     }
-    connect( this, SIGNAL(Modified()), props, SLOT(UpdateUI()) );
+    connect( this, SIGNAL(ObjectModified()), props, SLOT(UpdateUI()) );
     widgets->append(props);
     if( !this->IsRegistered() )
-        m_backUpTransform->DeepCopy(this->GetLocalTransform());
+        m_backUpTransform->DeepCopy(this->GetLocalTransform() );
 }
 
 void LandmarkRegistrationObject::Serialize( Serializer * ser )
@@ -121,6 +121,10 @@ void LandmarkRegistrationObject::Serialize( Serializer * ser )
         filename1.append("/LandmarkRegistration.xfm");
         this->WriteXFMFile(filename1);
     }
+    // LandmarkRegistrationObject cannot be manually trensformed, previously, the flag AllowManualTransformEdit
+    // was not used and in the old scenes it was set to default value true
+    // now, we use that flag to disallow manual changes in registration transform
+    this->SetCanEditTransformManually( false );
 }
 
 void LandmarkRegistrationObject::PostSceneRead()
@@ -174,7 +178,8 @@ void LandmarkRegistrationObject::ObjectAddedToScene()
 void LandmarkRegistrationObject::ObjectAboutToBeRemovedFromScene()
 {
     // m_targetPoints is not a child of LandmarkRegistrationObject, it has to be removed explicitly
-    GetManager()->RemoveObject( m_targetPoints );
+    if( m_targetPoints )
+        GetManager()->RemoveObject( m_targetPoints );
     disconnect( GetManager(), SIGNAL(CurrentObjectChanged()), this, SLOT(CurrentObjectChanged()));
 }
 
@@ -252,8 +257,8 @@ void LandmarkRegistrationObject::WriteTagFile( const QString & filename, bool sa
     writer->SetPointNames( pointNames );
     if( saveEnabledOnly )
     {
-        writer->AddVolume( m_activeSourcePoints.GetPointer(), m_sourcePoints->GetName().toUtf8().data() );
-        writer->AddVolume( m_activeTargetPoints.GetPointer(), m_targetPoints->GetName().toUtf8().data() );
+        writer->AddVolume( m_activeSourcePoints, m_sourcePoints->GetName().toUtf8().data() );
+        writer->AddVolume( m_activeTargetPoints, m_targetPoints->GetName().toUtf8().data() );
     }
     else
     {
@@ -272,7 +277,7 @@ void LandmarkRegistrationObject::WriteXFMFile( const QString & filename )
     mat->Identity();
     vtkSmartPointer<vtkXFMWriter> writer = vtkSmartPointer<vtkXFMWriter>::New();
     writer->SetFileName( filename.toUtf8().data() );
-    m_registrationTransform->GetRegistrationTransform()->GetMatrix(mat.GetPointer());
+    m_registrationTransform->GetRegistrationTransform()->GetMatrix(mat);
     writer->SetMatrix(mat);
     writer->Write();
 }
@@ -300,7 +305,7 @@ void LandmarkRegistrationObject::SetSourcePoints( vtkSmartPointer<PointsObject> 
     if( m_sourcePoints )
     {
         m_sourcePoints->disconnect( this );
-        this->GetManager()->RemoveObject( m_sourcePoints.GetPointer() );
+        this->GetManager()->RemoveObject( m_sourcePoints );
     }
     m_sourcePoints = pts;
     if ( m_sourcePoints )
@@ -344,7 +349,7 @@ void LandmarkRegistrationObject::SetTargetPoints(vtkSmartPointer<PointsObject> p
         if( m_targetObjectID == SceneManager::InvalidId )
             m_targetObjectID = this->GetManager()->GetSceneRoot()->GetObjectID();
         if( m_targetPoints->GetObjectID() == SceneManager::InvalidId )
-            this->GetManager()->AddObject( m_targetPoints.GetPointer(), this->GetManager()->GetObjectByID( m_targetObjectID ) );
+            this->GetManager()->AddObject( m_targetPoints, this->GetManager()->GetObjectByID( m_targetObjectID ) );
         else if( m_targetPoints->GetParent() != this->GetManager()->GetObjectByID( m_targetObjectID ) )
             this->GetManager()->ChangeParent( m_targetPoints, this->GetManager()->GetObjectByID( m_targetObjectID ), 0);
         m_targetPoints->SetHidden( this->IsHidden() );
@@ -453,7 +458,7 @@ void LandmarkRegistrationObject::PointAdded( )
         m_targetPoints->AddPoint( QString::number(m_targetPoints->GetNumberOfPoints()+1), coords );
         m_activeTargetPoints->InsertNextPoint(m_targetPoints->GetPointCoordinates( m_targetPoints->GetNumberOfPoints()-1));
     }
-    emit Modified();
+    emit ObjectModified();
 }
 
 void LandmarkRegistrationObject::PointRemoved( int index )
@@ -478,7 +483,7 @@ void LandmarkRegistrationObject::PointRemoved( int index )
     this->UpdateLandmarkTransform();
     if( m_sourcePoints->GetNumberOfPoints() > 0 )
         this->SelectPoint( 0 );
-    emit Modified();
+    emit ObjectModified();
 }
 
 void LandmarkRegistrationObject::EnablePicking( bool enable )
@@ -544,7 +549,7 @@ void LandmarkRegistrationObject::Update()
     this->UpdateLandmarkTransform();
     m_targetPoints->SetSelectedPoint( m_sourcePoints->GetSelectedPointIndex() );
 
-    emit Modified();
+    emit ObjectModified();
 }
 
 void LandmarkRegistrationObject::RegisterObject( bool on )
@@ -553,19 +558,17 @@ void LandmarkRegistrationObject::RegisterObject( bool on )
     if( on )
     {
         m_registrationTransform->UpdateRegistrationTransform();
-        this->SetLocalTransform(m_registrationTransform->GetRegistrationTransform());
+        vtkSmartPointer<vtkTransform> tmpTrans = vtkSmartPointer<vtkTransform>::New();
+        tmpTrans->SetMatrix( m_registrationTransform->GetRegistrationTransform()->GetMatrix() );
+        tmpTrans->Update();
+        this->SetLocalTransform(tmpTrans);
+        m_isRegistered = true;
     }
     else
     {
-        this->SetLocalTransform(m_backUpTransform.GetPointer());
+        this->SetLocalTransform(m_backUpTransform);
+        m_isRegistered = false;
     }
-}
-
-bool LandmarkRegistrationObject::IsRegistered()
-{
-    if( m_registrationTransform->GetRegistrationTransform() == this->GetLocalTransform() )
-        return true;
-    return false;
 }
 
 void LandmarkRegistrationObject::SetAllowScaling( bool on )
@@ -623,8 +626,8 @@ bool LandmarkRegistrationObject::ReadTagFile( )
     }
     if (filename.isNull() || filename.isEmpty())
         return false;
-    PointsObject *src = PointsObject::New();
-    PointsObject *trgt = PointsObject::New();
+    vtkSmartPointer<PointsObject> src = vtkSmartPointer<PointsObject>::New();
+    vtkSmartPointer<PointsObject> trgt = vtkSmartPointer<PointsObject>::New();
     bool ok = Application::GetInstance().GetPointsFromTagFile( filename, src, trgt );
     if( ! ok )
         return false;
@@ -635,7 +638,6 @@ bool LandmarkRegistrationObject::ReadTagFile( )
         return false;
     }
     this->SetSourcePoints( src );
-    src->Delete();
     if( trgt->GetNumberOfPoints() > 0 )
     {
         this->SetTargetPoints( trgt);
@@ -644,7 +646,6 @@ bool LandmarkRegistrationObject::ReadTagFile( )
     {
         this->UpdateTargetPoints();
     }
-    trgt->Delete();
     this->SelectPoint( 0 );
     this->UpdateLandmarkTransform();
     return true;

@@ -26,10 +26,10 @@ public:
     ~vtkInteractorStyleImage2();
 
     vtkTypeMacro(vtkInteractorStyleImage2,vtkInteractorStyleImage);
-    void PrintSelf(ostream& os, vtkIndent indent);
+    void PrintSelf(ostream& os, vtkIndent indent) override;
 
     // Reimplemented to prevent rotation
-    virtual void OnLeftButtonDown();
+    virtual void OnLeftButtonDown() override;
 
 private:
 

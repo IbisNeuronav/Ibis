@@ -15,7 +15,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include <QWidget>
 
-class Application;
 class StereotacticFramePluginInterface;
 
 namespace Ui

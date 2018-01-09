@@ -31,7 +31,7 @@ class vtkMNIOBJReader : public vtkPolyDataAlgorithm
 public:
     static vtkMNIOBJReader *New();
     vtkTypeMacro(vtkMNIOBJReader,vtkPolyDataAlgorithm);
-    virtual void PrintSelf(ostream& os, vtkIndent indent);
+    virtual void PrintSelf(ostream& os, vtkIndent indent) override;
 
     virtual int CanReadFile( const char * fname );
 
@@ -59,7 +59,7 @@ protected:
     ~vtkMNIOBJReader();
     vtkSmartPointer<vtkProperty> Property;
 
-    virtual int RequestData(vtkInformation* request, vtkInformationVector** inputVector, vtkInformationVector* outputVector);
+    virtual int RequestData(vtkInformation* request, vtkInformationVector** inputVector, vtkInformationVector* outputVector) override;
 
     char *FileName;
 

@@ -29,9 +29,9 @@ TransferFunctionKey::TransferFunctionKey( const TransferFunctionKey & other )
 {
     frame = other.frame;
     m_colorFunc = vtkSmartPointer<vtkColorTransferFunction>::New();
-    m_colorFunc->DeepCopy( other.m_colorFunc.GetPointer() );
+    m_colorFunc->DeepCopy( other.m_colorFunc );
     m_opacityFunc = vtkSmartPointer<vtkPiecewiseFunction>::New();
-    m_opacityFunc->DeepCopy( other.m_opacityFunc.GetPointer() );
+    m_opacityFunc->DeepCopy( other.m_opacityFunc );
 }
 
 TransferFunctionKey::~TransferFunctionKey()
@@ -42,9 +42,9 @@ void TransferFunctionKey::operator=( const TransferFunctionKey& other )
 {
     frame = other.frame;
     m_colorFunc = vtkSmartPointer<vtkColorTransferFunction>::New();
-    m_colorFunc->DeepCopy( other.m_colorFunc.GetPointer() );
+    m_colorFunc->DeepCopy( other.m_colorFunc );
     m_opacityFunc = vtkSmartPointer<vtkPiecewiseFunction>::New();
-    m_opacityFunc->DeepCopy( other.m_opacityFunc.GetPointer() );
+    m_opacityFunc->DeepCopy( other.m_opacityFunc );
 }
 
 void TransferFunctionKey::Serialize( Serializer * ser )
@@ -66,8 +66,8 @@ void TransferFunctionKey::Interpolate( TransferFunctionKey & keyA, TransferFunct
     m_colorFunc->RemoveAllPoints();
     int keyASize = keyA.m_colorFunc->GetSize();
     int keyBSize = keyB.m_colorFunc->GetSize();
-    vtkColorTransferFunction * colA = keyA.m_colorFunc;
-    vtkColorTransferFunction * colB = keyB.m_colorFunc;
+    vtkColorTransferFunction * colA = keyA.m_colorFunc.GetPointer();
+    vtkColorTransferFunction * colB = keyB.m_colorFunc.GetPointer();
     for( int i = 0; i < keyASize || i < keyBSize; ++i )
     {
         if( i < keyASize && i < keyBSize )
@@ -133,12 +133,12 @@ void TransferFunctionKey::Interpolate( TransferFunctionKey & keyA, TransferFunct
 
 vtkColorTransferFunction * TransferFunctionKey::GetColorFunc()
 {
-    return m_colorFunc.GetPointer();
+    return m_colorFunc;
 }
 
 vtkPiecewiseFunction * TransferFunctionKey::GetOpacityFunc()
 {
-    return m_opacityFunc.GetPointer();
+    return m_opacityFunc;
 }
 
 ObjectSerializationMacro( TFAnimation );

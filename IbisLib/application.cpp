@@ -44,7 +44,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QPushButton>
 #include <QApplication>
 #include <QMenu>
-#include "vtkSmartPointer.h"
 
 Application * Application::m_uniqueInstance = NULL;
 const QString Application::m_appName("ibis");
@@ -318,9 +317,8 @@ void Application::InitHardware()
     m_updateManager->Stop();
 
     // Init hardware
-    bool success = false;
     foreach( HardwareModule * module, m_hardwareModules )
-        success |= module->Init();
+        module->Init();
 
     if( m_hardwareModules.size() > 0 )
     {
@@ -359,6 +357,14 @@ QString Application::GetFullVersionString()
     QString buildQualifier( IBIS_BUILD_QUALIFIER );
     QString version;
     version = QString("%1.%2.%3 %4 %5\nrev. %6").arg(IBIS_MAJOR_VERSION).arg(IBIS_MINOR_VERSION).arg(IBIS_PATCH_VERSION).arg(versionQualifier).arg(buildQualifier).arg(IBIS_GIT_HASH);
+    return version;
+}
+
+QString Application::GetVersionString()
+{
+    QString versionQualifier( IBIS_VERSION_QUALIFIER );
+    QString version;
+    version = QString("%1.%2.%3  %4").arg(IBIS_MAJOR_VERSION).arg(IBIS_MINOR_VERSION).arg(IBIS_PATCH_VERSION).arg(versionQualifier);
     return version;
 }
 
@@ -501,9 +507,10 @@ void Application::OpenFiles( OpenFileParams * params, bool addToScene )
     m_progressDialogUpdateTimer = 0;
 }
 
-bool Application::GetImageDataFromVideoFrame(QString fileName, ImageObject *img )
+bool Application::GetImageDataFromVideoFrame(QString fileName, vtkImageData *img, vtkMatrix4x4 *mat )
 {
     Q_ASSERT(img);
+    Q_ASSERT(mat);
     m_fileReader = new FileReader;
     QFileInfo fi( fileName );
     if( !(fi.isReadable()) )
@@ -513,7 +520,7 @@ bool Application::GetImageDataFromVideoFrame(QString fileName, ImageObject *img 
         QMessageBox::critical( 0, "Error", message, 1, 0 );
         return false;
     }
-    bool ok = m_fileReader->GetFrameDataFromMINCFile( fileName, img );
+    bool ok = m_fileReader->GetFrameDataFromMINCFile( fileName, img, mat );
     delete m_fileReader;
     return ok;
 }

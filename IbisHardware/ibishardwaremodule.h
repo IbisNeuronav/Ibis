@@ -18,7 +18,7 @@ class TrackedVideoSource;
 class TrackerToolDisplayManager;
 class QMenu;
 
-class IbisHardwareModule : public QObject, public HardwareModule
+class IbisHardwareModule : public HardwareModule
 {
     
     Q_OBJECT
@@ -38,7 +38,7 @@ public:
 
     // Implementation of the HardwareModule interface
     virtual void AddSettingsMenuEntries( QMenu * menu );
-    virtual bool Init();
+    virtual void Init();
     virtual void Update();
     virtual bool ShutDown();
 

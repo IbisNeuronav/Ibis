@@ -33,7 +33,7 @@ public:
     virtual ~GlobalObjectPluginInterface() {}
 
     // Implementation of IbisPlugin interface
-    IbisPluginTypes GetPluginType() { return IbisPluginTypeGlobalObject; }
+    IbisPluginTypes GetPluginType()  override { return IbisPluginTypeGlobalObject; }
 
     virtual SceneObject * GetGlobalObjectInstance() = 0;
 

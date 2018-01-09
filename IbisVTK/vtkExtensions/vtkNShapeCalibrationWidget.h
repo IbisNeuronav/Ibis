@@ -47,7 +47,7 @@ public:
   static vtkNShapeCalibrationWidget *New();
 
   vtkTypeMacro(vtkNShapeCalibrationWidget,vtk3DWidget);
-  void PrintSelf(ostream& os, vtkIndent indent);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   // Separating code out with BTX and ETX makes the VTK
   // wrapping process ignore it.  For whatever reason, code
@@ -56,12 +56,12 @@ public:
 
   // Description:
   // Methods that satisfy the superclass' API.
-  virtual void SetEnabled(int);
+  virtual void SetEnabled(int) override;
   //BTX
-  virtual void PlaceWidget(double bounds[6]);
+  virtual void PlaceWidget(double bounds[6]) override;
   //ETX
-  void PlaceWidget() { this->Superclass::PlaceWidget(); }
-  void PlaceWidget( double xmin, double xmax, double ymin, double ymax, double zmin, double zmax ) { this->Superclass::PlaceWidget(xmin,xmax,ymin,ymax,zmin,zmax); }
+  void PlaceWidget()  override { this->Superclass::PlaceWidget(); }
+  void PlaceWidget( double xmin, double xmax, double ymin, double ymax, double zmin, double zmax )  override { this->Superclass::PlaceWidget(xmin,xmax,ymin,ymax,zmin,zmax); }
 
   // Description:
   // Set/Get the position of first end point.
@@ -206,7 +206,7 @@ protected:
   double                MiddleHandlePosition;
 
   void BuildRepresentation();
-  virtual void SizeHandles();
+  virtual void SizeHandles()  override;
   void HandlesOn(double length);
   void HandlesOff();
   int HighlightHandle(vtkProp *prop); //returns cell id

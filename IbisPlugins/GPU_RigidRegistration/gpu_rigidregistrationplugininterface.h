@@ -9,15 +9,14 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
 // Thanks to Dante De Nigris for writing this class
-#ifndef __GPU_RigidRegistrationPluginInterfacee_h_
+#ifndef __GPU_RigidRegistrationPluginInterface_h_
 #define __GPU_RigidRegistrationPluginInterface_h_
 
-#include <QObject>
 #include "toolplugininterface.h"
 
 class GPU_RigidRegistrationWidget;
 
-class GPU_RigidRegistrationPluginInterface : public QObject, public ToolPluginInterface
+class GPU_RigidRegistrationPluginInterface : public ToolPluginInterface
 {
 
     Q_OBJECT
@@ -25,6 +24,8 @@ class GPU_RigidRegistrationPluginInterface : public QObject, public ToolPluginIn
     Q_PLUGIN_METADATA(IID "Ibis.GPU_RigidRegistrationPluginInterface" )
 
 public:
+
+    vtkTypeMacro( GPU_RigidRegistrationPluginInterface, ToolPluginInterface );
 
     GPU_RigidRegistrationPluginInterface();
     ~GPU_RigidRegistrationPluginInterface();

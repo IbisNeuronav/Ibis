@@ -13,7 +13,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include <QWidget>
 
-class Application;
 class PointsObject;
 class QTreeWidgetItem;
 
@@ -57,9 +56,6 @@ protected:
 private:
 
     Ui::PointPropertiesWidget *ui;
-
-    QColor              m_show_distance_button_color;
-    Application        *m_application;
 };
 
 #endif

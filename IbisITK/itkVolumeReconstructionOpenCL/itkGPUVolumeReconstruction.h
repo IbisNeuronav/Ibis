@@ -15,6 +15,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include "itkObject.h"
 #include "itkOpenCLUtil.h"
+#include <itkImage.h>
 
 #include "vnl/vnl_matrix_fixed.h"
 #include "vnl/vnl_inverse.h"
@@ -111,7 +112,7 @@ protected:
 
   void InitializeGPUContext(void);
 
-  void PrintSelf(std::ostream & os, Indent indent) const;  
+  void PrintSelf(std::ostream & os, Indent indent) const override;
 
   cl_kernel CreateKernelFromFile(const char * filename, const char * cPreamble, const char * kernelname, const char * cOptions);
   cl_kernel CreateKernelFromString(const char * cOriginalSourceString, const char * cPreamble, const char * kernelname, const char * cOptions, cl_program * program);

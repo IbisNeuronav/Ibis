@@ -33,6 +33,7 @@ SET( IBISLIB_SRC
                      simplepropcreator.cpp
                      ibismath.cpp
                      ibisplugin.cpp
+                     ibisitkvtkconverter.cpp
                      gui/aboutbicigns.cpp
                      gui/aboutpluginswidget.cpp
                      gui/trackerstatusdialog.cpp
@@ -63,7 +64,6 @@ SET( IBISLIB_SRC
 SET( IBISLIB_HDR
                      trackedvideobuffer.h
                      ibistypes.h
-                     ibisplugin.h
                      serializer.h 
                      serializerhelper.h
                      ibisconfig.h
@@ -74,6 +74,7 @@ SET( IBISLIB_HDR
                      linesfactory.h
                      simplepropcreator.h
                      ibismath.h
+                     ibisitkvtkconverter.h
                      gui/guiutilities.h )
 
 SET( IBISLIB_HDR_MOC
@@ -81,6 +82,7 @@ SET( IBISLIB_HDR_MOC
                          application.h
                          mainwindow.h
                          scenemanager.h
+                         ibisplugin.h
                          filereader.h
                          sceneobject.h
                          trackedsceneobject.h

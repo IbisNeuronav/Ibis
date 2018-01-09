@@ -46,11 +46,11 @@ public:
     ~vtkMulti3DWidget();
 
     vtkTypeMacro(vtkMulti3DWidget,vtkMultiInteractorObserver);
-    void PrintSelf(ostream& os, vtkIndent indent);
+    void PrintSelf(ostream& os, vtkIndent indent) override;
 
     // Description:
     // Methods that satisfy the superclass' API.
-    void SetEnabled(int);
+    void SetEnabled(int) override;
 
     // Description:
     // This method is used to initially place the widget.  The placement of the
@@ -123,7 +123,7 @@ protected:
     
     // Description:
     // Let subclasses react to the addition-removal of interactors
-    virtual void InternalRemoveInteractor( int index );
+    virtual void InternalRemoveInteractor( int index ) override;
 
     // Description:
     // Get the index of the renderer passed in parameter, -1

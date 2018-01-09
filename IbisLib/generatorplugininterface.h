@@ -31,7 +31,7 @@ public:
     virtual ~GeneratorPluginInterface() {}
 
     // Implementation of IbisPlugin interface
-    IbisPluginTypes GetPluginType() { return IbisPluginTypeGenerator; }
+    IbisPluginTypes GetPluginType()  override { return IbisPluginTypeGenerator; }
 
     // Definition of the generator interface
     virtual QString GetMenuEntryString() = 0;

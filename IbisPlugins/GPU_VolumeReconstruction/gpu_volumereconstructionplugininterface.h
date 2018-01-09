@@ -10,15 +10,14 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 // Thanks to Dante De Nigris for writing this class
 
-#ifndef __GPU_VolumeReconstructionPluginInterfacee_h_
+#ifndef __GPU_VolumeReconstructionPluginInterface_h_
 #define __GPU_VolumeReconstructionPluginInterface_h_
 
-#include <QObject>
 #include "toolplugininterface.h"
 
 class GPU_VolumeReconstructionWidget;
 
-class GPU_VolumeReconstructionPluginInterface : public QObject, public ToolPluginInterface
+class GPU_VolumeReconstructionPluginInterface : public ToolPluginInterface
 {
 
     Q_OBJECT
@@ -26,6 +25,8 @@ class GPU_VolumeReconstructionPluginInterface : public QObject, public ToolPlugi
     Q_PLUGIN_METADATA(IID "Ibis.GPU_VolumeReconstructionPluginInterface" )
 
 public:
+
+    vtkTypeMacro( GPU_VolumeReconstructionPluginInterface, ToolPluginInterface );
 
     GPU_VolumeReconstructionPluginInterface();
     ~GPU_VolumeReconstructionPluginInterface();
@@ -35,6 +36,9 @@ public:
 
     QWidget * CreateFloatingWidget();
 
+protected:
+
+    GPU_VolumeReconstructionWidget * m_volumeReconstructionWidget;
 };
 
 #endif

@@ -141,7 +141,7 @@ void SceneManager::Init()
     this->MainCutPlanes->SetObjectManagedBySystem( true );
     this->MainCutPlanes->SetHidable( false );
     this->MainCutPlanes->SetObjectDeletable(false);
-    AddObject( this->MainCutPlanes.GetPointer(), this->SceneRoot );
+    AddObject( this->MainCutPlanes, this->SceneRoot );
     connect( this->MainCutPlanes, SIGNAL(StartPlaneMoved(int)), this, SLOT(OnStartCutPlaneInteraction()) );
     connect( this->MainCutPlanes, SIGNAL(EndPlaneMove(int)), this, SLOT(OnEndCutPlaneInteraction()) );
     connect( this->MainCutPlanes, SIGNAL(PlaneMoved(int)), this, SLOT(OnCutPlanesPositionChanged()) );
@@ -173,7 +173,7 @@ void SceneManager::Init()
     axesObject->SetListable( false );
     axesObject->SetObjectManagedBySystem(true);
     axesObject->SetHidden( false );
-    this->AddObject( axesObject.GetPointer() );
+    this->AddObject( axesObject );
     this->SetAxesObject( axesObject );
 
     this->SetCurrentObject( this->GetSceneRoot() );
@@ -374,6 +374,10 @@ void SceneManager::SaveScene( QString & fileName )
     writer.Start();
     writer.BeginSection("SaveScene");
     QString version(IBIS_SCENE_SAVE_VERSION);
+    QString hash = Application::GetInstance().GetGitHashShort();
+    QString ibisVersion = Application::GetInstance().GetVersionString();
+    ::Serialize( &writer, "IbisVersion",  ibisVersion );
+    ::Serialize( &writer, "IbisRevision",  hash );
     ::Serialize( &writer, "Version", version);
     ::Serialize( &writer, "NextObjectID", this->NextObjectID);
     this->UpdateProgress(1);
@@ -447,6 +451,7 @@ void SceneManager::Serialize( Serializer * ser )
                 ::Serialize( ser, viewName.toUtf8().data(), view );
             }
         }
+        ser->EndSection();
         return;
     }
     // writer

@@ -1,7 +1,5 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.5)
 
-cmake_policy(SET CMP0003 OLD)
-
 SET(CMAKE_COMMON_DIR ${CMAKE_CURRENT_SOURCE_DIR}/CMakeCommon)
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/CMakeCommon ${CMAKE_MODULE_PATH})
@@ -35,9 +33,21 @@ set( IBIS_EXTERNAL_DEPENDENCIES_DIR ${CMAKE_CURRENT_BINARY_DIR}/../ibisExternalD
 option( IBIS_USE_QT_MULTIMEDIA "Find and link with the Multimedia module in Qt. This is not required by Ibis but may be used by some plugins." OFF )
 set( IbisQtModules Widgets OpenGL Xml )
 if( IBIS_USE_QT_MULTIMEDIA )
-    set( IbisQtModules ${IbisQtModules} Multimedia )
+    list( APPEND IbisQtModules Multimedia )
+endif()
+if(UNIX AND NOT APPLE)
+    list( APPEND IbisQtModules X11Extras )
 endif()
 find_package( Qt5 COMPONENTS ${IbisQtModules} REQUIRED )
+
+if (Qt5Widgets_FOUND)
+    if (Qt5Widgets_VERSION VERSION_LESS 5.10.0)
+        message(WARNING "Minimum supported Qt5 version is 5.10.0.\nYou are using " ${Qt5Widgets_VERSION} ". It may work." )
+    endif()
+else()
+    message(SEND_ERROR "The Qt5Widgets library could not be found!")
+endif(Qt5Widgets_FOUND)
+
 include_directories( ${Qt5Widgets_INCLUDE_DIRS} )
 include_directories( ${Qt5Xml_INCLUDE_DIRS} )
 include_directories( ${Qt5Multimedia_INCLUDE_DIRS} )
@@ -57,7 +67,7 @@ include(${VTK_USE_FILE})
 # Look for ITK (required)
 #==================================================================
 set( AutoItkPath ${IBIS_EXTERNAL_DEPENDENCIES_DIR}/itk-${IBIS_ITK_LONG_VERSION}/install/lib/cmake/ITK-${IBIS_ITK_SHORT_VERSION} )
-find_package( ITK ${IBIS_ITK_SHORT_VERSION} EXACT REQUIRED PATHS ${AutoItkPath} )
+find_package( ITK ${IBIS_ITK_LONG_VERSION} EXACT REQUIRED PATHS ${AutoItkPath} )
 include( ${ITK_USE_FILE} )
 
 #==================================================================

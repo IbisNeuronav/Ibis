@@ -11,13 +11,12 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef CONTOURSURFACEPLUGININTERFACE_H
 #define CONTOURSURFACEPLUGININTERFACE_H
 
-#include <QObject>
 #include "objectplugininterface.h"
 #include "vtkSmartPointer.h"
 
 class GeneratedSurface;
 
-class ContourSurfacePluginInterface : public QObject, public ObjectPluginInterface
+class ContourSurfacePluginInterface : public ObjectPluginInterface
 {
 
     Q_OBJECT

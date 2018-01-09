@@ -74,7 +74,7 @@ namespace itk
       ZeroStepLength,
       Unknown }                                   StopConditionType;
 
-    virtual void StartOptimization(void);
+    virtual void StartOptimization(void) override;
     virtual void ResumeOptimization(void);
     virtual void StopOptimization(void);
 
@@ -314,7 +314,7 @@ namespace itk
     virtual ~CMAEvolutionStrategyOptimizer(){};
 
     /** PrintSelf */
-    void PrintSelf(std::ostream& os, Indent indent) const;
+    void PrintSelf(std::ostream& os, Indent indent) const override;
 
     /** Compute the following constant variables:
      * \li m_PopulationSize (if not provided by the user)

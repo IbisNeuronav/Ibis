@@ -42,26 +42,24 @@ SceneObject::SceneObject()
     this->ObjectManagedByTracker = false;
     this->AllowManualTransformEdit = true;
     this->LocalTransform = vtkTransform::New();  // by default, we have a vtkTransform that can be manipulated manually. Could be changed in certain object types.
-    this->WorldTransform = vtkTransform::New();
+    this->WorldTransform = vtkSmartPointer<vtkTransform>::New();
     this->IsModifyingTransform = false;
     this->TransformModified = false;
     this->RenderLayer = 0;
-    this->m_vtkConnections = vtkEventQtSlotConnect::New();
+    this->m_vtkConnections = vtkSmartPointer<vtkEventQtSlotConnect>::New();
     this->m_vtkConnections->Connect( this->LocalTransform, vtkCommand::ModifiedEvent, this, SLOT(NotifyTransformChanged()), 0, 0.0, Qt::DirectConnection );
     this->m_vtkConnections->Connect( this->WorldTransform, vtkCommand::ModifiedEvent, this, SLOT(NotifyTransformChanged()), 0, 0.0, Qt::DirectConnection );
 }
 
 SceneObject::~SceneObject() 
 {
-    this->m_vtkConnections->Delete();
-	if (this->LocalTransform)
-		this->LocalTransform->UnRegister( this );
-	this->WorldTransform->Delete();
+    if (this->LocalTransform)
+        this->LocalTransform->UnRegister( this );
 }
 
 void SceneObject::Serialize( Serializer * ser )
 {
-    vtkMatrix4x4 * local = 0;
+    vtkMatrix4x4 * local = this->LocalTransform->GetMatrix();
     bool allowChildren = true;
     bool allowChangeParent = true;
     bool objectManagedBySystem = false;
@@ -83,10 +81,7 @@ void SceneObject::Serialize( Serializer * ser )
         nameChangeable = this->NameChangeable;
         objectListable = this->ObjectListable;
         allowManualTransformEdit = this->AllowManualTransformEdit;
-        local = this->LocalTransform->GetMatrix();
     }
-    else
-        local = vtkMatrix4x4::New();
     ::Serialize( ser, "ObjectName", this->Name );
     ::Serialize( ser, "AllowChildren", allowChildren);
     ::Serialize( ser, "AllowChangeParent", allowChangeParent);
@@ -111,12 +106,8 @@ void SceneObject::Serialize( Serializer * ser )
         this->SetNameChangeable(nameChangeable);
         this->SetListable(objectListable);
         this->SetCanEditTransformManually(allowManualTransformEdit);
+        this->GetLocalTransform()->Update();
         this->UpdateWorldTransform();
-        vtkTransform *temp = vtkTransform::New();
-        temp->SetMatrix(local);
-        this->SetLocalTransform(temp);
-        local->Delete();
-        temp->Delete();
     }
 }
 
@@ -148,17 +139,17 @@ void SceneObject::SetDataFileName( QString name )
     }
 }
 
-void SceneObject::SetLocalTransform( vtkLinearTransform * localTransform )
+void SceneObject::SetLocalTransform( vtkTransform * localTransform )
 {
-	if( localTransform == this->LocalTransform )
-		return;
+    if( localTransform == this->LocalTransform )
+        return;
 
-	if( this->LocalTransform )
-	{
+    if( this->LocalTransform )
+    {
         this->m_vtkConnections->Disconnect( this->LocalTransform );
-		this->LocalTransform->UnRegister( this );
-		this->LocalTransform = 0;
-	}
+        this->LocalTransform->UnRegister( this );
+        this->LocalTransform = 0;
+    }
 
     if( localTransform )
     {
@@ -170,7 +161,17 @@ void SceneObject::SetLocalTransform( vtkLinearTransform * localTransform )
 
     this->m_vtkConnections->Connect( this->LocalTransform, vtkCommand::ModifiedEvent, this, SLOT(NotifyTransformChanged()), 0, 0.0, Qt::DirectConnection );
 
-	UpdateWorldTransform();
+    UpdateWorldTransform();
+}
+
+vtkTransform * SceneObject::GetLocalTransform( )
+{
+    return this->LocalTransform;
+}
+
+vtkTransform * SceneObject::GetWorldTransform( )
+{
+    return this->WorldTransform;
 }
 
 void SceneObject::NotifyTransformChanged()
@@ -203,7 +204,7 @@ void SceneObject::WorldTransformChanged()
     emit WorldTransformChangedSignal();
     for( int i = 0; i < GetNumberOfChildren(); ++i )
         this->Children[i]->WorldTransformChanged();
-    emit Modified();
+    emit ObjectModified();
 }
 
 void SceneObject::StartModifyingTransform()
@@ -232,7 +233,7 @@ void SceneObject::Setup( View * view )
 	view->Register( this );
 	Views.push_back( view );
 
-    connect( this, SIGNAL( Modified() ), view, SLOT(NotifyNeedRender()) );
+    connect( this, SIGNAL( ObjectModified() ), view, SLOT(NotifyNeedRender()) );
 }
 
 void SceneObject::Release( View * view )
@@ -244,7 +245,7 @@ void SceneObject::Release( View * view )
 	this->disconnect( view );
 	view->UnRegister( this );
 	this->Views.erase( it );
-    view->Modified();
+    view->NotifyNeedRender();
 }
 
 void SceneObject::ReleaseAllViews()
@@ -304,7 +305,7 @@ void SceneObject::UpdateWorldTransform()
 	this->WorldTransform->Identity();
 
 	if( Parent )
-		this->WorldTransform->Concatenate( Parent->WorldTransform );
+        this->WorldTransform->Concatenate( Parent->WorldTransform );
     if( LocalTransform )
         this->WorldTransform->Concatenate( LocalTransform );
 
@@ -438,7 +439,7 @@ void SceneObject::RemoveFromScene()
 
 void SceneObject::MarkModified()
 {
-    emit Modified();
+    emit ObjectModified();
 }
 
 void SceneObject::SetHiddenWithChildren( bool hide )

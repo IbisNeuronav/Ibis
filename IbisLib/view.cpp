@@ -199,7 +199,7 @@ void View::SetRenderingEnabled( bool b )
 
 vtkRenderWindowInteractor * View::GetInteractor()
 {
-    return this->Interactor.GetPointer();
+    return this->Interactor;
 }
 
 void View::SetInteractor( vtkRenderWindowInteractor * interactor )
@@ -232,16 +232,16 @@ void View::SetInteractor( vtkRenderWindowInteractor * interactor )
     this->Interactor->EnableRenderOff();
     this->EventObserver->Connect( this->Interactor, vtkCommand::RenderEvent, this, SLOT(NotifyNeedRender()) );
 
-    this->Interactor->AddObserver( vtkCommand::KeyPressEvent, this->InteractionCallback.GetPointer(), this->Priority );
-    this->Interactor->AddObserver( vtkCommand::LeftButtonPressEvent, this->InteractionCallback.GetPointer(), this->Priority );
-    this->Interactor->AddObserver( vtkCommand::LeftButtonReleaseEvent, this->InteractionCallback.GetPointer(), this->Priority );
-    this->Interactor->AddObserver( vtkCommand::MiddleButtonPressEvent, this->InteractionCallback.GetPointer(), this->Priority );
-    this->Interactor->AddObserver( vtkCommand::MiddleButtonReleaseEvent, this->InteractionCallback.GetPointer(), this->Priority );
-    this->Interactor->AddObserver( vtkCommand::RightButtonPressEvent, this->InteractionCallback.GetPointer(), this->Priority );
-    this->Interactor->AddObserver( vtkCommand::RightButtonReleaseEvent, this->InteractionCallback.GetPointer(), this->Priority );
-    this->Interactor->AddObserver( vtkCommand::MouseWheelForwardEvent, this->InteractionCallback.GetPointer(), this->Priority );
-    this->Interactor->AddObserver( vtkCommand::MouseWheelBackwardEvent, this->InteractionCallback.GetPointer(), this->Priority );
-    this->Interactor->AddObserver( vtkCommand::MouseMoveEvent, this->InteractionCallback.GetPointer(), this->Priority );
+    this->Interactor->AddObserver( vtkCommand::KeyPressEvent, this->InteractionCallback, this->Priority );
+    this->Interactor->AddObserver( vtkCommand::LeftButtonPressEvent, this->InteractionCallback, this->Priority );
+    this->Interactor->AddObserver( vtkCommand::LeftButtonReleaseEvent, this->InteractionCallback, this->Priority );
+    this->Interactor->AddObserver( vtkCommand::MiddleButtonPressEvent, this->InteractionCallback, this->Priority );
+    this->Interactor->AddObserver( vtkCommand::MiddleButtonReleaseEvent, this->InteractionCallback, this->Priority );
+    this->Interactor->AddObserver( vtkCommand::RightButtonPressEvent, this->InteractionCallback, this->Priority );
+    this->Interactor->AddObserver( vtkCommand::RightButtonReleaseEvent, this->InteractionCallback, this->Priority );
+    this->Interactor->AddObserver( vtkCommand::MouseWheelForwardEvent, this->InteractionCallback, this->Priority );
+    this->Interactor->AddObserver( vtkCommand::MouseWheelBackwardEvent, this->InteractionCallback, this->Priority );
+    this->Interactor->AddObserver( vtkCommand::MouseMoveEvent, this->InteractionCallback, this->Priority );
 }
 
 vtkRenderer * View::GetRenderer( int level )
@@ -261,17 +261,17 @@ vtkRenderer * View::GetRenderer( int level )
 
 vtkRenderer * View::GetRenderer()
 {
-    return this->Renderer.GetPointer();
+    return this->Renderer;
 }
 
 vtkRenderer * View::GetOverlayRenderer()
 {
-    return this->OverlayRenderer.GetPointer();
+    return this->OverlayRenderer;
 }
 
 vtkRenderer * View::GetOverlayRenderer2()
 {
-    return this->OverlayRenderer2.GetPointer();
+    return this->OverlayRenderer2;
 }
 
 void View::SetManager( SceneManager * manager )
@@ -300,7 +300,7 @@ void View::SetInteractorStyle( vtkInteractorStyle * style )
 
 vtkInteractorStyle * View::GetInteractorStyle()
 {
-    return this->InteractorStyle.GetPointer();
+    return this->InteractorStyle;
 }
 
 void View::ReleaseView()
@@ -512,7 +512,7 @@ void View::SetViewAngle( double angle )
 void View::NotifyNeedRender()
 {
     if( m_renderingEnabled )
-        emit Modified();
+        emit ViewModified();
 }
 
 void View::ReferenceTransformChanged()

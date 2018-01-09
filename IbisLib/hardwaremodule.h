@@ -34,10 +34,10 @@ public:
     HardwareModule() {}
     virtual ~HardwareModule() {}
 
-    virtual IbisPluginTypes GetPluginType() { return IbisPluginTypeHardwareModule; }
+    virtual IbisPluginTypes GetPluginType() VTK_OVERRIDE { return IbisPluginTypeHardwareModule; }
 
     virtual void AddSettingsMenuEntries( QMenu * menu ) {}
-    virtual bool Init() = 0;
+    virtual void Init() = 0;
     virtual void Update() = 0;
     virtual bool ShutDown() = 0;
 
@@ -57,10 +57,6 @@ public:
     virtual double DoTipCalibration( PointerObject * p, vtkMatrix4x4 * calibMat ) = 0;
     virtual bool IsCalibratingTip( PointerObject * p ) = 0;
     virtual void StopTipCalibration( PointerObject * p ) = 0;
-
-protected:
-
-    Application * m_application;
 
 };
 

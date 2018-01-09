@@ -9,7 +9,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
 #include <sstream>
-#include "imageobject.h"
 #include "vtkOutlineFilter.h"
 #include "vtkPolyDataMapper.h"
 #include "vtkRenderer.h"
@@ -37,6 +36,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "imageobjectvolumesettingswidget.h"
 #include "scenemanager.h"
 #include "lookuptablemanager.h"
+#include "imageobject.h"
 #include <QMessageBox>
 
 ObjectSerializationMacro( ImageObject );
@@ -44,37 +44,6 @@ ObjectSerializationMacro( ImageObject );
 #include <itkImageFileWriter.h>
 
 const int ImageObject::NumberOfBinsInHistogram = 256;
-
-template< class TInputImage >
-IbisItkVTKImageExport< TInputImage >::IbisItkVTKImageExport()
-{
-    for( int i = 0; i < 3; ++i )
-        vtkOrigin[ i ] = 0.0;
-}
-
-template< class TInputImage >
-double * IbisItkVTKImageExport< TInputImage >::OriginCallback()
-{
-    // run base class
-    double * orig = itk::VTKImageExport< TInputImage >::OriginCallback();
-
-    // Get inverse of the dir cosine matrix
-    InputImagePointer input = this->GetInput();
-    itk::Matrix< double, 3, 3 > dir_cos = input->GetDirection();
-    vnl_matrix_fixed< double, 3, 3 > inv_dir_cos = dir_cos.GetTranspose();
-
-    // Transform the origin back to the way vtk sees it
-    vnl_vector_fixed< double, 3 > origin;
-    vnl_vector_fixed< double, 3 > o_origin;
-    for( int j = 0; j < 3; j++ )
-        o_origin[ j ] = orig[ j ];
-    origin = inv_dir_cos * o_origin;
-
-    for( int i = 0; i < 3; ++i )
-        vtkOrigin[ i ] = origin[ i ];
-
-    return vtkOrigin;
-}
 
 ImageObject::PerViewElements::PerViewElements()
 {
@@ -142,10 +111,13 @@ ImageObject::ImageObject()
     m_colorLevel = 0.5;
     m_autoSampleDistance = true;
     m_sampleDistance = 1.0;
+
+    this->ItktovtkConverter = IbisItkVtkConverter::New();
 }
 
 ImageObject::~ImageObject()
 {
+    this->ItktovtkConverter->Delete();
 }
 
 #include "serializerhelper.h"
@@ -243,78 +215,26 @@ bool ImageObject::IsLabelImage()
     return false;
 }
 
-void ImageObject::SetItkImage( IbisItk3DImageType::Pointer image )
+void ImageObject::SetItkImage( IbisItkFloat3ImageType::Pointer image )
 {
-    if( !this->ItkToVtkExporter )
-        BuildItkToVtkExport();
     this->ItkImage = image;
     if( this->ItkImage )
     {
-        this->ItkToVtkExporter->SetInput( this->ItkImage );
-        this->ItkToVtkImporter->Update();
-        this->SetImage( this->ItkToVtkImporter->GetOutput() );
-
-        // Use itk image's dir cosines as the local transform for this image
-        itk::Matrix< double, 3, 3 > dirCosines = this->ItkImage->GetDirection();
-        vtkMatrix4x4 * rotMat = vtkMatrix4x4::New();
-        for( unsigned i = 0; i < 3; ++i )
-            for( unsigned j = 0; j < 3; ++j )
-                rotMat->SetElement( i, j, dirCosines( i, j ) );
         vtkTransform * rotTrans = vtkTransform::New();
-        rotTrans->SetMatrix( rotMat );
+        this->SetImage( this->ItktovtkConverter->ConvertItkImageToVtkImage( this->ItkImage, rotTrans ) );
         this->SetLocalTransform( rotTrans );
-        rotMat->Delete();
         rotTrans->Delete();
     }
 }
 
-void ImageObject::SetItkImage( IbisRGBImageType::Pointer image )
+void ImageObject::SetItkLabelImage( IbisItkUnsignedChar3ImageType::Pointer image )
 {
-    if( !this->ItkRGBImageToVtkExporter )
-        BuildItkRGBImageToVtkExport();
-    this->ItkRGBImage = image;
-    if( this->ItkRGBImage )
-    {
-        this->ItkRGBImageToVtkExporter->SetInput( this->ItkRGBImage );
-        this->ItkToVtkImporter->Update();
-        this->SetImage( this->ItkToVtkImporter->GetOutput() );
-
-        // Use itk image's dir cosines as the local transform for this image
-        itk::Matrix< double, 3, 3 > dirCosines = this->ItkRGBImage->GetDirection();
-        vtkMatrix4x4 * rotMat = vtkMatrix4x4::New();
-        for( unsigned i = 0; i < 3; ++i )
-            for( unsigned j = 0; j < 3; ++j )
-                rotMat->SetElement( i, j, dirCosines( i, j ) );
-        vtkTransform * rotTrans = vtkTransform::New();
-        rotTrans->SetMatrix( rotMat );
-        this->SetLocalTransform( rotTrans );
-        rotMat->Delete();
-        rotTrans->Delete();
-    }
-}
-
-
-void ImageObject::SetItkLabelImage( IbisItk3DLabelType::Pointer image )
-{
-    if( !this->ItkToVtkLabelExporter )
-        BuildItkToVtkLabelExport();
     this->ItkLabelImage = image;
     if( this->ItkLabelImage )
     {
-        this->ItkToVtkLabelExporter->SetInput( this->ItkLabelImage );
-        this->ItkToVtkImporter->Update();
-        this->SetImage( this->ItkToVtkImporter->GetOutput() );
-
-        // Use itk image's dir cosines as the local transform for this image
-        itk::Matrix< double, 3, 3 > dirCosines = this->ItkLabelImage->GetDirection();
-        vtkMatrix4x4 * rotMat = vtkMatrix4x4::New();
-        for( unsigned i = 0; i < 3; ++i )
-            for( unsigned j = 0; j < 3; ++j )
-                rotMat->SetElement( i, j, dirCosines( i, j ) );
         vtkTransform * rotTrans = vtkTransform::New();
-        rotTrans->SetMatrix( rotMat );
+        this->SetImage( this->ItktovtkConverter->ConvertItkImageToVtkImage( this->ItkLabelImage, rotTrans ) );
         this->SetLocalTransform( rotTrans );
-        rotMat->Delete();
         rotTrans->Delete();
     }
 }
@@ -337,18 +257,6 @@ void ImageObject::SetImage(vtkImageData * image)
     this->HistogramComputer->SetInputData( this->Image );
     SetupHistogramComputer();
     this->OutlineFilter->SetInputData( this->Image );
-}
-
-// simtodo : this shouldn't be needed, but calling Modified only on itk image
-// doesn't seem to be enough to update the voxels in the vtk image.
-void ImageObject::ForceUpdatePixels()
-{
-    if( this->ItkImage )
-    {
-        this->ItkImage->Modified();
-        this->ItkToVtkExporter->Modified();
-        this->ItkToVtkImporter->Modified();
-    }
 }
 
 //================================================================================
@@ -470,7 +378,7 @@ void ImageObject::SetVtkVolumeRenderingEnabled( bool on )
         ++it;
     }
 
-    emit Modified();
+    emit ObjectModified();
 }
 
 void ImageObject::SetVolumeRenderingWindow( double window )
@@ -529,7 +437,7 @@ void ImageObject::UpdateVolumeRenderingParamsInMapper()
         }
         ++it;
     }
-    emit Modified();
+    emit ObjectModified();
 }
 
 void ImageObject::SetVolumeClippingEnabled( vtkBoxWidget2 * widget, bool enabled )
@@ -569,7 +477,7 @@ void ImageObject::SetViewOutline( int isOn )
         }
     }
 
-    emit Modified();
+    emit ObjectModified();
 }
 
 int ImageObject::GetViewOutline()
@@ -585,7 +493,7 @@ void ImageObject::Setup3DRepresentation( View * view )
     outMapper->SetInputConnection( this->OutlineFilter->GetOutputPort() );
     vtkSmartPointer<vtkActor> outActor = vtkSmartPointer<vtkActor>::New();
     outActor->SetMapper( outMapper );
-	outActor->SetUserTransform( this->WorldTransform );
+    outActor->SetUserTransform( this->GetWorldTransform() );
     if( this->viewOutline )
         outActor->VisibilityOn();
     else
@@ -609,7 +517,7 @@ void ImageObject::Setup3DRepresentation( View * view )
     vtkSmartPointer<vtkVolume> volume = vtkSmartPointer<vtkVolume>::New();
     volume->SetMapper( volumeMapper );
     volume->SetProperty( m_volumeProperty );
-    volume->SetUserTransform( this->WorldTransform );
+    volume->SetUserTransform( this->GetWorldTransform() );
     volume->SetVisibility( m_vtkVolumeRenderingEnabled ? 1 : 0 );
     view->GetRenderer()->AddVolume( volume );
 
@@ -647,7 +555,7 @@ void ImageObject::Release3DRepresentation( View * view )
         PerViewElements * perView = (*itAssociations).second;
 
         // remove outline
-		view->GetRenderer()->RemoveViewProp( perView->outlineActor );
+        view->GetRenderer()->RemoveViewProp( perView->outlineActor );
 
         // remove volume
         view->GetRenderer()->RemoveViewProp( perView->volume );
@@ -703,7 +611,7 @@ void ImageObject::SetLut(vtkSmartPointer<vtkScalarsToColors> lut)
         this->Lut = lut;
     }
     emit LutChanged( this->GetObjectID() );
-    emit Modified();
+    emit ObjectModified();
 }
 
 int ImageObject::ChooseColorTable(int index)
@@ -737,7 +645,7 @@ int ImageObject::ChooseColorTable(int index)
         this->SetLut( lut );
     }
 
-    emit Modified();
+    emit ObjectModified();
     return 1;
 }
 
@@ -751,7 +659,7 @@ void ImageObject::SetLutRange( double r[2] )
     this->lutRange[0] = r[0];
     this->lutRange[1] = r[1];
     this->Lut->SetRange( r );
-    emit Modified();
+    emit ObjectModified();
 }
 
 void ImageObject::GetImageScalarRange(double *range)
@@ -790,7 +698,7 @@ void ImageObject::SetIntensityFactor( double factor )
         vtkPiecewiseFunctionLookupTable * lut = vtkPiecewiseFunctionLookupTable::SafeDownCast(this->GetLut());
         if( lut )
             lut->SetIntensityFactor( factor );
-        emit Modified();
+        emit ObjectModified();
     }
 }
 
@@ -827,7 +735,7 @@ void ImageObject::Hide()
 
     emit VisibilityChanged( this->GetObjectID() );
     UpdateVolumeRenderingParamsInMapper();
-    emit Modified();
+    emit ObjectModified();
 }
 
 void ImageObject::Show()
@@ -836,7 +744,7 @@ void ImageObject::Show()
 		this->SetViewOutline(1);
     emit VisibilityChanged( this->GetObjectID() );
     UpdateVolumeRenderingParamsInMapper();
-    emit Modified();
+    emit ObjectModified();
 }
 
 #include "mincinfowidget.h"
@@ -849,48 +757,12 @@ void ImageObject::ShowMincInfo()
     w->show();
 }
 
-void ImageObject::BuildItkToVtkExport()
-{
-    this->ItkToVtkExporter = ItkExporterType::New();
-    BuildVtkImport( this->ItkToVtkExporter );
-}
-
-void ImageObject::BuildItkRGBImageToVtkExport()
-{
-    this->ItkRGBImageToVtkExporter = ItkRGBImageExporterType::New();
-    BuildVtkImport( this->ItkRGBImageToVtkExporter );
-}
-
-
-void ImageObject::BuildItkToVtkLabelExport()
-{
-    this->ItkToVtkLabelExporter = ItkLabelExporterType::New();
-    BuildVtkImport( this->ItkToVtkLabelExporter );
-}
-
-void ImageObject::BuildVtkImport( itk::VTKImageExportBase * exporter )
-{
-    this->ItkToVtkImporter = vtkSmartPointer<vtkImageImport>::New();
-    this->ItkToVtkImporter->SetUpdateInformationCallback( exporter->GetUpdateInformationCallback() );
-    this->ItkToVtkImporter->SetPipelineModifiedCallback( exporter->GetPipelineModifiedCallback() );
-    this->ItkToVtkImporter->SetWholeExtentCallback( exporter->GetWholeExtentCallback() );
-    this->ItkToVtkImporter->SetSpacingCallback( exporter->GetSpacingCallback() );
-    this->ItkToVtkImporter->SetOriginCallback( exporter->GetOriginCallback() );
-    this->ItkToVtkImporter->SetScalarTypeCallback( exporter->GetScalarTypeCallback() );
-    this->ItkToVtkImporter->SetNumberOfComponentsCallback( exporter->GetNumberOfComponentsCallback() );
-    this->ItkToVtkImporter->SetPropagateUpdateExtentCallback( exporter->GetPropagateUpdateExtentCallback() );
-    this->ItkToVtkImporter->SetUpdateDataCallback( exporter->GetUpdateDataCallback() );
-    this->ItkToVtkImporter->SetDataExtentCallback( exporter->GetDataExtentCallback() );
-    this->ItkToVtkImporter->SetBufferPointerCallback( exporter->GetBufferPointerCallback() );
-    this->ItkToVtkImporter->SetCallbackUserData( exporter->GetCallbackUserData() );
-}
-
 //generic file writer
 void ImageObject::SaveImageData(QString &name)
 {
     if( this->ItkImage )
     {
-        itk::ImageFileWriter< IbisItk3DImageType >::Pointer mincWriter = itk::ImageFileWriter<IbisItk3DImageType>::New();
+        itk::ImageFileWriter< IbisItkFloat3ImageType >::Pointer mincWriter = itk::ImageFileWriter<IbisItkFloat3ImageType>::New();
         mincWriter->SetFileName(name.toUtf8().data());
 
         mincWriter->SetInput(this->ItkImage);
@@ -926,22 +798,22 @@ void ImageObject::SaveImageData(QString &name)
 
 vtkVolumeProperty * ImageObject::GetVolumeProperty()
 {
-    return m_volumeProperty.GetPointer();
+    return m_volumeProperty;
 }
 
 vtkScalarsToColors * ImageObject::GetLut()
 {
-    return Lut.GetPointer();
+    return Lut;
 }
 
 vtkImageData* ImageObject::GetImage( )
 {
-    return Image.GetPointer();
+    return Image;
 }
 
 vtkImageAccumulate * ImageObject::GetHistogramComputer()
 {
-    return HistogramComputer.GetPointer();
+    return HistogramComputer;
 }
 
 

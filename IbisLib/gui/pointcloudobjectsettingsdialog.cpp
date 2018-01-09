@@ -43,14 +43,14 @@ void PointCloudObjectSettingsDialog::SetPointCloudObject( PointCloudObject * obj
     
     if( m_object )
     {
-        disconnect( m_object, SIGNAL(Modified()), this, SLOT(UpdateSettings()) );
+        disconnect( m_object, SIGNAL(ObjectModified()), this, SLOT(UpdateSettings()) );
     }
     
     m_object = object;
     
     if( m_object )
     {
-        connect( m_object, SIGNAL(Modified()), this, SLOT(UpdateSettings()) );
+        connect( m_object, SIGNAL(ObjectModified()), this, SLOT(UpdateSettings()) );
     }
     
     this->UpdateUI();

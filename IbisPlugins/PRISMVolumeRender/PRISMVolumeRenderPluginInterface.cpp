@@ -12,8 +12,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include "PRISMVolumeRenderPluginInterface.h"
 #include "volumerenderingobject.h"
-#include "application.h"
-#include "scenemanager.h"
+
 #include <QSettings>
 
 PRISMVolumeRenderPluginInterface::PRISMVolumeRenderPluginInterface()
@@ -35,7 +34,7 @@ PRISMVolumeRenderPluginInterface::~PRISMVolumeRenderPluginInterface()
 
 SceneObject * PRISMVolumeRenderPluginInterface::GetGlobalObjectInstance()
 {
-    return m_vrObject.GetPointer();
+    return m_vrObject;
 }
 
 void PRISMVolumeRenderPluginInterface::LoadSettings( QSettings & s )

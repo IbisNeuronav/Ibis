@@ -39,7 +39,7 @@ void CameraObjectSettingsWidget::SetCamera( CameraObject * cam )
     Q_ASSERT( m_camera == 0 );
     m_camera = cam;
     connect( m_camera, SIGNAL(ParamsModified()), this, SLOT(CameraParamsModified()) );
-    connect( m_camera, SIGNAL(Modified()), this, SLOT(CameraModified()) );
+    connect( m_camera, SIGNAL(ObjectModified()), this, SLOT(CameraModified()) );
     UpdateUI();
 }
 

@@ -215,7 +215,7 @@ void PointsObject::Hide()
     {
         (*it)->SetHidden( true );
     }
-    emit Modified();
+    emit ObjectModified();
 }
 
 void PointsObject::Show()
@@ -226,7 +226,7 @@ void PointsObject::Show()
         (*it)->SetHidden( false );
     }
     this->UpdatePointsVisibility();
-    emit Modified();
+    emit ObjectModified();
 }
 
 void PointsObject::CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets)
@@ -400,25 +400,7 @@ void PointsObject::AddPointLocal( double coords[3], QString name, QString timest
 
 vtkPoints * PointsObject::GetPoints()
 {
-    return m_pointCoordinates.GetPointer();
-}
-
-void PointsObject::Reset()
-{   
-    PointList::iterator it = m_pointList.begin();
-    for(; it != m_pointList.end(); ++it)
-    {
-        this->GetManager()->RemoveObject( (*it ) );
-        (*it)->Delete();
-    }
-    m_pointList.clear();
-
-
-    m_pointCoordinates->Reset();
-    m_pointNames.clear();
-    m_timeStamps.clear();
-
-    emit Modified();
+    return m_pointCoordinates;
 }
 
 void PointsObject::SetSelectedPoint( int index )
@@ -431,7 +413,7 @@ void PointsObject::SetSelectedPoint( int index )
     UpdatePoints();
 
     emit PointsChanged();
-    emit Modified();
+    emit ObjectModified();
 }
 
 void PointsObject::MoveCursorToPoint( int index )
@@ -443,7 +425,7 @@ void PointsObject::MoveCursorToPoint( int index )
     {
         double * pos = m_pointCoordinates->GetPoint( index ); //in PointsObject space
         double worldPos[3];
-        this->WorldTransform->TransformPoint( pos, worldPos );
+        this->GetWorldTransform()->TransformPoint( pos, worldPos );
         this->GetManager()->SetCursorWorldPosition(worldPos);
     }
 }
@@ -472,7 +454,6 @@ int PointsObject::FindPoint(vtkActor *actor, double *pos, int viewType)
     if( viewType == THREED_VIEW_TYPE )
         return InvalidPointIndex;
     // Now see if any of 2D actors are picked
-    ApplicationSettings * settings = Application::GetInstance().GetSettings();
     vtkTransform * wt = this->GetWorldTransform();
     double worldPicked[3], worldPt[3];
     wt->TransformPoint( pos, worldPicked );
@@ -614,7 +595,6 @@ void PointsObject::RemovePoint(int index)
     // Update point representations
     if( GetManager() )
         GetManager()->RemoveObject( m_pointList[index] );
-    m_pointList[index]->Delete();
     m_pointList.removeAt( index );
     for( int i = 0; i < m_pointList.size(); ++i )
         m_pointList[i]->SetPointIndex( i );
@@ -661,7 +641,7 @@ void PointsObject::UpdatePointProperties( int index )
         pt->SetPropertyColor( m_activeColor );
     else
         pt->SetPropertyColor( m_inactiveColor );
-    emit Modified();
+    emit ObjectModified();
 }
 
 void PointsObject::UpdatePoints()
@@ -676,7 +656,7 @@ void PointsObject::SetPointLabel( int index, const QString &label )
 {
     m_pointNames.replace(index, label);
     this->UpdatePointProperties( index );
-    emit Modified();
+    emit ObjectModified();
 }
 
 const QString PointsObject::GetPointLabel(int index)
@@ -700,7 +680,7 @@ void PointsObject::SetPointCoordinates( int index, double coords[3] )
     m_pointCoordinates->SetPoint( index, coords );
     m_pointList.at( index )->SetPosition( m_pointCoordinates->GetPoint( index ) );
     emit PointsChanged();
-    emit Modified();
+    emit ObjectModified();
 }
 
 void PointsObject::SetPointTimeStamp( int index, const QString & stamp)
@@ -755,7 +735,7 @@ void PointsObject::ComputeDistanceFromSelectedPointToPointerTip()
         pointPos[i] = pos2[i];
     }
     double tmpPos[3];
-    vtkLinearTransform * transform = this->GetLocalTransform();
+    vtkTransform * transform = this->GetLocalTransform();
     transform->TransformPoint( pointPos, tmpPos );
     // convert to world
     double worldCoords[3];
@@ -830,8 +810,8 @@ void PointsObject::LineToPointerTip( double selectedPoint[3], double pointerTip[
     linesPolyData->SetPoints(points);
     linesPolyData->SetLines(cells);
 
-    m_lineToPointerTip->SetPolyData( linesPolyData.GetPointer() );
-    emit Modified();
+    m_lineToPointerTip->SetPolyData( linesPolyData );
+    emit ObjectModified();
 }
 
 void PointsObject::SetLineToPointerColor( double color[3] )
@@ -840,7 +820,7 @@ void PointsObject::SetLineToPointerColor( double color[3] )
         m_lineToPointerColor[i] = color[i];
     if( m_lineToPointerProperty )
         m_lineToPointerProperty->SetColor(color[0], color[1], color[2]);
-    emit Modified();
+    emit ObjectModified();
 }
 
 void PointsObject::GetLineToPointerColor(  double color[3] )

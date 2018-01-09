@@ -9,7 +9,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
 #include "contoursurfaceplugininterface.h"
-#include "application.h"
 #include "imageobject.h"
 #include "sceneobject.h"
 #include "scenemanager.h"
@@ -36,7 +35,7 @@ SceneObject *ContourSurfacePluginInterface::CreateObject()
     if( manager->IsLoadingScene() )
     {
         manager->AddObject(m_generatedSurface);
-        return m_generatedSurface.GetPointer();
+        return m_generatedSurface;
     }
     // If we have a current object we build surface now
     SceneObject *obj = manager->GetCurrentObject();
@@ -65,7 +64,7 @@ SceneObject *ContourSurfacePluginInterface::CreateObject()
             manager->AddObject(m_generatedSurface, image);
             manager->SetCurrentObject( m_generatedSurface );
         }
-        return m_generatedSurface.GetPointer();
+        return m_generatedSurface;
     }
     QMessageBox::warning( 0, "Error!", "Current object should be an ImageObject" );
     return NULL;
