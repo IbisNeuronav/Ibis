@@ -22,7 +22,7 @@ class qIGTLIOLogicController;
 class qIGTLIOClientWidget;
 
 
-class IbisHardwareIGSIO : public QObject, public HardwareModule
+class IbisHardwareIGSIO : public HardwareModule
 {
     
     Q_OBJECT
