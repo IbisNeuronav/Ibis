@@ -180,6 +180,7 @@ public:
     void GetAllPointerObjects( QList<PointerObject*> & all );
     void GetAllTrackedObjects( QList<TrackedSceneObject*> & all );
     void GetAllObjectsOfType( const char * typeName, QList<SceneObject*> & all );
+    void ChangeListability( SceneObject* obj, bool l );
 
     // Manage cursor visibility and color - wrapper for TrippleCutPlane
     bool GetCursorVisible();

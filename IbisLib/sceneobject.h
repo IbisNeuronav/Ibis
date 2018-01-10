@@ -110,7 +110,7 @@ public:
     int GetNumberOfListableChildren();
     SceneObject * GetListableChild( int index );
     bool IsListable() { return this->ObjectListable; }
-    void SetListable( bool l ) { this->ObjectListable = l; }
+    void SetListable( bool l );// { this->ObjectListable = l; }
 
     bool IsManagedBySystem() { return ObjectManagedBySystem; }
     vtkSetMacro( ObjectManagedBySystem, bool );
