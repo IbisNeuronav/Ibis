@@ -87,6 +87,15 @@ void IbisHardwareIGSIO::Init()
     }
 }
 
+TrackerToolState StatusStringToState( const std::string & status )
+{
+    if( status == "true" )
+        return Ok;
+    if( status == "false" )
+        return OutOfView;
+    return Undefined;
+}
+
 void IbisHardwareIGSIO::Update()
 {
     // Update everything
@@ -103,13 +112,13 @@ void IbisHardwareIGSIO::Update()
         {
             igtlio::ImageDevice * imageDevice = igtlio::ImageDevice::SafeDownCast( tool->ioDevice );
             tool->sceneObject->SetInputMatrix( imageDevice->GetContent().transform );
-            tool->sceneObject->SetState( Undefined ); // todo : set state properly when available
+            tool->sceneObject->SetState( Undefined );
         }
         else if( tool->ioDevice->GetDeviceType() == igtlio::TransformConverter::GetIGTLTypeName() )
         {
             igtlio::TransformDevice * transformDevice = igtlio::TransformDevice::SafeDownCast( tool->ioDevice );
             tool->sceneObject->SetInputMatrix( transformDevice->GetContent().transform );
-            tool->sceneObject->SetState( Undefined ); // todo : set state properly when available
+            tool->sceneObject->SetState( StatusStringToState( transformDevice->GetContent().transformStatus ) );
         }
         tool->sceneObject->MarkModified();
     }
@@ -132,6 +141,9 @@ bool IbisHardwareIGSIO::ShutDown()
     return true;
 }
 
+#include "vtkTimerLog.h"
+#include "vtksys/SystemTools.hxx"
+
 bool IbisHardwareIGSIO::LaunchAndConnectLocal()
 {   
     // First try to launch a server
@@ -150,8 +162,28 @@ bool IbisHardwareIGSIO::LaunchAndConnectLocal()
     }
 
     // Now, try to connect to it. By default the connector tries local host with port where server is listening
-    m_logic->CreateConnector();
-    m_logic->GetConnector( 0 )->Start();
+    igtlio::ConnectorPointer c = m_logic->CreateConnector();
+    c->Start();
+
+    // Wait for connection (max 3 sec)
+    double starttime = vtkTimerLog::GetUniversalTime();
+    while (vtkTimerLog::GetUniversalTime() - starttime < 3.0)
+    {
+        c->PeriodicProcess();
+        vtksys::SystemTools::Delay(5);
+
+        if (c->GetState() != igtlio::Connector::STATE_WAIT_CONNECTION)
+        {
+            break;
+        }
+    }
+    bool connected = c->GetState() == igtlio::Connector::STATE_CONNECTED;
+
+    // If connected, send empty status message to tell plus we are using header v2
+    if( connected )
+        m_logic->GetConnector(0)->SendEmptyStatusMessage( IGTL_HEADER_VERSION_2 );
+
+    return connected;
 }
 
 vtkTransform * IbisHardwareIGSIO::GetReferenceTransform()
