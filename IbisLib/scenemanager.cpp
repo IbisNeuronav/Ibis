@@ -860,14 +860,12 @@ void SceneManager::ChangeListability( SceneObject* obj, bool l )
     if( l ) //show on list
     {
         pos = obj->GetParent()->GetNumberOfListableChildren();
-        emit StartAddingObject( obj->GetParent(), pos );
-        emit FinishAddingObject();
+        emit AddObjectToList( obj->GetParent(), pos );
     }
     else
     {
         pos = obj->GetObjectListableIndex();
-        emit StartRemovingObject( obj->GetParent(), pos );
-        emit FinishRemovingObject();
+        emit RemoveObjectFromList( obj->GetParent(), pos );
     }
 }
 

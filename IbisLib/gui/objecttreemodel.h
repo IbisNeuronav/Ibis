@@ -84,6 +84,8 @@ private slots:
     void EndInserting();
     void BeginRemoving(  SceneObject * parent, int position );
     void EndRemoving();
+    void AddToList( SceneObject * parent, int position );
+    void RemoveFromList( SceneObject * parent, int position );
 
 private:
 

@@ -316,6 +316,8 @@ signals:
     void FinishAddingObject();
     void StartRemovingObject( SceneObject*, int );
     void FinishRemovingObject();
+    void AddObjectToList( SceneObject*, int );
+    void RemoveObjectFromList( SceneObject*, int );
 
     void ObjectAdded( int );
     void ObjectRemoved( int );
