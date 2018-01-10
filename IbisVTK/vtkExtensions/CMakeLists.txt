@@ -39,12 +39,30 @@ SET( VTK_EXTENSIONS_HDR
     DrawableTexture.h )
 
 #================================
+# Process GLSL shader files
+#================================
+set( LibGlsl vtkIbisImagePlaneMapper_FS )
+foreach( file ${LibGlsl} )
+  set( shader_src ${CMAKE_CURRENT_SOURCE_DIR}/${file}.glsl )
+  set( shader_cxx ${CMAKE_CURRENT_BINARY_DIR}/${file}.cxx )
+  set( shader_h ${CMAKE_CURRENT_BINARY_DIR}/${file}.h )
+  add_custom_command(
+    OUTPUT ${shader_cxx} ${shader_h}
+    DEPENDS ${shader_src}
+    COMMAND ${VTK_ENCODESTRING_EXE}
+    ARGS ${shader_cxx} ${shader_src} ${file} --build-header " " vtkSystemIncludes.h )
+  set( LibGlslSrc ${LibGlslSrc} ${shader_src} ${shader_h} ${shader_cxx} )
+endforeach(file)
+
+include_directories( ${CMAKE_CURRENT_BINARY_DIR} )
+
+#================================
 # Define output
 #================================
 IF (BUILD_SHARED_LIBS)
 ADD_LIBRARY( vtkExtensions SHARED ${VTK_EXTENSIONS_SRC} ${VTK_EXTENSIONS_HDR} )
 ELSE( BUILD_SHARED_LIBS )
-ADD_LIBRARY( vtkExtensions ${VTK_EXTENSIONS_SRC} ${VTK_EXTENSIONS_HDR} )
+ADD_LIBRARY( vtkExtensions ${VTK_EXTENSIONS_SRC} ${VTK_EXTENSIONS_HDR} ${LibGlslSrc} )
 ENDIF( BUILD_SHARED_LIBS )
 
 # install
