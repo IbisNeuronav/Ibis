@@ -58,7 +58,6 @@ ImageObject::PerViewElements::~PerViewElements()
 ImageObject::ImageObject()
 {
     this->ItkImage = 0;
-    this->ItkRGBImage = 0;
     this->ItkLabelImage = 0;
     this->OutlineFilter = vtkSmartPointer<vtkOutlineFilter>::New();
     this->viewOutline = 0;
@@ -766,23 +765,6 @@ void ImageObject::SaveImageData(QString &name)
         mincWriter->SetFileName(name.toUtf8().data());
 
         mincWriter->SetInput(this->ItkImage);
-
-        try
-        {
-            mincWriter->Update();
-        }
-        catch(itk::ExceptionObject & exp)
-        {
-            std::cerr << "Exception caught!" << std::endl;
-            std::cerr << exp << std::endl;
-        }
-    }
-    else if( this->ItkRGBImage )
-    {
-        itk::ImageFileWriter< IbisRGBImageType >::Pointer mincWriter = itk::ImageFileWriter<IbisRGBImageType>::New();
-        mincWriter->SetFileName(name.toUtf8().data());
-
-        mincWriter->SetInput(this->ItkRGBImage);
 
         try
         {
