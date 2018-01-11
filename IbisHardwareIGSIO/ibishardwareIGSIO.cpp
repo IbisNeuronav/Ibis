@@ -258,6 +258,7 @@ void IbisHardwareIGSIO::FindNewTools()
                     toolIndex = m_tools.size();
                     m_tools.append( newTool );
                 }
+                GetSceneManager()->AddObject( m_tools[toolIndex]->sceneObject );
             }
             if( toolIndex != -1 )
             {
@@ -272,8 +273,13 @@ void IbisHardwareIGSIO::FindNewTools()
                 else if( IsDeviceVideo(dev) )
                 {
                     m_tools[toolIndex]->imageDevice = dev;
+                    CameraObject * cam = CameraObject::SafeDownCast( m_tools[toolIndex]->sceneObject );
+                    if( cam )
+                    {
+                        igtlio::VideoDevice * videoDev = igtlio::VideoDevice::SafeDownCast( dev );
+                        cam->SetVideoInputData( videoDev->GetContent().image );
+                    }
                 }
-                GetSceneManager()->AddObject( m_tools[toolIndex]->sceneObject );
             }
         }
     }
