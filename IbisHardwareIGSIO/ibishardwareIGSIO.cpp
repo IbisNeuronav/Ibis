@@ -108,6 +108,7 @@ void IbisHardwareIGSIO::Update()
     // Push images, transforms and states to the TrackedSceneObjects
     foreach( Tool * tool, m_tools )
     {
+        if( tool->transformDevice == 0 ) continue;
         if( tool->transformDevice->GetDeviceType() == igtlio::ImageConverter::GetIGTLTypeName() )
         {
             igtlio::ImageDevice * imageDevice = igtlio::ImageDevice::SafeDownCast( tool->transformDevice );
