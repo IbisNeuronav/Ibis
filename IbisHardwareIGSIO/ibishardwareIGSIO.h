@@ -83,6 +83,10 @@ protected:
     bool IoHasDevice( igtlio::DevicePointer device );
     bool ModuleHasDevice( igtlio::DevicePointer device );
     TrackedSceneObject * InstanciateSceneObjectFromDevice( igtlio::DevicePointer device );
+    QString DeviceNameToToolName( const QString & deviceName );
+    bool IsDeviceImage( igtlio::DevicePointer device );
+    bool IsDeviceTransform( igtlio::DevicePointer device );
+    bool IsDeviceVideo( igtlio::DevicePointer device );
 
     // Plus server exec and config paths
     QString m_plusServerExec;
@@ -92,7 +96,8 @@ protected:
     struct Tool
     {
         TrackedSceneObject * sceneObject;
-        igtlio::DevicePointer ioDevice;
+        igtlio::DevicePointer transformDevice;
+        igtlio::DevicePointer imageDevice;
     };
     typedef QList< Tool* > toolList;
     toolList m_tools;
