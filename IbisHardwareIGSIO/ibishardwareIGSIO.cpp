@@ -113,13 +113,14 @@ void IbisHardwareIGSIO::Update()
         {
             igtlio::ImageDevice * imageDevice = igtlio::ImageDevice::SafeDownCast( tool->transformDevice );
             tool->sceneObject->SetInputMatrix( imageDevice->GetContent().transform );
-            tool->sceneObject->SetState( Undefined );
+            tool->sceneObject->SetState( Ok );
         }
         else if( tool->transformDevice->GetDeviceType() == igtlio::TransformConverter::GetIGTLTypeName() )
         {
             igtlio::TransformDevice * transformDevice = igtlio::TransformDevice::SafeDownCast( tool->transformDevice );
             tool->sceneObject->SetInputMatrix( transformDevice->GetContent().transform );
-            tool->sceneObject->SetState( StatusStringToState( transformDevice->GetContent().transformStatus ) );
+            //tool->sceneObject->SetState( StatusStringToState( transformDevice->GetContent().transformStatus ) );
+            tool->sceneObject->SetState( Ok );
         }
         tool->sceneObject->MarkModified();
     }
@@ -258,8 +259,8 @@ void IbisHardwareIGSIO::FindNewTools()
                     newTool->sceneObject = obj;
                     toolIndex = m_tools.size();
                     m_tools.append( newTool );
+                    GetSceneManager()->AddObject( m_tools[toolIndex]->sceneObject );
                 }
-                GetSceneManager()->AddObject( m_tools[toolIndex]->sceneObject );
             }
             if( toolIndex != -1 )
             {
