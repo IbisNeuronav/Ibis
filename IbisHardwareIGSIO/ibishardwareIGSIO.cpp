@@ -17,6 +17,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "cameraobject.h"
 #include <QDir>
 #include <QMenu>
+#include <QSettings>
 #include "igtlioLogic.h"
 #include "qIGTLIOLogicController.h"
 #include "qIGTLIOClientWidget.h"
@@ -26,16 +27,44 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include "igtlioImageConverter.h"
 #include "igtlioTransformConverter.h"
+#include "igtlioVideoConverter.h"
+#include "igtlioVideoDevice.h"
+#include "plusserverinterface.h"
+
+static const QString DefaultPlusConfigDirectory = Application::GetConfigDirectory() + QString("PlusToolkit/");
+static const QString DefaultPlusConfigFilesDirectory = DefaultPlusConfigDirectory + QString("ConfigFiles/");
+static const QString PlusToolkitPathsFilename = DefaultPlusConfigDirectory + QString("plus-toolkit-paths.txt");
 
 IbisHardwareIGSIO::IbisHardwareIGSIO()
 {
     m_logicController = 0;
     m_logic = 0;
     m_clientWidget = 0;
+    m_plusLauncher = 0;
+    m_plusConfigDir = DefaultPlusConfigFilesDirectory;
+
+    // Look for the Plus Toolkit path
+    /*if( QFile::exists( PlusToolkitPathsFilename ) )
+    {
+        QFile pathFile( PlusToolkitPathsFilename );
+        pathFile.open( QIODevice::ReadOnly | QIODevice::Text );
+        QTextStream pathIn( &pathFile );
+        pathIn >> m_plusServerExec;
+    }*/
 }
 
 IbisHardwareIGSIO::~IbisHardwareIGSIO()
 {
+}
+
+void IbisHardwareIGSIO::LoadSettings( QSettings & s )
+{
+    m_plusLastConfigFile = s.value( "LastConfigFile", "" ).toString();
+}
+
+void IbisHardwareIGSIO::SaveSettings( QSettings & s )
+{
+    s.setValue( "LastConfigFile", m_plusLastConfigFile );
 }
 
 void IbisHardwareIGSIO::AddSettingsMenuEntries( QMenu * menu )
@@ -48,6 +77,25 @@ void IbisHardwareIGSIO::Init()
     m_logicController = new qIGTLIOLogicController;
     m_logic = vtkSmartPointer<igtlio::Logic>::New();
     m_logicController->setLogic( m_logic );
+
+    // Temporarily encode config file until we have gui to do it
+    m_plusLastConfigFile = "PlusDeviceSet_OpenIGTLinkCommandsTest.xml";
+
+    // Make sure we have a valid config file before trying to launch a server
+    /*QFileInfo configInfo( m_plusConfigDir + m_plusLastConfigFile );
+    if( configInfo.exists() && configInfo.isReadable() )
+    {
+        LaunchAndConnectLocal();
+    }*/
+}
+
+TrackerToolState StatusStringToState( const std::string & status )
+{
+    if( status == "true" )
+        return Ok;
+    if( status == "false" )
+        return OutOfView;
+    return Undefined;
 }
 
 void IbisHardwareIGSIO::Update()
@@ -60,19 +108,19 @@ void IbisHardwareIGSIO::Update()
     // Push images, transforms and states to the TrackedSceneObjects
     foreach( Tool * tool, m_tools )
     {
-        if( !tool->ioDevice )
-            continue;
-        if( tool->ioDevice->GetDeviceType() == igtlio::ImageConverter::GetIGTLTypeName() )
+        if( tool->transformDevice == 0 ) continue;
+        if( tool->transformDevice->GetDeviceType() == igtlio::ImageConverter::GetIGTLTypeName() )
         {
-            igtlio::ImageDevice * imageDevice = igtlio::ImageDevice::SafeDownCast( tool->ioDevice );
+            igtlio::ImageDevice * imageDevice = igtlio::ImageDevice::SafeDownCast( tool->transformDevice );
             tool->sceneObject->SetInputMatrix( imageDevice->GetContent().transform );
-            tool->sceneObject->SetState( Undefined ); // todo : set state properly when available
+            tool->sceneObject->SetState( Ok );
         }
-        else if( tool->ioDevice->GetDeviceType() == igtlio::TransformConverter::GetIGTLTypeName() )
+        else if( tool->transformDevice->GetDeviceType() == igtlio::TransformConverter::GetIGTLTypeName() )
         {
-            igtlio::TransformDevice * transformDevice = igtlio::TransformDevice::SafeDownCast( tool->ioDevice );
+            igtlio::TransformDevice * transformDevice = igtlio::TransformDevice::SafeDownCast( tool->transformDevice );
             tool->sceneObject->SetInputMatrix( transformDevice->GetContent().transform );
-            tool->sceneObject->SetState( Undefined ); // todo : set state properly when available
+            //tool->sceneObject->SetState( StatusStringToState( transformDevice->GetContent().transformStatus ) );
+            tool->sceneObject->SetState( Ok );
         }
         tool->sceneObject->MarkModified();
     }
@@ -93,6 +141,51 @@ bool IbisHardwareIGSIO::ShutDown()
     }
 
     return true;
+}
+
+#include "vtkTimerLog.h"
+#include "vtksys/SystemTools.hxx"
+
+bool IbisHardwareIGSIO::LaunchAndConnectLocal()
+{   
+    // First try to launch a server
+    if( !m_plusLauncher )
+    {
+        m_plusLauncher = vtkSmartPointer<PlusServerInterface>::New();
+        m_plusLauncher->SetServerExecutable( m_plusServerExec );
+    }
+    QString plusConfiFile = m_plusConfigDir + m_plusLastConfigFile;
+    bool didLaunch = m_plusLauncher->StartServer( plusConfiFile );
+    if( !didLaunch )
+    {
+        QString msg = QString("Coulnd't launch the Plus Server to communicate with hardware: %1").arg( m_plusLauncher->GetLastErrorMessage() );
+        GetApplication()->Warning("Error", msg);
+        return false;
+    }
+
+    // Now, try to connect to it. By default the connector tries local host with port where server is listening
+    igtlio::ConnectorPointer c = m_logic->CreateConnector();
+    c->Start();
+
+    // Wait for connection (max 3 sec)
+    double starttime = vtkTimerLog::GetUniversalTime();
+    while (vtkTimerLog::GetUniversalTime() - starttime < 3.0)
+    {
+        c->PeriodicProcess();
+        vtksys::SystemTools::Delay(5);
+
+        if (c->GetState() != igtlio::Connector::STATE_WAIT_CONNECTION)
+        {
+            break;
+        }
+    }
+    bool connected = c->GetState() == igtlio::Connector::STATE_CONNECTED;
+
+    // If connected, send empty status message to tell plus we are using header v2
+    if( connected )
+        m_logic->GetConnector(0)->SendEmptyStatusMessage( IGTL_HEADER_VERSION_2 );
+
+    return connected;
 }
 
 vtkTransform * IbisHardwareIGSIO::GetReferenceTransform()
@@ -155,21 +248,41 @@ void IbisHardwareIGSIO::FindNewTools()
         igtlio::DevicePointer dev = m_logic->GetDevice( i );
         if( !ModuleHasDevice( dev ) )
         {
-            int toolIndex = FindToolByName( QString( dev->GetDeviceName().c_str() ) );
-            if( toolIndex == -1 )
+            QString toolRealName = DeviceNameToToolName( dev->GetDeviceName().c_str() );
+            int toolIndex = FindToolByName( toolRealName );
+            if( toolIndex == -1 )  // There is no tool by this name already
             {
                 TrackedSceneObject * obj = InstanciateSceneObjectFromDevice( dev );
                 if( obj )
                 {
                     Tool * newTool = new Tool;
-                    newTool->ioDevice = dev;
                     newTool->sceneObject = obj;
                     toolIndex = m_tools.size();
                     m_tools.append( newTool );
+                    GetSceneManager()->AddObject( m_tools[toolIndex]->sceneObject );
                 }
             }
             if( toolIndex != -1 )
-                GetSceneManager()->AddObject( m_tools[toolIndex]->sceneObject );
+            {
+                if( IsDeviceImage(dev) )
+                {
+                    m_tools[toolIndex]->imageDevice = dev;
+                }
+                else if( IsDeviceTransform(dev) )
+                {
+                    m_tools[toolIndex]->transformDevice = dev;
+                }
+                else if( IsDeviceVideo(dev) )
+                {
+                    m_tools[toolIndex]->imageDevice = dev;
+                    CameraObject * cam = CameraObject::SafeDownCast( m_tools[toolIndex]->sceneObject );
+                    if( cam )
+                    {
+                        igtlio::VideoDevice * videoDev = igtlio::VideoDevice::SafeDownCast( dev );
+                        cam->SetVideoInputData( videoDev->GetContent().image );
+                    }
+                }
+            }
         }
     }
 }
@@ -178,10 +291,10 @@ void IbisHardwareIGSIO::FindRemovedTools()
 {
     foreach( Tool * tool, m_tools )
     {
-        if( tool->sceneObject && tool->sceneObject->IsObjectInScene() && tool->ioDevice && !IoHasDevice( tool->ioDevice ) )
+        if( tool->sceneObject && tool->sceneObject->IsObjectInScene() && tool->transformDevice && !IoHasDevice( tool->transformDevice ) )
         {
             GetSceneManager()->RemoveObject( tool->sceneObject );
-            tool->ioDevice = igtlio::DevicePointer();
+            tool->transformDevice = igtlio::DevicePointer();
         }
     }
 }
@@ -198,7 +311,8 @@ bool IbisHardwareIGSIO::ModuleHasDevice( igtlio::DevicePointer device )
 {
     foreach( Tool * tool, m_tools )
     {
-        if( tool->ioDevice->GetDeviceName() == device->GetDeviceName() )
+        if( ( tool->transformDevice && tool->transformDevice->GetDeviceName() == device->GetDeviceName()) ||
+                ( tool->imageDevice && tool->imageDevice->GetDeviceName() == device->GetDeviceName() ) )
             return true;
     }
     return false;
@@ -217,24 +331,51 @@ bool IbisHardwareIGSIO::IoHasDevice( igtlio::DevicePointer device )
 // local config file.
 TrackedSceneObject * IbisHardwareIGSIO::InstanciateSceneObjectFromDevice( igtlio::DevicePointer device )
 {
-    QString devName( device->GetDeviceName().c_str() );
+    QString realName = DeviceNameToToolName( device->GetDeviceName().c_str() );
     TrackedSceneObject * res = 0;
 
-    if( device->GetDeviceType() == igtlio::ImageConverter::GetIGTLTypeName() )
+    if( IsDeviceImage(device) )
     {
         igtlio::ImageDevice * imageDev = igtlio::ImageDevice::SafeDownCast( device );
-        UsProbeObject * probe = UsProbeObject::New();
-        probe->SetVideoInputData( imageDev->GetContent().image );
-        res = probe;
+        if( realName.startsWith("USProbe") )
+        {
+            UsProbeObject * probe = UsProbeObject::New();
+            probe->SetVideoInputData( imageDev->GetContent().image );
+            res = probe;
+        }
+        else if( realName.startsWith("Camera") )
+        {
+            CameraObject * camera = CameraObject::New();
+            camera->SetVideoInputData( imageDev->GetContent().image );
+            res = camera;
+        }
     }
-    else if( device->GetDeviceType() == igtlio::TransformConverter::GetIGTLTypeName() )
+    else if( IsDeviceTransform(device) )
     {
-        res = PointerObject::New();
+        if( realName.startsWith("USProbe") )
+        {
+            res = UsProbeObject::New();
+        }
+        else if( realName.startsWith("Pointer") || realName.startsWith("Stylus") )
+        {
+            res = PointerObject::New();
+        }
+        else if( realName.startsWith("Camera") )
+        {
+            res = CameraObject::New();
+        }
+    }
+    else if( IsDeviceVideo(device) )
+    {
+        igtlio::VideoDevice * videoDev = igtlio::VideoDevice::SafeDownCast( device );
+        CameraObject * camera = CameraObject::New();
+        camera->SetVideoInputData( videoDev->GetContent().image );
+        res = camera;
     }
 
     if( res )
     {
-        res->SetName( devName );
+        res->SetName( realName );
         res->SetObjectManagedBySystem( true );
         res->SetCanAppendChildren( false );
         res->SetObjectManagedByTracker(true);
@@ -246,11 +387,32 @@ TrackedSceneObject * IbisHardwareIGSIO::InstanciateSceneObjectFromDevice( igtlio
     return res;
 }
 
+QString IbisHardwareIGSIO::DeviceNameToToolName( const QString & deviceName )
+{
+    QStringList nameParts = deviceName.split( "To" );
+    return nameParts[0];
+}
+
+bool IbisHardwareIGSIO::IsDeviceImage( igtlio::DevicePointer device )
+{
+    return device->GetDeviceType() == igtlio::ImageConverter::GetIGTLTypeName();
+}
+
+bool IbisHardwareIGSIO::IsDeviceTransform( igtlio::DevicePointer device )
+{
+    return device->GetDeviceType() == igtlio::TransformConverter::GetIGTLTypeName();
+}
+
+bool IbisHardwareIGSIO::IsDeviceVideo( igtlio::DevicePointer device )
+{
+    return device->GetDeviceType() == igtlio::VideoConverter::GetIGTLTypeName();
+}
+
 void IbisHardwareIGSIO::AddToolObjectsToScene()
 {
     foreach( Tool * tool, m_tools )
     {
-        if( !tool->sceneObject->IsObjectInScene() && tool->ioDevice && IoHasDevice( tool->ioDevice ) )
+        if( !tool->sceneObject->IsObjectInScene() && tool->transformDevice && IoHasDevice( tool->transformDevice ) )
         {
             GetSceneManager()->AddObject( tool->sceneObject );
         }
@@ -262,6 +424,6 @@ void IbisHardwareIGSIO::RemoveToolObjectsFromScene()
     foreach( Tool * tool, m_tools )
     {
         GetSceneManager()->RemoveObject( tool->sceneObject );
-        tool->ioDevice = igtlio::DevicePointer();
+        tool->transformDevice = igtlio::DevicePointer();
     }
 }
