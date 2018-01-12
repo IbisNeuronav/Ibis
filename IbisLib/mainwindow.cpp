@@ -907,7 +907,7 @@ void MainWindow::LoadSettings( QSettings & s )
     m_rightPanelSize = s.value( "MainWindowRightPanelSize", 150 ).toInt();
     m_4Views->LoadSettings( s );
     s.endGroup();
-    //resize( mainWindowSize );
+    resize( mainWindowSize );
     move( mainWindowPosition );
     UpdateMainSplitter();
 }
