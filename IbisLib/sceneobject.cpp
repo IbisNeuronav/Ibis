@@ -374,6 +374,13 @@ int SceneObject::GetObjectListableIndex()
     return 0; // scene root is unique
 }
 
+void SceneObject::SetListable( bool l )
+{
+    if( this->GetObjectID() != SceneManager::InvalidId && ( this->IsListable() != l ) )
+        this->GetManager()->ChangeListability( this, l );
+    this->ObjectListable = l;
+}
+
 bool SceneObject::DescendsFrom( SceneObject * obj )
 {
     if( obj == this )

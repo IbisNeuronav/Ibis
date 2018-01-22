@@ -24,6 +24,8 @@ ObjectTreeModel::ObjectTreeModel( SceneManager * man, QObject *parent)
     connect( m_sceneManager, SIGNAL(FinishAddingObject()), this, SLOT(EndInserting()) );
     connect( m_sceneManager, SIGNAL( StartRemovingObject( SceneObject*, int ) ), this, SLOT(BeginRemoving(SceneObject*,int)) );
     connect( m_sceneManager, SIGNAL(FinishRemovingObject()), this, SLOT(EndRemoving()) );
+    connect( m_sceneManager, SIGNAL(AddObjectToList( SceneObject*, int )), this, SLOT(AddToList(SceneObject*,int)) );
+    connect( m_sceneManager, SIGNAL(RemoveObjectFromList( SceneObject*, int )), this, SLOT(RemoveFromList(SceneObject*,int)) );
     connect( this, SIGNAL(ObjectRenamed(QString, QString)), m_sceneManager, SLOT(EmitSignalObjectRenamed(QString, QString)));
 }
 
@@ -250,6 +252,20 @@ void ObjectTreeModel::BeginRemoving( SceneObject * parent, int position )
 
 void ObjectTreeModel::EndRemoving()
 {
+    endRemoveRows();
+}
+
+void ObjectTreeModel::AddToList( SceneObject * parent, int position )
+{
+    QModelIndex parentIndex = ObjectToIndex( parent );
+    beginInsertRows( parentIndex, position, position );
+    endInsertRows();
+}
+
+void ObjectTreeModel::RemoveFromList( SceneObject * parent, int position )
+{
+    QModelIndex parentIndex = ObjectToIndex( parent );
+    beginRemoveRows( parentIndex, position, position );
     endRemoveRows();
 }
 
