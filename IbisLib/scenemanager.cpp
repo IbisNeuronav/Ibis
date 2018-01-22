@@ -854,21 +854,6 @@ void SceneManager::ChangeParent( SceneObject * object, SceneObject * newParent, 
     emit FinishAddingObject();
 }
 
-void SceneManager::ChangeListability( SceneObject* obj, bool l )
-{
-    int pos;
-    if( l ) //show on list
-    {
-        pos = obj->GetParent()->GetNumberOfListableChildren();
-        emit AddObjectToList( obj->GetParent(), pos );
-    }
-    else
-    {
-        pos = obj->GetObjectListableIndex();
-        emit RemoveObjectFromList( obj->GetParent(), pos );
-    }
-}
-
 void SceneManager::GetAllImageObjects( QList<ImageObject*> & objects )
 {
     for( int i = 0; i < this->AllObjects.size(); ++i )

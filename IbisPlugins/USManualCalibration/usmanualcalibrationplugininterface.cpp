@@ -186,7 +186,6 @@ void USManualCalibrationPluginInterface::StartPhantomRegistration()
         allocSource = true;
         sourcePoints = PointsObject::New();
         sourcePoints->SetName( "Phantom Source Points" );
-        GetSceneManager()->AddObject( sourcePoints, phantomObject );
         for( int i = 0; i < 4; ++i )
             sourcePoints->AddPoint( pointNames[i], pointCoords[i] );
         m_phantomRegSourcePointsId = sourcePoints->GetObjectID();
@@ -199,7 +198,6 @@ void USManualCalibrationPluginInterface::StartPhantomRegistration()
         allocTarget = true;
         targetPoints = PointsObject::New();
         targetPoints->SetName( "Phantom Target Points" );
-        GetSceneManager()->AddObject( targetPoints );
         for( int i = 0; i < 4; ++i )
             targetPoints->AddPoint( pointNames[i], pointCoords[i] );
         m_phantomRegTargetPointsId = targetPoints->GetObjectID();
