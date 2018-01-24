@@ -23,7 +23,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QVBoxLayout>
 #include <QTabWidget>
 #include <QList>
-#include <QMessageBox>
 
 ObjectSerializationMacro( SceneObject );
 
@@ -380,7 +379,7 @@ void SceneObject::SetListable( bool l )
     if( !this->IsObjectInScene( ) )
         this->ObjectListable = l;
     else
-        QMessageBox::warning( 0, "Error", "Parameter \"Listable\" may not be changed.", 1, 0 );
+        vtkErrorMacro(<< "Can't set listability for an object already in scene." );
 }
 
 bool SceneObject::DescendsFrom( SceneObject * obj )
