@@ -36,6 +36,8 @@ void BoneExtractionFilter< TImage >
 
     this->ThresholdByDistanceMap(input, m_Threshold);
 
+    this->CopyInputImageInformations(input);
+
     this->GraftOutput( m_ProcessedImage );
 
 
@@ -287,6 +289,25 @@ void BoneExtractionFilter< TImage >
     m_ProcessedImage = maskFilter->GetOutput();
     m_ProcessedImage->DisconnectPipeline();
 
+}
+
+template< typename TImage >
+void
+BoneExtractionFilter< TImage >
+::CopyInputImageInformations( ImageType * input )
+{
+    typedef itk::ChangeInformationImageFilter< TImage > InfoFilterType;
+    typename InfoFilterType::Pointer infoFilter = InfoFilterType::New();
+    infoFilter->SetInput( m_ProcessedImage );
+    infoFilter->SetOutputDirection(input->GetDirection());
+    infoFilter->ChangeDirectionOn();
+    infoFilter->SetOutputSpacing(input->GetSpacing());
+    infoFilter->ChangeSpacingOn();
+    infoFilter->SetOutputOrigin(input->GetOrigin());
+    infoFilter->ChangeOriginOn();
+    infoFilter->Update();
+
+    m_ProcessedImage = infoFilter->GetOutput();
 }
  
 template< typename TImage >

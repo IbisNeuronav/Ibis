@@ -19,9 +19,14 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 VertebraRegistrationWidget::VertebraRegistrationWidget(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::VertebraRegistrationWidget),
-    m_application(0)
+    m_application(0),
+    m_isProcessing(false),
+    m_targetVolumeLoaded(false),
+    m_queueSemaphore(false)
 {
     ui->setupUi(this);
+
+    m_maximumFrameQueueSize = (unsigned int) ui->numberOfFramesSpinBox->value();
 
     // Create the 2 view windows
     vtkRenderWindowInteractor * usInteractor = ui->usImageWindow->GetInteractor();
@@ -59,6 +64,9 @@ VertebraRegistrationWidget::VertebraRegistrationWidget(QWidget *parent) :
     m_ItktovtkConverter = IbisItkVtkConverter::New();
 
     m_ImageObjectId = SceneManager::InvalidId;
+
+    m_targetVolume = 0;
+    m_targetVolumeId = SceneManager::InvalidId;
 
     setWindowTitle( "Vertebra Registration" );
 //    UpdateUi();
@@ -144,28 +152,78 @@ void VertebraRegistrationWidget::on_startButton_clicked()
 
 void VertebraRegistrationWidget::on_addFrameButton_clicked()
 {
-    QDebugStream qout(std::cout,  ui->debugTextBrowser);
+//    QDebugStream qout(std::cout,  ui->debugTextBrowser);
+
+    /*
+    UsProbeObject * probe = m_pluginInterface->GetCurrentUsProbe();
+
+    unsigned int count = 0;
+    vtkImageData * bufferImage = 0;
+    if (probe)
+    {
+        while(count < m_maximumFrameQueueSize)
+        {
+            bufferImage = probe->GetVideoOutput();
+
+            IbisItkFloat3ImageType::Pointer itkImage = IbisItkFloat3ImageType::New();
+            m_ItktovtkConverter->ConvertVtkImageToItkImage(itkImage, bufferImage, vtkMatrix4x4::New());
+
+            m_boneFilter->SetInput(itkImage);
+            m_boneFilter->Update();
+
+            IbisItkFloat3ImageType::Pointer itkResultImage = m_boneFilter->GetOutput();
+
+            vtkImageData * im = m_ItktovtkConverter->ConvertItkImageToVtkImage( itkResultImage, 0 );
+
+            IbisItkFloat3ImageType::Pointer itkConvertedImage = IbisItkFloat3ImageType::New();
+            m_ItktovtkConverter->ConvertVtkImageToItkImage(itkConvertedImage, im, vtkMatrix4x4::New());
+
+            this->AddImageToQueue(itkConvertedImage);
+            count++;
+            std::cout << "Frame: " << count << ": " << bufferImage << " == " << probe->GetVideoOutput() << std::endl;
+
+        }
+    }
+    //*/
 
 
-    itk::TimeProbe clock;
+//    for (int i = 0; i < m_maximumFrameQueueSize; ++i) {
+//       IbisItkFloat3ImageType::Pointer image = this->GetImageFromQueue();
+//       std::cout << image << std::endl;
+//       std::cout << " ------------------------------------------------------ \n";
 
-    clock.Start();
 
-    this->CreateVolumeFromSlices(1);
+//       ImageObject *imobj = ImageObject::New();
+//       imobj->SetItkImage(image);
+//       QString name = QString::fromStdString( "Image " + std::to_string(i) );
+//       imobj->SetName(name);
+//       imobj->Modified();
+//       m_pluginInterface->GetSceneManager()->AddObject(imobj);
+//       m_pluginInterface->GetSceneManager()->SetReferenceDataObject(imobj);
 
-    clock.Stop();
+//    }
 
-    std::cout << "Volume size: " << m_sparseVolume->GetLargestPossibleRegion().GetSize() << std::endl;
-    std::cout << "Time: " << clock.GetMean() << std::endl;
+//    this->CreateVolumeFromSlices(1);
 
-//    volume->FillBuffer(1);
-    ImageObject *imobj = ImageObject::New();
-    imobj->SetItkImage(m_sparseVolume);
-    imobj->SetName("Volume");
-    imobj->Modified();
-    m_pluginInterface->GetSceneManager()->AddObject(imobj);
-    m_pluginInterface->GetSceneManager()->SetReferenceDataObject(imobj);
-//    imobj->Delete();
+
+//    itk::TimeProbe clock;
+
+//    clock.Start();
+
+//    this->CreateVolumeFromSlices(1);
+
+//    clock.Stop();
+
+//    std::cout << "Volume size: " << m_sparseVolume->GetLargestPossibleRegion().GetSize() << std::endl;
+//    std::cout << "Time: " << clock.GetMean() << std::endl;
+
+//    ImageObject *imobj = ImageObject::New();
+//    imobj->SetItkImage(m_sparseVolume);
+//    imobj->SetName("Volume");
+//    imobj->Modified();
+//    m_pluginInterface->GetSceneManager()->AddObject(imobj);
+//    m_pluginInterface->GetSceneManager()->SetReferenceDataObject(imobj);
+
 
 }
 
@@ -173,40 +231,26 @@ void VertebraRegistrationWidget::on_addFrameButton_clicked()
 
 void VertebraRegistrationWidget::CreateVolumeFromSlices(float spacingFactor)
 {
+
     IbisItkFloat3ImageType::PointType minPoint;
     IbisItkFloat3ImageType::PointType maxPoint;
     minPoint.Fill(itk::NumericTraits<IbisItkFloat3ImageType::PixelType>::max());
     maxPoint.Fill(itk::NumericTraits<IbisItkFloat3ImageType::PixelType>::NonpositiveMin());
 
-    if( m_application )
-    {
-        SceneManager * sm = m_pluginInterface->GetSceneManager();
-        const SceneManager::ObjectList & allObjects = sm->GetAllObjects();
-        for( int i = 0; i < allObjects.size(); ++i )
-        {
-            SceneObject * current = allObjects[i];
-            if( current != sm->GetSceneRoot() && current->IsListable() )
-            {
-                if( current->IsA("ImageObject") )
-                {
-                    ImageObject *imobj = ImageObject::SafeDownCast( current );
-                    IbisItkFloat3ImageType::Pointer itkImage = IbisItkFloat3ImageType::New();
-                    itkImage = imobj->GetItkImage();
+    std::cout << "Number of slices for reconstruction : " << m_inputImageList.size() << std::endl;
 
-                    m_inputImageList.push_back( itkImage );
-
-                    this->getMinimumMaximumVolumeExtent(itkImage, minPoint, maxPoint);
-
-                }
-            }
-        }
+    std::vector< itk::SmartPointer<IbisItkFloat3ImageType> > inputImageVector;
+    unsigned int N = m_inputImageList.size();
+    for (int i = 0; i < N; ++i) {
+        inputImageVector.push_back( this->GetImageFromQueue() );
+        this->getMinimumMaximumVolumeExtent(inputImageVector[i], minPoint, maxPoint);
     }
 
     IbisItkFloat3ImageType::Pointer volume = IbisItkFloat3ImageType::New();
     IbisItkFloat3ImageType::SpacingType spacing;
 
     if (spacingFactor == 0)
-        spacing = m_inputImageList[0]->GetSpacing();
+        spacing = inputImageVector[0]->GetSpacing();
     else
         spacing.Fill(spacingFactor);
     volume->SetSpacing(spacing);
@@ -228,9 +272,9 @@ void VertebraRegistrationWidget::CreateVolumeFromSlices(float spacingFactor)
     IbisItkFloat3ImageType::IndexType volumeIndex;
     IbisItkFloat3ImageType::PixelType voxel;
 
-    for (int i = 0; i < m_inputImageList.size(); ++i) {
+    for (int i = 0; i < inputImageVector.size(); ++i) {
         IbisItkFloat3ImageType::Pointer image;
-        image = m_inputImageList[i];
+        image = inputImageVector[i];
 
         itk::ImageRegionIterator<IbisItkFloat3ImageType> itkIterator(image, image->GetLargestPossibleRegion());
         itkIterator.GoToBegin();
@@ -248,7 +292,6 @@ void VertebraRegistrationWidget::CreateVolumeFromSlices(float spacingFactor)
                 {
                     voxel = image->GetPixel(index);
                     volume->SetPixel(volumeIndex, voxel);
-
                 }
             }
 
@@ -256,7 +299,9 @@ void VertebraRegistrationWidget::CreateVolumeFromSlices(float spacingFactor)
         }
     }
 
+    std::cout << "Size : " << size << std::endl;
     m_sparseVolume = volume;
+
 //    this->m_sparseMask = mask;
 }
 
@@ -303,15 +348,17 @@ void VertebraRegistrationWidget::getMinimumMaximumVolumeExtent(IbisItkFloat3Imag
 }
 
 
-vtkImageData * VertebraRegistrationWidget::GetVtkBoneSurface(vtkImageData * inputVtkImage)
+vtkImageData * VertebraRegistrationWidget::GetVtkBoneSurface(vtkImageData * inputVtkImage, vtkMatrix4x4 * transformMatrix)
 {
     IbisItkFloat3ImageType::Pointer itkImage = IbisItkFloat3ImageType::New();
-    m_ItktovtkConverter->ConvertVtkImageToItkImage(itkImage, inputVtkImage, vtkMatrix4x4::New());
+    m_ItktovtkConverter->ConvertVtkImageToItkImage(itkImage, inputVtkImage, transformMatrix);
 
     m_boneFilter->SetInput(itkImage);
     m_boneFilter->Update();
 
     IbisItkFloat3ImageType::Pointer itkResultImage = m_boneFilter->GetOutput();
+
+    this->AddImageToQueue(itkResultImage);
 
     return m_ItktovtkConverter->ConvertItkImageToVtkImage( itkResultImage, 0 );
 }
@@ -353,39 +400,44 @@ void VertebraRegistrationWidget::on_startButton_clicked()
     }
 
 //    m_pluginInterface->getGPURegistrationWidget()->SetDebugOn();
+    m_pluginInterface->getGPURegistrationWidget()->SetUseMask( true );
     m_pluginInterface->getGPURegistrationWidget()->runRegistration();
     resultTransform = m_pluginInterface->getGPURegistrationWidget()->GetResultTransform();
-
-    resultTransform->Print(std::cout);
+//    resultTransform->Inverse();
+//    resultTransform->Print(std::cout);
+    sourceImageObject->SetLocalTransform(resultTransform);
+    sourceImageObject->Modified();
 
 }
 
-//void VertebraRegistrationWidget::on_startButton_clicked()
-//{
-//    auto start_timer = std::chrono::high_resolution_clock::now();
-//    std::chrono::duration<double> elapsed;
 
-//    IbisItkFloat3ImageType::Pointer itkImage = IbisItkFloat3ImageType::New();
-//    m_ItktovtkConverter->ConvertVtkImageToItkImage(itkImage, ui->usImageWindow->cachedImage(), vtkMatrix4x4::New());
+/*
+void VertebraRegistrationWidget::on_startButton_clicked()
+{
+    auto start_timer = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> elapsed;
 
-//    m_boneFilter->SetInput(itkImage);
-//    m_boneFilter->Update();
+    IbisItkFloat3ImageType::Pointer itkImage = IbisItkFloat3ImageType::New();
+    m_ItktovtkConverter->ConvertVtkImageToItkImage(itkImage, ui->usImageWindow->cachedImage(), vtkMatrix4x4::New());
 
-//    IbisItkFloat3ImageType::Pointer itkResultImage = m_boneFilter->GetOutput();
+    m_boneFilter->SetInput(itkImage);
+    m_boneFilter->Update();
 
-//    vtkImageData * im = m_ItktovtkConverter->ConvertItkImageToVtkImage( itkResultImage, 0 );
+    IbisItkFloat3ImageType::Pointer itkResultImage = m_boneFilter->GetOutput();
 
-//    IbisItkFloat3ImageType::Pointer itkConvertedImage = IbisItkFloat3ImageType::New();
-//    m_ItktovtkConverter->ConvertVtkImageToItkImage(itkConvertedImage, im, vtkMatrix4x4::New());
+    vtkImageData * im = m_ItktovtkConverter->ConvertItkImageToVtkImage( itkResultImage, 0 );
+
+    IbisItkFloat3ImageType::Pointer itkConvertedImage = IbisItkFloat3ImageType::New();
+    m_ItktovtkConverter->ConvertVtkImageToItkImage(itkConvertedImage, im, vtkMatrix4x4::New());
 
 
-//    elapsed = std::chrono::high_resolution_clock::now() - start_timer;
-//    std::cout << "Filter implementation time: " << elapsed.count() << " s\n";
+    elapsed = std::chrono::high_resolution_clock::now() - start_timer;
+    std::cout << "Filter implementation time: " << elapsed.count() << " s\n";
 
-//    this->AddImageToScene<IbisItkFloat3ImageType>(itkResultImage, "Bone Image");
-//    this->AddImageToScene<IbisItkFloat3ImageType>(itkConvertedImage, "Converted Image");
-//}
-
+    this->AddImageToScene<IbisItkFloat3ImageType>(itkResultImage, "Bone Image");
+    this->AddImageToScene<IbisItkFloat3ImageType>(itkConvertedImage, "Converted Image");
+}
+//*/
 
 
 template <typename TInputImage>
@@ -394,14 +446,7 @@ void VertebraRegistrationWidget::UpdateItkMask(TInputImage &)
 
 }
 
-void VertebraRegistrationWidget::UpdateItkImage(itk::SmartPointer<IbisItkFloat3ImageType> itkImage, int objectId)
-{
-    // not working for now
-    ImageObject *imageObject = ImageObject::SafeDownCast(m_pluginInterface->GetSceneManager()->GetObjectByID(objectId));
-    imageObject->SetItkImage(itkImage);
-    imageObject->Modified();
-    m_pluginInterface->GetSceneManager()->Modified();
-}
+
 
 template <typename TInputImage>
 void VertebraRegistrationWidget::AddImageToScene(TInputImage * itkImage, QString name)
@@ -454,9 +499,9 @@ void VertebraRegistrationWidget::on_debugCheckBox_stateChanged(int value)
         m_debug = true;
 }
 
-void VertebraRegistrationWidget::on_alphaSpinBox_valueChanged(double value)
+void VertebraRegistrationWidget::on_numberOfFramesSpinBox_valueChanged(int value)
 {
-    m_alphaObjectness = value;
+    m_maximumFrameQueueSize = value;
 }
 
 void VertebraRegistrationWidget::on_betaSpinBox_valueChanged(double value)
@@ -508,6 +553,8 @@ void VertebraRegistrationWidget::UpdateUi()
         }
 
 
+
+
     }
 
     // Render graphic windows
@@ -556,27 +603,26 @@ void VertebraRegistrationWidget::UpdateInputs()
 {
     Q_ASSERT( m_pluginInterface );
 
-    ImageObject * im = m_pluginInterface->GetCurrentVolume();
-    if( im )
-    {
-        m_reslice->SetInputData(im->GetImage() );
-        m_reslice->SetLookupTable( im->GetLut() );
-    }
-    else
-    {
-        m_reslice->SetInputData( 0 );
-    }
+//    ImageObject * im = m_pluginInterface->GetCurrentVolume();
+//    if( im )
+//    {
+//        m_reslice->SetInputData(im->GetImage() );
+//        m_reslice->SetLookupTable( im->GetLut() );
+//    }
+//    else
+//    {
+//        m_reslice->SetInputData( 0 );
+//    }
 
-//    ImageObject * im2 = m_pluginInterface->GetAddedVolume();
 
     // validate us acquisition
-    USAcquisitionObject * acq = m_pluginInterface->GetCurrentAcquisition();
-    if( acq )
-    {
-        m_imageMask->SetMaskInputData( acq->GetMask() ); // ok so this about using mask function?
-        m_reslice->SetOutputExtent(0, acq->GetSliceWidth(), 0, acq->GetSliceHeight(), 0, 1);
-        acq->disconnect( this, SLOT(UpdateViews()) );
-    }
+//    USAcquisitionObject * acq = m_pluginInterface->GetCurrentAcquisition();
+//    if( acq )
+//    {
+//        m_imageMask->SetMaskInputData( acq->GetMask() ); // ok so this about using mask function?
+//        m_reslice->SetOutputExtent(0, acq->GetSliceWidth(), 0, acq->GetSliceHeight(), 0, 1);
+//        acq->disconnect( this, SLOT(UpdateViews()) );
+//    }
 
     // Validate live video source
     vtkTransform * usTransform = 0; // probe transform concatenated with calibration transform
@@ -586,45 +632,37 @@ void VertebraRegistrationWidget::UpdateInputs()
     if( probe )
         probe->disconnect( this, SLOT(UpdateViews()) );
 
+    probe->SetUseMask(true);
+
     if( m_pluginInterface->IsLive() )
     {
         Q_ASSERT( probe );
         connect( probe, SIGNAL(Modified()), this, SLOT(UpdateViews()) );
+        connect( probe, SIGNAL(Modified()), this, SLOT(CollectImages()));
         usTransform = probe->GetWorldTransform();
         m_usActor->VisibilityOn();
         m_usActor->GetMapper()->SetInputConnection( probe->GetVideoOutputPort() );
         m_usSlice->GetMapper()->SetInputConnection( probe->GetVideoOutputPort() );
     }
-    else if( acq )
-    {
-        connect( acq, SIGNAL( Modified() ), SLOT( UpdateViews() ) );
-        usTransform = acq->GetTransform();
-        m_usActor->SetVisibility( acq->GetNumberOfSlices()>0 ? 1 : 0 );
-        m_usActor->GetMapper()->SetInputConnection( acq->GetUnmaskedOutputPort() );
-        m_usSlice->GetMapper()->SetInputConnection( acq->GetUnmaskedOutputPort() );
-    }
+//    else if( acq )
+//    {
+//        connect( acq, SIGNAL( Modified() ), SLOT( UpdateViews() ) );
+//        usTransform = acq->GetTransform();
+//        m_usActor->SetVisibility( acq->GetNumberOfSlices()>0 ? 1 : 0 );
+//        m_usActor->GetMapper()->SetInputConnection( acq->GetUnmaskedOutputPort() );
+//        m_usSlice->GetMapper()->SetInputConnection( acq->GetUnmaskedOutputPort() );
+//    }
 
     // Compute slicing transform
     vtkSmartPointer<vtkTransform> concat = vtkSmartPointer<vtkTransform>::New();
     concat->Identity();
-    if( im )
-        concat->SetInput( im->GetWorldTransform()->GetLinearInverse() );
+//    if( im )
+//        concat->SetInput( im->GetWorldTransform()->GetLinearInverse() );
     if( usTransform )
     {
         concat->Concatenate( usTransform );
     }
     m_reslice->SetResliceTransform( concat );
-
-    // Compute slice transform for the second MRI
-    vtkSmartPointer<vtkTransform> concat2 = vtkSmartPointer<vtkTransform>::New();
-    concat2->Identity();
-//    if( im2 )
-//        concat2->SetInput( im2->GetWorldTransform()->GetLinearInverse() );
-    if( usTransform)
-    {
-        concat2->Concatenate( usTransform );
-    }
-//    m_reslice2->SetResliceTransform( concat2 );
 
     this->SetDefaultViews();
 
@@ -634,13 +672,57 @@ void VertebraRegistrationWidget::UpdateInputs()
 
 void VertebraRegistrationWidget::UpdateViews()
 {
-
-//    m_usActor->SetInputData( this->GetVtkBoneSurface(ui->usImageWindow->cachedImage()) );
-//    ui->usImageWindow->GetInteractor()->Render();
-
     ui->usImageWindow->update();
     UpdateStatus();
+}
 
+void VertebraRegistrationWidget::CollectImages()
+{
+    Q_ASSERT( m_pluginInterface );
+    if ((m_pluginInterface) && (!m_isProcessing))
+    {
+        UsProbeObject * probe = m_pluginInterface->GetCurrentUsProbe();
+        if ( m_pluginInterface->IsLive() )
+        {
+            if (probe->IsOk())
+            {
+                m_isProcessing = true;
+
+    //            this->GetVtkBoneSurface(probe->GetVideoOutput(), probe->GetLocalTransform()->GetMatrix() ) ;
+                vtkImageData * vtkimage =  probe->GetVideoOutput(); //this->GetVtkBoneSurface(probe->GetVideoOutput());
+                IbisItkFloat3ImageType::Pointer itkimage = IbisItkFloat3ImageType::New();
+                vtkMatrix4x4 * transformMatrix = probe->GetLocalTransform()->GetMatrix();
+                m_ItktovtkConverter->ConvertVtkImageToItkImage( itkimage, vtkimage, transformMatrix);
+
+                //transformMatrix->Print(std::cout);
+                //std::cout << "itkimage matrix\n" << itkimage->GetDirection() << std::endl;
+
+                m_boneFilter->SetInput(itkimage);
+                m_boneFilter->Update();
+
+                IbisItkFloat3ImageType::Pointer itkResultImage = m_boneFilter->GetOutput();
+
+                //std::cout << "Result matrix\n" << itkResultImage->GetDirection() << std::endl;
+
+                typedef itk::ImageDuplicator<IbisItkFloat3ImageType> DuplicatorType;
+                DuplicatorType::Pointer duplicator = DuplicatorType::New();
+                duplicator->SetInputImage(itkimage);
+                duplicator->Update();
+
+                //std::cout << "Duplicator matrix\n" << duplicator->GetOutput()->GetDirection() << std::endl;
+
+                this->AddImageToQueue( duplicator->GetOutput() );
+
+                m_isProcessing = false;
+
+            }
+            else
+            {
+                this->ClearQueue();
+            }
+        }
+
+    }
 }
 
 void VertebraRegistrationWidget::UpdateStatus()
@@ -723,6 +805,29 @@ void VertebraRegistrationWidget::on_liveCheckBox_toggled(bool checked)
     UpdateInputs();
 }
 
+void VertebraRegistrationWidget::on_targetImageComboBox_currentIndexChanged(int value)
+{
+    int targetObjectId = ui->targetImageComboBox->itemData( value ).toInt();
+    m_targetVolumeLoaded = (targetObjectId != SceneManager::InvalidId) && (ui->targetImageComboBox->count() > 0);
+
+    if (m_targetVolumeLoaded)
+    {
+        SceneManager * sm = m_pluginInterface->GetSceneManager();
+
+        ImageObject * targetImageObject = ImageObject::SafeDownCast( sm->GetObjectByID( targetObjectId ) );
+        Q_ASSERT_X( targetImageObject, "VertebraRegistrationWidget::on_targetImageComboBox_currentIndexChanged()", "Invalid target object" );
+
+        m_targetVolume = targetImageObject->GetItkImage();
+        m_targetVolumeId = targetObjectId;
+
+        std::cout << m_targetVolume->GetDirection();
+
+    }
+    else{
+        m_targetVolumeId = SceneManager::InvalidId;
+    }
+}
+
 
 void VertebraRegistrationWidget::MakeCrossLinesToShowProbeIsOutOfView()
 {
@@ -765,4 +870,109 @@ void VertebraRegistrationWidget::MakeCrossLinesToShowProbeIsOutOfView()
     m_usLine2Actor->SetVisibility(0);
     m_usRenderer->AddViewProp( m_usLine2Actor );
 
+}
+
+void VertebraRegistrationWidget::AddImageToQueue( itk::SmartPointer<IbisItkFloat3ImageType> image )
+{
+    if (!m_queueSemaphore)
+    {
+//        m_queueSemaphore = true;
+
+        m_inputImageList.push( image );
+        if (m_inputImageList.size() > m_maximumFrameQueueSize)
+        {
+            m_inputImageList.pop();
+//            m_queueSemaphore = false;
+
+            m_isProcessing = true;
+
+            if (m_targetVolumeLoaded)
+            {
+                std::cout << "Creating volume" << std::endl;
+                this->CreateVolumeFromSlices(1);
+
+                vtkTransform * resultTransform;
+
+                m_pluginInterface->getGPURegistrationWidget()->SetItkSourceImage( m_sparseVolume );
+                m_pluginInterface->getGPURegistrationWidget()->SetItkTargetImage( m_targetVolume );
+    //            m_pluginInterface->getGPURegistrationWidget()->SetSourceVtkTransform( vtkTransform::New() );
+    //            m_pluginInterface->getGPURegistrationWidget()->SetTargetVtkTransform(  );
+
+                SceneObject * transformObject = m_pluginInterface->GetSceneManager()->GetObjectByID( m_targetVolumeId );
+                if( transformObject->GetParent() )
+                {
+                    vtkTransform * parentVtktransform = vtkTransform::SafeDownCast( transformObject->GetParent()->GetWorldTransform() );
+                    Q_ASSERT_X( parentVtktransform, "VertebraRegistrationWidget::AddImageToQueue()", "Invalid transform" );
+                    m_pluginInterface->getGPURegistrationWidget()->SetParentVtkTransform(parentVtktransform);
+                }
+
+                m_pluginInterface->getGPURegistrationWidget()->SetUseMask( true );
+                m_pluginInterface->getGPURegistrationWidget()->runRegistration();
+
+                std::cout << "Performing registration..." << std::endl;
+                resultTransform = m_pluginInterface->getGPURegistrationWidget()->GetResultTransform();
+                std::cout << "Done." << std::endl;
+                resultTransform->Print(std::cout);
+
+//                IbisItkFloat3ImageType::DirectionType direction;
+
+//                IbisItkFloat3ImageType::PointType origin;
+//                for (int i = 0; i < 3; ++i) {
+//                    origin[i] = resultTransform->GetMatrix()->GetElement(i,3);
+//                    for (int j = 0; j < 3; ++j) {
+//                        direction[i][j] = resultTransform->GetMatrix()->GetElement(i,j);
+//                    }
+//                }
+
+                std::cout << "Direction :" << m_sparseVolume->GetDirection() << std::endl;
+                std::cout << "Origin :" << m_sparseVolume->GetOrigin() << std::endl;
+
+
+                std::cout << "Adding volume to scene" << std::endl;
+                ImageObject *imobj = ImageObject::New();
+                imobj->SetItkImage(m_sparseVolume);
+                imobj->SetName("Volume");
+                m_pluginInterface->GetSceneManager()->AddObject(imobj);
+                m_pluginInterface->GetSceneManager()->SetReferenceDataObject(imobj);
+                imobj->SetLocalTransform( resultTransform );
+                imobj->Modified();
+
+
+
+
+            }
+
+            m_isProcessing = false;
+        }
+    }
+}
+
+itk::SmartPointer<IbisItkFloat3ImageType> VertebraRegistrationWidget::GetImageFromQueue()
+{
+    if (!m_queueSemaphore)
+    {
+        m_queueSemaphore = true;
+        if (m_inputImageList.size() > 0)
+        {
+            itk::SmartPointer<IbisItkFloat3ImageType> itkimage = m_inputImageList.front();
+            m_inputImageList.pop();
+            m_queueSemaphore = false;
+            return itkimage;
+        }
+        m_queueSemaphore = false;
+    }
+    return 0;
+
+}
+
+void VertebraRegistrationWidget::ClearQueue()
+{
+    if (!m_queueSemaphore)
+    {
+        m_queueSemaphore = true;
+        while( !m_inputImageList.empty() )
+            m_inputImageList.pop();
+
+       m_queueSemaphore = false;
+    }
 }

@@ -62,6 +62,7 @@ public:
     void SetParentVtkTransform( vtkTransform * transform ) { this->m_parentVtkTransform = transform; }
     void SetDebugOn() { m_debug = true; }
     void SetDebugOff() { m_debug = false; }
+    void SetUseMask(bool usemask) { this->m_useMask = usemask; }
 
     double GetPercentile() { return m_percentile; }
     double GetInitialSigma() { return m_initialSigma; }
@@ -69,6 +70,7 @@ public:
     unsigned int GetOrientationSelectivity() { return m_orientationSelectivity; }
     unsigned int GetPopulationSize() { return m_populationSize; }
     vtkTransform * GetResultTransform() { return m_resultTransform; }
+    bool GetUseMask() { return m_useMask; }
 
 private:
 
@@ -77,6 +79,7 @@ private:
 
     bool m_OptimizationRunning;
     bool m_debug;
+    bool m_useMask;
 
     IbisItkFloat3ImageType::Pointer m_itkSourceImage;
     IbisItkFloat3ImageType::Pointer m_itkTargetImage;

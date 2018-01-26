@@ -82,6 +82,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "itkNumericTraits.h"
 #include "itkTimeProbe.h"
 
+#include "itkImageDuplicator.h"
+
 class Application;
 class VertebraRegistrationPluginInterface;
 class USAcquisitionObject;
@@ -115,6 +117,7 @@ public:
 
     void SetApplication( Application * app );
     void SetPluginInterface( VertebraRegistrationPluginInterface * interf );
+    void SetMaximumFrameQueueSize(unsigned int maxsize) { this->m_maximumFrameQueueSize = maxsize; }
 
     static void SetDefaultView( vtkSmartPointer<vtkImageSlice>, vtkSmartPointer<vtkRenderer> );
 
@@ -149,7 +152,7 @@ private:
 //    void ThresholdImage(itk::SmartPointer<IbisItkFloat2ImageType>, itk::SmartPointer<IbisItkUnsignedChar2ImageType> &, double);
 //    void ThresholdByDistanceMap(itk::SmartPointer<IbisItkFloat3ImageType> &, itk::SmartPointer<IbisItkUnsignedChar2ImageType>, double);
 
-    vtkImageData * GetVtkBoneSurface(vtkImageData *);
+    vtkImageData * GetVtkBoneSurface(vtkImageData *, vtkMatrix4x4 *);
 
     void CreateVolumeFromSlices(float spacingFactor=0);
     void getMinimumMaximumVolumeExtent(IbisItkFloat3ImageType::Pointer,
@@ -162,6 +165,9 @@ private:
 //    void applyGaborFilter(IbisItkFloat2ImageType::Pointer, IbisItkFloat2ImageType::Pointer);
 //    void CreateKernel(IbisItkFloat3ImageType::Pointer, unsigned int);
 
+    void AddImageToQueue( itk::SmartPointer<IbisItkFloat3ImageType> );
+    itk::SmartPointer<IbisItkFloat3ImageType> GetImageFromQueue();
+    void ClearQueue();
 
     Ui::VertebraRegistrationWidget * ui;
     Application * m_application;
@@ -171,6 +177,11 @@ private:
     double m_alphaObjectness;
     double m_betaObjectness;
     double m_gammaObjectness;
+
+    bool m_isProcessing;
+    bool m_targetVolumeLoaded;
+    int m_targetVolumeId;
+    bool m_queueSemaphore;
 
     VertebraRegistrationPluginInterface * m_pluginInterface;
 
@@ -193,8 +204,14 @@ private:
     IbisItkVtkConverter * m_ItktovtkConverter;
     int m_ImageObjectId;
 
-    std::vector< itk::SmartPointer<IbisItkFloat3ImageType> > m_inputImageList;
+    std::queue< itk::SmartPointer<IbisItkFloat3ImageType> > m_inputImageList;
+    unsigned int m_maximumFrameQueueSize;
+
     itk::SmartPointer<IbisItkFloat3ImageType> m_sparseVolume;
+    itk::SmartPointer<IbisItkFloat3ImageType> m_targetVolume;
+//    IbisItkFloat3ImageType::PointType m_minPoint;
+//    IbisItkFloat3ImageType::PointType m_maxPoint;
+
 
 
 protected:
@@ -209,6 +226,8 @@ private slots:
     void UpdateViews();
     void UpdateStatus();
 
+    void CollectImages();
+
     void on_liveCheckBox_toggled(bool checked);
 
 private slots:
@@ -217,9 +236,10 @@ private slots:
     void on_startButton_clicked();
     void on_refreshButton_clicked();
     void on_debugCheckBox_stateChanged(int);
-    void on_alphaSpinBox_valueChanged(double);
+    void on_numberOfFramesSpinBox_valueChanged(int);
     void on_betaSpinBox_valueChanged(double);
     void on_gammaSpinBox_valueChanged(double);
+    void on_targetImageComboBox_currentIndexChanged(int);
 
 };
 

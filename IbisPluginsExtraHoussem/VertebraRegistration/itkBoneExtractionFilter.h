@@ -11,7 +11,7 @@
 #include "itkBinaryThresholdImageFilter.h"
 #include "itkSignedMaurerDistanceMapImageFilter.h"
 #include "itkBresenhamLine.h"
-
+#include "itkChangeInformationImageFilter.h"
 
 
 namespace itk
@@ -64,6 +64,7 @@ protected:
     void RayCast(ImageType *);
     void GetMaxLinePixels(ImageType *, IndexType2D, IndexType2D, IndexType2D &);
     void ThresholdByDistanceMap(ImageType *, PixelType );
+    void CopyInputImageInformations( ImageType * );
 
 private:
 

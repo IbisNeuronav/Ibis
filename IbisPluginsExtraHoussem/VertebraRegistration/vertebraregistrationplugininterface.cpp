@@ -148,7 +148,10 @@ void VertebraRegistrationPluginInterface::ValidateCurrentUsProbe()
         QList<UsProbeObject*> allProbes;
         man->GetAllUsProbeObjects( allProbes );
         if( allProbes.size() > 0 )
+        {
             m_currentProbeObjectId = allProbes[0]->GetObjectID();
+        }
+
 
     }
 

@@ -131,6 +131,7 @@ public:
 GPURigidRegistration::GPURigidRegistration( ) :
     m_OptimizationRunning(false),
     m_debug(false),
+    m_useMask(false),
     m_percentile(0.8),
     m_initialSigma(1.0),
     m_gradientScale(1.0),
@@ -139,9 +140,10 @@ GPURigidRegistration::GPURigidRegistration( ) :
     m_populationSize(0),
     m_parentVtkTransform(0),
     m_sourceVtkTransform(0),
-    m_targetVtkTransform(0)
+    m_targetVtkTransform(0),
+    m_resultTransform(0)
 {
-    m_resultTransform = 0;
+
 }
 
 GPURigidRegistration::~GPURigidRegistration()
@@ -276,7 +278,8 @@ void GPURigidRegistration::runRegistration()
     metric->SetNumberOfPixels( numberOfPixels );
     metric->SetPercentile( percentile );
     metric->SetN( orientationSelectivity );
-    metric->SetComputeMask( false ); // ui->computeMaskCheckBox->isChecked()  );
+    metric->SetComputeMask( m_useMask );
+    metric->SetMaskThreshold( 0.5 );
     metric->SetGradientScale( gradientScale );
     GPUCostFunctionPointer costFunction = GPUCostFunctionType::New();
     costFunction->SetGPUMetric( metric );
