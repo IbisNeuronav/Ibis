@@ -374,6 +374,14 @@ int SceneObject::GetObjectListableIndex()
     return 0; // scene root is unique
 }
 
+void SceneObject::SetListable( bool l )
+{
+    if( !this->IsObjectInScene( ) )
+        this->ObjectListable = l;
+    else
+        vtkErrorMacro(<< "Can't set listability for an object already in scene." );
+}
+
 bool SceneObject::DescendsFrom( SceneObject * obj )
 {
     if( obj == this )
