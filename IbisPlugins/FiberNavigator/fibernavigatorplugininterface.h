@@ -17,7 +17,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include <QFileDialog>
 #include <QList>
-#include <QObject>
 #include <QtPlugin>
 #include <QString>
 #include <QtGui>
@@ -53,7 +52,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 typedef QList< SceneObject* > ObjectList;
 
-class FiberNavigatorPluginInterface : public QObject, public ToolPluginInterface
+class FiberNavigatorPluginInterface : public ToolPluginInterface
 {
 
     Q_OBJECT

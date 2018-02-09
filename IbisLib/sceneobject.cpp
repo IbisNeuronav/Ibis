@@ -204,7 +204,7 @@ void SceneObject::WorldTransformChanged()
     emit WorldTransformChangedSignal();
     for( int i = 0; i < GetNumberOfChildren(); ++i )
         this->Children[i]->WorldTransformChanged();
-    emit Modified();
+    emit ObjectModified();
 }
 
 void SceneObject::StartModifyingTransform()
@@ -233,7 +233,7 @@ void SceneObject::Setup( View * view )
 	view->Register( this );
 	Views.push_back( view );
 
-    connect( this, SIGNAL( Modified() ), view, SLOT(NotifyNeedRender()) );
+    connect( this, SIGNAL( ObjectModified() ), view, SLOT(NotifyNeedRender()) );
 }
 
 void SceneObject::Release( View * view )
@@ -245,7 +245,7 @@ void SceneObject::Release( View * view )
 	this->disconnect( view );
 	view->UnRegister( this );
 	this->Views.erase( it );
-    view->Modified();
+    view->NotifyNeedRender();
 }
 
 void SceneObject::ReleaseAllViews()
@@ -374,6 +374,14 @@ int SceneObject::GetObjectListableIndex()
     return 0; // scene root is unique
 }
 
+void SceneObject::SetListable( bool l )
+{
+    if( !this->IsObjectInScene( ) )
+        this->ObjectListable = l;
+    else
+        vtkErrorMacro(<< "Can't set listability for an object already in scene." );
+}
+
 bool SceneObject::DescendsFrom( SceneObject * obj )
 {
     if( obj == this )
@@ -439,7 +447,7 @@ void SceneObject::RemoveFromScene()
 
 void SceneObject::MarkModified()
 {
-    emit Modified();
+    emit ObjectModified();
 }
 
 void SceneObject::SetHiddenWithChildren( bool hide )

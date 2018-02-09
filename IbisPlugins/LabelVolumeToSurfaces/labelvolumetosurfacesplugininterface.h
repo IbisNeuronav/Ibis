@@ -13,11 +13,10 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef __LabelVolumeToSurfacesPluginInterface_h_
 #define __LabelVolumeToSurfacesPluginInterface_h_
 
-#include <QObject>
 #include "generatorplugininterface.h"
 #include "serializer.h"
 
-class LabelVolumeToSurfacesPluginInterface : public QObject, public GeneratorPluginInterface
+class LabelVolumeToSurfacesPluginInterface : public GeneratorPluginInterface
 {
 
     Q_OBJECT

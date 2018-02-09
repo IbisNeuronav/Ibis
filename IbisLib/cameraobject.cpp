@@ -338,7 +338,7 @@ void CameraObject::Setup( View * view )
         if( IsHidden() )
             Hide();
 
-        connect( this, SIGNAL(Modified()), view, SLOT(NotifyNeedRender()) );
+        connect( this, SIGNAL(ObjectModified()), view, SLOT(NotifyNeedRender()) );
     }
 }
 
@@ -364,7 +364,7 @@ void CameraObject::Release( View * view )
             }
             ClearDrawingOneView( view, perView );
             m_perViewElements.erase( it );
-            disconnect( this, SIGNAL(Modified()), view, SLOT(NotifyNeedRender()) );
+            disconnect( this, SIGNAL(ObjectModified()), view, SLOT(NotifyNeedRender()) );
 
             RemoveClient();
         }
@@ -505,7 +505,7 @@ void CameraObject::SetTransparencyCenter( double x, double y )
         elem.cameraImageMapper->SetTransparencyPosition( x, y );
         ++it;
     }
-    emit Modified(); // This can be set dynamically by the system so no ParamsModified
+    emit ObjectModified(); // This can be set dynamically by the system so no ParamsModified
 }
 
 void CameraObject::SetUseTransparency( bool use )
@@ -888,7 +888,7 @@ void CameraObject::ClearDrawing()
 
 void CameraObject::ParamsModifiedSlot()
 {
-    emit Modified();
+    emit ObjectModified();
 }
 
 void CameraObject::VideoUpdatedSlot()
@@ -924,7 +924,7 @@ void CameraObject::VideoUpdatedSlot()
     UpdateVtkCamera();
 
     emit VideoUpdatedSignal();
-    emit Modified();
+    emit ObjectModified();
 }
 
 void CameraObject::ObjectAddedToScene()

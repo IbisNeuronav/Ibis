@@ -32,7 +32,7 @@ public:
     virtual void Write();   
     virtual void SetMatrix(vtkMatrix4x4 *mat);
     
-    void PrintSelf(ostream &os, vtkIndent indent);
+    void PrintSelf(ostream &os, vtkIndent indent) override;
 
 protected:
 

@@ -385,7 +385,7 @@ void VolumeRenderingObject::Setup( View * view )
 
         view->GetRenderer()->AddViewProp( perView.volumeActor );
 
-        connect( this, SIGNAL(Modified()), view, SLOT(NotifyNeedRender()) );
+        connect( this, SIGNAL(ObjectModified()), view, SLOT(NotifyNeedRender()) );
 
         // register to receive mouse interaction event from this view
         view->AddInteractionObject( this, 0.5 );
@@ -440,7 +440,7 @@ void VolumeRenderingObject::Hide()
         ++itView;
     }
     UpdateInteractionWidgetVisibility();
-    emit Modified();
+    emit ObjectModified();
 }
 
 void VolumeRenderingObject::Show()
@@ -455,7 +455,7 @@ void VolumeRenderingObject::Show()
         ++itView;
     }
     UpdateInteractionWidgetVisibility();
-    emit Modified();
+    emit ObjectModified();
 }
 
 #include "vtkVolumePicker.h"
@@ -562,7 +562,7 @@ void VolumeRenderingObject::SetImage( int index, ImageObject * im )
     // Update all mappers with new situation
     UpdateAllMappers();
 
-    emit Modified();
+    emit ObjectModified();
 }
 
 int VolumeRenderingObject::GetNumberOfImageSlots()
@@ -615,7 +615,7 @@ void VolumeRenderingObject::EnableVolume( int index, bool enable )
             perView.volumeMapper->EnableInput( index, enable );
             ++itView;
         }
-        emit Modified();
+        emit ObjectModified();
     }
 }
 
@@ -646,7 +646,7 @@ void VolumeRenderingObject::SetMultFactor( double val )
         perView.volumeMapper->SetMultFactor( m_multFactor );
         ++itView;
     }
-    emit Modified();
+    emit ObjectModified();
 }
 
 void VolumeRenderingObject::SetSamplingDistance( double samplingDistance )
@@ -654,7 +654,7 @@ void VolumeRenderingObject::SetSamplingDistance( double samplingDistance )
     Q_ASSERT( samplingDistance > 0.0 );
     m_samplingDistance = samplingDistance;
     UpdateShaderParams();
-    emit Modified();
+    emit ObjectModified();
 }
 
 void VolumeRenderingObject::SetShowInteractionWidget( bool s )
@@ -751,7 +751,7 @@ void VolumeRenderingObject::SetRayInitShaderType( int typeIndex )
     Q_ASSERT( typeIndex < GetNumberOfRayInitShaderTypes() && typeIndex >= 0 );
     m_initShaderContributionType = typeIndex;
     UpdateAllMappers();
-    emit Modified();
+    emit ObjectModified();
 }
 
 void VolumeRenderingObject::SetRayInitShaderTypeByName( QString name )
@@ -789,7 +789,7 @@ void VolumeRenderingObject::AddRayInitShaderType( QString name, QString code, bo
     newContrib.custom = custom;
     m_initShaders.push_back( newContrib );
     m_initShaderContributionType = m_initShaders.size() - 1;
-    emit Modified();
+    emit ObjectModified();
 }
 
 void VolumeRenderingObject::DuplicateRayInitShaderType()
@@ -822,7 +822,7 @@ void VolumeRenderingObject::DuplicateRayInitShaderType()
         m_initShaderContributionType = newIndex;
     }
 
-    emit Modified();
+    emit ObjectModified();
 }
 
 void VolumeRenderingObject::DeleteRayInitShaderType()
@@ -847,7 +847,7 @@ void VolumeRenderingObject::SetRayInitShaderCode( QString code )
     Q_ASSERT( m_initShaderContributionType >= 0 && m_initShaderContributionType < m_initShaders.size() );
     m_initShaders[ m_initShaderContributionType ].code = code;
     UpdateAllMappers();
-    emit Modified();
+    emit ObjectModified();
 }
 
 int VolumeRenderingObject::GetNumberOfStopConditionShaderTypes()
@@ -884,7 +884,7 @@ void VolumeRenderingObject::SetStopConditionShaderType( int typeIndex )
     Q_ASSERT( typeIndex < GetNumberOfStopConditionShaderTypes() && typeIndex >= 0 );
     m_stopConditionShaderType = typeIndex;
     UpdateAllMappers();
-    emit Modified();
+    emit ObjectModified();
 }
 
 void VolumeRenderingObject::SetStopConditionShaderTypeByName( QString name )
@@ -922,7 +922,7 @@ void VolumeRenderingObject::AddStopConditionShaderType( QString name, QString co
     newContrib.custom = custom;
     m_stopConditionShaders.push_back( newContrib );
     m_stopConditionShaderType = m_stopConditionShaders.size() - 1;
-    emit Modified();
+    emit ObjectModified();
 }
 
 void VolumeRenderingObject::DuplicateStopConditionShaderType()
@@ -955,7 +955,7 @@ void VolumeRenderingObject::DuplicateStopConditionShaderType()
         m_stopConditionShaderType = newIndex;
     }
 
-    emit Modified();
+    emit ObjectModified();
 }
 
 void VolumeRenderingObject::DeleteStopConditionShaderType()
@@ -980,7 +980,7 @@ void VolumeRenderingObject::SetStopConditionShaderCode( QString code )
     Q_ASSERT( m_stopConditionShaderType >= 0 && m_stopConditionShaderType < m_stopConditionShaders.size() );
     m_stopConditionShaders[ m_stopConditionShaderType ].code = code;
     UpdateAllMappers();
-    emit Modified();
+    emit ObjectModified();
 }
 
 int VolumeRenderingObject::GetNumberOfShaderContributionTypes()
@@ -1023,7 +1023,7 @@ void VolumeRenderingObject::AddShaderContributionType( QString shaderName, QStri
     contrib.code = code;
     contrib.name = shaderName;
     m_volumeShaders.push_back( contrib );
-    emit Modified();
+    emit ObjectModified();
 }
 
 void VolumeRenderingObject::DeleteShaderContributionType( int shaderType )
@@ -1038,7 +1038,7 @@ void VolumeRenderingObject::DeleteShaderContributionType( int shaderType )
 
     m_volumeShaders.removeAt( shaderType );
 
-    emit Modified();
+    emit ObjectModified();
 }
 
 QString VolumeRenderingObject::GetUniqueCustomShaderName( QString name )
@@ -1075,7 +1075,7 @@ int VolumeRenderingObject::DuplicateShaderContribType( int typeIndex )
         m_volumeShaders.push_back( contrib );
     }
 
-    emit Modified();
+    emit ObjectModified();
 
     return newIndex;
 }
@@ -1087,7 +1087,7 @@ void VolumeRenderingObject::SetShaderContributionType( int volumeIndex, int type
     m_perImage[ volumeIndex ]->shaderContributionType = typeIndex;
     m_perImage[ volumeIndex ]->shaderContributionTypeName = m_volumeShaders[ typeIndex ].name;
     UpdateAllMappers();
-    emit Modified();
+    emit ObjectModified();
 }
 
 void VolumeRenderingObject::SetShaderContributionTypeByName( int volumeIndex, QString name )
@@ -1130,7 +1130,7 @@ void VolumeRenderingObject::SetCustomShaderCode( int volumeIndex, QString code )
     Q_ASSERT( contributionType < m_volumeShaders.size() );
     m_volumeShaders[ contributionType ].code = code;
     UpdateAllMappers();
-    emit Modified();
+    emit ObjectModified();
 }
 
 void VolumeRenderingObject::SetUse16BitsVolume( int volumeIndex, bool use )
@@ -1138,7 +1138,7 @@ void VolumeRenderingObject::SetUse16BitsVolume( int volumeIndex, bool use )
     Q_ASSERT( (unsigned)volumeIndex < m_perImage.size() );
     m_perImage[ volumeIndex ]->volumeIs16Bits = use;
     UpdateShiftScale( volumeIndex );
-    emit Modified();
+    emit ObjectModified();
 }
 
 bool VolumeRenderingObject::GetUse16BitsVolume( int volumeIndex )
@@ -1158,7 +1158,7 @@ void VolumeRenderingObject::SetUseLinearSampling( int volumeIndex, bool isLinear
         perView.volumeMapper->SetUseLinearSampling( volumeIndex, isLinear );
         ++itView;
     }
-    emit Modified();
+    emit ObjectModified();
 }
 
 bool VolumeRenderingObject::GetUseLinearSampling( int volumeIndex )
@@ -1187,7 +1187,7 @@ void VolumeRenderingObject::SetRenderState( vtkIbisRenderState * state )
 void VolumeRenderingObject::TransferFunctionModifiedSlot()
 {
     // Tell views to re-render
-    emit Modified();
+    emit ObjectModified();
 }
 
 void VolumeRenderingObject::ObjectAddedSlot( int objectId )
@@ -1284,7 +1284,7 @@ void VolumeRenderingObject::UpdateInteractionWidgetVisibility()
         perView.sphereWidget->GetHandleRepresentation()->SetWorldPosition( m_interactionPoint1 );
         ++itView;
     }
-    emit Modified();
+    emit ObjectModified();
 }
 
 void VolumeRenderingObject::UpdateInteractionPointPos()
@@ -1297,7 +1297,7 @@ void VolumeRenderingObject::UpdateInteractionPointPos()
         perView.volumeMapper->SetInteractionPoint2(  m_interactionPoint2 );
         ++itView;
     }
-    emit Modified();
+    emit ObjectModified();
 }
 
 void VolumeRenderingObject::timerEvent( QTimerEvent * e )
@@ -1312,7 +1312,7 @@ void VolumeRenderingObject::timerEvent( QTimerEvent * e )
         perView.volumeMapper->SetTime( t );
         ++itView;
     }
-    emit Modified();
+    emit ObjectModified();
 }
 
 void VolumeRenderingObject::UpdateMapper( PerView & pv )
@@ -1416,7 +1416,7 @@ void VolumeRenderingObject::InternalPostSceneRead()
         m_timerId = startTimer( 0 );
     }
 
-    emit Modified();
+    emit ObjectModified();
 }
 
 void VolumeRenderingObject::SaveCustomShaders()

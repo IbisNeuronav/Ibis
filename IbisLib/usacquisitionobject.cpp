@@ -203,7 +203,7 @@ void USAcquisitionObject::Hide()
         ++it;
     }
 
-    emit Modified();
+    emit ObjectModified();
 }
 
 void USAcquisitionObject::Show()
@@ -219,7 +219,7 @@ void USAcquisitionObject::Show()
                 ShowStaticSlices( perView );
             ++it;
         }
-        emit Modified();
+        emit ObjectModified();
     }
 }
 
@@ -274,7 +274,7 @@ void USAcquisitionObject::UpdatePipeline()
         ++it;
     }
 
-    emit Modified();
+    emit ObjectModified();
 }
 
 void USAcquisitionObject::HideStaticSlices( PerViewElements & perView )
@@ -285,7 +285,7 @@ void USAcquisitionObject::HideStaticSlices( PerViewElements & perView )
         (*it)->VisibilityOff();
         ++it;
     }
-    emit Modified();
+    emit ObjectModified();
 }
 
 void USAcquisitionObject::ShowStaticSlices( PerViewElements & perView )
@@ -296,7 +296,7 @@ void USAcquisitionObject::ShowStaticSlices( PerViewElements & perView )
         (*it)->VisibilityOn();
         ++it;
     }
-    emit Modified();
+    emit ObjectModified();
 }
 
 #include "hardwaremodule.h"
@@ -322,7 +322,7 @@ void USAcquisitionObject::Record()
     // Disable static slices
     this->SetEnableStaticSlices(false);
 
-    emit Modified();
+    emit ObjectModified();
 }
 
 void USAcquisitionObject::Updated()
@@ -334,7 +334,7 @@ void USAcquisitionObject::Updated()
         if( probe->IsOk() )
         {
             m_videoBuffer->AddFrame( probe->GetVideoOutput(), probe->GetUncalibratedWorldTransform()->GetMatrix() );
-            emit Modified();
+            emit ObjectModified();
         }
     }
 }
@@ -366,13 +366,13 @@ void USAcquisitionObject::SetCurrentFrame( int frameIndex )
     m_videoBuffer->SetCurrentFrame( frameIndex );
     m_currentImageTransform->SetMatrix( m_videoBuffer->GetCurrentMatrix() );
     m_sliceTransform->Update();
-    emit Modified();
+    emit ObjectModified();
 }
 
 void USAcquisitionObject::Clear()
 {
     m_videoBuffer->Clear();
-    emit Modified();
+    emit ObjectModified();
 }
 
 QString USAcquisitionObject::GetAcquisitionTypeAsString()
@@ -425,7 +425,7 @@ void USAcquisitionObject::SetCalibrationMatrix( vtkMatrix4x4 * mat )
     matCopy->DeepCopy( mat );
     m_calibrationTransform->SetMatrix( matCopy );
     matCopy->Delete();
-    emit Modified();
+    emit ObjectModified();
 }
 
 vtkTransform * USAcquisitionObject::GetCalibrationTransform()
@@ -1138,7 +1138,7 @@ int USAcquisitionObject::GetCurrentSlice()
 void USAcquisitionObject::SetSliceImageOpacity( double opacity )
 {
     m_sliceProperties->SetOpacity( opacity );
-    emit Modified();
+    emit ObjectModified();
 }
 
 double USAcquisitionObject::GetSliceImageOpacity()
@@ -1152,7 +1152,7 @@ void USAcquisitionObject::SetSliceLutIndex( int index )
     double range[2] = { 0.0, 255.0 };
     QString slicesLutName = Application::GetLookupTableManager()->GetTemplateLookupTableName( m_sliceLutIndex );
     Application::GetLookupTableManager()->CreateLookupTable( slicesLutName, range, m_lut );
-    emit Modified();
+    emit ObjectModified();
 }
 
 void USAcquisitionObject::SetEnableStaticSlices( bool enable )
@@ -1184,7 +1184,7 @@ void USAcquisitionObject::SetEnableStaticSlices( bool enable )
             ++it;
         }
     }
-    emit Modified();
+    emit ObjectModified();
 }
 
 void USAcquisitionObject::SetNumberOfStaticSlices( int nb )
@@ -1194,13 +1194,13 @@ void USAcquisitionObject::SetNumberOfStaticSlices( int nb )
     ReleaseAllStaticSlicesInAllViews();
     m_staticSlicesDataNeedUpdate = true;
     SetupAllStaticSlicesInAllViews();
-    emit Modified();
+    emit ObjectModified();
 }
 
 void USAcquisitionObject::SetStaticSlicesOpacity( double opacity )
 {
     m_staticSlicesProperties->SetOpacity( opacity );
-    emit Modified();
+    emit ObjectModified();
 }
 
 double USAcquisitionObject::GetStaticSlicesOpacity()
@@ -1221,6 +1221,6 @@ void USAcquisitionObject::SetStaticSlicesLutIndex( int index )
         m_staticSlicesData[i].mapToColors->SetLookupTable( staticLut );
     }
     staticLut->Delete();
-    emit Modified();
+    emit ObjectModified();
 }
 

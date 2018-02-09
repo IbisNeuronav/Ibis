@@ -80,7 +80,7 @@ void FrameRateTesterPluginInterface::SetRunning( bool run )
         // Reenable rendering everywhere
         SetRenderingEnabled( true );
     }
-    emit Modified();
+    emit PluginModified();
 }
 
 bool FrameRateTesterPluginInterface::IsRunning()
@@ -103,7 +103,7 @@ double FrameRateTesterPluginInterface::GetLastFrameRate()
 void FrameRateTesterPluginInterface::SetCurrentViewId( int id )
 {
     m_currentViewID = id;
-    emit Modified();
+    emit PluginModified();
 }
 
 void FrameRateTesterPluginInterface::OnTimerTriggered()

@@ -30,7 +30,7 @@ class vtkMultiTextureMapToPlane : public vtkDataSetAlgorithm
 public:
 
   vtkTypeMacro(vtkMultiTextureMapToPlane,vtkDataSetAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   // Description:
   // Construct
@@ -62,7 +62,7 @@ protected:
   vtkMultiTextureMapToPlane();
   ~vtkMultiTextureMapToPlane() {};
 
-  int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *);
+  int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *) override;
 
   // Plane specification
   double Origin[3];

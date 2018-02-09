@@ -85,7 +85,7 @@ void PointerObject::Setup( View * view )
         PerViewElements * perView = new PerViewElements;
         perView->tipActor = tipActor;
         this->pointerObjectInstances[ view ] = perView;
-        connect( this, SIGNAL(Modified()), view, SLOT(NotifyNeedRender()) );
+        connect( this, SIGNAL(ObjectModified()), view, SLOT(NotifyNeedRender()) );
     }
 }
 
@@ -93,7 +93,7 @@ void PointerObject::Release( View * view )
 {
     if( view->GetType() == THREED_VIEW_TYPE )
     {
-        disconnect( this, SIGNAL(Modified()), view, SLOT(NotifyNeedRender()) );
+        disconnect( this, SIGNAL(ObjectModified()), view, SLOT(NotifyNeedRender()) );
         PointerObjectViewAssociation::iterator itAssociations = this->pointerObjectInstances.find( view );
         if( itAssociations != this->pointerObjectInstances.end() )
         {
@@ -149,7 +149,7 @@ void PointerObject::UpdateTipCalibration()
     vtkMatrix4x4 * mat = vtkMatrix4x4::New();
     m_lastTipCalibrationRMS = GetHardwareModule()->DoTipCalibration( this, mat );
     SetCalibrationMatrix( mat );
-    emit Modified();
+    emit ObjectModified();
 }
 
 bool PointerObject::IsCalibratingTip()
@@ -218,7 +218,7 @@ void PointerObject::Hide()
             PerViewElements * perView = (*it).second;
             vtkActor * tipActor = perView->tipActor;
             tipActor->VisibilityOff();
-            emit Modified();
+            emit ObjectModified();
         }
     }
 }
@@ -236,7 +236,7 @@ void PointerObject::Show()
             PerViewElements * perView = (*it).second;
             vtkActor * tipActor = perView->tipActor;
             tipActor->VisibilityOn();
-            emit Modified();
+            emit ObjectModified();
         }
     }
 }
@@ -281,7 +281,7 @@ void PointerObject::UpdateTip()
             PerViewElements * perView = (*itAssociations).second;
             vtkActor * tipActor = perView->tipActor;
             tipActor->GetMapper()->Update();
-            emit Modified();
+            emit ObjectModified();
         }
     }
 }

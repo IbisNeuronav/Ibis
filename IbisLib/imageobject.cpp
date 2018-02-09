@@ -58,7 +58,6 @@ ImageObject::PerViewElements::~PerViewElements()
 ImageObject::ImageObject()
 {
     this->ItkImage = 0;
-    this->ItkRGBImage = 0;
     this->ItkLabelImage = 0;
     this->OutlineFilter = vtkSmartPointer<vtkOutlineFilter>::New();
     this->viewOutline = 0;
@@ -378,7 +377,7 @@ void ImageObject::SetVtkVolumeRenderingEnabled( bool on )
         ++it;
     }
 
-    emit Modified();
+    emit ObjectModified();
 }
 
 void ImageObject::SetVolumeRenderingWindow( double window )
@@ -437,7 +436,7 @@ void ImageObject::UpdateVolumeRenderingParamsInMapper()
         }
         ++it;
     }
-    emit Modified();
+    emit ObjectModified();
 }
 
 void ImageObject::SetVolumeClippingEnabled( vtkBoxWidget2 * widget, bool enabled )
@@ -477,7 +476,7 @@ void ImageObject::SetViewOutline( int isOn )
         }
     }
 
-    emit Modified();
+    emit ObjectModified();
 }
 
 int ImageObject::GetViewOutline()
@@ -611,7 +610,7 @@ void ImageObject::SetLut(vtkSmartPointer<vtkScalarsToColors> lut)
         this->Lut = lut;
     }
     emit LutChanged( this->GetObjectID() );
-    emit Modified();
+    emit ObjectModified();
 }
 
 int ImageObject::ChooseColorTable(int index)
@@ -645,7 +644,7 @@ int ImageObject::ChooseColorTable(int index)
         this->SetLut( lut );
     }
 
-    emit Modified();
+    emit ObjectModified();
     return 1;
 }
 
@@ -659,7 +658,7 @@ void ImageObject::SetLutRange( double r[2] )
     this->lutRange[0] = r[0];
     this->lutRange[1] = r[1];
     this->Lut->SetRange( r );
-    emit Modified();
+    emit ObjectModified();
 }
 
 void ImageObject::GetImageScalarRange(double *range)
@@ -698,7 +697,7 @@ void ImageObject::SetIntensityFactor( double factor )
         vtkPiecewiseFunctionLookupTable * lut = vtkPiecewiseFunctionLookupTable::SafeDownCast(this->GetLut());
         if( lut )
             lut->SetIntensityFactor( factor );
-        emit Modified();
+        emit ObjectModified();
     }
 }
 
@@ -735,7 +734,7 @@ void ImageObject::Hide()
 
     emit VisibilityChanged( this->GetObjectID() );
     UpdateVolumeRenderingParamsInMapper();
-    emit Modified();
+    emit ObjectModified();
 }
 
 void ImageObject::Show()
@@ -744,7 +743,7 @@ void ImageObject::Show()
 		this->SetViewOutline(1);
     emit VisibilityChanged( this->GetObjectID() );
     UpdateVolumeRenderingParamsInMapper();
-    emit Modified();
+    emit ObjectModified();
 }
 
 #include "mincinfowidget.h"
@@ -766,23 +765,6 @@ void ImageObject::SaveImageData(QString &name)
         mincWriter->SetFileName(name.toUtf8().data());
 
         mincWriter->SetInput(this->ItkImage);
-
-        try
-        {
-            mincWriter->Update();
-        }
-        catch(itk::ExceptionObject & exp)
-        {
-            std::cerr << "Exception caught!" << std::endl;
-            std::cerr << exp << std::endl;
-        }
-    }
-    else if( this->ItkRGBImage )
-    {
-        itk::ImageFileWriter< IbisRGBImageType >::Pointer mincWriter = itk::ImageFileWriter<IbisRGBImageType>::New();
-        mincWriter->SetFileName(name.toUtf8().data());
-
-        mincWriter->SetInput(this->ItkRGBImage);
 
         try
         {

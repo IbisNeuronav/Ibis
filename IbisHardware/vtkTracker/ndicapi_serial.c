@@ -213,6 +213,9 @@ int ndiSerialOpen(const char *device)
     return -1;             /* bail out on error */
   }
 
+  ndiSerialSleep( serial_port, 100 ); //HACK - without that sleep opening port fails.
+
+
   /* restore blocking now that the port is open (we just didn't want */
   /* the port to block while we were trying to open it) */
   fcntl(serial_port, F_SETFL, 0);

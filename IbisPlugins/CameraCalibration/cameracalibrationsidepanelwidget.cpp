@@ -42,7 +42,7 @@ void CameraCalibrationSidePanelWidget::SetPluginInterface( CameraCalibrationPlug
 
     m_pluginInterface = interface;
 
-    connect( m_pluginInterface, SIGNAL(Modified()), this, SLOT(InterfaceModified()) );
+    connect( m_pluginInterface, SIGNAL(PluginModified()), this, SLOT(InterfaceModified()) );
     connect( m_pluginInterface, SIGNAL(CameraCalibrationWidgetClosedSignal()), this, SLOT(UpdateUi()) );
 
     UpdateUi();

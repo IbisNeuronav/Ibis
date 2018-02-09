@@ -11,14 +11,13 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef LandmarkRegistrationObjectPluginInterface_H
 #define LandmarkRegistrationObjectPluginInterface_H
 
-#include <QObject>
 #include <QWidget>
 #include "objectplugininterface.h"
 #include "vtkSmartPointer.h"
 
 class LandmarkRegistrationObject;
 
-class LandmarkRegistrationObjectPluginInterface : public QObject, public ObjectPluginInterface
+class LandmarkRegistrationObjectPluginInterface : public ObjectPluginInterface
 {
 
     Q_OBJECT

@@ -24,12 +24,12 @@ public:
     bool IsDrivenByHardware() { return m_hardwareModule != 0; }
     HardwareModule * GetHardwareModule()  { return m_hardwareModule; }
 
-    virtual void Setup( View * view );
-    virtual void Release( View * view );
-    virtual void Hide();
-    virtual void Show();
+    virtual void Setup( View * view ) override;
+    virtual void Release( View * view ) override;
+    virtual void Hide() override;
+    virtual void Show() override;
 
-    virtual void Serialize( Serializer * ser );
+    virtual void Serialize( Serializer * ser ) override;
     virtual void SerializeTracked( Serializer * ser );
 
     TrackerToolState GetState() { return m_state; }

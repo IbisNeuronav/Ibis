@@ -66,11 +66,11 @@ public:
     CameraObject();
     ~CameraObject();
 
-    virtual void Serialize( Serializer * ser );
-    virtual void SerializeTracked( Serializer * ser );
-    virtual void Export();
+    virtual void Serialize( Serializer * ser ) override;
+    virtual void SerializeTracked( Serializer * ser ) override;
+    virtual void Export() override;
     bool Import( QString & directory, QProgressDialog * progressDlg=0 );
-    virtual bool IsExportable()  { return true; }
+    virtual bool IsExportable()  override { return true; }
 
     // Replacing direct interface to tracked video source
     void SetVideoInputConnection( vtkAlgorithmOutput * port );
@@ -81,9 +81,9 @@ public:
     void AddClient();
     void RemoveClient();
 
-    virtual void Setup( View * view );
-    virtual void Release( View * view );
-    virtual void CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets);
+    virtual void Setup( View * view ) override;
+    virtual void Release( View * view ) override;
+    virtual void CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets) override;
 
     void SetIntrinsicEditable( bool e ) { m_intrinsicEditable = e; }
     bool IsIntrinsicEditable() { return m_intrinsicEditable; }
@@ -135,7 +135,7 @@ public:
     int GetCurrentFrame();
 
     // ViewController implementation
-    void ReleaseControl( View * v );
+    void ReleaseControl( View * v ) override;
 
     // Transform point from world to image space
     void WorldToImage( double * worldPos, double & xIm, double & yIm );
@@ -160,12 +160,12 @@ protected slots:
 protected:
 
     void InternalDrawPath( std::vector< Vec3 > & p3d, double color[4] );
-    virtual void Hide();
-    virtual void Show();
+    virtual void Hide() override;
+    virtual void Show() override;
 
-    virtual void ObjectAddedToScene();
-    virtual void ObjectAboutToBeRemovedFromScene();
-    virtual void InternalWorldTransformChanged();
+    virtual void ObjectAddedToScene() override;
+    virtual void ObjectAboutToBeRemovedFromScene() override;
+    virtual void InternalWorldTransformChanged() override;
     void InternalSetIntrinsicParams();
     void UpdateGeometricRepresentation();
     void UpdateVtkCamera();

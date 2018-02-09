@@ -310,7 +310,7 @@ void DoubleViewWidget::UpdateInputs()
     if( m_pluginInterface->IsLive() )
     {
         Q_ASSERT( probe );
-        connect( probe, SIGNAL(Modified()), this, SLOT(UpdateViews()) );
+        connect( probe, SIGNAL(ObjectModified()), this, SLOT(UpdateViews()) );
         usTransform = probe->GetWorldTransform();
         m_usActor->VisibilityOn();
         m_usActor->GetMapper()->SetInputConnection( probe->GetVideoOutputPort() );
@@ -318,7 +318,7 @@ void DoubleViewWidget::UpdateInputs()
     }
     else if( acq )
     {
-        connect( acq, SIGNAL( Modified() ), SLOT( UpdateViews() ) );
+        connect( acq, SIGNAL( ObjectModified() ), SLOT( UpdateViews() ) );
         usTransform = acq->GetTransform();
         m_usActor->SetVisibility( acq->GetNumberOfSlices()>0 ? 1 : 0 );
         m_usActor->GetMapper()->SetInputConnection( acq->GetUnmaskedOutputPort() );

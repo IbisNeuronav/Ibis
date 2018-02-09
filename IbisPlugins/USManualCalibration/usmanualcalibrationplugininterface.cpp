@@ -186,10 +186,9 @@ void USManualCalibrationPluginInterface::StartPhantomRegistration()
         allocSource = true;
         sourcePoints = PointsObject::New();
         sourcePoints->SetName( "Phantom Source Points" );
-        GetSceneManager()->AddObject( sourcePoints, phantomObject );
         for( int i = 0; i < 4; ++i )
             sourcePoints->AddPoint( pointNames[i], pointCoords[i] );
-        m_phantomRegSourcePointsId = sourcePoints->GetObjectID();
+
     }
 
     PointsObject * targetPoints = PointsObject::SafeDownCast( GetSceneManager()->GetObjectByID( m_phantomRegTargetPointsId ) );
@@ -199,10 +198,8 @@ void USManualCalibrationPluginInterface::StartPhantomRegistration()
         allocTarget = true;
         targetPoints = PointsObject::New();
         targetPoints->SetName( "Phantom Target Points" );
-        GetSceneManager()->AddObject( targetPoints );
         for( int i = 0; i < 4; ++i )
             targetPoints->AddPoint( pointNames[i], pointCoords[i] );
-        m_phantomRegTargetPointsId = targetPoints->GetObjectID();
     }
 
     // Setup data in landmark registration plugin
@@ -215,6 +212,8 @@ void USManualCalibrationPluginInterface::StartPhantomRegistration()
     Q_ASSERT( regObj );
     regObj->SetSourcePoints( sourcePoints );
     regObj->SetTargetPoints( targetPoints );
+    m_phantomRegSourcePointsId = sourcePoints->GetObjectID();
+    m_phantomRegTargetPointsId = targetPoints->GetObjectID();
 
     GetSceneManager()->ChangeParent( phantomObject, regObj, 0 );
     regObj->SelectPoint( 0 );

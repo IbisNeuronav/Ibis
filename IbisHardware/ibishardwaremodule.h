@@ -18,7 +18,7 @@ class TrackedVideoSource;
 class TrackerToolDisplayManager;
 class QMenu;
 
-class IbisHardwareModule : public QObject, public HardwareModule
+class IbisHardwareModule : public HardwareModule
 {
     
     Q_OBJECT

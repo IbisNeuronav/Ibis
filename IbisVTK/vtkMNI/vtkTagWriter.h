@@ -41,7 +41,7 @@ public:
     void SetTimeStamps(std::vector<std::string> & ts);
     void SetTransformToSave(const char * ts);
 
-    void PrintSelf(ostream &os, vtkIndent indent);
+    void PrintSelf(ostream &os, vtkIndent indent) override;
 
 protected:
 

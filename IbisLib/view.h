@@ -112,7 +112,7 @@ public:
     
 signals:
 
-    void Modified();
+    void ViewModified();
     
 public slots:
 

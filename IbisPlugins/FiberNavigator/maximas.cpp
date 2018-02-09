@@ -19,6 +19,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 using std::string;
 #include <vector>
 using std::vector;
+#include <cmath>
 
 ///////////////////////////////////////////
 Maximas::Maximas( const string &filename )

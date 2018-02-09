@@ -13,14 +13,13 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef __USManualCalibrationPluginInterface_h_
 #define __USManualCalibrationPluginInterface_h_
 
-#include <QObject>
 #include "toolplugininterface.h"
 
 class USManualCalibrationWidget;
 class UsProbeObject;
 class SceneObject;
 
-class USManualCalibrationPluginInterface : public QObject, public ToolPluginInterface
+class USManualCalibrationPluginInterface : public ToolPluginInterface
 {
 
     Q_OBJECT

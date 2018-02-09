@@ -215,7 +215,7 @@ void PointsObject::Hide()
     {
         (*it)->SetHidden( true );
     }
-    emit Modified();
+    emit ObjectModified();
 }
 
 void PointsObject::Show()
@@ -226,7 +226,7 @@ void PointsObject::Show()
         (*it)->SetHidden( false );
     }
     this->UpdatePointsVisibility();
-    emit Modified();
+    emit ObjectModified();
 }
 
 void PointsObject::CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets)
@@ -413,7 +413,7 @@ void PointsObject::SetSelectedPoint( int index )
     UpdatePoints();
 
     emit PointsChanged();
-    emit Modified();
+    emit ObjectModified();
 }
 
 void PointsObject::MoveCursorToPoint( int index )
@@ -641,7 +641,7 @@ void PointsObject::UpdatePointProperties( int index )
         pt->SetPropertyColor( m_activeColor );
     else
         pt->SetPropertyColor( m_inactiveColor );
-    emit Modified();
+    emit ObjectModified();
 }
 
 void PointsObject::UpdatePoints()
@@ -656,7 +656,7 @@ void PointsObject::SetPointLabel( int index, const QString &label )
 {
     m_pointNames.replace(index, label);
     this->UpdatePointProperties( index );
-    emit Modified();
+    emit ObjectModified();
 }
 
 const QString PointsObject::GetPointLabel(int index)
@@ -680,7 +680,7 @@ void PointsObject::SetPointCoordinates( int index, double coords[3] )
     m_pointCoordinates->SetPoint( index, coords );
     m_pointList.at( index )->SetPosition( m_pointCoordinates->GetPoint( index ) );
     emit PointsChanged();
-    emit Modified();
+    emit ObjectModified();
 }
 
 void PointsObject::SetPointTimeStamp( int index, const QString & stamp)
@@ -811,7 +811,7 @@ void PointsObject::LineToPointerTip( double selectedPoint[3], double pointerTip[
     linesPolyData->SetLines(cells);
 
     m_lineToPointerTip->SetPolyData( linesPolyData );
-    emit Modified();
+    emit ObjectModified();
 }
 
 void PointsObject::SetLineToPointerColor( double color[3] )
@@ -820,7 +820,7 @@ void PointsObject::SetLineToPointerColor( double color[3] )
         m_lineToPointerColor[i] = color[i];
     if( m_lineToPointerProperty )
         m_lineToPointerProperty->SetColor(color[0], color[1], color[2]);
-    emit Modified();
+    emit ObjectModified();
 }
 
 void PointsObject::GetLineToPointerColor(  double color[3] )

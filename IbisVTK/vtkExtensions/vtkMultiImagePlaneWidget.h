@@ -128,12 +128,12 @@ public:
     static vtkMultiImagePlaneWidget *New();
 
     vtkTypeMacro(vtkMultiImagePlaneWidget,vtkMulti3DWidget);
-    void PrintSelf(ostream& os, vtkIndent indent);
+    void PrintSelf(ostream& os, vtkIndent indent) override;
 
     // Description:
     // Methods that satisfy the superclass' API.
-    virtual void PlaceWidget(double bounds[6]);
-	void PlaceWidget();
+    virtual void PlaceWidget(double bounds[6]) override;
+    void PlaceWidget() override;
 
     // Description:
     // Set the vtkImageData* input for the vtkImageReslice.
@@ -390,15 +390,15 @@ protected:
 
     // Description:
     // Let subclasses react the the addition of interactors
-    void InternalAddRenderer( vtkRenderer * ren, vtkAssembly * assembly );
-    void InternalRemoveRenderer( int index );
+    void InternalAddRenderer( vtkRenderer * ren, vtkAssembly * assembly ) override;
+    void InternalRemoveRenderer( int index ) override;
 
 	// Utility
     void AddTextureToPlane( vtkActor * planeActor, vtkPolyDataMapper * planeMapper, int inputIndex, int textureIndex );
     void UpdateTextureUnits();
 
-    void InternalEnable();
-    void InternalDisable();
+    void InternalEnable() override;
+    void InternalDisable() override;
     void DisableForOneRenderer( int rendererIndex );
 
     void ClearActors();
@@ -436,15 +436,15 @@ protected:
     //ETX
 
     // Catch events from vtk3DWidget2
-    virtual void OnMouseMove();
-    virtual void OnLeftButtonDown();
-    virtual void OnLeftButtonUp();
-    virtual void OnMiddleButtonDown();
-    virtual void OnMiddleButtonUp();
-    virtual void OnRightButtonDown();
-    virtual void OnRightButtonUp();
-    virtual void OnMouseWheelForward();
-    virtual void OnMouseWheelBackward();
+    virtual void OnMouseMove() override;
+    virtual void OnLeftButtonDown() override;
+    virtual void OnLeftButtonUp() override;
+    virtual void OnMiddleButtonDown() override;
+    virtual void OnMiddleButtonUp() override;
+    virtual void OnRightButtonDown() override;
+    virtual void OnRightButtonUp() override;
+    virtual void OnMouseWheelForward() override;
+    virtual void OnMouseWheelBackward() override;
 	void OnButtonDown( int action, int shiftAction, int ctrlAction );
 	void OnButtonUp( int action, int shiftAction, int ctrlAction );
 

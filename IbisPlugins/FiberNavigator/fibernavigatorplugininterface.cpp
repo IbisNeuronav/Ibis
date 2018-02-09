@@ -12,9 +12,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include "fibernavigatorplugininterface.h"
 
-
-//Q_EXPORT_STATIC_PLUGIN2(FiberNavigator, FiberNavigatorPluginInterface);
-
 FiberNavigatorPluginInterface::FiberNavigatorPluginInterface()
 {
     m_settingsWidget = 0;
@@ -558,7 +555,7 @@ void FiberNavigatorPluginInterface::AddCurrentStreamLine(vtkCellArray* lines, vt
             }
             tractPts->InsertPoint(index, currentStreamLine->GetPoint(j));
 
-            colorsArray->InsertNextTupleValue(color);
+            colorsArray->InsertNextTypedTuple(color);
             lines->InsertCellPoint(index);
 
             ++index;

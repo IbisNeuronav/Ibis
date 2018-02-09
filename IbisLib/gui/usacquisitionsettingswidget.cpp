@@ -41,14 +41,14 @@ void UsAcquisitionSettingsWidget::SetUSAcquisitionObject( USAcquisitionObject * 
 
     if (m_acquisitionObject)
     {
-        disconnect( m_acquisitionObject, SIGNAL(Modified()), this, SLOT(UpdateUi()) );
+        disconnect( m_acquisitionObject, SIGNAL(ObjectModified()), this, SLOT(UpdateUi()) );
     }
     m_acquisitionObject = acq;
     if (m_acquisitionObject)
     {
         if (m_acquisitionObject->GetNumberOfSlices() > 0)
             m_acquisitionObject->SetNumberOfStaticSlices(m_acquisitionObject->GetNumberOfStaticSlices());
-        connect( m_acquisitionObject, SIGNAL(Modified()), this, SLOT(UpdateUi()) );
+        connect( m_acquisitionObject, SIGNAL(ObjectModified()), this, SLOT(UpdateUi()) );
         UpdateUi();
     }
 }

@@ -144,7 +144,7 @@ protected:
 
   void InitializeGPUContext(void);
 
-  void PrintSelf(std::ostream & os, Indent indent) const;  
+  void PrintSelf(std::ostream & os, Indent indent) const override;
 
   void ComputeFixedImageGradient(void);
   void ComputeMovingImageGradient(void);
