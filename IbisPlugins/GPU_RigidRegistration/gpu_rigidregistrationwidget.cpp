@@ -17,130 +17,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "vnl/algo/vnl_real_eigensystem.h"
 #include "vtkSmartPointer.h"
 
-class CommandIterationUpdateOpenCL : public itk::Command
-{
-public:
-  typedef  CommandIterationUpdateOpenCL   Self;
-  typedef  itk::Command             Superclass;
-  typedef itk::SmartPointer<Self>  Pointer;
-  itkNewMacro( Self );
-
-protected:
-  CommandIterationUpdateOpenCL() {};
-
-public:
-
-  typedef const OptimizerType                         *OptimizerPointer;
-  typedef const GPUCostFunctionType                   *GPUConstCostFunctionPointer;
-  typedef ItkRigidTransformType::Pointer              ItkRigidTransformPointer;
-  Application                                         *m_app;
-  int                                                 m_transformObjectID;  
-  int                                                 m_targetImageObjectID;
-  bool                                                m_Debug;
-
-  void SetApplication(Application * app)
-  {
-      m_app = app;
-  }
-
-  void SetDebug(bool debug)
-  {
-    m_Debug = debug;
-  }
-
-  void SetTransformObjectID( int transformObjectID )
-  {
-      m_transformObjectID = transformObjectID;
-  }
-  
-  void SetTargetImageObjectID( int transformObjectID )
-  {
-      m_targetImageObjectID = transformObjectID;
-  }  
-
-  void Execute(itk::Object *caller, const itk::EventObject & event)
-  {
-    Execute( (const itk::Object *)caller, event);
-  }
-
-  void Execute(const itk::Object * object, const itk::EventObject & event)
-  {
-    OptimizerPointer optimizer =
-                         dynamic_cast< OptimizerPointer >( object );
-    GPUConstCostFunctionPointer   metric = dynamic_cast< GPUConstCostFunctionPointer >( optimizer->GetCostFunction() );
-
-    if( ! itk::IterationEvent().CheckEvent( &event ) )
-      {
-      return;
-      }
-
-    if(m_Debug)
-      std::cout << "Optimizer Value:\t" << optimizer->GetCurrentValue() << std::endl;
-
-    if(m_app)
-    {
-      ItkRigidTransformPointer itkTransform = ItkRigidTransformType::New();      
-
-      ItkRigidTransformType::ParametersType params = optimizer->GetCurrentPosition();
-      ItkRigidTransformType::CenterType center = metric->GetCenter();
-      itkTransform->SetCenter(center);
-      itkTransform->SetParameters(params);
-
-      SceneObject * transformObject = m_app->GetSceneManager()->GetObjectByID( m_transformObjectID );
-      vtkTransform * vtktransform = vtkTransform::SafeDownCast( transformObject->GetLocalTransform() );
-      Q_ASSERT_X( vtktransform, "GPU_RigidRegistrationWidget::on_startButton_clicked()", "Invalid transform" );
-
-      SceneObject * targetImageObject = m_app->GetSceneManager()->GetObjectByID( m_targetImageObjectID );
-      vtkTransform * targetImageVtktransform = vtkTransform::SafeDownCast( targetImageObject->GetWorldTransform() );
-      Q_ASSERT_X( targetImageVtktransform, "GPU_RigidRegistrationWidget::on_startButton_clicked()", "Invalid transform" );
-
-      transformObject->StartModifyingTransform();
-
-      ItkRigidTransformType::MatrixType matrix = 
-        itkTransform->GetMatrix();
-    
-      ItkRigidTransformType::OffsetType offset = 
-        itkTransform->GetOffset();
-    
-      vtkSmartPointer<vtkMatrix4x4> localMatrix_inv = vtkSmartPointer<vtkMatrix4x4>::New();
-
-      for(unsigned int i=0; i<3; i++ )
-        {
-        for(unsigned int j=0; j<3; j++ )
-          {
-          localMatrix_inv->SetElement(i,j,
-            matrix.GetVnlMatrix().get(i,j));   
-          }
-    
-        localMatrix_inv->SetElement( i, 3, offset[i]);        
-       }
-      localMatrix_inv->Invert();
-       
-      vtkSmartPointer<vtkMatrix4x4> targetLocalMatrix = vtkSmartPointer<vtkMatrix4x4>::New();
-      targetImageVtktransform->GetMatrix( targetLocalMatrix );
-       
-      vtkSmartPointer<vtkMatrix4x4> finalMatrix = vtkSmartPointer<vtkMatrix4x4>::New();
-       
-      if( transformObject->GetParent() )
-        {
-        vtkTransform * parentVtktransform = vtkTransform::SafeDownCast( transformObject->GetParent()->GetWorldTransform() );
-        Q_ASSERT_X( parentVtktransform, "GPU_RigidRegistrationWidget::on_startButton_clicked()", "Invalid transform" );
-        vtkSmartPointer<vtkMatrix4x4> parentWorldMatrix = vtkSmartPointer<vtkMatrix4x4>::New();
-        parentVtktransform->GetInverse( parentWorldMatrix );
-        finalMatrix->Multiply4x4( parentWorldMatrix, localMatrix_inv, localMatrix_inv );
-        }
-
-      finalMatrix->Multiply4x4( localMatrix_inv, targetLocalMatrix, finalMatrix );
-      vtktransform->SetMatrix( finalMatrix );
-      vtktransform->Modified();
-      transformObject->FinishModifyingTransform();
-
-     }    
-  }
-
-};
-
-
 GPU_RigidRegistrationWidget::GPU_RigidRegistrationWidget(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::GPU_RigidRegistrationWidget),
@@ -154,6 +30,8 @@ GPU_RigidRegistrationWidget::GPU_RigidRegistrationWidget(QWidget *parent) :
     connect(ui->populationSizeDial, SIGNAL(valueChanged(int)), ui->populationSizeValueLabel, SLOT(setNum(int)));
     connect(ui->debugCheckBox, SIGNAL(stateChanged(int)), this, SLOT(on_debugCheckBox_clicked()));
     ui->registrationOutputTextEdit->hide();
+
+    m_rigidRegistrator = new GPU_RigidRegistration();
 
 }
 
@@ -191,13 +69,12 @@ void GPU_RigidRegistrationWidget::on_startButton_clicked()
     Q_ASSERT_X( targetImageObject, "GPU_RigidRegistrationWidget::on_startButton_clicked()", "Invalid target object" );
     vtkTransform * targetVtkTransform = vtkTransform::SafeDownCast( targetImageObject->GetWorldTransform() );
 
+    SceneObject * transformObject = sm->GetObjectByID( transformObjectId );
+    vtkTransform * vtktransform = vtkTransform::SafeDownCast( transformObject->GetLocalTransform() );
+    Q_ASSERT_X( vtktransform, "GPU_RigidRegistrationWidget::on_startButton_clicked()", "Invalid transform" );
+
     IbisItkFloat3ImageType::Pointer itkSourceImage = sourceImageObject->GetItkImage();
     IbisItkFloat3ImageType::Pointer itkTargetImage = targetImageObject->GetItkImage();
-
-
-    QElapsedTimer timer;
-    timer.start();
-
 
     ui->userFeedbackLabel->setText(QString("Processing..(patience is a virtue)"));
     /*
@@ -209,147 +86,46 @@ void GPU_RigidRegistrationWidget::on_startButton_clicked()
 
     QDebugStream qout(std::cout,  ui->registrationOutputTextEdit);
 
-    if(debug)
-      std::cout << "Setting up registration..." << std::endl;
-    /** Registration */
+    m_registrationTimer.start();
 
-    ItkRigidTransformType::Pointer    itkTransform  = ItkRigidTransformType::New();
-    
-    OptimizerType::Pointer      optimizer     = OptimizerType::New();   
+    // Initialize parameters
+    m_rigidRegistrator->SetNumberOfPixels( ui->numebrOfPixelsDial->value() );
+    m_rigidRegistrator->SetOrientationSelectivity( ui->selectivityDial->value() );
+    m_rigidRegistrator->SetPopulationSize( ui->populationSizeDial->value() );
+    m_rigidRegistrator->SetInitialSigma( ui->initialSigmaComboBox->itemData( ui->initialSigmaComboBox->currentIndex() ).toDouble() );
+    m_rigidRegistrator->SetPercentile( ui->percentileComboBox->itemData( ui->percentileComboBox->currentIndex() ).toDouble() );
+    m_rigidRegistrator->SetUseMask( ui->computeMaskCheckBox->isChecked() );
+    m_rigidRegistrator->SetDebug( debug );
 
-    double percentile =  ui->percentileComboBox->itemData( ui->percentileComboBox->currentIndex() ).toDouble();
-    double initialSigma = ui->initialSigmaComboBox->itemData( ui->initialSigmaComboBox->currentIndex() ).toDouble();
-    double gradientScale = 1.0;
-    unsigned int numberOfPixels = ui->numebrOfPixelsDial->value();
-    unsigned int orientationSelectivity = ui->selectivityDial->value();
-    unsigned int populationSize = ui->populationSizeDial->value();
+    // Set image inputs
+    m_rigidRegistrator->SetItkSourceImage( itkSourceImage );
+    m_rigidRegistrator->SetItkTargetImage( itkTargetImage );
 
-    GPUMetricPointer metric = GPUMetricType::New();
-    metric->SetFixedImage(itkTargetImage);
-    metric->SetMovingImage(itkSourceImage);
+    // Set transform inputs
+    m_rigidRegistrator->SetVtkTransform( vtktransform );
+    m_rigidRegistrator->SetSourceVtkTransform( sourceVtkTransform );
+    m_rigidRegistrator->SetTargetVtkTransform( targetVtkTransform );
 
-    /* Initialize Transform */
-    vtkSmartPointer<vtkMatrix4x4> localMatrix = vtkSmartPointer<vtkMatrix4x4>::New();
-    sourceVtkTransform->GetInverse(localMatrix);
-  
-    vtkSmartPointer<vtkMatrix4x4> finalMatrix = vtkSmartPointer<vtkMatrix4x4>::New();
-    finalMatrix->Multiply4x4( targetVtkTransform->GetMatrix(), localMatrix, finalMatrix);
+    if( transformObject->GetParent() )
+    {
+        vtkTransform * parentVtktransform = vtkTransform::SafeDownCast( transformObject->GetParent()->GetWorldTransform() );
+        Q_ASSERT_X( parentVtktransform, "VertebraRegistrationWidget::AddImageToQueue()", "Invalid transform" );
+        m_rigidRegistrator->SetParentVtkTransform(parentVtktransform);
+    }
 
-    ItkRigidTransformType::OffsetType offset;
- 
-    vnl_matrix<double> M(3,3); 
+    // Run registration
+    transformObject->StartModifyingTransform();
+    m_rigidRegistrator->runRegistration();
+    transformObject->FinishModifyingTransform();
 
-    for(unsigned int i=0; i<3; i++ )
-     {
-     for(unsigned int j=0; j<3; j++ )
-       {
-        M[i][j] = finalMatrix->GetElement(i,j);
-       }     
-      offset[i] = finalMatrix->GetElement(i,3);
-      }
-
-    double angleX, angleY, angleZ;
-    angleX = vcl_asin(M[2][1]);
-    double A = vcl_cos(angleX);
-    if( vcl_fabs(A) > 0.00005 )
-      {
-      double x = M[2][2] / A;
-      double y = -M[2][0] / A;
-      angleY = vcl_atan2(y, x);
-
-      x = M[1][1] / A;
-      y = -M[0][1] / A;
-      angleZ = vcl_atan2(y, x);
-      }
-    else
-      {
-      angleZ = 0;
-      double x = M[0][0];
-      double y = M[1][0];
-      angleY = vcl_atan2(y, x);
-      }
-
-    ItkRigidTransformType::ParametersType params = ItkRigidTransformType::ParametersType(6);
-    params[0] = angleX; params[1] = angleY; params[2] = angleZ;
-
-    ItkRigidTransformType::CenterType center;
-    center[0] = itkTargetImage->GetOrigin()[0] + itkTargetImage->GetSpacing()[0] * itkTargetImage->GetBufferedRegion().GetSize()[0] / 2.0;
-    center[1] = itkTargetImage->GetOrigin()[1] + itkTargetImage->GetSpacing()[1] * itkTargetImage->GetBufferedRegion().GetSize()[1] / 2.0;
-    center[2] = itkTargetImage->GetOrigin()[2] + itkTargetImage->GetSpacing()[2] * itkTargetImage->GetBufferedRegion().GetSize()[2] / 2.0;  
-
-
-    for( unsigned int i = 0; i < 3; i++ )
-      {
-      params[i+3] = offset[i] - center[i];
-      for( unsigned int j = 0; j < 3; j++ )
-        {
-        params[i+3] += M[i][j] * center[j];
-        }
-      }
-
-    itkTransform->SetCenter(center);
-    itkTransform->SetParameters(params);
-
-    metric->SetTransform(itkTransform);
-    metric->SetNumberOfPixels( numberOfPixels );
-    metric->SetPercentile(           percentile          );
-    metric->SetN(         orientationSelectivity           );
-    metric->SetComputeMask( ui->computeMaskCheckBox->isChecked()  );
-    metric->SetGradientScale(       gradientScale                 );
-    GPUCostFunctionPointer costFunction = GPUCostFunctionType::New();
-    costFunction->SetGPUMetric( metric );
-
-    metric->Update();
-    qint64 preprocessingTime = timer.elapsed();
-
-
-    optimizer->SetCostFunction( costFunction ); 
-    optimizer->SetInitialPosition( itkTransform->GetParameters() );
-    OptimizerType::ScalesType   scales =  OptimizerType::ScalesType(itkTransform->GetNumberOfParameters());
-    scales[0] = 3500;  scales[1] = 3500;  scales[2] = 3500;
-    scales[3] = 0.1;  scales[4] = 0.1;  scales[5] = 0.1;
-    optimizer->SetScales( scales );
-    optimizer->SetUseCovarianceMatrixAdaptation( true );
-    optimizer->SetUpdateBDPeriod( 0 );
-    optimizer->SetValueTolerance(0.001);
-    optimizer->SetMaximumDeviation( 1 );
-    optimizer->SetUseScales( true );
-    optimizer->SetPopulationSize( populationSize );
-    optimizer->SetNumberOfParents( 0 );
-    optimizer->SetMaximumNumberOfIterations( 300 );
-    optimizer->SetInitialSigma( initialSigma );
-
-
-    CommandIterationUpdateOpenCL::Pointer observer = CommandIterationUpdateOpenCL::New();
-    observer->SetApplication( m_pluginInterface->GetApplication() );
-    observer->SetTransformObjectID( transformObjectId );
-    observer->SetTargetImageObjectID( targetImageObjectId );
-    observer->SetDebug(debug);
-    optimizer->AddObserver( itk::IterationEvent(), observer );
-
-    if(debug)
-      std::cout << "Starting registration..." << std::endl;
+//    sourceImageObject->ObjectModified();
 
     m_OptimizationRunning = true;
-    try
-    {
-      optimizer->StartOptimization();
-    }
-    catch( itk::ExceptionObject & err )
-    {
-      std::cerr << "ExceptionObject caught !" << std::endl;
-      std::cerr << err << std::endl;
-    }
 
-    qint64 registrationTime = timer.elapsed();
+    qint64 registrationTime = m_registrationTimer.elapsed();
 
-    if(debug)
-      std::cout << "Done." << std::endl;
 
-    if(debug)      
-      std::cout << "Rigid Registration took " << qreal(registrationTime)/1000.0 << "secs"<< std::endl;
-
-    QString feedbackString = QString("Full Registration finished in %1 secs ( Pre in %2 secs )").arg(qreal(registrationTime)/1000.0).arg(qreal(preprocessingTime)/1000.0);
+    QString feedbackString = QString("Full Registration finished in %1 secs").arg(qreal(registrationTime)/1000.0);
     ui->userFeedbackLabel->setText(feedbackString);
     m_OptimizationRunning = false;
 
