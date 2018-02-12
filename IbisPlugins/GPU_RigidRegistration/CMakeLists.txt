@@ -2,9 +2,10 @@
 set( PluginSrc
         gpu_rigidregistrationplugininterface.cpp
         gpu_rigidregistrationwidget.cpp
+        gpu_rigidregistration.cpp
         qdebugstream.h
 )
-set( PluginHdrMoc gpu_rigidregistrationwidget.h gpu_rigidregistrationplugininterface.h )
+set( PluginHdrMoc gpu_rigidregistrationwidget.h gpu_rigidregistrationplugininterface.h gpu_rigidregistration.h)
 set( PluginUi gpu_rigidregistrationwidget.ui )
 
 IF( NOT OPENCL_FOUND )
