@@ -114,11 +114,9 @@ void GPU_RigidRegistrationWidget::on_startButton_clicked()
     }
 
     // Run registration
-    transformObject->StartModifyingTransform();
     m_rigidRegistrator->runRegistration();
-    transformObject->FinishModifyingTransform();
 
-//    sourceImageObject->ObjectModified();
+    sourceImageObject->ObjectModified();
 
     m_OptimizationRunning = true;
 

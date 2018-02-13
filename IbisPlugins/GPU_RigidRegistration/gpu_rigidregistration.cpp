@@ -291,6 +291,7 @@ void GPU_RigidRegistration::runRegistration()
     metric->SetGradientScale( gradientScale );
     GPUCostFunctionPointer costFunction = GPUCostFunctionType::New();
     costFunction->SetGPUMetric( metric );
+    costFunction->SetDebug(m_debug);
 
     metric->Update();
 

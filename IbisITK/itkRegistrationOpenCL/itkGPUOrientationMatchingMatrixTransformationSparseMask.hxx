@@ -58,7 +58,7 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
   m_Transform = NULL;
   m_MetricValue = 0;
 
-
+  m_Debug = false;
 
 }
 
@@ -364,7 +364,8 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
   OpenCLCheckError(errid, __FILE__, __LINE__, ITK_LOCATION);
 
   clockGPUKernel.Stop();
-  std::cerr << "Fixed Image Gradient GPU Kernel took:\t" << clockGPUKernel.GetMean() << std::endl;
+  if(m_Debug)
+    std::cerr << "Fixed Image Gradient GPU Kernel took:\t" << clockGPUKernel.GetMean() << std::endl;
 
   FixedGradientMagnitudeSampleType::Pointer sample = FixedGradientMagnitudeSampleType::New();
   IdxSampleType::Pointer maskIdxSample = IdxSampleType::New();
@@ -374,7 +375,8 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
 
   unsigned int nbrOfPixelsForHistogram =  100000;
 
-  std::cerr << nbrOfPixelsForHistogram << "\t" << nbrOfPixelsInFixedImage << std::endl;
+  if(m_Debug)
+    std::cerr << nbrOfPixelsForHistogram << "\t" << nbrOfPixelsInFixedImage << std::endl;
   unsigned int testCntr = 0;
   if(nbrOfPixelsForHistogram < nbrOfPixelsInFixedImage)
     {
@@ -418,8 +420,11 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
         }
       }
     }
-  std::cerr << "Test Counter:\t" << testCntr << std::endl;
-  std::cerr << "Sample Size:\t" << sample->Size() << std::endl;
+  if(m_Debug)
+    {
+      std::cerr << "Test Counter:\t" << testCntr << std::endl;
+      std::cerr << "Sample Size:\t" << sample->Size() << std::endl;
+    }
 
   itk::TimeProbe clock2;
   clock2.Start();
@@ -436,8 +441,11 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
   InternalRealType magnitudeThreshold = histogram->Quantile(0, m_Percentile);
 
   clock2.Stop();
-  std::cerr << "Computing histogram took:\t" << clock2.GetMean() << std::endl;
-  std::cerr << "Magnitude Threshold:\t" << magnitudeThreshold << std::endl;
+  if(m_Debug)
+  {
+      std::cerr << "Computing histogram took:\t" << clock2.GetMean() << std::endl;
+      std::cerr << "Magnitude Threshold:\t" << magnitudeThreshold << std::endl;
+  }
 
   unsigned int maxThreads = 256;
   m_Threads = (m_NumberOfPixels < maxThreads*2) ? this->NextPow2((m_NumberOfPixels + 1)/ 2) : maxThreads;
@@ -477,7 +485,8 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
   }
 
   clock.Stop();
-  std::cerr << "Post-Processing Fixed Image Gradient took:\t" << clock.GetMean() << std::endl;
+  if(m_Debug)
+    std::cerr << "Post-Processing Fixed Image Gradient took:\t" << clock.GetMean() << std::endl;
 
   clReleaseMemObject(m_FixedImageGradientGPUBuffer);
   clReleaseMemObject(m_FixedImageGPUBuffer);
@@ -501,7 +510,8 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
   {
     itkExceptionMacro(<< "Moving Image is not set" );
   }
-  std::cout << "Computing Moving Image Gradient" << std::endl;
+  if(m_Debug)
+    std::cout << "Computing Moving Image Gradient" << std::endl;
   /*Create Moving Image Buffer */
 
   unsigned int nbrOfPixelsInMovingImage = m_MovingImage->GetBufferedRegion().GetNumberOfPixels();
@@ -773,7 +783,8 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
 
   if(!m_MovingImageGradientGPUImage)
   {
-    std::cout << "Preparing to Compute Gradients.." << std::endl;
+    if(m_Debug)
+        std::cout << "Preparing to Compute Gradients.." << std::endl;
     this->ComputeFixedImageGradient();  
     this->ComputeMovingImageGradient();  
   }

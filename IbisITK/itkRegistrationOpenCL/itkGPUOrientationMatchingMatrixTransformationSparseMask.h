@@ -121,6 +121,8 @@ public:
 
   itkSetMacro(GradientScale, double);
 
+  itkSetMacro(Debug, bool);
+
   typedef GaussianDerivativeOperator<InternalRealType, FixedImageDimension> FixedDerivativeOperatorType;
   typedef GaussianDerivativeOperator<InternalRealType, MovingImageDimension> MovingDerivativeOperatorType;
 
@@ -162,6 +164,8 @@ protected:
 
   bool              m_ComputeMask;
   double            m_MaskThreshold;
+
+  bool              m_Debug;
 
   unsigned int      m_Blocks;
   unsigned int      m_Threads;
