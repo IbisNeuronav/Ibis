@@ -1234,7 +1234,8 @@ GPU2D3DOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingIm
 
   if(!m_MovingImageGradientGPUImage)
   {
-    std::cout << "Preparing to Compute Gradients.." << std::endl;
+    if(m_Debug)
+        std::cout << "Preparing to Compute Gradients.." << std::endl;
     this->ComputeFixedImageGradient(); 
     this->ComputeMovingImageGradient(); 
   }

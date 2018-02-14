@@ -24,28 +24,10 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "vtkTransform.h"
 #include "vtkMatrix4x4.h"
 
-#include "itkGPU3DRigidSimilarityMetric.h"
-#include "itkEuler3DTransform.h"
-#include "itkImageDuplicator.h"
-
-#include "itkAmoebaOptimizer.h"
-#include "itkSPSAOptimizer.h"
-#include "itkCMAEvolutionStrategyOptimizer.h"
-
-typedef itk::ImageDuplicator< IbisItkFloat3ImageType >  DuplicatorType;
-
-typedef itk::CMAEvolutionStrategyOptimizer            OptimizerType;
-
-typedef itk::GPU3DRigidSimilarityMetric<IbisItkFloat3ImageType,IbisItkFloat3ImageType>
-                                                    GPUCostFunctionType;
-typedef GPUCostFunctionType::Pointer                GPUCostFunctionPointer;
-
-typedef  GPUCostFunctionType::GPUMetricType         GPUMetricType;
-typedef  GPUCostFunctionType::GPUMetricPointer      GPUMetricPointer;
-
-typedef itk::Euler3DTransform<double>                ItkRigidTransformType;
+#include "gpu_rigidregistration.h"
 
 class GPU_RigidRegistrationPluginInterface;
+class GPU_RigidRegistration;
 
 namespace Ui
 {
@@ -73,6 +55,8 @@ private:
 
     Ui::GPU_RigidRegistrationWidget * ui;
     GPU_RigidRegistrationPluginInterface * m_pluginInterface;
+    GPU_RigidRegistration * m_rigidRegistrator;
+    QElapsedTimer m_registrationTimer;
     bool          m_OptimizationRunning;
 
 private slots:
