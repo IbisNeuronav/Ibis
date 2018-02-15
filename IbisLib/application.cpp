@@ -201,6 +201,7 @@ Application::~Application()
     {
         allPlugins[i]->Delete(); // this is called because otherwise plugins destructors are never called, Qt bug. The codde has to be revised once Qt is fixed.
     }
+    delete m_ibisAPI;
 }
 
 void Application::ApplyApplicationSettings()

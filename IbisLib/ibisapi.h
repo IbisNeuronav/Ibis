@@ -98,7 +98,6 @@ signals:
     void CursorPositionChanged();
     void IbisClockTick();
 
-
 private:
     Application  * m_application;
     SceneManager * m_sceneManager;

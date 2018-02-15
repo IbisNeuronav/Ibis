@@ -30,7 +30,6 @@ IbisAPI::~IbisAPI()
     disconnect( m_application, SIGNAL( IbisClockTick() ), this, SLOT( IbisClockTickSlot() ) );
 }
 
-// from SceneManager
 void IbisAPI::SetApplication( Application * app )
 {
     m_application = app;
@@ -271,4 +270,3 @@ void IbisAPI::RemoveBottomWidget( QWidget * w )
 {
     m_application->RemoveBottomWidget( w );
 }
-
