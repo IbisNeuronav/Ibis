@@ -10,6 +10,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 #include "application.h"
 #include "hardwaremodule.h"
+#include "ibisapi.h"
 #include "mainwindow.h"
 #include "githash.h"
 #include "version.h"
@@ -122,7 +123,7 @@ Application::Application( )
     m_fileReader = 0;
     m_fileOpenProgressDialog = 0;
     m_progressDialogUpdateTimer = 0;
-    m_sceneManager = 0;
+    m_ibisAPI = 0;
     m_updateManager = 0;
     m_lookupTableManager = 0;
 }
@@ -169,6 +170,10 @@ void Application::Init( bool viewerOnly )
     // Despite what the user says, if there is no hardware module, go viewer only.
     if( m_hardwareModules.size() == 0 )
         m_viewerOnly = true;
+
+    // Create programming interface for plugins
+    m_ibisAPI = new IbisAPI();
+    m_ibisAPI->SetApplication( this );
 }
 
 Application::~Application()
@@ -195,6 +200,7 @@ Application::~Application()
     {
         allPlugins[i]->Delete(); // this is called because otherwise plugins destructors are never called, Qt bug. The codde has to be revised once Qt is fixed.
     }
+    delete m_ibisAPI;
 }
 
 void Application::ApplyApplicationSettings()
@@ -795,7 +801,7 @@ void Application::LoadPlugins()
         IbisPlugin * p = qobject_cast< IbisPlugin* >( plugin );
         if( p )
         {
-            p->SetApplication( this );
+            p->SetIbisAPI( m_ibisAPI );
             p->BaseLoadSettings( settings );
             if( p->GetPluginType() == IbisPluginTypeTool )
             {

@@ -26,6 +26,7 @@ class QSettings;
 class HardwareModule;
 class UpdateManager;
 class SceneManager;
+class IbisAPI;
 class SceneObject;
 class WorldObject;
 class CameraObject;
@@ -98,9 +99,10 @@ public:
     void AddGlobalEventHandler( GlobalEventHandler * h );
     void RemoveGlobalEventHandler( GlobalEventHandler * h );
     bool GlobalKeyEvent( QKeyEvent * e );
-    
+
     void InitHardware();
-    
+    void InitAPI();
+
     void AddHardwareSettingsMenuEntries( QMenu * menu );
     void AddToolObjectsToScene();
     void RemoveToolObjectsFromScene();
@@ -203,6 +205,7 @@ private:
 
     MainWindow                  * m_mainWindow;
     SceneManager                * m_sceneManager;
+    IbisAPI                     * m_ibisAPI;
     UpdateManager               * m_updateManager;
     QList<HardwareModule*>        m_hardwareModules;
     LookupTableManager          * m_lookupTableManager;

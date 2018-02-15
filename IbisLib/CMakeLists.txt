@@ -5,6 +5,7 @@ PROJECT( IBISLIB )
 #================================
 
 SET( IBISLIB_SRC
+                     ibisapi.cpp
                      application.cpp
                      mainwindow.cpp
                      scenemanager.cpp
@@ -78,6 +79,7 @@ SET( IBISLIB_HDR
                      gui/guiutilities.h )
 
 SET( IBISLIB_HDR_MOC
+                        ibisapi.h
                          view.h
                          application.h
                          mainwindow.h
