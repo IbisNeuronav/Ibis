@@ -46,6 +46,11 @@ SceneObject * IbisAPI::GetObjectByID( int id )
     return m_sceneManager->GetObjectByID( id );
 }
 
+SceneObject * IbisAPI::GetSceneRoot()
+{
+    return m_sceneManager->GetSceneRoot();
+}
+
 void IbisAPI::ChangeParent( SceneObject * object, SceneObject * newParent, int newChildIndex )
 {
     m_sceneManager->ChangeParent( object, newParent, newChildIndex );
