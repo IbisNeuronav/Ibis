@@ -13,6 +13,11 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QSettings>
 
 
+IbisPlugin::IbisPlugin()
+{
+    m_ibisAPI = 0;
+}
+
 void IbisPlugin::BaseLoadSettings( QSettings & s )
 {
     s.beginGroup( this->GetPluginName() );
