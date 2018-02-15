@@ -49,7 +49,7 @@ void IbisHardwareModule::AddSettingsMenuEntries( QMenu * menu )
 void IbisHardwareModule::Init()
 {
     // Create the tracker if it doesn't exist. Otherwise, make sure tracking is stopped
-    m_tracker->SetSceneManager( GetSceneManager() );
+    m_tracker->SetIbisAPI( GetIbisAPI() );
     m_tracker->StopTracking();
 
     // Read hardware configuration
