@@ -2,13 +2,18 @@
 #define IBISAPI_H
 
 #include <QObject>
+#include <QList>
 #include "application.h"
 
 class SceneManager;
 class SceneObject;
+class QString;
+class PointerObject;
 
-class IbisAPI
+class IbisAPI : public QObject
 {
+
+    Q_OBJECT
 
 public:
     IbisAPI();
@@ -22,11 +27,25 @@ public:
     SceneObject * GetCurrentObject( );
     SceneObject * GetObjectByID( int id );
     SceneObject * GetSceneRoot();
+    PointerObject *GetNavigationPointerObject( );
+    void GetAllImageObjects( QList<ImageObject*> & objects );
 
 
     void ChangeParent( SceneObject * object, SceneObject * newParent, int newChildIndex );
 
     bool IsLoadingScene();
+    const QString GetSceneDirectory();
+
+    static QString FindUniqueName( QString wantedName, QStringList & otherNames );
+
+public slots:
+    void ObjectAddedSlot( int id );
+    void ObjectRemovedSlot( int id );
+
+signals:
+
+    void ObjectAdded( int );
+    void ObjectRemoved( int );
 
 
 private:
