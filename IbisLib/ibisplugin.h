@@ -43,7 +43,7 @@ signals:
 
 protected:
 
-    IbisPlugin() {}
+    IbisPlugin();
     virtual ~IbisPlugin() {}
 
     // These functions should be overriden only by the base class for each plugin type base classes.

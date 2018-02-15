@@ -79,7 +79,7 @@ SET( IBISLIB_HDR
                      gui/guiutilities.h )
 
 SET( IBISLIB_HDR_MOC
-                        ibisapi.h
+                         ibisapi.h
                          view.h
                          application.h
                          mainwindow.h
