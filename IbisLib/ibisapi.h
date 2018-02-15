@@ -21,6 +21,7 @@ public:
     void SetCurrentObject( SceneObject * cur  );
     SceneObject * GetCurrentObject( );
     SceneObject * GetObjectByID( int id );
+    SceneObject * GetSceneRoot();
 
 
     void ChangeParent( SceneObject * object, SceneObject * newParent, int newChildIndex );
