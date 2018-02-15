@@ -17,6 +17,11 @@ IbisPlugin::IbisPlugin()
     m_ibisAPI = 0;
 }
 
+IbisPlugin::IbisPlugin()
+{
+    m_ibisAPI = 0;
+}
+
 void IbisPlugin::BaseLoadSettings( QSettings & s )
 {
     s.beginGroup( this->GetPluginName() );

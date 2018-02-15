@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QList>
 #include <QMap>
+#include "application.h"
 
 class Application;
 class SceneManager;
@@ -89,6 +90,7 @@ public slots:
     void ReferenceTransformChangedSlot();
     void CursorPositionChangedSlot();
     void IbisClockTickSlot();
+
 
 signals:
 
