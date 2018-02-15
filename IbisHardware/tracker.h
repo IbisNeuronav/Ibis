@@ -24,7 +24,7 @@ class vtkPOLARISTracker;
 class vtkTrackerTool;
 class QWidget;
 class vtkMatrix4x4;
-class SceneManager;
+class IbisAPI;
 class TrackedVideoSource;
 class IbisHardwareModule;
 class PolyDataObject;
@@ -93,7 +93,7 @@ public:
     ~Tracker();
 
     void SetHardwareModule( IbisHardwareModule * hw ) { m_hardwareModule = hw; }
-    void SetSceneManager( SceneManager * man ) { m_sceneManager = man; }
+    void SetIbisAPI( IbisAPI * api ) { m_ibisAPI = api; }
         
     // Description:
     // Initialize the tracking system. If IsInitialized() == 1, system is already tracking
@@ -237,8 +237,8 @@ private:
     vtkPOLARISTracker   * m_tracker;
     QString               m_trackerVersion;
 
-    SceneManager * m_sceneManager;
-    IbisHardwareModule * m_hardwareModule;
+    IbisAPI             * m_ibisAPI;
+    IbisHardwareModule  * m_hardwareModule;
     
     // Meta information for every tool that is not contained in vtkTracker
     typedef std::vector<ToolDescription> ToolDescriptionVec;

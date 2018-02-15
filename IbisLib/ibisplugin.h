@@ -16,8 +16,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QObject>
 #include <QString>
 
+class IbisAPI;
 class Application;
-class SceneManager;
 class QSettings;
 
 
@@ -30,8 +30,7 @@ public:
 
     vtkTypeMacro( IbisPlugin, vtkObject );
 
-    Application * GetApplication() { return m_application; }
-    SceneManager * GetSceneManager();
+    IbisAPI * GetIbisAPI() { return m_ibisAPI; }
 
     virtual QString GetPluginName() = 0;
     virtual IbisPluginTypes GetPluginType() = 0;
@@ -61,8 +60,12 @@ private:
 
     friend class Application;
 
+    IbisAPI * m_ibisAPI;
+
+    friend class IbisAPI;
+
     // Should only be called by Application at init and shutdown
-    void SetApplication( Application * app ) { m_application = app; }
+    void SetIbisAPI( IbisAPI * api ) { m_ibisAPI = api; }
     void BaseLoadSettings( QSettings & s );
     void BaseSaveSettings( QSettings & s );
 

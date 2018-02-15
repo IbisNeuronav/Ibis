@@ -14,6 +14,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QDir>
 #include <QMessageBox>
 #include "application.h"
+#include "ibisapi.h"
 #include "mainwindow.h"
 #include "commandlinearguments.h"
 #include "vtkObject.h"
