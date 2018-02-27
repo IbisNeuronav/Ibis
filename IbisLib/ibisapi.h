@@ -29,6 +29,7 @@ public:
     SceneObject * GetSceneRoot();
     PointerObject *GetNavigationPointerObject( );
     void GetAllImageObjects( QList<ImageObject*> & objects );
+    const QList< SceneObject* > & GetAllObjects();
 
 
     void ChangeParent( SceneObject * object, SceneObject * newParent, int newChildIndex );
