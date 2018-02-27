@@ -283,6 +283,11 @@ void vtkIbisImagePlaneMapper::UpdateTexture()
         format = GL_LUMINANCE;
         internalFormat = GL_LUMINANCE;
     }
+    else if( input->GetNumberOfScalarComponents() == 4 )
+    {
+        format = GL_RGBA;
+        internalFormat = GL_RGBA;
+    }
 
     // Setup the texture
     int dim[3];

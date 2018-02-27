@@ -242,7 +242,8 @@ void CameraObject::Export()
      calMatrix->Delete();
 
      m_videoBuffer->Import( directory, progressDlg );
-    SetCurrentFrame( 0 );
+     SetCurrentFrame( 0 );
+     m_videoInputSwitch->Update();  // Without this update, image is not displayed, but it shouldn't be needed
 
      // Update representation in view
      UpdateGeometricRepresentation();
