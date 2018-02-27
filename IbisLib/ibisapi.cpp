@@ -69,6 +69,11 @@ void IbisAPI::GetAllImageObjects( QList<ImageObject*> & objects )
     m_sceneManager->GetAllImageObjects( objects );
 }
 
+const QList<SceneObject *> &IbisAPI::GetAllObjects()
+{
+    return m_sceneManager->GetAllObjects();
+}
+
 void IbisAPI::ChangeParent( SceneObject * object, SceneObject * newParent, int newChildIndex )
 {
     m_sceneManager->ChangeParent( object, newParent, newChildIndex );
