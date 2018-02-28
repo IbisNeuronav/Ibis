@@ -11,7 +11,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "doubleviewwidget.h"
 #include "ui_doubleviewwidget.h"
 #include "usacquisitionplugininterface.h"
-#include "scenemanager.h"
+#include "ibisapi.h"
 #include "imageobject.h"
 #include "usacquisitionobject.h"
 #include "usprobeobject.h"
@@ -218,12 +218,12 @@ void DoubleViewWidget::UpdateUi()
 
     // Update acquisition combo
     QList<USAcquisitionObject*> acquisitions;
-    m_pluginInterface->GetSceneManager()->GetAllUSAcquisitionObjects( acquisitions );
+    m_pluginInterface->GetIbisAPI()->GetAllUSAcquisitionObjects( acquisitions );
     GuiUtilities::UpdateSceneObjectComboBox( ui->acquisitionsComboBox, acquisitions, m_pluginInterface->GetCurrentAcquisitionObjectId());
 
     // Update volume combo
     QList<ImageObject*> images;
-    m_pluginInterface->GetSceneManager()->GetAllImageObjects( images );
+    m_pluginInterface->GetIbisAPI()->GetAllImageObjects( images );
     GuiUtilities::UpdateSceneObjectComboBox( ui->imageObjectsComboBox_1, images, m_pluginInterface->GetCurrentVolumeObjectId());
 
     // Update added volume combo
