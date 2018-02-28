@@ -17,6 +17,7 @@ class ImageObject;
 class ToolPluginInterface;
 class ObjectPluginInterface;
 class View;
+class USAcquisitionObject;
 
 class QProgressDialog;
 class QString;

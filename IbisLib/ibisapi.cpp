@@ -10,6 +10,7 @@
 #include "usacquisitionobject.h"
 #include "toolplugininterface.h"
 #include "objectplugininterface.h"
+#include "usacquisitionobject.h"
 
 #include <QString>
 
@@ -30,6 +31,7 @@ IbisAPI::~IbisAPI()
     disconnect( m_application, SIGNAL( IbisClockTick() ), this, SLOT( IbisClockTickSlot() ) );
 }
 
+// from SceneManager
 void IbisAPI::SetApplication( Application * app )
 {
     m_application = app;
