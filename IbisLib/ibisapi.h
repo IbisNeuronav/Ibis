@@ -7,8 +7,11 @@
 
 class SceneManager;
 class SceneObject;
-class QString;
+class USAcquisitionObject;
+class UsProbeObject;
 class PointerObject;
+class QProgressDialog;
+class QString;
 
 class IbisAPI : public QObject
 {
@@ -21,6 +24,7 @@ public:
 
     static const int InvalidId;
 
+    // from SceneManager:
     void AddObject( SceneObject * object, SceneObject * attachTo = 0 );
     void RemoveObject( SceneObject * object , bool viewChange = true);
     void SetCurrentObject( SceneObject * cur  );
@@ -30,6 +34,8 @@ public:
     PointerObject *GetNavigationPointerObject( );
     void GetAllImageObjects( QList<ImageObject*> & objects );
     const QList< SceneObject* > & GetAllObjects();
+    void GetAllUSAcquisitionObjects( QList<USAcquisitionObject*> & all );
+    void GetAllUsProbeObjects( QList<UsProbeObject*> & all );
 
 
     void ChangeParent( SceneObject * object, SceneObject * newParent, int newChildIndex );
@@ -38,6 +44,13 @@ public:
     const QString GetSceneDirectory();
 
     static QString FindUniqueName( QString wantedName, QStringList & otherNames );
+
+
+    // from Application
+    QProgressDialog * StartProgress( int max, const QString & caption = QString() );
+    void StopProgress( QProgressDialog * progressDialog);
+    void UpdateProgress( QProgressDialog*, int current );
+
 
 public slots:
     void ObjectAddedSlot( int id );

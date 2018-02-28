@@ -15,6 +15,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "imageobject.h"
 #include "doubleviewwidget.h"
 #include "scenemanager.h"
+#include "ibisapi.h"
 #include <QtPlugin>
 #include <QString>
 #include <QtGui>
@@ -53,15 +54,15 @@ bool USAcquisitionPluginInterface::CanRun()
 
 QWidget *USAcquisitionPluginInterface::CreateFloatingWidget()
 {
-    m_baseDir = GetSceneManager()->GetSceneDirectory();
+    IbisAPI *ibisAPI = GetIbisAPI();
+    Q_ASSERT(ibisAPI);
+    m_baseDir = ibisAPI->GetSceneDirectory();
     m_baseDir.append("/");
     m_baseDir.append(ACQ_BASE_DIR);
 
     // Watch for objects added and removed from the scene
-    SceneManager * man = GetSceneManager();
-    Q_ASSERT(man);
-    connect( man, SIGNAL(ObjectAdded(int)), this, SLOT(SceneContentChanged()) );
-    connect( man, SIGNAL(ObjectRemoved(int)), this, SLOT(SceneContentChanged()) );
+    connect( ibisAPI, SIGNAL(ObjectAdded(int)), this, SLOT(SceneContentChanged()) );
+    connect( ibisAPI, SIGNAL(ObjectRemoved(int)), this, SLOT(SceneContentChanged()) );
 
     ValidateAllSceneObjects();
 
@@ -76,9 +77,10 @@ QWidget *USAcquisitionPluginInterface::CreateFloatingWidget()
 
 bool USAcquisitionPluginInterface::WidgetAboutToClose()
 {
-    SceneManager * man = GetSceneManager();
-    disconnect( man, SIGNAL(ObjectAdded(int)), this, SLOT(SceneContentChanged()) );
-    disconnect( man, SIGNAL(ObjectRemoved(int)), this, SLOT(SceneContentChanged()) );
+    IbisAPI *ibisAPI = GetIbisAPI();
+    Q_ASSERT(ibisAPI);
+    disconnect( ibisAPI, SIGNAL(ObjectAdded(int)), this, SLOT(SceneContentChanged()) );
+    disconnect( ibisAPI, SIGNAL(ObjectRemoved(int)), this, SLOT(SceneContentChanged()) );
 
     USAcquisitionObject * acq = GetCurrentAcquisition();
     if( acq )
@@ -98,12 +100,16 @@ bool USAcquisitionPluginInterface::WidgetAboutToClose()
 
 UsProbeObject * USAcquisitionPluginInterface::GetCurrentUsProbe()
 {
-    return UsProbeObject::SafeDownCast( GetSceneManager()->GetObjectByID( m_currentProbeObjectId ) );
+    IbisAPI *ibisAPI = GetIbisAPI();
+    Q_ASSERT(ibisAPI);
+    return UsProbeObject::SafeDownCast( ibisAPI->GetObjectByID( m_currentProbeObjectId ) );
 }
 
 USAcquisitionObject * USAcquisitionPluginInterface::GetCurrentAcquisition()
 {
-    return USAcquisitionObject::SafeDownCast( GetSceneManager()->GetObjectByID( m_currentAcquisitionObjectId ) );
+    IbisAPI *ibisAPI = GetIbisAPI();
+    Q_ASSERT(ibisAPI);
+    return USAcquisitionObject::SafeDownCast( ibisAPI->GetObjectByID( m_currentAcquisitionObjectId ) );
 }
 
 void USAcquisitionPluginInterface::ValidateAllSceneObjects()
@@ -117,13 +123,14 @@ void USAcquisitionPluginInterface::ValidateAllSceneObjects()
 void USAcquisitionPluginInterface::ValidateCurrentAcquisition()
 {
     int initialAcqId = m_currentAcquisitionObjectId;
-    SceneManager * man = GetSceneManager();
-    if( !man->GetObjectByID( m_currentAcquisitionObjectId ) )
+    IbisAPI *ibisAPI = GetIbisAPI();
+    Q_ASSERT(ibisAPI);
+    if( !ibisAPI->GetObjectByID( m_currentAcquisitionObjectId ) )
         m_currentAcquisitionObjectId = SceneManager::InvalidId;
     if( m_currentAcquisitionObjectId == SceneManager::InvalidId  )
     {
         QList<USAcquisitionObject*> acquisitions;
-        man->GetAllUSAcquisitionObjects( acquisitions );
+        ibisAPI->GetAllUSAcquisitionObjects( acquisitions );
         if( acquisitions.size() > 0)
             m_currentAcquisitionObjectId = acquisitions[0]->GetObjectID();
     }
@@ -135,13 +142,14 @@ void USAcquisitionPluginInterface::ValidateCurrentAcquisition()
 void USAcquisitionPluginInterface::ValidateCurrentUsProbe()
 {
     int initialProbeId = m_currentProbeObjectId;
-    SceneManager * man = GetSceneManager();
-    if( !man->GetObjectByID( m_currentProbeObjectId ) )
+    IbisAPI *ibisAPI = GetIbisAPI();
+    Q_ASSERT(ibisAPI);
+    if( !ibisAPI->GetObjectByID( m_currentProbeObjectId ) )
         m_currentProbeObjectId = SceneManager::InvalidId;
     if( m_currentProbeObjectId == SceneManager::InvalidId )
     {
         QList<UsProbeObject*> allProbes;
-        man->GetAllUsProbeObjects( allProbes );
+        ibisAPI->GetAllUsProbeObjects( allProbes );
         if( allProbes.size() > 0 )
             m_currentProbeObjectId = allProbes[0]->GetObjectID();
     }
@@ -152,27 +160,32 @@ void USAcquisitionPluginInterface::ValidateCurrentUsProbe()
 
 ImageObject * USAcquisitionPluginInterface::GetCurrentVolume()
 {
-    return ImageObject::SafeDownCast( GetSceneManager()->GetObjectByID( m_currentVolumeObjectId ) );
+    IbisAPI *ibisAPI = GetIbisAPI();
+    Q_ASSERT(ibisAPI);
+    return ImageObject::SafeDownCast( ibisAPI->GetObjectByID( m_currentVolumeObjectId ) );
 }
 
 ImageObject * USAcquisitionPluginInterface::GetAddedVolume()
 {
-    return ImageObject::SafeDownCast( GetSceneManager()->GetObjectByID( m_addedVolumeObjectId ) );
+    IbisAPI *ibisAPI = GetIbisAPI();
+    Q_ASSERT(ibisAPI);
+    return ImageObject::SafeDownCast( ibisAPI->GetObjectByID( m_addedVolumeObjectId ) );
 }
 
 void USAcquisitionPluginInterface::ValidateCurrentVolume()
 {
     int initialVolumeId = m_currentVolumeObjectId;
 
-    SceneManager * man = GetSceneManager();
-    if( !man->GetObjectByID( m_currentVolumeObjectId ) )
+    IbisAPI *ibisAPI = GetIbisAPI();
+    Q_ASSERT(ibisAPI);
+    if( !ibisAPI->GetObjectByID( m_currentVolumeObjectId ) )
         m_currentVolumeObjectId = SceneManager::InvalidId;
 
     int newVolumeId = m_currentVolumeObjectId;
     if( newVolumeId == SceneManager::InvalidId )
     {
         QList<ImageObject*> images;
-        man->GetAllImageObjects( images );
+        ibisAPI->GetAllImageObjects( images );
         if( images.size() > 0 )
             newVolumeId = images[0]->GetObjectID();
     }
@@ -188,15 +201,16 @@ void USAcquisitionPluginInterface::ValidateAddedVolume()
 {
     int initialVolumeId = m_addedVolumeObjectId;
 
-    SceneManager * man = GetSceneManager();
-    if( !man->GetObjectByID( m_addedVolumeObjectId ) )
+    IbisAPI *ibisAPI = GetIbisAPI();
+    Q_ASSERT(ibisAPI);
+    if( !ibisAPI->GetObjectByID( m_addedVolumeObjectId ) )
         m_addedVolumeObjectId = SceneManager::InvalidId;
 
     int newVolumeId = m_addedVolumeObjectId;
     if( newVolumeId == SceneManager::InvalidId )
     {
         QList<ImageObject*> images;
-        man->GetAllImageObjects( images );
+        ibisAPI->GetAllImageObjects( images );
         if( images.size() > 1 )
             newVolumeId = images[1]->GetObjectID();
         else if( images.size() > 0 )
@@ -214,7 +228,8 @@ void USAcquisitionPluginInterface::ValidateAddedVolume()
 
 void USAcquisitionPluginInterface::NewAcquisition()
 {
-    SceneManager * manager = GetSceneManager();
+    IbisAPI *ibisAPI = GetIbisAPI();
+    Q_ASSERT(ibisAPI);
     USAcquisitionObject *newAcquisition = USAcquisitionObject::New();
     newAcquisition->SetCanAppendChildren(true);
     newAcquisition->SetNameChangeable( true );
@@ -228,8 +243,8 @@ void USAcquisitionPluginInterface::NewAcquisition()
     newAcquisition->SetName(name);
     newAcquisition->SetUsProbe( GetCurrentUsProbe() );
     newAcquisition->SetHidden( true );
-    manager->AddObject(newAcquisition);
-    manager->SetCurrentObject(newAcquisition);
+    ibisAPI->AddObject(newAcquisition);
+    ibisAPI->SetCurrentObject(newAcquisition);
     m_currentAcquisitionObjectId = newAcquisition->GetObjectID();
     newAcquisition->Delete();
 
@@ -259,14 +274,16 @@ void USAcquisitionPluginInterface::SetCurrentAcquisitionObjectId( int id )
 
 void USAcquisitionPluginInterface::SetCurrentVolumeObjectId( int id )
 {
-    ImageObject * prev = ImageObject::SafeDownCast( GetSceneManager()->GetObjectByID( m_currentVolumeObjectId ) );
+    IbisAPI *ibisAPI = GetIbisAPI();
+    Q_ASSERT(ibisAPI);
+    ImageObject * prev = ImageObject::SafeDownCast( ibisAPI->GetObjectByID( m_currentVolumeObjectId ) );
     if( prev )
     {
         disconnect( prev, SIGNAL(LutChanged(int)), this, SLOT(LutChanged(int)) );
         disconnect( prev, SIGNAL(ObjectModified()), this, SLOT(OnImageChanged()));
     }
     m_currentVolumeObjectId = id;
-    ImageObject * im = ImageObject::SafeDownCast( GetSceneManager()->GetObjectByID( id ) );
+    ImageObject * im = ImageObject::SafeDownCast( ibisAPI->GetObjectByID( id ) );
     if( im )
     {
         connect( im, SIGNAL(LutChanged(int)), this, SLOT(LutChanged(int)) );
@@ -276,14 +293,16 @@ void USAcquisitionPluginInterface::SetCurrentVolumeObjectId( int id )
 
 void USAcquisitionPluginInterface::SetAddedVolumeObjectId( int id )
 {
-    ImageObject * prev = ImageObject::SafeDownCast( GetSceneManager()->GetObjectByID( m_addedVolumeObjectId ) );
+    IbisAPI *ibisAPI = GetIbisAPI();
+    Q_ASSERT(ibisAPI);
+    ImageObject * prev = ImageObject::SafeDownCast( ibisAPI->GetObjectByID( m_addedVolumeObjectId ) );
     if( prev )
     {
         disconnect( prev, SIGNAL(LutChanged(int)), this, SLOT(LutChanged(int)) );
         disconnect( prev, SIGNAL(ObjectModified()), this, SLOT(OnImageChanged()));
     }
     m_addedVolumeObjectId = id;
-    ImageObject * im = ImageObject::SafeDownCast( GetSceneManager()->GetObjectByID( id ) );
+    ImageObject * im = ImageObject::SafeDownCast( ibisAPI->GetObjectByID( id ) );
     if( im )
     {
         connect( im, SIGNAL(LutChanged(int)), this, SLOT(LutChanged(int)) );
@@ -308,9 +327,10 @@ void USAcquisitionPluginInterface::OnImageChanged()
 
 void USAcquisitionPluginInterface::MakeAcquisitionName(QString & name)
 {
-    SceneManager *manager = GetSceneManager();
+    IbisAPI *ibisAPI = GetIbisAPI();
+    Q_ASSERT(ibisAPI);
     QList< USAcquisitionObject* > acquisitions;
-    manager->GetAllUSAcquisitionObjects(acquisitions);
+    ibisAPI->GetAllUSAcquisitionObjects(acquisitions);
     int index = acquisitions.count();
     QString namePrefix(ACQ_ACQUISITION_PREFIX);
     name = namePrefix;

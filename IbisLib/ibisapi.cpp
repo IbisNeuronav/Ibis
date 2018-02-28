@@ -1,7 +1,10 @@
 #include "ibisapi.h"
 #include "scenemanager.h"
 #include "sceneobject.h"
+#include "imageobject.h"
 #include "pointerobject.h"
+#include "usprobeobject.h"
+#include "usacquisitionobject.h"
 
 #include <QString>
 
@@ -19,7 +22,7 @@ IbisAPI::~IbisAPI()
     disconnect( m_sceneManager, SIGNAL( ObjectRemoved(int) ), this, SLOT( ObjectRemovedSlot(int) ) );
 }
 
-
+// from SceneManager
 void IbisAPI::SetApplication( Application * app )
 {
     m_application = app;
@@ -74,6 +77,16 @@ const QList<SceneObject *> &IbisAPI::GetAllObjects()
     return m_sceneManager->GetAllObjects();
 }
 
+void IbisAPI::GetAllUSAcquisitionObjects( QList<USAcquisitionObject*> & all )
+{
+    return m_sceneManager->GetAllUSAcquisitionObjects( all );
+}
+
+void IbisAPI::GetAllUsProbeObjects( QList<UsProbeObject*> & all )
+{
+    return m_sceneManager->GetAllUsProbeObjects( all );
+}
+
 void IbisAPI::ChangeParent( SceneObject * object, SceneObject * newParent, int newChildIndex )
 {
     m_sceneManager->ChangeParent( object, newParent, newChildIndex );
@@ -103,4 +116,21 @@ void IbisAPI::ObjectAddedSlot( int id )
 void IbisAPI::ObjectRemovedSlot( int id )
 {
     emit ObjectRemoved( id );
+}
+
+
+// from Application
+QProgressDialog * IbisAPI::StartProgress( int max, const QString & caption )
+{
+    return m_application->StartProgress( max, caption );
+}
+
+void IbisAPI::StopProgress( QProgressDialog * progressDialog )
+{
+    m_application->StopProgress( progressDialog );
+}
+
+void IbisAPI::UpdateProgress( QProgressDialog* progressDialog, int current )
+{
+    m_application->UpdateProgress( progressDialog, current );
 }
