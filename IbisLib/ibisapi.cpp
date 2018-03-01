@@ -5,6 +5,7 @@
 #include "pointerobject.h"
 #include "usprobeobject.h"
 #include "usacquisitionobject.h"
+#include "toolplugininterface.h"
 
 #include <QString>
 
@@ -133,4 +134,9 @@ void IbisAPI::StopProgress( QProgressDialog * progressDialog )
 void IbisAPI::UpdateProgress( QProgressDialog* progressDialog, int current )
 {
     m_application->UpdateProgress( progressDialog, current );
+}
+
+ToolPluginInterface * IbisAPI::GetToolPluginByName( QString name )
+{
+    return m_application->GetToolPluginByName( name );
 }

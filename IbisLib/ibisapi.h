@@ -10,6 +10,8 @@ class SceneObject;
 class USAcquisitionObject;
 class UsProbeObject;
 class PointerObject;
+class ToolPluginInterface;
+
 class QProgressDialog;
 class QString;
 
@@ -51,6 +53,7 @@ public:
     void StopProgress( QProgressDialog * progressDialog);
     void UpdateProgress( QProgressDialog*, int current );
 
+    ToolPluginInterface * GetToolPluginByName( QString name );
 
 public slots:
     void ObjectAddedSlot( int id );

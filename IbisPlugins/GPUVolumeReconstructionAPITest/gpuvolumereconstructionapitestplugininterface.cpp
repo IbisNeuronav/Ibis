@@ -7,11 +7,11 @@
 #include "vtkImageData.h"
 #include "vtkSmartPointer.h"
 #include "application.h"
-#include "scenemanager.h"
 #include "imageobject.h"
 #include "gpu_volumereconstructionplugininterface.h"
 #include "gpu_volumereconstruction.h"
 #include "usacquisitionobject.h"
+#include "ibisapi.h"
 
 GPUVolumeReconstructionAPITestPluginInterface::GPUVolumeReconstructionAPITestPluginInterface()
 {
@@ -28,14 +28,15 @@ bool GPUVolumeReconstructionAPITestPluginInterface::CanRun()
 
 QWidget * GPUVolumeReconstructionAPITestPluginInterface::CreateFloatingWidget()
 {
-    ToolPluginInterface * toolPlugin = this->GetApplication()->GetToolPluginByName( "GPU_VolumeReconstruction");
+    IbisAPI *ibisAPI = this->GetIbisAPI();
+    Q_ASSERT(ibisAPI);
+    ToolPluginInterface * toolPlugin = ibisAPI->GetToolPluginByName( "GPU_VolumeReconstruction");
     if( !toolPlugin )
         return 0;
     GPU_VolumeReconstructionPluginInterface *volumeReconstructorPlugin = GPU_VolumeReconstructionPluginInterface::SafeDownCast( toolPlugin );
     Q_ASSERT( volumeReconstructorPlugin );
-    SceneManager *sm = this->GetSceneManager();
     QList<USAcquisitionObject*> acquisitions;
-    sm->GetAllUSAcquisitionObjects( acquisitions );
+    ibisAPI->GetAllUSAcquisitionObjects( acquisitions );
 
     int numberOfAcquisitions = acquisitions.count();
     if( numberOfAcquisitions > 0 )
@@ -69,8 +70,8 @@ QWidget * GPUVolumeReconstructionAPITestPluginInterface::CreateFloatingWidget()
             QString volName("ReconstructedVolume");
             volName.append( QString::number( i ) );
             reconstructedImage->SetName(volName);
-            sm->AddObject(reconstructedImage, sm->GetSceneRoot() );
-            sm->SetCurrentObject( reconstructedImage );
+            ibisAPI->AddObject(reconstructedImage.GetPointer(), acq->GetParent()->GetParent() );
+            ibisAPI->SetCurrentObject( reconstructedImage.GetPointer() );
         }
         reconstructor->Delete();
         return 0;
