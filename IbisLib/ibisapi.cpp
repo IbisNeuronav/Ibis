@@ -230,7 +230,6 @@ QString IbisAPI::GetConfigDirectory()
 {
     return m_application->GetConfigDirectory();
 }
-
 QString IbisAPI::GetOpenFileName( const QString & caption, const QString & dir, const QString & filter )
 {
     return m_application->GetOpenFileName( caption, dir, filter );

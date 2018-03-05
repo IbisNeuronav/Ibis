@@ -3,8 +3,11 @@
 
 #include <QObject>
 #include <QList>
+<<<<<<< a3a5ef9966ce17a06b764b481ceab5f93cb83137
 #include <QMap>
 #include "application.h"
+=======
+>>>>>>> Replaced Application and SceneManager with ibisAPI in ibishardwaremodule.cpp and hardwaremodule.h. Added GetConfigDirectory() and GetGitHashShort() to ibisAPI.
 
 class Application;
 class SceneManager;
@@ -12,7 +15,10 @@ class SceneObject;
 class USAcquisitionObject;
 class UsProbeObject;
 class PointerObject;
+<<<<<<< a3a5ef9966ce17a06b764b481ceab5f93cb83137
 class CameraObject;
+=======
+>>>>>>> Replaced Application and SceneManager with ibisAPI in ibishardwaremodule.cpp and hardwaremodule.h. Added GetConfigDirectory() and GetGitHashShort() to ibisAPI.
 class ImageObject;
 class ToolPluginInterface;
 class ObjectPluginInterface;
