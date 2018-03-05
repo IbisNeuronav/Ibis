@@ -3,13 +3,14 @@
 
 #include <QObject>
 #include <QList>
-#include "application.h"
 
+class Application;
 class SceneManager;
 class SceneObject;
 class USAcquisitionObject;
 class UsProbeObject;
 class PointerObject;
+class ImageObject;
 class ToolPluginInterface;
 
 class QProgressDialog;
@@ -53,6 +54,8 @@ public:
     void StopProgress( QProgressDialog * progressDialog);
     void UpdateProgress( QProgressDialog*, int current );
 
+    QString GetConfigDirectory();
+    QString GetGitHashShort();
     ToolPluginInterface * GetToolPluginByName( QString name );
 
 public slots:

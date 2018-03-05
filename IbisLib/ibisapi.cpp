@@ -1,4 +1,5 @@
 #include "ibisapi.h"
+#include "application.h"
 #include "scenemanager.h"
 #include "sceneobject.h"
 #include "imageobject.h"
@@ -134,6 +135,16 @@ void IbisAPI::StopProgress( QProgressDialog * progressDialog )
 void IbisAPI::UpdateProgress( QProgressDialog* progressDialog, int current )
 {
     m_application->UpdateProgress( progressDialog, current );
+}
+
+QString IbisAPI::GetConfigDirectory()
+{
+    return m_application->GetConfigDirectory();
+}
+
+QString IbisAPI::GetGitHashShort()
+{
+    return m_application->GetGitHashShort();
 }
 
 ToolPluginInterface * IbisAPI::GetToolPluginByName( QString name )
