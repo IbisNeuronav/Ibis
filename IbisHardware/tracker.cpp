@@ -23,8 +23,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "vtkPLYReader.h"
 #include "serializerhelper.h"
 
-#include "application.h"
-#include "scenemanager.h"
 #include "trackedsceneobject.h"
 #include "pointerobject.h"
 #include "usprobeobject.h"
@@ -37,7 +35,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 ObjectSerializationMacro( Tracker );
 ObjectSerializationMacro( ToolDescription );
 
-ToolDescription::ToolDescription() : type( Passive ), use( Generic ), active(0), toolPort(-1), name(""), romFileName("")
+ToolDescription::ToolDescription() :
+    type( Passive ), use( Generic ), active(0), toolPort(-1), name(""), romFileName(""), configDir("")
 {
     this->videoSourceIndex = 0;
     this->cachedSerialNumber = "";
@@ -102,7 +101,7 @@ void ToolDescription::InstanciateSceneObject()
     sceneObject->SetCanEditTransformManually( false );
 
     // instanciate tool model if it is available
-    QString toolModelDir = Application::GetInstance().GetConfigDirectory() + "/tool-models";
+    QString toolModelDir = configDir + "/tool-models";
     QString modelFileName = toolModelDir + "/" + this->name + ".ply";
     if( QFile::exists( modelFileName ) )
     {
@@ -433,6 +432,7 @@ int Tracker::AddNewTool( ToolType type, QString & name )
         desc.active = 0;
         desc.name = name;
         desc.romFileName = "";
+        desc.SetConfigDir( m_ibisAPI->GetConfigDirectory() );
         desc.InstanciateSceneObject();
         m_toolVec.push_back( desc );
         m_currentTool = m_toolVec.size() - 1;
