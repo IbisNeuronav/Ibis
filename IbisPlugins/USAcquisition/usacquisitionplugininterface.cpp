@@ -14,7 +14,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "usprobeobject.h"
 #include "imageobject.h"
 #include "doubleviewwidget.h"
-#include "scenemanager.h"
 #include "ibisapi.h"
 #include <QtPlugin>
 #include <QString>
