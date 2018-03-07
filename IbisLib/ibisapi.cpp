@@ -5,6 +5,7 @@
 #include "imageobject.h"
 #include "pointerobject.h"
 #include "usprobeobject.h"
+#include "cameraobject.h"
 #include "usacquisitionobject.h"
 #include "toolplugininterface.h"
 
@@ -89,6 +90,11 @@ void IbisAPI::GetAllUsProbeObjects( QList<UsProbeObject*> & all )
     return m_sceneManager->GetAllUsProbeObjects( all );
 }
 
+void IbisAPI::GetAllCameraObjects( QList<CameraObject*> & all )
+{
+    return m_sceneManager->GetAllCameraObjects( all );
+}
+
 void IbisAPI::ChangeParent( SceneObject * object, SceneObject * newParent, int newChildIndex )
 {
     m_sceneManager->ChangeParent( object, newParent, newChildIndex );
@@ -135,6 +141,11 @@ void IbisAPI::StopProgress( QProgressDialog * progressDialog )
 void IbisAPI::UpdateProgress( QProgressDialog* progressDialog, int current )
 {
     m_application->UpdateProgress( progressDialog, current );
+}
+
+bool IbisAPI::IsViewerOnly()
+{
+    return m_application->IsViewerOnly();
 }
 
 QString IbisAPI::GetConfigDirectory()

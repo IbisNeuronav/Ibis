@@ -10,6 +10,7 @@ class SceneObject;
 class USAcquisitionObject;
 class UsProbeObject;
 class PointerObject;
+class CameraObject;
 class ImageObject;
 class ToolPluginInterface;
 
@@ -39,6 +40,7 @@ public:
     const QList< SceneObject* > & GetAllObjects();
     void GetAllUSAcquisitionObjects( QList<USAcquisitionObject*> & all );
     void GetAllUsProbeObjects( QList<UsProbeObject*> & all );
+    void GetAllCameraObjects( QList<CameraObject*> & all );
 
 
     void ChangeParent( SceneObject * object, SceneObject * newParent, int newChildIndex );
@@ -54,6 +56,7 @@ public:
     void StopProgress( QProgressDialog * progressDialog);
     void UpdateProgress( QProgressDialog*, int current );
 
+    bool IsViewerOnly();
     QString GetConfigDirectory();
     QString GetGitHashShort();
     ToolPluginInterface * GetToolPluginByName( QString name );
