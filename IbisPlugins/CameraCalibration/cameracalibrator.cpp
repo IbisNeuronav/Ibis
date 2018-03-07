@@ -10,9 +10,10 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 // Thanks to Simon Drouin for writing this class
 
+#include "cameracalibrationplugininterface.h"
 #include "cameracalibrator.h"
 #include "cameraobject.h"
-#include "application.h"
+#include "ibisapi.h"
 #include "vtkImageData.h"
 #include "vtkMatrix4x4.h"
 #include "vtkMatrix4x4Operators.h"
@@ -55,6 +56,7 @@ CameraCalibrator::CameraCalibrator()
     m_gridHeight = 1;
     m_gridCellSize = 30.0;
     m_minimizer = vtkAmoebaMinimizer::New();
+    m_pluginInterface = 0;
 }
 
 CameraCalibrator::~CameraCalibrator()
@@ -128,7 +130,7 @@ void CameraCalibrator::ExportCalibrationData( QString dir, QProgressDialog * pro
         writer->Write();
 
         if( progressDlg )
-            Application::GetInstance().UpdateProgress( progressDlg, (int)round( (float)i / m_cameraImages.size() * 100.0 ) );
+            m_pluginInterface->GetIbisAPI()->UpdateProgress( progressDlg, (int)round( (float)i / m_cameraImages.size() * 100.0 ) );
     }
     writer->Delete();
 }
@@ -218,7 +220,7 @@ void CameraCalibrator::ImportCalibrationData( QString dirName, QProgressDialog *
         m_viewEnabled.push_back( true );
 
         if( progressDlg )
-            Application::GetInstance().UpdateProgress( progressDlg, (int)round( (float)i / numberOfViews * 100.0 ) );
+            m_pluginInterface->GetIbisAPI()->UpdateProgress( progressDlg, (int)round( (float)i / numberOfViews * 100.0 ) );
     }
     reader->Delete();
 }
@@ -760,7 +762,7 @@ double CameraCalibrator::ComputeCrossValidation( double translationScale, double
         }
 
         if( progressDlg )
-            Application::GetInstance().UpdateProgress( progressDlg, (int)round( (float)xvalIndex / numberOfViews * 100.0 ) );
+            m_pluginInterface->GetIbisAPI()->UpdateProgress( progressDlg, (int)round( (float)xvalIndex / numberOfViews * 100.0 ) );
     }
 
     // Compute mean reprojection error
@@ -855,3 +857,7 @@ void CameraCalibrator::ClearMatrixArray( std::vector< vtkMatrix4x4 * > & matVec 
     matVec.clear();
 }
 
+void CameraCalibrator::SetPluginInterface( CameraCalibrationPluginInterface *ifc )
+{
+    m_pluginInterface = ifc;
+}
