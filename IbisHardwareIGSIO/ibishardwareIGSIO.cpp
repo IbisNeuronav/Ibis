@@ -30,9 +30,11 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "igtlioVideoConverter.h"
 #include "igtlioVideoDevice.h"
 #include "plusserverinterface.h"
+#include "configio.h"
 
 static const QString DefaultPlusConfigDirectory = Application::GetConfigDirectory() + QString("PlusToolkit/");
-static const QString DefaultPlusConfigFilesDirectory = DefaultPlusConfigDirectory + QString("ConfigFiles/");
+static const QString DefaultPlusConfigFilesDirectory = DefaultPlusConfigDirectory + QString("PlusConfigFiles/");
+static const QString DefaultIGSIOConfigFilesDirectory = DefaultPlusConfigDirectory + QString("IGSIOConfigFiles/");
 static const QString PlusToolkitPathsFilename = DefaultPlusConfigDirectory + QString("plus-toolkit-paths.txt");
 
 IbisHardwareIGSIO::IbisHardwareIGSIO()
@@ -44,13 +46,13 @@ IbisHardwareIGSIO::IbisHardwareIGSIO()
     m_plusConfigDir = DefaultPlusConfigFilesDirectory;
 
     // Look for the Plus Toolkit path
-    /*if( QFile::exists( PlusToolkitPathsFilename ) )
+    if( QFile::exists( PlusToolkitPathsFilename ) )
     {
         QFile pathFile( PlusToolkitPathsFilename );
         pathFile.open( QIODevice::ReadOnly | QIODevice::Text );
         QTextStream pathIn( &pathFile );
         pathIn >> m_plusServerExec;
-    }*/
+    }
 }
 
 IbisHardwareIGSIO::~IbisHardwareIGSIO()
@@ -59,12 +61,12 @@ IbisHardwareIGSIO::~IbisHardwareIGSIO()
 
 void IbisHardwareIGSIO::LoadSettings( QSettings & s )
 {
-    m_plusLastConfigFile = s.value( "LastConfigFile", "" ).toString();
+    m_lastIGSIOConfigFile = s.value( "LastConfigFile", "" ).toString();
 }
 
 void IbisHardwareIGSIO::SaveSettings( QSettings & s )
 {
-    s.setValue( "LastConfigFile", m_plusLastConfigFile );
+    s.setValue( "LastConfigFile", m_lastIGSIOConfigFile );
 }
 
 void IbisHardwareIGSIO::AddSettingsMenuEntries( QMenu * menu )
@@ -79,14 +81,22 @@ void IbisHardwareIGSIO::Init()
     m_logicController->setLogic( m_logic );
 
     // Temporarily encode config file until we have gui to do it
-    m_plusLastConfigFile = "PlusDeviceSet_OpenIGTLinkCommandsTest.xml";
+    m_lastIGSIOConfigFile = "IGSIOConfig.xml";
 
-    // Make sure we have a valid config file before trying to launch a server
-    /*QFileInfo configInfo( m_plusConfigDir + m_plusLastConfigFile );
-    if( configInfo.exists() && configInfo.isReadable() )
+    // Try to launch or connect with all servers in the config file or connect to existing servers
+    QString configFile = DefaultIGSIOConfigFilesDirectory + m_lastIGSIOConfigFile;
+    ConfigIO in( configFile );
+    for( int i = 0; i < in.GetNumberOfServers(); ++i )
     {
-        LaunchAndConnectLocal();
-    }*/
+        // If the server is local and should be launched automatically, then launch it
+        if( in.GetServerIPAddress(i) == "localhost" && in.GetStartAuto(i) )
+        {
+            LauchLocalServer( in.GetServerPort(i), in.GetPlusConfigFile(i) );
+        }
+
+        // Now try to connect to server
+        Connect( in.GetServerIPAddress(i), in.GetServerPort(i) );
+    }
 }
 
 TrackerToolState StatusStringToState( const std::string & status )
@@ -143,18 +153,14 @@ bool IbisHardwareIGSIO::ShutDown()
     return true;
 }
 
-#include "vtkTimerLog.h"
-#include "vtksys/SystemTools.hxx"
-
-bool IbisHardwareIGSIO::LaunchAndConnectLocal()
-{   
-    // First try to launch a server
+bool IbisHardwareIGSIO::LauchLocalServer( int port, QString plusConfigFile )
+{
     if( !m_plusLauncher )
     {
         m_plusLauncher = vtkSmartPointer<PlusServerInterface>::New();
         m_plusLauncher->SetServerExecutable( m_plusServerExec );
     }
-    QString plusConfiFile = m_plusConfigDir + m_plusLastConfigFile;
+    QString plusConfiFile = m_plusConfigDir + plusConfigFile;
     bool didLaunch = m_plusLauncher->StartServer( plusConfiFile );
     if( !didLaunch )
     {
@@ -162,8 +168,14 @@ bool IbisHardwareIGSIO::LaunchAndConnectLocal()
         GetApplication()->Warning("Error", msg);
         return false;
     }
+    return true;
+}
 
-    // Now, try to connect to it. By default the connector tries local host with port where server is listening
+#include "vtkTimerLog.h"
+#include "vtksys/SystemTools.hxx"
+
+bool IbisHardwareIGSIO::Connect( std::string ip, int port )
+{   
     igtlio::ConnectorPointer c = m_logic->CreateConnector();
     c->Start();
 

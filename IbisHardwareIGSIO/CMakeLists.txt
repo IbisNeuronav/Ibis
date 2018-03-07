@@ -13,8 +13,8 @@ find_package(OpenIGTLink REQUIRED)
 find_package( OpenIGTLinkIO REQUIRED )
 
 # Define sources
-set( IbisHardwareIgsioSrc ibishardwareIGSIO.cpp plusserverinterface.cpp )
-set( IbisHardwareIgsioHdr )
+set( IbisHardwareIgsioSrc ibishardwareIGSIO.cpp plusserverinterface.cpp configio.cpp )
+set( IbisHardwareIgsioHdr configio.h )
 set( IbisHardwareIgsioHdrMoc ibishardwareIGSIO.h plusserverinterface.h )
 set( IbisHardwareIgsioUi )
 

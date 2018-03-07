@@ -52,7 +52,8 @@ public:
     virtual bool ShutDown() override;
 
     // Launch a Plus server and connect
-    bool LaunchAndConnectLocal();
+    bool LauchLocalServer( int port, QString plusConfigFile );
+    bool Connect( std::string ip, int port );
 
     virtual void AddToolObjectsToScene() override;
     virtual void RemoveToolObjectsFromScene() override;
@@ -91,7 +92,7 @@ protected:
     // Plus server exec and config paths
     QString m_plusServerExec;
     QString m_plusConfigDir;
-    QString m_plusLastConfigFile;
+    QString m_lastIGSIOConfigFile;
 
     struct Tool
     {
