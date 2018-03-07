@@ -14,8 +14,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "cameracalibrationwidget.h"
 #include "cameracalibrationsidepanelwidget.h"
 #include "cameracalibrator.h"
-#include "application.h"
-#include "scenemanager.h"
+#include "ibisapi.h"
 #include "sceneobject.h"
 #include "polydataobject.h"
 #include "cameraobject.h"
@@ -38,7 +37,8 @@ CameraCalibrationPluginInterface::CameraCalibrationPluginInterface()
     m_calibrationGridHeight = 8;
     m_calibrationGridCellSize = 30.0;
     m_cameraCalibrator = new CameraCalibrator;
-    m_currentCameraObjectId = SceneManager::InvalidId;
+    m_cameraCalibrator->SetPluginInterface( this );
+    m_currentCameraObjectId = IbisAPI::InvalidId;
     m_calibrationGridObject = 0;
 
     m_computeCenter = false;
@@ -77,12 +77,12 @@ QWidget * CameraCalibrationPluginInterface::CreateTab()
     InitializeCameraCalibrator();
 
     BuildCalibrationGridRepresentation();
-    GetSceneManager()->AddObject( m_calibrationGridObject );
+    GetIbisAPI()->AddObject( m_calibrationGridObject );
 
     UpdateCameraViewsObjects();
 
-    connect( GetSceneManager(), SIGNAL(ObjectAdded(int)), this, SLOT(OnObjectAddedOrRemoved()) );
-    connect( GetSceneManager(), SIGNAL(ObjectRemoved(int)), this, SLOT(OnObjectAddedOrRemoved()) );
+    connect( GetIbisAPI(), SIGNAL(ObjectAdded(int)), this, SLOT(OnObjectAddedOrRemoved()) );
+    connect( GetIbisAPI(), SIGNAL(ObjectRemoved(int)), this, SLOT(OnObjectAddedOrRemoved()) );
 
     CameraCalibrationSidePanelWidget * widget = new CameraCalibrationSidePanelWidget;
     widget->SetPluginInterface( this );
@@ -96,10 +96,10 @@ bool CameraCalibrationPluginInterface::WidgetAboutToClose()
         m_cameraCalibrationWidget->close();
 
     ClearCameraViews();
-    GetSceneManager()->RemoveObject( m_calibrationGridObject );
+    GetIbisAPI()->RemoveObject( m_calibrationGridObject );
 
-    disconnect( GetSceneManager(), SIGNAL(ObjectAdded(int)), this, SLOT(OnObjectAddedOrRemoved()) );
-    disconnect( GetSceneManager(), SIGNAL(ObjectRemoved(int)), this, SLOT(OnObjectAddedOrRemoved()) );
+    disconnect( GetIbisAPI(), SIGNAL(ObjectAdded(int)), this, SLOT(OnObjectAddedOrRemoved()) );
+    disconnect( GetIbisAPI(), SIGNAL(ObjectRemoved(int)), this, SLOT(OnObjectAddedOrRemoved()) );
 
     return true;
 }
@@ -152,9 +152,9 @@ void CameraCalibrationPluginInterface::OnObjectAddedOrRemoved()
 void CameraCalibrationPluginInterface::GetAllValidCamerasFromScene( QList<CameraObject*> & all )
 {
     QList<CameraObject*> allCams;
-    GetSceneManager()->GetAllCameraObjects( allCams );
+    GetIbisAPI()->GetAllCameraObjects( allCams );
     int nbValidCams = 0;
-    bool needTrackableCamera = !GetApplication()->IsViewerOnly();
+    bool needTrackableCamera = !GetIbisAPI()->IsViewerOnly();
     for( int i = 0; i < allCams.size(); ++i )
     {
         if( !needTrackableCamera || allCams[i]->IsDrivenByHardware() )
@@ -179,7 +179,7 @@ bool CameraCalibrationPluginInterface::HasValidCamera()
 
 CameraObject * CameraCalibrationPluginInterface::GetCurrentCameraObject()
 {
-    return CameraObject::SafeDownCast( GetSceneManager()->GetObjectByID( m_currentCameraObjectId ) );
+    return CameraObject::SafeDownCast( GetIbisAPI()->GetObjectByID( m_currentCameraObjectId ) );
 }
 
 void CameraCalibrationPluginInterface::SetComputeCenter( bool c )
@@ -235,9 +235,9 @@ void CameraCalibrationPluginInterface::CancelAccumulation()
 
 void CameraCalibrationPluginInterface::ImportCalibrationData( QString dir )
 {
-    QProgressDialog * dlg = Application::GetInstance().StartProgress( 100, "Importing calibration data..." );
+    QProgressDialog * dlg = GetIbisAPI()->StartProgress( 100, "Importing calibration data..." );
     m_cameraCalibrator->ImportCalibrationData( dir, dlg );
-    Application::GetInstance().StopProgress( dlg );
+    GetIbisAPI()->StopProgress( dlg );
 
     // Update grid representation as it might have changed because of imported data
     m_calibrationGridWidth = m_cameraCalibrator->GetGridWidth();
@@ -328,7 +328,7 @@ void CameraCalibrationPluginInterface::UpdateCameraViewsObjects()
                 calibMat->Delete();
                 newCam->AddFrame( m_cameraCalibrator->GetCameraImage( i ), m_cameraCalibrator->GetIntrinsicCameraToGridMatrix( i ) );
 
-                GetSceneManager()->AddObject( newCam, m_calibrationGridObject );
+                GetIbisAPI()->AddObject( newCam, m_calibrationGridObject );
                 m_cameraViewsObjectIds.push_back( newCam->GetObjectID() );
                 newCam->Delete();
 
@@ -343,7 +343,7 @@ void CameraCalibrationPluginInterface::UpdateCameraViewsObjects()
                 calMat2->Delete();
                 calCam->AddFrame( m_cameraCalibrator->GetCameraImage(i), m_cameraCalibrator->GetTrackingMatrix( i ) );
 
-                GetSceneManager()->AddObject( calCam );
+                GetIbisAPI()->AddObject( calCam );
                 m_cameraCalibratedViewsObjectIds.push_back( calCam->GetObjectID() );
                 calCam->Delete();
             }
@@ -379,9 +379,9 @@ void CameraCalibrationPluginInterface::ShowAllCapturedViews()
 {
     for( int i = 0; i < m_cameraViewsObjectIds.size(); ++i )
     {
-        SceneObject * obj = GetSceneManager()->GetObjectByID( m_cameraViewsObjectIds[i] );
+        SceneObject * obj = GetIbisAPI()->GetObjectByID( m_cameraViewsObjectIds[i] );
         obj->SetHidden( false );
-        SceneObject * calObj = GetSceneManager()->GetObjectByID( m_cameraCalibratedViewsObjectIds[i] );
+        SceneObject * calObj = GetIbisAPI()->GetObjectByID( m_cameraCalibratedViewsObjectIds[i] );
         calObj->SetHidden( false );
     }
 }
@@ -390,9 +390,9 @@ void CameraCalibrationPluginInterface::HideAllCapturedViews()
 {
     for( int i = 0; i < m_cameraViewsObjectIds.size(); ++i )
     {
-        SceneObject * obj = GetSceneManager()->GetObjectByID( m_cameraViewsObjectIds[i] );
+        SceneObject * obj = GetIbisAPI()->GetObjectByID( m_cameraViewsObjectIds[i] );
         obj->SetHidden( true );
-        SceneObject * calObj = GetSceneManager()->GetObjectByID( m_cameraCalibratedViewsObjectIds[i] );
+        SceneObject * calObj = GetIbisAPI()->GetObjectByID( m_cameraCalibratedViewsObjectIds[i] );
         calObj->SetHidden( true );
     }
 }
@@ -411,23 +411,23 @@ bool CameraCalibrationPluginInterface::IsShowingGrid()
 
 void CameraCalibrationPluginInterface::ValidateCurrentCamera()
 {
-    bool needTrackableCamera = !GetApplication()->IsViewerOnly();
+    bool needTrackableCamera = !GetIbisAPI()->IsViewerOnly();
 
     // if we have an id, check object is still valid
     int newCameraId = m_currentCameraObjectId;
-    if( m_currentCameraObjectId != SceneManager::InvalidId )
+    if( m_currentCameraObjectId != IbisAPI::InvalidId )
     {
-        SceneObject * obj = GetSceneManager()->GetObjectByID( m_currentCameraObjectId );
+        SceneObject * obj = GetIbisAPI()->GetObjectByID( m_currentCameraObjectId );
         CameraObject * camObj = CameraObject::SafeDownCast( obj );
         if( !camObj || ( needTrackableCamera && !camObj->IsDrivenByHardware() ) )
-            newCameraId = SceneManager::InvalidId;
+            newCameraId = IbisAPI::InvalidId;
     }
 
     // If we don't have an id, try to find a valid camera
-    if( newCameraId == SceneManager::InvalidId )
+    if( newCameraId == IbisAPI::InvalidId )
     {
         QList< CameraObject* > cams;
-        GetSceneManager()->GetAllCameraObjects( cams );
+        GetIbisAPI()->GetAllCameraObjects( cams );
         for( int i = 0; i < cams.size(); ++i )
         {
             if( !needTrackableCamera || cams[i]->IsDrivenByHardware() )
@@ -439,12 +439,12 @@ void CameraCalibrationPluginInterface::ValidateCurrentCamera()
     }
 
     // Still no valid camera, create one
-    if( newCameraId == SceneManager::InvalidId && !needTrackableCamera )
+    if( newCameraId == IbisAPI::InvalidId && !needTrackableCamera )
     {
         CameraObject * cam = CameraObject::New();
         cam->SetName( "Default Camera" );
         cam->SetCanEditTransformManually( false );
-        GetSceneManager()->AddObject( cam );
+        GetIbisAPI()->AddObject( cam );
         newCameraId = cam->GetObjectID();
         cam->Delete();
     }
@@ -525,24 +525,21 @@ void CameraCalibrationPluginInterface::BuildCalibrationGridRepresentation()
 
 void CameraCalibrationPluginInterface::ClearCameraViews()
 {
-    SceneManager * man = GetSceneManager();
-    Q_ASSERT( man );
-
     // Clear all camera views objects
     for( unsigned i = 0; i < m_cameraViewsObjectIds.size(); ++i )
     {
-        SceneObject * cam = GetSceneManager()->GetObjectByID( m_cameraViewsObjectIds[i] );
+        SceneObject * cam = GetIbisAPI()->GetObjectByID( m_cameraViewsObjectIds[i] );
         if( cam )
-            man->RemoveObject( cam );
+            GetIbisAPI()->RemoveObject( cam );
     }
     m_cameraViewsObjectIds.clear();
 
     // Clear all calibrated camera views objects
     for( unsigned i = 0; i < m_cameraCalibratedViewsObjectIds.size(); ++i )
     {
-        SceneObject * cam = GetSceneManager()->GetObjectByID( m_cameraCalibratedViewsObjectIds[i] );
+        SceneObject * cam = GetIbisAPI()->GetObjectByID( m_cameraCalibratedViewsObjectIds[i] );
         if( cam )
-            GetSceneManager()->RemoveObject( cam );
+            GetIbisAPI()->RemoveObject( cam );
     }
     m_cameraCalibratedViewsObjectIds.clear();
 }

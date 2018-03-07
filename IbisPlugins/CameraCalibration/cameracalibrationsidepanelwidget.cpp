@@ -14,10 +14,9 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "ui_cameracalibrationsidepanelwidget.h"
 #include "cameracalibrationplugininterface.h"
 #include "cameracalibrator.h"
-#include "scenemanager.h"
+#include "ibisapi.h"
 #include "cameraobject.h"
 #include "vtkMatrix4x4Operators.h"
-#include "application.h"
 #include <QFileDialog>
 #include <QDir>
 #include <QMessageBox>
@@ -61,7 +60,7 @@ void CameraCalibrationSidePanelWidget::UpdateUi()
     ui->currentCameraComboBox->blockSignals( true );
     ui->currentCameraComboBox->clear();
     QList<CameraObject*> allCams;
-    m_pluginInterface->GetSceneManager()->GetAllCameraObjects( allCams );
+    m_pluginInterface->GetIbisAPI()->GetAllCameraObjects( allCams );
     int nbValidCams = 0;
     for( int i = 0; i < allCams.size(); ++i )
     {
@@ -70,7 +69,7 @@ void CameraCalibrationSidePanelWidget::UpdateUi()
             ui->currentCameraComboBox->setCurrentIndex( i );
     }
     if( allCams.size() == 0 )
-        ui->currentCameraComboBox->addItem( "None", QVariant( SceneManager::InvalidId ) );
+        ui->currentCameraComboBox->addItem( "None", QVariant( IbisAPI::InvalidId ) );
     ui->currentCameraComboBox->blockSignals( false );
 
     ui->gridWidthSpinBox->blockSignals( true );
@@ -158,9 +157,9 @@ void CameraCalibrationSidePanelWidget::on_exportCalibrationDataButton_clicked()
     QString dir = QFileDialog::getExistingDirectory( this, "Choose directory to export calibration data", QDir::homePath() );
     if( !dir.isEmpty() )
     {
-        QProgressDialog * dlg = Application::GetInstance().StartProgress( 100, "Exporting calibration data..." );
+        QProgressDialog * dlg = m_pluginInterface->GetIbisAPI()->StartProgress( 100, "Exporting calibration data..." );
         m_pluginInterface->GetCameraCalibrator()->ExportCalibrationData( dir, dlg );
-        Application::GetInstance().StopProgress( dlg );
+        m_pluginInterface->GetIbisAPI()->StopProgress( dlg );
     }
 }
 
@@ -197,14 +196,14 @@ void CameraCalibrationSidePanelWidget::on_validationButton_clicked()
 {
     Q_ASSERT( m_pluginInterface );
 
-    QProgressDialog * dlg = Application::GetInstance().StartProgress( 100, "Computing cross-validation..." );
+    QProgressDialog * dlg = m_pluginInterface->GetIbisAPI()->StartProgress( 100, "Computing cross-validation..." );
     double tScale = m_pluginInterface->GetExtrinsicTranslationScale();
     double rScale = m_pluginInterface->GetExtrinsicRotationScale();
     double stdDevReprojError = 0.0;
     double minDist = 0.0;
     double maxDist = 0.0;
     double avgReprojError = m_pluginInterface->GetCameraCalibrator()->ComputeCrossValidation( tScale, rScale, stdDevReprojError, minDist, maxDist, dlg );
-    Application::GetInstance().StopProgress( dlg );
+    m_pluginInterface->GetIbisAPI()->StopProgress( dlg );
 
     QString validationText = QString("Average reprojection error: %1 +/- %2 mm\n").arg( avgReprojError ).arg(stdDevReprojError);
     validationText += QString("Distance range: ( %1, %2 )").arg( minDist ).arg( maxDist );
