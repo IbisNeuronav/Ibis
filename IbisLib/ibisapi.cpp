@@ -10,8 +10,6 @@
 #include "usacquisitionobject.h"
 #include "toolplugininterface.h"
 #include "objectplugininterface.h"
-#include "usacquisitionobject.h"
-#include "toolplugininterface.h"
 
 #include <QString>
 
