@@ -6,7 +6,6 @@
 #include "vtkTransform.h"
 #include "vtkImageData.h"
 #include "vtkSmartPointer.h"
-#include "application.h"
 #include "imageobject.h"
 #include "gpu_volumereconstructionplugininterface.h"
 #include "gpu_volumereconstruction.h"

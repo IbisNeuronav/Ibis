@@ -12,7 +12,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include "gpu_rigidregistrationplugininterface.h"
 #include "gpu_rigidregistrationwidget.h"
-#include "application.h"
 #include <QtPlugin>
 
 GPU_RigidRegistrationPluginInterface::GPU_RigidRegistrationPluginInterface()

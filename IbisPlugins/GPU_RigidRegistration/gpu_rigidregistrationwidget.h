@@ -17,7 +17,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QMessageBox>
 #include "qdebugstream.h"
 #include "ui_gpu_rigidregistrationwidget.h"
-#include "application.h"
 #include "sceneobject.h"
 #include "imageobject.h"
 #include "vtkTransform.h"
