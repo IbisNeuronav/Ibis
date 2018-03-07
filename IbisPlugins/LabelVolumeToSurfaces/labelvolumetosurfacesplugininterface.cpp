@@ -11,7 +11,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 // Thanks to Simon Drouin for writing this class
 
 #include "labelvolumetosurfacesplugininterface.h"
-#include "application.h"
 #include "imageobject.h"
 #include "ibisapi.h"
 #include <QtPlugin>
