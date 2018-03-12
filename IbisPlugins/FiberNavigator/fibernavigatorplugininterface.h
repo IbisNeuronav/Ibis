@@ -21,13 +21,12 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QString>
 #include <QtGui>
 
-#include "application.h"
+//#include "application.h"
 #include "fiberobjectsettingswidget.h"
 #include "fractionalAnisotropy.h"
 #include "imageobject.h"
 #include "maximas.h"
 #include "polydataobject.h"
-#include "scenemanager.h"
 #include "view.h"
 #include "SVL.h"
 #include "toolplugininterface.h"

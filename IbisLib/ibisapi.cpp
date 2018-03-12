@@ -6,6 +6,7 @@
 #include "pointerobject.h"
 #include "usprobeobject.h"
 #include "cameraobject.h"
+#include "view.h"
 #include "usacquisitionobject.h"
 #include "toolplugininterface.h"
 
@@ -70,6 +71,11 @@ PointerObject * IbisAPI::GetNavigationPointerObject( )
     return m_sceneManager->GetNavigationPointerObject();
 }
 
+int  IbisAPI::GetNumberOfUserObjects()
+{
+    return m_sceneManager->GetNumberOfUserObjects();
+}
+
 void IbisAPI::GetAllImageObjects( QList<ImageObject*> & objects )
 {
     m_sceneManager->GetAllImageObjects( objects );
@@ -93,6 +99,25 @@ void IbisAPI::GetAllUsProbeObjects( QList<UsProbeObject*> & all )
 void IbisAPI::GetAllCameraObjects( QList<CameraObject*> & all )
 {
     return m_sceneManager->GetAllCameraObjects( all );
+}
+
+View * IbisAPI::GetMain3DView()
+{
+    return m_sceneManager->GetMain3DView( );
+}
+
+View * IbisAPI::GetMainCoronalView()
+{
+    return m_sceneManager->GetMainCoronalView( );
+}
+
+View * IbisAPI::GetMainSagittalView()
+{
+    return m_sceneManager->GetMainSagittalView( );
+}
+View * IbisAPI::GetMainTransverseView()
+{
+    return m_sceneManager->GetMainTransverseView( );
 }
 
 void IbisAPI::ChangeParent( SceneObject * object, SceneObject * newParent, int newChildIndex )
@@ -148,9 +173,27 @@ bool IbisAPI::IsViewerOnly()
     return m_application->IsViewerOnly();
 }
 
+QString IbisAPI::GetWorkingDirectory()
+{
+    return m_application->GetSettings()->WorkingDirectory;
+}
+
 QString IbisAPI::GetConfigDirectory()
 {
     return m_application->GetConfigDirectory();
+}
+
+QString IbisAPI::GetOpenFileName( const QString & caption, const QString & dir, const QString & filter )
+{
+    return m_application->GetOpenFileName( caption, dir, filter );
+}
+QString IbisAPI::GetSaveFileName( const QString & caption, const QString & dir, const QString & filter )
+{
+    return m_application->GetSaveFileName( caption, dir, filter );
+}
+QString IbisAPI::GetExistingDirectory( const QString & caption, const QString & dir )
+{
+    return m_application->GetExistingDirectory( caption, dir );
 }
 
 QString IbisAPI::GetGitHashShort()
