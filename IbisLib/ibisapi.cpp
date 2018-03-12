@@ -241,6 +241,19 @@ QString IbisAPI::GetExistingDirectory( const QString & caption, const QString & 
     return m_application->GetExistingDirectory( caption, dir );
 }
 
+QString IbisAPI::GetOpenFileName( const QString & caption, const QString & dir, const QString & filter )
+{
+    return m_application->GetOpenFileName( caption, dir, filter );
+}
+QString IbisAPI::GetSaveFileName( const QString & caption, const QString & dir, const QString & filter )
+{
+    return m_application->GetSaveFileName( caption, dir, filter );
+}
+QString IbisAPI::GetExistingDirectory( const QString & caption, const QString & dir )
+{
+    return m_application->GetExistingDirectory( caption, dir );
+}
+
 QString IbisAPI::GetGitHashShort()
 {
     return m_application->GetGitHashShort();

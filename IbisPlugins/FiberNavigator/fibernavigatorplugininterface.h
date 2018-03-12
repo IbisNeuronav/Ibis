@@ -21,6 +21,10 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QString>
 #include <QtGui>
 
+<<<<<<< 2b8074c2b09542ee2cf33ffa00c2521fb1470ea7
+=======
+//#include "application.h"
+>>>>>>> Added more functions to IbisAPI. Replaced SceneManager and Application with IbisAPI in FiberNavigator plugin. Removed some comments from GPU_RigidRegistrationPluginInterface.
 #include "fiberobjectsettingswidget.h"
 #include "fractionalAnisotropy.h"
 #include "imageobject.h"
