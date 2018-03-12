@@ -24,6 +24,8 @@ IbisAPI::~IbisAPI()
 {
     disconnect( m_sceneManager, SIGNAL( ObjectAdded(int) ), this, SLOT( ObjectAddedSlot(int) ) );
     disconnect( m_sceneManager, SIGNAL( ObjectRemoved(int) ), this, SLOT( ObjectRemovedSlot(int) ) );
+    disconnect( m_sceneManager, SIGNAL( ReferenceTransformChanged() ), this, SLOT( ReferenceTransformChangedSlot() ) );
+    disconnect( m_sceneManager, SIGNAL( CursorPositionChanged() ), this, SLOT( CursorPositionChangedSlot() ) );
 }
 
 // from SceneManager
@@ -34,6 +36,8 @@ void IbisAPI::SetApplication( Application * app )
 
     connect( m_sceneManager, SIGNAL( ObjectAdded(int) ), this, SLOT( ObjectAddedSlot(int) ) );
     connect( m_sceneManager, SIGNAL( ObjectRemoved(int) ), this, SLOT( ObjectRemovedSlot(int) ) );
+    connect( m_sceneManager, SIGNAL( ReferenceTransformChanged() ), this, SLOT( ReferenceTransformChangedSlot() ) );
+    connect( m_sceneManager, SIGNAL( CursorPositionChanged() ), this, SLOT( CursorPositionChangedSlot() ) );
 }
 
 void IbisAPI::AddObject( SceneObject * object, SceneObject * attachTo )
@@ -74,6 +78,11 @@ PointerObject * IbisAPI::GetNavigationPointerObject( )
 int  IbisAPI::GetNumberOfUserObjects()
 {
     return m_sceneManager->GetNumberOfUserObjects();
+}
+
+ImageObject * IbisAPI::GetReferenceDataObject( )
+{
+    return m_sceneManager->GetReferenceDataObject();
 }
 
 void IbisAPI::GetAllImageObjects( QList<ImageObject*> & objects )
@@ -150,6 +159,16 @@ QString IbisAPI::FindUniqueName( QString wantedName, QStringList & otherNames )
     return SceneManager::FindUniqueName( wantedName, otherNames );
 }
 
+void IbisAPI::GetCursorPosition( double pos[3] )
+{
+    m_sceneManager->GetCursorPosition( pos );
+}
+
+void IbisAPI::SetCursorPosition( double *pos )
+{
+    m_sceneManager->SetCursorPosition( pos );
+}
+
 // slots
 void IbisAPI::ObjectAddedSlot( int id )
 {
@@ -159,6 +178,16 @@ void IbisAPI::ObjectAddedSlot( int id )
 void IbisAPI::ObjectRemovedSlot( int id )
 {
     emit ObjectRemoved( id );
+}
+
+void IbisAPI::ReferenceTransformChangedSlot()
+{
+    emit ReferenceTransformChanged();
+}
+
+void IbisAPI::CursorPositionChangedSlot()
+{
+    emit CursorPositionChanged();
 }
 
 
