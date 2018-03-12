@@ -13,12 +13,13 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "frameratetesterwidget.h"
 #include "ui_frameratetesterwidget.h"
 #include "frameratetesterplugininterface.h"
-#include "scenemanager.h"
+#include "ibisapi.h"
 #include "vtkqtrenderwindow.h"
 #include <QSize>
 #include <QMap>
 #include <QComboBox>
 #include "view.h"
+#include "scenemanager.h" //needed for guiutils
 #include "guiutilities.h"
 
 FrameRateTesterWidget::FrameRateTesterWidget(QWidget *parent) :
@@ -44,19 +45,19 @@ void FrameRateTesterWidget::SetPluginInterface( FrameRateTesterPluginInterface *
 void FrameRateTesterWidget::UpdateUi()
 {
     Q_ASSERT( m_pluginInterface );
-    Q_ASSERT( m_pluginInterface->GetCurrentViewID() != SceneManager::InvalidId );
+    Q_ASSERT( m_pluginInterface->GetCurrentViewID() != IbisAPI::InvalidId );
 
     // Current view combo
     ui->currentViewComboBox->blockSignals( true );
     ui->currentViewComboBox->clear();
-    QMap<View*, int> allViews = m_pluginInterface->GetSceneManager()->GetAllViews();
+    QMap<View*, int> allViews = m_pluginInterface->GetIbisAPI()->GetAllViews();
     GuiUtilities::UpdateObjectComboBox( ui->currentViewComboBox, allViews, m_pluginInterface->GetCurrentViewID() );
     int currentIndex = GuiUtilities::ObjectComboBoxIndexFromObjectId( ui->currentViewComboBox, m_pluginInterface->GetCurrentViewID() );
     ui->currentViewComboBox->setCurrentIndex( currentIndex );
     ui->currentViewComboBox->blockSignals( false );
 
     // View size
-    View * v = m_pluginInterface->GetSceneManager()->GetViewByID( m_pluginInterface->GetCurrentViewID() );
+    View * v = m_pluginInterface->GetIbisAPI()->GetViewByID( m_pluginInterface->GetCurrentViewID() );
     QSize s = v->GetQtRenderWindow()->size();
     ui->windowSizeLabel->setText( QString("Size : %1 x %2").arg( s.width() ).arg( s.height() ) );
 
