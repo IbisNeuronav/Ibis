@@ -11,11 +11,13 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 // Thanks to Francois Rheau for writing this class
 
 #include "fibernavigatorplugininterface.h"
+#include "ibisapi.h"
+
 
 FiberNavigatorPluginInterface::FiberNavigatorPluginInterface()
 {
     m_settingsWidget = 0;
-    m_fiberObjectId = SceneManager::InvalidId;
+    m_fiberObjectId = IbisAPI::InvalidId;
     m_maximas = Maximas();
     m_FA = fractionalAnisotropy();
     m_volumeShape = 0;
@@ -88,7 +90,7 @@ void FiberNavigatorPluginInterface::SceneFinishedLoading()
 
 QWidget * FiberNavigatorPluginInterface::CreateTab()
 {
-    if(GetSceneManager()->GetObjectByID(m_fiberObjectId) == 0)
+    if(GetIbisAPI()->GetObjectByID(m_fiberObjectId) == 0)
         CreateObject();
 
     m_settingsWidget = new FiberObjectSettingsWidget;
@@ -96,22 +98,22 @@ QWidget * FiberNavigatorPluginInterface::CreateTab()
 
     EnableRoi(m_roiVisible);
 
-    connect( GetSceneManager(), SIGNAL(ObjectAdded(int)), this, SLOT(SceneFinishedLoading()) );
+    connect( GetIbisAPI(), SIGNAL(ObjectAdded(int)), this, SLOT(SceneFinishedLoading()) );
     return m_settingsWidget;
 }
 
 bool FiberNavigatorPluginInterface::WidgetAboutToClose()
 {
-    SceneManager * manager = GetSceneManager();
-    Q_ASSERT(manager);
-    SceneObject * obj = manager->GetObjectByID(m_fiberObjectId);
+    IbisAPI *ibisAPI = GetIbisAPI();
+    Q_ASSERT(ibisAPI);
+    SceneObject * obj = ibisAPI->GetObjectByID(m_fiberObjectId);
     if(obj)
-        manager->RemoveObject(obj);
+        ibisAPI->RemoveObject(obj);
     EnableRoi(false);
-    View * v = this->GetSceneManager()->GetMain3DView();
+    View * v = ibisAPI->GetMain3DView();
     v->GetOverlayRenderer()->InteractiveOn();
 
-    disconnect( GetSceneManager(), SIGNAL(ObjectAdded(int)), this, SLOT(SceneFinishedLoading()) );
+    disconnect( ibisAPI, SIGNAL(ObjectAdded(int)), this, SLOT(SceneFinishedLoading()) );
     return true;
 }
 
@@ -187,10 +189,11 @@ void FiberNavigatorPluginInterface::SetReferenceId(int nb)
 
 std::vector< std::pair< int, QString> > FiberNavigatorPluginInterface::GetObjectsName()
 {
-    SceneManager* sceneManager = this->GetSceneManager();
+    IbisAPI *ibisAPI = GetIbisAPI();
+    Q_ASSERT(ibisAPI);
     std::vector< std::pair< int, QString> > potentialObject;
     QList<ImageObject*> objects;
-    sceneManager->GetAllImageObjects(objects);
+    ibisAPI->GetAllImageObjects(objects);
     for(int j=0; j<objects.size(); ++j)
     {
         SceneObject* object = objects.at(j);
@@ -263,7 +266,9 @@ void FiberNavigatorPluginInterface::SetRoiBounds(
     double bounds[] = {xmin, xmax, ymin, ymax, zmin, zmax};
     m_roi->GetRepresentation()->PlaceWidget(bounds);
 
-    View * v = this->GetSceneManager()->GetMain3DView();
+    IbisAPI *ibisAPI = GetIbisAPI();
+    Q_ASSERT(ibisAPI);
+    View * v = ibisAPI->GetMain3DView();
     v->NotifyNeedRender();
 }
 
@@ -275,23 +280,25 @@ void FiberNavigatorPluginInterface::RoiModifiedSlot()
 
 void FiberNavigatorPluginInterface::CreateObject()
 {
-    SceneManager* manager = GetSceneManager();
-    Q_ASSERT(manager);
-    View * v = manager->GetMain3DView();
+    IbisAPI *ibisAPI = GetIbisAPI();
+    Q_ASSERT(ibisAPI);
+    View * v = ibisAPI->GetMain3DView();
     v->GetOverlayRenderer()->InteractiveOff();
 	v->GetOverlayRenderer2()->InteractiveOff();
 
     vtkSmartPointer<PolyDataObject> fobj = vtkSmartPointer<PolyDataObject>::New();
     fobj->SetName("Fibers");
     UpdateFibers(fobj);
-    manager->AddObject(fobj);
-    manager->SetCurrentObject(fobj);
+    ibisAPI->AddObject(fobj);
+    ibisAPI->SetCurrentObject(fobj);
     m_fiberObjectId = fobj->GetObjectID();
 }
 
 void FiberNavigatorPluginInterface::EnableRoi(bool on)
 {
-    View * v = this->GetSceneManager()->GetMain3DView();
+    IbisAPI *ibisAPI = GetIbisAPI();
+    Q_ASSERT(ibisAPI);
+    View * v = ibisAPI->GetMain3DView();
 
     if(on)
     {
@@ -316,7 +323,9 @@ void FiberNavigatorPluginInterface::EnableRoi(bool on)
 
 void FiberNavigatorPluginInterface::UpdateFibers()
 {
-    PolyDataObject * poly = PolyDataObject::SafeDownCast(this->GetSceneManager()->GetObjectByID(m_fiberObjectId));
+    IbisAPI *ibisAPI = GetIbisAPI();
+    Q_ASSERT(ibisAPI);
+    PolyDataObject * poly = PolyDataObject::SafeDownCast(ibisAPI->GetObjectByID(m_fiberObjectId));
     if(poly)
         UpdateFibers(poly);
 }
@@ -331,8 +340,9 @@ void FiberNavigatorPluginInterface::UpdateFibers(PolyDataObject * obj)
     colors->SetNumberOfComponents(3);
     colors->SetName("Colors");
 
-    SceneManager* sceneManager = this->GetSceneManager();
-    if(IsRoiVisible() && sceneManager->GetNumberOfUserObjects() > 1)
+    IbisAPI *ibisAPI = GetIbisAPI();
+    Q_ASSERT(ibisAPI);
+    if(IsRoiVisible() && ibisAPI->GetNumberOfUserObjects() > 1)
     {
         tractPts->SetNumberOfPoints(m_maximumLength/m_stepSize*(m_seedPerAxis*m_seedPerAxis*m_seedPerAxis));
 
@@ -394,7 +404,7 @@ void FiberNavigatorPluginInterface::UpdateFibers(PolyDataObject * obj)
     vtkSmartPointer<vtkActor> actor = vtkSmartPointer<vtkActor>::New();
     actor->SetMapper(mapper);
 
-    View* viewer = sceneManager->GetMain3DView();
+    View* viewer = ibisAPI->GetMain3DView();
     viewer->GetRenderer()->RemoveActor(m_actor);
     viewer->GetRenderer()->AddActor(actor);
     m_actor = actor;
@@ -404,17 +414,18 @@ void FiberNavigatorPluginInterface::UpdateFibers(PolyDataObject * obj)
 vtkSmartPointer<vtkTransform> FiberNavigatorPluginInterface::prepareTransformation()
 {
     vtkSmartPointer<vtkTransform> dataTransform = vtkSmartPointer<vtkTransform>::New();
-    SceneManager* sceneManager = this->GetSceneManager();
+    IbisAPI *ibisAPI = GetIbisAPI();
+    Q_ASSERT(ibisAPI);
 
     //TODO : Find the relation between the reference ID and the #object displayed
-    ImageObject* refObj = ImageObject::SafeDownCast(sceneManager->GetObjectByID(m_referenceId));
+    ImageObject* refObj = ImageObject::SafeDownCast(ibisAPI->GetObjectByID(m_referenceId));
     double* volumeOrigin = refObj->GetImage()->GetOrigin();
 
     double voxelSize[3]= { m_maximas.getVoxelSizeX(), m_maximas.getVoxelSizeY(), m_maximas.getVoxelSizeZ() };
 
     //TODO :
 
-    dataTransform->Concatenate(sceneManager->GetObjectByID(m_referenceId)->GetWorldTransform());
+    dataTransform->Concatenate(ibisAPI->GetObjectByID(m_referenceId)->GetWorldTransform());
     dataTransform->Scale(voxelSize);
     dataTransform->Translate(volumeOrigin[0]/voxelSize[0], volumeOrigin[1]/voxelSize[1], volumeOrigin[2]/voxelSize[2]);
 
@@ -424,12 +435,13 @@ vtkSmartPointer<vtkTransform> FiberNavigatorPluginInterface::prepareTransformati
 double* FiberNavigatorPluginInterface::GetVolumeCenter()
 {
     vtkSmartPointer<vtkTransform> dataTransform = vtkSmartPointer<vtkTransform>::New();
-    SceneManager* sceneManager = this->GetSceneManager();
+    IbisAPI *ibisAPI = GetIbisAPI();
+    Q_ASSERT(ibisAPI);
 
-    dataTransform->Concatenate(sceneManager->GetObjectByID(m_referenceId)->GetWorldTransform());
+    dataTransform->Concatenate(ibisAPI->GetObjectByID(m_referenceId)->GetWorldTransform());
 
     //TODO : Find the relation between the reference ID and the #object displayed
-    ImageObject* refObj = ImageObject::SafeDownCast(sceneManager->GetObjectByID(m_referenceId));
+    ImageObject* refObj = ImageObject::SafeDownCast(ibisAPI->GetObjectByID(m_referenceId));
     double* volumeBounds = refObj->GetImage()->GetBounds();
 
     double  x = (floor((volumeBounds[0]+volumeBounds[1])*100.0))/200.0,

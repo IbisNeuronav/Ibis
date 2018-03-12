@@ -24,9 +24,6 @@ GPU_RigidRegistrationPluginInterface::~GPU_RigidRegistrationPluginInterface()
 
 bool GPU_RigidRegistrationPluginInterface::CanRun()
 {
-    // This plugin can't run in viewer-only mode. Needs video capture and tracking.
-    //if( m_application->IsViewerOnly() )
-    //    return false;
     return true;
 }
 
