@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QList>
+#include <QMap>
 
 class Application;
 class SceneManager;
@@ -44,10 +45,12 @@ public:
     void GetAllUsProbeObjects( QList<UsProbeObject*> & all );
     void GetAllCameraObjects( QList<CameraObject*> & all );
 
+    View * GetViewByID( int id );
     View * GetMain3DView();
     View * GetMainCoronalView();
     View * GetMainSagittalView();
     View * GetMainTransverseView();
+    QMap<View*, int> GetAllViews( );
 
     void ChangeParent( SceneObject * object, SceneObject * newParent, int newChildIndex );
 

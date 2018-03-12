@@ -101,6 +101,11 @@ void IbisAPI::GetAllCameraObjects( QList<CameraObject*> & all )
     return m_sceneManager->GetAllCameraObjects( all );
 }
 
+View * IbisAPI::GetViewByID( int id )
+{
+    return m_sceneManager->GetViewByID( id );
+}
+
 View * IbisAPI::GetMain3DView()
 {
     return m_sceneManager->GetMain3DView( );
@@ -118,6 +123,11 @@ View * IbisAPI::GetMainSagittalView()
 View * IbisAPI::GetMainTransverseView()
 {
     return m_sceneManager->GetMainTransverseView( );
+}
+
+QMap<View*, int> IbisAPI::GetAllViews( )
+{
+    return m_sceneManager->GetAllViews();
 }
 
 void IbisAPI::ChangeParent( SceneObject * object, SceneObject * newParent, int newChildIndex )
