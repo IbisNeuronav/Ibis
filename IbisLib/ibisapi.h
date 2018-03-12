@@ -91,7 +91,6 @@ public slots:
     void CursorPositionChangedSlot();
     void IbisClockTickSlot();
 
-
 signals:
 
     void ObjectAdded( int );
