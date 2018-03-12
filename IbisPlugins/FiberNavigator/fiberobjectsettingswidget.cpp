@@ -14,6 +14,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "ui_fiberobjectsettingswidget.h"
 #include "fibernavigatorplugininterface.h"
 #include "sceneobject.h"
+#include "ibisapi.h"
 #include <QtGui>
 
 FiberObjectSettingsWidget::FiberObjectSettingsWidget( QWidget * parent )
@@ -158,7 +159,10 @@ void FiberObjectSettingsWidget::on_roiGroupBox_toggled( bool on )
 
 void FiberObjectSettingsWidget::on_loadMaximaButton_clicked()
 {
-    QString lastVisitedDir = Application::GetInstance().GetSettings()->WorkingDirectory;
+    Q_ASSERT( m_pluginInterface );
+    IbisAPI *ibisAPI = m_pluginInterface->GetIbisAPI();
+    Q_ASSERT(ibisAPI);
+    QString lastVisitedDir = ibisAPI->GetWorkingDirectory();
     QString filePath = QFileDialog::getOpenFileName(0, tr("Open File"), lastVisitedDir, tr("Files (*.nii)"));
 
     if(!filePath.length())
@@ -174,7 +178,10 @@ void FiberObjectSettingsWidget::on_loadMaximaButton_clicked()
 
 void FiberObjectSettingsWidget::on_loadFAButton_clicked()
 {
-    QString lastVisitedDir = Application::GetInstance().GetSettings()->WorkingDirectory;
+    Q_ASSERT( m_pluginInterface );
+    IbisAPI *ibisAPI = m_pluginInterface->GetIbisAPI();
+    Q_ASSERT(ibisAPI);
+    QString lastVisitedDir = ibisAPI->GetWorkingDirectory();
     QString filePath = QFileDialog::getOpenFileName(0, tr("Open File"), lastVisitedDir, tr("Files (*.nii)"));
 
     if(!filePath.length())

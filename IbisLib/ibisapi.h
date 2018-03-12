@@ -13,6 +13,7 @@ class PointerObject;
 class CameraObject;
 class ImageObject;
 class ToolPluginInterface;
+class View;
 
 class QProgressDialog;
 class QString;
@@ -36,12 +37,17 @@ public:
     SceneObject * GetObjectByID( int id );
     SceneObject * GetSceneRoot();
     PointerObject *GetNavigationPointerObject( );
+    int  GetNumberOfUserObjects();
     void GetAllImageObjects( QList<ImageObject*> & objects );
     const QList< SceneObject* > & GetAllObjects();
     void GetAllUSAcquisitionObjects( QList<USAcquisitionObject*> & all );
     void GetAllUsProbeObjects( QList<UsProbeObject*> & all );
     void GetAllCameraObjects( QList<CameraObject*> & all );
 
+    View * GetMain3DView();
+    View * GetMainCoronalView();
+    View * GetMainSagittalView();
+    View * GetMainTransverseView();
 
     void ChangeParent( SceneObject * object, SceneObject * newParent, int newChildIndex );
 
@@ -57,7 +63,11 @@ public:
     void UpdateProgress( QProgressDialog*, int current );
 
     bool IsViewerOnly();
+    QString GetWorkingDirectory();
     QString GetConfigDirectory();
+    QString GetOpenFileName( const QString & caption = QString(), const QString & dir = QString(), const QString & filter = QString() );
+    QString GetSaveFileName( const QString & caption = QString(), const QString & dir = QString(), const QString & filter = QString() );
+    QString GetExistingDirectory( const QString & caption = QString(), const QString & dir = QString() );
     QString GetGitHashShort();
     ToolPluginInterface * GetToolPluginByName( QString name );
 
