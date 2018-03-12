@@ -39,6 +39,7 @@ public:
     SceneObject * GetSceneRoot();
     PointerObject *GetNavigationPointerObject( );
     int  GetNumberOfUserObjects();
+    ImageObject * GetReferenceDataObject( );
     void GetAllImageObjects( QList<ImageObject*> & objects );
     const QList< SceneObject* > & GetAllObjects();
     void GetAllUSAcquisitionObjects( QList<USAcquisitionObject*> & all );
@@ -59,6 +60,8 @@ public:
 
     static QString FindUniqueName( QString wantedName, QStringList & otherNames );
 
+    void GetCursorPosition( double pos[3] );
+    void SetCursorPosition( double *pos );
 
     // from Application
     QProgressDialog * StartProgress( int max, const QString & caption = QString() );
@@ -77,11 +80,15 @@ public:
 public slots:
     void ObjectAddedSlot( int id );
     void ObjectRemovedSlot( int id );
+    void ReferenceTransformChangedSlot();
+    void CursorPositionChangedSlot();
 
 signals:
 
     void ObjectAdded( int );
     void ObjectRemoved( int );
+    void ReferenceTransformChanged();
+    void CursorPositionChanged();
 
 
 private:
