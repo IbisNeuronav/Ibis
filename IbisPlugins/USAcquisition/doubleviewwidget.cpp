@@ -13,7 +13,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "usacquisitionplugininterface.h"
 #include "ibisapi.h"
 #include "imageobject.h"
-#include "usacquisitionobject.h"
+#include "usacquisitionobject.h" //it includes scenemanager.h needed in guiutils
 #include "usprobeobject.h"
 #include "hardwaremodule.h"
 #include "guiutilities.h"
