@@ -14,6 +14,7 @@ class PointerObject;
 class CameraObject;
 class ImageObject;
 class ToolPluginInterface;
+class ObjectPluginInterface;
 class View;
 
 class QProgressDialog;
@@ -76,12 +77,14 @@ public:
     QString GetExistingDirectory( const QString & caption = QString(), const QString & dir = QString() );
     QString GetGitHashShort();
     ToolPluginInterface * GetToolPluginByName( QString name );
+    ObjectPluginInterface *GetObjectPluginByName( QString className );
 
 public slots:
     void ObjectAddedSlot( int id );
     void ObjectRemovedSlot( int id );
     void ReferenceTransformChangedSlot();
     void CursorPositionChangedSlot();
+    void IbisClockTickSlot();
 
 signals:
 
@@ -89,6 +92,7 @@ signals:
     void ObjectRemoved( int );
     void ReferenceTransformChanged();
     void CursorPositionChanged();
+    void IbisClockTick();
 
 
 private:

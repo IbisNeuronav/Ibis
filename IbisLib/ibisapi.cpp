@@ -9,6 +9,7 @@
 #include "view.h"
 #include "usacquisitionobject.h"
 #include "toolplugininterface.h"
+#include "objectplugininterface.h"
 
 #include <QString>
 
@@ -26,6 +27,7 @@ IbisAPI::~IbisAPI()
     disconnect( m_sceneManager, SIGNAL( ObjectRemoved(int) ), this, SLOT( ObjectRemovedSlot(int) ) );
     disconnect( m_sceneManager, SIGNAL( ReferenceTransformChanged() ), this, SLOT( ReferenceTransformChangedSlot() ) );
     disconnect( m_sceneManager, SIGNAL( CursorPositionChanged() ), this, SLOT( CursorPositionChangedSlot() ) );
+    disconnect( m_application, SIGNAL( IbisClockTick() ), this, SLOT( IbisClockTickSlot() ) );
 }
 
 // from SceneManager
@@ -38,6 +40,7 @@ void IbisAPI::SetApplication( Application * app )
     connect( m_sceneManager, SIGNAL( ObjectRemoved(int) ), this, SLOT( ObjectRemovedSlot(int) ) );
     connect( m_sceneManager, SIGNAL( ReferenceTransformChanged() ), this, SLOT( ReferenceTransformChangedSlot() ) );
     connect( m_sceneManager, SIGNAL( CursorPositionChanged() ), this, SLOT( CursorPositionChangedSlot() ) );
+    connect( m_application, SIGNAL( IbisClockTick() ), this, SLOT( IbisClockTickSlot() ) );
 }
 
 void IbisAPI::AddObject( SceneObject * object, SceneObject * attachTo )
@@ -190,6 +193,10 @@ void IbisAPI::CursorPositionChangedSlot()
     emit CursorPositionChanged();
 }
 
+void IbisAPI::IbisClockTickSlot()
+{
+    emit IbisClockTick();
+}
 
 // from Application
 QProgressDialog * IbisAPI::StartProgress( int max, const QString & caption )
@@ -243,4 +250,9 @@ QString IbisAPI::GetGitHashShort()
 ToolPluginInterface * IbisAPI::GetToolPluginByName( QString name )
 {
     return m_application->GetToolPluginByName( name );
+}
+
+ObjectPluginInterface * IbisAPI::GetObjectPluginByName( QString className )
+{
+    return m_application->GetObjectPluginByName( className );
 }

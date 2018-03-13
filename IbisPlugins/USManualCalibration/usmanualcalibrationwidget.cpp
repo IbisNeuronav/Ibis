@@ -23,7 +23,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "vtkNShapeCalibrationWidget.h"
 #include "vtkEventQtSlotConnect.h"
 #include <QTimer>
-#include "application.h"
+#include "ibisapi.h"
 
 USManualCalibrationWidget::USManualCalibrationWidget(QWidget *parent) :
     QWidget(parent),
@@ -87,7 +87,7 @@ void USManualCalibrationWidget::SetPluginInterface( USManualCalibrationPluginInt
     if( probe )
     {
         m_imageActor->SetInputData( probe->GetVideoOutput() );
-        connect( m_pluginInterface->GetApplication(), SIGNAL(IbisClockTick()), this, SLOT(NewFrameSlot()) );
+        connect( m_pluginInterface->GetIbisAPI(), SIGNAL(IbisClockTick()), this, SLOT(NewFrameSlot()) );
         probe->AddClient();
         this->RenderFirst();
     }
