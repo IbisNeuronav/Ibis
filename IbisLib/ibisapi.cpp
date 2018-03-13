@@ -27,10 +27,7 @@ IbisAPI::~IbisAPI()
     disconnect( m_sceneManager, SIGNAL( ObjectRemoved(int) ), this, SLOT( ObjectRemovedSlot(int) ) );
     disconnect( m_sceneManager, SIGNAL( ReferenceTransformChanged() ), this, SLOT( ReferenceTransformChangedSlot() ) );
     disconnect( m_sceneManager, SIGNAL( CursorPositionChanged() ), this, SLOT( CursorPositionChangedSlot() ) );
-<<<<<<< b7a1b7338d589611956b223d1374c67fe1f8be77
     disconnect( m_application, SIGNAL( IbisClockTick() ), this, SLOT( IbisClockTickSlot() ) );
-=======
->>>>>>> Replaced SceneManager and Application with IbisAPI in StereotacticFrame plugin. Added more functions to IbisAPI.
 }
 
 // from SceneManager
