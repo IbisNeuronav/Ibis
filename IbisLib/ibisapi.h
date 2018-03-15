@@ -78,6 +78,10 @@ public:
     QString GetGitHashShort();
     ToolPluginInterface * GetToolPluginByName( QString name );
     ObjectPluginInterface *GetObjectPluginByName( QString className );
+    SceneObject * GetGlobalObjectInstance( const QString & className );
+
+    void AddBottomWidget( QWidget * w );
+    void RemoveBottomWidget( QWidget * w );
 
 public slots:
     void ObjectAddedSlot( int id );
