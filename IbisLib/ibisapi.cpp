@@ -256,3 +256,19 @@ ObjectPluginInterface * IbisAPI::GetObjectPluginByName( QString className )
 {
     return m_application->GetObjectPluginByName( className );
 }
+
+SceneObject * IbisAPI::GetGlobalObjectInstance( const QString & className )
+{
+    return m_application->GetGlobalObjectInstance( className );
+}
+
+void IbisAPI::AddBottomWidget( QWidget * w )
+{
+    m_application->AddBottomWidget( w );
+}
+
+void IbisAPI::RemoveBottomWidget( QWidget * w )
+{
+    m_application->RemoveBottomWidget( w );
+}
+

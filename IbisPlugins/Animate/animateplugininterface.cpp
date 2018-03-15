@@ -14,8 +14,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "animatewidget.h"
 #include "timelinewidget.h"
 #include <QtPlugin>
-#include "application.h"
-#include "scenemanager.h"
+#include "ibisapi.h"
 #include "DomeRenderer.h"
 #include "view.h"
 #include "vtkRenderer.h"
@@ -95,7 +94,7 @@ QWidget * AnimatePluginInterface::CreateTab()
     m_timelineWidget = new TimelineWidget;
     m_timelineWidget->SetPluginInterface( this );
     m_timelineWidget->setAttribute( Qt::WA_DeleteOnClose );
-    GetApplication()->AddBottomWidget( m_timelineWidget );
+    GetIbisAPI()->AddBottomWidget( m_timelineWidget );
 
     return widget;
 }
@@ -104,14 +103,14 @@ bool AnimatePluginInterface::WidgetAboutToClose()
 {
     if( GetRenderDome() )
         SetRenderDome( false );
-    GetApplication()->RemoveBottomWidget( m_timelineWidget );
+    GetIbisAPI()->RemoveBottomWidget( m_timelineWidget );
     m_timelineWidget = 0;
     return true;
 }
 
 VolumeRenderingObject * AnimatePluginInterface::GetVolumeRenderer()
 {
-    VolumeRenderingObject * vr = VolumeRenderingObject::SafeDownCast( GetApplication()->GetGlobalObjectInstance("VolumeRenderingObject") );
+    VolumeRenderingObject * vr = VolumeRenderingObject::SafeDownCast( GetIbisAPI()->GetGlobalObjectInstance("VolumeRenderingObject") );
     return vr;
 }
 
@@ -120,15 +119,15 @@ void AnimatePluginInterface::SetRenderDome( bool r )
     m_renderDome = r;
     if( r )
     {
-        GetSceneManager()->GetMain3DView()->GetRenderer()->SetDelegate( m_domeRenderDelegate );
+        GetIbisAPI()->GetMain3DView()->GetRenderer()->SetDelegate( m_domeRenderDelegate );
         GetVolumeRenderer()->SetRenderState( m_renderState );
     }
     else
     {
-        GetSceneManager()->GetMain3DView()->GetRenderer()->SetDelegate( 0 );
+        GetIbisAPI()->GetMain3DView()->GetRenderer()->SetDelegate( 0 );
         GetVolumeRenderer()->SetRenderState( 0 );
     }
-    GetSceneManager()->GetMain3DView()->NotifyNeedRender();
+    GetIbisAPI()->GetMain3DView()->NotifyNeedRender();
 }
 
 bool AnimatePluginInterface::GetRenderDome()
@@ -139,7 +138,7 @@ bool AnimatePluginInterface::GetRenderDome()
 void AnimatePluginInterface::SetDomeCubeTextureSize( int size )
 {
     m_domeRenderDelegate->SetCubeTextureSize( size );
-    GetSceneManager()->GetMain3DView()->NotifyNeedRender();
+    GetIbisAPI()->GetMain3DView()->NotifyNeedRender();
 }
 
 int AnimatePluginInterface::GetDomeCubeTextureSize()
@@ -149,12 +148,12 @@ int AnimatePluginInterface::GetDomeCubeTextureSize()
 
 double AnimatePluginInterface::GetCameraAngle()
 {
-    return GetSceneManager()->GetMain3DView()->GetViewAngle();
+    return GetIbisAPI()->GetMain3DView()->GetViewAngle();
 }
 
 void AnimatePluginInterface::SetCameraAngle( double angle )
 {
-    GetSceneManager()->GetMain3DView()->SetViewAngle( angle );
+    GetIbisAPI()->GetMain3DView()->SetViewAngle( angle );
 }
 
 double AnimatePluginInterface::GetDomeViewAngle()
@@ -165,7 +164,7 @@ double AnimatePluginInterface::GetDomeViewAngle()
 void AnimatePluginInterface::SetDomeViewAngle( double angle )
 {
     m_domeRenderDelegate->SetDomeViewAngle( angle );
-    GetSceneManager()->GetMain3DView()->NotifyNeedRender();
+    GetIbisAPI()->GetMain3DView()->NotifyNeedRender();
 }
 
 void AnimatePluginInterface::SetRenderSize( int w, int h )
@@ -185,7 +184,7 @@ void AnimatePluginInterface::SetCurrentFrame( int f )
     m_currentFrame = f;
 
     // Adjust camera
-    vtkCamera * cam = GetSceneManager()->GetMain3DView()->GetRenderer()->GetActiveCamera();
+    vtkCamera * cam = GetIbisAPI()->GetMain3DView()->GetRenderer()->GetActiveCamera();
     m_cameraAnim->ComputeFrame( f, cam );
 
     // Adjust transfer function
@@ -206,7 +205,7 @@ void AnimatePluginInterface::SetCurrentFrame( int f )
     this->SetMinCamDistance( camDistKey.GetValue() );
 
     // Broadcast the message
-    GetSceneManager()->GetMain3DView()->NotifyNeedRender();
+    GetIbisAPI()->GetMain3DView()->NotifyNeedRender();
     emit CurrentFrameChanged();
 }
 
@@ -258,7 +257,7 @@ void AnimatePluginInterface::SetCameraKey( bool set )
     bool hasKey = HasCameraKey();
     Q_ASSERT( hasKey != set );
 
-    vtkCamera * cam = GetSceneManager()->GetMain3DView()->GetRenderer()->GetActiveCamera();
+    vtkCamera * cam = GetIbisAPI()->GetMain3DView()->GetRenderer()->GetActiveCamera();
     if( set )
         m_cameraAnim->AddKeyframe( m_currentFrame, cam );
     else
