@@ -21,7 +21,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "vtkEventQtSlotConnect.h"
 #include "vtkAxesActor.h"
 #include "vtkRenderer.h"
-#include "application.h"
 #include "ibisapi.h"
 #include "view.h"
 #include "polydataobject.h"
