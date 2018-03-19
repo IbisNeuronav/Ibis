@@ -25,7 +25,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "vtkOffscreenCamera.h"
 #include "vtkOpenGLExtensionManager.h"
 #include "vtkRenderer.h"
-#include "scenemanager.h"
+#include "ibisapi.h"
 #include "view.h"
 #include "DomeRenderer.h"
 
@@ -105,7 +105,7 @@ void OffscreenRenderer::Setup()
     //-------------------------------
     // Initialize GL and Make GL context current
     //-------------------------------
-    vtkOpenGLRenderWindow * win = vtkOpenGLRenderWindow::SafeDownCast( m_animate->GetSceneManager()->GetMain3DView()->GetQtRenderWindow()->GetRenderWindow() );
+    vtkOpenGLRenderWindow * win = vtkOpenGLRenderWindow::SafeDownCast( m_animate->GetIbisAPI()->GetMain3DView()->GetQtRenderWindow()->GetRenderWindow() );
     Q_ASSERT( win );
     if( !m_glInit )
     {
@@ -158,7 +158,7 @@ void OffscreenRenderer::Setup()
     //-------------------------------
     m_cam = vtkOffscreenCamera::New();
     m_cam->SetRenderSize( m_renderSize );
-    vtkRenderer * ren = m_animate->GetSceneManager()->GetMain3DView()->GetRenderer();
+    vtkRenderer * ren = m_animate->GetIbisAPI()->GetMain3DView()->GetRenderer();
     m_backupCam = ren->GetActiveCamera();
     m_cam->DeepCopy( m_backupCam );
     ren->SetActiveCamera( m_cam );
@@ -184,7 +184,7 @@ void OffscreenRenderer::Setup()
 void OffscreenRenderer::RenderOneFrame( QString filename )
 {
     // Render
-    vtkRenderer * ren = m_animate->GetSceneManager()->GetMain3DView()->GetRenderer();
+    vtkRenderer * ren = m_animate->GetIbisAPI()->GetMain3DView()->GetRenderer();
     ren->Render();
 
     // Get the raw data from OpenGL
@@ -203,7 +203,7 @@ void OffscreenRenderer::RenderOneFrame( QString filename )
 
 void OffscreenRenderer::Cleanup()
 {
-    vtkRenderer * ren = m_animate->GetSceneManager()->GetMain3DView()->GetRenderer();
+    vtkRenderer * ren = m_animate->GetIbisAPI()->GetMain3DView()->GetRenderer();
     DomeRenderer * domeDelegate = DomeRenderer::SafeDownCast( ren->GetDelegate() );
     if( domeDelegate )
         domeDelegate->SetOverideWindowSize( false );
