@@ -15,6 +15,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QProgressDialog>
 #include "animateplugininterface.h"
 #include <QDir>
+#include <QUrl>
 #include <QDateTime>
 #include "vtkqtrenderwindow.h"
 #include "vtkOpenGLRenderWindow.h"
