@@ -59,7 +59,6 @@ int main( int argc, char** argv )
     MainWindow * mw = new MainWindow( 0 );
     mw->setAttribute( Qt::WA_DeleteOnClose );
     mw->show();
-    Application::GetInstance().SetMainWindow( mw );
     Application::GetInstance().LoadWindowSettings();
     a.connect( &a, SIGNAL( lastWindowClosed() ), &a, SLOT( quit() ) );
     a.connect( &a, SIGNAL( aboutToQuit() ), &Application::GetInstance(), SLOT( SaveSettings() ) );
