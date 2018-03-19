@@ -62,6 +62,9 @@ int main( int argc, char** argv )
     mw->setAttribute( Qt::WA_DeleteOnClose );
     mw->show();
 
+    mw->setAttribute( Qt::WA_DeleteOnClose );
+    mw->show();
+
     a.connect( &a, SIGNAL( lastWindowClosed() ), &a, SLOT( quit() ) );
     a.connect( &a, SIGNAL( aboutToQuit() ), &Application::GetInstance(), SLOT( SaveSettings() ) );
     a.installEventFilter( mw );
