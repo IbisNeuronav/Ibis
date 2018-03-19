@@ -12,8 +12,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include "usmanualcalibrationplugininterface.h"
 #include "usmanualcalibrationwidget.h"
-//#include "application.h"
-//#include "scenemanager.h"
 #include "ibisapi.h"
 #include "sceneobject.h"
 #include "usprobeobject.h"

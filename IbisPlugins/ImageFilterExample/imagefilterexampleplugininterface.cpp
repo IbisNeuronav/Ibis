@@ -12,7 +12,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include "imagefilterexampleplugininterface.h"
 #include "imagefilterexamplewidget.h"
-#include "application.h"
 #include <QtPlugin>
 
 ImageFilterExamplePluginInterface::ImageFilterExamplePluginInterface()
