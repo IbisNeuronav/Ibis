@@ -109,7 +109,7 @@ public:
 
     int GetNumberOfListableChildren();
     SceneObject * GetListableChild( int index );
-    bool IsListable() { return this->ObjectListable; }
+    bool IsListable() { return ObjectListable; }
     void SetListable( bool l );
 
     bool IsManagedBySystem() { return ObjectManagedBySystem; }

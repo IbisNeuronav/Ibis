@@ -57,6 +57,7 @@ ImageObject::PerViewElements::~PerViewElements()
 
 ImageObject::ImageObject()
 {
+    this->Image = 0;
     this->ItkImage = 0;
     this->ItkLabelImage = 0;
     this->OutlineFilter = vtkSmartPointer<vtkOutlineFilter>::New();
