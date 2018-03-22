@@ -1,19 +1,8 @@
 #include "gpu_volumereconstruction.h"
 #include "ibisitkvtkconverter.h"
-#include "scenemanager.h"
-#include "sceneobject.h"
-#include "usacquisitionobject.h"
-#include "vtkTransform.h"
-#include "vtkLinearTransform.h"
 #include "vtkMatrix4x4.h"
 
 #include "vtkImageData.h"
-#include "vtkImageShiftScale.h"
-#include "vtkImageLuminance.h"
-#include "vtkMath.h"
-
-#include "imageobject.h"
-
 
 GPU_VolumeReconstruction::GPU_VolumeReconstruction()
 {
