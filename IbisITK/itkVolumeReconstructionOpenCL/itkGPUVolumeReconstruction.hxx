@@ -63,6 +63,8 @@ GPUVolumeReconstruction< TImage >
     
   if(m_VolumeReconstructionPopulatingKernel)
     clReleaseKernel(m_VolumeReconstructionPopulatingKernel);
+  if( m_Context )
+      clReleaseContext( m_Context );
 
 }
 
