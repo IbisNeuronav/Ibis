@@ -49,10 +49,10 @@ GPUVolumeReconstruction< TImage >
   m_KernelStdDev   = 1.0;
   m_VolumeSpacing   = 1.0;
 
-  m_ReconstructedVolume = NULL;
+  m_ReconstructedVolume = 0;
+  m_FixedSliceMask = 0;
 
   m_Transform = TransformType::New();
-;
 }
 
 
@@ -311,9 +311,6 @@ GPUVolumeReconstruction< TImage >
 
   typename ImageType::SpacingType spacing1;
   spacing1.Fill( m_VolumeSpacing );
-  // spacing1[0] = 1.0; // first index on X
-  // spacing1[1] = 1.0; // first index on Y
-  // spacing1[2] = 1.0; // first index on Z  
 
   typename ImageType::SizeType size1;
   size1[0] = ceil(m_UpperBound[0] - m_LowerBound[0])/spacing1[0]; // size along X
@@ -572,7 +569,7 @@ GPUVolumeReconstruction< TImage >
     memcpy((void*)&allMatrices[12], (void *)&m_VolumeIndexToSliceIndexMatrices[12*sliceCntr], 12*sizeof(InternalRealType)*nbrOfSlicesToProcess);    
     memcpy((void*)&allMatrices[12*(nbrOfSlicesToProcess+1)], (void *)&m_SliceIndexToLocationMatrices[12*sliceCntr], 12*sizeof(InternalRealType)*nbrOfSlicesToProcess);
 
-    m_gpuAllMatrices = clCreateBuffer(m_Context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, 
+    m_gpuAllMatrices = clCreateBuffer(m_Context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
                             12 * sizeof(InternalRealType) * (2* nbrOfSlicesToProcess + 1),
                             allMatrices, &errid);
     OpenCLCheckError(errid, __FILE__, __LINE__, ITK_LOCATION);  
@@ -658,6 +655,9 @@ GPUVolumeReconstruction< TImage >
   itk::TimeProbe clockSettingValue;
   clockSettingValue.Start();
 
+#ifdef DEBUG
+  unsigned int n = 0, m = 0;
+#endif
   for(unsigned int i=0; i<nbrOfPixelsInVolume; i++)
   {
     InternalRealType weightedValue = cpuAccumWeightAndWeightedValueBuffer[2*i];
@@ -667,22 +667,29 @@ GPUVolumeReconstruction< TImage >
     {
       ImagePixelType reconstructedValue = weightedValue / weight;
       m_ReconstructedVolume->SetPixel(m_ReconstructedVolume->ComputeIndex(i), reconstructedValue);
+#ifdef DEBUG
+      m++;
+#endif
     }
     else
     {
       m_ReconstructedVolume->SetPixel(m_ReconstructedVolume->ComputeIndex(i), 0.0);
+#ifdef DEBUG
+      n++;
+#endif
     }
   }
   clockSettingValue.Stop();
 
 #ifdef DEBUG
+    std::cout << "nbrOfPixelsInVolume = " << nbrOfPixelsInVolume << " m = " << m  << " n = " << n << std::endl;
     std::cerr << "Time to Pixel Values with for loop:\t" << clockSettingValue.GetMean() << std::endl;
 #endif    
 
 #ifdef DEBUG
   WriterPointer writer = WriterType::New();
   writer->SetInput(m_ReconstructedVolume);
-  writer->SetFileName( "reconstructedVolume.mhd" );
+  writer->SetFileName( "reconstructedVolume.mnc" );
   writer->Update();
 #endif  
 

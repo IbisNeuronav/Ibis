@@ -133,6 +133,8 @@ bool IbisItkVtkConverter::ConvertVtkImageToItkImage( IbisItkFloat3ImageType::Poi
 {
     if( !itkOutputImage )
         return false;
+
+    itkOutputImage->Initialize();
     int numberOfScalarComponents = img->GetNumberOfScalarComponents();
     vtkImageData *grayImage = img;
     vtkSmartPointer<vtkImageLuminance> luminanceFilter = vtkSmartPointer<vtkImageLuminance>::New();
@@ -214,6 +216,7 @@ bool IbisItkVtkConverter::ConvertVtkImageToItkImage( IbisRGBImageType::Pointer i
     if( !itkOutputImage )
         return false;
 
+    itkOutputImage->Initialize();
     int * dimensions = image->GetDimensions();
     IbisItkFloat3ImageType::SizeType  size;
     IbisItkFloat3ImageType::IndexType start;
@@ -274,6 +277,7 @@ bool IbisItkVtkConverter::ConvertVtkImageToItkImage( IbisItkUnsignedChar3ImageTy
     if( !itkOutputImage )
         return false;
 
+    itkOutputImage->Initialize();
     IbisItkUnsignedChar3ImageType::SizeType  size;
     IbisItkUnsignedChar3ImageType::IndexType start;
     IbisItkUnsignedChar3ImageType::RegionType region;

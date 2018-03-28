@@ -124,9 +124,6 @@ protected:
 
   bool              m_Debug;
 
-  unsigned int      m_Blocks;
-  unsigned int      m_Threads;
-
   unsigned int      m_NumberOfSlices;
   unsigned int      m_NbrPixelsInSlice;
 
@@ -142,10 +139,9 @@ protected:
 
   std::vector<ImagePointer>  m_FixedSlices;
 
-  std::vector<unsigned int>       m_SliceValidIdxs;
+  std::vector<unsigned int>  m_SliceValidIdxs;
 
-  ImagePointer                m_ReconstructedVolume;
-  cl_mem                      m_ReconstructedImageGPUBuffer;
+  ImagePointer               m_ReconstructedVolume;
 
   cl_program          m_VolumeReconstructionPopulatingProgram;
   cl_kernel           m_VolumeReconstructionPopulatingKernel;

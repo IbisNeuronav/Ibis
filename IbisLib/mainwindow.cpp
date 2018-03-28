@@ -40,7 +40,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QFileInfo>
 #include <QCloseEvent>
 #include <QFileDialog>
-#include <QTimer>
 #include <QPluginLoader>
 #include <QScrollArea>
 #include <QMimeData>

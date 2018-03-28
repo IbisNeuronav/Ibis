@@ -14,7 +14,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "gpu_volumereconstructionwidget.h"
 #include <QComboBox>
 #include <QMessageBox>
-#include <QtConcurrent/QtConcurrent>
 #include "vnl/algo/vnl_symmetric_eigensystem.h"
 #include "vnl/algo/vnl_real_eigensystem.h"
 
@@ -40,7 +39,6 @@ GPU_VolumeReconstructionWidget::GPU_VolumeReconstructionWidget(QWidget *parent) 
     ui->progressBar->setMinimum(0);
     ui->progressBar->setMaximum(0);
     ui->progressBar->hide();
-    connect(&this->m_futureWatcher, SIGNAL(finished()), this, SLOT(slot_finished()));
 
     m_VolumeReconstructor = GPU_VolumeReconstruction::New();
 }
@@ -63,18 +61,14 @@ void GPU_VolumeReconstructionWidget::slot_finished()
 
     SceneManager * sm = m_pluginInterface->GetSceneManager();
 
-    // Get US Acquisition Object
-    USAcquisitionObject * selectedUSAcquisitionObject = USAcquisitionObject::SafeDownCast( sm->GetObjectByID( usAcquisitionObjectId) );
-    Q_ASSERT_X( selectedUSAcquisitionObject, "GPU_VolumeReconstructionWidget::slot_finished()", "Invalid target US object" );
-
     qint64 reconstructionTime = m_ReconstructionTimer.elapsed();
 
     //Add Reconstructed Volume to Scene
     vtkSmartPointer<ImageObject> reconstructedImage = vtkSmartPointer<ImageObject>::New();
-    reconstructedImage->SetItkImage( m_VolumeReconstructor->GetReconstructor()->GetReconstructedVolume() );
     reconstructedImage->SetName("Reconstructed Volume");
+    reconstructedImage->SetItkImage( m_VolumeReconstructor->GetReconstructedImage() );
 
-    sm->AddObject(reconstructedImage, selectedUSAcquisitionObject->GetParent()->GetParent() );
+    sm->AddObject(reconstructedImage, sm->GetSceneRoot() );
     sm->SetCurrentObject( reconstructedImage );
 
 #ifdef DEBUG
@@ -162,8 +156,9 @@ void GPU_VolumeReconstructionWidget::on_startButton_clicked()
     std::cerr << "Starting reconstruction..." << std::endl;
 #endif   
 
-    QFuture<void> future = QtConcurrent::run(m_VolumeReconstructor->GetReconstructor().GetPointer(), &VolumeReconstructionType::ReconstructVolume);
-    this->m_futureWatcher.setFuture(future);
+    m_VolumeReconstructor->start();
+    m_VolumeReconstructor->wait();
+    this->slot_finished();
 }
 
 void GPU_VolumeReconstructionWidget::UpdateUi()
