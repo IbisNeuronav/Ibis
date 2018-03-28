@@ -635,6 +635,7 @@ GPUVolumeReconstruction< TImage >
   }while(sliceCntr < m_NumberOfSlices);
 
   delete[] allMatrices;
+  delete[] m_VolumeIndexToSliceIndexMatrices;
 
   errid = clReleaseMemObject(inputImageMaskGPUBuffer);
   OpenCLCheckError(errid, __FILE__, __LINE__, ITK_LOCATION);
