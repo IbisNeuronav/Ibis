@@ -160,7 +160,7 @@ GPUVolumeReconstruction< TImage >
 
   cl_program program;
   cl_kernel kernel = CreateKernelFromString(OriginalSourceString, cPreamble, kernelname, cOptions, &program);
-
+  delete[] OriginalSourceString;
 }
 
 
@@ -197,7 +197,7 @@ GPUVolumeReconstruction< TImage >
     clGetProgramBuildInfo(m_Program, 0, CL_PROGRAM_BUILD_LOG, paramValueSize, paramValue, NULL);
     paramValue[paramValueSize] = '\0';
     std::cerr << paramValue << std::endl;
-    free( paramValue );
+    delete[] paramValue;
     OpenCLCheckError(errid, __FILE__, __LINE__, ITK_LOCATION);
     itkExceptionMacro(<<"Cannot Build Program");
     }
@@ -636,6 +636,9 @@ GPUVolumeReconstruction< TImage >
 
   delete[] allMatrices;
   delete[] m_VolumeIndexToSliceIndexMatrices;
+  delete[] m_VolumeIndexToLocationMatrix;
+  delete[] m_SliceIndexToLocationMatrices;
+  delete[] maskValues;
 
   errid = clReleaseMemObject(inputImageMaskGPUBuffer);
   OpenCLCheckError(errid, __FILE__, __LINE__, ITK_LOCATION);
