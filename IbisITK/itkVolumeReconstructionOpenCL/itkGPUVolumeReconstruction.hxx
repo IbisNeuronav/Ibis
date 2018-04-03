@@ -163,6 +163,8 @@ GPUVolumeReconstruction< TImage >
   cl_program program;
   cl_kernel kernel = CreateKernelFromString(OriginalSourceString, cPreamble, kernelname, cOptions, &program);
   delete[] OriginalSourceString;
+  fclose( pFileStream );
+  return kernel;
 }
 
 
