@@ -31,8 +31,6 @@ public:
     ~GPU_VolumeReconstruction();
     vtkTypeMacro( GPU_VolumeReconstruction,vtkObject )
 
-    void CreateReconstructor();
-    void DestroyReconstructor();
     VolumeReconstructionPointer GetReconstructor() { return m_VolReconstructor; }
 
     void ReconstructVolume();

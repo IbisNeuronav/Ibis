@@ -46,7 +46,6 @@ QWidget * GPUVolumeReconstructionAPITestPluginInterface::CreateFloatingWidget()
 
             USAcquisitionObject * acq = acquisitions[i];
             int nbrOfSlices = acq->GetNumberOfSlices();
-            reconstructor->CreateReconstructor();
             reconstructor->SetNumberOfSlices( nbrOfSlices );
             reconstructor->SetFixedSliceMask( acq->GetMask() );
             reconstructor->SetUSSearchRadius( 3 );
@@ -72,7 +71,6 @@ QWidget * GPUVolumeReconstructionAPITestPluginInterface::CreateFloatingWidget()
             reconstructedImage->SetName(volName);
             sm->AddObject(reconstructedImage, sm->GetSceneRoot() );
             sm->SetCurrentObject( reconstructedImage );
-            reconstructor->DestroyReconstructor();
             reconstructor->Delete();
         }
         return 0;

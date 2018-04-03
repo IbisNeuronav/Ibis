@@ -80,8 +80,6 @@ void GPU_VolumeReconstructionWidget::slot_finished()
     ui->userFeedbackLabel->setText(feedbackString);
 
     ui->progressBar->hide();
-
-    m_VolumeReconstructor->DestroyReconstructor();
 }
 
 void GPU_VolumeReconstructionWidget::on_startButton_clicked()
@@ -131,7 +129,6 @@ void GPU_VolumeReconstructionWidget::on_startButton_clicked()
 #ifdef DEBUG
     std::cerr << "Constructing m_Reconstructor..." << std::endl;
 #endif
-    m_VolumeReconstructor->CreateReconstructor();
     m_VolumeReconstructor->SetNumberOfSlices( nbrOfSlices );
     m_VolumeReconstructor->SetFixedSliceMask( selectedUSAcquisitionObject->GetMask() );
     m_VolumeReconstructor->SetUSSearchRadius( usSearchRadius );

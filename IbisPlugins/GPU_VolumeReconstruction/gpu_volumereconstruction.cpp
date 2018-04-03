@@ -6,22 +6,12 @@
 
 GPU_VolumeReconstruction::GPU_VolumeReconstruction()
 {
+    m_VolReconstructor = VolumeReconstructionType::New();
 }
 
 GPU_VolumeReconstruction::~GPU_VolumeReconstruction()
 {
-}
-
-void GPU_VolumeReconstruction::CreateReconstructor()
-{
-    m_mutex.lock();
-    m_VolReconstructor = VolumeReconstructionType::New();
-}
-
-void GPU_VolumeReconstruction::DestroyReconstructor()
-{
     m_VolReconstructor = 0;
-    m_mutex.unlock();
 }
 
 void GPU_VolumeReconstruction::SetNumberOfSlices( unsigned int nbrOfSlices )
