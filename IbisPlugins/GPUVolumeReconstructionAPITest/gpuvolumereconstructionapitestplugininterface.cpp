@@ -49,20 +49,19 @@ QWidget * GPUVolumeReconstructionAPITestPluginInterface::CreateFloatingWidget()
             reconstructor->SetNumberOfSlices( nbrOfSlices );
             reconstructor->SetFixedSliceMask( acq->GetMask() );
             reconstructor->SetUSSearchRadius( 3 );
-            reconstructor->SetVolumeSpacing( 1 );
-            reconstructor->SetKernelStdDev( 0.5 );
+            reconstructor->SetVolumeSpacing( 1.0 );
+            reconstructor->SetKernelStdDev( 1.0 );
             vtkSmartPointer<vtkMatrix4x4> sliceTransformMatrix = vtkSmartPointer<vtkMatrix4x4>::New() ;
             vtkSmartPointer<vtkImageData> slice = vtkSmartPointer<vtkImageData>::New();
-            for(int i = 0; i < nbrOfSlices; i++)
+            for(int j = 0; j < nbrOfSlices; j++)
             {
-                acq->GetFrameData( i, slice.GetPointer(), sliceTransformMatrix.GetPointer() );
-                reconstructor->SetFixedSlice(i, slice.GetPointer(), sliceTransformMatrix.GetPointer() );
+                acq->GetFrameData( j, slice, sliceTransformMatrix );
+                reconstructor->SetFixedSlice(j, slice, sliceTransformMatrix );
             }
 
              //Construct ITK Matrix corresponding to VTK Local Matrix
             reconstructor->SetTransform( acq->GetLocalTransform()->GetMatrix() );
-            reconstructor->start();
-            reconstructor->wait();
+            reconstructor->ReconstructVolume();
 
             vtkSmartPointer<ImageObject> reconstructedImage = vtkSmartPointer<ImageObject>::New();
             reconstructedImage->SetItkImage( reconstructor->GetReconstructedImage() );

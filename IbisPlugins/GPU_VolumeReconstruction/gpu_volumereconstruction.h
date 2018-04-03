@@ -1,9 +1,6 @@
 #ifndef GPU_VOLUMERECONSTRUCTION_H
 #define GPU_VOLUMERECONSTRUCTION_H
 
-#include <QObject>
-#include <QThread>
-#include <QMutex>
 #include "vtkObject.h"
 #include "imageobject.h"
 #include "vtkSmartPointer.h"
@@ -19,9 +16,8 @@ typedef itk::GPUVolumeReconstruction<IbisItkFloat3ImageType>
                                                     VolumeReconstructionType;
 typedef VolumeReconstructionType::Pointer           VolumeReconstructionPointer;
 
-class GPU_VolumeReconstruction : public QThread, public vtkObject
+class GPU_VolumeReconstruction : public vtkObject
 {
-    Q_OBJECT
 
 public:
 
@@ -45,8 +41,6 @@ public:
 
 protected:
 
-    void run() override;
-    QMutex m_mutex;
     VolumeReconstructionPointer m_VolReconstructor;
     IbisItkFloat3ImageType::Pointer m_reconstructedImage;
 };

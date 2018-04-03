@@ -153,8 +153,7 @@ void GPU_VolumeReconstructionWidget::on_startButton_clicked()
     std::cerr << "Starting reconstruction..." << std::endl;
 #endif   
 
-    m_VolumeReconstructor->start();
-    m_VolumeReconstructor->wait();
+    m_VolumeReconstructor->ReconstructVolume();
     this->slot_finished();
 }
 

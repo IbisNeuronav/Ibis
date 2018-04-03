@@ -46,6 +46,7 @@ void GPU_VolumeReconstruction::SetKernelStdDev( float stdDev )
 void GPU_VolumeReconstruction::SetFixedSlice( int index, vtkImageData *slice, vtkMatrix4x4 *sliceTransformMatrix )
 {
     IbisItkFloat3ImageType::Pointer itkSliceImage = IbisItkFloat3ImageType::New();
+    itkSliceImage->Initialize();
     vtkSmartPointer<IbisItkVtkConverter> converter = vtkSmartPointer<IbisItkVtkConverter>::New();
     converter->ConvertVtkImageToItkImage( itkSliceImage, slice, sliceTransformMatrix );
     m_VolReconstructor->SetFixedSlice( index, itkSliceImage );
@@ -112,9 +113,4 @@ void GPU_VolumeReconstruction::ReconstructVolume()
 {
     m_VolReconstructor->ReconstructVolume();
     m_reconstructedImage = m_VolReconstructor->GetReconstructedVolume();
-}
-
-void GPU_VolumeReconstruction::run()
-{
-    this->ReconstructVolume();
 }
