@@ -20,13 +20,10 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include "itkGPU3DRigidSimilarityMetric.h"
 #include "itkEuler3DTransform.h"
-#include "itkImageDuplicator.h"
 
 #include "itkAmoebaOptimizer.h"
 #include "itkSPSAOptimizer.h"
 #include "itkCMAEvolutionStrategyOptimizer.h"
-
-typedef itk::ImageDuplicator< IbisItkFloat3ImageType >  DuplicatorType;
 
 typedef itk::CMAEvolutionStrategyOptimizer            OptimizerType;
 

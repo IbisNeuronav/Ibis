@@ -26,7 +26,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 //#define DEBUG
 
 #ifdef DEBUG
-  #include "itkImageDuplicator.h"
   #include "itkImageFileWriter.h"
 #endif
 
@@ -89,10 +88,7 @@ public:
   itkSetMacro(Debug, bool);
 
 
-#ifdef DEBUG                                                       
-  typedef itk::ImageDuplicator< ImageType >            DuplicatorType;
-  typedef typename DuplicatorType::Pointer                  DuplicatorPointer;
-
+#ifdef DEBUG
   typedef itk::ImageFileWriter< ImageType  >  WriterType;  
   typedef typename WriterType::Pointer        WriterPointer;
 #endif
