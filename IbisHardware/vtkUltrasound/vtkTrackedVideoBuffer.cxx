@@ -77,6 +77,8 @@ vtkTrackedVideoBuffer::~vtkTrackedVideoBuffer()
     this->CalibrationTransform->Delete();
     this->UncalibratedOutputTransform->Delete();
     this->OutputTransform->Delete();
+    this->FreezeMatrixSum->Delete();
+    this->FreezeMatrix->Delete();
 }
 
 void vtkTrackedVideoBuffer::PrintSelf(ostream& os, vtkIndent indent)

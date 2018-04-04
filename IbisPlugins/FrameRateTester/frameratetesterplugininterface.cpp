@@ -32,6 +32,7 @@ FrameRateTesterPluginInterface::FrameRateTesterPluginInterface()
 
 FrameRateTesterPluginInterface::~FrameRateTesterPluginInterface()
 {
+    delete m_time;
 }
 
 bool FrameRateTesterPluginInterface::CanRun()

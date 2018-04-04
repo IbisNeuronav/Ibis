@@ -148,6 +148,7 @@ Tracker::Tracker()
 Tracker::~Tracker()
 {
     m_tracker->Destroy();
+    m_referenceTransform->Delete();
 }
 
 void Tracker::Initialize()

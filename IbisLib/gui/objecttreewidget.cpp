@@ -39,6 +39,7 @@ ObjectTreeWidget::~ObjectTreeWidget()
 {
     if (m_treeModel)
         delete m_treeModel;
+    delete ui;
 }
 
 void ObjectTreeWidget::SetSceneManager( SceneManager * man )
