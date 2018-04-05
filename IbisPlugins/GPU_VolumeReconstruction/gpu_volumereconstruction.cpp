@@ -115,3 +115,8 @@ void GPU_VolumeReconstruction::ReconstructVolume()
     m_VolReconstructor->ReconstructVolume();
     m_reconstructedImage = m_VolReconstructor->GetReconstructedVolume();
 }
+
+void GPU_VolumeReconstruction::SetDebug( bool debug )
+{
+    m_VolReconstructor->SetDebug( debug );
+}
