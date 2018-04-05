@@ -87,8 +87,6 @@ public:
 
   void ReconstructVolume(void);  
 
-  unsigned int NextPow2( unsigned int x );
-
   void SetFixedSlice( unsigned int sliceIdx, ImagePointer sliceImage);
 
   void SetNumberOfSlices( unsigned int numberOfSlices );

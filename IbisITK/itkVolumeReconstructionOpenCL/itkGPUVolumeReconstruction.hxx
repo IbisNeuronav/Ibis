@@ -65,7 +65,10 @@ GPUVolumeReconstruction< TImage >
     clReleaseKernel(m_VolumeReconstructionPopulatingKernel);
   if( m_Context )
       clReleaseContext( m_Context );
-
+  for(unsigned int i=0; i<m_NumberOfDevices; i++)
+    {
+      clReleaseCommandQueue( m_CommandQueue[i] );
+    }
 }
 
 template< class TImage >
@@ -122,19 +125,6 @@ GPUVolumeReconstruction< TImage >
 ::PrintSelf(std::ostream & os, Indent indent) const
 {
   Superclass::PrintSelf(os, indent);
-}
-
-template< class TImage >
-unsigned int
-GPUVolumeReconstruction< TImage >
-::NextPow2( unsigned int x ) {
-    --x;
-    x |= x >> 1;
-    x |= x >> 2;
-    x |= x >> 4;
-    x |= x >> 8;
-    x |= x >> 16;
-    return ++x;
 }
 
 /**
