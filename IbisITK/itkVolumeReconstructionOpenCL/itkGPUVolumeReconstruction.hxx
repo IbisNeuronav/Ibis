@@ -38,12 +38,12 @@ GPUVolumeReconstruction< TImage >
     itkExceptionMacro(<< "OpenCL-enabled GPU is not present.");
   }
 
+  m_Debug = false;
+
   /* Initialize GPU Context */
   this->InitializeGPUContext();
 
   m_NumberOfSlices = 0;  
-
-  m_Debug = false;
 
   m_USSearchRadius = 0;
   m_KernelStdDev   = 1.0;
@@ -102,16 +102,14 @@ GPUVolumeReconstruction< TImage >
     OpenCLCheckError( errid, __FILE__, __LINE__, ITK_LOCATION );
     }
 
-#ifdef DEBUG
-  std::cerr << "Creating Kernel.. " << std::endl;
-#endif  
+  if( m_Debug )
+    std::cerr << "Creating Kernel.. " << std::endl;
 
   m_VolumeReconstructionPopulatingKernel = CreateKernelFromString( GPUVolumeReconstructionKernel,
                                                      "", "VolumeReconstructionPopulating", "", &m_VolumeReconstructionPopulatingProgram);
 
-#ifdef DEBUG
-  std::cerr << "Creating Kernel.. DONE" << std::endl;
-#endif    
+  if( m_Debug )
+    std::cerr << "Creating Kernel.. DONE" << std::endl;
 
 }
 
@@ -261,9 +259,8 @@ void
 GPUVolumeReconstruction< TImage >
 ::CreateReconstructedVolume( void )
 {
-#ifdef DEBUG
-  std::cerr << "Creating Empty Reconstructed Volume.." << std::endl;
-#endif  
+  if( m_Debug )
+    std::cerr << "Creating Empty Reconstructed Volume.." << std::endl;
 
   itk::TimeProbe clockReconstruction;
   clockReconstruction.Start();
@@ -332,10 +329,8 @@ GPUVolumeReconstruction< TImage >
   m_ReconstructedVolume->Allocate();
   m_ReconstructedVolume->FillBuffer(0.0);
 
-#ifdef DEBUG
-  std::cerr << "Creating Emtpy Reconstructed Volume..DONE" << std::endl;
-#endif    
-
+  if( m_Debug )
+    std::cerr << "Creating Emtpy Reconstructed Volume..DONE" << std::endl;
 }
 
 template< class TImage >
@@ -344,15 +339,14 @@ GPUVolumeReconstruction< TImage >
 ::CreateMatrices(void)
 {
 
-#ifdef DEBUG
-  std::cerr << "Creating Matrices.." << std::endl;
-#endif  
+  if( m_Debug )
+    std::cerr << "Creating Matrices.." << std::endl;
 
   m_VolumeIndexToSliceIndexMatrices = new InternalRealType[m_NumberOfSlices * 12];
   m_VolumeIndexToLocationMatrix = new InternalRealType[12];
   m_SliceIndexToLocationMatrices = new InternalRealType[m_NumberOfSlices * 12];  
 
-  ImageDirectionType volumeScale;       
+  ImageDirectionType volumeScale;
   for ( unsigned int i = 0; i < ImageDimension; i++ )
     {
       volumeScale[i][i]= m_ReconstructedVolume->GetSpacing()[i];
@@ -424,15 +418,11 @@ GPUVolumeReconstruction< TImage >
 
   cl_int errid;
 
-#ifdef DEBUG
-  std::cerr << "Creating Matrix Buffers on GPU" << std::endl;
-#endif  
-
-#ifdef DEBUG
-  std::cerr << "Creating Matrices..DONE" << std::endl;
-#endif  
-
-
+  if( m_Debug )
+  {
+    std::cerr << "Creating Matrix Buffers on GPU" << std::endl;
+    std::cerr << "Creating Matrices..DONE" << std::endl;
+  }
 }
 
 
@@ -468,16 +458,28 @@ GPUVolumeReconstruction< TImage >
   unsigned int size_output = nbrOfPixelsInVolume*sizeof(ImagePixelType);
   unsigned int size_slice = m_NbrPixelsInSlice * sizeof(InternalRealType);
 
-//  std::cout << "Volume Spacing:\t" << m_VolumeSpacing << std::endl;
-//  std::cout << "Standard Deviation:\t" << m_KernelStdDev << std::endl;
+  if( m_Debug )
+  {
+    std::cout << "Volume Spacing:\t" << m_VolumeSpacing << std::endl;
+    std::cout << "Standard Deviation:\t" << m_KernelStdDev << std::endl;
+    std::cout << "Number of Pixels in Slice:\t" << m_NbrPixelsInSlice << std::endl;
+  }
 
 
   unsigned char * maskValues = new unsigned char[m_NbrPixelsInSlice];
+  unsigned int ll = 0;
   for(unsigned int n=0; n < m_NbrPixelsInSlice; n++)
   {
     maskValues[n] = (unsigned char)(m_FixedSliceMask->GetPixel( m_FixedSliceMask->ComputeIndex(n)) );
+    if( maskValues[n] == 0 ) ll++;
   }
-  
+  if( m_Debug )
+  {
+    std::cout << "Volume Spacing:\t" << m_VolumeSpacing << std::endl;
+    std::cout << "Standard Deviation:\t" << m_KernelStdDev << std::endl;
+    std::cout << "Number of Pixels in Slice:\t" << m_NbrPixelsInSlice << std::endl;
+  }
+
   cl_int errid;
   cl_image_format mask_image_format;
   mask_image_format.image_channel_order = CL_R;
@@ -514,6 +516,10 @@ GPUVolumeReconstruction< TImage >
   volumeSize[0] = m_ReconstructedVolume->GetLargestPossibleRegion().GetSize()[0];
   volumeSize[1] = m_ReconstructedVolume->GetLargestPossibleRegion().GetSize()[1];
   volumeSize[2] = m_ReconstructedVolume->GetLargestPossibleRegion().GetSize()[2];  
+  if( m_Debug )
+  {
+    std::cout << "Volume Size:\t" << volumeSize[0] << ", " << volumeSize[1] << ", " << volumeSize[2] << std::endl;
+  }
 
   for(unsigned int i=0; i<3; i++)
     {
@@ -529,7 +535,6 @@ GPUVolumeReconstruction< TImage >
   do
   {
     unsigned int nbrOfSlicesToProcess = std::min(m_NumberOfSlices - sliceCntr, maxNbrOfSlices);
-    unsigned int size_input = nbrOfSlicesToProcess * size_slice;
 
     clockMemCpy.Start();
     ImagePixelType * allSlicesPixels = new ImagePixelType[nbrOfSlicesToProcess*m_NbrPixelsInSlice];
@@ -654,18 +659,16 @@ GPUVolumeReconstruction< TImage >
 
   clockGPUKernel.Stop();
 
-#ifdef DEBUG
+  if( m_Debug )
+  {
     std::cerr << "Time to Populate and Accumulate Value in GPU:\t" << clockGPUKernel.GetMean() << std::endl;
     std::cerr << "Time to MemCpy:\t" << clockMemCpy.GetMean() << std::endl;
-#endif  
-
+  }
 
   itk::TimeProbe clockSettingValue;
   clockSettingValue.Start();
 
-#ifdef DEBUG
   unsigned int n = 0, m = 0;
-#endif
   for(unsigned int i=0; i<nbrOfPixelsInVolume; i++)
   {
     InternalRealType weightedValue = cpuAccumWeightAndWeightedValueBuffer[2*i];
@@ -675,32 +678,27 @@ GPUVolumeReconstruction< TImage >
     {
       ImagePixelType reconstructedValue = weightedValue / weight;
       m_ReconstructedVolume->SetPixel(m_ReconstructedVolume->ComputeIndex(i), reconstructedValue);
-#ifdef DEBUG
-      m++;
-#endif
+      if( m_Debug )
+        m++;
     }
     else
     {
       m_ReconstructedVolume->SetPixel(m_ReconstructedVolume->ComputeIndex(i), 0.0);
-#ifdef DEBUG
-      n++;
-#endif
+      if( m_Debug )
+        n++;
     }
   }
   clockSettingValue.Stop();
 
-#ifdef DEBUG
+  if( m_Debug )
+  {
     std::cout << "nbrOfPixelsInVolume = " << nbrOfPixelsInVolume << " m = " << m  << " n = " << n << std::endl;
     std::cerr << "Time to Pixel Values with for loop:\t" << clockSettingValue.GetMean() << std::endl;
-#endif    
-
-#ifdef DEBUG
-  WriterPointer writer = WriterType::New();
-  writer->SetInput(m_ReconstructedVolume);
-  writer->SetFileName( "reconstructedVolume.mnc" );
-  writer->Update();
-#endif  
-
+    WriterPointer writer = WriterType::New();
+    writer->SetInput(m_ReconstructedVolume);
+    writer->SetFileName( "reconstructedVolume.mnc" );
+    writer->Update();
+  }
   errid = clReleaseMemObject(accumWeightAndWeightedValueGPUBuffer);
   OpenCLCheckError(errid, __FILE__, __LINE__, ITK_LOCATION);
 

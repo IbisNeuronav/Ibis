@@ -7,6 +7,7 @@
 GPU_VolumeReconstruction::GPU_VolumeReconstruction()
 {
     m_VolReconstructor = VolumeReconstructionType::New();
+    m_VolReconstructor->SetDebug( false );
 }
 
 GPU_VolumeReconstruction::~GPU_VolumeReconstruction()

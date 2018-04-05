@@ -23,12 +23,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include "itkEuler3DTransform.h"
 
-//#define DEBUG
-
-#ifdef DEBUG
-  #include "itkImageFileWriter.h"
-#endif
-
+#include "itkImageFileWriter.h" //ImageFileWriter used for debugging
 namespace itk
 {
 
@@ -81,17 +76,14 @@ public:
   itkStaticConstMacro(ImageDimension, unsigned int,
                       TImage::ImageDimension);
 
-
   typedef Image<InternalRealType, ImageDimension>         RealImageType;
   typedef typename RealImageType::Pointer                 RealImagePointer;
 
   itkSetMacro(Debug, bool);
 
-
-#ifdef DEBUG
+  //ImageFileWriter used for debugging
   typedef itk::ImageFileWriter< ImageType  >  WriterType;  
   typedef typename WriterType::Pointer        WriterPointer;
-#endif
 
   void ReconstructVolume(void);  
 
