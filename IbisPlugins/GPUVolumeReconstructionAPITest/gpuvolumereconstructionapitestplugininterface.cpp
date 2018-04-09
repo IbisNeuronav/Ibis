@@ -43,7 +43,7 @@ QWidget * GPUVolumeReconstructionAPITestPluginInterface::CreateFloatingWidget()
         for( int i = 0; i < numberOfAcquisitions; i++ )
         {
             GPU_VolumeReconstruction *reconstructor = GPU_VolumeReconstruction::New();
-            reconstructor->SetDebug( false );
+            reconstructor->SetDebugFlag( false );
 
             USAcquisitionObject * acq = acquisitions[i];
             int nbrOfSlices = acq->GetNumberOfSlices();

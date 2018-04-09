@@ -38,7 +38,7 @@ public:
     void SetKernelStdDev( float stdDev );
     void SetFixedSlice( int index, vtkImageData *slice, vtkMatrix4x4 *sliceTransformMatrix );
     void SetTransform( vtkMatrix4x4 *transformMatrix );
-    void SetDebug( bool debug );
+    void SetDebugFlag( bool debug );
 
 protected:
 

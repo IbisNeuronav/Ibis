@@ -67,7 +67,7 @@ public:
 
   itkSetMacro(KernelStdDev, float);  
 
-  itkSetMacro(VolumeSpacing, float);    
+  itkSetMacro(VolumeSpacing, float);
 
   itkGetObjectMacro(Transform, TransformType);
   itkSetObjectMacro(Transform, TransformType);  

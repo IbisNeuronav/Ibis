@@ -105,15 +105,8 @@ GPUVolumeReconstruction< TImage >
     OpenCLCheckError( errid, __FILE__, __LINE__, ITK_LOCATION );
     }
 
-  if( m_Debug )
-    std::cerr << "Creating Kernel.. " << std::endl;
-
   m_VolumeReconstructionPopulatingKernel = CreateKernelFromString( GPUVolumeReconstructionKernel,
                                                      "", "VolumeReconstructionPopulating", "", &m_VolumeReconstructionPopulatingProgram);
-
-  if( m_Debug )
-    std::cerr << "Creating Kernel.. DONE" << std::endl;
-
 }
 
 /**
@@ -161,6 +154,8 @@ cl_kernel
 GPUVolumeReconstruction< TImage >
 ::CreateKernelFromString(const char * cOriginalSourceString, const char * cPreamble, const char * kernelname, const char * cOptions, cl_program * program)
 {
+  if( m_Debug )
+    std::cerr << "Creating Kernel.. " << std::endl;
 
   cl_int errid;
 
@@ -197,6 +192,9 @@ GPUVolumeReconstruction< TImage >
   free(cSourceString);
   cl_kernel kernel = clCreateKernel(*program, kernelname, &errid);
   OpenCLCheckError(errid, __FILE__, __LINE__, ITK_LOCATION);  
+
+  if( m_Debug )
+    std::cerr << "Creating Kernel.. DONE" << std::endl;
 
   return kernel;
 }
@@ -405,13 +403,10 @@ GPUVolumeReconstruction< TImage >
       }        
   }
 
-
-  cl_int errid;
-
   if( m_Debug )
   {
-    std::cerr << "Creating Matrix Buffers on GPU" << std::endl;
-    std::cerr << "Creating Matrices..DONE" << std::endl;
+    std::cout << "Creating Matrix Buffers on GPU" << std::endl;
+    std::cout << "Creating Matrices..DONE" << std::endl;
   }
 }
 
@@ -455,13 +450,10 @@ GPUVolumeReconstruction< TImage >
     std::cout << "Number of Pixels in Slice:\t" << m_NbrPixelsInSlice << std::endl;
   }
 
-
   unsigned char * maskValues = new unsigned char[m_NbrPixelsInSlice];
-  unsigned int ll = 0;
   for(unsigned int n=0; n < m_NbrPixelsInSlice; n++)
   {
     maskValues[n] = (unsigned char)(m_FixedSliceMask->GetPixel( m_FixedSliceMask->ComputeIndex(n)) );
-    if( maskValues[n] == 0 ) ll++;
   }
   if( m_Debug )
   {
