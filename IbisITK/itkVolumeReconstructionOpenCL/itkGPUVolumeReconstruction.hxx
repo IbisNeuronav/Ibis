@@ -59,16 +59,17 @@ GPUVolumeReconstruction< TImage >
 template< class TImage >
 GPUVolumeReconstruction< TImage >
 ::~GPUVolumeReconstruction()
-{
-    
+{    
   if(m_VolumeReconstructionPopulatingKernel)
     clReleaseKernel(m_VolumeReconstructionPopulatingKernel);
-  if( m_Context )
-      clReleaseContext( m_Context );
+  if( m_VolumeReconstructionPopulatingProgram )
+      clReleaseProgram( m_VolumeReconstructionPopulatingProgram );
   for(unsigned int i=0; i<m_NumberOfDevices; i++)
     {
       clReleaseCommandQueue( m_CommandQueue[i] );
     }
+  if( m_Context )
+      clReleaseContext( m_Context );
 }
 
 template< class TImage >
@@ -222,7 +223,6 @@ void
 GPUVolumeReconstruction< TImage >
 ::SetFixedSlice( unsigned int sliceIdx, ImagePointer sliceImage )
 {
-
   m_FixedSlices[sliceIdx] = sliceImage;
 }
 
@@ -455,12 +455,6 @@ GPUVolumeReconstruction< TImage >
   {
     maskValues[n] = (unsigned char)(m_FixedSliceMask->GetPixel( m_FixedSliceMask->ComputeIndex(n)) );
   }
-  if( m_Debug )
-  {
-    std::cout << "Volume Spacing:\t" << m_VolumeSpacing << std::endl;
-    std::cout << "Standard Deviation:\t" << m_KernelStdDev << std::endl;
-    std::cout << "Number of Pixels in Slice:\t" << m_NbrPixelsInSlice << std::endl;
-  }
 
   cl_int errid;
   cl_image_format mask_image_format;
@@ -498,16 +492,17 @@ GPUVolumeReconstruction< TImage >
   volumeSize[0] = m_ReconstructedVolume->GetLargestPossibleRegion().GetSize()[0];
   volumeSize[1] = m_ReconstructedVolume->GetLargestPossibleRegion().GetSize()[1];
   volumeSize[2] = m_ReconstructedVolume->GetLargestPossibleRegion().GetSize()[2];  
-  if( m_Debug )
-  {
-    std::cout << "Volume Size:\t" << volumeSize[0] << ", " << volumeSize[1] << ", " << volumeSize[2] << std::endl;
-  }
 
   for(unsigned int i=0; i<3; i++)
     {
     globalSize[i] = localSize[i]*(unsigned int)ceil( (float)volumeSize[i]/(float)localSize[i]);
     }
 
+  if( m_Debug )
+  {
+    std::cout << "Volume Size:\t" << volumeSize[0] << ", " << volumeSize[1] << ", " << volumeSize[2] << std::endl;
+    std::cout << "globalSize:\t" << globalSize[0] << ", " << globalSize[1] << ", " << globalSize[2] << std::endl;
+  }
   itk::TimeProbe clockMemCpy;
 
   InternalRealType * allMatrices = new InternalRealType[12*(2*maxNbrOfSlices+1)];
