@@ -94,7 +94,7 @@ public:
 
 protected:
   GPUVolumeReconstruction();
-  ~GPUVolumeReconstruction();
+  virtual ~GPUVolumeReconstruction();
 
   void InitializeGPUContext(void);
 

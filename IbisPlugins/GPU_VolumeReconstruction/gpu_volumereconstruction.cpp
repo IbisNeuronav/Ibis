@@ -12,7 +12,6 @@ GPU_VolumeReconstruction::GPU_VolumeReconstruction()
 
 GPU_VolumeReconstruction::~GPU_VolumeReconstruction()
 {
-    m_VolReconstructor = 0;
 }
 
 void GPU_VolumeReconstruction::SetNumberOfSlices( unsigned int nbrOfSlices )

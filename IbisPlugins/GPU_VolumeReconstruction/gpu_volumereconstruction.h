@@ -24,7 +24,7 @@ public:
     static GPU_VolumeReconstruction * New() { return new GPU_VolumeReconstruction; }
 
     GPU_VolumeReconstruction();
-    ~GPU_VolumeReconstruction();
+    virtual ~GPU_VolumeReconstruction();
     vtkTypeMacro( GPU_VolumeReconstruction,vtkObject )
 
     VolumeReconstructionPointer GetReconstructor() { return m_VolReconstructor; }

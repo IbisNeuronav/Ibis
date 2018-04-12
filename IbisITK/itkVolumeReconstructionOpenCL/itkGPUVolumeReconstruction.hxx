@@ -60,10 +60,10 @@ template< class TImage >
 GPUVolumeReconstruction< TImage >
 ::~GPUVolumeReconstruction()
 {    
-  if(m_VolumeReconstructionPopulatingKernel)
-    clReleaseKernel(m_VolumeReconstructionPopulatingKernel);
   if( m_VolumeReconstructionPopulatingProgram )
       clReleaseProgram( m_VolumeReconstructionPopulatingProgram );
+  if(m_VolumeReconstructionPopulatingKernel)
+    clReleaseKernel(m_VolumeReconstructionPopulatingKernel);
   for(unsigned int i=0; i<m_NumberOfDevices; i++)
     {
       clReleaseCommandQueue( m_CommandQueue[i] );
