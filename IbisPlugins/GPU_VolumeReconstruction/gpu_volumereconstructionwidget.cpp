@@ -57,8 +57,6 @@ GPU_VolumeReconstructionWidget::~GPU_VolumeReconstructionWidget()
 
 void GPU_VolumeReconstructionWidget::slot_finished()
 {
-    int usAcquisitionObjectId = ui->usAcquisitionComboBox->itemData( ui->usAcquisitionComboBox->currentIndex() ).toInt();
-
     SceneManager * sm = m_pluginInterface->GetSceneManager();
 
     qint64 reconstructionTime = m_ReconstructionTimer.elapsed();
