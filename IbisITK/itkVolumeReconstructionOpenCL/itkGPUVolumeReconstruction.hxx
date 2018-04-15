@@ -68,8 +68,10 @@ GPUVolumeReconstruction< TImage >
     {
       clReleaseCommandQueue( m_CommandQueue[i] );
     }
+  free( m_CommandQueue );
   if( m_Context )
       clReleaseContext( m_Context );
+  free( m_Devices );
 }
 
 template< class TImage >
