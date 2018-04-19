@@ -56,10 +56,11 @@ int main( int argc, char** argv )
 
     // Create main window
     MainWindow * mw = new MainWindow( 0 );
-    mw->setAttribute( Qt::WA_DeleteOnClose );
-    mw->show();
     Application::GetInstance().SetMainWindow( mw );
     Application::GetInstance().LoadWindowSettings();
+    mw->setAttribute( Qt::WA_DeleteOnClose );
+    mw->show();
+
     a.connect( &a, SIGNAL( lastWindowClosed() ), &a, SLOT( quit() ) );
     a.connect( &a, SIGNAL( aboutToQuit() ), &Application::GetInstance(), SLOT( SaveSettings() ) );
     a.installEventFilter( mw );
