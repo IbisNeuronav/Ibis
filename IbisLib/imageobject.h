@@ -59,7 +59,6 @@ public:
     void SetItkImage( IbisItkFloat3ImageType::Pointer image );  // for all others
     void SetItkLabelImage( IbisItkUnsignedChar3ImageType::Pointer image );  // for labels
     IbisItkFloat3ImageType::Pointer GetItkImage() { return this->ItkImage; }
-    IbisRGBImageType::Pointer GetItkRGBImage() { return this->ItkRGBImage; }
     IbisItkUnsignedChar3ImageType::Pointer GetItkLabelImage() { return this->ItkLabelImage; }
     void SetImage( vtkImageData * image );
     
@@ -132,7 +131,6 @@ protected:
 
     IbisItkVtkConverter *ItktovtkConverter;
     IbisItkFloat3ImageType::Pointer ItkImage;
-    IbisRGBImageType::Pointer ItkRGBImage;
     IbisItkUnsignedChar3ImageType::Pointer ItkLabelImage;
 
     vtkImageData* Image;
