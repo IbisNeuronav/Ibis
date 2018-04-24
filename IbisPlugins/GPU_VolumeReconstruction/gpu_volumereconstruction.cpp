@@ -109,7 +109,7 @@ void GPU_VolumeReconstruction::SetTransform( vtkMatrix4x4 *transformMatrix )
     m_VolReconstructor->SetTransform( itkTransform );
 }
 
-void GPU_VolumeReconstruction::ReconstructVolume()
+void GPU_VolumeReconstruction::run()
 {
     m_VolReconstructor->ReconstructVolume();
     m_reconstructedImage = m_VolReconstructor->GetReconstructedVolume();

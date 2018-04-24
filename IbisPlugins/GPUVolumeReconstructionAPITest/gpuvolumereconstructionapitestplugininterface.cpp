@@ -40,11 +40,10 @@ QWidget * GPUVolumeReconstructionAPITestPluginInterface::CreateFloatingWidget()
     int numberOfAcquisitions = acquisitions.count();
     if( numberOfAcquisitions > 0 )
     {
+        GPU_VolumeReconstruction *reconstructor = GPU_VolumeReconstruction::New();
+        reconstructor->SetDebugFlag( false );
         for( int i = 0; i < numberOfAcquisitions; i++ )
         {
-            GPU_VolumeReconstruction *reconstructor = GPU_VolumeReconstruction::New();
-            reconstructor->SetDebugFlag( false );
-
             USAcquisitionObject * acq = acquisitions[i];
             int nbrOfSlices = acq->GetNumberOfSlices();
             reconstructor->SetNumberOfSlices( nbrOfSlices );
@@ -62,7 +61,8 @@ QWidget * GPUVolumeReconstructionAPITestPluginInterface::CreateFloatingWidget()
 
              //Construct ITK Matrix corresponding to VTK Local Matrix
             reconstructor->SetTransform( acq->GetLocalTransform()->GetMatrix() );
-            reconstructor->ReconstructVolume();
+            reconstructor->start();
+            reconstructor->wait();
 
             vtkSmartPointer<ImageObject> reconstructedImage = vtkSmartPointer<ImageObject>::New();
             reconstructedImage->SetItkImage( reconstructor->GetReconstructedImage() );
@@ -71,8 +71,8 @@ QWidget * GPUVolumeReconstructionAPITestPluginInterface::CreateFloatingWidget()
             reconstructedImage->SetName(volName);
             sm->AddObject(reconstructedImage, sm->GetSceneRoot() );
             sm->SetCurrentObject( reconstructedImage );
-            reconstructor->Delete();
         }
+        reconstructor->Delete();
         return 0;
     }
     QMessageBox::warning( 0, "Error", "No acquisition in scene." );
