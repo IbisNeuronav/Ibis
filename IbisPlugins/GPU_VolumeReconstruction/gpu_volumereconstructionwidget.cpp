@@ -31,7 +31,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 GPU_VolumeReconstructionWidget::GPU_VolumeReconstructionWidget(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::GPU_VolumeReconstructionWidget),
-    m_pluginInterface(0)
+    m_pluginInterface(nullptr)
 {
     ui->setupUi(this);    
     setWindowTitle( "US Volume Reconstruction with GPU" );

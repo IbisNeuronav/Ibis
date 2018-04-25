@@ -49,9 +49,6 @@ GPUVolumeReconstruction< TImage >
   m_KernelStdDev   = 1.0;
   m_VolumeSpacing   = 1.0;
 
-  m_ReconstructedVolume = 0;
-  m_FixedSliceMask = 0;
-
   m_Transform = TransformType::New();
 }
 
@@ -82,18 +79,18 @@ GPUVolumeReconstruction< TImage >
   cl_int errid;
 
   // Get the platforms
-  errid = clGetPlatformIDs(0, NULL, &m_NumberOfPlatforms);
+  errid = clGetPlatformIDs(0, nullptr, &m_NumberOfPlatforms);
   OpenCLCheckError( errid, __FILE__, __LINE__, ITK_LOCATION );
 
   // Get NVIDIA platform by default
   m_Platform = OpenCLSelectPlatform("NVIDIA");
-  assert(m_Platform != NULL);
+  assert(m_Platform != nullptr);
 
   cl_device_type devType = CL_DEVICE_TYPE_GPU;
   m_Devices = OpenCLGetAvailableDevices(m_Platform, devType, &m_NumberOfDevices);
 
   // create context
-  m_Context = clCreateContext(0, m_NumberOfDevices, m_Devices, NULL, NULL, &errid);
+  m_Context = clCreateContext(0, m_NumberOfDevices, m_Devices, nullptr, nullptr, &errid);
   OpenCLCheckError( errid, __FILE__, __LINE__, ITK_LOCATION );
 
   // create command queues
@@ -132,7 +129,7 @@ GPUVolumeReconstruction< TImage >
 ::CreateKernelFromFile(const char * filename, const char * cPreamble, const char * kernelname, const char * cOptions)
 {
 
-  FILE*  pFileStream = NULL;
+  FILE*  pFileStream = nullptr;
   pFileStream = fopen(filename, "rb");
   if(pFileStream == 0)
     {
@@ -177,14 +174,14 @@ GPUVolumeReconstruction< TImage >
   *program = clCreateProgramWithSource( m_Context, 1, (const char **)&cSourceString, &szFinalLength, &errid);
   OpenCLCheckError(errid, __FILE__, __LINE__, ITK_LOCATION);
 
-  errid = clBuildProgram(*program, 0, NULL, cOptions, NULL, NULL);
+  errid = clBuildProgram(*program, 0, nullptr, cOptions, nullptr, nullptr);
   if(errid != CL_SUCCESS)
     {
     size_t paramValueSize = 0;
-    clGetProgramBuildInfo(m_Program, 0, CL_PROGRAM_BUILD_LOG, 0, NULL, &paramValueSize);
+    clGetProgramBuildInfo(m_Program, 0, CL_PROGRAM_BUILD_LOG, 0, nullptr, &paramValueSize);
     char *paramValue;
     paramValue = new char[paramValueSize+1];
-    clGetProgramBuildInfo(m_Program, 0, CL_PROGRAM_BUILD_LOG, paramValueSize, paramValue, NULL);
+    clGetProgramBuildInfo(m_Program, 0, CL_PROGRAM_BUILD_LOG, paramValueSize, paramValue, nullptr);
     paramValue[paramValueSize] = '\0';
     if( m_Debug )
       std::cerr << paramValue << std::endl;
@@ -216,7 +213,7 @@ GPUVolumeReconstruction< TImage >
 
   for(unsigned int i=0; i<m_NumberOfSlices; i++)
   {
-    m_FixedSlices[i] = NULL;
+    m_FixedSlices[i] = nullptr;
   }
 
 }
@@ -237,9 +234,10 @@ GPUVolumeReconstruction< TImage >
   bool allSlicesDefined = true;
   for(unsigned int i=0; i<m_NumberOfSlices; i++)
   {
-    if( !m_FixedSlices[i] )
+    if( m_FixedSlices[i] == nullptr )
     {
       allSlicesDefined = false;
+      break;
     }
   }
   return allSlicesDefined;
@@ -425,7 +423,7 @@ GPUVolumeReconstruction< TImage >
     itkExceptionMacro(<< "All Fixed Slices have not been set." );
   }
 
-  if( !m_FixedSliceMask )
+  if( m_FixedSliceMask == nullptr )
   {
     itkExceptionMacro(<< "Slice Mask has not been set." );
   }
@@ -473,7 +471,7 @@ GPUVolumeReconstruction< TImage >
   desc.image_slice_pitch = 0;
   desc.num_mip_levels = 0;
   desc.num_samples = 0;
-  desc.buffer = NULL;
+  desc.buffer = nullptr;
   cl_mem inputImageMaskGPUBuffer = clCreateImage(   m_Context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
                                                     &(mask_image_format),
                                                     &desc,
@@ -548,7 +546,7 @@ GPUVolumeReconstruction< TImage >
     desc.image_slice_pitch = 0;
     desc.num_mip_levels = 0;
     desc.num_samples = 0;
-    desc.buffer = NULL;
+    desc.buffer = nullptr;
     cl_mem inputImageGPUBuffer = clCreateImage(   m_Context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
                                                     &(gpu_image_format),
                                                     &desc,
@@ -586,7 +584,7 @@ GPUVolumeReconstruction< TImage >
     OpenCLCheckError(errid, __FILE__, __LINE__, ITK_LOCATION);    
 
 
-    errid = clSetKernelArg(m_VolumeReconstructionPopulatingKernel, argidx++, sizeof(InternalRealType) * 12 * (2*nbrOfSlicesToProcess + 1), NULL);
+    errid = clSetKernelArg(m_VolumeReconstructionPopulatingKernel, argidx++, sizeof(InternalRealType) * 12 * (2*nbrOfSlicesToProcess + 1), nullptr);
     OpenCLCheckError(errid, __FILE__, __LINE__, ITK_LOCATION);  
 
     errid = clSetKernelArg(m_VolumeReconstructionPopulatingKernel, argidx++, sizeof(int),  &(sliceCntr) );
@@ -604,7 +602,7 @@ GPUVolumeReconstruction< TImage >
     errid = clSetKernelArg(m_VolumeReconstructionPopulatingKernel, argidx++, sizeof(float),  &(m_KernelStdDev) );
     OpenCLCheckError(errid, __FILE__, __LINE__, ITK_LOCATION);          
 
-    errid = clEnqueueNDRangeKernel(m_CommandQueue[0], m_VolumeReconstructionPopulatingKernel, 3, NULL, globalSize, localSize, 0, NULL, NULL);
+    errid = clEnqueueNDRangeKernel(m_CommandQueue[0], m_VolumeReconstructionPopulatingKernel, 3, nullptr, globalSize, localSize, 0, nullptr, nullptr);
     OpenCLCheckError(errid, __FILE__, __LINE__, ITK_LOCATION);    
 
     errid = clFinish(m_CommandQueue[0]);
@@ -634,7 +632,7 @@ GPUVolumeReconstruction< TImage >
 
 
   errid = clEnqueueReadBuffer(m_CommandQueue[0], accumWeightAndWeightedValueGPUBuffer, CL_TRUE, 0, 
-    2*size_output, cpuAccumWeightAndWeightedValueBuffer, 0, NULL, NULL);
+    2*size_output, cpuAccumWeightAndWeightedValueBuffer, 0, nullptr, nullptr);
   OpenCLCheckError(errid, __FILE__, __LINE__, ITK_LOCATION);    
 
   clockGPUKernel.Stop();
