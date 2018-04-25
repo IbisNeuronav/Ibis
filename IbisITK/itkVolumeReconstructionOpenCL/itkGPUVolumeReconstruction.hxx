@@ -186,7 +186,8 @@ GPUVolumeReconstruction< TImage >
     paramValue = new char[paramValueSize+1];
     clGetProgramBuildInfo(m_Program, 0, CL_PROGRAM_BUILD_LOG, paramValueSize, paramValue, NULL);
     paramValue[paramValueSize] = '\0';
-    std::cerr << paramValue << std::endl;
+    if( m_Debug )
+      std::cerr << paramValue << std::endl;
     delete[] paramValue;
     OpenCLCheckError(errid, __FILE__, __LINE__, ITK_LOCATION);
     itkExceptionMacro(<<"Cannot Build Program");
