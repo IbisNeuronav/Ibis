@@ -605,6 +605,9 @@ GPUVolumeReconstruction< TImage >
     errid = clEnqueueNDRangeKernel(m_CommandQueue[0], m_VolumeReconstructionPopulatingKernel, 3, nullptr, globalSize, localSize, 0, nullptr, nullptr);
     OpenCLCheckError(errid, __FILE__, __LINE__, ITK_LOCATION);    
 
+    errid = clFlush(m_CommandQueue[0]);
+    OpenCLCheckError(errid, __FILE__, __LINE__, ITK_LOCATION);
+
     errid = clFinish(m_CommandQueue[0]);
     OpenCLCheckError(errid, __FILE__, __LINE__, ITK_LOCATION);    
 
