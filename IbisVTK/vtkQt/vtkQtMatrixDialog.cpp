@@ -240,7 +240,7 @@ void vtkQtMatrixDialog::UpdateUI()
         {
             for( int j = 0; j < 4; j++ )
             {
-                m_matEdit[i][j]->setText( QString::number( m_matrix->Element[i][j], 'g', 15 ) );
+                m_matEdit[i][j]->setText( QString::number( m_matrix->Element[i][j], 'g', 6 ) );
             }
         }
     }
