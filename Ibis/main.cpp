@@ -57,7 +57,6 @@ int main( int argc, char** argv )
 
     // Create main window
     MainWindow * mw = new MainWindow( 0 );
-    MainWindow * mw = new MainWindow( 0 );
     Application::GetInstance().SetMainWindow( mw );
     Application::GetInstance().LoadWindowSettings();
     mw->setAttribute( Qt::WA_DeleteOnClose );
