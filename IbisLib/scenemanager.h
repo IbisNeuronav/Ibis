@@ -331,6 +331,7 @@ protected:
     void InternalClearScene();
     void Init();
     void Clear();
+    void ApplyApplicationSettings();
     void NotifyPluginsSceneAboutToLoad();
     void NotifyPluginsSceneFinishedLoading();
     void NotifyPluginsSceneAboutToSave();

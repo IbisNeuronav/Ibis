@@ -335,8 +335,25 @@ void SceneManager::NewScene()
 
     // Clear the scene
     InternalClearScene();
-
+    ApplyApplicationSettings(); //re-apply global ibis settings
     SetRenderingEnabled( true );
+}
+
+void SceneManager::ApplyApplicationSettings()
+{
+    ApplicationSettings *settings =Application::GetInstance().GetSettings();
+
+    this->Set3DViewFollowingReferenceVolume( settings->ViewFollowsReference );
+    this->Set3DInteractorStyle( settings->InteractorStyle3D );
+
+    this->SetCursorVisibility( settings->ShowCursor );
+    this->ViewPlane( 0, settings->ShowXPlane );
+    this->ViewPlane( 1, settings->ShowYPlane );
+    this->ViewPlane( 2, settings->ShowZPlane );
+    this->SetDisplayInterpolationType( settings->TripleCutPlaneDisplayInterpolationType );
+    this->SetResliceInterpolationType( settings->TripleCutPlaneResliceInterpolationType );
+
+    this->GetAxesObject()->SetHidden( !settings->ShowAxes );
 }
 
 void SceneManager::CancelProgress()
@@ -1630,6 +1647,7 @@ void SceneManager::ObjectWriter( Serializer * ser )
                     copyProcess->start(program, arguments);
                     if (copyProcess->waitForStarted())
                         copyProcess->waitForFinished();
+                    delete copyProcess;
                 }
             }
             else
