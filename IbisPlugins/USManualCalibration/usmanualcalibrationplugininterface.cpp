@@ -12,8 +12,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include "usmanualcalibrationplugininterface.h"
 #include "usmanualcalibrationwidget.h"
-#include "application.h"
-#include "scenemanager.h"
+#include "ibisapi.h"
 #include "sceneobject.h"
 #include "usprobeobject.h"
 #include <QtPlugin>
@@ -39,11 +38,11 @@ const double phantomPoints[16][3] = { { 0, 5, 50 },
 
 USManualCalibrationPluginInterface::USManualCalibrationPluginInterface()
 {
-    m_calibrationPhantomObjectId = SceneManager::InvalidId;
-    m_phantomRegSourcePointsId = SceneManager::InvalidId;
-    m_phantomRegTargetPointsId = SceneManager::InvalidId;
-    m_landmarkRegistrationObjectId = SceneManager::InvalidId;
-    m_usProbeObjectId = SceneManager::InvalidId;
+    m_calibrationPhantomObjectId = IbisAPI::InvalidId;
+    m_phantomRegSourcePointsId = IbisAPI::InvalidId;
+    m_phantomRegTargetPointsId = IbisAPI::InvalidId;
+    m_landmarkRegistrationObjectId = IbisAPI::InvalidId;
+    m_usProbeObjectId = IbisAPI::InvalidId;
 }
 
 USManualCalibrationPluginInterface::~USManualCalibrationPluginInterface()
@@ -60,7 +59,7 @@ QWidget * USManualCalibrationPluginInterface::CreateFloatingWidget()
     // Make sure the us probe is still available and find another one if it is not
     ValidateUsProbe();
 
-    if( m_usProbeObjectId == SceneManager::InvalidId )
+    if( m_usProbeObjectId == IbisAPI::InvalidId )
     {
         QString message( "No valid probe detected." );
         QMessageBox::critical( 0, "Error", message, 1, 0 );
@@ -72,7 +71,7 @@ QWidget * USManualCalibrationPluginInterface::CreateFloatingWidget()
     USManualCalibrationWidget * calibrationWidget = new USManualCalibrationWidget;
     calibrationWidget->SetPluginInterface( this );
 
-    if( m_landmarkRegistrationObjectId == SceneManager::InvalidId )
+    if( m_landmarkRegistrationObjectId == IbisAPI::InvalidId )
         this->StartPhantomRegistration();
 
     return calibrationWidget;
@@ -80,13 +79,13 @@ QWidget * USManualCalibrationPluginInterface::CreateFloatingWidget()
 
 bool USManualCalibrationPluginInterface::WidgetAboutToClose()
 {
-    if( m_landmarkRegistrationObjectId != SceneManager::InvalidId )
+    if( m_landmarkRegistrationObjectId != IbisAPI::InvalidId )
     {
-        this->GetSceneManager()->RemoveObject( this->GetSceneManager()->GetObjectByID( m_landmarkRegistrationObjectId ) );
-        m_calibrationPhantomObjectId = SceneManager::InvalidId;
-        m_phantomRegSourcePointsId = SceneManager::InvalidId;
-        m_phantomRegTargetPointsId = SceneManager::InvalidId;
-        m_landmarkRegistrationObjectId = SceneManager::InvalidId;
+        this->GetIbisAPI()->RemoveObject( this->GetIbisAPI()->GetObjectByID( m_landmarkRegistrationObjectId ) );
+        m_calibrationPhantomObjectId = IbisAPI::InvalidId;
+        m_phantomRegSourcePointsId = IbisAPI::InvalidId;
+        m_phantomRegTargetPointsId = IbisAPI::InvalidId;
+        m_landmarkRegistrationObjectId = IbisAPI::InvalidId;
     }
     return true;
 }
@@ -105,18 +104,18 @@ void USManualCalibrationPluginInterface::SaveSettings( QSettings & s )
 
 UsProbeObject * USManualCalibrationPluginInterface::GetCurrentUsProbe()
 {
-    return UsProbeObject::SafeDownCast( GetSceneManager()->GetObjectByID( m_usProbeObjectId ) );
+    return UsProbeObject::SafeDownCast( GetIbisAPI()->GetObjectByID( m_usProbeObjectId ) );
 }
 
 void USManualCalibrationPluginInterface::ValidateUsProbe()
 {
-    UsProbeObject * probe = UsProbeObject::SafeDownCast( GetSceneManager()->GetObjectByID( m_usProbeObjectId ) );
+    UsProbeObject * probe = UsProbeObject::SafeDownCast( GetIbisAPI()->GetObjectByID( m_usProbeObjectId ) );
     if( !probe )
-        m_usProbeObjectId = SceneManager::InvalidId;
-    if( m_usProbeObjectId == SceneManager::InvalidId )
+        m_usProbeObjectId = IbisAPI::InvalidId;
+    if( m_usProbeObjectId == IbisAPI::InvalidId )
     {
         QList<UsProbeObject*> allProbes;
-        GetSceneManager()->GetAllUsProbeObjects( allProbes );
+        GetIbisAPI()->GetAllUsProbeObjects( allProbes );
         if( allProbes.size() > 0 )
             m_usProbeObjectId = allProbes[0]->GetObjectID();
     }
@@ -129,8 +128,8 @@ void USManualCalibrationPluginInterface::ValidateUsProbe()
 
 void USManualCalibrationPluginInterface::BuildCalibrationPhantomRepresentation()
 {
-    bool needNewRepresentation = m_calibrationPhantomObjectId == SceneManager::InvalidId;
-    needNewRepresentation |= GetSceneManager()->GetObjectByID( m_calibrationPhantomObjectId ) == 0;
+    bool needNewRepresentation = m_calibrationPhantomObjectId == IbisAPI::InvalidId;
+    needNewRepresentation |= GetIbisAPI()->GetObjectByID( m_calibrationPhantomObjectId ) == 0;
     if( !needNewRepresentation )
         return;
 
@@ -154,7 +153,7 @@ void USManualCalibrationPluginInterface::BuildCalibrationPhantomRepresentation()
     phantomObject->SetNameChangeable( false );
     //phantomObject->SetObjectDeletable( false );
     phantomObject->SetPolyData( phantomLinesPoly );
-    GetSceneManager()->AddObject( phantomObject );
+    GetIbisAPI()->AddObject( phantomObject );
     m_calibrationPhantomObjectId = phantomObject->GetObjectID();
 
     // Cleanup
@@ -174,12 +173,12 @@ void USManualCalibrationPluginInterface::StartPhantomRegistration()
     const char * pointNames[4] = { "One", "Two", "Three", "Four" };
     double pointCoords[4][3] = { { 2.5, 2.5, 48.0 }, { 2.5, 47.5, 48 }, { 47.5, 2.5, 48 }, {  47.5, 47.5, 48 } };
 
-    if( m_calibrationPhantomObjectId == SceneManager::InvalidId )
+    if( m_calibrationPhantomObjectId == IbisAPI::InvalidId )
         BuildCalibrationPhantomRepresentation();
-    SceneObject * phantomObject = GetSceneManager()->GetObjectByID( m_calibrationPhantomObjectId );
+    SceneObject * phantomObject = GetIbisAPI()->GetObjectByID( m_calibrationPhantomObjectId );
 
     // Add source and target points to scene
-    PointsObject * sourcePoints = PointsObject::SafeDownCast( GetSceneManager()->GetObjectByID( m_phantomRegSourcePointsId ) );
+    PointsObject * sourcePoints = PointsObject::SafeDownCast( GetIbisAPI()->GetObjectByID( m_phantomRegSourcePointsId ) );
     bool allocSource = false;
     if( !sourcePoints )
     {
@@ -191,7 +190,7 @@ void USManualCalibrationPluginInterface::StartPhantomRegistration()
 
     }
 
-    PointsObject * targetPoints = PointsObject::SafeDownCast( GetSceneManager()->GetObjectByID( m_phantomRegTargetPointsId ) );
+    PointsObject * targetPoints = PointsObject::SafeDownCast( GetIbisAPI()->GetObjectByID( m_phantomRegTargetPointsId ) );
     bool allocTarget = false;
     if( !targetPoints )
     {
@@ -203,7 +202,7 @@ void USManualCalibrationPluginInterface::StartPhantomRegistration()
     }
 
     // Setup data in landmark registration plugin
-    ObjectPluginInterface * basePlugin = GetApplication()->GetObjectPluginByName( "LandmarkRegistrationObject" );
+    ObjectPluginInterface * basePlugin = GetIbisAPI()->GetObjectPluginByName( "LandmarkRegistrationObject" );
     LandmarkRegistrationObjectPluginInterface * landmarkRegPlugin = LandmarkRegistrationObjectPluginInterface::SafeDownCast( basePlugin );
     Q_ASSERT( landmarkRegPlugin );
     LandmarkRegistrationObject *regObj = LandmarkRegistrationObject::SafeDownCast( landmarkRegPlugin->CreateObject() );
@@ -215,9 +214,9 @@ void USManualCalibrationPluginInterface::StartPhantomRegistration()
     m_phantomRegSourcePointsId = sourcePoints->GetObjectID();
     m_phantomRegTargetPointsId = targetPoints->GetObjectID();
 
-    GetSceneManager()->ChangeParent( phantomObject, regObj, 0 );
+    GetIbisAPI()->ChangeParent( phantomObject, regObj, 0 );
     regObj->SelectPoint( 0 );
-    GetSceneManager()->SetCurrentObject( regObj );
+    GetIbisAPI()->SetCurrentObject( regObj );
     // cleanup
     if( allocSource )
         sourcePoints->Delete();
@@ -232,6 +231,6 @@ void USManualCalibrationPluginInterface::StartPhantomRegistration()
 
  SceneObject * USManualCalibrationPluginInterface::GetCalibrationPhantomObject()
  {
-     SceneObject * obj = GetSceneManager()->GetObjectByID( m_calibrationPhantomObjectId );
+     SceneObject * obj = GetIbisAPI()->GetObjectByID( m_calibrationPhantomObjectId );
      return obj;
  }

@@ -9,6 +9,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
 #include "tracker.h"
+#include "ibisapi.h"
 #include "ibishardwaremodule.h"
 #include "trackedvideosource.h"
 #include "vtkPOLARISTracker.h"
@@ -22,8 +23,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "vtkPLYReader.h"
 #include "serializerhelper.h"
 
-#include "application.h"
-#include "scenemanager.h"
 #include "trackedsceneobject.h"
 #include "pointerobject.h"
 #include "usprobeobject.h"
@@ -36,7 +35,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 ObjectSerializationMacro( Tracker );
 ObjectSerializationMacro( ToolDescription );
 
-ToolDescription::ToolDescription() : type( Passive ), use( Generic ), active(0), toolPort(-1), name(""), romFileName("")
+ToolDescription::ToolDescription() :
+    type( Passive ), use( Generic ), active(0), toolPort(-1), name(""), romFileName(""), configDir("")
 {
     this->videoSourceIndex = 0;
     this->cachedSerialNumber = "";
@@ -101,7 +101,7 @@ void ToolDescription::InstanciateSceneObject()
     sceneObject->SetCanEditTransformManually( false );
 
     // instanciate tool model if it is available
-    QString toolModelDir = Application::GetInstance().GetConfigDirectory() + "/tool-models";
+    QString toolModelDir = configDir + "/tool-models";
     QString modelFileName = toolModelDir + "/" + this->name + ".ply";
     if( QFile::exists( modelFileName ) )
     {
@@ -137,7 +137,7 @@ void ToolDescription::ClearSceneObject()
 Tracker::Tracker()
 {
     m_hardwareModule = 0;
-    m_sceneManager = 0;
+    m_ibisAPI = 0;
     m_tracker = vtkPOLARISTracker::New();
     m_currentTool = -1;
     m_referenceTool = -1;
@@ -154,7 +154,6 @@ Tracker::~Tracker()
 void Tracker::Initialize()
 {
     Q_ASSERT( m_hardwareModule );
-    Q_ASSERT( m_sceneManager );
 
     if( !this->IsInitialized() )
     {        
@@ -162,18 +161,18 @@ void Tracker::Initialize()
         if( m_tracker->Probe() )
         {
             if (m_tracker->GetVersion())// patch for errors when getting version in vtkNDITracker::InternalStartTracking
-                m_trackerVersion = m_tracker->GetVersion(); 
+                m_trackerVersion = m_tracker->GetVersion();
 
             this->ActivateAllPassiveTools();
 
             m_tracker->StartTracking();
             if(m_trackerVersion.isEmpty() && m_tracker->GetVersion()) // patch for errors when getting version in vtkPOLARISTracker::InternalStartTracking
-                m_trackerVersion = m_tracker->GetVersion(); 
+                m_trackerVersion = m_tracker->GetVersion();
             m_tracker->Update();
         }
     }
 }
-    
+
 void Tracker::StopTracking()
 {
     if( this->IsInitialized() )
@@ -231,7 +230,7 @@ vtkTrackerTool * Tracker::GetTool( int toolIndex )
 vtkTrackerTool * Tracker::GetTool( QString & toolName )
 {
     int index = this->GetToolIndex( toolName );
-    return this->GetTool( index );    
+    return this->GetTool( index );
 }
 
 vtkTrackerTool * Tracker::GetTool( TrackedSceneObject * obj )
@@ -258,17 +257,17 @@ QString Tracker::GetToolDescription( int toolIndex )
     vtkTrackerTool * tool = this->GetTool( toolIndex );
     if( tool )
     {
-		ret = QString("Type: ") + QString( tool->GetToolType() ) + QString("\n");
-		ret += QString("Revision: ") + QString(tool->GetToolRevision()) + QString("\n");
-		ret += QString("Manufacturer: ") + QString(tool->GetToolManufacturer()) + QString("\n");
-		ret += QString("PartNumber: ") + QString(tool->GetToolPartNumber()) + QString("\n");
-		ret += QString("SerialNumber: ") + QString(tool->GetToolSerialNumber());
+        ret = QString("Type: ") + QString( tool->GetToolType() ) + QString("\n");
+        ret += QString("Revision: ") + QString(tool->GetToolRevision()) + QString("\n");
+        ret += QString("Manufacturer: ") + QString(tool->GetToolManufacturer()) + QString("\n");
+        ret += QString("PartNumber: ") + QString(tool->GetToolPartNumber()) + QString("\n");
+        ret += QString("SerialNumber: ") + QString(tool->GetToolSerialNumber());
     }
     else
     {
         ret = QString( "Tool has not been activated. No description yet\n" );
     }
-    return ret;        
+    return ret;
 }
 
 int Tracker::ToolNameExists( QString toolName )
@@ -318,7 +317,7 @@ void Tracker::SetCurrentToolIndex( int toolIndex )
 
 int Tracker::GetNumberOfTools()
 {
-    return m_toolVec.size();    
+    return m_toolVec.size();
 }
 
 int Tracker::GetNumberOfActiveTools()
@@ -329,7 +328,7 @@ int Tracker::GetNumberOfActiveTools()
     {
         if( this->IsToolActive( i ) )
             count++;
-    }       
+    }
     return count;
 }
 
@@ -396,11 +395,11 @@ void Tracker::SetToolUse( int toolIndex, ToolUse use )
     if( m_toolVec[ toolIndex ].use != use )
     {
         m_toolVec[ toolIndex ].use = use;
-        if( m_toolVec[ toolIndex ].sceneObject &&  m_sceneManager )
+        if( m_toolVec[ toolIndex ].sceneObject &&  m_ibisAPI )
             RemoveToolFromScene( toolIndex );
         m_toolVec[ toolIndex ].ClearSceneObject();
         m_toolVec[ toolIndex ].InstanciateSceneObject();
-        if( m_sceneManager && m_toolVec[ toolIndex ].toolPort != -1 )
+        if( m_ibisAPI && m_toolVec[ toolIndex ].toolPort != -1 )
             AddToolToScene( toolIndex );
     }
 }
@@ -433,6 +432,7 @@ int Tracker::AddNewTool( ToolType type, QString & name )
         desc.active = 0;
         desc.name = name;
         desc.romFileName = "";
+        desc.SetConfigDir( m_ibisAPI->GetConfigDirectory() );
         desc.InstanciateSceneObject();
         m_toolVec.push_back( desc );
         m_currentTool = m_toolVec.size() - 1;
@@ -680,9 +680,9 @@ void Tracker::AddToolToScene( int toolIndex )
     }
 
     m_toolVec[toolIndex].sceneObject->SetHardwareModule( m_hardwareModule );
-    m_sceneManager->AddObject( m_toolVec[toolIndex].sceneObject );
+    m_ibisAPI->AddObject( m_toolVec[toolIndex].sceneObject );
     if( m_toolVec[toolIndex].toolModel )
-        m_sceneManager->AddObject( m_toolVec[toolIndex].toolModel, m_toolVec[toolIndex].sceneObject );
+        m_ibisAPI->AddObject( m_toolVec[toolIndex].toolModel, m_toolVec[toolIndex].sceneObject );
 }
 
 void Tracker::RemoveToolFromScene( int toolIndex )
@@ -690,7 +690,7 @@ void Tracker::RemoveToolFromScene( int toolIndex )
     Q_ASSERT( toolIndex >= 0 && toolIndex < (int)m_toolVec.size() );
     Q_ASSERT( m_toolVec[toolIndex].toolPort == -1 );
 
-    m_sceneManager->RemoveObject( m_toolVec[ toolIndex ].sceneObject );
+    m_ibisAPI->RemoveObject( m_toolVec[ toolIndex ].sceneObject );
 }
 
 void Tracker::LookForNewActiveTools()

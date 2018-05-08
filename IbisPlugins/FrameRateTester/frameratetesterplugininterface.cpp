@@ -12,8 +12,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include "frameratetesterplugininterface.h"
 #include "frameratetesterwidget.h"
-#include "application.h"
-#include "scenemanager.h"
+#include "ibisapi.h"
 #include "view.h"
 #include <QTimer>
 #include <QTime>
@@ -113,7 +112,7 @@ void FrameRateTesterPluginInterface::OnTimerTriggered()
         m_time->restart();
 
     // Render
-    GetSceneManager()->GetViewByID( m_currentViewID )->Render();
+    GetIbisAPI()->GetViewByID( m_currentViewID )->Render();
 
     // Increment stats
     m_lastPeriod = ((double)m_time->elapsed()) * 0.001;
@@ -131,10 +130,10 @@ void FrameRateTesterPluginInterface::OnTimerTriggered()
 
 void FrameRateTesterPluginInterface::SetRenderingEnabled( bool enabled )
 {
-    QMap<View*, int> allViews = GetSceneManager()->GetAllViews();
+    QMap<View*, int> allViews = GetIbisAPI()->GetAllViews();
     foreach( int id, allViews.values() )
     {
         if( id != m_currentViewID )
-            GetSceneManager()->GetViewByID( id )->SetRenderingEnabled( enabled );
+            GetIbisAPI()->GetViewByID( id )->SetRenderingEnabled( enabled );
     }
 }

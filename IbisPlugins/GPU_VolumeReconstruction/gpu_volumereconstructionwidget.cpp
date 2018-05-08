@@ -18,8 +18,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "vnl/algo/vnl_symmetric_eigensystem.h"
 #include "vnl/algo/vnl_real_eigensystem.h"
 
-#include "application.h"
-#include "scenemanager.h"
 #include "sceneobject.h"
 #include "imageobject.h"
 #include "usacquisitionobject.h"
@@ -28,6 +26,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "vtkMatrix4x4.h"
 
 #include "itkImageFileWriter.h"
+#include "ibisapi.h"
 
 GPU_VolumeReconstructionWidget::GPU_VolumeReconstructionWidget(QWidget *parent) :
     QWidget(parent),
@@ -61,10 +60,11 @@ void GPU_VolumeReconstructionWidget::slot_finished()
 {
     int usAcquisitionObjectId = ui->usAcquisitionComboBox->itemData( ui->usAcquisitionComboBox->currentIndex() ).toInt();
 
-    SceneManager * sm = m_pluginInterface->GetSceneManager();
+    IbisAPI *ibisAPI = m_pluginInterface->GetIbisAPI();
+    Q_ASSERT(ibisAPI);
 
     // Get US Acquisition Object
-    USAcquisitionObject * selectedUSAcquisitionObject = USAcquisitionObject::SafeDownCast( sm->GetObjectByID( usAcquisitionObjectId) );
+    USAcquisitionObject * selectedUSAcquisitionObject = USAcquisitionObject::SafeDownCast( ibisAPI->GetObjectByID( usAcquisitionObjectId) );
     Q_ASSERT_X( selectedUSAcquisitionObject, "GPU_VolumeReconstructionWidget::slot_finished()", "Invalid target US object" );
 
     qint64 reconstructionTime = m_ReconstructionTimer.elapsed();
@@ -74,8 +74,8 @@ void GPU_VolumeReconstructionWidget::slot_finished()
     reconstructedImage->SetItkImage( m_VolumeReconstructor->GetReconstructor()->GetReconstructedVolume() );
     reconstructedImage->SetName("Reconstructed Volume");
 
-    sm->AddObject(reconstructedImage, selectedUSAcquisitionObject->GetParent()->GetParent() );
-    sm->SetCurrentObject( reconstructedImage );
+    ibisAPI->AddObject(reconstructedImage, selectedUSAcquisitionObject->GetParent()->GetParent() );
+    ibisAPI->SetCurrentObject( reconstructedImage );
 
 #ifdef DEBUG
     std::cerr << "Done..." << std::endl;
@@ -101,9 +101,10 @@ void GPU_VolumeReconstructionWidget::on_startButton_clicked()
         return;
     }
 
-    SceneManager * sm = m_pluginInterface->GetSceneManager();
+    IbisAPI *ibisAPI = m_pluginInterface->GetIbisAPI();
+    Q_ASSERT(ibisAPI);
     // Get US Acquisition Object
-    USAcquisitionObject * selectedUSAcquisitionObject = USAcquisitionObject::SafeDownCast( sm->GetObjectByID( usAcquisitionObjectId) );
+    USAcquisitionObject * selectedUSAcquisitionObject = USAcquisitionObject::SafeDownCast( ibisAPI->GetObjectByID( usAcquisitionObjectId) );
     Q_ASSERT_X( selectedUSAcquisitionObject, "GPU_VolumeReconstructionWidget::on_startButton_clicked()", "Invalid target US object" );
 
     unsigned int nbrOfSlices = selectedUSAcquisitionObject->GetNumberOfSlices();
@@ -172,12 +173,13 @@ void GPU_VolumeReconstructionWidget::UpdateUi()
   ui->usAcquisitionComboBox->clear();
   ui->usSearchRadiusComboBox->clear();
   ui->usVolumeSpacingComboBox->clear();
-  SceneManager * sm = m_pluginInterface->GetSceneManager();
-  const SceneManager::ObjectList & allObjects = sm->GetAllObjects();
+  IbisAPI *ibisAPI = m_pluginInterface->GetIbisAPI();
+  Q_ASSERT(ibisAPI);
+  const QList< SceneObject* > allObjects = ibisAPI->GetAllObjects();
   for( int i = 0; i < allObjects.size(); ++i )
     {
       SceneObject * current = allObjects[i];
-      if( current != sm->GetSceneRoot() && current->IsListable() && !current->IsManagedByTracker())
+      if( current != ibisAPI->GetSceneRoot() && current->IsListable() && !current->IsManagedByTracker())
         {
           if( current->IsA("USAcquisitionObject") )
             {

@@ -24,7 +24,7 @@ class vtkPOLARISTracker;
 class vtkTrackerTool;
 class QWidget;
 class vtkMatrix4x4;
-class SceneManager;
+class IbisAPI;
 class TrackedVideoSource;
 class IbisHardwareModule;
 class PolyDataObject;
@@ -45,6 +45,7 @@ struct ToolDescription
     virtual void Serialize( Serializer * serializer );
     void InstanciateSceneObject();
     void ClearSceneObject();
+    void SetConfigDir(QString dir) { configDir = dir; }
     ToolType type;           // Passive = 1, Active = 0
     ToolUse use;             // What is this tool used for.
     int active;              // wether the tool has been activated
@@ -55,6 +56,7 @@ struct ToolDescription
     QString cachedSerialNumber;   // serial number used to recognize active tools when plugged in
     TrackedSceneObject * sceneObject;  // Object in the scene if active or holding state if inactive
     PolyDataObject * toolModel; // tool 3D model with origin at origin of the tracker tool
+    QString configDir;
 };
 
 ObjectSerializationHeaderMacro( ToolDescription );
@@ -93,7 +95,7 @@ public:
     ~Tracker();
 
     void SetHardwareModule( IbisHardwareModule * hw ) { m_hardwareModule = hw; }
-    void SetSceneManager( SceneManager * man ) { m_sceneManager = man; }
+    void SetIbisAPI( IbisAPI * api ) { m_ibisAPI = api; }
         
     // Description:
     // Initialize the tracking system. If IsInitialized() == 1, system is already tracking
@@ -237,8 +239,8 @@ private:
     vtkPOLARISTracker   * m_tracker;
     QString               m_trackerVersion;
 
-    SceneManager * m_sceneManager;
-    IbisHardwareModule * m_hardwareModule;
+    IbisAPI             * m_ibisAPI;
+    IbisHardwareModule  * m_hardwareModule;
     
     // Meta information for every tool that is not contained in vtkTracker
     typedef std::vector<ToolDescription> ToolDescriptionVec;

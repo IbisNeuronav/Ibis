@@ -11,14 +11,14 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 // Thanks to Simon Drouin for writing this class
 
 #include "labelvolumetosurfacesplugininterface.h"
-#include "application.h"
 #include "imageobject.h"
-#include "scenemanager.h"
+#include "ibisapi.h"
 #include <QtPlugin>
 #include <QString>
 #include <QtGui>
 #include <QApplication>
 #include <QMessageBox>
+#include <QProgressDialog>
 #include "vtkImageAccumulate.h"
 #include "vtkPointData.h"
 #include "vtkMarchingContourFilter.h"
@@ -28,6 +28,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "vtkWindowedSincPolyDataFilter.h"
 #include "vtkImageData.h"
 #include "polydataobject.h"
+#include "ibisapi.h"
 
 static double labelColors[256][3] = {{0,0,0},
                                         {1,0,0},
@@ -297,9 +298,9 @@ LabelVolumeToSurfacesPluginInterface::~LabelVolumeToSurfacesPluginInterface()
 
 bool LabelVolumeToSurfacesPluginInterface::CanRun()
 {
-    SceneManager  *manager = GetSceneManager();
-    Q_ASSERT( manager );
-    ImageObject * image = ImageObject::SafeDownCast( manager->GetCurrentObject() );
+    IbisAPI *ibisAPI = GetIbisAPI();
+    Q_ASSERT(ibisAPI);
+    ImageObject * image = ImageObject::SafeDownCast( ibisAPI->GetCurrentObject() );
     if( image && image->IsLabelImage() )
         return true;
     return false;
@@ -307,9 +308,9 @@ bool LabelVolumeToSurfacesPluginInterface::CanRun()
 
 void LabelVolumeToSurfacesPluginInterface::Run()
 {
-    SceneManager  *manager = GetSceneManager();
-    Q_ASSERT( manager );
-    ImageObject * image = ImageObject::SafeDownCast( manager->GetCurrentObject() );
+    IbisAPI *ibisAPI = GetIbisAPI();
+    Q_ASSERT(ibisAPI);
+    ImageObject * image = ImageObject::SafeDownCast( ibisAPI->GetCurrentObject() );
     if( image && image->IsLabelImage() )
     {  
         // Get the range of labels
@@ -350,7 +351,9 @@ void LabelVolumeToSurfacesPluginInterface::Run()
         smoother->NonManifoldSmoothingOn();
         smoother->NormalizeCoordinatesOn();
 
-        QProgressDialog * pd = GetApplication()->StartProgress( 100, "Extracting surfaces..." );
+        IbisAPI *ibisAPI = GetIbisAPI();
+        Q_ASSERT(ibisAPI);
+        QProgressDialog * pd = ibisAPI->StartProgress( 100, "Extracting surfaces..." );
         QApplication::processEvents();
 
         for( int i = minLabel; i <= maxLabel; ++i )
@@ -374,18 +377,18 @@ void LabelVolumeToSurfacesPluginInterface::Run()
             polyDataObj->SetPolyData( outCopy );
             if( i < 256 )
                 polyDataObj->SetColor( labelColors[i] );
-            manager->AddObject( polyDataObj, image );
+            ibisAPI->AddObject( polyDataObj, image );
 
             // cleanup
             outCopy->Delete();
             polyDataObj->Delete();
 
             int progress = (int)( 100 * i / (double) numberOfLabels );
-            GetApplication()->UpdateProgress( pd, progress );
+            ibisAPI->UpdateProgress( pd, progress );
             QApplication::processEvents();
         }
 
-        GetApplication()->StopProgress( pd );
+        ibisAPI->StopProgress( pd );
 
         // Cleanup
         contourExtractor->Delete();

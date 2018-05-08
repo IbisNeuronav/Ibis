@@ -15,7 +15,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include <QWidget>
 
-class Application;
+class ImageFilterExamplePluginInterface;
 
 namespace Ui
 {
@@ -33,14 +33,14 @@ public:
     explicit ImageFilterExampleWidget(QWidget *parent = 0);
     ~ImageFilterExampleWidget();
 
-    void SetApplication( Application * app );
+    void SetPluginInterface( ImageFilterExamplePluginInterface * interf );
 
 private:
 
     void UpdateUi();
 
     Ui::ImageFilterExampleWidget * ui;
-    Application * m_application;
+    ImageFilterExamplePluginInterface * m_pluginInterface;
 
 
 private slots:

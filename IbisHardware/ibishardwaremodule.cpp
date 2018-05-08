@@ -9,18 +9,18 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
 #include "ibishardwaremodule.h"
-#include "application.h"
 #include "tracker.h"
 #include "trackedvideosource.h"
-#include "scenemanager.h"
 #include "vtkTracker.h"
 #include "vtkTrackerTool.h"
 #include "vtkTransform.h"
 #include "pointerobject.h"
 #include "usprobeobject.h"
 #include "cameraobject.h"
+#include "ibisapi.h"
 #include <QDir>
 #include <QMenu>
+#include <QDialog>
 #include <QVBoxLayout>
 
 static const QString IbisHardwareModuleConfigFilename("IbisHardwareModuleConfig.xml");
@@ -49,7 +49,7 @@ void IbisHardwareModule::AddSettingsMenuEntries( QMenu * menu )
 void IbisHardwareModule::Init()
 {
     // Create the tracker if it doesn't exist. Otherwise, make sure tracking is stopped
-    m_tracker->SetSceneManager( GetSceneManager() );
+    m_tracker->SetIbisAPI( GetIbisAPI() );
     m_tracker->StopTracking();
 
     // Read hardware configuration
@@ -179,7 +179,7 @@ void IbisHardwareModule::RemoveToolObjectsFromScene()
 
 void IbisHardwareModule::ReadHardwareConfig()
 {
-    QString filename = Application::GetConfigDirectory() + IbisHardwareModuleConfigFilename;
+    QString filename = GetIbisAPI()->GetConfigDirectory() + IbisHardwareModuleConfigFilename;
 
     // make sure the file exists and is readable
     QFileInfo fileInfo( filename );
@@ -201,7 +201,7 @@ void IbisHardwareModule::ReadHardwareConfig()
 
 void IbisHardwareModule::WriteHardwareConfig()
 {
-    QString filename = Application::GetConfigDirectory() + IbisHardwareModuleConfigFilename;
+    QString filename = GetIbisAPI()->GetConfigDirectory() + IbisHardwareModuleConfigFilename;
 
     // make sure directory exists. Possible filename doesn't exist, but dir has to exist and be writable
     QFileInfo info( filename );
@@ -229,14 +229,14 @@ void IbisHardwareModule::WriteHardwareConfig()
     InternalWriteHardwareConfig( generalConfigFileName );
 
     // make a backup of the config file
-    QString backupDir = Application::GetConfigDirectory() + "/BackupConfig/";
+    QString backupDir = GetIbisAPI()->GetConfigDirectory() + "/BackupConfig/";
     if( !QFile::exists( backupDir ) )
     {
         QDir dir;
         dir.mkpath( backupDir );
     }
     QString dateAndTime( QDateTime::currentDateTime().toString() );
-    QString backupFileName = QString( "%1Rev-%2-%3-%4" ).arg( backupDir ).arg( Application::GetGitHashShort() ).arg( dateAndTime ).arg( info.fileName() );
+    QString backupFileName = QString( "%1Rev-%2-%3-%4" ).arg( backupDir ).arg( GetIbisAPI()->GetGitHashShort() ).arg( dateAndTime ).arg( info.fileName() );
     InternalWriteHardwareConfig( backupFileName );
 }
 
