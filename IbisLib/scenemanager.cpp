@@ -332,28 +332,13 @@ void SceneManager::LoadScene(QString & fileName, bool interactive )
 void SceneManager::NewScene()
 {
     SetRenderingEnabled( false );
-
+    //Save current application settings
+    Application::GetInstance().UpdateApplicationSettings();
     // Clear the scene
     InternalClearScene();
-    ApplyApplicationSettings(); //re-apply global ibis settings
+    //re-apply global ibis settings
+    Application::GetInstance().ApplyApplicationSettings();
     SetRenderingEnabled( true );
-}
-
-void SceneManager::ApplyApplicationSettings()
-{
-    ApplicationSettings *settings =Application::GetInstance().GetSettings();
-
-    this->Set3DViewFollowingReferenceVolume( settings->ViewFollowsReference );
-    this->Set3DInteractorStyle( settings->InteractorStyle3D );
-
-    this->SetCursorVisibility( settings->ShowCursor );
-    this->ViewPlane( 0, settings->ShowXPlane );
-    this->ViewPlane( 1, settings->ShowYPlane );
-    this->ViewPlane( 2, settings->ShowZPlane );
-    this->SetDisplayInterpolationType( settings->TripleCutPlaneDisplayInterpolationType );
-    this->SetResliceInterpolationType( settings->TripleCutPlaneResliceInterpolationType );
-
-    this->GetAxesObject()->SetHidden( !settings->ShowAxes );
 }
 
 void SceneManager::CancelProgress()

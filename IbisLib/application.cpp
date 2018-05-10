@@ -148,29 +148,10 @@ void Application::Init( bool viewerOnly )
     m_settings.LoadSettings( settings );
 
     // Create the object that will manage the 3D scene in the visualizer
-    // and add axes at its origin
     m_sceneManager = SceneManager::New();
-    double bgColor[3];
-    m_settings.ViewBackgroundColor.getRgbF( &bgColor[0], &bgColor[1], &bgColor[2] );
-    m_sceneManager->SetViewBackgroundColor( bgColor );
-    m_sceneManager->Set3DCameraViewAngle( m_settings.CameraViewAngle3D );
 
-    double cursorColor[3];
-    m_settings.CutPlanesCursorColor.getRgbF( &cursorColor[0], &cursorColor[1], &cursorColor[2] );
-    WorldObject * world = WorldObject::SafeDownCast(m_sceneManager->GetSceneRoot());
-    world->SetCursorColor(cursorColor);
-
-    m_sceneManager->Set3DViewFollowingReferenceVolume( m_settings.ViewFollowsReference );
-    m_sceneManager->Set3DInteractorStyle( m_settings.InteractorStyle3D );
-
-    m_sceneManager->SetCursorVisibility( m_settings.ShowCursor );
-    m_sceneManager->ViewPlane( 0, m_settings.ShowXPlane );
-    m_sceneManager->ViewPlane( 1, m_settings.ShowYPlane );
-    m_sceneManager->ViewPlane( 2, m_settings.ShowZPlane );
-    m_sceneManager->SetDisplayInterpolationType( m_settings.TripleCutPlaneDisplayInterpolationType );
-    m_sceneManager->SetResliceInterpolationType( m_settings.TripleCutPlaneResliceInterpolationType );
-
-    m_sceneManager->GetAxesObject()->SetHidden( !m_settings.ShowAxes );
+    //Apply settings to scene
+    this->ApplyApplicationSettings();
 
     m_updateManager = UpdateManager::New();
 
@@ -216,9 +197,33 @@ Application::~Application()
     }
 }
 
-void Application::SaveSettings()
+void Application::ApplyApplicationSettings()
 {
-    // Update application settings
+    double bgColor[3];
+    m_settings.ViewBackgroundColor.getRgbF( &bgColor[0], &bgColor[1], &bgColor[2] );
+    m_sceneManager->SetViewBackgroundColor( bgColor );
+    m_sceneManager->Set3DCameraViewAngle( m_settings.CameraViewAngle3D );
+
+    double cursorColor[3];
+    m_settings.CutPlanesCursorColor.getRgbF( &cursorColor[0], &cursorColor[1], &cursorColor[2] );
+    WorldObject * world = WorldObject::SafeDownCast(m_sceneManager->GetSceneRoot());
+    world->SetCursorColor(cursorColor);
+
+    m_sceneManager->Set3DViewFollowingReferenceVolume( m_settings.ViewFollowsReference );
+    m_sceneManager->Set3DInteractorStyle( m_settings.InteractorStyle3D );
+
+    m_sceneManager->SetCursorVisibility( m_settings.ShowCursor );
+    m_sceneManager->ViewPlane( 0, m_settings.ShowXPlane );
+    m_sceneManager->ViewPlane( 1, m_settings.ShowYPlane );
+    m_sceneManager->ViewPlane( 2, m_settings.ShowZPlane );
+    m_sceneManager->SetDisplayInterpolationType( m_settings.TripleCutPlaneDisplayInterpolationType );
+    m_sceneManager->SetResliceInterpolationType( m_settings.TripleCutPlaneResliceInterpolationType );
+
+    m_sceneManager->GetAxesObject()->SetHidden( !m_settings.ShowAxes );
+}
+
+void Application::UpdateApplicationSettings()
+{
     double * backgroundColor = m_sceneManager->GetViewBackgroundColor();
     m_settings.ViewBackgroundColor = QColor( int(backgroundColor[0] * 255), int(backgroundColor[1] * 255), int(backgroundColor[2] * 255) );
     WorldObject * world = WorldObject::SafeDownCast(m_sceneManager->GetSceneRoot());
@@ -233,7 +238,12 @@ void Application::SaveSettings()
     m_settings.ShowZPlane = m_sceneManager->IsPlaneVisible( 2 );
     m_settings.TripleCutPlaneDisplayInterpolationType = m_sceneManager->GetDisplayInterpolationType();
     m_settings.TripleCutPlaneResliceInterpolationType = m_sceneManager->GetResliceInterpolationType();
+}
 
+void Application::SaveSettings()
+{
+    // Update application settings
+    this->UpdateApplicationSettings();
 
     // Save settings
     QSettings settings( m_appOrganisation, m_appName );
