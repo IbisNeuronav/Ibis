@@ -304,6 +304,15 @@ void SceneManager::LoadScene(QString & fileName, bool interactive )
     ::Serialize( &reader, "CursorVisible", cursorVisible);
     this->SceneRoot->SetAxesHidden(axesHidden);
     this->SceneRoot->SetCursorVisible(cursorVisible);
+    QColor cursorColor = this->GetCursorColor();
+    int color;
+    if( ::Serialize( &reader, "CutPlanesCursorColor_r", color ) )
+        cursorColor.setRed( color );
+    if( ::Serialize( &reader, "CutPlanesCursorColor_g", color ) )
+            cursorColor.setGreen( color );
+    if( ::Serialize( &reader, "CutPlanesCursorColor_b", color ) )
+            cursorColor.setBlue( color );
+    this->SetCursorColor( cursorColor );
 
     Application::GetInstance().GetMainWindow()->Serialize( &reader );
     reader.EndSection();
@@ -390,6 +399,12 @@ void SceneManager::SaveScene( QString & fileName )
     bool cursorVisible = this->SceneRoot->GetCursorVisible();
     ::Serialize( &writer, "AxesHidden", axesHidden);
     ::Serialize( &writer, "CursorVisible", cursorVisible);
+    int color = this->GetCursorColor().red();
+    ::Serialize( &writer, "CutPlanesCursorColor_r", color );
+    color = this->GetCursorColor().green();
+    ::Serialize( &writer, "CutPlanesCursorColor_g", color );
+    color = this->GetCursorColor().blue();
+    ::Serialize( &writer, "CutPlanesCursorColor_b", color );
 
     Application::GetInstance().GetMainWindow()->Serialize( &writer );
 
