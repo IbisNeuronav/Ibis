@@ -127,7 +127,6 @@ void SceneManager::Init()
     this->SceneRoot->Manager = this;
     this->SceneRoot->ObjectID = this->NextSystemObjectID--;
 
-    CurrentObject = this->SceneRoot;
     AllObjects.push_back( this->SceneRoot );
     this->SceneRoot->Register(this);
 
@@ -339,6 +338,7 @@ void SceneManager::NewScene()
     //re-apply global ibis settings
     Application::GetInstance().ApplyApplicationSettings();
     SetRenderingEnabled( true );
+    this->SetCurrentObject( this->GetSceneRoot() );
 }
 
 void SceneManager::CancelProgress()
