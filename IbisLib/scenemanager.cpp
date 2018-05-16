@@ -127,7 +127,6 @@ void SceneManager::Init()
     this->SceneRoot->Manager = this;
     this->SceneRoot->ObjectID = this->NextSystemObjectID--;
 
-    CurrentObject = this->SceneRoot;
     AllObjects.push_back( this->SceneRoot );
     this->SceneRoot->Register(this);
 
@@ -305,6 +304,15 @@ void SceneManager::LoadScene(QString & fileName, bool interactive )
     ::Serialize( &reader, "CursorVisible", cursorVisible);
     this->SceneRoot->SetAxesHidden(axesHidden);
     this->SceneRoot->SetCursorVisible(cursorVisible);
+    QColor cursorColor = this->GetCursorColor();
+    int color;
+    if( ::Serialize( &reader, "CutPlanesCursorColor_r", color ) )
+        cursorColor.setRed( color );
+    if( ::Serialize( &reader, "CutPlanesCursorColor_g", color ) )
+            cursorColor.setGreen( color );
+    if( ::Serialize( &reader, "CutPlanesCursorColor_b", color ) )
+            cursorColor.setBlue( color );
+    this->SetCursorColor( cursorColor );
 
     Application::GetInstance().GetMainWindow()->Serialize( &reader );
     reader.EndSection();
@@ -332,11 +340,14 @@ void SceneManager::LoadScene(QString & fileName, bool interactive )
 void SceneManager::NewScene()
 {
     SetRenderingEnabled( false );
-
+    //Save current application settings
+    Application::GetInstance().UpdateApplicationSettings();
     // Clear the scene
     InternalClearScene();
-
+    //re-apply global ibis settings
+    Application::GetInstance().ApplyApplicationSettings();
     SetRenderingEnabled( true );
+    this->SetCurrentObject( this->GetSceneRoot() );
 }
 
 void SceneManager::CancelProgress()
@@ -388,6 +399,12 @@ void SceneManager::SaveScene( QString & fileName )
     bool cursorVisible = this->SceneRoot->GetCursorVisible();
     ::Serialize( &writer, "AxesHidden", axesHidden);
     ::Serialize( &writer, "CursorVisible", cursorVisible);
+    int color = this->GetCursorColor().red();
+    ::Serialize( &writer, "CutPlanesCursorColor_r", color );
+    color = this->GetCursorColor().green();
+    ::Serialize( &writer, "CutPlanesCursorColor_g", color );
+    color = this->GetCursorColor().blue();
+    ::Serialize( &writer, "CutPlanesCursorColor_b", color );
 
     Application::GetInstance().GetMainWindow()->Serialize( &writer );
 
@@ -1630,6 +1647,7 @@ void SceneManager::ObjectWriter( Serializer * ser )
                     copyProcess->start(program, arguments);
                     if (copyProcess->waitForStarted())
                         copyProcess->waitForFinished();
+                    delete copyProcess;
                 }
             }
             else
