@@ -13,15 +13,15 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include "hardwaremodule.h"
 #include "igtlioDevice.h"
+#include "configio.h"
 
-namespace  igtlio {
-    class Logic;
-}
+class igtlioLogic;
+
 class QMenu;
 class qIGTLIOLogicController;
 class qIGTLIOClientWidget;
 class PlusServerInterface;
-
+class vtkEventQtSlotConnect;
 
 class IbisHardwareIGSIO : public HardwareModule
 {
@@ -45,15 +45,15 @@ public:
     virtual void LoadSettings( QSettings & s ) override;
     virtual void SaveSettings( QSettings & s ) override;
 
+    // Load Ibis-Plus configs
+    void StartConfig( QString configFile );
+    void ClearConfig();
+
     // Implementation of the HardwareModule interface
     virtual void AddSettingsMenuEntries( QMenu * menu ) override;
     virtual void Init() override;
     virtual void Update() override;
     virtual bool ShutDown() override;
-
-    // Launch a Plus server and connect
-    bool LauchLocalServer( int port, QString plusConfigFile );
-    bool Connect( std::string ip, int port );
 
     virtual void AddToolObjectsToScene() override;
     virtual void RemoveToolObjectsFromScene() override;
@@ -75,36 +75,43 @@ public:
 private slots:
 
     void OpenSettingsWidget();
+    void OnDeviceNew( vtkObject*, unsigned long, void*, void* );
+    void OnDeviceRemoved( vtkObject*, unsigned long, void*, void* );
 
 protected:
 
-    void FindNewTools();
-    void FindRemovedTools();
+    // Launch a Plus server and connect
+    bool LauchLocalServer( int port, QString plusConfigFile );
+    void Connect( std::string ip, int port );
+    void DisconnectAllServers();
+    void ShutDownLocalServers();
+
+    // Utility functions
     int FindToolByName( QString name );
-    bool IoHasDevice( igtlio::DevicePointer device );
-    bool ModuleHasDevice( igtlio::DevicePointer device );
-    TrackedSceneObject * InstanciateSceneObjectFromDevice( igtlio::DevicePointer device );
-    QString DeviceNameToToolName( const QString & deviceName );
-    bool IsDeviceImage( igtlio::DevicePointer device );
-    bool IsDeviceTransform( igtlio::DevicePointer device );
-    bool IsDeviceVideo( igtlio::DevicePointer device );
+    TrackedSceneObject * InstanciateSceneObjectFromType( QString objectName, QString objectType );
+    bool IsDeviceImage( igtlioDevicePointer device );
+    bool IsDeviceTransform( igtlioDevicePointer device );
+    bool IsDeviceVideo( igtlioDevicePointer device );
 
     // Plus server exec and config paths
     QString m_plusServerExec;
     QString m_plusConfigDir;
-    QString m_lastIGSIOConfigFile;
+    QString m_lastIbisPlusConfigFile;
 
     struct Tool
     {
-        TrackedSceneObject * sceneObject;
-        igtlio::DevicePointer transformDevice;
-        igtlio::DevicePointer imageDevice;
+        vtkSmartPointer<TrackedSceneObject> sceneObject;
+        igtlioDevicePointer transformDevice;
+        igtlioDevicePointer imageDevice;
     };
     typedef QList< Tool* > toolList;
     toolList m_tools;
 
-    vtkSmartPointer<igtlio::Logic> m_logic;
-    vtkSmartPointer<PlusServerInterface> m_plusLauncher;
+    DeviceToolMap m_deviceToolAssociations;
+
+    vtkSmartPointer<igtlioLogic> m_logic;
+    vtkSmartPointer<vtkEventQtSlotConnect> m_logicCallbacks;
+    QList< vtkSmartPointer<PlusServerInterface> > m_plusLaunchers;
     qIGTLIOLogicController * m_logicController;
     qIGTLIOClientWidget * m_clientWidget;
 };

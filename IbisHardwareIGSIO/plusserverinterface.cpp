@@ -39,12 +39,12 @@ bool PlusServerInterface::StartServer(const QString& configFilePath)
     QFileInfo configInfo( configFilePath );
     if( !configInfo.exists() )
     {
-        SetLastErrorMessage( QString("PlusServer config () not found").arg( configFilePath ) );
+        SetLastErrorMessage( QString("PlusServer config (%1) not found").arg( configFilePath ) );
         return false;
     }
     if( !configInfo.isReadable() )
     {
-        SetLastErrorMessage( QString("PlusServer config () is not readable").arg( configFilePath ) );
+        SetLastErrorMessage( QString("PlusServer config (%1) is not readable").arg( configFilePath ) );
         return false;
     }
 
