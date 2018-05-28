@@ -38,32 +38,37 @@ GPUVolumeReconstruction< TImage >
     itkExceptionMacro(<< "OpenCL-enabled GPU is not present.");
   }
 
+  m_Debug = false;
+
   /* Initialize GPU Context */
   this->InitializeGPUContext();
 
   m_NumberOfSlices = 0;  
 
-  m_Debug = false;
-
   m_USSearchRadius = 0;
   m_KernelStdDev   = 1.0;
   m_VolumeSpacing   = 1.0;
 
-  m_ReconstructedVolume = NULL;
-
   m_Transform = TransformType::New();
-;
 }
 
 
 template< class TImage >
 GPUVolumeReconstruction< TImage >
 ::~GPUVolumeReconstruction()
-{
-    
+{    
+  if( m_VolumeReconstructionPopulatingProgram )
+      clReleaseProgram( m_VolumeReconstructionPopulatingProgram );
   if(m_VolumeReconstructionPopulatingKernel)
     clReleaseKernel(m_VolumeReconstructionPopulatingKernel);
-
+  for(unsigned int i=0; i<m_NumberOfDevices; i++)
+    {
+      clReleaseCommandQueue( m_CommandQueue[i] );
+    }
+  free( m_CommandQueue );
+  if( m_Context )
+      clReleaseContext( m_Context );
+  free( m_Devices );
 }
 
 template< class TImage >
@@ -74,18 +79,18 @@ GPUVolumeReconstruction< TImage >
   cl_int errid;
 
   // Get the platforms
-  errid = clGetPlatformIDs(0, NULL, &m_NumberOfPlatforms);
+  errid = clGetPlatformIDs(0, nullptr, &m_NumberOfPlatforms);
   OpenCLCheckError( errid, __FILE__, __LINE__, ITK_LOCATION );
 
   // Get NVIDIA platform by default
   m_Platform = OpenCLSelectPlatform("NVIDIA");
-  assert(m_Platform != NULL);
+  assert(m_Platform != nullptr);
 
   cl_device_type devType = CL_DEVICE_TYPE_GPU;
   m_Devices = OpenCLGetAvailableDevices(m_Platform, devType, &m_NumberOfDevices);
 
   // create context
-  m_Context = clCreateContext(0, m_NumberOfDevices, m_Devices, NULL, NULL, &errid);
+  m_Context = clCreateContext(0, m_NumberOfDevices, m_Devices, nullptr, nullptr, &errid);
   OpenCLCheckError( errid, __FILE__, __LINE__, ITK_LOCATION );
 
   // create command queues
@@ -100,17 +105,8 @@ GPUVolumeReconstruction< TImage >
     OpenCLCheckError( errid, __FILE__, __LINE__, ITK_LOCATION );
     }
 
-#ifdef DEBUG
-  std::cerr << "Creating Kernel.. " << std::endl;
-#endif  
-
   m_VolumeReconstructionPopulatingKernel = CreateKernelFromString( GPUVolumeReconstructionKernel,
                                                      "", "VolumeReconstructionPopulating", "", &m_VolumeReconstructionPopulatingProgram);
-
-#ifdef DEBUG
-  std::cerr << "Creating Kernel.. DONE" << std::endl;
-#endif    
-
 }
 
 /**
@@ -124,19 +120,6 @@ GPUVolumeReconstruction< TImage >
   Superclass::PrintSelf(os, indent);
 }
 
-template< class TImage >
-unsigned int
-GPUVolumeReconstruction< TImage >
-::NextPow2( unsigned int x ) {
-    --x;
-    x |= x >> 1;
-    x |= x >> 2;
-    x |= x >> 4;
-    x |= x >> 8;
-    x |= x >> 16;
-    return ++x;
-}
-
 /**
  * Create OpenCL Kernel from File and Preamble 
  */
@@ -146,7 +129,7 @@ GPUVolumeReconstruction< TImage >
 ::CreateKernelFromFile(const char * filename, const char * cPreamble, const char * kernelname, const char * cOptions)
 {
 
-  FILE*  pFileStream = NULL;
+  FILE*  pFileStream = nullptr;
   pFileStream = fopen(filename, "rb");
   if(pFileStream == 0)
     {
@@ -160,7 +143,9 @@ GPUVolumeReconstruction< TImage >
 
   cl_program program;
   cl_kernel kernel = CreateKernelFromString(OriginalSourceString, cPreamble, kernelname, cOptions, &program);
-
+  delete[] OriginalSourceString;
+  fclose( pFileStream );
+  return kernel;
 }
 
 
@@ -169,6 +154,8 @@ cl_kernel
 GPUVolumeReconstruction< TImage >
 ::CreateKernelFromString(const char * cOriginalSourceString, const char * cPreamble, const char * kernelname, const char * cOptions, cl_program * program)
 {
+  if( m_Debug )
+    std::cerr << "Creating Kernel.. " << std::endl;
 
   cl_int errid;
 
@@ -187,17 +174,18 @@ GPUVolumeReconstruction< TImage >
   *program = clCreateProgramWithSource( m_Context, 1, (const char **)&cSourceString, &szFinalLength, &errid);
   OpenCLCheckError(errid, __FILE__, __LINE__, ITK_LOCATION);
 
-  errid = clBuildProgram(*program, 0, NULL, cOptions, NULL, NULL);
+  errid = clBuildProgram(*program, 0, nullptr, cOptions, nullptr, nullptr);
   if(errid != CL_SUCCESS)
     {
     size_t paramValueSize = 0;
-    clGetProgramBuildInfo(m_Program, 0, CL_PROGRAM_BUILD_LOG, 0, NULL, &paramValueSize);
+    clGetProgramBuildInfo(m_Program, 0, CL_PROGRAM_BUILD_LOG, 0, nullptr, &paramValueSize);
     char *paramValue;
     paramValue = new char[paramValueSize+1];
-    clGetProgramBuildInfo(m_Program, 0, CL_PROGRAM_BUILD_LOG, paramValueSize, paramValue, NULL);
+    clGetProgramBuildInfo(m_Program, 0, CL_PROGRAM_BUILD_LOG, paramValueSize, paramValue, nullptr);
     paramValue[paramValueSize] = '\0';
-    std::cerr << paramValue << std::endl;
-    free( paramValue );
+    if( m_Debug )
+      std::cerr << paramValue << std::endl;
+    delete[] paramValue;
     OpenCLCheckError(errid, __FILE__, __LINE__, ITK_LOCATION);
     itkExceptionMacro(<<"Cannot Build Program");
     }
@@ -205,6 +193,9 @@ GPUVolumeReconstruction< TImage >
   free(cSourceString);
   cl_kernel kernel = clCreateKernel(*program, kernelname, &errid);
   OpenCLCheckError(errid, __FILE__, __LINE__, ITK_LOCATION);  
+
+  if( m_Debug )
+    std::cerr << "Creating Kernel.. DONE" << std::endl;
 
   return kernel;
 }
@@ -222,7 +213,7 @@ GPUVolumeReconstruction< TImage >
 
   for(unsigned int i=0; i<m_NumberOfSlices; i++)
   {
-    m_FixedSlices[i] = NULL;
+    m_FixedSlices[i] = nullptr;
   }
 
 }
@@ -232,7 +223,6 @@ void
 GPUVolumeReconstruction< TImage >
 ::SetFixedSlice( unsigned int sliceIdx, ImagePointer sliceImage )
 {
-
   m_FixedSlices[sliceIdx] = sliceImage;
 }
 
@@ -244,9 +234,10 @@ GPUVolumeReconstruction< TImage >
   bool allSlicesDefined = true;
   for(unsigned int i=0; i<m_NumberOfSlices; i++)
   {
-    if( !m_FixedSlices[i] )
+    if( m_FixedSlices[i] == nullptr )
     {
       allSlicesDefined = false;
+      break;
     }
   }
   return allSlicesDefined;
@@ -257,9 +248,8 @@ void
 GPUVolumeReconstruction< TImage >
 ::CreateReconstructedVolume( void )
 {
-#ifdef DEBUG
-  std::cerr << "Creating Empty Reconstructed Volume.." << std::endl;
-#endif  
+  if( m_Debug )
+    std::cerr << "Creating Empty Reconstructed Volume.." << std::endl;
 
   itk::TimeProbe clockReconstruction;
   clockReconstruction.Start();
@@ -311,9 +301,6 @@ GPUVolumeReconstruction< TImage >
 
   typename ImageType::SpacingType spacing1;
   spacing1.Fill( m_VolumeSpacing );
-  // spacing1[0] = 1.0; // first index on X
-  // spacing1[1] = 1.0; // first index on Y
-  // spacing1[2] = 1.0; // first index on Z  
 
   typename ImageType::SizeType size1;
   size1[0] = ceil(m_UpperBound[0] - m_LowerBound[0])/spacing1[0]; // size along X
@@ -331,10 +318,8 @@ GPUVolumeReconstruction< TImage >
   m_ReconstructedVolume->Allocate();
   m_ReconstructedVolume->FillBuffer(0.0);
 
-#ifdef DEBUG
-  std::cerr << "Creating Emtpy Reconstructed Volume..DONE" << std::endl;
-#endif    
-
+  if( m_Debug )
+    std::cerr << "Creating Emtpy Reconstructed Volume..DONE" << std::endl;
 }
 
 template< class TImage >
@@ -343,15 +328,14 @@ GPUVolumeReconstruction< TImage >
 ::CreateMatrices(void)
 {
 
-#ifdef DEBUG
-  std::cerr << "Creating Matrices.." << std::endl;
-#endif  
+  if( m_Debug )
+    std::cerr << "Creating Matrices.." << std::endl;
 
   m_VolumeIndexToSliceIndexMatrices = new InternalRealType[m_NumberOfSlices * 12];
   m_VolumeIndexToLocationMatrix = new InternalRealType[12];
   m_SliceIndexToLocationMatrices = new InternalRealType[m_NumberOfSlices * 12];  
 
-  ImageDirectionType volumeScale;       
+  ImageDirectionType volumeScale;
   for ( unsigned int i = 0; i < ImageDimension; i++ )
     {
       volumeScale[i][i]= m_ReconstructedVolume->GetSpacing()[i];
@@ -420,18 +404,11 @@ GPUVolumeReconstruction< TImage >
       }        
   }
 
-
-  cl_int errid;
-
-#ifdef DEBUG
-  std::cerr << "Creating Matrix Buffers on GPU" << std::endl;
-#endif  
-
-#ifdef DEBUG
-  std::cerr << "Creating Matrices..DONE" << std::endl;
-#endif  
-
-
+  if( m_Debug )
+  {
+    std::cout << "Creating Matrix Buffers on GPU" << std::endl;
+    std::cout << "Creating Matrices..DONE" << std::endl;
+  }
 }
 
 
@@ -446,7 +423,7 @@ GPUVolumeReconstruction< TImage >
     itkExceptionMacro(<< "All Fixed Slices have not been set." );
   }
 
-  if( !m_FixedSliceMask )
+  if( m_FixedSliceMask == nullptr )
   {
     itkExceptionMacro(<< "Slice Mask has not been set." );
   }
@@ -467,16 +444,19 @@ GPUVolumeReconstruction< TImage >
   unsigned int size_output = nbrOfPixelsInVolume*sizeof(ImagePixelType);
   unsigned int size_slice = m_NbrPixelsInSlice * sizeof(InternalRealType);
 
-//  std::cout << "Volume Spacing:\t" << m_VolumeSpacing << std::endl;
-//  std::cout << "Standard Deviation:\t" << m_KernelStdDev << std::endl;
-
+  if( m_Debug )
+  {
+    std::cout << "Volume Spacing:\t" << m_VolumeSpacing << std::endl;
+    std::cout << "Standard Deviation:\t" << m_KernelStdDev << std::endl;
+    std::cout << "Number of Pixels in Slice:\t" << m_NbrPixelsInSlice << std::endl;
+  }
 
   unsigned char * maskValues = new unsigned char[m_NbrPixelsInSlice];
   for(unsigned int n=0; n < m_NbrPixelsInSlice; n++)
   {
     maskValues[n] = (unsigned char)(m_FixedSliceMask->GetPixel( m_FixedSliceMask->ComputeIndex(n)) );
   }
-  
+
   cl_int errid;
   cl_image_format mask_image_format;
   mask_image_format.image_channel_order = CL_R;
@@ -491,7 +471,7 @@ GPUVolumeReconstruction< TImage >
   desc.image_slice_pitch = 0;
   desc.num_mip_levels = 0;
   desc.num_samples = 0;
-  desc.buffer = NULL;
+  desc.buffer = nullptr;
   cl_mem inputImageMaskGPUBuffer = clCreateImage(   m_Context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
                                                     &(mask_image_format),
                                                     &desc,
@@ -519,6 +499,11 @@ GPUVolumeReconstruction< TImage >
     globalSize[i] = localSize[i]*(unsigned int)ceil( (float)volumeSize[i]/(float)localSize[i]);
     }
 
+  if( m_Debug )
+  {
+    std::cout << "Volume Size:\t" << volumeSize[0] << ", " << volumeSize[1] << ", " << volumeSize[2] << std::endl;
+    std::cout << "globalSize:\t" << globalSize[0] << ", " << globalSize[1] << ", " << globalSize[2] << std::endl;
+  }
   itk::TimeProbe clockMemCpy;
 
   InternalRealType * allMatrices = new InternalRealType[12*(2*maxNbrOfSlices+1)];
@@ -528,7 +513,6 @@ GPUVolumeReconstruction< TImage >
   do
   {
     unsigned int nbrOfSlicesToProcess = std::min(m_NumberOfSlices - sliceCntr, maxNbrOfSlices);
-    unsigned int size_input = nbrOfSlicesToProcess * size_slice;
 
     clockMemCpy.Start();
     ImagePixelType * allSlicesPixels = new ImagePixelType[nbrOfSlicesToProcess*m_NbrPixelsInSlice];
@@ -562,7 +546,7 @@ GPUVolumeReconstruction< TImage >
     desc.image_slice_pitch = 0;
     desc.num_mip_levels = 0;
     desc.num_samples = 0;
-    desc.buffer = NULL;
+    desc.buffer = nullptr;
     cl_mem inputImageGPUBuffer = clCreateImage(   m_Context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
                                                     &(gpu_image_format),
                                                     &desc,
@@ -572,7 +556,7 @@ GPUVolumeReconstruction< TImage >
     memcpy((void*)&allMatrices[12], (void *)&m_VolumeIndexToSliceIndexMatrices[12*sliceCntr], 12*sizeof(InternalRealType)*nbrOfSlicesToProcess);    
     memcpy((void*)&allMatrices[12*(nbrOfSlicesToProcess+1)], (void *)&m_SliceIndexToLocationMatrices[12*sliceCntr], 12*sizeof(InternalRealType)*nbrOfSlicesToProcess);
 
-    m_gpuAllMatrices = clCreateBuffer(m_Context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR, 
+    m_gpuAllMatrices = clCreateBuffer(m_Context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
                             12 * sizeof(InternalRealType) * (2* nbrOfSlicesToProcess + 1),
                             allMatrices, &errid);
     OpenCLCheckError(errid, __FILE__, __LINE__, ITK_LOCATION);  
@@ -600,7 +584,7 @@ GPUVolumeReconstruction< TImage >
     OpenCLCheckError(errid, __FILE__, __LINE__, ITK_LOCATION);    
 
 
-    errid = clSetKernelArg(m_VolumeReconstructionPopulatingKernel, argidx++, sizeof(InternalRealType) * 12 * (2*nbrOfSlicesToProcess + 1), NULL);
+    errid = clSetKernelArg(m_VolumeReconstructionPopulatingKernel, argidx++, sizeof(InternalRealType) * 12 * (2*nbrOfSlicesToProcess + 1), nullptr);
     OpenCLCheckError(errid, __FILE__, __LINE__, ITK_LOCATION);  
 
     errid = clSetKernelArg(m_VolumeReconstructionPopulatingKernel, argidx++, sizeof(int),  &(sliceCntr) );
@@ -618,8 +602,11 @@ GPUVolumeReconstruction< TImage >
     errid = clSetKernelArg(m_VolumeReconstructionPopulatingKernel, argidx++, sizeof(float),  &(m_KernelStdDev) );
     OpenCLCheckError(errid, __FILE__, __LINE__, ITK_LOCATION);          
 
-    errid = clEnqueueNDRangeKernel(m_CommandQueue[0], m_VolumeReconstructionPopulatingKernel, 3, NULL, globalSize, localSize, 0, NULL, NULL);
+    errid = clEnqueueNDRangeKernel(m_CommandQueue[0], m_VolumeReconstructionPopulatingKernel, 3, nullptr, globalSize, localSize, 0, nullptr, nullptr);
     OpenCLCheckError(errid, __FILE__, __LINE__, ITK_LOCATION);    
+
+    errid = clFlush(m_CommandQueue[0]);
+    OpenCLCheckError(errid, __FILE__, __LINE__, ITK_LOCATION);
 
     errid = clFinish(m_CommandQueue[0]);
     OpenCLCheckError(errid, __FILE__, __LINE__, ITK_LOCATION);    
@@ -638,26 +625,31 @@ GPUVolumeReconstruction< TImage >
   }while(sliceCntr < m_NumberOfSlices);
 
   delete[] allMatrices;
+  delete[] m_VolumeIndexToSliceIndexMatrices;
+  delete[] m_VolumeIndexToLocationMatrix;
+  delete[] m_SliceIndexToLocationMatrices;
+  delete[] maskValues;
 
   errid = clReleaseMemObject(inputImageMaskGPUBuffer);
   OpenCLCheckError(errid, __FILE__, __LINE__, ITK_LOCATION);
 
 
   errid = clEnqueueReadBuffer(m_CommandQueue[0], accumWeightAndWeightedValueGPUBuffer, CL_TRUE, 0, 
-    2*size_output, cpuAccumWeightAndWeightedValueBuffer, 0, NULL, NULL);
+    2*size_output, cpuAccumWeightAndWeightedValueBuffer, 0, nullptr, nullptr);
   OpenCLCheckError(errid, __FILE__, __LINE__, ITK_LOCATION);    
 
   clockGPUKernel.Stop();
 
-#ifdef DEBUG
+  if( m_Debug )
+  {
     std::cerr << "Time to Populate and Accumulate Value in GPU:\t" << clockGPUKernel.GetMean() << std::endl;
     std::cerr << "Time to MemCpy:\t" << clockMemCpy.GetMean() << std::endl;
-#endif  
-
+  }
 
   itk::TimeProbe clockSettingValue;
   clockSettingValue.Start();
 
+  unsigned int n = 0, m = 0;
   for(unsigned int i=0; i<nbrOfPixelsInVolume; i++)
   {
     InternalRealType weightedValue = cpuAccumWeightAndWeightedValueBuffer[2*i];
@@ -667,25 +659,27 @@ GPUVolumeReconstruction< TImage >
     {
       ImagePixelType reconstructedValue = weightedValue / weight;
       m_ReconstructedVolume->SetPixel(m_ReconstructedVolume->ComputeIndex(i), reconstructedValue);
+      if( m_Debug )
+        m++;
     }
     else
     {
       m_ReconstructedVolume->SetPixel(m_ReconstructedVolume->ComputeIndex(i), 0.0);
+      if( m_Debug )
+        n++;
     }
   }
   clockSettingValue.Stop();
 
-#ifdef DEBUG
+  if( m_Debug )
+  {
+    std::cout << "nbrOfPixelsInVolume = " << nbrOfPixelsInVolume << " m = " << m  << " n = " << n << std::endl;
     std::cerr << "Time to Pixel Values with for loop:\t" << clockSettingValue.GetMean() << std::endl;
-#endif    
-
-#ifdef DEBUG
-  WriterPointer writer = WriterType::New();
-  writer->SetInput(m_ReconstructedVolume);
-  writer->SetFileName( "reconstructedVolume.mhd" );
-  writer->Update();
-#endif  
-
+    WriterPointer writer = WriterType::New();
+    writer->SetInput(m_ReconstructedVolume);
+    writer->SetFileName( "reconstructedVolume.mnc" );
+    writer->Update();
+  }
   errid = clReleaseMemObject(accumWeightAndWeightedValueGPUBuffer);
   OpenCLCheckError(errid, __FILE__, __LINE__, ITK_LOCATION);
 

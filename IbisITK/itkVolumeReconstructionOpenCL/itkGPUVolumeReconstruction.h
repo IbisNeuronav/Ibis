@@ -23,13 +23,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include "itkEuler3DTransform.h"
 
-//#define DEBUG
-
-#ifdef DEBUG
-  #include "itkImageDuplicator.h"
-  #include "itkImageFileWriter.h"
-#endif
-
+#include "itkImageFileWriter.h" //ImageFileWriter used for debugging
 namespace itk
 {
 
@@ -73,7 +67,7 @@ public:
 
   itkSetMacro(KernelStdDev, float);  
 
-  itkSetMacro(VolumeSpacing, float);    
+  itkSetMacro(VolumeSpacing, float);
 
   itkGetObjectMacro(Transform, TransformType);
   itkSetObjectMacro(Transform, TransformType);  
@@ -82,24 +76,16 @@ public:
   itkStaticConstMacro(ImageDimension, unsigned int,
                       TImage::ImageDimension);
 
-
   typedef Image<InternalRealType, ImageDimension>         RealImageType;
   typedef typename RealImageType::Pointer                 RealImagePointer;
 
   itkSetMacro(Debug, bool);
 
-
-#ifdef DEBUG                                                       
-  typedef itk::ImageDuplicator< ImageType >            DuplicatorType;
-  typedef typename DuplicatorType::Pointer                  DuplicatorPointer;
-
+  //ImageFileWriter used for debugging
   typedef itk::ImageFileWriter< ImageType  >  WriterType;  
   typedef typename WriterType::Pointer        WriterPointer;
-#endif
 
   void ReconstructVolume(void);  
-
-  unsigned int NextPow2( unsigned int x );
 
   void SetFixedSlice( unsigned int sliceIdx, ImagePointer sliceImage);
 
@@ -108,7 +94,7 @@ public:
 
 protected:
   GPUVolumeReconstruction();
-  ~GPUVolumeReconstruction();
+  virtual ~GPUVolumeReconstruction();
 
   void InitializeGPUContext(void);
 
@@ -123,9 +109,6 @@ protected:
   bool CheckAllSlicesDefined( void );
 
   bool              m_Debug;
-
-  unsigned int      m_Blocks;
-  unsigned int      m_Threads;
 
   unsigned int      m_NumberOfSlices;
   unsigned int      m_NbrPixelsInSlice;
@@ -142,10 +125,9 @@ protected:
 
   std::vector<ImagePointer>  m_FixedSlices;
 
-  std::vector<unsigned int>       m_SliceValidIdxs;
+  std::vector<unsigned int>  m_SliceValidIdxs;
 
-  ImagePointer                m_ReconstructedVolume;
-  cl_mem                      m_ReconstructedImageGPUBuffer;
+  ImagePointer               m_ReconstructedVolume;
 
   cl_program          m_VolumeReconstructionPopulatingProgram;
   cl_kernel           m_VolumeReconstructionPopulatingKernel;

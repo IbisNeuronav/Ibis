@@ -856,7 +856,7 @@ void USAcquisitionObject::GetItkImage(IbisItkUnsignedChar3ImageType::Pointer itk
 
 void USAcquisitionObject:: GetItkRGBImage(IbisRGBImageType::Pointer itkOutputImage, int frameNo, bool masked , bool useCalibratedTransform, int relativeToObjectID )
 {
-    Q_ASSERT_X(itkOutputImage, "USAcquisitionObject::GetItkImage()", "itkOutputImage must be allocated before this call");
+    Q_ASSERT_X(itkOutputImage, "USAcquisitionObject::GetItkImage()", "itkOutputImage must be created before this call");
 
     // prepare transform
     vtkSmartPointer<vtkMatrix4x4> frameMatrix = vtkSmartPointer<vtkMatrix4x4>::New();

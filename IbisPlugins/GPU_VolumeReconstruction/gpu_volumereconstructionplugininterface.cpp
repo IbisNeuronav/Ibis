@@ -17,7 +17,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 GPU_VolumeReconstructionPluginInterface::GPU_VolumeReconstructionPluginInterface()
 {
-    m_volumeReconstructionWidget = 0;
+    m_volumeReconstructionWidget = nullptr;
 }
 
 GPU_VolumeReconstructionPluginInterface::~GPU_VolumeReconstructionPluginInterface()
