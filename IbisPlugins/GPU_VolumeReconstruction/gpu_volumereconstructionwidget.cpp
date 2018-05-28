@@ -41,6 +41,7 @@ GPU_VolumeReconstructionWidget::GPU_VolumeReconstructionWidget(QWidget *parent) 
     ui->progressBar->hide();
 
     m_VolumeReconstructor = GPU_VolumeReconstruction::New();
+    connect( m_VolumeReconstructor, SIGNAL(finished()), this, SLOT(slot_finished()) );
 }
 
 void GPU_VolumeReconstructionWidget::SetPluginInterface( GPU_VolumeReconstructionPluginInterface *ifc )
@@ -152,8 +153,6 @@ void GPU_VolumeReconstructionWidget::on_startButton_clicked()
 #endif   
 
     m_VolumeReconstructor->start();
-    m_VolumeReconstructor->wait();
-    this->slot_finished();
 }
 
 void GPU_VolumeReconstructionWidget::UpdateUi()
