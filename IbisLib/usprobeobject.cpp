@@ -78,7 +78,16 @@ UsProbeObject::UsProbeObject()
 
     m_currentCalibrationMatrixIndex = -1;
 
+    // Input to the probe object
     m_videoInput = vtkSmartPointer<vtkPassThrough>::New();
+
+    // Temporary input image
+    vtkSmartPointer<vtkImageData> tempImage = vtkSmartPointer<vtkImageData>::New();
+    tempImage->SetDimensions( 320, 240, 1 );
+    tempImage->AllocateScalars( VTK_UNSIGNED_CHAR, 3 );
+    m_videoInput->SetInputData( tempImage );
+
+    // Processed image that is rendered
     m_actorInput = vtkSmartPointer<vtkPassThrough>::New();
 
     m_mask = USMask::New(); // mask in use
