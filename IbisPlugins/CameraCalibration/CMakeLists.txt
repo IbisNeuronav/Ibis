@@ -3,7 +3,7 @@ if( NOT OpenCV_FOUND )
     message( FATAL_ERROR "CameraCalibration plugin requires OpenCV. Set OpenCV dir or disable build of CameraCalibration plugin." )
 endif()
 
-include_directories( ${LandmarkRegistrationIncludeDir} ${IBIS_VTK_INCLUDE_DIR} ${IBIS_VTKOPENCV_INCLUDE_DIR} )
+include_directories( ${LandmarkRegistrationIncludeDir} ${IBIS_VTK_INCLUDE_DIR} )
 
 # define sources
 set( PluginSrc cameracalibrationplugininterface.cpp cameracalibrationwidget.cpp cameracalibrationsidepanelwidget.cpp cameracalibrator.cpp )
