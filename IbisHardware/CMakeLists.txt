@@ -41,6 +41,8 @@ include_directories( ${CMAKE_CURRENT_BINARY_DIR} )           # for files generat
 set( IbisHardwareSrcAll ${IbisHardwareSrc} ${IbisHardwareHdr} ${IbisHardwareHdrMoc} ${IbisHardwareMoc} ${IbisHardwareUiHdr} )
 add_library( IbisHardware ${IbisHardwareSrcAll} )
 
+target_link_libraries( IbisHardware svl )
+
 target_include_directories( IbisHardware PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/vtkTracker ${CMAKE_CURRENT_SOURCE_DIR}/vtkVideo ${CMAKE_CURRENT_SOURCE_DIR}/vtkUltrasound )
 
 # append necessary libraries to the list for ibis to link
