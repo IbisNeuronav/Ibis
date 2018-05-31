@@ -717,6 +717,7 @@ int CameraObject::GetNumberOfFrames()
 void CameraObject::AddFrame( vtkImageData * image, vtkMatrix4x4 * uncalMat )
 {
     m_videoBuffer->AddFrame( image, uncalMat );
+    m_videoInputSwitch->Update();  // Without this update, image is not displayed, but it shouldn't be needed
     if( m_videoBuffer->GetNumberOfFrames() == 1 )
         UpdateGeometricRepresentation();
 }
