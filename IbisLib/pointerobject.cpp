@@ -75,6 +75,7 @@ void PointerObject::Setup( View * view )
 
         vtkActor * tipActor = vtkActor::New();
         tipActor->SetMapper( tipMapper );
+        tipActor->SetVisibility( this->IsHidden() ? 0 : 1 );
         tipMapper->Delete();
         
         view->GetRenderer()->AddViewProp( tipActor );

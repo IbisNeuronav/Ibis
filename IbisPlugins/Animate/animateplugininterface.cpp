@@ -67,6 +67,9 @@ AnimatePluginInterface::~AnimatePluginInterface()
     delete m_renderState;
     delete m_cameraAnim;
     delete m_playbackTimer;
+    delete m_playbackTime;
+    delete m_tfAnim;
+    delete m_minCamDistanceAnim;
 }
 
 bool AnimatePluginInterface::CanRun()

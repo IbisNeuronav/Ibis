@@ -398,6 +398,7 @@ void TripleCutPlaneObject::SetCursorColor( const QColor & c )
     {
         this->Planes[i]->GetCursorProperty()->SetColor(newColorfloat);
     }
+    emit ObjectModified();
 }
 
 QColor TripleCutPlaneObject::GetCursorColor()

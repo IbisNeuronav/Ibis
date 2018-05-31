@@ -118,6 +118,8 @@ public:
 
     // Application Settings (saved automatically at each run )
     ApplicationSettings * GetSettings();
+    void UpdateApplicationSettings();
+    void ApplyApplicationSettings();
     void SetUpdateFrequency( double fps );
     double GetUpdateFrequency() { return GetSettings()->UpdateFrequency; }
 

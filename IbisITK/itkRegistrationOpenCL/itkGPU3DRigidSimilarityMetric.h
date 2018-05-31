@@ -30,6 +30,8 @@ public:
   itkNewMacro( Self );
   itkTypeMacro( GPU3DRigidSimilarityMetric, SingleValuedCostFunction );
 
+  itkSetMacro(Debug, bool);
+
   enum { SpaceDimension=6 };
 
   typedef Superclass::ParametersType              ParametersType;
@@ -55,6 +57,7 @@ public:
    {
     m_GPUMetric = NULL;    
     m_EulerTransform = EulerTransformType::New();
+    m_Debug = true;
     }
 
   double GetValue( const ParametersType & parameters ) const override
@@ -107,6 +110,8 @@ private:
   typename GPUMetricType::Pointer        m_GPUMetric;
   EulerTransformPointer                  m_EulerTransform; 
   PointType                              m_Center;
+
+  bool                                   m_Debug;
 
   
 };

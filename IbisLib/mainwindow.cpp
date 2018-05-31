@@ -27,6 +27,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "serializer.h"
 
 #include <QApplication>
+#include <QDesktopWidget>
 #include <QAction>
 #include <QMenuBar>
 #include <QStatusBar>
@@ -39,7 +40,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QFileInfo>
 #include <QCloseEvent>
 #include <QFileDialog>
-#include <QTimer>
 #include <QPluginLoader>
 #include <QScrollArea>
 #include <QMimeData>
@@ -900,23 +900,30 @@ void MainWindow::Serialize( Serializer * ser )
 void MainWindow::LoadSettings( QSettings & s )
 {
     s.beginGroup( "MainWindow" );
-    QRect mainWindowRect( 0, 0, 800, 600 );
-    QPoint mainWindowPosition = s.value( "MainWindow_pos", mainWindowRect.topLeft() ).toPoint();
-    QSize mainWindowSize = s.value( "MainWindow_size", mainWindowRect.size() ).toSize();
+
+    const QByteArray geometry = s.value( "geometry", QByteArray() ).toByteArray();
+    if( geometry.isEmpty() )
+    {
+        const QRect availableGeometry = QApplication::desktop()->availableGeometry(this);
+        resize( (int)(availableGeometry.width() * 0.7) , (int)(availableGeometry.height() * 0.6 ) );
+        move( (availableGeometry.width() - width()) / 2, (availableGeometry.height() - height()) / 2 );
+    }
+    else
+    {
+        restoreGeometry(geometry);
+    }
+
     m_leftPanelSize = s.value( "MainWindowLeftPanelSize", 150 ).toInt();
     m_rightPanelSize = s.value( "MainWindowRightPanelSize", 150 ).toInt();
     m_4Views->LoadSettings( s );
     s.endGroup();
-    resize( mainWindowSize );
-    move( mainWindowPosition );
     UpdateMainSplitter();
 }
 
 void MainWindow::SaveSettings( QSettings & s )
 {
     s.beginGroup( "MainWindow" );
-    s.setValue( "MainWindow_pos", pos() );
-    s.setValue( "MainWindow_size", size() );
+    s.setValue("geometry", saveGeometry());
     s.setValue( "MainWindowLeftPanelSize", m_leftPanelSize );
     s.setValue( "MainWindowRightPanelSize", m_rightPanelSize );
     m_4Views->SaveSettings( s );

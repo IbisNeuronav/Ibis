@@ -69,7 +69,8 @@ if( IBIS_INSTALL_OPENCV )
                    -DWITH_JASPER:BOOL=FALSE 
                    -DBUILD_DOCS:BOOL=FALSE 
                    -DBUILD_FAT_JAVA_LIB:BOOL=FALSE 
-                   -DWITH_CUDA:BOOL=FALSE )
+                   -DWITH_CUDA:BOOL=FALSE
+                   -DWITH_VTK:BOOL=FALSE )
 endif()
 
 add_custom_target( IbisExternalDependencies ALL )

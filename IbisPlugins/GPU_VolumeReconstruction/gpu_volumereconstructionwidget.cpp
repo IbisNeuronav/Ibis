@@ -14,7 +14,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "gpu_volumereconstructionwidget.h"
 #include <QComboBox>
 #include <QMessageBox>
-#include <QtConcurrent/QtConcurrent>
 #include "vnl/algo/vnl_symmetric_eigensystem.h"
 #include "vnl/algo/vnl_real_eigensystem.h"
 
@@ -32,7 +31,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 GPU_VolumeReconstructionWidget::GPU_VolumeReconstructionWidget(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::GPU_VolumeReconstructionWidget),
-    m_pluginInterface(0)
+    m_pluginInterface(nullptr)
 {
     ui->setupUi(this);    
     setWindowTitle( "US Volume Reconstruction with GPU" );
@@ -40,9 +39,9 @@ GPU_VolumeReconstructionWidget::GPU_VolumeReconstructionWidget(QWidget *parent) 
     ui->progressBar->setMinimum(0);
     ui->progressBar->setMaximum(0);
     ui->progressBar->hide();
-    connect(&this->m_futureWatcher, SIGNAL(finished()), this, SLOT(slot_finished()));
 
     m_VolumeReconstructor = GPU_VolumeReconstruction::New();
+    connect( m_VolumeReconstructor, SIGNAL(finished()), this, SLOT(slot_finished()) );
 }
 
 void GPU_VolumeReconstructionWidget::SetPluginInterface( GPU_VolumeReconstructionPluginInterface *ifc )
@@ -59,22 +58,16 @@ GPU_VolumeReconstructionWidget::~GPU_VolumeReconstructionWidget()
 
 void GPU_VolumeReconstructionWidget::slot_finished()
 {
-    int usAcquisitionObjectId = ui->usAcquisitionComboBox->itemData( ui->usAcquisitionComboBox->currentIndex() ).toInt();
-
     SceneManager * sm = m_pluginInterface->GetSceneManager();
-
-    // Get US Acquisition Object
-    USAcquisitionObject * selectedUSAcquisitionObject = USAcquisitionObject::SafeDownCast( sm->GetObjectByID( usAcquisitionObjectId) );
-    Q_ASSERT_X( selectedUSAcquisitionObject, "GPU_VolumeReconstructionWidget::slot_finished()", "Invalid target US object" );
 
     qint64 reconstructionTime = m_ReconstructionTimer.elapsed();
 
     //Add Reconstructed Volume to Scene
     vtkSmartPointer<ImageObject> reconstructedImage = vtkSmartPointer<ImageObject>::New();
-    reconstructedImage->SetItkImage( m_VolumeReconstructor->GetReconstructor()->GetReconstructedVolume() );
     reconstructedImage->SetName("Reconstructed Volume");
+    reconstructedImage->SetItkImage( m_VolumeReconstructor->GetReconstructedImage() );
 
-    sm->AddObject(reconstructedImage, selectedUSAcquisitionObject->GetParent()->GetParent() );
+    sm->AddObject(reconstructedImage, sm->GetSceneRoot() );
     sm->SetCurrentObject( reconstructedImage );
 
 #ifdef DEBUG
@@ -86,8 +79,6 @@ void GPU_VolumeReconstructionWidget::slot_finished()
     ui->userFeedbackLabel->setText(feedbackString);
 
     ui->progressBar->hide();
-
-    m_VolumeReconstructor->DestroyReconstructor();
 }
 
 void GPU_VolumeReconstructionWidget::on_startButton_clicked()
@@ -137,7 +128,6 @@ void GPU_VolumeReconstructionWidget::on_startButton_clicked()
 #ifdef DEBUG
     std::cerr << "Constructing m_Reconstructor..." << std::endl;
 #endif
-    m_VolumeReconstructor->CreateReconstructor();
     m_VolumeReconstructor->SetNumberOfSlices( nbrOfSlices );
     m_VolumeReconstructor->SetFixedSliceMask( selectedUSAcquisitionObject->GetMask() );
     m_VolumeReconstructor->SetUSSearchRadius( usSearchRadius );
@@ -162,8 +152,7 @@ void GPU_VolumeReconstructionWidget::on_startButton_clicked()
     std::cerr << "Starting reconstruction..." << std::endl;
 #endif   
 
-    QFuture<void> future = QtConcurrent::run(m_VolumeReconstructor->GetReconstructor().GetPointer(), &VolumeReconstructionType::ReconstructVolume);
-    this->m_futureWatcher.setFuture(future);
+    m_VolumeReconstructor->start();
 }
 
 void GPU_VolumeReconstructionWidget::UpdateUi()

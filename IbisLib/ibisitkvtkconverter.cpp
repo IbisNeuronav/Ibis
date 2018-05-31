@@ -52,8 +52,11 @@ IbisItkVtkConverter::~IbisItkVtkConverter()
 
 vtkImageData * IbisItkVtkConverter::ConvertItkImageToVtkImage(IbisItkFloat3ImageType::Pointer img , vtkTransform *tr = 0)
 {
-    this->ItkToVtkExporter = ItkExporterType::New();
-    BuildVtkImport( this->ItkToVtkExporter );
+    if( !this->ItkToVtkExporter )
+    {
+        this->ItkToVtkExporter = ItkExporterType::New();
+        BuildVtkImport( this->ItkToVtkExporter );
+    }
     this->ItkToVtkExporter->SetInput( img );
     this->ItkToVtkImporter->Update();
     if( tr )
@@ -63,8 +66,11 @@ vtkImageData * IbisItkVtkConverter::ConvertItkImageToVtkImage(IbisItkFloat3Image
 
 vtkImageData * IbisItkVtkConverter::ConvertItkImageToVtkImage( IbisRGBImageType::Pointer img, vtkTransform *tr = 0 )
 {
-    this->ItkRGBImageToVtkExporter = ItkRGBImageExporterType::New();
-    BuildVtkImport( this->ItkRGBImageToVtkExporter );
+    if( !this->ItkRGBImageToVtkExporter )
+    {
+        this->ItkRGBImageToVtkExporter = ItkRGBImageExporterType::New();
+        BuildVtkImport( this->ItkRGBImageToVtkExporter );
+    }
     this->ItkRGBImageToVtkExporter->SetInput( img );
     this->ItkToVtkImporter->Update();
     if( tr )
@@ -74,8 +80,11 @@ vtkImageData * IbisItkVtkConverter::ConvertItkImageToVtkImage( IbisRGBImageType:
 
 vtkImageData * IbisItkVtkConverter::ConvertItkImageToVtkImage(IbisItkUnsignedChar3ImageType::Pointer img , vtkTransform *tr = 0)
 {
-    this->ItkToVtkUnsignedChar3lExporter = IbisItkUnsignedChar3ExporterType::New();
-    BuildVtkImport( this->ItkToVtkUnsignedChar3lExporter );
+    if( !this->ItkToVtkUnsignedChar3lExporter )
+    {
+        this->ItkToVtkUnsignedChar3lExporter = IbisItkUnsignedChar3ExporterType::New();
+        BuildVtkImport( this->ItkToVtkUnsignedChar3lExporter );
+    }
     this->ItkToVtkUnsignedChar3lExporter->SetInput( img );
     this->ItkToVtkImporter->Update();
     if( tr )
@@ -124,6 +133,8 @@ bool IbisItkVtkConverter::ConvertVtkImageToItkImage( IbisItkFloat3ImageType::Poi
 {
     if( !itkOutputImage )
         return false;
+
+    itkOutputImage->Initialize();
     int numberOfScalarComponents = img->GetNumberOfScalarComponents();
     vtkImageData *grayImage = img;
     vtkSmartPointer<vtkImageLuminance> luminanceFilter = vtkSmartPointer<vtkImageLuminance>::New();
@@ -205,6 +216,7 @@ bool IbisItkVtkConverter::ConvertVtkImageToItkImage( IbisRGBImageType::Pointer i
     if( !itkOutputImage )
         return false;
 
+    itkOutputImage->Initialize();
     int * dimensions = image->GetDimensions();
     IbisItkFloat3ImageType::SizeType  size;
     IbisItkFloat3ImageType::IndexType start;
@@ -265,6 +277,7 @@ bool IbisItkVtkConverter::ConvertVtkImageToItkImage( IbisItkUnsignedChar3ImageTy
     if( !itkOutputImage )
         return false;
 
+    itkOutputImage->Initialize();
     IbisItkUnsignedChar3ImageType::SizeType  size;
     IbisItkUnsignedChar3ImageType::IndexType start;
     IbisItkUnsignedChar3ImageType::RegionType region;
