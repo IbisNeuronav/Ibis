@@ -103,7 +103,6 @@ set( VTK_ENCODESTRING_EXE ${VTK_INSTALL_PREFIX}/bin/vtkEncodeString-${VTK_MAJOR_
 # Build SVL (Simple Vector Library). This lib may be used everywhere
 # including in vtk extension classes.
 add_subdirectory( svl )
-include_directories( ${svlIncludeDir} )
 #==================================================================
 add_subdirectory( IbisITK )
 add_subdirectory( IbisVTK )
