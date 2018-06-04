@@ -71,7 +71,6 @@ QWidget * GPUVolumeReconstructionAPITestPluginInterface::CreateFloatingWidget()
             reconstructedImage->SetName(volName);
             ibisAPI->AddObject(reconstructedImage, acq->GetParent()->GetParent() );
             ibisAPI->SetCurrentObject( reconstructedImage );
-            reconstructor->DestroyReconstructor();
         }
         reconstructor->Delete();
         return 0;

@@ -66,6 +66,8 @@ void GPU_VolumeReconstructionWidget::slot_finished()
     USAcquisitionObject * selectedUSAcquisitionObject = USAcquisitionObject::SafeDownCast( ibisAPI->GetObjectByID( usAcquisitionObjectId) );
     Q_ASSERT_X( selectedUSAcquisitionObject, "GPU_VolumeReconstructionWidget::slot_finished()", "Invalid target US object" );
 
+    qint64 reconstructionTime = m_ReconstructionTimer.elapsed();
+
     //Add Reconstructed Volume to Scene
     vtkSmartPointer<ImageObject> reconstructedImage = vtkSmartPointer<ImageObject>::New();
     reconstructedImage->SetName("Reconstructed Volume");

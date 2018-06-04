@@ -228,18 +228,6 @@ QString IbisAPI::GetConfigDirectory()
 {
     return m_application->GetConfigDirectory();
 }
-QString IbisAPI::GetOpenFileName( const QString & caption, const QString & dir, const QString & filter )
-{
-    return m_application->GetOpenFileName( caption, dir, filter );
-}
-QString IbisAPI::GetSaveFileName( const QString & caption, const QString & dir, const QString & filter )
-{
-    return m_application->GetSaveFileName( caption, dir, filter );
-}
-QString IbisAPI::GetExistingDirectory( const QString & caption, const QString & dir )
-{
-    return m_application->GetExistingDirectory( caption, dir );
-}
 
 QString IbisAPI::GetOpenFileName( const QString & caption, const QString & dir, const QString & filter )
 {
@@ -283,3 +271,4 @@ void IbisAPI::RemoveBottomWidget( QWidget * w )
 {
     m_application->RemoveBottomWidget( w );
 }
+
