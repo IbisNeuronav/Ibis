@@ -209,7 +209,6 @@ MainWindow::MainWindow( QWidget * parent )
 
     UpdateMainSplitter();
 
-    Application::GetInstance().SetMainWindow(this);
     // -----------------------------------------
     // Create UI elements from the plugins
     // -----------------------------------------
