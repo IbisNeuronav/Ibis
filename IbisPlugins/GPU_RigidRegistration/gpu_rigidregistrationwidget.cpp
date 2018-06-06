@@ -155,7 +155,7 @@ void GPU_RigidRegistrationWidget::UpdateUi()
 
   IbisAPI *ibisAPI = m_pluginInterface->GetIbisAPI();
   Q_ASSERT(ibisAPI);
-  const QList< SceneObject* > allObjects = ibisAPI->GetAllObjects();
+  const QList< SceneObject* > &allObjects = ibisAPI->GetAllObjects();
   for( int i = 0; i < allObjects.size(); ++i )
   {
       SceneObject * current = allObjects[i];

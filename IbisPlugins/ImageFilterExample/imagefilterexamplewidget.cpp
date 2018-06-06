@@ -113,7 +113,7 @@ void ImageFilterExampleWidget::UpdateUi()
     IbisAPI *ibisAPI = m_pluginInterface->GetIbisAPI();
     if( ibisAPI )
     {
-        const QList< SceneObject* > allObjects = ibisAPI->GetAllObjects();
+        const QList< SceneObject* > &allObjects = ibisAPI->GetAllObjects();
         for( int i = 0; i < allObjects.size(); ++i )
         {
             SceneObject * current = allObjects[i];
