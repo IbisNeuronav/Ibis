@@ -492,6 +492,10 @@ void CameraObject::SetLensDisplacement( double d )
 void CameraObject::SetTransparencyCenterTracked( bool t )
 {
     m_trackedTransparencyCenter = t;
+    if( !IsDrivenByHardware() )
+    {
+        ListenForIbisClockTick( t );
+    }
     emit ParamsModified();
 }
 
@@ -849,6 +853,14 @@ void CameraObject::DrawWorldPath( std::vector< Vec3 > & points, double color[4] 
     InternalDrawPath( p3d, color );
 }
 
+void CameraObject::ListenForIbisClockTick( bool listen )
+{
+    if( listen )
+        connect( &Application::GetInstance(), SIGNAL(IbisClockTick()), this, SLOT(VideoUpdatedSlot()) );
+    else
+        disconnect( &Application::GetInstance(), SIGNAL(IbisClockTick()), this, SLOT(VideoUpdatedSlot()) );
+}
+
 void CameraObject::InternalDrawPath( std::vector< Vec3 > & p3d, double color[4] )
 {
     PerViewElementCont::iterator it = m_perViewElements.begin();
@@ -896,8 +908,6 @@ void CameraObject::ParamsModifiedSlot()
 
 void CameraObject::VideoUpdatedSlot()
 {
-    Q_ASSERT( IsDrivenByHardware() );
-
     if( IsRecording() && GetState() == Ok )
     {
         m_recordingCamera->AddFrame( GetVideoOutput(), GetUncalibratedTransform()->GetMatrix() );
@@ -932,14 +942,14 @@ void CameraObject::VideoUpdatedSlot()
 
 void CameraObject::ObjectAddedToScene()
 {
-    if( IsDrivenByHardware() )
-        connect( &Application::GetInstance(), SIGNAL(IbisClockTick()), this, SLOT(VideoUpdatedSlot()) );
+    if( IsDrivenByHardware() || m_trackedTransparencyCenter )
+        ListenForIbisClockTick( true );
 }
 
 void CameraObject::ObjectAboutToBeRemovedFromScene()
 {
-    if( IsDrivenByHardware() )
-        disconnect( &Application::GetInstance(), SIGNAL(IbisClockTick()), this, SLOT(VideoUpdatedSlot()) );
+    if( IsDrivenByHardware() || m_trackedTransparencyCenter )
+        ListenForIbisClockTick( false );
     if( m_trackingCamera )
         SetTrackCamera( false );
 }
