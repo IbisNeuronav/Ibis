@@ -165,7 +165,6 @@ protected:
 
     virtual void ObjectAddedToScene() override;
     virtual void ObjectAboutToBeRemovedFromScene() override;
-    virtual void InternalWorldTransformChanged() override;
     void InternalSetIntrinsicParams();
     void UpdateGeometricRepresentation();
     void UpdateVtkCamera();

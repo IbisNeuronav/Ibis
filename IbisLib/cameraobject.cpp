@@ -725,6 +725,7 @@ void CameraObject::AddFrame( vtkImageData * image, vtkMatrix4x4 * uncalMat )
 void CameraObject::SetCurrentFrame( int frame )
 {
     m_videoBuffer->SetCurrentFrame( frame );
+    UpdateVtkCamera();
     emit ParamsModified();
 }
 
@@ -941,11 +942,6 @@ void CameraObject::ObjectAboutToBeRemovedFromScene()
         disconnect( &Application::GetInstance(), SIGNAL(IbisClockTick()), this, SLOT(VideoUpdatedSlot()) );
     if( m_trackingCamera )
         SetTrackCamera( false );
-}
-
-void CameraObject::InternalWorldTransformChanged()
-{
-    UpdateVtkCamera();
 }
 
 void CameraObject::InternalSetIntrinsicParams()
