@@ -10,7 +10,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 #include "landmarkregistrationobjectplugininterface.h"
 #include "landmarkregistrationobject.h"
-#include "scenemanager.h"
+#include "ibisapi.h"
 #include "pointsobject.h"
 #include <QtPlugin>
 #include <QString>
@@ -31,8 +31,8 @@ LandmarkRegistrationObjectPluginInterface::~LandmarkRegistrationObjectPluginInte
 SceneObject *LandmarkRegistrationObjectPluginInterface::CreateObject()
 {
     m_landmarkRegistrationObject = 0;
-    SceneManager *manager = GetSceneManager();
-    Q_ASSERT(manager);
+    IbisAPI *ibisAPI = GetIbisAPI();
+    Q_ASSERT(ibisAPI);
     vtkSmartPointer<PointsObject>sourcePoints = vtkSmartPointer<PointsObject>::New();
     sourcePoints->SetName( "RegistrationSourcePoints" );
     sourcePoints->SetListable( false );
@@ -50,10 +50,10 @@ SceneObject *LandmarkRegistrationObjectPluginInterface::CreateObject()
     m_landmarkRegistrationObject = vtkSmartPointer<LandmarkRegistrationObject>::New();
     m_landmarkRegistrationObject->SetName( "Landmark Registration" );
     m_landmarkRegistrationObject->SetCanEditTransformManually( false );
-    manager->AddObject( m_landmarkRegistrationObject );
-    manager->AddObject( sourcePoints, m_landmarkRegistrationObject );
-    manager->AddObject( targetPoints, manager->GetSceneRoot() );
-    m_landmarkRegistrationObject->SetTargetObjectID( manager->GetSceneRoot()->GetObjectID() );
+    ibisAPI->AddObject( m_landmarkRegistrationObject );
+    ibisAPI->AddObject( sourcePoints, m_landmarkRegistrationObject );
+    ibisAPI->AddObject( targetPoints, ibisAPI->GetSceneRoot() );
+    m_landmarkRegistrationObject->SetTargetObjectID( ibisAPI->GetSceneRoot()->GetObjectID() );
     m_landmarkRegistrationObject->SetSourcePoints( sourcePoints );
     m_landmarkRegistrationObject->SetTargetPoints( targetPoints );
     return m_landmarkRegistrationObject;

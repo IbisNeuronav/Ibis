@@ -14,8 +14,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "ibisplugin.h"
 #include "ibistypes.h"
 
-class Application;
-class SceneManager;
 class QMenu;
 class vtkImageData;
 class vtkTransform;

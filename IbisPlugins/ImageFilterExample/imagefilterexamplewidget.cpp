@@ -10,10 +10,10 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 // Thanks to Simon Drouin for writing this class
 
+#include "imagefilterexampleplugininterface.h"
 #include "imagefilterexamplewidget.h"
 #include "ui_imagefilterexamplewidget.h"
-#include "application.h"
-#include "scenemanager.h"
+#include "ibisapi.h"
 #include "sceneobject.h"
 #include "imageobject.h"
 #include "vtkTransform.h"
@@ -24,7 +24,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 ImageFilterExampleWidget::ImageFilterExampleWidget(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::ImageFilterExampleWidget),
-    m_application(0)
+    m_pluginInterface(0)
 {
     ui->setupUi(this);
     setWindowTitle( "Image Filter Example" );
@@ -36,9 +36,9 @@ ImageFilterExampleWidget::~ImageFilterExampleWidget()
     delete ui;
 }
 
-void ImageFilterExampleWidget::SetApplication( Application * app )
+void ImageFilterExampleWidget::SetPluginInterface( ImageFilterExamplePluginInterface * interf )
 {
-    m_application = app;
+    m_pluginInterface = interf;
     UpdateUi();
 }
 
@@ -56,10 +56,11 @@ void ImageFilterExampleWidget::on_startButton_clicked()
     }
 
     // Get input images
-    SceneManager * sm = m_application->GetSceneManager();
-    ImageObject * sourceImageObject = ImageObject::SafeDownCast( sm->GetObjectByID( sourceImageObjectId ) );
+    IbisAPI *ibisAPI = m_pluginInterface->GetIbisAPI();
+    Q_ASSERT(ibisAPI);
+    ImageObject * sourceImageObject = ImageObject::SafeDownCast( ibisAPI->GetObjectByID( sourceImageObjectId ) );
     Q_ASSERT_X( sourceImageObject, "ImageFilterExampleWidget::on_startButton_clicked()", "Invalid source object" );
-    ImageObject * targetImageObject = ImageObject::SafeDownCast( sm->GetObjectByID( targetImageObjectId ) );
+    ImageObject * targetImageObject = ImageObject::SafeDownCast( ibisAPI->GetObjectByID( targetImageObjectId ) );
     Q_ASSERT_X( targetImageObject, "ImageFilterExampleWidget::on_startButton_clicked()", "Invalid target object" );
 
     IbisItkFloat3ImageType::Pointer itkSourceImage = sourceImageObject->GetItkImage();
@@ -85,7 +86,7 @@ void ImageFilterExampleWidget::on_startButton_clicked()
     ui->progressBar->setValue( 0 );
     ui->progressBar->setEnabled( false );
 
-    SceneObject * transformObject = sm->GetObjectByID( transformObjectId );
+    SceneObject * transformObject = ibisAPI->GetObjectByID( transformObjectId );
     vtkTransform * transform = vtkTransform::SafeDownCast( transformObject->GetLocalTransform() );
     Q_ASSERT_X( transform, "ImageFilterExampleWidget::on_startButton_clicked()", "Invalid transform" );
 
@@ -107,14 +108,16 @@ void ImageFilterExampleWidget::UpdateUi()
     ui->transformObjectComboBox->clear();
     ui->sourceImageComboBox->clear();
     ui->targetImageComboBox->clear();
-    if( m_application )
+    if( !m_pluginInterface )
+        return;
+    IbisAPI *ibisAPI = m_pluginInterface->GetIbisAPI();
+    if( ibisAPI )
     {
-        SceneManager * sm = m_application->GetSceneManager();
-        const SceneManager::ObjectList & allObjects = sm->GetAllObjects();
+        const QList< SceneObject* > &allObjects = ibisAPI->GetAllObjects();
         for( int i = 0; i < allObjects.size(); ++i )
         {
             SceneObject * current = allObjects[i];
-            if( current != sm->GetSceneRoot() && current->IsListable() )
+            if( current != ibisAPI->GetSceneRoot() && current->IsListable() )
             {
                 vtkTransform * localTransform = vtkTransform::SafeDownCast( current->GetLocalTransform() );
                 if( localTransform && current->CanEditTransformManually() )

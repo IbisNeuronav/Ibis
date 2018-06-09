@@ -13,7 +13,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "serializerhelper.h"
 #include "application.h"
 #include "ibisconfig.h"
-#include "scenemanager.h"
 #include "usacquisitionsettingswidget.h"
 #include "usmasksettingswidget.h"
 #include "imageobject.h"

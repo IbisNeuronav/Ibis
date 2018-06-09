@@ -10,8 +10,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 #include "contoursurfaceplugininterface.h"
 #include "imageobject.h"
+#include "ibisapi.h"
 #include "sceneobject.h"
-#include "scenemanager.h"
 #include "generatedsurface.h"
 #include <QtPlugin>
 #include <QString>
@@ -28,17 +28,17 @@ ContourSurfacePluginInterface::~ContourSurfacePluginInterface()
 
 SceneObject *ContourSurfacePluginInterface::CreateObject()
 {
-    SceneManager *manager = GetSceneManager();
-    Q_ASSERT(manager);
+    IbisAPI *ibisAPI = GetIbisAPI();
+    Q_ASSERT(ibisAPI);
     m_generatedSurface = vtkSmartPointer<GeneratedSurface>::New();
     m_generatedSurface->SetPluginInterface( this );
-    if( manager->IsLoadingScene() )
+    if( ibisAPI->IsLoadingScene() )
     {
-        manager->AddObject(m_generatedSurface);
+        ibisAPI->AddObject(m_generatedSurface);
         return m_generatedSurface;
     }
     // If we have a current object we build surface now
-    SceneObject *obj = manager->GetCurrentObject();
+    SceneObject *obj = ibisAPI->GetCurrentObject();
     if (obj->IsA("ImageObject"))
     {
         ImageObject *image = ImageObject::SafeDownCast(obj);
@@ -61,8 +61,8 @@ SceneObject *ContourSurfacePluginInterface::CreateObject()
             surfaceName.append(QString::number(image->GetNumberOfChildren()));
             m_generatedSurface->SetName(surfaceName);
             m_generatedSurface->SetScalarsVisible(0);
-            manager->AddObject(m_generatedSurface, image);
-            manager->SetCurrentObject( m_generatedSurface );
+            ibisAPI->AddObject(m_generatedSurface, image);
+            ibisAPI->SetCurrentObject( m_generatedSurface );
         }
         return m_generatedSurface;
     }
@@ -71,7 +71,7 @@ SceneObject *ContourSurfacePluginInterface::CreateObject()
 }
 bool ContourSurfacePluginInterface::CanBeActivated()
 {
-    if( this->GetSceneManager()->GetCurrentObject()->IsA( "ImageObject" ) )
+    if( this->GetIbisAPI()->GetCurrentObject()->IsA( "ImageObject" ) )
         return true;
     return false;
 }

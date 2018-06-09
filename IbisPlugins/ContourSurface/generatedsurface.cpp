@@ -23,7 +23,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include "generatedsurface.h"
 #include "surfacesettingswidget.h"
-#include "scenemanager.h"
+#include "ibisapi.h"
 #include "imageobject.h"
 #include "polydataobjectsettingsdialog.h"
 #include "contoursurfaceplugininterface.h"
@@ -33,7 +33,7 @@ ObjectSerializationMacro( GeneratedSurface );
 
 GeneratedSurface::GeneratedSurface()
 {
-    m_imageObjectID = SceneManager::InvalidId;
+    m_imageObjectID = IbisAPI::InvalidId;
     m_contourValue = 0.0;
     m_radius = DEFAULT_RADIUS;
     m_standardDeviation = DEFAULT_STANDARD_DEVIATION;
@@ -57,18 +57,18 @@ void GeneratedSurface::Serialize( Serializer * ser )
     ::Serialize( ser, "StandardDeviation", m_standardDeviation );
     if( ser->IsReader() )
     {
-        ImageObject *img = ImageObject::SafeDownCast(m_pluginInterface->GetSceneManager()->GetObjectByID( m_imageObjectID ) );
+        ImageObject *img = ImageObject::SafeDownCast(m_pluginInterface->GetIbisAPI()->GetObjectByID( m_imageObjectID ) );
         if ( img )
         {
             this->GenerateSurface();
-            m_pluginInterface->GetSceneManager()->ChangeParent( this, img, img->GetNumberOfChildren() );
+            m_pluginInterface->GetIbisAPI()->ChangeParent( this, img, img->GetNumberOfChildren() );
         }
     }
 }
 
 vtkImageAccumulate * GeneratedSurface::GetImageHistogram()
 {
-    ImageObject *img = ImageObject::SafeDownCast(m_pluginInterface->GetSceneManager()->GetObjectByID( m_imageObjectID ) );
+    ImageObject *img = ImageObject::SafeDownCast(m_pluginInterface->GetIbisAPI()->GetObjectByID( m_imageObjectID ) );
     if ( img )
         return img->GetHistogramComputer();
     return 0;
@@ -76,7 +76,7 @@ vtkImageAccumulate * GeneratedSurface::GetImageHistogram()
 
 vtkScalarsToColors * GeneratedSurface::GetImageLut()
 {
-    ImageObject *img = ImageObject::SafeDownCast(m_pluginInterface->GetSceneManager()->GetObjectByID( m_imageObjectID ) );
+    ImageObject *img = ImageObject::SafeDownCast(m_pluginInterface->GetIbisAPI()->GetObjectByID( m_imageObjectID ) );
     if ( img )
         return img->GetLut();
     else
@@ -85,7 +85,7 @@ vtkScalarsToColors * GeneratedSurface::GetImageLut()
 
 void GeneratedSurface::SetImageLutRange(double range[2])
 {
-    ImageObject *img = ImageObject::SafeDownCast(m_pluginInterface->GetSceneManager()->GetObjectByID( m_imageObjectID ) );
+    ImageObject *img = ImageObject::SafeDownCast(m_pluginInterface->GetIbisAPI()->GetObjectByID( m_imageObjectID ) );
     if ( img )
     {
         img->GetLut()->SetRange(range);
@@ -95,7 +95,7 @@ void GeneratedSurface::SetImageLutRange(double range[2])
 
 void GeneratedSurface::GetImageScalarRange(double range[2])
 {
-    ImageObject *img = ImageObject::SafeDownCast(m_pluginInterface->GetSceneManager()->GetObjectByID( m_imageObjectID ) );
+    ImageObject *img = ImageObject::SafeDownCast(m_pluginInterface->GetIbisAPI()->GetObjectByID( m_imageObjectID ) );
     if ( img )
         img->GetImageScalarRange(range);
     else
@@ -107,7 +107,7 @@ void GeneratedSurface::GetImageScalarRange(double range[2])
 
 bool GeneratedSurface::GenerateSurface()
 {
-    ImageObject *img = ImageObject::SafeDownCast(m_pluginInterface->GetSceneManager()->GetObjectByID( m_imageObjectID ) );
+    ImageObject *img = ImageObject::SafeDownCast(m_pluginInterface->GetIbisAPI()->GetObjectByID( m_imageObjectID ) );
     if ( img )
     {
         vtkSmartPointer<vtkMarchingContourFilter> contourExtractor = vtkSmartPointer<vtkMarchingContourFilter>::New();
@@ -175,5 +175,5 @@ void GeneratedSurface::SetPluginInterface( ContourSurfacePluginInterface * inter
 
 bool GeneratedSurface::IsValid()
 {
-    return ImageObject::SafeDownCast(m_pluginInterface->GetSceneManager()->GetObjectByID( m_imageObjectID ) ) != 0;
+    return ImageObject::SafeDownCast(m_pluginInterface->GetIbisAPI()->GetObjectByID( m_imageObjectID ) ) != 0;
 }
