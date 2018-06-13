@@ -93,6 +93,7 @@ ELSE( BUILD_SHARED_LIBS )
 ENDIF( BUILD_SHARED_LIBS )
 
 target_link_libraries( itkRegistration ${ITK_LIBRARIES} )
+<<<<<<< 923867558d5e01c185118793671f0b03b53ab06e
 #================================
 # Define include dir for
 # dependent projects
