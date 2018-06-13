@@ -43,6 +43,11 @@ ELSE( BUILD_SHARED_LIBS )
 ENDIF( BUILD_SHARED_LIBS )
 
 target_link_libraries( itkVolumeReconstructionOpenCL ${ITK_LIBRARIES}  ${OPENCL_LIBRARIES})
+#================================
+# Define include dir for
+# dependent projects
+#================================
+target_include_directories( itkVolumeReconstructionOpenCL PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR} )
 
 # install
 if( IBIS_INSTALL_LIBS_AND_HEADERS )
@@ -50,12 +55,3 @@ if( IBIS_INSTALL_LIBS_AND_HEADERS )
     INSTALL_FILES(/include FILES ${IBIS_ITK_VOLUME_RECONSTRUCTION_OPENCL_HDR})
 endif( IBIS_INSTALL_LIBS_AND_HEADERS )
 
-#================================
-# Define include dir for
-# dependent projects
-#================================
-SET( ITK_VOLUME_RECONSTRUCTION_OPENCL_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR} CACHE PATH "Include directory for itkVolumeReconstructionOpenCL .h files" )
-MARK_AS_ADVANCED( ITK_VOLUME_RECONSTRUCTION_OPENCL_INCLUDE_DIR )
-
-SET( ITK_VOLUME_RECONSTRUCTION_OPENCL_KERNEL_INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR}  CACHE PATH "Include directory for itkVolumeReconstructionOpenCL Kernel .h files" )
-MARK_AS_ADVANCED( ITK_VOLUME_RECONSTRUCTION_OPENCL_KERNEL_INCLUDE_DIR  )
