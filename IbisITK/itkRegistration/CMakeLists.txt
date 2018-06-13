@@ -93,6 +93,7 @@ ELSE( BUILD_SHARED_LIBS )
 ENDIF( BUILD_SHARED_LIBS )
 
 target_link_libraries( itkRegistration ${ITK_LIBRARIES} )
+target_include_directories( itkRegistration PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} )
 
 # install
 if( IBIS_INSTALL_LIBS_AND_HEADERS )
@@ -104,5 +105,3 @@ endif( IBIS_INSTALL_LIBS_AND_HEADERS )
 # Define include dir for
 # dependent projects
 #================================
-SET( ITK_REGISTRATION_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR} CACHE PATH "Include directory for itkRegistration .h files" )
-MARK_AS_ADVANCED( ITK_REGISTRATION_INCLUDE_DIR )
