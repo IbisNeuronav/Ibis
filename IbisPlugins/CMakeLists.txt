@@ -89,7 +89,6 @@ macro( DefinePlugin PluginSrc PluginHdr PluginHdrMoc PluginUi )
     include_directories( ${CMAKE_CURRENT_BINARY_DIR} )  # needed to include qt-generated source files
     set( PluginSources ${PluginSrc} ${PluginHdrMoc} ${PluginUi} ${PluginMoc} ${PluginHdrUi} )
     add_library( ${PluginName} ${PluginSources} )
-    target_link_libraries( ${PluginName} svl )
     if( CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64" )
         set_target_properties( ${PluginName} PROPERTIES COMPILE_FLAGS "-fPIC")
     endif()
