@@ -16,3 +16,4 @@ DefinePlugin( "${PluginSrc}" "${PluginHdr}" "${PluginHdrMoc}" "${PluginUi}" )
 
 #add library specific to this plugin
 target_link_libraries( ${PluginName} svl PRISMVolumeRender )
+
