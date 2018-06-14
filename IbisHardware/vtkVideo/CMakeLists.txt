@@ -53,6 +53,11 @@ ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
 CONFIGURE_FILE( ${CMAKE_CURRENT_SOURCE_DIR}/vtkVideoConfigure.h.in ${CMAKE_CURRENT_BINARY_DIR}/vtkVideoConfigure.h )
 
+<<<<<<< ed04d28297d9f459130735e127f1898a85f76262
+=======
+include_directories( ${CMAKE_CURRENT_BINARY_DIR} )  # to include vtkVideoConfigure.h
+
+>>>>>>> Eliminated IBIS_VTK_INCLUDE_DIR.
 #================================
 # Define sources
 #================================
