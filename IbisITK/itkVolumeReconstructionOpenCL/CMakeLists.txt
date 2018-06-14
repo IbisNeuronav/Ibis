@@ -30,7 +30,7 @@ foreach( file ${LibCL} )
   set( LibCLHdr ${LibCLHdr} ${clKernel_h} )
 endforeach(file)
 
-include_directories( ${CMAKE_CURRENT_BINARY_DIR} ${OPENCL_INCLUDE_DIRS})
+include_directories( ${OPENCL_INCLUDE_DIRS})
 
 
 #================================
