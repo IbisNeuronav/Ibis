@@ -9,7 +9,6 @@ add_subdirectory( vtkUltrasound )
 #================================
 # Includes dir for other Ibis libs
 #================================
-include_directories( ${IBIS_VTK_INCLUDE_DIR} )
 include_directories( ${IBISLIB_INCLUDE_DIR} )
 include_directories( ${IBISLIB_INCLUDE_DIR}/gui )
 include_directories( ${IBISLIB_BINARY_DIR} )    # include qt-generated headers
@@ -41,7 +40,7 @@ include_directories( ${CMAKE_CURRENT_BINARY_DIR} )           # for files generat
 set( IbisHardwareSrcAll ${IbisHardwareSrc} ${IbisHardwareHdr} ${IbisHardwareHdrMoc} ${IbisHardwareMoc} ${IbisHardwareUiHdr} )
 add_library( IbisHardware ${IbisHardwareSrcAll} )
 
-target_link_libraries( IbisHardware svl )
+target_link_libraries( IbisHardware svl vtkExtensions )
 
 target_include_directories( IbisHardware PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/vtkTracker ${CMAKE_CURRENT_SOURCE_DIR}/vtkVideo ${CMAKE_CURRENT_SOURCE_DIR}/vtkUltrasound )
 
