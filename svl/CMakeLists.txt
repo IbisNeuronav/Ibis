@@ -16,9 +16,10 @@ ADD_LIBRARY( svl ${SVL_SRC} ${SVL_HDR} )
 # Define include dir for
 # dependent projects
 #================================
-SET( include_dir_content ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR} )  # we need binary dir for configured header files
-SET( svlIncludeDir ${include_dir_content} CACHE PATH "Include directory for svl .h files" )
-MARK_AS_ADVANCED( svlIncludeDir )
+
+add_library( svlHeaders INTERFACE )
+target_compile_definitions( svlHeaders INTERFACE LIBRARY_HEADER_ONLY )
+target_include_directories( svlHeaders INTERFACE ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR} )
 
 INSTALL_FILES( /include/svl .*\\.h$ )
 INSTALL_TARGETS( /lib/ svl )

@@ -16,3 +16,4 @@ set( PluginUi animatewidget.ui timelinewidget.ui )
 
 # Create plugin
 DefinePlugin( "${PluginSrc}" "${PluginHdr}" "${PluginHdrMoc}" "${PluginUi}" )
+target_link_libraries( ${PluginName} svlHeaders )
