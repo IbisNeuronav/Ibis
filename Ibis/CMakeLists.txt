@@ -17,7 +17,6 @@ qt5_wrap_cpp( IBIS_MOC ${IBIS_HDR_MOC} )
 # make rules to create c++ source from Qt resource files
 
 # Define include directories for other ibis libs
-include_directories( ${IBIS_VTK_INCLUDE_DIR} )
 include_directories( ${IBISLIB_INCLUDE_DIR} )
 include_directories( ${IBISLIB_INCLUDE_DIR}/gui )
 include_directories( ${IBISLIB_BINARY_DIR} )    # include qt-generated headers
