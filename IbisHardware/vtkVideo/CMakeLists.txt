@@ -53,14 +53,12 @@ ENDIF(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
 CONFIGURE_FILE( ${CMAKE_CURRENT_SOURCE_DIR}/vtkVideoConfigure.h.in ${CMAKE_CURRENT_BINARY_DIR}/vtkVideoConfigure.h )
 
-include_directories( ${CMAKE_CURRENT_BINARY_DIR} )  # to include vtkVideoConfigure.h
-
 #================================
 # Define sources
 #================================
 ADD_LIBRARY( vtkVideo ${VIDEO_SRC} ${VIDEO_HDR} )
 target_include_directories( vtkVideo PRIVATE ${CMAKE_CURRENT_BINARY_DIR} )  # to include vtkVideoConfigure.h
-target_link_libraries( vtkVideo ibisVTKHeaders )
+target_link_libraries( vtkVideo ibisVTKHeaders IbisHardwareHeaders )
 
 if( IBIS_INSTALL_LIBS_AND_HEADERS )
     INSTALL_TARGETS(/lib vtkVideo)
