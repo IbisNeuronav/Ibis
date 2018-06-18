@@ -7,7 +7,6 @@
 #include "vtkImageData.h"
 #include "vtkSmartPointer.h"
 #include "imageobject.h"
-#include "gpu_volumereconstructionplugininterface.h"
 #include "gpu_volumereconstruction.h"
 #include "usacquisitionobject.h"
 #include "ibisapi.h"
@@ -32,8 +31,6 @@ QWidget * GPUVolumeReconstructionAPITestPluginInterface::CreateFloatingWidget()
     ToolPluginInterface * toolPlugin = ibisAPI->GetToolPluginByName( "GPU_VolumeReconstruction");
     if( !toolPlugin )
         return 0;
-    GPU_VolumeReconstructionPluginInterface *volumeReconstructorPlugin = GPU_VolumeReconstructionPluginInterface::SafeDownCast( toolPlugin );
-    Q_ASSERT( volumeReconstructorPlugin );
     QList<USAcquisitionObject*> acquisitions;
     ibisAPI->GetAllUSAcquisitionObjects( acquisitions );
 
