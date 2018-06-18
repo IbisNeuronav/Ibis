@@ -1,5 +1,4 @@
 # at least for now, we will provide all plugins with the include dirs they might need
-include_directories( ${IBIS_VTK_INCLUDE_DIR} )
 include_directories( ${IBISLIB_INCLUDE_DIR} )
 include_directories( ${IBISLIB_INCLUDE_DIR}/gui )
 include_directories( ${IBISLIB_BINARY_DIR} )    # include qt-generated headers
@@ -89,6 +88,7 @@ macro( DefinePlugin PluginSrc PluginHdr PluginHdrMoc PluginUi )
     include_directories( ${CMAKE_CURRENT_BINARY_DIR} )  # needed to include qt-generated source files
     set( PluginSources ${PluginSrc} ${PluginHdrMoc} ${PluginUi} ${PluginMoc} ${PluginHdrUi} )
     add_library( ${PluginName} ${PluginSources} )
+    target_link_libraries( ${PluginName} ibisVTKHeaders )
     target_include_directories( ${PluginName} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/${PluginName} )
     if( CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64" )
         set_target_properties( ${PluginName} PROPERTIES COMPILE_FLAGS "-fPIC")

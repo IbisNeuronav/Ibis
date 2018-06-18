@@ -10,11 +10,6 @@ SET( VTKOPENCV_HDR
 )
 
 #================================
-# Includes dir for vtkIbis libs
-#================================
-include_directories( ${IBIS_VTK_INCLUDE_DIR} )
-
-#================================
 # Define output
 #================================
 IF (BUILD_SHARED_LIBS)
@@ -23,7 +18,7 @@ ELSE( BUILD_SHARED_LIBS )
 ADD_LIBRARY( ibisVTKOpenCVBridge ${VTKOPENCV_SRC} ${VTKOPENCV_HDR} )
 ENDIF( BUILD_SHARED_LIBS )
 
-target_link_libraries( ibisVTKOpenCVBridge svlHeaders )
+target_link_libraries( ibisVTKOpenCVBridge svlHeaders ibisVTKHeaders )
 target_include_directories( ibisVTKOpenCVBridge PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} )
 
 # install
