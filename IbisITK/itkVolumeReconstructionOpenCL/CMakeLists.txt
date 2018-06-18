@@ -54,8 +54,6 @@ endif( IBIS_INSTALL_LIBS_AND_HEADERS )
 # Define include dir for
 # dependent projects
 #================================
-SET( ITK_VOLUME_RECONSTRUCTION_OPENCL_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR} CACHE PATH "Include directory for itkVolumeReconstructionOpenCL .h files" )
-MARK_AS_ADVANCED( ITK_VOLUME_RECONSTRUCTION_OPENCL_INCLUDE_DIR )
-
-SET( ITK_VOLUME_RECONSTRUCTION_OPENCL_KERNEL_INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR}  CACHE PATH "Include directory for itkVolumeReconstructionOpenCL Kernel .h files" )
-MARK_AS_ADVANCED( ITK_VOLUME_RECONSTRUCTION_OPENCL_KERNEL_INCLUDE_DIR  )
+add_library( itkVolumeReconstructionOpenCLHeaders INTERFACE )
+target_compile_definitions( itkVolumeReconstructionOpenCLHeaders INTERFACE LIBRARY_HEADER_ONLY )
+target_include_directories( itkVolumeReconstructionOpenCLHeaders INTERFACE ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR} )

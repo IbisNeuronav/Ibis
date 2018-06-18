@@ -94,7 +94,6 @@ IF( OPENCL_FOUND )
     endforeach(GPUKernel)    
 
     set( itkLibsToUse ${itkLibsToUse} itkVolumeReconstructionOpenCL)
-    include_directories( ${ITK_VOLUME_RECONSTRUCTION_OPENCL_INCLUDE_DIR} )
     
     set( gpuLibs ${OPENCL_LIBRARIES})
 ENDIF()
