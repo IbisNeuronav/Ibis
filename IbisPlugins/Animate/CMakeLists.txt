@@ -1,6 +1,3 @@
-include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
-include_directories( ${PRISMVolumeRenderIncludeDir} )
-
 # define sources
 set( PluginSrc animateplugininterface.cpp animatewidget.cpp timelinewidget.cpp
                 DomeRenderer.cpp vtkOffscreenCamera.cxx CameraAnimation.cpp
@@ -16,4 +13,5 @@ set( PluginUi animatewidget.ui timelinewidget.ui )
 
 # Create plugin
 DefinePlugin( "${PluginSrc}" "${PluginHdr}" "${PluginHdrMoc}" "${PluginUi}" )
-target_link_libraries( ${PluginName} svlHeaders )
+target_link_libraries( ${PluginName} svlHeaders PRISMVolumeRenderHeaders )
+target_include_directories( ${PluginName}  PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} )

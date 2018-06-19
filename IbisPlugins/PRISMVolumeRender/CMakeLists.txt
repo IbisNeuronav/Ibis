@@ -18,8 +18,6 @@ foreach( file ${LibGlsl} )
   set( LibGlslSrc ${LibGlslSrc} ${shader_src} ${shader_h} ${shader_cxx} )
 endforeach(file)
 
-include_directories( ${CMAKE_CURRENT_BINARY_DIR} )
-
 # define sources
 set( PluginSrc  PRISMVolumeRenderPluginInterface.cpp
                 volumerenderingobject.cpp
