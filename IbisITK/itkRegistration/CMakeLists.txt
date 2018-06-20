@@ -104,5 +104,6 @@ endif( IBIS_INSTALL_LIBS_AND_HEADERS )
 # Define include dir for
 # dependent projects
 #================================
-SET( ITK_REGISTRATION_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR} CACHE PATH "Include directory for itkRegistration .h files" )
-MARK_AS_ADVANCED( ITK_REGISTRATION_INCLUDE_DIR )
+add_library( itkRegistrationHeaders INTERFACE )
+target_compile_definitions( itkRegistrationHeaders INTERFACE LIBRARY_HEADER_ONLY )
+target_include_directories( itkRegistrationHeaders INTERFACE  ${CMAKE_CURRENT_SOURCE_DIR} )
