@@ -43,9 +43,6 @@ foreach( file ${LibCL} )
   set( LibCLHdr ${LibCLHdr} ${clKernel_h} )
 endforeach(file)
 
-include_directories( ${CMAKE_CURRENT_BINARY_DIR} ${OPENCL_INCLUDE_DIRS})
-
-
 #================================
 # Define output
 #================================
@@ -55,6 +52,7 @@ ELSE( BUILD_SHARED_LIBS )
    ADD_LIBRARY( itkRegistrationOpenCL ${IBIS_ITK_REGISTRATION_OPENCL_SRC} ${IBIS_ITK_REGISTRATION_OPENCL_HDR} ${LibCLSrc} )
 ENDIF( BUILD_SHARED_LIBS )
 
+target_include_directories( itkRegistrationOpenCL PRIVATE ${CMAKE_CURRENT_BINARY_DIR} ${OPENCL_INCLUDE_DIRS})
 target_link_libraries( itkRegistrationOpenCL ${ITK_LIBRARIES}  ${OPENCL_LIBRARIES})
 
 # install
