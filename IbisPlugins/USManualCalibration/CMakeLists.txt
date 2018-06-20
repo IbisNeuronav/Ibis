@@ -1,5 +1,3 @@
-include_directories( ${LandmarkRegistrationObjectIncludeDir} )
-
 # define sources
 set( PluginSrc usmanualcalibrationplugininterface.cpp usmanualcalibrationwidget.cpp )
 set( PluginHdr )
@@ -8,3 +6,4 @@ set( PluginUi usmanualcalibrationwidget.ui )
 
 # Create plugin
 DefinePlugin( "${PluginSrc}" "${PluginHdr}" "${PluginHdrMoc}" "${PluginUi}" )
+target_link_libraries( ${PluginName} LandmarkRegistrationObjectHeaders )

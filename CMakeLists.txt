@@ -76,13 +76,7 @@ include( ${ITK_USE_FILE} )
 if( IBIS_USE_OPENCV )
     set( AutoOpenCVPath ${IBIS_EXTERNAL_DEPENDENCIES_DIR}/opencv-${IBIS_OPENCV_LONG_VERSION}/install/share/OpenCV )
     find_package( OpenCV ${IBIS_OPENCV_LONG_VERSION} REQUIRED EXACT PATHS ${AutoOpenCVPath} )
-    include_directories( ${OpenCV_INCLUDE_DIRS} )
 endif()
-
-#==================================================================
-# Include linux include directories, needed for kernel 2.6.x+
-#==================================================================
-include_directories(/usr/src/linux/include)
 
 #==================================================================
 # Create options to build or not the different dependent projects.
@@ -103,7 +97,6 @@ set( VTK_ENCODESTRING_EXE ${VTK_INSTALL_PREFIX}/bin/vtkEncodeString-${VTK_MAJOR_
 # Build SVL (Simple Vector Library). This lib may be used everywhere
 # including in vtk extension classes.
 add_subdirectory( svl )
-include_directories( ${svlIncludeDir} )
 #==================================================================
 add_subdirectory( IbisITK )
 add_subdirectory( IbisVTK )
@@ -120,7 +113,7 @@ if( CMAKE_BUILD_TYPE MATCHES "Debug" )
     set( IBIS_BUILD_QUALIFIER "Debug" )
 endif( CMAKE_BUILD_TYPE MATCHES "Debug" )
 
-# include the output directory, where the svnversion.h file is generated
+# include the output directory, where the githash.h file is generated
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 # a custom target that is always built

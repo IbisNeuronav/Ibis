@@ -5,3 +5,4 @@ set( PluginUi stereotacticframewidget.ui )
 
 # Create plugin
 DefinePlugin( "${PluginSrc}" "${PluginHdr}" "${PluginHdrMoc}" "${PluginUi}" )
+target_link_libraries( ${PluginName} svlHeaders )
