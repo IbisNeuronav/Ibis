@@ -86,14 +86,7 @@ set( itkLibsToUse ${itkLibsToUse} itkRegistration )
 
 IF( OPENCL_FOUND )
     set( itkLibsToUse ${itkLibsToUse} itkRegistrationOpenCL)
-    include_directories( ${ITK_REGISTRATION_OPENCL_INCLUDE_DIR} )
-    foreach(GPUKernel ${ITKGPUOrientationMatching_Kernels}) 
-        message(${ITK_REGISTRATION_OPENCL_INCLUDE_DIR}/${GPUKernel})
-        configure_file(${ITK_REGISTRATION_OPENCL_INCLUDE_DIR}/${GPUKernel}  ${CMAKE_BINARY_DIR}/${GPUKernel} COPYONLY)
-    endforeach(GPUKernel)    
-
     set( itkLibsToUse ${itkLibsToUse} itkVolumeReconstructionOpenCL)
-    
     set( gpuLibs ${OPENCL_LIBRARIES})
 ENDIF()
 
