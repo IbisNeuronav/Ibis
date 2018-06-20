@@ -18,7 +18,6 @@ add_subdirectory( vtkUltrasound )
 # Includes dir for other Ibis libs
 #================================
 include_directories( ${IBISLIB_INCLUDE_DIR} )
-include_directories( ${IBISLIB_INCLUDE_DIR}/gui )
 include_directories( ${IBISLIB_BINARY_DIR} )    # include qt-generated headers
 
 

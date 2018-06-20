@@ -18,7 +18,6 @@ qt5_wrap_cpp( IBIS_MOC ${IBIS_HDR_MOC} )
 
 # Define include directories for other ibis libs
 include_directories( ${IBISLIB_INCLUDE_DIR} )
-include_directories( ${IBISLIB_INCLUDE_DIR}/gui )
 include_directories( ${IBISLIB_BINARY_DIR} )    # include qt-generated headers
 
 # Generate the file that is going to import the plugins
