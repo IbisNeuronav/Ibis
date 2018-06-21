@@ -1,6 +1,5 @@
 # at least for now, we will provide all plugins with the include dirs they might need
 include_directories( ${IBISLIB_INCLUDE_DIR} )
-include_directories( ${IBISLIB_INCLUDE_DIR}/gui )
 include_directories( ${IBISLIB_BINARY_DIR} )    # include qt-generated headers
 
 # Needed to build static plugins properly
