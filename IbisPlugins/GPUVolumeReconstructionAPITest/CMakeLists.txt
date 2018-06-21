@@ -11,7 +11,8 @@ IF( NOT OPENCL_FOUND )
 ENDIF()
 
 
-include_directories( ${GPU_VolumeReconstructionIncludeDir} )
 # Create plugin
 DefinePlugin( "${PluginSrc}" "${PluginHdr}" "${PluginHdrMoc}" "${PluginUi}" )
-target_link_libraries( ${PluginName} itkVolumeReconstructionOpenCL )
+
+#add library specific to this plugin
+target_link_libraries( ${PluginName} itkVolumeReconstructionOpenCL GPU_VolumeReconstruction )
