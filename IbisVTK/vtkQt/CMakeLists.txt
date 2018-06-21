@@ -7,7 +7,6 @@ SET( IBIS_VTK_QT_SRC
            vtkqtrenderwindow.cpp )
 
 SET( IBIS_VTK_QT_HDR_MOC vtkQtImageViewer.h vtkQtMatrixDialog.h vtkqtrenderwindow.h )
-set( IBIS_VTK_QT_PLUGIN_HDR_MOC vtkQtHistogramWidget.h vtkQtPiecewiseFunctionWidget.h vtkQtColorTransferFunctionWidget.h )
 
 if(APPLE)
     set( IBIS_VTK_QT_SRC ${IBIS_VTK_QT_SRC} retinadisplayhack.mm retinadisplayhack.h )
