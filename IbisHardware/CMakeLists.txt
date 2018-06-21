@@ -5,14 +5,11 @@ add_subdirectory( vtkTracker )
 add_subdirectory( vtkVideo )
 add_subdirectory( vtkUltrasound )
 
-
 #================================
 # Includes dir for other Ibis libs
 #================================
 include_directories( ${IBISLIB_INCLUDE_DIR} )
-include_directories( ${IBISLIB_INCLUDE_DIR}/gui )
 include_directories( ${IBISLIB_BINARY_DIR} )    # include qt-generated headers
-
 
 # Define sources
 set( IbisHardwareSrc ibishardwaremodule.cpp
@@ -28,7 +25,6 @@ qt5_wrap_cpp( IbisHardwareMoc ${IbisHardwareHdrMoc} )
 
 # Generate code for .ui files -> ui_xxx.h
 qt5_wrap_ui( IbisHardwareUiHdr ${IbisHardwareUi} )
-
 
 set( libsToUse vtkVideo vtkQt vtkTracker vtkUltrasound  )
 
