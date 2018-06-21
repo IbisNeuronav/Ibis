@@ -62,7 +62,7 @@ include_directories( ${Qt5Multimedia_INCLUDE_DIRS} )
 # Look for VTK (required)
 #==================================================================
 set( AutoVtkPath ${IBIS_EXTERNAL_DEPENDENCIES_DIR}/vtk-${IBIS_VTK_LONG_VERSION}/build )
-find_package(VTK ${IBIS_VTK_LONG_VERSION} EXACT COMPONENTS vtkGUISupportQt vtkRenderingOpenGL vtkRenderingVolumeOpenGL vtkRenderingImage
+find_package(VTK ${IBIS_VTK_LONG_VERSION} EXACT COMPONENTS vtkGUISupportQt vtkRenderingOpenGL vtkRenderingVolumeOpenGL2
     vtkRenderingAnnotation vtkImagingStencil vtkImagingStatistics vtkFiltersTexture
     vtkInteractionStyle vtkInteractionWidgets
     vtkIOXML vtkIOLegacy vtkIOPLY NO_MODULE
