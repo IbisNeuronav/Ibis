@@ -80,6 +80,8 @@ private slots:
 
 protected:
 
+    virtual void InitPlugin() override;
+
     // Launch a Plus server and connect
     bool LauchLocalServer( int port, QString plusConfigFile );
     void Connect( std::string ip, int port );
@@ -92,11 +94,6 @@ protected:
     bool IsDeviceImage( igtlioDevicePointer device );
     bool IsDeviceTransform( igtlioDevicePointer device );
     bool IsDeviceVideo( igtlioDevicePointer device );
-
-    // Plus server exec and config paths
-    QString m_plusServerExec;
-    QString m_plusConfigDir;
-    QString m_lastIbisPlusConfigFile;
 
     struct Tool
     {
@@ -114,6 +111,21 @@ protected:
     QList< vtkSmartPointer<PlusServerInterface> > m_plusLaunchers;
     qIGTLIOLogicController * m_logicController;
     qIGTLIOClientWidget * m_clientWidget;
+
+    // Useful paths
+
+    // Full path of the executable of plus server
+    QString m_plusServerExec;
+    // Last ibisplus config file loaded
+    QString m_lastIbisPlusConfigFile;
+    // Default directory where all config files needed for Plus support in Ibis are located
+    QString m_plusConfigDirectory;
+    // Default directory where IbisPlus configuration files, i.e. files that contain the specification of plus servers, are located.
+    QString m_ibisPlusConfigFilesDirectory;
+    // Name and path of the text file that contains the location of the Plus server
+    QString m_plusToolkitPathsFilename;
+    // Default directory where Plus Toolkit config files are located
+    QString m_plusConfigFilesDirectory;
 };
 
 #endif

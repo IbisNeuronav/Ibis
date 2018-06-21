@@ -12,8 +12,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "plusserverinterface.h"
 #include "configio.h"
 
-#include "application.h"
-#include "scenemanager.h"
+#include "ibisapi.h"
 #include "pointerobject.h"
 #include "usprobeobject.h"
 #include "cameraobject.h"
@@ -37,35 +36,12 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "igtlioTransformConverter.h"
 #include "igtlioVideoConverter.h"
 
-// Default directory where all config files needed for Plus support in Ibis are located
-static const QString DefaultPlusConfigDirectory = Application::GetConfigDirectory() + QString("PlusToolkit/");
-
-// Default directory where IbisPlus configuration files, i.e. files that contain the specification of plus servers, are located.
-static const QString DefaultIbisPlusConfigFilesDirectory = DefaultPlusConfigDirectory + QString("IbisPlusConfigFiles/");
-
-// Name and path of the text file that contains the location of the Plus server
-static const QString PlusToolkitPathsFilename = DefaultPlusConfigDirectory + QString("plus-toolkit-paths.txt");
-
-// Default directory where Plus Toolkit config files are located
-static const QString DefaultPlusConfigFilesDirectory = DefaultPlusConfigDirectory + QString("PlusConfigFiles/");
-
-
 IbisHardwareIGSIO::IbisHardwareIGSIO()
 {
     m_logicController = 0;
     m_logic = 0;
     m_clientWidget = 0;
-    m_plusConfigDir = DefaultPlusConfigFilesDirectory;
     m_logicCallbacks = vtkSmartPointer<vtkEventQtSlotConnect>::New();
-
-    // Look for the Plus Toolkit path
-    if( QFile::exists( PlusToolkitPathsFilename ) )
-    {
-        QFile pathFile( PlusToolkitPathsFilename );
-        pathFile.open( QIODevice::ReadOnly | QIODevice::Text );
-        QTextStream pathIn( &pathFile );
-        pathIn >> m_plusServerExec;
-    }
 }
 
 IbisHardwareIGSIO::~IbisHardwareIGSIO()
@@ -100,7 +76,7 @@ void IbisHardwareIGSIO::Init()
     m_lastIbisPlusConfigFile = "AutoLocalServerConfig.xml";
 
     // Initialize with last config file
-    QString configFile = DefaultIbisPlusConfigFilesDirectory + m_lastIbisPlusConfigFile;
+    QString configFile = m_ibisPlusConfigFilesDirectory + m_lastIbisPlusConfigFile;
     StartConfig( configFile );
 }
 
@@ -115,7 +91,7 @@ void IbisHardwareIGSIO::StartConfig( QString configFile )
         Tool * newTool = new Tool;
         newTool->sceneObject = InstanciateSceneObjectFromType( in.GetToolName(i), in.GetToolType( i ) );
         m_tools.append( newTool );
-        GetSceneManager()->AddObject( newTool->sceneObject );
+        GetIbisAPI()->AddObject( newTool->sceneObject );
     }
 
     // Keep track of Plus device to Ibis tool association
@@ -198,7 +174,7 @@ void IbisHardwareIGSIO::AddToolObjectsToScene()
     {
         if( !tool->sceneObject->IsObjectInScene() )
         {
-            GetSceneManager()->AddObject( tool->sceneObject );
+            GetIbisAPI()->AddObject( tool->sceneObject );
         }
     }
 }
@@ -207,7 +183,7 @@ void IbisHardwareIGSIO::RemoveToolObjectsFromScene()
 {
     foreach( Tool * tool, m_tools )
     {
-        GetSceneManager()->RemoveObject( tool->sceneObject );
+        GetIbisAPI()->RemoveObject( tool->sceneObject );
     }
 }
 
@@ -330,18 +306,35 @@ void IbisHardwareIGSIO::OnDeviceRemoved( vtkObject*, unsigned long, void*, void 
     }
 }
 
+void IbisHardwareIGSIO::InitPlugin()
+{
+    m_plusConfigDirectory = GetIbisAPI()->GetConfigDirectory() + QString("PlusToolkit/");
+    m_ibisPlusConfigFilesDirectory = m_plusConfigDirectory + QString("IbisPlusConfigFiles/");
+    m_plusToolkitPathsFilename = m_plusConfigDirectory + QString("plus-toolkit-paths.txt");
+    m_plusConfigFilesDirectory = m_plusConfigDirectory + QString("PlusConfigFiles/");
+
+    // Look for the Plus Toolkit path
+    if( QFile::exists( m_plusToolkitPathsFilename ) )
+    {
+        QFile pathFile( m_plusToolkitPathsFilename );
+        pathFile.open( QIODevice::ReadOnly | QIODevice::Text );
+        QTextStream pathIn( &pathFile );
+        pathIn >> m_plusServerExec;
+    }
+}
+
 bool IbisHardwareIGSIO::LauchLocalServer( int port, QString plusConfigFile )
 {
     vtkSmartPointer<PlusServerInterface> plusLauncher = vtkSmartPointer<PlusServerInterface>::New();
     plusLauncher->SetServerExecutable( m_plusServerExec );
     m_plusLaunchers.push_back( plusLauncher );
 
-    QString plusConfiFile = m_plusConfigDir + plusConfigFile;
+    QString plusConfiFile = m_plusConfigDirectory + plusConfigFile;
     bool didLaunch = plusLauncher->StartServer( plusConfiFile );
     if( !didLaunch )
     {
         QString msg = QString("Coulnd't launch the Plus Server to communicate with hardware: %1").arg( plusLauncher->GetLastErrorMessage() );
-        GetApplication()->Warning("Error", msg);
+        GetIbisAPI()->Warning("Error", msg);
         return false;
     }
     return true;

@@ -13,10 +13,13 @@ class UsProbeObject;
 class PointerObject;
 class CameraObject;
 class ImageObject;
+class PolyDataObject;
 class ToolPluginInterface;
 class ObjectPluginInterface;
 class View;
 class USAcquisitionObject;
+class GlobalEventHandler;
+class vtkMatrix4x4;
 
 class QProgressDialog;
 class QString;
@@ -43,6 +46,7 @@ public:
     int  GetNumberOfUserObjects();
     ImageObject * GetReferenceDataObject( );
     void GetAllImageObjects( QList<ImageObject*> & objects );
+    void GetAllPolyDataObjects( QList<PolyDataObject*> & objects );
     const QList< SceneObject* > & GetAllObjects();
     void GetAllUSAcquisitionObjects( QList<USAcquisitionObject*> & all );
     void GetAllUsProbeObjects( QList<UsProbeObject*> & all );
@@ -54,9 +58,12 @@ public:
     View * GetMainSagittalView();
     View * GetMainTransverseView();
     QMap<View*, int> GetAllViews( );
+    double * GetViewBackgroundColor();
 
     void ChangeParent( SceneObject * object, SceneObject * newParent, int newChildIndex );
 
+    void NewScene();
+    void LoadScene( QString & filename, bool interactive = true );
     bool IsLoadingScene();
     const QString GetSceneDirectory();
 
@@ -70,6 +77,8 @@ public:
     void StopProgress( QProgressDialog * progressDialog);
     void UpdateProgress( QProgressDialog*, int current );
 
+    void Warning( const QString &title, const QString & text );
+
     bool IsViewerOnly();
     QString GetWorkingDirectory();
     QString GetConfigDirectory();
@@ -81,6 +90,18 @@ public:
     ObjectPluginInterface *GetObjectPluginByName( QString className );
     SceneObject * GetGlobalObjectInstance( const QString & className );
 
+    // Allow plugins to listen for events (e.g. key press) on any window of Ibis
+    void AddGlobalEventHandler( GlobalEventHandler * h );
+    void RemoveGlobalEventHandler( GlobalEventHandler * h );
+
+    // Data loading utilities
+    bool OpenTransformFile( QString filename, vtkMatrix4x4 * mat );
+
+    // Control layout of Main Window
+    void SetMainWindowFullscreen( bool f );
+    void SetToolbarVisibility( bool v );
+    void SetLeftPanelVisibility( bool v );
+    void SetRightPanelVisibility( bool v );
     void AddBottomWidget( QWidget * w );
     void RemoveBottomWidget( QWidget * w );
 
