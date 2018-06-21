@@ -19,7 +19,7 @@ ADD_LIBRARY( ibisVTKOpenCVBridge ${VTKOPENCV_SRC} ${VTKOPENCV_HDR} )
 ENDIF( BUILD_SHARED_LIBS )
 
 target_link_libraries( ibisVTKOpenCVBridge svl vtkExtensions )
-target_include_directories( ibisVTKOpenCVBridge PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} )
+target_include_directories( ibisVTKOpenCVBridge PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${OpenCV_INCLUDE_DIRS} )
 
 # install
 if( IBIS_INSTALL_LIBS_AND_HEADERS )
