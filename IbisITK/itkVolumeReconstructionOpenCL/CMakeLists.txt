@@ -30,9 +30,6 @@ foreach( file ${LibCL} )
   set( LibCLHdr ${LibCLHdr} ${clKernel_h} )
 endforeach(file)
 
-include_directories( ${OPENCL_INCLUDE_DIRS})
-
-
 #================================
 # Define output
 #================================
@@ -47,7 +44,7 @@ target_link_libraries( itkVolumeReconstructionOpenCL ${ITK_LIBRARIES}  ${OPENCL_
 # Define include dir for
 # dependent projects
 #================================
-target_include_directories( itkVolumeReconstructionOpenCL PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR} )
+target_include_directories( itkVolumeReconstructionOpenCL PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR} ${OPENCL_INCLUDE_DIRS} )
 
 # install
 if( IBIS_INSTALL_LIBS_AND_HEADERS )
