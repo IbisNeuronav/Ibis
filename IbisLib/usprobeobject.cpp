@@ -343,11 +343,18 @@ void UsProbeObject::CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> 
 void UsProbeObject::SetVideoInputConnection( vtkAlgorithmOutput * port )
 {
     m_videoInput->SetInputConnection( port );
+    emit ObjectModified();
 }
 
 void UsProbeObject::SetVideoInputData( vtkImageData * image )
 {
     m_videoInput->SetInputData( image );
+    emit ObjectModified();
+}
+
+void UsProbeObject::UpdateVideoInput()
+{
+    m_videoInput->Update();
 }
 
 int UsProbeObject::GetNumberOfAvailableLUT()

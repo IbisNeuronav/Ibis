@@ -46,7 +46,6 @@ IbisHardwareIGSIO::IbisHardwareIGSIO()
 
 IbisHardwareIGSIO::~IbisHardwareIGSIO()
 {
-    ClearConfig();
 }
 
 void IbisHardwareIGSIO::LoadSettings( QSettings & s )
@@ -119,6 +118,7 @@ void IbisHardwareIGSIO::ClearConfig()
     {
         delete tool;
     }
+    m_tools.clear();
     ShutDownLocalServers();
 }
 
@@ -139,19 +139,32 @@ void IbisHardwareIGSIO::Update()
     // Push images, transforms and states to the TrackedSceneObjects
     foreach( Tool * tool, m_tools )
     {
-        if( tool->transformDevice == 0 ) continue;
-        if( tool->transformDevice->GetDeviceType() == igtlioImageConverter::GetIGTLTypeName() )
+        if( tool->transformDevice )
         {
-            igtlioImageDevice * imageDevice = igtlioImageDevice::SafeDownCast( tool->transformDevice );
-            tool->sceneObject->SetInputMatrix( imageDevice->GetContent().transform );
-            tool->sceneObject->SetState( Ok );
+            if( tool->transformDevice->GetDeviceType() == igtlioImageConverter::GetIGTLTypeName() )
+            {
+                igtlioImageDevice * imageDevice = igtlioImageDevice::SafeDownCast( tool->transformDevice );
+                tool->sceneObject->SetInputMatrix( imageDevice->GetContent().transform );
+                tool->sceneObject->SetState( Ok );
+            }
+            else if( tool->transformDevice->GetDeviceType() == igtlioTransformConverter::GetIGTLTypeName() )
+            {
+                igtlioTransformDevice * transformDevice = igtlioTransformDevice::SafeDownCast( tool->transformDevice );
+                tool->sceneObject->SetInputMatrix( transformDevice->GetContent().transform );
+                //tool->sceneObject->SetState( StatusStringToState( transformDevice->GetContent().transformStatus ) );
+                tool->sceneObject->SetState( Ok );
+            }
         }
-        else if( tool->transformDevice->GetDeviceType() == igtlioTransformConverter::GetIGTLTypeName() )
+        if( tool->imageDevice )
         {
-            igtlioTransformDevice * transformDevice = igtlioTransformDevice::SafeDownCast( tool->transformDevice );
-            tool->sceneObject->SetInputMatrix( transformDevice->GetContent().transform );
-            //tool->sceneObject->SetState( StatusStringToState( transformDevice->GetContent().transformStatus ) );
-            tool->sceneObject->SetState( Ok );
+            igtlioImageDevice * imDevice = igtlioImageDevice::SafeDownCast( tool->imageDevice );
+            if( tool->sceneObject->IsA( "UsProbeObject" ) )
+            {
+                vtkSmartPointer<UsProbeObject> probe = UsProbeObject::SafeDownCast( tool->sceneObject );
+
+                // simtodo: We should not have to do this every frame. Check pipeline logic.
+                probe->SetVideoInputData( imDevice->GetContent().image );
+            }
         }
         tool->sceneObject->MarkModified();
     }
@@ -244,12 +257,16 @@ void IbisHardwareIGSIO::OnDeviceNew( vtkObject*, unsigned long, void*, void * ca
 {
     igtlioDevicePointer device = reinterpret_cast<igtlioDevice*>( callData );
     QString toolName, toolPart;
-    m_deviceToolAssociations.ToolAndPartFromDevice( QString(device->GetDeviceName().c_str()), toolName, toolPart );
+    QString deviceName( device->GetDeviceName().c_str() );
+    cout << "New device: " << deviceName.toUtf8().data() << endl;
+    m_deviceToolAssociations.ToolAndPartFromDevice( deviceName, toolName, toolPart );
     if( toolName.isEmpty() )
         return;
     int toolIndex = FindToolByName( toolName );
     if( toolIndex == -1 )
         return;
+
+    cout << "----> Connected to tool ( " << toolName.toUtf8().data() << " ), part ( " << toolPart.toUtf8().data() << " )" << std::endl;
 
     // Assign image data of new device to the video input of the scene object
     if( toolPart == "ImageAndTransform" || toolPart == "Image" )
@@ -276,6 +293,8 @@ void IbisHardwareIGSIO::OnDeviceNew( vtkObject*, unsigned long, void*, void * ca
             vtkSmartPointer<UsProbeObject> probe = UsProbeObject::SafeDownCast( m_tools[ toolIndex ]->sceneObject );
             probe->SetVideoInputData( imageContent );
         }
+
+        m_tools[toolIndex]->imageDevice = device;
     }
 
     // Specify the device should be used to recover transform on every update
@@ -329,8 +348,8 @@ bool IbisHardwareIGSIO::LauchLocalServer( int port, QString plusConfigFile )
     plusLauncher->SetServerExecutable( m_plusServerExec );
     m_plusLaunchers.push_back( plusLauncher );
 
-    QString plusConfiFile = m_plusConfigDirectory + plusConfigFile;
-    bool didLaunch = plusLauncher->StartServer( plusConfiFile );
+    QString plusConfigFileFullPath = m_plusConfigFilesDirectory + plusConfigFile;
+    bool didLaunch = plusLauncher->StartServer( plusConfigFileFullPath );
     if( !didLaunch )
     {
         QString msg = QString("Coulnd't launch the Plus Server to communicate with hardware: %1").arg( plusLauncher->GetLastErrorMessage() );

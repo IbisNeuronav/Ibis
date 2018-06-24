@@ -108,6 +108,8 @@ DeviceToolMap ConfigIO::GetAssociations()
     return res;
 }
 
+#include <iostream>
+
 bool ConfigIO::ReadConfig( QString configFile )
 {
     // Make sure the config file exists
