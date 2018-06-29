@@ -22,6 +22,7 @@ class qIGTLIOLogicController;
 class qIGTLIOClientWidget;
 class PlusServerInterface;
 class vtkEventQtSlotConnect;
+class IbisHardwareIGSIOSettingsWidget;
 
 class IbisHardwareIGSIO : public HardwareModule
 {
@@ -46,6 +47,10 @@ public:
     virtual void SaveSettings( QSettings & s ) override;
 
     // Load Ibis-Plus configs
+    bool GetAutoStartLastConfig() { return m_autoStartLastConfig; }
+    void SetAutoStartLastConfig( bool start ) { m_autoStartLastConfig = start; }
+    QString GetIbisPlusConfigDirectory() { return m_ibisPlusConfigFilesDirectory; }
+    QString GetLastIbisPlusConfigFilename() { return m_lastIbisPlusConfigFile; }
     void StartConfig( QString configFile );
     void ClearConfig();
 
@@ -75,6 +80,9 @@ public:
 private slots:
 
     void OpenSettingsWidget();
+    void OnSettingsWidgetClosed();
+    void OpenConfigFileWidget();
+    void OnConfigFileWidgetClosed();
     void OnDeviceNew( vtkObject*, unsigned long, void*, void* );
     void OnDeviceRemoved( vtkObject*, unsigned long, void*, void* );
 
@@ -110,7 +118,12 @@ protected:
     vtkSmartPointer<vtkEventQtSlotConnect> m_logicCallbacks;
     QList< vtkSmartPointer<PlusServerInterface> > m_plusLaunchers;
     qIGTLIOLogicController * m_logicController;
+
+    bool m_autoStartLastConfig;
+
+    // Settings widgets
     qIGTLIOClientWidget * m_clientWidget;
+    IbisHardwareIGSIOSettingsWidget * m_settingsWidget;
 
     // Useful paths
 

@@ -23,6 +23,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include "qIGTLIOLogicController.h"
 #include "qIGTLIOClientWidget.h"
+#include "ibishardwareIGSIOsettingswidget.h"
 
 #include "vtkTransform.h"
 #include "vtkImageData.h"
@@ -42,6 +43,8 @@ IbisHardwareIGSIO::IbisHardwareIGSIO()
     m_logic = 0;
     m_clientWidget = 0;
     m_logicCallbacks = vtkSmartPointer<vtkEventQtSlotConnect>::New();
+    m_settingsWidget = 0;
+    m_autoStartLastConfig = false;
 }
 
 IbisHardwareIGSIO::~IbisHardwareIGSIO()
@@ -51,15 +54,18 @@ IbisHardwareIGSIO::~IbisHardwareIGSIO()
 void IbisHardwareIGSIO::LoadSettings( QSettings & s )
 {
     m_lastIbisPlusConfigFile = s.value( "LastConfigFile", "" ).toString();
+    m_autoStartLastConfig = s.value( "AutoStartLastConfig", QVariant(false) ).toBool();
 }
 
 void IbisHardwareIGSIO::SaveSettings( QSettings & s )
 {
     s.setValue( "LastConfigFile", m_lastIbisPlusConfigFile );
+    s.setValue( "AutoStartLastConfig", m_autoStartLastConfig );
 }
 
 void IbisHardwareIGSIO::AddSettingsMenuEntries( QMenu * menu )
 {
+    menu->addAction( tr("&IGSIO Config file"), this, SLOT( OpenConfigFileWidget() ) );
     menu->addAction( tr("&IGSIO Settings"), this, SLOT( OpenSettingsWidget() ) );
 }
 
@@ -71,18 +77,19 @@ void IbisHardwareIGSIO::Init()
     m_logicCallbacks->Connect( m_logic, igtlioLogic::NewDeviceEvent, this, SLOT(OnDeviceNew(vtkObject*, unsigned long, void*, void*)) );
     m_logicCallbacks->Connect( m_logic, igtlioLogic::RemovedDeviceEvent, this, SLOT(OnDeviceRemoved(vtkObject*, unsigned long, void*, void*)) );
 
-    // Temporarily encode config file until we have gui to do it
-    m_lastIbisPlusConfigFile = "AutoLocalServerConfig.xml";
-
     // Initialize with last config file
-    QString configFile = m_ibisPlusConfigFilesDirectory + m_lastIbisPlusConfigFile;
-    StartConfig( configFile );
+    if( m_autoStartLastConfig )
+        StartConfig( m_lastIbisPlusConfigFile );
 }
 
 void IbisHardwareIGSIO::StartConfig( QString configFile )
 {
+    // Make sure the previous config is cleared.
+    ClearConfig();
+
     // Read config
-    ConfigIO in( configFile );
+    QString configFilePath = m_ibisPlusConfigFilesDirectory + configFile;
+    ConfigIO in( configFilePath );
 
     // Instanciate Ibis scene objects specified in config file
     for( int i = 0; i < in.GetNumberOfTools(); ++i )
@@ -108,6 +115,8 @@ void IbisHardwareIGSIO::StartConfig( QString configFile )
         // Now try to connect to server
         Connect( in.GetServerIPAddress(i), in.GetServerPort(i) );
     }
+
+    m_lastIbisPlusConfigFile = configFile;
 }
 
 void IbisHardwareIGSIO::ClearConfig()
@@ -246,11 +255,38 @@ void IbisHardwareIGSIO::StopTipCalibration( PointerObject * p )
 
 void IbisHardwareIGSIO::OpenSettingsWidget()
 {
-    m_clientWidget = new qIGTLIOClientWidget;
-    m_clientWidget->setLogic( m_logic );
+    if( !m_clientWidget )
+    {
+        m_clientWidget = new qIGTLIOClientWidget;
+        m_clientWidget->setLogic( m_logic );
+        m_clientWidget->setGeometry(0,0, 859, 811);
+        m_clientWidget->setAttribute( Qt::WA_DeleteOnClose );
+        connect( m_clientWidget, SIGNAL(destroyed(QObject*)), this, SLOT(OnSettingsWidgetClosed()));
+    }
 
-    m_clientWidget->setGeometry(0,0, 859, 811);
     m_clientWidget->show();
+}
+
+void IbisHardwareIGSIO::OnSettingsWidgetClosed()
+{
+    m_clientWidget = 0;
+}
+
+void IbisHardwareIGSIO::OpenConfigFileWidget()
+{
+    if( !m_settingsWidget )
+    {
+        m_settingsWidget = new IbisHardwareIGSIOSettingsWidget;
+        m_settingsWidget->SetIgsio( this );
+        m_settingsWidget->setAttribute( Qt::WA_DeleteOnClose );
+        connect( m_settingsWidget, SIGNAL(destroyed(QObject*)), this, SLOT(OnConfigFileWidgetClosed()));
+    }
+    m_settingsWidget->show();
+}
+
+void IbisHardwareIGSIO::OnConfigFileWidgetClosed()
+{
+    m_settingsWidget = 0;
 }
 
 void IbisHardwareIGSIO::OnDeviceNew( vtkObject*, unsigned long, void*, void * callData )
