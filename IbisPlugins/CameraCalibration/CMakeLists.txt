@@ -13,7 +13,7 @@ set( PluginUi cameracalibrationwidget.ui cameracalibrationsidepanelwidget.ui )
 DefinePlugin( "${PluginSrc}" "${PluginHdr}" "${PluginHdrMoc}" "${PluginUi}" )
 
 #add library specific to this plugin
-target_link_libraries( ${PluginName} ibisVTKOpenCVBridge LandmarkRegistrationObject )
+target_link_libraries( ${PluginName} ibisVTKOpenCVBridge )
 
 # Command-line exec to test the calibration
 #add_executable( CalibrationXValidation CalibrationXValidation.cpp )
