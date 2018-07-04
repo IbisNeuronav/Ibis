@@ -803,11 +803,7 @@ void Application::LoadPlugins()
         {
             p->SetIbisAPI( m_ibisAPI );
             p->BaseLoadSettings( settings );
-            if( p->GetPluginType() == IbisPluginTypeTool )
-            {
-                ToolPluginInterface * t = ToolPluginInterface::SafeDownCast( p );
-                t->InitPlugin();
-            }
+            p->InitPlugin();
         }
     }
     settings.endGroup();

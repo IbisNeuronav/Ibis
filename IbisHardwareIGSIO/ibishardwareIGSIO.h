@@ -13,15 +13,16 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include "hardwaremodule.h"
 #include "igtlioDevice.h"
+#include "configio.h"
 
-namespace  igtlio {
-    class Logic;
-}
+class igtlioLogic;
+
 class QMenu;
 class qIGTLIOLogicController;
 class qIGTLIOClientWidget;
 class PlusServerInterface;
-
+class vtkEventQtSlotConnect;
+class IbisHardwareIGSIOSettingsWidget;
 
 class IbisHardwareIGSIO : public HardwareModule
 {
@@ -45,14 +46,19 @@ public:
     virtual void LoadSettings( QSettings & s ) override;
     virtual void SaveSettings( QSettings & s ) override;
 
+    // Load Ibis-Plus configs
+    bool GetAutoStartLastConfig() { return m_autoStartLastConfig; }
+    void SetAutoStartLastConfig( bool start ) { m_autoStartLastConfig = start; }
+    QString GetIbisPlusConfigDirectory() { return m_ibisPlusConfigFilesDirectory; }
+    QString GetLastIbisPlusConfigFilename() { return m_lastIbisPlusConfigFile; }
+    void StartConfig( QString configFile );
+    void ClearConfig();
+
     // Implementation of the HardwareModule interface
     virtual void AddSettingsMenuEntries( QMenu * menu ) override;
     virtual void Init() override;
     virtual void Update() override;
     virtual bool ShutDown() override;
-
-    // Launch a Plus server and connect
-    bool LaunchAndConnectLocal();
 
     virtual void AddToolObjectsToScene() override;
     virtual void RemoveToolObjectsFromScene() override;
@@ -74,38 +80,65 @@ public:
 private slots:
 
     void OpenSettingsWidget();
+    void OnSettingsWidgetClosed();
+    void OpenConfigFileWidget();
+    void OnConfigFileWidgetClosed();
+    void OnDeviceNew( vtkObject*, unsigned long, void*, void* );
+    void OnDeviceRemoved( vtkObject*, unsigned long, void*, void* );
 
 protected:
 
-    void FindNewTools();
-    void FindRemovedTools();
-    int FindToolByName( QString name );
-    bool IoHasDevice( igtlio::DevicePointer device );
-    bool ModuleHasDevice( igtlio::DevicePointer device );
-    TrackedSceneObject * InstanciateSceneObjectFromDevice( igtlio::DevicePointer device );
-    QString DeviceNameToToolName( const QString & deviceName );
-    bool IsDeviceImage( igtlio::DevicePointer device );
-    bool IsDeviceTransform( igtlio::DevicePointer device );
-    bool IsDeviceVideo( igtlio::DevicePointer device );
+    virtual void InitPlugin() override;
 
-    // Plus server exec and config paths
-    QString m_plusServerExec;
-    QString m_plusConfigDir;
-    QString m_plusLastConfigFile;
+    // Launch a Plus server and connect
+    bool LauchLocalServer( int port, QString plusConfigFile );
+    void Connect( std::string ip, int port );
+    void DisconnectAllServers();
+    void ShutDownLocalServers();
+
+    // Utility functions
+    int FindToolByName( QString name );
+    TrackedSceneObject * InstanciateSceneObjectFromType( QString objectName, QString objectType );
+    bool IsDeviceImage( igtlioDevicePointer device );
+    bool IsDeviceTransform( igtlioDevicePointer device );
+    bool IsDeviceVideo( igtlioDevicePointer device );
 
     struct Tool
     {
-        TrackedSceneObject * sceneObject;
-        igtlio::DevicePointer transformDevice;
-        igtlio::DevicePointer imageDevice;
+        vtkSmartPointer<TrackedSceneObject> sceneObject;
+        igtlioDevicePointer transformDevice;
+        igtlioDevicePointer imageDevice;
     };
     typedef QList< Tool* > toolList;
     toolList m_tools;
 
-    vtkSmartPointer<igtlio::Logic> m_logic;
-    vtkSmartPointer<PlusServerInterface> m_plusLauncher;
+    DeviceToolMap m_deviceToolAssociations;
+
+    vtkSmartPointer<igtlioLogic> m_logic;
+    vtkSmartPointer<vtkEventQtSlotConnect> m_logicCallbacks;
+    QList< vtkSmartPointer<PlusServerInterface> > m_plusLaunchers;
     qIGTLIOLogicController * m_logicController;
+
+    bool m_autoStartLastConfig;
+
+    // Settings widgets
     qIGTLIOClientWidget * m_clientWidget;
+    IbisHardwareIGSIOSettingsWidget * m_settingsWidget;
+
+    // Useful paths
+
+    // Full path of the executable of plus server
+    QString m_plusServerExec;
+    // Last ibisplus config file loaded
+    QString m_lastIbisPlusConfigFile;
+    // Default directory where all config files needed for Plus support in Ibis are located
+    QString m_plusConfigDirectory;
+    // Default directory where IbisPlus configuration files, i.e. files that contain the specification of plus servers, are located.
+    QString m_ibisPlusConfigFilesDirectory;
+    // Name and path of the text file that contains the location of the Plus server
+    QString m_plusToolkitPathsFilename;
+    // Default directory where Plus Toolkit config files are located
+    QString m_plusConfigFilesDirectory;
 };
 
 #endif
