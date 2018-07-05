@@ -19,7 +19,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QMap>
 #include <QComboBox>
 #include "view.h"
-#include "scenemanager.h" //needed for guiutils
 #include "guiutilities.h"
 
 FrameRateTesterWidget::FrameRateTesterWidget(QWidget *parent) :
