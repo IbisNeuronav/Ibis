@@ -16,10 +16,6 @@ qt5_wrap_cpp( IBIS_MOC ${IBIS_HDR_MOC} )
 
 # make rules to create c++ source from Qt resource files
 
-# Define include directories for other ibis libs
-include_directories( ${IBISLIB_INCLUDE_DIR} )
-include_directories( ${IBISLIB_BINARY_DIR} )    # include qt-generated headers
-
 # Generate the file that is going to import the plugins
 set( ImportPluginsSourceFile ${CMAKE_CURRENT_BINARY_DIR}/importplugins.cpp )
 file( WRITE ${ImportPluginsSourceFile} "#include <QtPlugin>\n\n" )
