@@ -113,9 +113,6 @@ if( CMAKE_BUILD_TYPE MATCHES "Debug" )
     set( IBIS_BUILD_QUALIFIER "Debug" )
 endif( CMAKE_BUILD_TYPE MATCHES "Debug" )
 
-# include the output directory, where the version.h file is generated
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
-
 # a custom target that is always built
 add_custom_target(gitversion ALL
     DEPENDS version_git_hash)

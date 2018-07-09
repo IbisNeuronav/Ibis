@@ -1,4 +1,4 @@
-PROJECT ( IBIS )
+PROJECT ( IBIS_MAIN )
 
 # define sources
 SET( IBIS_SRC main.cpp commandlinearguments.cpp )
