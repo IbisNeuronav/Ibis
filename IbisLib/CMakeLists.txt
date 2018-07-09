@@ -178,8 +178,7 @@ ENDIF( CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64" )
 # Define include dir for
 # dependent projects
 #================================
-SET( IBISLIB_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/gui CACHE PATH "Include directory for IbisLib header files" )
-MARK_AS_ADVANCED( IBISLIB_INCLUDE_DIR )
+SET( IBISLIB_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/gui PARENT_SCOPE )
 
 set (UI_FILES "ui*")
 set (MOC_FILES "moc*")
