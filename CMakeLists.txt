@@ -113,7 +113,7 @@ if( CMAKE_BUILD_TYPE MATCHES "Debug" )
     set( IBIS_BUILD_QUALIFIER "Debug" )
 endif( CMAKE_BUILD_TYPE MATCHES "Debug" )
 
-# include the output directory, where the svnversion.h file is generated
+# include the output directory, where the version.h file is generated
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 # a custom target that is always built
@@ -132,9 +132,6 @@ set_source_files_properties(${CMAKE_CURRENT_BINARY_DIR}/githash.h
 
 # configure version file
 configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/version.h.in ${CMAKE_CURRENT_BINARY_DIR}/version.h )
-
-# needed for projects to include version.h
-include_directories( ${Ibis_BINARY_DIR} )
 
 add_subdirectory( IbisLib )
 set( HardwareModulesLibs "" )
