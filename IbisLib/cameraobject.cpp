@@ -259,6 +259,7 @@ void CameraObject::SetVideoInputConnection( vtkAlgorithmOutput * port )
 void CameraObject::SetVideoInputData( vtkImageData * image )
 {
     m_videoInputSwitch->SetInputData( image );
+    emit ObjectModified();
 }
 
 vtkImageData * CameraObject::GetVideoOutput()

@@ -46,6 +46,11 @@ protected:
     IbisPlugin();
     virtual ~IbisPlugin() {}
 
+    // Give a chance to plugin to initialize things right after construction
+    // but with a valid pointer to m_ibiAPI and after settings have been loaded.
+    // This function can be overriden by every plugin to initialize its internal data.
+    virtual void InitPlugin() {}
+
     // These functions should be overriden only by the base class for each plugin type base classes.
     virtual void PluginTypeLoadSettings( QSettings & s ) {}
     virtual void PluginTypeSaveSettings( QSettings & s ) {}

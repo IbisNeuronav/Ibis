@@ -56,6 +56,7 @@ public:
 
     void SetVideoInputConnection( vtkAlgorithmOutput * port );
     void SetVideoInputData( vtkImageData * image );
+    void UpdateVideoInput();
 
     int GetVideoImageWidth();
     int GetVideoImageHeight();
