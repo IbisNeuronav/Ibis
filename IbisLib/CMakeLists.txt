@@ -164,12 +164,15 @@ qt5_add_resources( IBISLIB_RCC_SRC ${IBISLIB_RCC})
 
 #================================
 # Define output
+# ibis_BINARY_DIR is automatically computed by CMake using the main project name ibis
+# this directory contains version.h and githash.h needed by application.cpp
 #================================
 set( IBISLIB_all_src ${IBISLIB_SRC} ${IBISLIB_MOC} ${IBISLIB_HDR} ${IBISLIB_HDR_MOC} ${IBISLIB_HDR_UI} ${IBISLIB_RCC_SRC} )
 ADD_LIBRARY( IbisLib ${IBISLIB_all_src})
 
 target_link_libraries( IbisLib svl vtkExtensions)
-target_include_directories( IbisLib PUBLIC  ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/gui )
+target_include_directories( IbisLib PUBLIC  ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/gui
+    PRIVATE ${ibis_BINARY_DIR} )
 IF( CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64" )
   SET_TARGET_PROPERTIES( IbisLib PROPERTIES COMPILE_FLAGS "-fPIC")
 ENDIF( CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64" )
