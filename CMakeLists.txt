@@ -8,8 +8,8 @@ set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/CMakeCommon ${CMAKE_MODULE_PAT
 # Find location to install the progs
 #
 # This MUST come before PROJECT or it does not work
-INCLUDE(${CMAKE_COMMON_DIR}/InstallLocation.cmake)
 #======================================================
+INCLUDE(${CMAKE_COMMON_DIR}/InstallLocation.cmake)
 
 PROJECT( ibis )
 
