@@ -483,7 +483,7 @@ GPUVolumeReconstruction< TImage >
   localSize[0] = localSize[1] = localSize[2] = OpenCLGetLocalBlockSize(3);
 
 
-  InternalRealType * cpuAccumWeightAndWeightedValueBuffer = new InternalRealType[2*nbrOfPixelsInVolume];
+  InternalRealType * cpuAccumWeightAndWeightedValueBuffer = new InternalRealType[2*nbrOfPixelsInVolume]{};
   cl_mem accumWeightAndWeightedValueGPUBuffer = clCreateBuffer(m_Context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
                             2*size_output, cpuAccumWeightAndWeightedValueBuffer, &errid);
   OpenCLCheckError(errid, __FILE__, __LINE__, ITK_LOCATION);    
