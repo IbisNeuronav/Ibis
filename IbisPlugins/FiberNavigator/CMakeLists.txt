@@ -10,4 +10,4 @@ add_definitions( -DHAVE_ZLIB )
 DefinePlugin( "${PluginSrc}" "${PluginHdr}" "${PluginHdrMoc}" "${PluginUi}" )
 
 #add library specific to this plugin
-target_link_libraries( ${PluginName} z )
+target_link_libraries( ${PluginName} z svl )
