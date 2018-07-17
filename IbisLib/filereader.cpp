@@ -668,6 +668,16 @@ bool FileReader::GetFrameDataFromMINCFile(QString filename, vtkImageData *img , 
     QString fileMINC2;
     if( this->IsMINC1( filename ) )
     {
+        if( this->m_mincconvert.isEmpty())
+            this->FindMincConverter();
+        if( this->m_mincconvert.isEmpty())
+        {
+            QString tmp("File ");
+            tmp.append( filename + " is an acquired frame of MINC1 type and needs to be coverted to MINC2.\n" +
+                        "Tool minccalc was not found in standard paths on your file system.\n" );
+            QMessageBox::critical( 0, "Error", tmp, 1, 0 );
+            return false;
+        }
         if( this->ConvertMINC1toMINC2( filename, fileMINC2, true ) )
             fileToRead = fileMINC2;
     }
