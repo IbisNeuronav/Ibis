@@ -227,7 +227,7 @@ void FileReader::run()
         OpenFileParams::SingleFileParam & param = m_params->filesParams[i];
         m_currentFileIndex = i;
         QList<SceneObject*> readObjects;
-        OpenFile( readObjects, param.fileName, param.objectName, param.isLabel , param.isMINC1 );
+        OpenFile( readObjects, param.fileName, param.objectName, param.isLabel );
         if( readObjects.size() > 0 )
             param.loadedObject = readObjects[0];
         if( readObjects.size() > 1 )
@@ -275,17 +275,25 @@ void FileReader::ReaderProgress( double fileProgress )
 }
 
 bool FileReader::OpenFile( QList<SceneObject*> & readObjects, QString filename, const QString & dataObjectName,
-                           bool isLabel, bool isMINC1)
+                           bool isLabel )
 {
     if( QFile::exists( filename ) )
     {
         QString fileToOpen( filename );
-        if( isMINC1 )
+        QString fileMINC2;
+        if( this->IsMINC1( filename ) )
         {
-            bool ok = false;
-            QString fileMINC2;
-            ok = this->ConvertMINC1toMINC2( filename, fileMINC2 );
-            if( ok )
+            if( this->m_mincconvert.isEmpty())
+                this->FindMincConverter();
+            if( this->m_mincconvert.isEmpty())
+            {
+                QString tmp("File ");
+                tmp.append( filename + " is  of MINC1 type and needs to be coverted to MINC2.\n" +
+                            "Tool mincconvert was not found in standard paths on your file system.\n" );
+                QMessageBox::critical( 0, "Error", tmp, 1, 0 );
+                return false;
+            }
+            if( this->ConvertMINC1toMINC2( filename, fileMINC2, true ) )
                 fileToOpen = fileMINC2;
         }
         // Try reading using ITK ( all itk supported formats )
@@ -674,7 +682,7 @@ bool FileReader::GetFrameDataFromMINCFile(QString filename, vtkImageData *img , 
         {
             QString tmp("File ");
             tmp.append( filename + " is an acquired frame of MINC1 type and needs to be coverted to MINC2.\n" +
-                        "Tool minccalc was not found in standard paths on your file system.\n" );
+                        "Tools mincconvert and minccalc were not found in standard paths on your file system.\n" );
             QMessageBox::critical( 0, "Error", tmp, 1, 0 );
             return false;
         }

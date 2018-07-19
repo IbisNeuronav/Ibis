@@ -32,12 +32,11 @@ public:
 
     struct SingleFileParam
     {
-        SingleFileParam() : isReference(false), isLabel(false), isMINC1(false), loadedObject(0), secondaryObject(0), parent(0) {}
+        SingleFileParam() : isReference(false), isLabel(false), loadedObject(0), secondaryObject(0), parent(0) {}
         QString fileName;
         QString objectName;
         bool isReference;
         bool isLabel;  // load image as label image instead of floats.
-        bool isMINC1;
         SceneObject * loadedObject;
         SceneObject * secondaryObject;  // This is a hack to attach the second point object that can be found in PointsObjects
         SceneObject * parent;
@@ -97,7 +96,7 @@ protected:
 
     void run();
 
-    bool OpenFile        (QList<SceneObject*> & readObjects, QString filename, const QString & dataObjectName = "", bool isLabel = false, bool isMINC1 = false );
+    bool OpenFile        (QList<SceneObject*> & readObjects, QString filename, const QString & dataObjectName = "", bool isLabel = false);
     bool OpenItkFile     ( QList<SceneObject*> & readObjects, QString filename, const QString & dataObjectName = "" );
     bool OpenItkLabelFile( QList<SceneObject*> & readObjects, QString filename, const QString & dataObjectName = "" );
     bool OpenObjFile     ( QList<SceneObject*> & readObjects, QString filename, const QString & dataObjectName = "" );

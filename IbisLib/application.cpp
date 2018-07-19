@@ -404,7 +404,6 @@ void Application::OpenFiles( OpenFileParams * params, bool addToScene )
     // Create Reader that reads files in another thread
     m_fileReader = new FileReader;
     m_fileReader->SetParams( params );
-    bool minc1found = false;
     for( int i = 0; i < params->filesParams.size(); ++i )
     {
         OpenFileParams::SingleFileParam & cur = params->filesParams[i];
@@ -418,29 +417,24 @@ void Application::OpenFiles( OpenFileParams * params, bool addToScene )
         }
         if( m_fileReader->IsMINC1( cur.fileName.toUtf8().data() ) )
         {
-            minc1found = true;
-            cur.isMINC1 = true;
+            if( m_fileReader->FindMincConverter() )
+            {
+                if( m_settings.ShowMINCConversionWarning )
+                    this->ShowMinc1Warning( true );
+            }
+            else
+            {
+                this->ShowMinc1Warning( false );
+                delete m_fileReader;
+                m_fileReader = 0;
+                return;
+            }
         }
     }
 
     // See if it is the first batch of objects loaded/created
     int initialNumberOfUserObjects = GetSceneManager()->GetNumberOfUserObjects();
 
-    if( minc1found )
-    {
-        if( m_fileReader->FindMincConverter() )
-        {
-            if( m_settings.ShowMINCConversionWarning )
-                this->ShowMinc1Warning( true );
-        }
-        else
-        {
-            this->ShowMinc1Warning( false );
-            delete m_fileReader;
-            m_fileReader = 0;
-            return;
-        }
-    }
     m_fileReader->start();
 
     // Create a progress dialog and a timer to update it
