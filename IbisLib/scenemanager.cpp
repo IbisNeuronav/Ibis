@@ -69,6 +69,7 @@ SceneManager::SceneManager()
     this->NavigationPointerID = SceneManager::InvalidId;
     this->IsNavigating = false;
     this->LoadingScene = false;
+    this->SceneDirectory = QDir::homePath();
 
     m_referenceTransform = vtkTransform::New();
     m_invReferenceTransform = vtkTransform::New();
