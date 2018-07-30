@@ -17,15 +17,15 @@ endif()
 qt5_wrap_cpp( IBIS_VTK_QT_MOC ${IBIS_VTK_QT_HDR_MOC} )
 qt5_wrap_cpp( IBIS_VTK_QT_PLUGIN_MOC ${IBIS_VTK_QT_PLUGIN_HDR_MOC} )
 
-INCLUDE_DIRECTORIES(${QT_EXTENSIONS_INCLUDE_DIR})
-
 #================================
 # Define sources
 #================================
-INCLUDE_DIRECTORIES(${IBIS_VTK_INCLUDE_DIR})
 
 set( vtkQt_all_src ${IBIS_VTK_QT_SRC} ${IBIS_VTK_QT_HDR} ${IBIS_VTK_QT_HDR_MOC} ${IBIS_VTK_QT_MOC} ${IBIS_VTK_QT_PLUGING_HDR_MOC} ${IBIS_VTK_QT_PLUGIN_MOC} )
 ADD_LIBRARY( vtkQt  ${vtkQt_all_src} )
+
+target_link_libraries( vtkQt vtkMNI vtkExtensions )
+target_include_directories( vtkQt PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} )
 
 IF( CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64" )
   SET_TARGET_PROPERTIES( vtkQt PROPERTIES COMPILE_FLAGS "-fPIC")

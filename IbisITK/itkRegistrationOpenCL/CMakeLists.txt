@@ -43,9 +43,6 @@ foreach( file ${LibCL} )
   set( LibCLHdr ${LibCLHdr} ${clKernel_h} )
 endforeach(file)
 
-include_directories( ${CMAKE_CURRENT_BINARY_DIR} ${OPENCL_INCLUDE_DIRS})
-
-
 #================================
 # Define output
 #================================
@@ -67,8 +64,5 @@ endif( IBIS_INSTALL_LIBS_AND_HEADERS )
 # Define include dir for
 # dependent projects
 #================================
-SET( ITK_REGISTRATION_OPENCL_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR} CACHE PATH "Include directory for itkRegistrationOpenCL .h files" )
-MARK_AS_ADVANCED( ITK_REGISTRATION_OPENCL_INCLUDE_DIR )
-
-SET( ITK_REGISTRATION_OPENCL_KERNEL_INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR}  CACHE PATH "Include directory for itkRegistrationOpenCL Kernel .h files" )
-MARK_AS_ADVANCED( ITK_REGISTRATION_OPENCL_KERNEL_INCLUDE_DIR  )
+target_include_directories( itkRegistrationOpenCL PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_BINARY_DIR} ${OPENCL_INCLUDE_DIRS} )
