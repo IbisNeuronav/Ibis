@@ -36,7 +36,7 @@ set( libsToUse vtkVideo vtkQt vtkTracker vtkUltrasound  )
 set( IbisHardwareSrcAll ${IbisHardwareSrc} ${IbisHardwareHdr} ${IbisHardwareHdrMoc} ${IbisHardwareMoc} ${IbisHardwareUiHdr} )
 add_library( IbisHardware ${IbisHardwareSrcAll} )
 
-target_link_libraries( IbisHardware svl vtkExtensions )
+target_link_libraries( IbisHardware svl vtkQt vtkMNI vtkExtensions )
 
 target_include_directories( IbisHardware PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/vtkTracker ${CMAKE_CURRENT_SOURCE_DIR}/vtkVideo ${CMAKE_CURRENT_SOURCE_DIR}/vtkUltrasound )
 

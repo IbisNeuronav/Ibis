@@ -21,6 +21,7 @@ SET( VTK_MNI_HDR
 ADD_LIBRARY( vtkMNI ${VTK_MNI_SRC} ${VTK_MNI_HDR} )
 
 target_link_libraries( vtkMNI vtkExtensions )
+target_include_directories( vtkMNI PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} )
 
 if( IBIS_INSTALL_LIBS_AND_HEADERS )
     INSTALL_TARGETS(/lib vtkMNI)
