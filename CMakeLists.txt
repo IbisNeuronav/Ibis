@@ -42,7 +42,7 @@ find_package( Qt5 COMPONENTS ${IbisQtModules} REQUIRED )
 
 if (Qt5Widgets_FOUND)
     if (Qt5Widgets_VERSION VERSION_LESS 5.10.0)
-        message(WARNING "Minimum supported Qt5 version is 5.10.0.\nYou are using " ${Qt5Widgets_VERSION} ". It may work." )
+        message(SEND_ERROR "Minimum supported Qt5 version is 5.10.0.\nYou are using " ${Qt5Widgets_VERSION} "." )
     endif()
 else()
     message(SEND_ERROR "The Qt5Widgets library could not be found!")
