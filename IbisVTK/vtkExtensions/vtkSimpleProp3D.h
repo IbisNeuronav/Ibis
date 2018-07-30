@@ -68,7 +68,7 @@ public:
   // appear differently. Usually this involves checking the mtime of the
   // prop plus anything else it depends on such as properties, mappers,
   // etc.
-  unsigned long GetRedrawMTime() override;
+  vtkMTimeType GetRedrawMTime() override;
 
   // Description:
   // Shallow copy of this vtkSimpleProp3D. Overloads the virtual vtkProp method.
