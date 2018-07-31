@@ -118,7 +118,7 @@ void TrackerSettingsDialog::ActiveCheckBoxToggled( bool isOn )
 
 void TrackerSettingsDialog::BrowseRomFileButtonClicked()
 {
-    QString romFile = Application::GetInstance().GetOpenFileName( "Rom file name", ".", "Rom files (*.rom)" );
+    QString romFile = Application::GetInstance().GetFileNameOpen( "Rom file name", ".", "Rom files (*.rom)" );
     m_tracker->SetRomFileName( m_tracker->GetCurrentToolIndex(), romFile );
     UpdateToolDescription();
 }
