@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-set( project_name IbisExternalDependencies )
+set( project_name IbisDeps )
 project( ${project_name} )
 
 set( external_project_dir ${CMAKE_CURRENT_BINARY_DIR} )
@@ -12,9 +12,7 @@ ExternalProject_Add( ${vtk_name}
     SOURCE_DIR ${external_project_dir}/${vtk_name}/src
     BINARY_DIR ${external_project_dir}/${vtk_name}/build
     GIT_REPOSITORY "https://github.com/Kitware/VTK.git"
-    GIT_TAG v${IBIS_VTK_LONG_VERSION}
-    BUILD_COMMAND   make
-    INSTALL_COMMAND make install 
+    GIT_TAG v${IBIS_VTK_LONG_VERSION} 
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=${external_project_dir}/${vtk_name}/install
                -DCMAKE_OSX_SYSROOT:PATH=${CMAKE_OSX_SYSROOT} 
                -DCMAKE_OSX_DEPLOYMENT_TARGET:STRING=${CMAKE_OSX_DEPLOYMENT_TARGET}
@@ -35,9 +33,7 @@ ExternalProject_Add( ${itk_name}
     SOURCE_DIR ${external_project_dir}/${itk_name}/src
     GIT_REPOSITORY "https://github.com/InsightSoftwareConsortium/ITK.git"
     GIT_TAG v${IBIS_ITK_LONG_VERSION}
-    BINARY_DIR ${external_project_dir}/${itk_name}/build
-    BUILD_COMMAND   make
-    INSTALL_COMMAND make install 
+    BINARY_DIR ${external_project_dir}/${itk_name}/build 
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=${external_project_dir}/${itk_name}/install 
                -DCMAKE_OSX_SYSROOT:PATH=${CMAKE_OSX_SYSROOT} 
                -DCMAKE_OSX_DEPLOYMENT_TARGET:STRING=${CMAKE_OSX_DEPLOYMENT_TARGET} 
@@ -56,8 +52,6 @@ if( IBIS_INSTALL_OPENCV )
         GIT_REPOSITORY "https://github.com/opencv/opencv.git"
         GIT_TAG 70bbf17b133496bd7d54d034b0f94bd869e0e810
         BINARY_DIR ${external_project_dir}/${opencv_name}/build
-        BUILD_COMMAND   make
-        INSTALL_COMMAND make install
         CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=${external_project_dir}/${opencv_name}/install 
                    -DCMAKE_OSX_SYSROOT:PATH=${CMAKE_OSX_SYSROOT} 
                    -DCMAKE_OSX_DEPLOYMENT_TARGET:STRING=${CMAKE_OSX_DEPLOYMENT_TARGET} 
@@ -73,10 +67,10 @@ if( IBIS_INSTALL_OPENCV )
                    -DWITH_VTK:BOOL=FALSE )
 endif()
 
-add_custom_target( IbisExternalDependencies ALL )
-add_dependencies( IbisExternalDependencies ${vtk_name} )
-add_dependencies( IbisExternalDependencies ${itk_name} )
+add_custom_target( IbisDeps ALL )
+add_dependencies( IbisDeps ${vtk_name} )
+add_dependencies( IbisDeps ${itk_name} )
 if( IBIS_INSTALL_OPENCV )
-add_dependencies( IbisExternalDependencies ${opencv_name} )
+add_dependencies( IbisDeps ${opencv_name} )
 endif()
 

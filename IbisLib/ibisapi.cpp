@@ -256,13 +256,13 @@ QString IbisAPI::GetConfigDirectory()
     return m_application->GetConfigDirectory();
 }
 
-QString IbisAPI::GetOpenFileName( const QString & caption, const QString & dir, const QString & filter )
+QString IbisAPI::GetFileNameOpen( const QString & caption, const QString & dir, const QString & filter )
 {
-    return m_application->GetOpenFileName( caption, dir, filter );
+    return m_application->GetFileNameOpen( caption, dir, filter );
 }
-QString IbisAPI::GetSaveFileName( const QString & caption, const QString & dir, const QString & filter )
+QString IbisAPI::GetFileNameSave( const QString & caption, const QString & dir, const QString & filter )
 {
-    return m_application->GetSaveFileName( caption, dir, filter );
+    return m_application->GetFileNameSave( caption, dir, filter );
 }
 QString IbisAPI::GetExistingDirectory( const QString & caption, const QString & dir )
 {

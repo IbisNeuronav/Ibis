@@ -193,8 +193,8 @@ void DrawableTexture::PrintGLTextureState()
         cout << "   TEXTURE_1D - enabled: " << ( glIsEnabled( GL_TEXTURE_1D ) == GL_TRUE ? 1 : 0 ) << " - Binding: " << binding << endl;
         glGetIntegerv( GL_TEXTURE_BINDING_2D, &binding );
         cout << "   TEXTURE_2D - enabled: " << ( glIsEnabled( GL_TEXTURE_2D ) == GL_TRUE ? 1 : 0 ) << " - Binding: " << binding << endl;
-        glGetIntegerv( GL_TEXTURE_BINDING_3D, &binding );
-        cout << "   TEXTURE_3D - enabled: " << ( glIsEnabled( GL_TEXTURE_3D ) == GL_TRUE ? 1 : 0 ) << " - Binding: " << binding << endl;
+        glGetIntegerv( vtkgl::TEXTURE_BINDING_3D, &binding );
+        cout << "   TEXTURE_3D - enabled: " << ( glIsEnabled( vtkgl::TEXTURE_3D ) == GL_TRUE ? 1 : 0 ) << " - Binding: " << binding << endl;
         glGetIntegerv( vtkgl::TEXTURE_BINDING_RECTANGLE, &binding );
         cout << "   TEXTURE_RECTANGLE - enabled: " << ( glIsEnabled( vtkgl::TEXTURE_RECTANGLE ) == GL_TRUE ? 1 : 0 ) << " - Binding: " << binding << endl;
     }

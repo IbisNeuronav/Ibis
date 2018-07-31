@@ -82,8 +82,8 @@ public:
     bool IsViewerOnly();
     QString GetWorkingDirectory();
     QString GetConfigDirectory();
-    QString GetOpenFileName( const QString & caption = QString(), const QString & dir = QString(), const QString & filter = QString() );
-    QString GetSaveFileName( const QString & caption = QString(), const QString & dir = QString(), const QString & filter = QString() );
+    QString GetFileNameOpen( const QString & caption = QString(), const QString & dir = QString(), const QString & filter = QString() );
+    QString GetFileNameSave( const QString & caption = QString(), const QString & dir = QString(), const QString & filter = QString() );
     QString GetExistingDirectory( const QString & caption = QString(), const QString & dir = QString() );
     QString GetGitHashShort();
     ToolPluginInterface * GetToolPluginByName( QString name );

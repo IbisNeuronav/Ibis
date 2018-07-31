@@ -65,10 +65,15 @@ if(APPLE)
     set( executable_flags MACOSX_BUNDLE )
 endif(APPLE)
 
+if( WIN32 )
+	set( executable_flags WIN32 )
+	set( platform_src Ibis.rc )
+endif()
+
 #================================
 # Define executable
 #================================
-SET( SOURCE ${IBIS_HDR} ${IBIS_HDR_MOC} ${IBIS_SRC} ${ImportPluginsSourceFile} ${IBIS_MOC} ${IBIS_SRC_ICNS} )
+SET( SOURCE ${IBIS_HDR} ${IBIS_HDR_MOC} ${IBIS_SRC} ${ImportPluginsSourceFile} ${IBIS_MOC} ${IBIS_SRC_ICNS} ${platform_src} )
 ADD_EXECUTABLE( ${exec_name} ${executable_flags} ${SOURCE} )
 
 if (APPLE)

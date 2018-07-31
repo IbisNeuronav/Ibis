@@ -114,10 +114,10 @@ void LandmarkRegistrationObject::Serialize( Serializer * ser )
     }
     if( !ser->IsReader() )
     {
-        QString filename( ser->GetCurrentDirectory() );
+        QString filename( ser->GetSerializationDirectory() );
         filename.append("/LandmarkRegistration.tag");
         this->WriteTagFile( filename, true );
-        QString filename1( ser->GetCurrentDirectory() );
+        QString filename1( ser->GetSerializationDirectory() );
         filename1.append("/LandmarkRegistration.xfm");
         this->WriteXFMFile(filename1);
     }
@@ -200,7 +200,7 @@ void LandmarkRegistrationObject::Export()
     {
         tag_directory = QDir::homePath() + "/" + IBIS_CONFIGURATION_SUBDIRECTORY;
     }
-    QString filename = Application::GetInstance().GetSaveFileName( "Save tag file", tag_directory, "Tag file (*.tag)" );
+    QString filename = Application::GetInstance().GetFileNameSave( "Save tag file", tag_directory, "Tag file (*.tag)" );
 
     if(!filename.isEmpty())
     {
@@ -607,7 +607,7 @@ bool LandmarkRegistrationObject::ReadTagFile( )
     }
     if (!QFile::exists(tag_directory))
         tag_directory = QDir::homePath();
-    QString filename = Application::GetInstance().GetOpenFileName( "Load tag file", tag_directory, "Tag file (*.tag)" );
+    QString filename = Application::GetInstance().GetFileNameOpen( "Load tag file", tag_directory, "Tag file (*.tag)" );
     if (!filename.isEmpty())
     {
         QFileInfo fi(filename);

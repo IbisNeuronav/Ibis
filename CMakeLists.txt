@@ -25,7 +25,7 @@ set( CMAKE_CXX_STANDARD 11 )
 # dependencies.
 #==================================================================
 include(${CMAKE_COMMON_DIR}/DependencyVersions.cmake)
-set( IBIS_EXTERNAL_DEPENDENCIES_DIR ${CMAKE_CURRENT_BINARY_DIR}/../ibisExternalDependencies CACHE PATH "Path where the external dependencies (itk, vtk, openCV) have been built" )
+set( IBIS_EXTERNAL_DEPENDENCIES_DIR ${CMAKE_CURRENT_BINARY_DIR}/../IbisDeps CACHE PATH "Path where the external dependencies (itk, vtk, openCV) have been built" )
 
 #==================================================================
 # Look for QT5 (required)
@@ -81,7 +81,7 @@ endif()
 #==================================================================
 # Create options to build or not the different dependent projects.
 #==================================================================
-if( NOT APPLE )
+if(UNIX AND NOT APPLE)
     OPTION( IBIS_BUILD_DEFAULT_HARDWARE_MODULE "Build default hardware module on Linux." ON )
 endif()
 OPTION( IBIS_BUILD_IGSIO_HARDWARE_MODULE "Build hardware module that allows connection to OpenIGTLinkServers" OFF )

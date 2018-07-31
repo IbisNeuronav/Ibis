@@ -61,7 +61,7 @@ public:
     
     virtual int IsReader() = 0;
     void SetFilename( const char * name ) { m_filename = name; }
-    QString GetCurrentDirectory()
+    QString GetSerializationDirectory()
     {
         QFileInfo info( QString(m_filename.c_str()) );
         return info.path();

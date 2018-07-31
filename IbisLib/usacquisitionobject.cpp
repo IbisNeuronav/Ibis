@@ -687,7 +687,7 @@ void USAcquisitionObject::Serialize( Serializer * ser )
     if (ser->IsReader())
     {   
         if (m_baseDirectory.at(0) == '.')
-            m_baseDirectory.replace(0, 1, ser->GetCurrentDirectory() );
+            m_baseDirectory.replace(0, 1, ser->GetSerializationDirectory() );
         if (!QDir(m_baseDirectory).exists())
         {
             QString  accessError = tr("Cannot find acquisition directory: ") + m_baseDirectory;

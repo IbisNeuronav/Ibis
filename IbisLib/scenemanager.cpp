@@ -9,7 +9,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
 #include <iostream>
-#include <unistd.h>
 #include <algorithm>
 #include "scenemanager.h"
 #include "mainwindow.h"

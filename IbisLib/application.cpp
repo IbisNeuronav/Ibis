@@ -645,7 +645,7 @@ void Application::PostModalDialog()
 // Next 2 functions are a workaround for a bug in Qt. The update manager is ran by a Idle Qt timer (timeout = 0)
 // and for an unknown reason, Qt can't pop up file dialogs properly when such timer is running in the main loop.
 #include <QFileDialog>
-QString Application::GetOpenFileName( const QString & caption, const QString & dir, const QString & filter )
+QString Application::GetFileNameOpen( const QString & caption, const QString & dir, const QString & filter )
 {
     QWidget *parent = 0;
     if (m_mainWindow)
@@ -657,9 +657,9 @@ QString Application::GetOpenFileName( const QString & caption, const QString & d
     return filename;
 }
 
-QString Application::GetSaveFileName( const QString & caption, const QString & dir, const QString & filter )
+QString Application::GetFileNameSave( const QString & caption, const QString & dir, const QString & filter )
 {
-    Q_ASSERT_X( m_mainWindow, "Application::GetSaveFileName()", "MainWindow was not set" );
+    Q_ASSERT_X( m_mainWindow, "Application::GetFileNameSave()", "MainWindow was not set" );
     bool running = PreModalDialog();
     QString filename = QFileDialog::getSaveFileName( m_mainWindow, caption, dir, filter );
     if( running )
@@ -681,7 +681,7 @@ QString Application::GetExistingDirectory( const QString & caption, const QStrin
 bool Application::GetOpenFileSequence( QStringList & filenames, QString extension, const QString & caption, const QString & dir, const QString & filter )
 {
     // Get Base directory and file pattern
-    QString firstFilename = Application::GetInstance().GetOpenFileName( "Select first file of acquisition", dir, "Minc file (*.mnc)" );
+    QString firstFilename = Application::GetInstance().GetFileNameOpen( "Select first file of acquisition", dir, "Minc file (*.mnc)" );
     if( firstFilename.isEmpty() )
         return false;
 
