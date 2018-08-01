@@ -40,9 +40,15 @@ if(UNIX AND NOT APPLE)
 endif()
 find_package( Qt5 COMPONENTS ${IbisQtModules} REQUIRED )
 
+# Qt support by Qt Company: QT 5.1.0 to 5.5.0 support ended.  5.6.0 still supported until March 2019.
+# ibis was never tested with versions 5.6.0, 5.7.0 and 5.8.0. It might work with 5.8.0.
+# it worked with 5.9.3
+
 if (Qt5Widgets_FOUND)
-    if (Qt5Widgets_VERSION VERSION_LESS 5.10.0)
-        message(WARNING "Minimum supported Qt5 version is 5.10.0.\nYou are using " ${Qt5Widgets_VERSION} ". It may work." )
+    if (Qt5Widgets_VERSION VERSION_LESS 5.6.0)
+        message(SEND_ERROR "Qt version 5.5.x or lower is no longer supported.\nCurrently supported Qt version is 5.9 and higher.\nYou are using " ${Qt5Widgets_VERSION} "." )
+    elseif (Qt5Widgets_VERSION VERSION_LESS 5.9.0)
+        message(SEND_ERROR "Currently supported Qt version is 5.9 and higher.\nYou are using " ${Qt5Widgets_VERSION} ". It may work." )
     endif()
 else()
     message(SEND_ERROR "The Qt5Widgets library could not be found!")
