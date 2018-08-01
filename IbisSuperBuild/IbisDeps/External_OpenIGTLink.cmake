@@ -13,5 +13,5 @@ ExternalProject_Add( ${openigtlink_name}
                -DOpenIGTLink_SUPERBUILD:BOOL=OFF
                -DOpenIGTLink_PROTOCOL_VERSION_2:BOOL=OFF
                -DOpenIGTLink_PROTOCOL_VERSION_3:BOOL=ON
-               -DOpenIGTLink_ENABLE_VIDEOSTREAMING:BOOL=OFF
+               -DOpenIGTLink_ENABLE_VIDEOSTREAMING:BOOL=ON
     INSTALL_COMMAND "" )
