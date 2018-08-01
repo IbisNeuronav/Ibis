@@ -558,15 +558,12 @@ void LandmarkRegistrationObject::RegisterObject( bool on )
     if( on )
     {
         m_registrationTransform->UpdateRegistrationTransform();
-        vtkSmartPointer<vtkTransform> tmpTrans = vtkSmartPointer<vtkTransform>::New();
-        tmpTrans->SetMatrix( m_registrationTransform->GetRegistrationTransform()->GetMatrix() );
-        tmpTrans->Update();
-        this->SetLocalTransform(tmpTrans);
+        this->GetLocalTransform()->SetInput( m_registrationTransform->GetRegistrationTransform() );
         m_isRegistered = true;
     }
     else
     {
-        this->SetLocalTransform(m_backUpTransform);
+        this->GetLocalTransform()->SetInput( m_backUpTransform );
         m_isRegistered = false;
     }
 }
