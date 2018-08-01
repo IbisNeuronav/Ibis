@@ -295,6 +295,8 @@ bool FileReader::OpenFile( QList<SceneObject*> & readObjects, QString filename, 
             }
             if( this->ConvertMINC1toMINC2( filename, fileMINC2, true ) )
                 fileToOpen = fileMINC2;
+            else
+                return false;
         }
         // Try reading using ITK ( all itk supported formats )
         bool fileOpened = false;
@@ -688,6 +690,8 @@ bool FileReader::GetFrameDataFromMINCFile(QString filename, vtkImageData *img , 
         }
         if( this->ConvertMINC1toMINC2( filename, fileMINC2, true ) )
             fileToRead = fileMINC2;
+        else
+            return false;
     }
 
     IOBasePointer io = itk::ImageIOFactory::CreateImageIO(fileToRead.toUtf8().data(), itk::ImageIOFactory::ReadMode );
