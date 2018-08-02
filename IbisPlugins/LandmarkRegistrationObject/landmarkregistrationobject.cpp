@@ -569,17 +569,6 @@ void LandmarkRegistrationObject::RegisterObject( bool on )
     }
 }
 
-void LandmarkRegistrationObject::SetAllowScaling( bool on )
-{
-    m_registrationTransform->SetScalingAllowed( on );
-    emit ObjectModified();
-}
-
-bool LandmarkRegistrationObject::IsScalingAllowed()
-{
-    return m_registrationTransform->IsScalingAllowed();
-}
-
 void LandmarkRegistrationObject::SetTargetObjectID( int id )
 {
     Q_ASSERT( GetManager() );
