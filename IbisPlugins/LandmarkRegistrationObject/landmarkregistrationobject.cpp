@@ -14,6 +14,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "landmarktransform.h"
 #include "scenemanager.h"
 #include "ibisconfig.h"
+#include "imageobject.h"
 #include "application.h"
 #include "view.h"
 #include "vtkPoints.h"
@@ -558,15 +559,12 @@ void LandmarkRegistrationObject::RegisterObject( bool on )
     if( on )
     {
         m_registrationTransform->UpdateRegistrationTransform();
-        vtkSmartPointer<vtkTransform> tmpTrans = vtkSmartPointer<vtkTransform>::New();
-        tmpTrans->SetMatrix( m_registrationTransform->GetRegistrationTransform()->GetMatrix() );
-        tmpTrans->Update();
-        this->SetLocalTransform(tmpTrans);
+        this->GetLocalTransform()->SetInput( m_registrationTransform->GetRegistrationTransform() );
         m_isRegistered = true;
     }
     else
     {
-        this->SetLocalTransform(m_backUpTransform);
+        this->GetLocalTransform()->SetInput( m_backUpTransform );
         m_isRegistered = false;
     }
 }
@@ -574,6 +572,7 @@ void LandmarkRegistrationObject::RegisterObject( bool on )
 void LandmarkRegistrationObject::SetAllowScaling( bool on )
 {
     m_registrationTransform->SetScalingAllowed( on );
+    emit ObjectModified();
 }
 
 bool LandmarkRegistrationObject::IsScalingAllowed()
