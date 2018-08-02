@@ -108,13 +108,6 @@ void LandmarkRegistrationObjectSettingsWidget::on_capturePushButton_clicked()
     }
 }
 
-void LandmarkRegistrationObjectSettingsWidget::on_allowScalingCheckBox_toggled( bool on )
-{
-    Q_ASSERT( m_registrationObject );
-    m_registrationObject->SetAllowScaling( on );
-    this->UpdateUI();
-}
-
 void LandmarkRegistrationObjectSettingsWidget::on_importPushButton_clicked()
 {
     if (this->ReadTagFile())
@@ -239,10 +232,6 @@ void LandmarkRegistrationObjectSettingsWidget::DeletePoint()
 void LandmarkRegistrationObjectSettingsWidget::UpdateUI()
 {
     Q_ASSERT(m_registrationObject);
-
-    ui->allowScalingCheckBox->blockSignals( true );
-    ui->allowScalingCheckBox->setChecked( m_registrationObject->IsScalingAllowed() );
-    ui->allowScalingCheckBox->blockSignals( false );
 
     ui->targetComboBox->blockSignals(true);
     ui->targetComboBox->clear();
