@@ -14,6 +14,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "landmarktransform.h"
 #include "scenemanager.h"
 #include "ibisconfig.h"
+#include "imageobject.h"
 #include "application.h"
 #include "view.h"
 #include "vtkPoints.h"
@@ -571,6 +572,7 @@ void LandmarkRegistrationObject::RegisterObject( bool on )
 void LandmarkRegistrationObject::SetAllowScaling( bool on )
 {
     m_registrationTransform->SetScalingAllowed( on );
+    emit ObjectModified();
 }
 
 bool LandmarkRegistrationObject::IsScalingAllowed()
