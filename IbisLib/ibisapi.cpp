@@ -85,6 +85,11 @@ int  IbisAPI::GetNumberOfUserObjects()
     return m_sceneManager->GetNumberOfUserObjects();
 }
 
+void IbisAPI::GetAllUserObjects(QList<SceneObject*> &list)
+{
+    m_sceneManager->GetAllUserObjects( list );
+}
+
 ImageObject * IbisAPI::GetReferenceDataObject( )
 {
     return m_sceneManager->GetReferenceDataObject();
