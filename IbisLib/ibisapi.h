@@ -44,6 +44,7 @@ public:
     SceneObject * GetSceneRoot();
     PointerObject *GetNavigationPointerObject( );
     int  GetNumberOfUserObjects();
+    void GetAllUserObjects(QList<SceneObject*> &);
     ImageObject * GetReferenceDataObject( );
     void GetAllImageObjects( QList<ImageObject*> & objects );
     void GetAllPolyDataObjects( QList<PolyDataObject*> & objects );
