@@ -130,6 +130,11 @@ void IbisAPI::GetAllTrackedObjects( QList<TrackedSceneObject*> & all )
     return m_sceneManager->GetAllTrackedObjects( all );
 }
 
+void IbisAPI::GetAllPointsObjects( QList<PointsObject*> & objects )
+{
+    return m_sceneManager->GetAllPointsObjects( objects );
+}
+
 void IbisAPI::GetAllObjectsOfType( const char * typeName, QList<SceneObject*> & all )
 {
     return m_sceneManager->GetAllObjectsOfType( typeName, all );
