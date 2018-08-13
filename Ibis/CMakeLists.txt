@@ -1,4 +1,4 @@
-PROJECT ( IBIS )
+PROJECT ( IBIS_MAIN )
 
 # define sources
 SET( IBIS_SRC main.cpp commandlinearguments.cpp )
@@ -15,12 +15,6 @@ endif()
 qt5_wrap_cpp( IBIS_MOC ${IBIS_HDR_MOC} )
 
 # make rules to create c++ source from Qt resource files
-
-# Define include directories for other ibis libs
-include_directories( ${IBIS_VTK_INCLUDE_DIR} )
-include_directories( ${IBISLIB_INCLUDE_DIR} )
-include_directories( ${IBISLIB_INCLUDE_DIR}/gui )
-include_directories( ${IBISLIB_BINARY_DIR} )    # include qt-generated headers
 
 # Generate the file that is going to import the plugins
 set( ImportPluginsSourceFile ${CMAKE_CURRENT_BINARY_DIR}/importplugins.cpp )
@@ -71,10 +65,15 @@ if(APPLE)
     set( executable_flags MACOSX_BUNDLE )
 endif(APPLE)
 
+if( WIN32 )
+	set( executable_flags WIN32 )
+	set( platform_src Ibis.rc )
+endif()
+
 #================================
 # Define executable
 #================================
-SET( SOURCE ${IBIS_HDR} ${IBIS_HDR_MOC} ${IBIS_SRC} ${ImportPluginsSourceFile} ${IBIS_MOC} ${IBIS_SRC_ICNS} )
+SET( SOURCE ${IBIS_HDR} ${IBIS_HDR_MOC} ${IBIS_SRC} ${ImportPluginsSourceFile} ${IBIS_MOC} ${IBIS_SRC_ICNS} ${platform_src} )
 ADD_EXECUTABLE( ${exec_name} ${executable_flags} ${SOURCE} )
 
 if (APPLE)
@@ -88,15 +87,7 @@ set( itkLibsToUse ${itkLibsToUse} itkRegistration )
 
 IF( OPENCL_FOUND )
     set( itkLibsToUse ${itkLibsToUse} itkRegistrationOpenCL)
-    include_directories( ${ITK_REGISTRATION_OPENCL_INCLUDE_DIR} )
-    foreach(GPUKernel ${ITKGPUOrientationMatching_Kernels}) 
-        message(${ITK_REGISTRATION_OPENCL_INCLUDE_DIR}/${GPUKernel})
-        configure_file(${ITK_REGISTRATION_OPENCL_INCLUDE_DIR}/${GPUKernel}  ${CMAKE_BINARY_DIR}/${GPUKernel} COPYONLY)
-    endforeach(GPUKernel)    
-
     set( itkLibsToUse ${itkLibsToUse} itkVolumeReconstructionOpenCL)
-    include_directories( ${ITK_VOLUME_RECONSTRUCTION_OPENCL_INCLUDE_DIR} )
-    
     set( gpuLibs ${OPENCL_LIBRARIES})
 ENDIF()
 

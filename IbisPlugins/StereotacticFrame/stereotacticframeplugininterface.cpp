@@ -21,8 +21,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "vtkEventQtSlotConnect.h"
 #include "vtkAxesActor.h"
 #include "vtkRenderer.h"
-#include "application.h"
-#include "scenemanager.h"
+#include "ibisapi.h"
 #include "view.h"
 #include "polydataobject.h"
 #include "imageobject.h"
@@ -87,8 +86,8 @@ QWidget * StereotacticFramePluginInterface::CreateTab()
     StereotacticFrameWidget * widget = new StereotacticFrameWidget;
     widget->SetPluginInterface( this );
 
-    connect( Application::GetSceneManager(), SIGNAL(ReferenceTransformChanged()), this, SLOT( OnReferenceTransformChanged() ));
-    connect( Application::GetSceneManager(), SIGNAL(CursorPositionChanged()), this, SLOT(OnCursorMoved()) );
+    connect( GetIbisAPI(), SIGNAL(ReferenceTransformChanged()), this, SLOT( OnReferenceTransformChanged() ));
+    connect( GetIbisAPI(), SIGNAL(CursorPositionChanged()), this, SLOT(OnCursorMoved()) );
 
     return widget;
 }
@@ -101,8 +100,8 @@ bool StereotacticFramePluginInterface::WidgetAboutToClose()
     if( m_3DFrameOn )
         Disable3DFrame();
 
-    disconnect( Application::GetSceneManager(), SIGNAL(ReferenceTransformChanged()), this, SLOT( OnReferenceTransformChanged() ));
-    disconnect( Application::GetSceneManager(), SIGNAL(CursorPositionChanged()), this, SLOT(OnCursorMoved()) );
+    disconnect( GetIbisAPI(), SIGNAL(ReferenceTransformChanged()), this, SLOT( OnReferenceTransformChanged() ));
+    disconnect( GetIbisAPI(), SIGNAL(CursorPositionChanged()), this, SLOT(OnCursorMoved()) );
 
     return true;
 }
@@ -122,7 +121,7 @@ void StereotacticFramePluginInterface::EnableManipulators()
 {
     m_manipulatorsCallbacks = vtkEventQtSlotConnect::New();
 
-    View * v = Application::GetSceneManager()->GetMainTransverseView( );
+    View * v = GetIbisAPI()->GetMainTransverseView( );
     Q_ASSERT_X( v, "StereotacticFramePluginInterface::CreateTab()", "No transverse view defined. It is needed by the StereotacticFrame plugin" );
 
     for( int i = 0; i < 4; ++i )
@@ -158,7 +157,7 @@ void StereotacticFramePluginInterface::DisableManipulators()
         m_manipulatorsCallbacks = 0;
     }
 
-    View * v = Application::GetSceneManager()->GetMainTransverseView( );
+    View * v = GetIbisAPI()->GetMainTransverseView( );
     Q_ASSERT_X( v, "StereotacticFramePluginInterface::WidgetAboutToClose()", "No transverse view defined. It is needed by the StereotacticFrame plugin" );
     for( int i = 0; i < 4; i++ )
     {
@@ -198,7 +197,7 @@ void StereotacticFramePluginInterface::GetCursorFramePosition( double pos[3] )
 {
     // Get position of the cursor in reference image space
     double cursorPos[4];
-    Application::GetSceneManager()->GetCursorPosition( cursorPos );
+    GetIbisAPI()->GetCursorPosition( cursorPos );
     cursorPos[3] = 1.0;
 
     // transform it into frame space
@@ -227,7 +226,7 @@ void StereotacticFramePluginInterface::SetCursorFromFramePosition( double pos[3]
     m_frameTransform->GetMatrix( mat );
     mat->MultiplyPoint( framePos, transformedPos );
 
-    Application::GetSceneManager()->SetCursorPosition(transformedPos);
+    GetIbisAPI()->SetCursorPosition(transformedPos);
 }
 
 void StereotacticFramePluginInterface::OnCursorMoved()
@@ -264,7 +263,7 @@ void StereotacticFramePluginInterface::UpdateManipulators()
 {
     // Get cursor position
     double cursorPos[3];
-    Application::GetSceneManager()->GetCursorPosition( cursorPos );
+    GetIbisAPI()->GetCursorPosition( cursorPos );
 
     for( int nIndex = 0; nIndex < 4; ++nIndex )  // for each of the manipulators
     {
@@ -294,7 +293,7 @@ void StereotacticFramePluginInterface::UpdateManipulators()
 
 void StereotacticFramePluginInterface::Enable3DFrame()
 {
-    ImageObject * ref = GetSceneManager()->GetReferenceDataObject();
+    ImageObject * ref = GetIbisAPI()->GetReferenceDataObject();
 
     vtkSmartPointer<vtkPoints> pts = vtkSmartPointer<vtkPoints>::New();
 
@@ -325,13 +324,13 @@ void StereotacticFramePluginInterface::Enable3DFrame()
     m_frameRepresentation->SetCanEditTransformManually( false );
     m_frameRepresentation->SetLocalTransform( m_frameTransform );
 
-    GetSceneManager()->AddObject( m_frameRepresentation, ref );
+    GetIbisAPI()->AddObject( m_frameRepresentation, ref );
     m_frameRepresentation->Modified();
 }
 
 void StereotacticFramePluginInterface::Disable3DFrame()
 {
-    GetSceneManager()->RemoveObject( m_frameRepresentation );
+    GetIbisAPI()->RemoveObject( m_frameRepresentation );
     m_frameRepresentation->Delete();
     m_frameRepresentation = 0;
 }
@@ -355,7 +354,7 @@ void StereotacticFramePluginInterface::ComputeInitialTransform()
     alignmentTransform->SetMatrix( alignmentMat );
 
     // Now, we compute a translation that centers bounding boxes of image and frame
-    ImageObject * ref = GetSceneManager()->GetReferenceDataObject();
+    ImageObject * ref = GetIbisAPI()->GetReferenceDataObject();
     if( !ref )
         return;
     double imageCenter[3] = { 0.0, 0.0, 0.0 };

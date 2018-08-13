@@ -49,8 +49,6 @@ public:
     void UpdateLandmarkTransform();
     void RegisterObject( bool on );
     bool IsRegistered() { return m_isRegistered; }
-    void SetAllowScaling( bool on );
-    bool IsScalingAllowed();
     int  GetTargetObjectID() { return m_targetObjectID; }
     void SetTargetObjectID( int id );
     int  GetPointEnabledStatus( int index );

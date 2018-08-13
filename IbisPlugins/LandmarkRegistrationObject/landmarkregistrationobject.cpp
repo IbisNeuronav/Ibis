@@ -14,6 +14,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "landmarktransform.h"
 #include "scenemanager.h"
 #include "ibisconfig.h"
+#include "imageobject.h"
 #include "application.h"
 #include "view.h"
 #include "vtkPoints.h"
@@ -114,10 +115,10 @@ void LandmarkRegistrationObject::Serialize( Serializer * ser )
     }
     if( !ser->IsReader() )
     {
-        QString filename( ser->GetCurrentDirectory() );
+        QString filename( ser->GetSerializationDirectory() );
         filename.append("/LandmarkRegistration.tag");
         this->WriteTagFile( filename, true );
-        QString filename1( ser->GetCurrentDirectory() );
+        QString filename1( ser->GetSerializationDirectory() );
         filename1.append("/LandmarkRegistration.xfm");
         this->WriteXFMFile(filename1);
     }
@@ -200,7 +201,7 @@ void LandmarkRegistrationObject::Export()
     {
         tag_directory = QDir::homePath() + "/" + IBIS_CONFIGURATION_SUBDIRECTORY;
     }
-    QString filename = Application::GetInstance().GetSaveFileName( "Save tag file", tag_directory, "Tag file (*.tag)" );
+    QString filename = Application::GetInstance().GetFileNameSave( "Save tag file", tag_directory, "Tag file (*.tag)" );
 
     if(!filename.isEmpty())
     {
@@ -558,27 +559,14 @@ void LandmarkRegistrationObject::RegisterObject( bool on )
     if( on )
     {
         m_registrationTransform->UpdateRegistrationTransform();
-        vtkSmartPointer<vtkTransform> tmpTrans = vtkSmartPointer<vtkTransform>::New();
-        tmpTrans->SetMatrix( m_registrationTransform->GetRegistrationTransform()->GetMatrix() );
-        tmpTrans->Update();
-        this->SetLocalTransform(tmpTrans);
+        this->GetLocalTransform()->SetInput( m_registrationTransform->GetRegistrationTransform() );
         m_isRegistered = true;
     }
     else
     {
-        this->SetLocalTransform(m_backUpTransform);
+        this->GetLocalTransform()->SetInput( m_backUpTransform );
         m_isRegistered = false;
     }
-}
-
-void LandmarkRegistrationObject::SetAllowScaling( bool on )
-{
-    m_registrationTransform->SetScalingAllowed( on );
-}
-
-bool LandmarkRegistrationObject::IsScalingAllowed()
-{
-    return m_registrationTransform->IsScalingAllowed();
 }
 
 void LandmarkRegistrationObject::SetTargetObjectID( int id )
@@ -607,7 +595,7 @@ bool LandmarkRegistrationObject::ReadTagFile( )
     }
     if (!QFile::exists(tag_directory))
         tag_directory = QDir::homePath();
-    QString filename = Application::GetInstance().GetOpenFileName( "Load tag file", tag_directory, "Tag file (*.tag)" );
+    QString filename = Application::GetInstance().GetFileNameOpen( "Load tag file", tag_directory, "Tag file (*.tag)" );
     if (!filename.isEmpty())
     {
         QFileInfo fi(filename);

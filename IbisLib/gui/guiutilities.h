@@ -13,9 +13,9 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include <QList>
 #include <QMap>
+#include "ibisapi.h"
 
 class SceneObject;
-class SceneManager;
 class QComboBox;
 
 class GuiUtilities
@@ -35,7 +35,7 @@ public:
                 cb->setCurrentIndex( i );
         }
         if( allObjs.size() == 0 )
-            cb->addItem( "None", QVariant( SceneManager::InvalidId ) );
+            cb->addItem( "None", QVariant( IbisAPI::InvalidId ) );
         cb->blockSignals( false );
     }
 
@@ -53,7 +53,7 @@ public:
             index++;
         }
         if( allObjs.size() == 0 )
-            cb->addItem( "None", QVariant( SceneManager::InvalidId ) );
+            cb->addItem( "None", QVariant( IbisAPI::InvalidId ) );
         cb->blockSignals( false );
     }
 
@@ -63,7 +63,7 @@ public:
         bool ok = false;
         int objectId = v.toInt( &ok );
         if( !ok )
-            objectId = SceneManager::InvalidId;
+            objectId = IbisAPI::InvalidId;
         return objectId;
     }
 
@@ -77,7 +77,7 @@ public:
             if( ok  && objectId == id )
                 return index;
         }
-        return SceneManager::InvalidId;
+        return IbisAPI::InvalidId;
     }
 };
 

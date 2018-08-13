@@ -49,10 +49,6 @@ public:
 
     bool IsPluginActive() { return m_settings.active; }
 
-    // Give a chance to plugin to initialize things right after construction
-    // but with pointer to application and SceneManager available.
-    virtual void InitPlugin() {}
-
     // Functions that should be overriden in plugins
     virtual bool CanRun() = 0;
     virtual QString GetMenuEntryString() = 0;

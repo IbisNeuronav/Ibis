@@ -10,6 +10,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 #include "application.h"
 #include "hardwaremodule.h"
+#include "ibisapi.h"
 #include "mainwindow.h"
 #include "githash.h"
 #include "version.h"
@@ -122,7 +123,7 @@ Application::Application( )
     m_fileReader = 0;
     m_fileOpenProgressDialog = 0;
     m_progressDialogUpdateTimer = 0;
-    m_sceneManager = 0;
+    m_ibisAPI = 0;
     m_updateManager = 0;
     m_lookupTableManager = 0;
 }
@@ -169,6 +170,10 @@ void Application::Init( bool viewerOnly )
     // Despite what the user says, if there is no hardware module, go viewer only.
     if( m_hardwareModules.size() == 0 )
         m_viewerOnly = true;
+
+    // Create programming interface for plugins
+    m_ibisAPI = new IbisAPI();
+    m_ibisAPI->SetApplication( this );
 }
 
 Application::~Application()
@@ -185,6 +190,7 @@ Application::~Application()
     if( m_updateManager )
         m_updateManager->Delete();
 
+    delete m_ibisAPI;
     m_sceneManager->Destroy();
 
     delete m_lookupTableManager;
@@ -398,7 +404,6 @@ void Application::OpenFiles( OpenFileParams * params, bool addToScene )
     // Create Reader that reads files in another thread
     m_fileReader = new FileReader;
     m_fileReader->SetParams( params );
-    bool minc1found = false;
     for( int i = 0; i < params->filesParams.size(); ++i )
     {
         OpenFileParams::SingleFileParam & cur = params->filesParams[i];
@@ -412,29 +417,24 @@ void Application::OpenFiles( OpenFileParams * params, bool addToScene )
         }
         if( m_fileReader->IsMINC1( cur.fileName.toUtf8().data() ) )
         {
-            minc1found = true;
-            cur.isMINC1 = true;
+            if( m_fileReader->FindMincConverter() )
+            {
+                if( m_settings.ShowMINCConversionWarning )
+                    this->ShowMinc1Warning( true );
+            }
+            else
+            {
+                this->ShowMinc1Warning( false );
+                delete m_fileReader;
+                m_fileReader = 0;
+                return;
+            }
         }
     }
 
     // See if it is the first batch of objects loaded/created
     int initialNumberOfUserObjects = GetSceneManager()->GetNumberOfUserObjects();
 
-    if( minc1found )
-    {
-        if( m_fileReader->FindMincConverter() )
-        {
-            if( m_settings.ShowMINCConversionWarning )
-                this->ShowMinc1Warning( true );
-        }
-        else
-        {
-            this->ShowMinc1Warning( false );
-            delete m_fileReader;
-            m_fileReader = 0;
-            return;
-        }
-    }
     m_fileReader->start();
 
     // Create a progress dialog and a timer to update it
@@ -639,7 +639,7 @@ void Application::PostModalDialog()
 // Next 2 functions are a workaround for a bug in Qt. The update manager is ran by a Idle Qt timer (timeout = 0)
 // and for an unknown reason, Qt can't pop up file dialogs properly when such timer is running in the main loop.
 #include <QFileDialog>
-QString Application::GetOpenFileName( const QString & caption, const QString & dir, const QString & filter )
+QString Application::GetFileNameOpen( const QString & caption, const QString & dir, const QString & filter )
 {
     QWidget *parent = 0;
     if (m_mainWindow)
@@ -651,9 +651,9 @@ QString Application::GetOpenFileName( const QString & caption, const QString & d
     return filename;
 }
 
-QString Application::GetSaveFileName( const QString & caption, const QString & dir, const QString & filter )
+QString Application::GetFileNameSave( const QString & caption, const QString & dir, const QString & filter )
 {
-    Q_ASSERT_X( m_mainWindow, "Application::GetSaveFileName()", "MainWindow was not set" );
+    Q_ASSERT_X( m_mainWindow, "Application::GetFileNameSave()", "MainWindow was not set" );
     bool running = PreModalDialog();
     QString filename = QFileDialog::getSaveFileName( m_mainWindow, caption, dir, filter );
     if( running )
@@ -675,7 +675,7 @@ QString Application::GetExistingDirectory( const QString & caption, const QStrin
 bool Application::GetOpenFileSequence( QStringList & filenames, QString extension, const QString & caption, const QString & dir, const QString & filter )
 {
     // Get Base directory and file pattern
-    QString firstFilename = Application::GetInstance().GetOpenFileName( "Select first file of acquisition", dir, "Minc file (*.mnc)" );
+    QString firstFilename = Application::GetInstance().GetFileNameOpen( "Select first file of acquisition", dir, "Minc file (*.mnc)" );
     if( firstFilename.isEmpty() )
         return false;
 
@@ -795,13 +795,9 @@ void Application::LoadPlugins()
         IbisPlugin * p = qobject_cast< IbisPlugin* >( plugin );
         if( p )
         {
-            p->SetApplication( this );
+            p->SetIbisAPI( m_ibisAPI );
             p->BaseLoadSettings( settings );
-            if( p->GetPluginType() == IbisPluginTypeTool )
-            {
-                ToolPluginInterface * t = ToolPluginInterface::SafeDownCast( p );
-                t->InitPlugin();
-            }
+            p->InitPlugin();
         }
     }
     settings.endGroup();

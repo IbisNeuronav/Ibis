@@ -3,7 +3,10 @@
 
 #include <QObject>
 #include "vtkObject.h"
+#include "vtkSmartPointer.h"
 #include <QProcess>
+
+typedef vtkSmartPointer<class PlusServerInterface> PlusServerInterfacePtr;
 
 class PlusServerInterface : public QObject, public vtkObject
 {

@@ -13,7 +13,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "serializerhelper.h"
 #include "application.h"
 #include "ibisconfig.h"
-#include "scenemanager.h"
 #include "usacquisitionsettingswidget.h"
 #include "usmasksettingswidget.h"
 #include "imageobject.h"
@@ -688,7 +687,7 @@ void USAcquisitionObject::Serialize( Serializer * ser )
     if (ser->IsReader())
     {   
         if (m_baseDirectory.at(0) == '.')
-            m_baseDirectory.replace(0, 1, ser->GetCurrentDirectory() );
+            m_baseDirectory.replace(0, 1, ser->GetSerializationDirectory() );
         if (!QDir(m_baseDirectory).exists())
         {
             QString  accessError = tr("Cannot find acquisition directory: ") + m_baseDirectory;

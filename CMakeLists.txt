@@ -8,8 +8,8 @@ set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/CMakeCommon ${CMAKE_MODULE_PAT
 # Find location to install the progs
 #
 # This MUST come before PROJECT or it does not work
-INCLUDE(${CMAKE_COMMON_DIR}/InstallLocation.cmake)
 #======================================================
+INCLUDE(${CMAKE_COMMON_DIR}/InstallLocation.cmake)
 
 PROJECT( ibis )
 
@@ -25,7 +25,7 @@ set( CMAKE_CXX_STANDARD 11 )
 # dependencies.
 #==================================================================
 include(${CMAKE_COMMON_DIR}/DependencyVersions.cmake)
-set( IBIS_EXTERNAL_DEPENDENCIES_DIR ${CMAKE_CURRENT_BINARY_DIR}/../ibisExternalDependencies CACHE PATH "Path where the external dependencies (itk, vtk, openCV) have been built" )
+set( IBIS_EXTERNAL_DEPENDENCIES_DIR ${CMAKE_CURRENT_BINARY_DIR}/../IbisDeps CACHE PATH "Path where the external dependencies (itk, vtk, openCV) have been built" )
 
 #==================================================================
 # Look for QT5 (required)
@@ -40,9 +40,15 @@ if(UNIX AND NOT APPLE)
 endif()
 find_package( Qt5 COMPONENTS ${IbisQtModules} REQUIRED )
 
+# Qt support by Qt Company: QT 5.1.0 to 5.5.0 support ended.  5.6.0 still supported until March 2019.
+# ibis was never tested with versions 5.6.0, 5.7.0 and 5.8.0. It might work with 5.8.0.
+# it worked with 5.9.3
+
 if (Qt5Widgets_FOUND)
-    if (Qt5Widgets_VERSION VERSION_LESS 5.10.0)
-        message(WARNING "Minimum supported Qt5 version is 5.10.0.\nYou are using " ${Qt5Widgets_VERSION} ". It may work." )
+    if (Qt5Widgets_VERSION VERSION_LESS 5.6.0)
+        message(SEND_ERROR "Qt version 5.5.x or lower is no longer supported.\nCurrently supported Qt version is 5.9 and higher.\nYou are using " ${Qt5Widgets_VERSION} "." )
+    elseif (Qt5Widgets_VERSION VERSION_LESS 5.9.0)
+        message(SEND_ERROR "Currently supported Qt version is 5.9 and higher.\nYou are using " ${Qt5Widgets_VERSION} ". It may work." )
     endif()
 else()
     message(SEND_ERROR "The Qt5Widgets library could not be found!")
@@ -76,18 +82,12 @@ include( ${ITK_USE_FILE} )
 if( IBIS_USE_OPENCV )
     set( AutoOpenCVPath ${IBIS_EXTERNAL_DEPENDENCIES_DIR}/opencv-${IBIS_OPENCV_LONG_VERSION}/install/share/OpenCV )
     find_package( OpenCV ${IBIS_OPENCV_LONG_VERSION} REQUIRED EXACT PATHS ${AutoOpenCVPath} )
-    include_directories( ${OpenCV_INCLUDE_DIRS} )
 endif()
-
-#==================================================================
-# Include linux include directories, needed for kernel 2.6.x+
-#==================================================================
-include_directories(/usr/src/linux/include)
 
 #==================================================================
 # Create options to build or not the different dependent projects.
 #==================================================================
-if( NOT APPLE )
+if(UNIX AND NOT APPLE)
     OPTION( IBIS_BUILD_DEFAULT_HARDWARE_MODULE "Build default hardware module on Linux." ON )
 endif()
 OPTION( IBIS_BUILD_IGSIO_HARDWARE_MODULE "Build hardware module that allows connection to OpenIGTLinkServers" OFF )
@@ -103,7 +103,6 @@ set( VTK_ENCODESTRING_EXE ${VTK_INSTALL_PREFIX}/bin/vtkEncodeString-${VTK_MAJOR_
 # Build SVL (Simple Vector Library). This lib may be used everywhere
 # including in vtk extension classes.
 add_subdirectory( svl )
-include_directories( ${svlIncludeDir} )
 #==================================================================
 add_subdirectory( IbisITK )
 add_subdirectory( IbisVTK )
@@ -119,9 +118,6 @@ set( IBIS_VERSION_QUALIFIER "Dev" )                    # Dev, Alpha, Beta or not
 if( CMAKE_BUILD_TYPE MATCHES "Debug" )
     set( IBIS_BUILD_QUALIFIER "Debug" )
 endif( CMAKE_BUILD_TYPE MATCHES "Debug" )
-
-# include the output directory, where the svnversion.h file is generated
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 # a custom target that is always built
 add_custom_target(gitversion ALL
@@ -139,9 +135,6 @@ set_source_files_properties(${CMAKE_CURRENT_BINARY_DIR}/githash.h
 
 # configure version file
 configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/version.h.in ${CMAKE_CURRENT_BINARY_DIR}/version.h )
-
-# needed for projects to include version.h
-include_directories( ${Ibis_BINARY_DIR} )
 
 add_subdirectory( IbisLib )
 set( HardwareModulesLibs "" )

@@ -14,7 +14,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QWidget>
 #include <QLineEdit>
 #include "usmask.h"
-#include <math.h>
+#include <Constants.h>
 
 namespace Ui {
 class USMaskSettingsWidget;
@@ -30,8 +30,8 @@ public:
     void SetMask( USMask *mask );
     void DisableSetASDefault();
 
-    inline double to_degrees(double radians) { return radians * (180.0 / M_PI); }
-    inline double to_radians(double degrees) { return degrees * (M_PI / 180.0); }
+    inline double to_degrees(double radians) { return radians * (180.0 / vl_pi ); }
+    inline double to_radians(double degrees) { return degrees * (vl_pi / 180.0); }
 
 private slots:
 

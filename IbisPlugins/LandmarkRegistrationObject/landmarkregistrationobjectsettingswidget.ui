@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>337</width>
-    <height>298</height>
+    <height>308</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -54,13 +54,6 @@ ON</string>
       </widget>
      </item>
     </layout>
-   </item>
-   <item>
-    <widget class="QCheckBox" name="allowScalingCheckBox">
-     <property name="text">
-      <string>Allow Scaling</string>
-     </property>
-    </widget>
    </item>
    <item>
     <widget class="QLabel" name="label">

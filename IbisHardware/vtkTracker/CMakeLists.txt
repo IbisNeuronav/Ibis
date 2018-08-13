@@ -57,6 +57,7 @@ ADD_LIBRARY (vtkTracker ${Tracker_SRCS} ${Tracker_HDRS} )
 ADD_LIBRARY (ndicapi ${NDI_SRCS} ${NDI_HDRS} )
 
 TARGET_LINK_LIBRARIES(vtkTracker ndicapi)
+target_include_directories( vtkTracker PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} )
 
 if( IBIS_INSTALL_LIBS_AND_HEADERS )
     INSTALL_TARGETS(/lib vtkTracker ndicapi)

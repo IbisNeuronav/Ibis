@@ -9,13 +9,12 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
 #include "ibisplugin.h"
-#include "application.h"
+#include "ibisapi.h"
 #include <QSettings>
 
-SceneManager * IbisPlugin::GetSceneManager()
+IbisPlugin::IbisPlugin()
 {
-    Q_ASSERT( m_application );
-    return m_application->GetSceneManager();
+    m_ibisAPI = 0;
 }
 
 void IbisPlugin::BaseLoadSettings( QSettings & s )

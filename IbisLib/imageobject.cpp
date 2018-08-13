@@ -188,7 +188,7 @@ void ImageObject::Export()
     QString fullName(this->GetManager()->GetSceneDirectory());
     fullName.append("/");
     fullName.append(objectName);
-    QString saveName = Application::GetInstance().GetSaveFileName( tr("Save Object"), fullName, tr("*.mnc") );
+    QString saveName = Application::GetInstance().GetFileNameSave( tr("Save Object"), fullName, tr("*.mnc") );
     if(saveName.isEmpty())
         return;
     if (QFile::exists(saveName))

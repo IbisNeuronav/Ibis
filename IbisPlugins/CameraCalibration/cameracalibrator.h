@@ -19,6 +19,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 class vtkImageData;
 class vtkMatrix4x4;
 class vtkAmoebaMinimizer;
+class CameraCalibrationPluginInterface;
 
 struct CameraExtrinsicParams
 {
@@ -77,11 +78,15 @@ public:
 
     double GetViewReprojectionError( int viewIndex );
 
+    void SetPluginInterface( CameraCalibrationPluginInterface *ifc );
+
 protected:
 
     void InitGridWorldPoints();
     void ClearMatrixArray( std::vector< vtkMatrix4x4 * > & matVec );
     double ComputeAvgReprojectionError( CameraIntrinsicParams & intParams, CameraExtrinsicParams & extParams );
+
+    CameraCalibrationPluginInterface *m_pluginInterface;
 
     // Grid description
     int m_gridWidth;

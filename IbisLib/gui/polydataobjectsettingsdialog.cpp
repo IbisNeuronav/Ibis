@@ -247,7 +247,7 @@ void PolyDataObjectSettingsDialog::on_textureImageBrowseButton_clicked()
 {
     QString filter = tr("Image files(*.png)");
     QString dir = QDir::homePath();
-    QString filename = Application::GetInstance().GetOpenFileName( "Choose image file", dir, filter );
+    QString filename = Application::GetInstance().GetFileNameOpen( "Choose image file", dir, filter );
     this->textureImageLineEdit->setText( filename );
 }
 

@@ -13,10 +13,10 @@ find_package(OpenIGTLink REQUIRED)
 find_package( OpenIGTLinkIO REQUIRED )
 
 # Define sources
-set( IbisHardwareIgsioSrc ibishardwareIGSIO.cpp plusserverinterface.cpp )
-set( IbisHardwareIgsioHdr )
-set( IbisHardwareIgsioHdrMoc ibishardwareIGSIO.h plusserverinterface.h )
-set( IbisHardwareIgsioUi )
+set( IbisHardwareIgsioSrc ibishardwareIGSIO.cpp plusserverinterface.cpp configio.cpp ibishardwareIGSIOsettingswidget.cpp )
+set( IbisHardwareIgsioHdr configio.h )
+set( IbisHardwareIgsioHdrMoc ibishardwareIGSIO.h plusserverinterface.h ibishardwareIGSIOsettingswidget.h )
+set( IbisHardwareIgsioUi ibishardwareIGSIOsettingswidget.ui )
 
 # moc Qt source file without a ui file
 qt5_wrap_cpp( IbisHardwareIgsioMoc ${IbisHardwareIgsioHdrMoc} )

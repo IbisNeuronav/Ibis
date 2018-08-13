@@ -186,7 +186,7 @@ void PolyDataObject::Export()
     QString fullName(this->GetManager()->GetSceneDirectory());
     fullName.append("/");
     fullName.append(surfaceName);
-    QString saveName = Application::GetInstance().GetSaveFileName( tr("Save Object"), fullName, tr("*.vtk") );
+    QString saveName = Application::GetInstance().GetFileNameSave( tr("Save Object"), fullName, tr("*.vtk") );
     if(saveName.isEmpty())
         return;
     if (QFile::exists(saveName))

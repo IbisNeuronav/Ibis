@@ -204,7 +204,7 @@ void vtkSimpleProp3D::Update()
     }
 }
 
-unsigned long int vtkSimpleProp3D::GetRedrawMTime()
+vtkMTimeType vtkSimpleProp3D::GetRedrawMTime()
 {
     unsigned long mTime=this->GetMTime();
     unsigned long time;

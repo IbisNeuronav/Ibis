@@ -54,8 +54,6 @@ foreach( file ${LibGlsl} )
   set( LibGlslSrc ${LibGlslSrc} ${shader_src} ${shader_h} ${shader_cxx} )
 endforeach(file)
 
-include_directories( ${CMAKE_CURRENT_BINARY_DIR} )
-
 #================================
 # Define output
 #================================
@@ -64,6 +62,8 @@ ADD_LIBRARY( vtkExtensions SHARED ${VTK_EXTENSIONS_SRC} ${VTK_EXTENSIONS_HDR} )
 ELSE( BUILD_SHARED_LIBS )
 ADD_LIBRARY( vtkExtensions ${VTK_EXTENSIONS_SRC} ${VTK_EXTENSIONS_HDR} ${LibGlslSrc} )
 ENDIF( BUILD_SHARED_LIBS )
+
+target_include_directories( vtkExtensions  PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} PRIVATE ${CMAKE_CURRENT_BINARY_DIR} )
 
 # install
 if( IBIS_INSTALL_LIBS_AND_HEADERS )

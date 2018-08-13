@@ -16,8 +16,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QObject>
 #include <QString>
 
+class IbisAPI;
 class Application;
-class SceneManager;
 class QSettings;
 
 
@@ -30,8 +30,7 @@ public:
 
     vtkTypeMacro( IbisPlugin, vtkObject );
 
-    Application * GetApplication() { return m_application; }
-    SceneManager * GetSceneManager();
+    IbisAPI * GetIbisAPI() { return m_ibisAPI; }
 
     virtual QString GetPluginName() = 0;
     virtual IbisPluginTypes GetPluginType() = 0;
@@ -44,8 +43,13 @@ signals:
 
 protected:
 
-    IbisPlugin() {}
+    IbisPlugin();
     virtual ~IbisPlugin() {}
+
+    // Give a chance to plugin to initialize things right after construction
+    // but with a valid pointer to m_ibiAPI and after settings have been loaded.
+    // This function can be overriden by every plugin to initialize its internal data.
+    virtual void InitPlugin() {}
 
     // These functions should be overriden only by the base class for each plugin type base classes.
     virtual void PluginTypeLoadSettings( QSettings & s ) {}
@@ -61,8 +65,12 @@ private:
 
     friend class Application;
 
+    IbisAPI * m_ibisAPI;
+
+    friend class IbisAPI;
+
     // Should only be called by Application at init and shutdown
-    void SetApplication( Application * app ) { m_application = app; }
+    void SetIbisAPI( IbisAPI * api ) { m_ibisAPI = api; }
     void BaseLoadSettings( QSettings & s );
     void BaseSaveSettings( QSettings & s );
 

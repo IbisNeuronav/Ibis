@@ -26,6 +26,7 @@ class QSettings;
 class HardwareModule;
 class UpdateManager;
 class SceneManager;
+class IbisAPI;
 class SceneObject;
 class WorldObject;
 class CameraObject;
@@ -98,9 +99,10 @@ public:
     void AddGlobalEventHandler( GlobalEventHandler * h );
     void RemoveGlobalEventHandler( GlobalEventHandler * h );
     bool GlobalKeyEvent( QKeyEvent * e );
-    
+
     void InitHardware();
-    
+    void InitAPI();
+
     void AddHardwareSettingsMenuEntries( QMenu * menu );
     void AddToolObjectsToScene();
     void RemoveToolObjectsFromScene();
@@ -152,8 +154,8 @@ public:
     bool GetPointsFromTagFile(QString fileName, PointsObject *pts1, PointsObject *pts2 );
 
     // Useful modal dialog
-    QString GetOpenFileName( const QString & caption = QString(), const QString & dir = QString(), const QString & filter = QString() );
-    QString GetSaveFileName( const QString & caption = QString(), const QString & dir = QString(), const QString & filter = QString() );
+    QString GetFileNameOpen( const QString & caption = QString(), const QString & dir = QString(), const QString & filter = QString() );
+    QString GetFileNameSave( const QString & caption = QString(), const QString & dir = QString(), const QString & filter = QString() );
     QString GetExistingDirectory( const QString & caption = QString(), const QString & dir = QString() );
     bool GetOpenFileSequence( QStringList & filenames, QString extension, const QString & caption, const QString & dir, const QString & filter );
     int LaunchModalDialog( QDialog * d );
@@ -203,6 +205,7 @@ private:
 
     MainWindow                  * m_mainWindow;
     SceneManager                * m_sceneManager;
+    IbisAPI                     * m_ibisAPI;
     UpdateManager               * m_updateManager;
     QList<HardwareModule*>        m_hardwareModules;
     LookupTableManager          * m_lookupTableManager;

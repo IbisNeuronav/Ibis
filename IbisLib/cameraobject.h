@@ -159,13 +159,13 @@ protected slots:
 
 protected:
 
+    void ListenForIbisClockTick( bool listen );
     void InternalDrawPath( std::vector< Vec3 > & p3d, double color[4] );
     virtual void Hide() override;
     virtual void Show() override;
 
     virtual void ObjectAddedToScene() override;
     virtual void ObjectAboutToBeRemovedFromScene() override;
-    virtual void InternalWorldTransformChanged() override;
     void InternalSetIntrinsicParams();
     void UpdateGeometricRepresentation();
     void UpdateVtkCamera();

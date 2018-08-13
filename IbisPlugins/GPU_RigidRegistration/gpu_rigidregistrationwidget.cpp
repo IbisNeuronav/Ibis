@@ -16,6 +16,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "vnl/algo/vnl_symmetric_eigensystem.h"
 #include "vnl/algo/vnl_real_eigensystem.h"
 #include "vtkSmartPointer.h"
+#include "ibisapi.h"
 
 GPU_RigidRegistrationWidget::GPU_RigidRegistrationWidget(QWidget *parent) :
     QWidget(parent),
@@ -60,16 +61,17 @@ void GPU_RigidRegistrationWidget::on_startButton_clicked()
     }
 
     // Get input images
-    SceneManager * sm = m_pluginInterface->GetSceneManager();
-    ImageObject * sourceImageObject = ImageObject::SafeDownCast( sm->GetObjectByID( sourceImageObjectId ) );
+    IbisAPI *ibisAPI = m_pluginInterface->GetIbisAPI();
+    Q_ASSERT(ibisAPI);
+    ImageObject * sourceImageObject = ImageObject::SafeDownCast( ibisAPI->GetObjectByID( sourceImageObjectId ) );
     Q_ASSERT_X( sourceImageObject, "GPU_RigidRegistrationWidget::on_startButton_clicked()", "Invalid source object" );
     vtkTransform * sourceVtkTransform = vtkTransform::SafeDownCast( sourceImageObject->GetWorldTransform() );
 
-    ImageObject * targetImageObject = ImageObject::SafeDownCast( sm->GetObjectByID( targetImageObjectId ) );
+    ImageObject * targetImageObject = ImageObject::SafeDownCast( ibisAPI->GetObjectByID( targetImageObjectId ) );
     Q_ASSERT_X( targetImageObject, "GPU_RigidRegistrationWidget::on_startButton_clicked()", "Invalid target object" );
     vtkTransform * targetVtkTransform = vtkTransform::SafeDownCast( targetImageObject->GetWorldTransform() );
 
-    SceneObject * transformObject = sm->GetObjectByID( transformObjectId );
+    SceneObject * transformObject = ibisAPI->GetObjectByID( transformObjectId );
     vtkTransform * vtktransform = vtkTransform::SafeDownCast( transformObject->GetLocalTransform() );
     Q_ASSERT_X( vtktransform, "GPU_RigidRegistrationWidget::on_startButton_clicked()", "Invalid transform" );
 
@@ -151,12 +153,13 @@ void GPU_RigidRegistrationWidget::UpdateUi()
   ui->initialSigmaComboBox->addItem( "8.0", QVariant( 8.0 ) );
   ui->initialSigmaComboBox->setCurrentIndex( 1 );
 
-  SceneManager * sm = m_pluginInterface->GetSceneManager();
-  const SceneManager::ObjectList & allObjects = sm->GetAllObjects();
+  IbisAPI *ibisAPI = m_pluginInterface->GetIbisAPI();
+  Q_ASSERT(ibisAPI);
+  const QList< SceneObject* > &allObjects = ibisAPI->GetAllObjects();
   for( int i = 0; i < allObjects.size(); ++i )
   {
       SceneObject * current = allObjects[i];
-      if( current != sm->GetSceneRoot() && current->IsListable() && !current->IsManagedByTracker())
+      if( current != ibisAPI->GetSceneRoot() && current->IsListable() && !current->IsManagedByTracker())
       {
           if( current->IsA("ImageObject") )
           {
@@ -179,7 +182,7 @@ void GPU_RigidRegistrationWidget::UpdateUi()
   else
   {
       int sourceId = ui->sourceImageComboBox->itemData( ui->sourceImageComboBox->currentIndex() ).toInt();
-      ImageObject * sourceImageObject = ImageObject::SafeDownCast( sm->GetObjectByID( sourceId ) );
+      ImageObject * sourceImageObject = ImageObject::SafeDownCast( ibisAPI->GetObjectByID( sourceId ) );
 
       if( sourceImageObject->CanEditTransformManually() )
       {
@@ -205,8 +208,9 @@ void GPU_RigidRegistrationWidget::on_sourceImageComboBox_activated(int index)
   if( sourceId != -1)
   {
       ui->transformObjectComboBox->clear();    
-      SceneManager * sm = m_pluginInterface->GetSceneManager();
-      ImageObject * sourceImageObject = ImageObject::SafeDownCast( sm->GetObjectByID( sourceId ) );
+      IbisAPI *ibisAPI = m_pluginInterface->GetIbisAPI();
+      Q_ASSERT(ibisAPI);
+      ImageObject * sourceImageObject = ImageObject::SafeDownCast( ibisAPI->GetObjectByID( sourceId ) );
       ui->transformObjectComboBox->addItem( sourceImageObject->GetName(), QVariant( sourceId ) );
       if(sourceImageObject->GetParent() )
       {
