@@ -585,7 +585,7 @@ void MainWindow::fileNewScene()
             return;
     }
     Application::GetInstance().GetSettings()->WorkingDirectory = QDir::homePath();
-    manager->SetSceneDirectory( QDir::homePath() ); // to force directory selection
+    manager->SetSceneDirectory( "" ); // to force directory selection
     manager->NewScene();
 }
 
