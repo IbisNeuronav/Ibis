@@ -120,6 +120,26 @@ void IbisAPI::GetAllUsProbeObjects( QList<UsProbeObject*> & all )
     return m_sceneManager->GetAllUsProbeObjects( all );
 }
 
+void IbisAPI::GetAllPointerObjects( QList<PointerObject*> & all )
+{
+    return m_sceneManager->GetAllPointerObjects( all );
+}
+
+void IbisAPI::GetAllTrackedObjects( QList<TrackedSceneObject*> & all )
+{
+    return m_sceneManager->GetAllTrackedObjects( all );
+}
+
+void IbisAPI::GetAllPointsObjects( QList<PointsObject*> & objects )
+{
+    return m_sceneManager->GetAllPointsObjects( objects );
+}
+
+void IbisAPI::GetAllObjectsOfType( const char * typeName, QList<SceneObject*> & all )
+{
+    return m_sceneManager->GetAllObjectsOfType( typeName, all );
+}
+
 void IbisAPI::GetAllCameraObjects( QList<CameraObject*> & all )
 {
     return m_sceneManager->GetAllCameraObjects( all );

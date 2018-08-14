@@ -13,6 +13,8 @@ class UsProbeObject;
 class PointerObject;
 class CameraObject;
 class ImageObject;
+class PointsObject;
+class TrackedSceneObject;
 class PolyDataObject;
 class ToolPluginInterface;
 class ObjectPluginInterface;
@@ -52,6 +54,11 @@ public:
     void GetAllUSAcquisitionObjects( QList<USAcquisitionObject*> & all );
     void GetAllUsProbeObjects( QList<UsProbeObject*> & all );
     void GetAllCameraObjects( QList<CameraObject*> & all );
+
+    void GetAllPointsObjects( QList<PointsObject*> & objects );
+    void GetAllPointerObjects( QList<PointerObject*> & all );
+    void GetAllTrackedObjects( QList<TrackedSceneObject*> & all );
+    void GetAllObjectsOfType( const char * typeName, QList<SceneObject*> & all );
 
     View * GetViewByID( int id );
     View * GetMain3DView();
