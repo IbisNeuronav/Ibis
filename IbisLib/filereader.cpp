@@ -26,13 +26,14 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "imageobject.h"
 #include "polydataobject.h"
 #include "pointsobject.h"
+#include "ibisconfig.h"
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
 #include <QApplication>
 #include <QProcess>
 #include <QMessageBox>
-
+#include <QTextStream>
 #include <itkImageIOFactory.h>
 
 FileReader::FileReader(QObject *parent)
@@ -85,6 +86,36 @@ QString FindExecutable( QStringList & candidatePaths )
 
 bool FileReader::FindMincConverter()
 {
+    if( !m_mincconvert.isEmpty() && !m_minccalc.isEmpty() )
+        return true;
+    // First check if there is a configuration file
+    QString mincconfig = QDir::homePath() + "/" + IBIS_CONFIGURATION_SUBDIRECTORY + "/minctoolspath.txt";
+
+    QFileInfo info( mincconfig );
+    if( info.exists() && info.isReadable() )
+    {
+        QFile mincConfigFile( mincconfig );
+        QStringList mincConvertPaths1, mincCalcPaths1;
+        QString toolPath;
+        if( mincConfigFile.open( QIODevice::ReadOnly | QIODevice::Text ) )
+        {
+            while( !mincConfigFile.atEnd() )
+            {
+                QTextStream input( &mincConfigFile );
+                toolPath = input.readLine();
+                toolPath.append( "/mincconvert");
+                mincConvertPaths1.append( toolPath );
+                toolPath.replace( "convert", "calc" );
+                mincCalcPaths1.append( toolPath );
+                m_mincconvert = FindExecutable( mincConvertPaths1 );
+                m_minccalc = FindExecutable( mincCalcPaths1 );
+                mincConfigFile.close();
+                if( !m_mincconvert.isEmpty() && !m_minccalc.isEmpty() )
+                    return true;
+            }
+        }
+    }
+
     m_mincconvert = FindExecutable( mincConvertPaths );
     m_minccalc = FindExecutable( mincCalcPaths );
     return ( !m_mincconvert.isEmpty() && !m_minccalc.isEmpty() );
