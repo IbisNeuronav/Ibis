@@ -13,10 +13,9 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include <QThread>
 #include <QStringList>
-#include "itkMetaDataObject.h"
+#include <itkMetaDataObject.h>
 #include <itkMetaDataDictionary.h>
 
-class SceneManager;
 class SceneObject;
 class vtkEventQtSlotConnect;
 class vtkObject;
@@ -82,6 +81,10 @@ public:
     void PrintMetadata(itk::MetaDataDictionary &dict);
     bool FindMincConverter();
     bool IsMINC1( QString fileName );
+    void SetMINCConvert( QString conv ) { m_mincconvert = conv; }
+    QString GetMINCConvert( ) { return m_mincconvert; }
+    void SetMINCCalc( QString calc ) { m_minccalc = calc; }
+    QString GetMINCCalc( ) { return m_minccalc; }
     bool ConvertMINC1toMINC2(QString &inputileName, QString &outputileName , bool isVideoFrame = false );
     bool GetFrameDataFromMINCFile(QString filename, vtkImageData *img , vtkMatrix4x4 *mat );
     bool GetPointsDataFromTagFile( QString filename, PointsObject *pts1, PointsObject *pts2 );

@@ -26,7 +26,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "imageobject.h"
 #include "polydataobject.h"
 #include "pointsobject.h"
-#include "ibisconfig.h"
+#include "application.h"
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
@@ -89,7 +89,7 @@ bool FileReader::FindMincConverter()
     if( !m_mincconvert.isEmpty() && !m_minccalc.isEmpty() )
         return true;
     // First check if there is a configuration file
-    QString mincconfig = QDir::homePath() + "/" + IBIS_CONFIGURATION_SUBDIRECTORY + "/minctoolspath.txt";
+    QString mincconfig = Application::GetConfigDirectory() + "/minctoolspath.txt";
 
     QFileInfo info( mincconfig );
     if( info.exists() && info.isReadable() )
@@ -710,7 +710,11 @@ bool FileReader::GetFrameDataFromMINCFile(QString filename, vtkImageData *img , 
     if( this->IsMINC1( filename ) )
     {
         if( this->m_mincconvert.isEmpty())
+        {
             this->FindMincConverter();
+            QString tmp("All acquired frames in MINC1 format will be automatically converted to MINC2.");
+            QMessageBox::information( 0, "Information", tmp, 1, 0 );
+        }
         if( this->m_mincconvert.isEmpty())
         {
             QString tmp("File ");
