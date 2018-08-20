@@ -16,15 +16,15 @@ option( IBIS_INSTALL_OPENCV "Install OpenCV library needed in some plugins" OFF 
 
 # Build All External Dependencies except Qt (vtk, Itk, minc, etc.)
 set( vtk_name vtk-${IBIS_VTK_LONG_VERSION} )
-set( IBIS_VTK_DIR ${CMAKE_CURRENT_BINARY_DIR}/IbisDeps/${vtk_name}/install/lib/cmake/vtk-${IBIS_VTK_SHORT_VERSION})
+set( IBIS_VTK_DIR ${CMAKE_CURRENT_BINARY_DIR}/IbisDeps/${vtk_name}/build )
 set( itk_name itk-${IBIS_ITK_LONG_VERSION} )
-set( IBIS_ITK_DIR ${CMAKE_CURRENT_BINARY_DIR}/IbisDeps/${itk_name}/install/lib/cmake/ITK-${IBIS_ITK_SHORT_VERSION})
+set( IBIS_ITK_DIR ${CMAKE_CURRENT_BINARY_DIR}/IbisDeps/${itk_name}/build )
 set( opencv_name opencv-${IBIS_OPENCV_LONG_VERSION} )
-set( IBIS_OPENCV_DIR ${CMAKE_CURRENT_BINARY_DIR}/IbisDeps/${opencv_name}/install/share/OpenCV )
+set( IBIS_OPENCV_DIR ${CMAKE_CURRENT_BINARY_DIR}/IbisDeps/${opencv_name}/build )
 set( openigtlink_name OpenIGTLink )
-set( IBIS_OPENIGTLINK_DIR ${CMAKE_CURRENT_BINARY_DIR}/IbisDeps/${openigtlink_name}/src/${openigtlink_name}-build )
+set( IBIS_OPENIGTLINK_DIR ${CMAKE_CURRENT_BINARY_DIR}/IbisDeps/${openigtlink_name}/build )
 set( openigtlinkio_name OpenIGTLinkIO )
-set( IBIS_OPENIGTLINKIO_DIR ${CMAKE_CURRENT_BINARY_DIR}/IbisDeps/${openigtlinkio_name}/src/${openigtlinkio_name}-build)
+set( IBIS_OPENIGTLINKIO_DIR ${CMAKE_CURRENT_BINARY_DIR}/IbisDeps/${openigtlinkio_name}/build)
 add_subdirectory( IbisDeps )
 
 # Build Ibis
@@ -38,10 +38,11 @@ if( IBIS_BUILD_IGTL_HARDWARE_SUPPORT )
 endif()
 ExternalProject_Add(
     Ibis
+    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/Ibis
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../
     BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/Ibis
     CMAKE_ARGS -DIBIS_USE_OPENCV=${IBIS_INSTALL_OPENCV}
-               -DOpenCV_DIR=${OpenCV_DIR}
+               -DOpenCV_DIR=${IBIS_OPENCV_DIR}
                -DCMAKE_OSX_SYSROOT:PATH=${CMAKE_OSX_SYSROOT}
                -DCMAKE_OSX_DEPLOYMENT_TARGET:STRING=${CMAKE_OSX_DEPLOYMENT_TARGET}
                -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_INSTALL_PREFIX}

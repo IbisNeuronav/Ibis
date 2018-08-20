@@ -1,5 +1,10 @@
+set( openigtlinkio_prefix ${external_project_dir}/${openigtlinkio_name} )
 ExternalProject_Add( ${openigtlinkio_name}
-  PREFIX ${external_project_dir}/${openigtlinkio_name}
+  PREFIX ${openigtlinkio_prefix}
+  SOURCE_DIR ${openigtlinkio_prefix}/src
+  BINARY_DIR ${openigtlinkio_prefix}/build
+  STAMP_DIR ${openigtlinkio_prefix}/stamp
+  INSTALL_COMMAND ""
   GIT_REPOSITORY "git://github.com/IGSIO/OpenIGTLinkIO.git"
   GIT_TAG master
   CMAKE_ARGS -DCMAKE_OSX_SYSROOT:PATH=${CMAKE_OSX_SYSROOT}

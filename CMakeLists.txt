@@ -61,7 +61,7 @@ include_directories( ${Qt5Multimedia_INCLUDE_DIRS} )
 #==================================================================
 # Look for VTK (required)
 #==================================================================
-set( AutoVtkPath ${IBIS_EXTERNAL_DEPENDENCIES_DIR}/vtk-${IBIS_VTK_LONG_VERSION}/install/lib/cmake/vtk-${IBIS_VTK_SHORT_VERSION} )
+set( AutoVtkPath ${IBIS_EXTERNAL_DEPENDENCIES_DIR}/vtk-${IBIS_VTK_LONG_VERSION}/build )
 find_package(VTK ${IBIS_VTK_LONG_VERSION} EXACT COMPONENTS vtkGUISupportQt vtkRenderingOpenGL vtkRenderingVolumeOpenGL vtkRenderingImage
     vtkRenderingAnnotation vtkImagingStencil vtkImagingStatistics vtkFiltersTexture
     vtkInteractionStyle vtkInteractionWidgets
@@ -69,10 +69,20 @@ find_package(VTK ${IBIS_VTK_LONG_VERSION} EXACT COMPONENTS vtkGUISupportQt vtkRe
     PATHS ${AutoVtkPath} )
 include(${VTK_USE_FILE})
 
+# Find vtkEncodeString utility executable. Look in built or installed dir structure
+set( vtkEncodeStringExeFile vtkEncodeString-${VTK_MAJOR_VERSION}.${VTK_MINOR_VERSION} )
+find_program( VTK_ENCODESTRING_EXE ${vtkEncodeStringExeFile} PATHS
+              ${VTK_DIR}/bin/
+              ${VTK_INSTALL_PREFIX}/bin
+              NO_DEFAULT_PATH )
+if( NOT VTK_ENCODESTRING_EXE )
+    message( FATAL_ERROR "the vtkEncodeString executable could not be found in the VTK directory.")
+endif()
+
 #==================================================================
 # Look for ITK (required)
 #==================================================================
-set( AutoItkPath ${IBIS_EXTERNAL_DEPENDENCIES_DIR}/itk-${IBIS_ITK_LONG_VERSION}/install/lib/cmake/ITK-${IBIS_ITK_SHORT_VERSION} )
+set( AutoItkPath ${IBIS_EXTERNAL_DEPENDENCIES_DIR}/itk-${IBIS_ITK_LONG_VERSION}/build )
 find_package( ITK ${IBIS_ITK_LONG_VERSION} EXACT REQUIRED PATHS ${AutoItkPath} )
 include( ${ITK_USE_FILE} )
 
@@ -80,7 +90,7 @@ include( ${ITK_USE_FILE} )
 # Look for OpenCV (required by some plugins, but not the main app)
 #==================================================================
 if( IBIS_USE_OPENCV )
-    set( AutoOpenCVPath ${IBIS_EXTERNAL_DEPENDENCIES_DIR}/opencv-${IBIS_OPENCV_LONG_VERSION}/install/share/OpenCV )
+    set( AutoOpenCVPath ${IBIS_EXTERNAL_DEPENDENCIES_DIR}/opencv-${IBIS_OPENCV_LONG_VERSION}/build )
     find_package( OpenCV ${IBIS_OPENCV_LONG_VERSION} REQUIRED EXACT PATHS ${AutoOpenCVPath} )
 endif()
 
@@ -96,8 +106,6 @@ OPTION( IBIS_INSTALL_LIBS_AND_HEADERS "make install will install all libraries a
 
 find_package ( OpenCL QUIET )
 include(${CMAKE_COMMON_DIR}/OpenCLMacros.cmake)
-
-set( VTK_ENCODESTRING_EXE ${VTK_INSTALL_PREFIX}/bin/vtkEncodeString-${VTK_MAJOR_VERSION}.${VTK_MINOR_VERSION} )
 
 #==================================================================
 # Build SVL (Simple Vector Library). This lib may be used everywhere
@@ -146,5 +154,3 @@ if( IBIS_BUILD_IGSIO_HARDWARE_MODULE )
 endif()
 add_subdirectory( IbisPlugins )
 add_subdirectory( Ibis )
-
-

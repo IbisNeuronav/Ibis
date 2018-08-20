@@ -1,8 +1,12 @@
+set( itk_prefix ${external_project_dir}/${itk_name} )
 ExternalProject_Add( ${itk_name}
-    SOURCE_DIR ${external_project_dir}/${itk_name}/src
+    PREFIX ${itk_prefix}
+    SOURCE_DIR ${itk_prefix}/src
+    BINARY_DIR ${itk_prefix}/build
+    STAMP_DIR ${itk_prefix}/stamp
+    INSTALL_COMMAND ""
     GIT_REPOSITORY "https://github.com/InsightSoftwareConsortium/ITK.git"
     GIT_TAG v${IBIS_ITK_LONG_VERSION}
-    BINARY_DIR ${external_project_dir}/${itk_name}/build
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=${external_project_dir}/${itk_name}/install
                -DCMAKE_OSX_SYSROOT:PATH=${CMAKE_OSX_SYSROOT}
                -DCMAKE_OSX_DEPLOYMENT_TARGET:STRING=${CMAKE_OSX_DEPLOYMENT_TARGET}

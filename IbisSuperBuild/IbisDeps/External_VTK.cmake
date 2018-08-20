@@ -1,13 +1,16 @@
+set( vtk_prefix ${external_project_dir}/${vtk_name} )
 ExternalProject_Add( ${vtk_name}
-    SOURCE_DIR ${external_project_dir}/${vtk_name}/src
-    BINARY_DIR ${external_project_dir}/${vtk_name}/build
+    PREFIX ${vtk_prefix}
+    SOURCE_DIR ${vtk_prefix}/src
+    BINARY_DIR ${vtk_prefix}/build
+    STAMP_DIR ${vtk_prefix}/stamp
+    INSTALL_COMMAND ""
     GIT_REPOSITORY "https://github.com/Kitware/VTK.git"
     GIT_TAG v${IBIS_VTK_LONG_VERSION}
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=${external_project_dir}/${vtk_name}/install
                -DCMAKE_OSX_SYSROOT:PATH=${CMAKE_OSX_SYSROOT}
                -DCMAKE_OSX_DEPLOYMENT_TARGET:STRING=${CMAKE_OSX_DEPLOYMENT_TARGET}
                -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
-               -DQT_QMAKE_EXECUTABLE:PATH=${QT_QMAKE_EXECUTABLE}
                -DBUILD_TESTING:BOOL=FALSE
                -DBUILD_SHARED_LIBS:BOOL=FALSE
                -DCMAKE_CXX_FLAGS:STRING=-fPIC

@@ -9,8 +9,10 @@ include_directories( ${IBISLIB_INCLUDE_DIR} )
 #================================
 # Find OpenIGTLink, OpenIGTLinkIO
 #================================
-find_package(OpenIGTLink REQUIRED)
-find_package( OpenIGTLinkIO REQUIRED )
+set( AutoIgtlPath ${IBIS_EXTERNAL_DEPENDENCIES_DIR}/OpenIGTLink/build )
+find_package( OpenIGTLink REQUIRED PATHS ${AutoIgtlPath} )
+set( AutoIgtlIOPath ${IBIS_EXTERNAL_DEPENDENCIES_DIR}/OpenIGTLinkIO/build )
+find_package( OpenIGTLinkIO REQUIRED PATHS ${AutoIgtlIOPath} )
 
 # Define sources
 set( IbisHardwareIgsioSrc ibishardwareIGSIO.cpp plusserverinterface.cpp configio.cpp ibishardwareIGSIOsettingswidget.cpp )

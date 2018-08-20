@@ -1,5 +1,10 @@
+set( openigtlink_prefix ${external_project_dir}/${openigtlink_name} )
 ExternalProject_Add( ${openigtlink_name}
-    PREFIX ${external_project_dir}/${openigtlink_name}
+    PREFIX ${openigtlink_prefix}
+    SOURCE_DIR ${openigtlink_prefix}/src
+    BINARY_DIR ${openigtlink_prefix}/build
+    STAMP_DIR ${openigtlink_prefix}/stamp
+    INSTALL_COMMAND ""
     GIT_REPOSITORY "git://github.com/openigtlink/OpenIGTLink.git"
     GIT_TAG master
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=${external_project_dir}/${openigtlink_name}/install
