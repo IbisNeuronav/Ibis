@@ -417,17 +417,29 @@ void Application::OpenFiles( OpenFileParams * params, bool addToScene )
         }
         if( m_fileReader->IsMINC1( cur.fileName.toUtf8().data() ) )
         {
-            if( m_fileReader->FindMincConverter() )
+            if( m_ibisAPI->GetMINCConvert().isEmpty() || m_ibisAPI->GetMINCCalc().isEmpty() )
             {
-                if( m_settings.ShowMINCConversionWarning )
-                    this->ShowMinc1Warning( true );
+                if( m_fileReader->FindMincConverter() )
+                {
+                    if( m_settings.ShowMINCConversionWarning )
+                        this->ShowMinc1Warning( true );
+                    m_ibisAPI->SetMINCConvert( m_fileReader->GetMINCConvert() );
+                    m_ibisAPI->SetMINCCalc( m_fileReader->GetMINCCalc() );
+                }
+                else
+                {
+                    this->ShowMinc1Warning( false );
+                    delete m_fileReader;
+                    m_fileReader = 0;
+                    return;
+                }
             }
             else
             {
-                this->ShowMinc1Warning( false );
-                delete m_fileReader;
-                m_fileReader = 0;
-                return;
+                if( m_settings.ShowMINCConversionWarning )
+                    this->ShowMinc1Warning( true );
+                m_fileReader->SetMINCConvert( m_ibisAPI->GetMINCConvert() );
+                m_fileReader->SetMINCCalc( m_ibisAPI->GetMINCCalc() );
             }
         }
     }
@@ -530,7 +542,14 @@ bool Application::GetImageDataFromVideoFrame(QString fileName, vtkImageData *img
         QMessageBox::critical( 0, "Error", message, 1, 0 );
         return false;
     }
+    m_fileReader->SetMINCConvert( m_ibisAPI->GetMINCConvert() );
+    m_fileReader->SetMINCCalc( m_ibisAPI->GetMINCCalc() );
     bool ok = m_fileReader->GetFrameDataFromMINCFile( fileName, img, mat );
+    if( m_ibisAPI->GetMINCConvert().isEmpty() || m_ibisAPI->GetMINCCalc().isEmpty() )
+    {
+        m_ibisAPI->SetMINCConvert( m_fileReader->GetMINCConvert() );
+        m_ibisAPI->SetMINCCalc( m_fileReader->GetMINCCalc() );
+    }
     delete m_fileReader;
     return ok;
 }

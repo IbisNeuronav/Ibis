@@ -26,13 +26,14 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "imageobject.h"
 #include "polydataobject.h"
 #include "pointsobject.h"
+#include "application.h"
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
 #include <QApplication>
 #include <QProcess>
 #include <QMessageBox>
-
+#include <QTextStream>
 #include <itkImageIOFactory.h>
 
 FileReader::FileReader(QObject *parent)
@@ -85,6 +86,36 @@ QString FindExecutable( QStringList & candidatePaths )
 
 bool FileReader::FindMincConverter()
 {
+    if( !m_mincconvert.isEmpty() && !m_minccalc.isEmpty() )
+        return true;
+    // First check if there is a configuration file
+    QString mincconfig = Application::GetConfigDirectory() + "/minctoolspath.txt";
+
+    QFileInfo info( mincconfig );
+    if( info.exists() && info.isReadable() )
+    {
+        QFile mincConfigFile( mincconfig );
+        QStringList mincConvertPaths1, mincCalcPaths1;
+        QString toolPath;
+        if( mincConfigFile.open( QIODevice::ReadOnly | QIODevice::Text ) )
+        {
+            while( !mincConfigFile.atEnd() )
+            {
+                QTextStream input( &mincConfigFile );
+                toolPath = input.readLine();
+                toolPath.append( "/mincconvert");
+                mincConvertPaths1.append( toolPath );
+                toolPath.replace( "convert", "calc" );
+                mincCalcPaths1.append( toolPath );
+                m_mincconvert = FindExecutable( mincConvertPaths1 );
+                m_minccalc = FindExecutable( mincCalcPaths1 );
+                mincConfigFile.close();
+                if( !m_mincconvert.isEmpty() && !m_minccalc.isEmpty() )
+                    return true;
+            }
+        }
+    }
+
     m_mincconvert = FindExecutable( mincConvertPaths );
     m_minccalc = FindExecutable( mincCalcPaths );
     return ( !m_mincconvert.isEmpty() && !m_minccalc.isEmpty() );
@@ -679,7 +710,11 @@ bool FileReader::GetFrameDataFromMINCFile(QString filename, vtkImageData *img , 
     if( this->IsMINC1( filename ) )
     {
         if( this->m_mincconvert.isEmpty())
+        {
             this->FindMincConverter();
+            QString tmp("All acquired frames in MINC1 format will be automatically converted to MINC2.");
+            QMessageBox::information( 0, "Information", tmp, 1, 0 );
+        }
         if( this->m_mincconvert.isEmpty())
         {
             QString tmp("File ");

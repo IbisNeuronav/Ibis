@@ -113,6 +113,12 @@ public:
     void AddBottomWidget( QWidget * w );
     void RemoveBottomWidget( QWidget * w );
 
+    // MINC tools
+    void SetMINCConvert( QString conv ) { m_mincconvert = conv; }
+    QString GetMINCConvert( ) { return m_mincconvert; }
+    void SetMINCCalc( QString calc ) { m_minccalc = calc; }
+    QString GetMINCCalc( ) { return m_minccalc; }
+
 public slots:
     void ObjectAddedSlot( int id );
     void ObjectRemovedSlot( int id );
@@ -134,6 +140,9 @@ private:
 
     friend class Application;
     void SetApplication( Application * app );
+    // MINC tools
+    QString m_mincconvert;
+    QString m_minccalc;
 };
 
 #endif // IBISAPI_H
