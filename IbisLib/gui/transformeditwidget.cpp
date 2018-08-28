@@ -208,6 +208,7 @@ void TransformEditWidget::SetIdentityButtonClicked()
         if( transform )
         {
             transform->Identity();
+            transform->Modified();
             this->UpdateUi();
         }
     }
