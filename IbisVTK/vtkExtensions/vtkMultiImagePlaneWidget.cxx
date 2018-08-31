@@ -246,7 +246,8 @@ void vtkMultiImagePlaneWidget::AddTextureToPlane( vtkActor * planeActor, vtkPoly
 {
     vtkTexture * tex = this->Inputs[inputIndex].Texture;
     std::string textureName = ComposeTextureName( inputIndex );
-    planeMapper->MapDataArrayToMultiTextureAttribute( textureName.c_str(), ComposeTextureCoordName(inputIndex).c_str(), vtkDataObject::FIELD_ASSOCIATION_POINTS );
+    std::string texCoordName = ComposeTextureCoordName(inputIndex);
+    planeMapper->MapDataArrayToMultiTextureAttribute( textureName.c_str(), texCoordName.c_str(), vtkDataObject::FIELD_ASSOCIATION_POINTS );
     planeActor->GetProperty()->SetTexture( textureName.c_str(), tex );
 }
 
@@ -273,7 +274,7 @@ void vtkMultiImagePlaneWidget::InternalAddRenderer( vtkRenderer * ren, vtkAssemb
     texturePlaneActor->SetMapper( mapper );
     texturePlaneActor->SetUserTransform( this->BoundingTransform );
     vtkProperty * properties = texturePlaneActor->GetProperty();
-    properties->SetColor( 0.0, 0.0, 0.0 );
+    properties->SetColor( 1.0, 1.0, 1.0 );
     properties->SetAmbient( 1.0 );
     properties->SetDiffuse( 1.0 );
     properties->LightingOff();
@@ -1212,13 +1213,11 @@ void vtkMultiImagePlaneWidget::UpdateTextureUnits()
     {
         vtkActor * actor = this->TexturePlaneActors[act];
         actor->GetProperty()->RemoveAllTextures();
-        int textureIndex = 0;
         for( int in = 0; in < this->Inputs.size(); ++in )
         {
             if( !this->Inputs[in].IsHidden )
             {
                 this->AddTextureToPlane( actor, this->TexturePlaneMappers[act], in );
-                ++textureIndex;
             }
         }
     }
