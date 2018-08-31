@@ -62,7 +62,8 @@ include_directories( ${Qt5Multimedia_INCLUDE_DIRS} )
 # Look for VTK (required)
 #==================================================================
 set( AutoVtkPath ${IBIS_EXTERNAL_DEPENDENCIES_DIR}/vtk-${IBIS_VTK_LONG_VERSION}/build )
-find_package(VTK ${IBIS_VTK_LONG_VERSION} EXACT COMPONENTS vtkGUISupportQt vtkRenderingOpenGL vtkRenderingVolumeOpenGL2
+find_package(VTK ${IBIS_VTK_LONG_VERSION} EXACT COMPONENTS vtkGUISupportQt vtkRenderingOpenGL2
+    vtkRenderingImage vtkRenderingVolumeOpenGL2
     vtkRenderingAnnotation vtkImagingStencil vtkImagingStatistics vtkFiltersTexture
     vtkInteractionStyle vtkInteractionWidgets
     vtkIOXML vtkIOLegacy vtkIOPLY NO_MODULE
@@ -70,7 +71,9 @@ find_package(VTK ${IBIS_VTK_LONG_VERSION} EXACT COMPONENTS vtkGUISupportQt vtkRe
 include(${VTK_USE_FILE})
 
 # Find vtkEncodeString utility executable. Look in built or installed dir structure
-set( vtkEncodeStringExeFile vtkEncodeString-${VTK_MAJOR_VERSION}.${VTK_MINOR_VERSION} )
+#set( vtkEncodeStringExeFile vtkEncodeString-${VTK_MAJOR_VERSION}.${VTK_MINOR_VERSION} )
+# temp hack: vtk 9.0.0 (master head) still produces vtkEncodeString-8.1
+set( vtkEncodeStringExeFile vtkEncodeString-8.1 )
 find_program( VTK_ENCODESTRING_EXE ${vtkEncodeStringExeFile} PATHS
               ${VTK_DIR}/bin/
               ${VTK_DIR}/bin/Debug/

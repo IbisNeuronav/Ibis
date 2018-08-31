@@ -12,6 +12,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include "vtkPRISMVolumeMapper.h"
 
+#include "vtkObjectFactory.h"
 #include "vtkCamera.h"
 #include "vtkLightCollection.h"
 #include "vtkLight.h"
@@ -45,10 +46,7 @@ vtkPRISMVolumeMapper::PerVolume::PerVolume()
     shaderVolumeContribution = defaultVolumeContribution;
 }
 
-//----------------------------------------------------------------------------
-// Needed when we don't use the vtkStandardNewMacro.
-vtkInstantiatorNewMacro(vtkPRISMVolumeMapper);
-//----------------------------------------------------------------------------
+vtkStandardNewMacro(vtkPRISMVolumeMapper);
 
 //-----------------------------------------------------------------------------
 vtkPRISMVolumeMapper::vtkPRISMVolumeMapper()
@@ -87,14 +85,6 @@ vtkPRISMVolumeMapper::vtkPRISMVolumeMapper()
 vtkPRISMVolumeMapper::~vtkPRISMVolumeMapper()
 {
 }
-
-
-//-----------------------------------------------------------------------------
-vtkPRISMVolumeMapper * vtkPRISMVolumeMapper::New()
-{
-    return new vtkPRISMVolumeMapper;
-}
-
 
 int vtkPRISMVolumeMapper::IsRenderSupported( vtkVolumeProperty *, vtkRenderer * ren )
 {
@@ -194,9 +184,9 @@ void vtkPRISMVolumeMapper::Render( vtkRenderer * ren, vtkVolume * vol )
 
     this->UpdateDepthBufferTexture( renderSize[0], renderSize[1] );
 
-    GLboolean isMultisampleEnabled = glIsEnabled( vtkgl::MULTISAMPLE );
+    GLboolean isMultisampleEnabled = glIsEnabled( GL_MULTISAMPLE );
     if( isMultisampleEnabled )
-        glDisable(vtkgl::MULTISAMPLE );
+        glDisable( GL_MULTISAMPLE );
 
     // Setup volume matrix. Usually, this should be done by the 3D prop, but
     // it seems like it is not the case for volume props.
@@ -372,7 +362,7 @@ void vtkPRISMVolumeMapper::Render( vtkRenderer * ren, vtkVolume * vol )
     VolumeShader->UseProgram( false );
 
     if( isMultisampleEnabled )
-        glEnable( vtkgl::MULTISAMPLE );
+        glEnable( GL_MULTISAMPLE );
 
     // retrieve enable state for blend, lighting and depth test
     glPopAttrib();
@@ -591,10 +581,10 @@ void vtkPRISMVolumeMapper::UpdateWorldToTextureMatrix( vtkVolume * volume )
 
 int vtkPRISMVolumeMapper::IsTextureSizeSupported( int size[3] )
 {
-    vtkgl::TexImage3D( vtkgl::PROXY_TEXTURE_3D, 0, GL_LUMINANCE, size[0], size[1], size[2], 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, NULL );
+    glTexImage3D( GL_PROXY_TEXTURE_3D, 0, GL_LUMINANCE, size[0], size[1], size[2], 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, NULL );
 
     GLint width;
-    glGetTexLevelParameteriv( vtkgl::PROXY_TEXTURE_3D, 0, GL_TEXTURE_WIDTH, &width );
+    glGetTexLevelParameteriv( GL_PROXY_TEXTURE_3D, 0, GL_TEXTURE_WIDTH, &width );
 
     if( width != 0 )
         return 1;
@@ -686,17 +676,17 @@ int vtkPRISMVolumeMapper::UpdateVolumes( )
         }
 
         // Transfer the input volume to the RGBA volume
-        glEnable( vtkgl::TEXTURE_3D );
+        glEnable( GL_TEXTURE_3D );
         if( pv.VolumeTextureId == 0 )
             glGenTextures( 1, &pv.VolumeTextureId );
-        glBindTexture( vtkgl::TEXTURE_3D, pv.VolumeTextureId );
+        glBindTexture( GL_TEXTURE_3D, pv.VolumeTextureId );
         //glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         //glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexParameteri( vtkgl::TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri( vtkgl::TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        vtkgl::TexImage3D( vtkgl::TEXTURE_3D, 0, internalFormat, dim[0], dim[1], dim[2], 0, GL_LUMINANCE, glScalarType, input->GetScalarPointer() );
-        glBindTexture( vtkgl::TEXTURE_3D, 0 );
-        glDisable( vtkgl::TEXTURE_3D );
+        glTexParameteri( GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri( GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glTexImage3D( GL_TEXTURE_3D, 0, internalFormat, dim[0], dim[1], dim[2], 0, GL_LUMINANCE, glScalarType, input->GetScalarPointer() );
+        glBindTexture( GL_TEXTURE_3D, 0 );
+        glDisable( GL_TEXTURE_3D );
 
         if( glGetError() != GL_NO_ERROR )
         {

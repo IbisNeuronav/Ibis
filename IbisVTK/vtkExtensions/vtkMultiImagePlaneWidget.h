@@ -126,7 +126,6 @@ public:
     // Description:
     // Instantiate the object.
     static vtkMultiImagePlaneWidget *New();
-
     vtkTypeMacro(vtkMultiImagePlaneWidget,vtkMulti3DWidget);
     void PrintSelf(ostream& os, vtkIndent indent) override;
 
@@ -394,7 +393,7 @@ protected:
     void InternalRemoveRenderer( int index ) override;
 
 	// Utility
-    void AddTextureToPlane( vtkActor * planeActor, vtkPolyDataMapper * planeMapper, int inputIndex, int textureIndex );
+    void AddTextureToPlane( vtkActor * planeActor, vtkPolyDataMapper * planeMapper, int inputIndex );
     void UpdateTextureUnits();
 
     void InternalEnable() override;
@@ -545,7 +544,8 @@ public:
     void UpdateNormal();
 protected:
     void ComputeBounds( double globalBounds[] );
-    void GetTextureCoordName( std::string & name, int index );
+    std::string ComposeTextureCoordName( int index );
+    std::string ComposeTextureName( int index );
 
     // The cross-hair cursor
     int                CursorActive;
