@@ -80,7 +80,7 @@ vtkMultiImagePlaneWidget::vtkMultiImagePlaneWidget() : vtkMulti3DWidget()
     this->ShowPlaneOutline = 0;
     this->CurrentImageValue        = VTK_FLOAT_MAX;
     this->MarginSelectMode         = 8;
-    this->BoundingImage            = 0;
+    this->BoundingImage            = nullptr;
     this->BoundingTransform        = vtkTransform::New();
 
     // Represent the plane's outline geometry
@@ -120,10 +120,10 @@ vtkMultiImagePlaneWidget::vtkMultiImagePlaneWidget() : vtkMulti3DWidget()
     this->PlaceWidget(bounds);
 
     // Set up the initial properties
-    this->PlaneProperty         = 0;
-    this->SelectedPlaneProperty = 0;
-    this->CursorProperty        = 0;
-    this->MarginProperty        = 0;
+    this->PlaneProperty         = nullptr;
+    this->SelectedPlaneProperty = nullptr;
+    this->CursorProperty        = nullptr;
+    this->MarginProperty        = nullptr;
     this->CreateDefaultProperties();
 
     // Set up actions
@@ -222,25 +222,33 @@ void vtkMultiImagePlaneWidget::SetActorsTransforms()
         this->MarginActors[i]->SetUserTransform( this->BoundingTransform );
 }
 
-void vtkMultiImagePlaneWidget::GetTextureCoordName( std::string & name, int index )
+std::string vtkMultiImagePlaneWidget::ComposeTextureCoordName( int index )
 {
     std::ostringstream os;
     os << "TexCoord_";
     os.width(3);
     os.fill('0');
     os << index;
-    name = os.str();
+    return os.str();
 }
 
-void vtkMultiImagePlaneWidget::AddTextureToPlane( vtkActor * planeActor, vtkPolyDataMapper * planeMapper, int inputIndex, int textureIndex )
+std::string vtkMultiImagePlaneWidget::ComposeTextureName( int index )
+{
+    std::ostringstream os;
+    os << "Texture_";
+    os.width(3);
+    os.fill('0');
+    os << index;
+    return os.str();
+}
+
+void vtkMultiImagePlaneWidget::AddTextureToPlane( vtkActor * planeActor, vtkPolyDataMapper * planeMapper, int inputIndex )
 {
     vtkTexture * tex = this->Inputs[inputIndex].Texture;
-    std::string texCoordName;
-    this->GetTextureCoordName( texCoordName, textureIndex );
-    planeMapper->MapDataArrayToMultiTextureAttribute(vtkProperty::VTK_TEXTURE_UNIT_0 + textureIndex, texCoordName.c_str(), vtkDataObject::FIELD_ASSOCIATION_POINTS );
-    planeActor->GetProperty()->SetTexture(vtkProperty::VTK_TEXTURE_UNIT_0 + textureIndex, tex );
+    std::string textureName = ComposeTextureName( inputIndex );
+    planeMapper->MapDataArrayToMultiTextureAttribute( textureName.c_str(), ComposeTextureCoordName(inputIndex).c_str(), vtkDataObject::FIELD_ASSOCIATION_POINTS );
+    planeActor->GetProperty()->SetTexture( textureName.c_str(), tex );
 }
-
 
 void vtkMultiImagePlaneWidget::InternalAddRenderer( vtkRenderer * ren, vtkAssembly * assembly )
 {
@@ -270,13 +278,11 @@ void vtkMultiImagePlaneWidget::InternalAddRenderer( vtkRenderer * ren, vtkAssemb
     properties->SetDiffuse( 1.0 );
     properties->LightingOff();
     properties->ShadingOff();
-    int textureUnit = 0;
     for( int i = 0; i < this->Inputs.size(); ++i )
 	{
         if( !this->Inputs[ i ].IsHidden )
         {
-            AddTextureToPlane( texturePlaneActor, mapper, i, textureUnit );
-            ++textureUnit;
+            AddTextureToPlane( texturePlaneActor, mapper, i );
         }
 	}
     texturePlaneActor->PickableOn();
@@ -1175,7 +1181,7 @@ int vtkMultiImagePlaneWidget::AddInput( vtkImageData * in, vtkScalarsToColors * 
         inObjects.Texture->SetInterpolate(this->TextureInterpolate);
     else
         inObjects.Texture->SetInterpolate( 0 );
-    inObjects.Texture->MapColorScalarsThroughLookupTableOff();
+    inObjects.Texture->SetColorModeToDirectScalars();
     inObjects.Texture->SetBlendingMode(vtkTexture::VTK_TEXTURE_BLENDING_MODE_ADD);
     inObjects.Texture->RepeatOff();
 
@@ -1211,7 +1217,7 @@ void vtkMultiImagePlaneWidget::UpdateTextureUnits()
         {
             if( !this->Inputs[in].IsHidden )
             {
-                this->AddTextureToPlane( actor, this->TexturePlaneMappers[act], in, textureIndex );
+                this->AddTextureToPlane( actor, this->TexturePlaneMappers[act], in );
                 ++textureIndex;
             }
         }
@@ -1592,8 +1598,7 @@ void vtkMultiImagePlaneWidget::UpdateNormal()
 		else
             in.Reslice->SetOutputExtent( 0, 1, 0, 1, 0, 0 );
 
-        std::string tcoordName;
-        this->GetTextureCoordName( tcoordName, i );
+        std::string tcoordName = this->ComposeTextureCoordName( i );
         double offsetX = .5 / ( extentX + 1 );
         double offsetY = .5 / ( extentY + 1 );
         this->TexturePlaneCoords->AddTCoordSet( tcoordName.c_str(), offsetX, offsetY );
