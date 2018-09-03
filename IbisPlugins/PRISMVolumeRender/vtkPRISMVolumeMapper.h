@@ -177,6 +177,11 @@ protected:
   bool SetEyeTo3DTextureMatrixVariable( vtkVolume * volume, vtkRenderer * renderer );
 
   // Description:
+  // Compute projection, inverse projection and modelview matrices
+  // from camera paramters and set them in the shader.
+  bool SetCameraMatrices( vtkRenderer * ren );
+
+  // Description:
   // Compute various camera related variables and set in shader
   // 1 - camera pos in texture space, 2 -the min and max distance
   // between the virtual camera and the volume in texture space.

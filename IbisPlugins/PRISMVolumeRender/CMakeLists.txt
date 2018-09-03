@@ -4,7 +4,7 @@
 # C string literal in a header
 # file.
 #================================
-set( LibGlsl vtkPRISMVolumeRaycast_FS )
+set( LibGlsl vtkPRISMVolumeRaycast_FS vtkPRISMVolumeRaycast_VS vtkPRISMVolumeMapperBackface_FS vtkPRISMVolumeMapperBackface_VS )
 
 foreach( file ${LibGlsl} )
   set( shader_src ${CMAKE_CURRENT_SOURCE_DIR}/${file}.glsl )
