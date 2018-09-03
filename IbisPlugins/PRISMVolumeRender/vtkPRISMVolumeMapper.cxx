@@ -128,13 +128,13 @@ void vtkPRISMVolumeMapper::Render( vtkRenderer * ren, vtkVolume * vol )
     if( !this->GlExtensionsLoaded )
         this->LoadExtensions( ren->GetRenderWindow() );
 
-    if( !this->GlExtensionsLoaded )
+    /*if( !this->GlExtensionsLoaded )
     {
         vtkErrorMacro( "The following extensions are not supported: " );
         for( UnsupportedContainer::iterator it = this->UnsupportedExtensions.begin(); it != this->UnsupportedExtensions.end(); ++it )
             vtkErrorMacro( << (*it) );
         return;
-    }
+    }*/
 
     if( !this->BackfaceShader )
     {
@@ -226,6 +226,7 @@ void vtkPRISMVolumeMapper::Render( vtkRenderer * ren, vtkVolume * vol )
     glCullFace( GL_FRONT );
     BackfaceShader->UseProgram( true );
     bool res = BackfaceShader->SetVariable( "windowSize", renderSize[0], renderSize[1] );
+    res &= this->SetCameraMatrices( ren );
     BackfaceTexture->DrawToTexture( true );
     glClearColor( 0.0, 0.0, 0.0, 0.0 );
     glClear( GL_COLOR_BUFFER_BIT );
@@ -295,6 +296,7 @@ void vtkPRISMVolumeMapper::Render( vtkRenderer * ren, vtkVolume * vol )
     res = VolumeShader->SetVariable( "stepSize", float(realSamplingDistance) );
     res = VolumeShader->SetVariable( "stepSizeAdjustment", float(this->SampleDistance) );
     res = this->SetEyeTo3DTextureMatrixVariable( vol, ren );
+    res = this->SetCameraMatrices( ren );
 
     // compute Interaction point position in 3D texture space
     this->UpdateWorldToTextureMatrix( vol );
@@ -475,6 +477,9 @@ std::string vtkPRISMVolumeMapper::GetShaderBuildError()
 }
 
 #include "vtkPRISMVolumeRaycast_FS.h"
+#include "vtkPRISMVolumeRaycast_VS.h"
+#include "vtkPRISMVolumeMapperBackface_FS.h"
+#include "vtkPRISMVolumeMapperBackface_VS.h"
 
 void ReplaceAll( std::string & original, std::string findString, std::string replaceString )
 {
@@ -486,26 +491,13 @@ void ReplaceAll( std::string & original, std::string findString, std::string rep
     }
 }
 
-const char backfaceShaderCode[] = "uniform ivec2 windowSize; \
-        void main() \
-        { \
-            gl_FragColor = gl_Color; \
-            vec4 ndcPos;  \
-            ndcPos.xy = ( (gl_FragCoord.xy / vec2(windowSize) ) * 2.0) - 1.0; \
-            ndcPos.z = (2.0 * gl_FragCoord.z - gl_DepthRange.near - gl_DepthRange.far) / gl_DepthRange.diff; \
-            ndcPos.w = 1.0; \
-            vec4 clipPos = ndcPos / gl_FragCoord.w; \
-            vec4 eyeSpaceCoord = gl_ProjectionMatrixInverse * clipPos; \
-            gl_FragColor.a =  -eyeSpaceCoord.z; \
-        }";
-
 bool vtkPRISMVolumeMapper::CreateBackfaceShader()
 {
-    std::string shaderCode( backfaceShaderCode );
     if( !this->BackfaceShader )
         this->BackfaceShader = new GlslShader;
     this->BackfaceShader->Reset();
-    this->BackfaceShader->AddShaderMemSource( shaderCode.c_str() );
+    this->BackfaceShader->AddShaderMemSource( vtkPRISMVolumeMapperBackface_FS );
+    this->BackfaceShader->AddVertexShaderMemSource( vtkPRISMVolumeMapperBackface_VS );
     bool result = this->BackfaceShader->Init();
     return result;
 }
@@ -549,6 +541,7 @@ bool vtkPRISMVolumeMapper::UpdateVolumeShader()
         this->VolumeShader = new GlslShader;
     this->VolumeShader->Reset();
     this->VolumeShader->AddShaderMemSource( shaderCode.c_str() );
+    this->VolumeShader->AddVertexShaderMemSource( vtkPRISMVolumeRaycast_VS );
     bool result = this->VolumeShader->Init();
     return result;
 }
@@ -836,6 +829,34 @@ bool vtkPRISMVolumeMapper::SetEyeTo3DTextureMatrixVariable( vtkVolume * volume, 
     // Set the matrix with the shader
     bool res = this->VolumeShader->SetVariable( "eyeToTexture", eyeToTexture );
     return res;
+}
+
+#include "vtkOpenGLCamera.h"
+#include "vtkMatrix3x3.h"
+
+bool vtkPRISMVolumeMapper::SetCameraMatrices( vtkRenderer * ren )
+{
+    vtkOpenGLCamera * cam = vtkOpenGLCamera::SafeDownCast( ren->GetActiveCamera() );
+    if( !ren )
+    {
+        vtkErrorMacro(<<"vtkPRISMVolumeMapper: this mapper only works with OpenGL.")
+        return false;
+    }
+
+    vtkMatrix4x4 * glTransformMatrix;
+    vtkMatrix4x4 * modelViewMatrix;
+    vtkMatrix3x3 * normalMatrix;
+    vtkMatrix4x4 * projectionMatrix;
+    cam->GetKeyMatrices( ren, modelViewMatrix, normalMatrix, projectionMatrix, glTransformMatrix );
+
+    vtkNew<vtkMatrix4x4> projectionMatrixInverse;
+    projectionMatrixInverse->DeepCopy(projectionMatrix);
+    projectionMatrixInverse->Invert();
+
+    this->VolumeShader->SetVariable( "projectionMatrix", projectionMatrix );
+    this->VolumeShader->SetVariable( "projectionMatrixInverse", projectionMatrixInverse );
+    this->VolumeShader->SetVariable( "modelViewMatrix", modelViewMatrix );
+
 }
 
 #include <limits>
