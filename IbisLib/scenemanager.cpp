@@ -82,13 +82,6 @@ SceneManager::~SceneManager()
     this->SceneRoot->Delete();
 }
 
-// for debugging only
-int SceneManager::GetRefCount()
-{
-    int n = this->GetReferenceCount();
-    return n;
-}
-
 void SceneManager::Destroy()
 {
     this->ReleaseAllViews();
