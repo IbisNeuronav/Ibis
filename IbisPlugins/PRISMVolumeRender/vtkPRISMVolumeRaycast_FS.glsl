@@ -18,6 +18,10 @@ uniform vec3 lightPosition;
 uniform vec3 cameraPosition;
 uniform vec2 volumeDistanceRange;
 
+in vec3 color;
+
+out vec4 fragColor;
+
 // Determine if ptTest is inside the cylinder defined by pt1, pt2 and radius.
 // Returns distance to the central axis of the cylinder if inside and -1.0 otherwise
 float IsInsideCylinder( vec3 ptTest, vec3 pt1, vec3 pt2, float radius )
@@ -160,7 +164,7 @@ void main()
 
     // Compute volume entry and exit point in GL normalized texture coordinates
     vec4 entryBack = texture( back_tex_id, gl_FragCoord.xy );
-    vec4 entryFront = gl_Color;
+    vec4 entryFront = vec4( color, 1.0 );
     vec3 diff =  entryBack.rgb - entryFront.rgb;
 
     // Find real eye-space depth of front side of the cube
@@ -226,6 +230,6 @@ void main()
         currentDistance += stepSize;
     }
 
-    gl_FragColor.rgb = finalColor.rgb * multFactor;
-    gl_FragColor.a = finalColor.a;
+    fragColor.rgb = finalColor.rgb * multFactor;
+    fragColor.a = finalColor.a;
 }

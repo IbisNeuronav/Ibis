@@ -34,6 +34,7 @@ public:
 	bool Init();
     std::string GetErrorMessage() { return m_errorMessage; }
 	bool UseProgram( bool use );
+
 	bool SetVariable( const char * name, int value );
     bool SetVariable( const char * name, int count, int * values );
 	bool SetVariable( const char * name, float value );

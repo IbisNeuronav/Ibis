@@ -49,7 +49,7 @@ class vtkPRISMVolumeMapper : public vtkVolumeMapper
 public:
 
   vtkTypeMacro(vtkPRISMVolumeMapper,vtkVolumeMapper);
-  void PrintSelf(ostream& os, vtkIndent indent);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   static vtkPRISMVolumeMapper * New();
 
@@ -63,13 +63,13 @@ public:
   // WARNING: INTERNAL METHOD - NOT INTENDED FOR GENERAL USE
   // DO NOT USE THIS METHOD OUTSIDE OF THE RENDERING PROCESS
   // Render the volume
-  virtual void Render(vtkRenderer *ren, vtkVolume *vol);
+  virtual void Render(vtkRenderer *ren, vtkVolume *vol) override;
 
   // Description:
   // Release any graphics resources that are being consumed by this texture.
   // The parameter window could be used to determine which graphic
   // resources to release.
-  void ReleaseGraphicsResources(vtkWindow *);
+  void ReleaseGraphicsResources(vtkWindow *) override;
 
   // Description:
   // This is not really a distance. It is a ratio of the sampling
@@ -102,7 +102,7 @@ protected:
   vtkPRISMVolumeMapper();
   ~vtkPRISMVolumeMapper();
 
-  int FillInputPortInformation( int port, vtkInformation * info );
+  int FillInputPortInformation( int port, vtkInformation * info ) override;
 
   void RemoveInput( int index );
   
@@ -145,11 +145,6 @@ protected:
   vtkSmartPointer<vtkMatrix4x4> WorldToTextureMatrix;
   vtkSmartPointer<vtkColoredCube> ColoredCube;
 
-  // Extension management
-  bool GlExtensionsLoaded;
-  typedef std::vector< std::string > UnsupportedContainer;
-  UnsupportedContainer UnsupportedExtensions;
-
   bool CreateBackfaceShader();
   bool UpdateVolumeShader();
 
@@ -179,7 +174,7 @@ protected:
   // Description:
   // Compute projection, inverse projection and modelview matrices
   // from camera paramters and set them in the shader.
-  bool SetCameraMatrices( vtkRenderer * ren );
+  bool SetCameraMatrices( vtkRenderer * ren, GlslShader * s );
 
   // Description:
   // Compute various camera related variables and set in shader
@@ -187,14 +182,7 @@ protected:
   // between the virtual camera and the volume in texture space.
   bool SetCameraVariablesInShader( vtkRenderer * ren, vtkVolume * volume );
 
-  // Description:
-  // Impemented in subclass - check is texture size is OK.
-  virtual int IsTextureSizeSupported( int size[3] );
-
-  void LoadExtensions( vtkRenderWindow * window );
   void GetRenderSize( vtkRenderer * ren, int size[2] );
-
-  void CheckGLError( const char * msg );
   
 private:
 

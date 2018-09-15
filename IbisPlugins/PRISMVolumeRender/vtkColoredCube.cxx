@@ -172,21 +172,21 @@ void vtkColoredCube::Render()
 
   // Vertices
   vtkPoints * points = cubePoly->GetPoints();
-  glEnableClientState( GL_VERTEX_ARRAY );
+  glEnableVertexAttribArray( 0 );  // by convention, shaders in Ibis bind index 0 attribute array in_vertex
   GLenum vertexType = vtkDataTypeToGlEnum( points->GetDataType() );
-  glVertexPointer( 3, vertexType, 0, points->GetData()->GetVoidPointer(0) );
+  glVertexAttribPointer( 0, 3, vertexType, GL_FALSE, 0, points->GetData()->GetVoidPointer(0) );
 
   // Colors
   vtkDataArray * colors = cubePoly->GetPointData()->GetScalars();
-  glEnableClientState( GL_COLOR_ARRAY );
-  glColorPointer( 3, GL_UNSIGNED_BYTE, 0, colors->GetVoidPointer(0) );
+  glEnableVertexAttribArray( 1 );  // by convention, shaders in Ibis bind index 1 attribute array in_color
+  glVertexAttribPointer( 1, 3, GL_UNSIGNED_BYTE, GL_FALSE, 0, colors->GetVoidPointer(0) );
 
   // Draw Triangles
   glDrawElements( GL_TRIANGLES, BoxIndices->GetDataSize(), GL_UNSIGNED_INT, BoxIndices->GetVoidPointer(0) );
 
   // Restore previous state
-  glDisableClientState( GL_VERTEX_ARRAY );
-  glDisableClientState( GL_COLOR_ARRAY );
+  glDisableVertexAttribArray( 0 );
+  glDisableVertexAttribArray( 1 );
 }
 
 //----------------------------------------------------------------------------

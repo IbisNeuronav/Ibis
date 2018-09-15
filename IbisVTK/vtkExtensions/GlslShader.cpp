@@ -83,12 +83,18 @@ bool GlslShader::Init()
 		GLint logLength = 0;
         glGetProgramiv( m_glslProg, GL_INFO_LOG_LENGTH, &logLength );
         GLchar * infoLog = new GLchar[ logLength + 1 ];
-        glGetProgramInfoLog( m_glslProg, logLength, NULL, infoLog );
+        glGetProgramInfoLog( m_glslProg, logLength, nullptr, infoLog );
         vtkErrorMacro( << "Error in glsl program linking:" << infoLog );
         m_errorMessage = infoLog;
 		delete [] infoLog;
 		return false;
     }
+
+    // Set vertex attribut location
+    UseProgram( true );
+    glBindAttribLocation( m_glslProg, 0, "in_vertex" );
+    glBindAttribLocation( m_glslProg, 1, "in_color" );
+    UseProgram( false );
 
     m_errorMessage = "";
 	m_init = true;
@@ -126,6 +132,7 @@ bool GlslShader::CreateAndCompileShader( unsigned shaderType, unsigned & shaderI
         return false;
     }
     m_errorMessage = "";
+
 	return true;
 }
 

@@ -21,7 +21,7 @@ public:
 
   static vtkColoredCube *New();
   vtkTypeMacro(vtkColoredCube,vtkObject);
-  void PrintSelf(ostream& os, vtkIndent indent);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   void UpdateGeometry( vtkRenderer * ren, vtkMatrix4x4 * mat );
   void Render();
