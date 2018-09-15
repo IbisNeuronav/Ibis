@@ -26,7 +26,7 @@ class vtkColorPolyData : public vtkDataSetAlgorithm
 public:
 
   vtkTypeMacro(vtkColorPolyData,vtkDataSetAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   // Description:
   // Construct with s,t range=(0,1) and automatic plane generation turned on.
@@ -42,7 +42,7 @@ protected:
   vtkColorPolyData();
   ~vtkColorPolyData() {}
 
-  int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *);
+  int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *) override;
 
   double Bounds[6];
 

@@ -43,19 +43,19 @@ public:
     VolumeRenderingObject();
     virtual ~VolumeRenderingObject();
 
-    virtual void Serialize( Serializer * ser );
+    virtual void Serialize( Serializer * ser ) override;
     void Clear();
 
     // SceneObject implementation
-    virtual void Setup( View * view );
-    virtual void PreDisplaySetup();
-    virtual void Release( View * view );
-    virtual QWidget * CreateSettingsDialog( QWidget * parent );
-    virtual void CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets) {}
+    virtual void Setup( View * view ) override;
+    virtual void PreDisplaySetup() override;
+    virtual void Release( View * view ) override;
+    virtual QWidget * CreateSettingsDialog( QWidget * parent ) override;
+    virtual void CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets) override {}
 
     // Use picking to set interaction point
     bool Pick( View * v, int x, int y, double pickedPos[3] );
-    virtual bool OnLeftButtonPressed( View * v, int x, int y, unsigned modifiers );
+    virtual bool OnLeftButtonPressed( View * v, int x, int y, unsigned modifiers ) override;
     bool GetPickPos() { return m_pickPos; }
     void SetPickPos( bool set );
     double GetPickValue() { return m_pickValue; }
@@ -182,14 +182,14 @@ public slots:
 
 protected:
 
-    virtual void Hide();
-    virtual void Show();
-    void ObjectAddedToScene();
-    void ObjectRemovedFromScene();
+    virtual void Hide() override;
+    virtual void Show() override;
+    void ObjectAddedToScene() override;
+    void ObjectRemovedFromScene() override;
 
     void UpdateInteractionWidgetVisibility();
     void UpdateInteractionPointPos();
-    virtual void timerEvent( QTimerEvent * e );
+    virtual void timerEvent( QTimerEvent * e ) override;
     struct PerView;
     void UpdateMapper( PerView & pv );
     void UpdateAllMappers();
@@ -197,7 +197,7 @@ protected:
     void UpdateShaderParams();
     void ConnectImageSlot( PerImage * pi );
 
-    virtual void InternalPostSceneRead();
+    virtual void InternalPostSceneRead() override;
 
     QList< ShaderContrib > m_volumeShaders;
     void UpdateShaderContributionTypeIndices();

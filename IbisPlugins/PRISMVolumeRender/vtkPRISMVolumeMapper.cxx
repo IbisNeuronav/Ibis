@@ -31,6 +31,9 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "GlslShader.h"
 #include "vtkColoredCube.h"
 #include "vtk_glew.h"
+#include "vtkOpenGLError.h"
+#include "vtkOpenGLState.h"
+#include "vtkOpenGLRenderWindow.h"
 
 #include <sstream>
 
@@ -41,7 +44,7 @@ const char defaultVolumeContribution[] = "           vec4 volumeSample = texture
 const char defaultStopConditionCode[] = "        if( finalColor.a > .99 ) \n            break;";
 
 vtkPRISMVolumeMapper::PerVolume::PerVolume()
-    : SavedTextureInput(0), VolumeTextureId(0), Property(0), TranferFunctionTextureId(0), Enabled(true), linearSampling(true)
+    : SavedTextureInput(nullptr), VolumeTextureId(0), Property(nullptr), TranferFunctionTextureId(0), Enabled(true), linearSampling(true)
 {
     shaderVolumeContribution = defaultVolumeContribution;
 }
@@ -67,16 +70,15 @@ vtkPRISMVolumeMapper::vtkPRISMVolumeMapper()
     this->InteractionPoint2[0] = 0.0;
     this->InteractionPoint2[1] = 0.0;
     this->InteractionPoint2[2] = 200.0;
-    this->BackfaceTexture = 0;
+    this->BackfaceTexture = nullptr;
     this->DepthBufferTextureId = 0;
     this->DepthBufferTextureSize[0] = 1;
     this->DepthBufferTextureSize[1] = 1;
     this->WorldToTextureMatrix = vtkSmartPointer<vtkMatrix4x4>::New();
-    this->VolumeShader = 0;
-    this->BackfaceShader = 0;
+    this->VolumeShader = nullptr;
+    this->BackfaceShader = nullptr;
     this->VolumeShaderNeedsUpdate = true;
-    this->GlExtensionsLoaded = false;
-    this->RenderState = 0;
+    this->RenderState = nullptr;
     this->ColoredCube = vtkSmartPointer<vtkColoredCube>::New();
     this->StopConditionCode = defaultStopConditionCode;
 }
@@ -86,55 +88,41 @@ vtkPRISMVolumeMapper::~vtkPRISMVolumeMapper()
 {
 }
 
-int vtkPRISMVolumeMapper::IsRenderSupported( vtkVolumeProperty *, vtkRenderer * ren )
+int vtkPRISMVolumeMapper::IsRenderSupported( vtkVolumeProperty *, vtkRenderer * )
 {
     // simtodo : implement this properly
     return 1;
 }
 
-void vtkPRISMVolumeMapper::CheckGLError( const char * msg )
+class PRISMScopedGLState
 {
-    GLenum res = glGetError();
-    if( res != GL_NO_ERROR )
-    {
-        std::string message( msg );
-        message += "GL error: ";
-        if( res == GL_INVALID_ENUM )
-            message += "GL_INVALID_ENUM";
-        else if( res == GL_INVALID_VALUE )
-            message += "GL_INVALID_VALUE";
-        else if( res == GL_INVALID_OPERATION )
-            message += "GL_INVALID_OPERATION";
-        else if( res == GL_INVALID_FRAMEBUFFER_OPERATION )
-            message += "GL_INVALID_FRAMEBUFFER_OPERATION";
-        else if( res == GL_OUT_OF_MEMORY )
-            message += "GL_OUT_OF_MEMORY";
-        else if( res == GL_STACK_UNDERFLOW )
-            message += "GL_STACK_UNDERFLOW";
-        else if( res == GL_STACK_OVERFLOW )
-            message += "GL_STACK_OVERFLOW";
-        else
-            message += "Unknown error";
-        vtkErrorMacro( << message );
-    }
-}
+public:
+    PRISMScopedGLState( vtkOpenGLState * s )
+        : m_clearColor(s)
+        , m_enableDisableBlend(s,GL_BLEND)
+        , m_enableDisableCull(s,GL_CULL_FACE)
+        , m_enableDisableMultisample(s,GL_MULTISAMPLE)
+        , m_blendFuncSeparate(s)
+        , m_state(s) {}
+    ~PRISMScopedGLState() {}
+protected:
+    vtkOpenGLState::ScopedglClearColor m_clearColor;
+    vtkOpenGLState::ScopedglEnableDisable m_enableDisableBlend;
+    vtkOpenGLState::ScopedglEnableDisable m_enableDisableCull;
+    vtkOpenGLState::ScopedglEnableDisable m_enableDisableMultisample;
+    vtkOpenGLState::ScopedglBlendFuncSeparate m_blendFuncSeparate;
+    vtkOpenGLState * m_state;
+};
 
 void vtkPRISMVolumeMapper::Render( vtkRenderer * ren, vtkVolume * vol )
 {
     // Resets GL error before we start rendering, which helps isolating error within the mapper
-    CheckGLError( "begin vtkPRISMVolumeMapper::Render, " );
+    vtkOpenGLCheckErrorMacro("begin vtkPRISMVolumeMapper::Render, " );
 
-    // Make sure we have all extensions we need
-    if( !this->GlExtensionsLoaded )
-        this->LoadExtensions( ren->GetRenderWindow() );
-
-    /*if( !this->GlExtensionsLoaded )
-    {
-        vtkErrorMacro( "The following extensions are not supported: " );
-        for( UnsupportedContainer::iterator it = this->UnsupportedExtensions.begin(); it != this->UnsupportedExtensions.end(); ++it )
-            vtkErrorMacro( << (*it) );
-        return;
-    }*/
+    // Keep a copy of the opengl state to be restored
+    vtkOpenGLRenderWindow * renWin = vtkOpenGLRenderWindow::SafeDownCast( ren->GetRenderWindow() );
+    vtkOpenGLState * ostate = renWin->GetState();
+    PRISMScopedGLState scopedState(ostate);
 
     if( !this->BackfaceShader )
     {
@@ -145,6 +133,8 @@ void vtkPRISMVolumeMapper::Render( vtkRenderer * ren, vtkVolume * vol )
             return;
         }
     }
+
+    vtkOpenGLCheckErrorMacro("vtkPRISMVolumeMapper: Failed after backface shader init");
 
     // Make sure the shader as been created successfully
     if( this->VolumeShaderNeedsUpdate )
@@ -158,11 +148,15 @@ void vtkPRISMVolumeMapper::Render( vtkRenderer * ren, vtkVolume * vol )
         this->VolumeShaderNeedsUpdate = false;
     }
 
+    vtkOpenGLCheckErrorMacro("vtkPRISMVolumeMapper: Failed after volume shader init");
+
     // Make sure the volume texture is up to date
     if( !this->UpdateVolumes() )
     {
         return;
     }
+
+    vtkOpenGLCheckErrorMacro("vtkPRISMVolumeMapper: Failed after volume update, " );
 
     // Send transfer functions to gpu if changed
     if( !this->UpdateTransferFunctions() )
@@ -170,11 +164,13 @@ void vtkPRISMVolumeMapper::Render( vtkRenderer * ren, vtkVolume * vol )
         return;
     }
 
+    vtkOpenGLCheckErrorMacro("vtkPRISMVolumeMapper: Failed after transfer function update, " );
+
     // Make sure render target textures still correspond to screen size
     if( !this->BackfaceTexture )
     {
-        this->BackfaceTexture = new DrawableTexture;
-        this->BackfaceTexture->Init( 1, 1 );
+        this->BackfaceTexture = DrawableTexture::New();
+        this->BackfaceTexture->Init( 1, 1, ostate );
     }
 
     int renderSize[2];
@@ -184,52 +180,22 @@ void vtkPRISMVolumeMapper::Render( vtkRenderer * ren, vtkVolume * vol )
 
     this->UpdateDepthBufferTexture( renderSize[0], renderSize[1] );
 
-    GLboolean isMultisampleEnabled = glIsEnabled( GL_MULTISAMPLE );
-    if( isMultisampleEnabled )
-        glDisable( GL_MULTISAMPLE );
+    // Disable multisampling
+    ostate->vtkglDisable( GL_MULTISAMPLE );
 
-    // Setup volume matrix. Usually, this should be done by the 3D prop, but
-    // it seems like it is not the case for volume props.
-    double * mat = vol->GetMatrix()->Element[0];
-    double mat2[16];
-    mat2[0] = mat[0];
-    mat2[1] = mat[4];
-    mat2[2] = mat[8];
-    mat2[3] = mat[12];
-    mat2[4] = mat[1];
-    mat2[5] = mat[5];
-    mat2[6] = mat[9];
-    mat2[7] = mat[13];
-    mat2[8] = mat[2];
-    mat2[9] = mat[6];
-    mat2[10] = mat[10];
-    mat2[11] = mat[14];
-    mat2[12] = mat[3];
-    mat2[13] = mat[7];
-    mat2[14] = mat[11];
-    mat2[15] = mat[15];
-    glMatrixMode( GL_MODELVIEW );
-    glPushMatrix();
-    glMultMatrixd( mat2 );
-
-    // Save enable state for blend, lighting, depth test and shade model
-    glPushAttrib( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_ENABLE_BIT | GL_LIGHTING_BIT );
-
-    glDisable( GL_BLEND );
-    glDisable( GL_LIGHTING );
-    glDisable( GL_DEPTH_TEST );
-
-    glShadeModel( GL_SMOOTH );
+    ostate->vtkglDisable( GL_BLEND );
+    ostate->vtkglDisable( GL_DEPTH_TEST );
 
     // Draw backfaces to the texture
-    glEnable( GL_CULL_FACE );
-    glCullFace( GL_FRONT );
+    ostate->vtkglEnable( GL_CULL_FACE );
+    ostate->vtkglCullFace( GL_FRONT );
     BackfaceShader->UseProgram( true );
     bool res = BackfaceShader->SetVariable( "windowSize", renderSize[0], renderSize[1] );
-    res &= this->SetCameraMatrices( ren );
+    res &= this->SetCameraMatrices( ren, BackfaceShader );
+    res &= BackfaceShader->SetVariable( "volumeMatrix", vol->GetMatrix() );
     BackfaceTexture->DrawToTexture( true );
-    glClearColor( 0.0, 0.0, 0.0, 0.0 );
-    glClear( GL_COLOR_BUFFER_BIT );
+    ostate->vtkglClearColor( 0.0, 0.0, 0.0, 0.0 );
+    ostate->vtkglClear( GL_COLOR_BUFFER_BIT );
 
     ColoredCube->SetBounds( this->VolumeBounds );
     ColoredCube->SetCropping( this->Cropping );
@@ -237,31 +203,30 @@ void vtkPRISMVolumeMapper::Render( vtkRenderer * ren, vtkVolume * vol )
     ColoredCube->UpdateGeometry( ren, vol->GetMatrix() );
     ColoredCube->Render();
 
+    vtkOpenGLCheckErrorMacro("tmp 5, " );
+
     BackfaceTexture->DrawToTexture( false );
 
+    vtkOpenGLCheckErrorMacro("vtkPRISMVolumeMapper: Failed after rendering cube backface, " );
+
     // Draw front of cube and do raycasting in the shader
-    glCullFace( GL_BACK );
-    glColor4d( 1.0, 1.0, 1.0, 1.0 );
+    ostate->vtkglCullFace( GL_BACK );
 
     // Bind back texture in texture unit 0
     glActiveTexture( GL_TEXTURE0 );
-    glEnable( GL_TEXTURE_RECTANGLE );
     glBindTexture( GL_TEXTURE_RECTANGLE, BackfaceTexture->GetTexId() );
 
     // Bind depth texture in texture unit 1
     glActiveTexture( GL_TEXTURE1 );
-    glEnable( GL_TEXTURE_RECTANGLE );
     glBindTexture( GL_TEXTURE_RECTANGLE, DepthBufferTextureId );
 
     // Bind all volumes and their respective transfer functions to texture units starting at 1
     for( unsigned i = 0; i < VolumesInfo.size(); ++i )
     {
         glActiveTexture( GL_TEXTURE2 + 2 * i );
-        glEnable( GL_TEXTURE_1D );
         glBindTexture( GL_TEXTURE_1D, VolumesInfo[i].TranferFunctionTextureId );
 
         glActiveTexture( GL_TEXTURE2 + 2 * i + 1 );
-        glEnable( GL_TEXTURE_3D );
         glBindTexture( GL_TEXTURE_3D, VolumesInfo[i].VolumeTextureId );
         glTexParameteri( GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, VolumesInfo[i].linearSampling ? GL_LINEAR : GL_NEAREST );
         glTexParameteri( GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, VolumesInfo[i].linearSampling ? GL_LINEAR : GL_NEAREST );
@@ -270,11 +235,12 @@ void vtkPRISMVolumeMapper::Render( vtkRenderer * ren, vtkVolume * vol )
     // Setup ray-tracer shader program and render front of cube
     VolumeShader->UseProgram( true );
 
-    res = VolumeShader->SetVariable( "time", Time );
-    res = VolumeShader->SetVariable( "multFactor", this->MultFactor );
-    res = VolumeShader->SetVariable( "back_tex_id", int(0) );
-    res = VolumeShader->SetVariable( "depthBuffer", int(1) );
-    res = VolumeShader->SetVariable( "windowSize", renderSize[0], renderSize[1] );
+    res &= VolumeShader->SetVariable( "time", Time );
+    res &= VolumeShader->SetVariable( "multFactor", this->MultFactor );
+    res &= VolumeShader->SetVariable( "back_tex_id", int(0) );
+    res &= VolumeShader->SetVariable( "depthBuffer", int(1) );
+    res &= VolumeShader->SetVariable( "windowSize", renderSize[0], renderSize[1] );
+    res &= VolumeShader->SetVariable( "volumeMatrix", vol->GetMatrix() );
 
     int * transferFuncTextureUnits = new int[ VolumesInfo.size() ];
     int * volumeTextureUnits = new int[ VolumesInfo.size() ];
@@ -285,18 +251,18 @@ void vtkPRISMVolumeMapper::Render( vtkRenderer * ren, vtkVolume * vol )
         volumeTextureUnits[i] = 2 * i + 3;
         volEnabled[i] = VolumesInfo[i].Enabled ? 1 : 0;
     }
-    res = VolumeShader->SetVariable( "transferFunctions", VolumesInfo.size(), transferFuncTextureUnits );
-    res = VolumeShader->SetVariable( "volumes", VolumesInfo.size(), volumeTextureUnits );
-    res = VolumeShader->SetVariable( "volOn", VolumesInfo.size(), volEnabled );
+    res &= VolumeShader->SetVariable( "transferFunctions", VolumesInfo.size(), transferFuncTextureUnits );
+    res &= VolumeShader->SetVariable( "volumes", VolumesInfo.size(), volumeTextureUnits );
+    res &= VolumeShader->SetVariable( "volOn", VolumesInfo.size(), volEnabled );
     delete [] transferFuncTextureUnits;
     delete [] volumeTextureUnits;
     delete [] volEnabled;
 
     double realSamplingDistance = this->SampleDistance * this->TextureSpaceSamplingDenominator;
-    res = VolumeShader->SetVariable( "stepSize", float(realSamplingDistance) );
-    res = VolumeShader->SetVariable( "stepSizeAdjustment", float(this->SampleDistance) );
-    res = this->SetEyeTo3DTextureMatrixVariable( vol, ren );
-    res = this->SetCameraMatrices( ren );
+    res &= VolumeShader->SetVariable( "stepSize", float(realSamplingDistance) );
+    res &= VolumeShader->SetVariable( "stepSizeAdjustment", float(this->SampleDistance) );
+    res &= this->SetEyeTo3DTextureMatrixVariable( vol, ren );
+    res &= this->SetCameraMatrices( ren, VolumeShader );
 
     // compute Interaction point position in 3D texture space
     this->UpdateWorldToTextureMatrix( vol );
@@ -306,13 +272,13 @@ void vtkPRISMVolumeMapper::Render( vtkRenderer * ren, vtkVolume * vol )
     interactP1[0] = InteractionPoint1[0]; interactP1[1] = InteractionPoint1[1]; interactP1[2] = InteractionPoint1[2]; interactP1[3] = 1.0;
     double interactP1Trans[4];
     this->WorldToTextureMatrix->MultiplyPoint( interactP1, interactP1Trans );
-    res = VolumeShader->SetVariable( "interactionPoint1", (float)interactP1Trans[0], (float)interactP1Trans[1], (float)interactP1Trans[2] );
+    res &= VolumeShader->SetVariable( "interactionPoint1", (float)interactP1Trans[0], (float)interactP1Trans[1], (float)interactP1Trans[2] );
 
     double interactP2[4];
     interactP2[0] = InteractionPoint2[0]; interactP2[1] = InteractionPoint2[1]; interactP2[2] = InteractionPoint2[2]; interactP2[3] = 1.0;
     double interactP2Trans[4];
     this->WorldToTextureMatrix->MultiplyPoint( interactP2, interactP2Trans );
-    res = VolumeShader->SetVariable( "interactionPoint2", (float)interactP2Trans[0], (float)interactP2Trans[1], (float)interactP2Trans[2] );
+    res &= VolumeShader->SetVariable( "interactionPoint2", (float)interactP2Trans[0], (float)interactP2Trans[1], (float)interactP2Trans[2] );
 
     // Compute light position in texture space
     double lightPos[4] = { 0.0, 0.0, 0.0, 1.0 };
@@ -324,68 +290,55 @@ void vtkPRISMVolumeMapper::Render( vtkRenderer * ren, vtkVolume * vol )
         l->GetTransformedPosition( lightPos );
     }
     this->WorldToTextureMatrix->MultiplyPoint( lightPos, lightPos );
-    res = VolumeShader->SetVariable( "lightPosition", (float)lightPos[0], (float)lightPos[1], (float)lightPos[2] );
+    res &= VolumeShader->SetVariable( "lightPosition", (float)lightPos[0], (float)lightPos[1], (float)lightPos[2] );
 
     // Set cam position and distance range variables in the shader
-    res |= SetCameraVariablesInShader( ren, vol );
+    res &= SetCameraVariablesInShader( ren, vol );
 
-    glEnable( GL_BLEND );
-    glBlendFunc( GL_ONE, GL_ONE_MINUS_SRC_ALPHA );
+    ostate->vtkglEnable( GL_BLEND );
+    ostate->vtkglBlendFunc( GL_ONE, GL_ONE_MINUS_SRC_ALPHA );
     ColoredCube->Render();
-
-    // retrieve old modelview matrix
-    glMatrixMode( GL_MODELVIEW );
-    glPopMatrix();
-
-    glDisable( GL_BLEND );
 
     // Unbind all volume and transfer function textures
     for( unsigned i = 0; i < VolumesInfo.size(); ++i )
     {
         glActiveTexture( GL_TEXTURE2 + 2 * i );
         glBindTexture( GL_TEXTURE_1D, 0 );
-        glDisable( GL_TEXTURE_1D );
 
         glActiveTexture( GL_TEXTURE2 + 2 * i + 1 );
         glBindTexture( GL_TEXTURE_3D, 0 );
-        glDisable( GL_TEXTURE_3D );
     }
 
     // unbind depth texture in tex unit 1
     glActiveTexture( GL_TEXTURE1 );
     glBindTexture( GL_TEXTURE_RECTANGLE, 0 );
-    glDisable( GL_TEXTURE_RECTANGLE );
 
     // unbind back texture in tex unit 0
     glActiveTexture( GL_TEXTURE0 );
     glBindTexture( GL_TEXTURE_RECTANGLE, 0 );
-    glDisable( GL_TEXTURE_RECTANGLE );
 
     VolumeShader->UseProgram( false );
 
-    if( isMultisampleEnabled )
-        glEnable( GL_MULTISAMPLE );
-
-    // retrieve enable state for blend, lighting and depth test
-    glPopAttrib();
+    // Resets GL error before we start rendering, which helps isolating error within the mapper
+    vtkOpenGLCheckErrorMacro("End vtkPRISMVolumeMapper::Render, " );
 }
 
 void vtkPRISMVolumeMapper::ReleaseGraphicsResources( vtkWindow * )
 {
     if( BackfaceTexture )
     {
-        delete BackfaceTexture;
-        BackfaceTexture = 0;
+        BackfaceTexture->Delete();
+        BackfaceTexture = nullptr;
     }
     if( BackfaceShader )
     {
         BackfaceShader->Delete();
-        BackfaceShader = 0;
+        BackfaceShader = nullptr;
     }
     if( VolumeShader )
     {
         VolumeShader->Delete();
-        VolumeShader = 0;
+        VolumeShader = nullptr;
         VolumeShaderNeedsUpdate = true;
     }
     if( this->DepthBufferTextureId != 0 )
@@ -404,7 +357,6 @@ void vtkPRISMVolumeMapper::ReleaseGraphicsResources( vtkWindow * )
         pv.TranferFunctionTextureId = 0;
         pv.SavedTextureInput = 0;
     }
-    this->GlExtensionsLoaded = false;
 }
 
 int vtkPRISMVolumeMapper::GetNumberOfInputs()
@@ -572,18 +524,6 @@ void vtkPRISMVolumeMapper::UpdateWorldToTextureMatrix( vtkVolume * volume )
     this->WorldToTextureMatrix->Invert();
 }
 
-int vtkPRISMVolumeMapper::IsTextureSizeSupported( int size[3] )
-{
-    glTexImage3D( GL_PROXY_TEXTURE_3D, 0, GL_LUMINANCE, size[0], size[1], size[2], 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, NULL );
-
-    GLint width;
-    glGetTexLevelParameteriv( GL_PROXY_TEXTURE_3D, 0, GL_TEXTURE_WIDTH, &width );
-
-    if( width != 0 )
-        return 1;
-    return 0;
-}
-
 //-----------------------------------------------------------------------------
 int vtkPRISMVolumeMapper::UpdateVolumes( )
 {
@@ -622,13 +562,33 @@ int vtkPRISMVolumeMapper::UpdateVolumes( )
             return 0;
         }
 
+        // Determine texture formats
+        int scalarType = input->GetScalarType();
+        if( scalarType != VTK_UNSIGNED_CHAR && scalarType != VTK_UNSIGNED_SHORT )
+        {
+            vtkErrorMacro("Only VTK_UNSIGNED_CHAR and VTK_UNSIGNED_SHORT input scalar type is supported by this mapper");
+            return 0;
+        }
+        GLenum glScalarType = GL_UNSIGNED_BYTE;
+        GLint internalFormat = GL_RED;
+        if( scalarType == VTK_UNSIGNED_SHORT )
+        {
+            internalFormat = GL_R16;
+            glScalarType = GL_UNSIGNED_SHORT;
+        }
+
+        // Check volume texture size is supported
         int dim[3];
         input->GetDimensions(dim);
-        if( !this->IsTextureSizeSupported( dim ) )
+        glTexImage3D( GL_PROXY_TEXTURE_3D, 0, internalFormat, dim[0], dim[1], dim[2], 0, GL_RED, glScalarType, nullptr );
+        GLint texWidth;
+        glGetTexLevelParameteriv( GL_PROXY_TEXTURE_3D, 0, GL_TEXTURE_WIDTH, &texWidth );
+        if( texWidth == 0 )
         {
             vtkErrorMacro("Size of volume is not supported");
             return 0;
         }
+        vtkOpenGLCheckErrors( "vtkPRISMPolyDataMapper: Error after checking 3D texture size\n");
 
         // Set bounds of the volume according to specifications of the first volume (we render only within the bound of the first volume)
         if( i == 0 )
@@ -654,38 +614,16 @@ int vtkPRISMVolumeMapper::UpdateVolumes( )
             this->TextureSpaceSamplingDenominator = 1.0 / dim[smallestStepDimIndex];
         }
 
-        int scalarType = input->GetScalarType();
-        if( scalarType != VTK_UNSIGNED_CHAR && scalarType != VTK_UNSIGNED_SHORT )
-        {
-            vtkErrorMacro("Only VTK_UNSIGNED_CHAR and VTK_UNSIGNED_SHORT input scalar type is supported by this mapper");
-            return 0;
-        }
-        GLenum glScalarType = GL_UNSIGNED_BYTE;
-        GLint internalFormat = GL_LUMINANCE;
-        if( scalarType == VTK_UNSIGNED_SHORT )
-        {
-            internalFormat = GL_LUMINANCE16;
-            glScalarType = GL_UNSIGNED_SHORT;
-        }
-
         // Transfer the input volume to the RGBA volume
-        glEnable( GL_TEXTURE_3D );
         if( pv.VolumeTextureId == 0 )
             glGenTextures( 1, &pv.VolumeTextureId );
         glBindTexture( GL_TEXTURE_3D, pv.VolumeTextureId );
-        //glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        //glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         glTexParameteri( GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri( GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        glTexImage3D( GL_TEXTURE_3D, 0, internalFormat, dim[0], dim[1], dim[2], 0, GL_LUMINANCE, glScalarType, input->GetScalarPointer() );
+        glTexImage3D( GL_TEXTURE_3D, 0, internalFormat, dim[0], dim[1], dim[2], 0, GL_RED, glScalarType, input->GetScalarPointer() );
         glBindTexture( GL_TEXTURE_3D, 0 );
-        glDisable( GL_TEXTURE_3D );
 
-        if( glGetError() != GL_NO_ERROR )
-        {
-            vtkErrorMacro( "Error setting 3D texture for the volume" );
-            return 0;
-        }
+        vtkOpenGLCheckErrors( "vtkPRISMPolyDataMapper: Error setting 3D texture for the volume");
     }
 
     return 1;
@@ -734,24 +672,20 @@ int vtkPRISMVolumeMapper::UpdateTransferFunctions( )
         {
             glGenTextures( 1, &(pv.TranferFunctionTextureId) );
         }
-        glEnable( GL_TEXTURE_1D );
+
         glBindTexture( GL_TEXTURE_1D, pv.TranferFunctionTextureId );
         glTexParameteri( GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
         glTexParameteri( GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
         glTexParameteri( GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
-        glTexImage1D( GL_TEXTURE_1D, 0, 4, tableSize, 0, GL_RGBA, GL_FLOAT, fullTable );
+        glTexImage1D( GL_TEXTURE_1D, 0, GL_RGBA, tableSize, 0, GL_RGBA, GL_FLOAT, fullTable );
         glBindTexture( GL_TEXTURE_1D, 0 );
-        glDisable( GL_TEXTURE_1D );
 
         delete [] table;
         delete [] rgbTable;
         delete [] fullTable;
 
-        if( glGetError() != GL_NO_ERROR )
-        {
-            vtkErrorMacro( "Error setting texture for transfer function for volume " << i  );
-            return 0;
-        }
+        vtkOpenGLCheckErrorMacro( "Error setting texture for transfer function for volume , " );
+
     }
 
     return 1;
@@ -768,7 +702,6 @@ int vtkPRISMVolumeMapper::UpdateDepthBufferTexture( int width, int height )
         glGenTextures( 1, &this->DepthBufferTextureId );
     }
 
-    glEnable( GL_TEXTURE_RECTANGLE );
     glBindTexture( GL_TEXTURE_RECTANGLE, this->DepthBufferTextureId );
 
     // If size has changed, reallocate texture
@@ -776,8 +709,8 @@ int vtkPRISMVolumeMapper::UpdateDepthBufferTexture( int width, int height )
     {
         glTexParameteri( GL_TEXTURE_RECTANGLE, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri( GL_TEXTURE_RECTANGLE, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexParameterf( GL_TEXTURE_RECTANGLE, GL_TEXTURE_WRAP_S, GL_CLAMP);
-        glTexParameterf( GL_TEXTURE_RECTANGLE, GL_TEXTURE_WRAP_T, GL_CLAMP);
+        glTexParameterf( GL_TEXTURE_RECTANGLE, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+        glTexParameterf( GL_TEXTURE_RECTANGLE, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
         glTexParameteri( GL_TEXTURE_RECTANGLE, GL_TEXTURE_COMPARE_MODE, GL_NONE );
         glTexImage2D( GL_TEXTURE_RECTANGLE, 0, GL_DEPTH_COMPONENT32F, width, height, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0 );
         this->DepthBufferTextureSize[0] = width;
@@ -789,7 +722,6 @@ int vtkPRISMVolumeMapper::UpdateDepthBufferTexture( int width, int height )
     glCopyTexSubImage2D( GL_TEXTURE_RECTANGLE, 0, 0, 0, 0, 0, width, height );
 
     glBindTexture( GL_TEXTURE_RECTANGLE, 0 );
-    glDisable( GL_TEXTURE_RECTANGLE );
 
     return 1;
 }
@@ -834,7 +766,7 @@ bool vtkPRISMVolumeMapper::SetEyeTo3DTextureMatrixVariable( vtkVolume * volume, 
 #include "vtkOpenGLCamera.h"
 #include "vtkMatrix3x3.h"
 
-bool vtkPRISMVolumeMapper::SetCameraMatrices( vtkRenderer * ren )
+bool vtkPRISMVolumeMapper::SetCameraMatrices( vtkRenderer * ren, GlslShader * s )
 {
     vtkOpenGLCamera * cam = vtkOpenGLCamera::SafeDownCast( ren->GetActiveCamera() );
     if( !ren )
@@ -853,10 +785,11 @@ bool vtkPRISMVolumeMapper::SetCameraMatrices( vtkRenderer * ren )
     projectionMatrixInverse->DeepCopy(projectionMatrix);
     projectionMatrixInverse->Invert();
 
-    this->VolumeShader->SetVariable( "projectionMatrix", projectionMatrix );
-    this->VolumeShader->SetVariable( "projectionMatrixInverse", projectionMatrixInverse );
-    this->VolumeShader->SetVariable( "modelViewMatrix", modelViewMatrix );
+    s->SetVariable( "projectionMatrix", projectionMatrix );
+    s->SetVariable( "projectionMatrixInverse", projectionMatrixInverse.Get() );
+    s->SetVariable( "modelViewMatrix", modelViewMatrix );
 
+    return true;
 }
 
 #include <limits>
@@ -911,23 +844,8 @@ bool vtkPRISMVolumeMapper::SetCameraVariablesInShader( vtkRenderer * ren, vtkVol
     }
 
     res |= VolumeShader->SetVariable( "volumeDistanceRange", (float)minDist, (float)maxDist );
+
     return res;
-}
-
-//===============================================================
-// Need
-//      GL_ARB_texture_float
-//===============================================================
-void vtkPRISMVolumeMapper::LoadExtensions( vtkRenderWindow * window )
-{
-    this->UnsupportedExtensions.clear();
-    this->GlExtensionsLoaded = true;
-
-    if( !glewIsSupported("GL_ARB_texture_float") )
-    {
-        this->GlExtensionsLoaded = false;
-        this->UnsupportedExtensions.push_back( std::string("GL_ARB_texture_float is required but not supported" ) );
-    }
 }
 
 void vtkPRISMVolumeMapper::GetRenderSize( vtkRenderer * ren, int size[2] )
@@ -950,6 +868,8 @@ int vtkPRISMVolumeMapper::FillInputPortInformation( int port, vtkInformation * i
     {
         return 0;
     }
+
+    info->Set( vtkAlgorithm::INPUT_IS_OPTIONAL(), 1);
     info->Set( vtkAlgorithm::INPUT_IS_REPEATABLE(), 1 );
     return 1;
 }
