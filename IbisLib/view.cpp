@@ -520,24 +520,6 @@ void View::ReferenceTransformChanged()
     // We update transform only if it is a 2D view or if Manager says we follow 3D views as well
     if( this->Manager && ( this->GetType() != THREED_VIEW_TYPE || this->Manager->Is3DViewFollowingReferenceVolume() ) )
     {
-        this->ApplyReferenceTransform();
-        NotifyNeedRender();
-    }
-}
-
-void View::WindowStartsRendering()
-{
-    if( this->GetType() != THREED_VIEW_TYPE )
-    {
-        this->ApplyReferenceTransform();
-    }
-    this->Renderer->ResetCameraClippingRange();
-}
-
-void View::ApplyReferenceTransform()
-{
-    if( this->Manager )
-    {
         ImageObject * obj = this->Manager->GetReferenceDataObject();
         if( obj && this->Renderer )
         {
@@ -554,8 +536,15 @@ void View::ApplyReferenceTransform()
             // backup inverted current transform
             this->PrevViewingTransform->DeepCopy( refTransform->GetMatrix() );
             this->PrevViewingTransform->Invert();
+
+            NotifyNeedRender();
         }
     }
+}
+
+void View::WindowStartsRendering()
+{
+    this->Renderer->ResetCameraClippingRange();
 }
 
 void View::SetupAllObjects()
