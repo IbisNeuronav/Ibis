@@ -208,7 +208,7 @@ void TransformEditWidget::SetIdentityButtonClicked()
         if( transform )
         {
             transform->Identity();
-            transform->Modified();
+            transform->Modified(); // this patch is added to correct vtk bug in vtkTransform::Identity() and will be removed once vtk is fixed.
             this->UpdateUi();
         }
     }
