@@ -36,7 +36,7 @@ ObjectSerializationMacro( Tracker );
 ObjectSerializationMacro( ToolDescription );
 
 ToolDescription::ToolDescription() :
-    type( Passive ), use( Generic ), active(0), toolPort(-1), name(""), romFileName(""), configDir("")
+    type( Passive ), use( Generic ), active(0), toolPort(-1), name(""), romFileName("")
 {
     this->videoSourceIndex = 0;
     this->cachedSerialNumber = "";
@@ -99,25 +99,6 @@ void ToolDescription::InstanciateSceneObject()
     sceneObject->SetObjectManagedByTracker(true);
     sceneObject->SetCanChangeParent( false );
     sceneObject->SetCanEditTransformManually( false );
-
-    // instanciate tool model if it is available
-    QString toolModelDir = configDir + "/tool-models";
-    QString modelFileName = toolModelDir + "/" + this->name + ".ply";
-    if( QFile::exists( modelFileName ) )
-    {
-        vtkPLYReader * reader = vtkPLYReader::New();
-        reader->SetFileName( modelFileName.toUtf8().data() );
-        reader->Update();
-        toolModel = PolyDataObject::New();
-        toolModel->SetNameChangeable( false );
-        toolModel->SetCanChangeParent( false );
-        toolModel->SetObjectManagedBySystem( true );
-        toolModel->SetObjectManagedByTracker( true );
-        toolModel->SetPolyData( reader->GetOutput() );
-        toolModel->SetScalarsVisible( true );
-        reader->Delete();
-        toolModel->SetName("3D Model");
-    }
 }
 
 void ToolDescription::ClearSceneObject()
@@ -432,7 +413,6 @@ int Tracker::AddNewTool( ToolType type, QString & name )
         desc.active = 0;
         desc.name = name;
         desc.romFileName = "";
-        desc.SetConfigDir( m_ibisAPI->GetConfigDirectory() );
         desc.InstanciateSceneObject();
         m_toolVec.push_back( desc );
         m_currentTool = m_toolVec.size() - 1;
@@ -548,6 +528,7 @@ void Tracker::Serialize( Serializer * serial )
 
     if( serial->IsReader() )
     {
+        InstanciateToolModels();
         if( wasTracking )
             this->Initialize();
     }
@@ -744,6 +725,33 @@ void Tracker::LookForNewActiveTools()
 
                 emit ToolListChanged();
             }
+        }
+    }
+}
+
+void Tracker::InstanciateToolModels()
+{
+    for( ToolDescription & td : m_toolVec )
+    {
+        QString configDir = m_hardwareModule->GetIbisAPI()->GetConfigDirectory();
+        QString toolModelDir = configDir + "/tool-models";
+        QString modelFileName = toolModelDir + "/" + td.name + ".ply";
+        if( QFile::exists( modelFileName ) )
+        {
+            if( td.toolModel )
+                td.toolModel->Delete();
+            vtkPLYReader * reader = vtkPLYReader::New();
+            reader->SetFileName( modelFileName.toUtf8().data() );
+            reader->Update();
+            td.toolModel = PolyDataObject::New();
+            td.toolModel->SetNameChangeable( false );
+            td.toolModel->SetCanChangeParent( false );
+            td.toolModel->SetObjectManagedBySystem( true );
+            td.toolModel->SetObjectManagedByTracker( true );
+            td.toolModel->SetPolyData( reader->GetOutput() );
+            td.toolModel->SetScalarsVisible( true );
+            reader->Delete();
+            td.toolModel->SetName("3D Model");
         }
     }
 }
