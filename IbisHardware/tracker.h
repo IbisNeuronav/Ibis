@@ -45,7 +45,6 @@ struct ToolDescription
     virtual void Serialize( Serializer * serializer );
     void InstanciateSceneObject();
     void ClearSceneObject();
-    void SetConfigDir(QString dir) { configDir = dir; }
     ToolType type;           // Passive = 1, Active = 0
     ToolUse use;             // What is this tool used for.
     int active;              // wether the tool has been activated
@@ -56,7 +55,6 @@ struct ToolDescription
     QString cachedSerialNumber;   // serial number used to recognize active tools when plugged in
     TrackedSceneObject * sceneObject;  // Object in the scene if active or holding state if inactive
     PolyDataObject * toolModel; // tool 3D model with origin at origin of the tracker tool
-    QString configDir;
 };
 
 ObjectSerializationHeaderMacro( ToolDescription );
@@ -214,6 +212,7 @@ private:
 
     TrackedVideoSource * GetVideoSource( int sourceIndex );
 
+    void InstanciateToolModels();
     void PushTrackerStateToSceneObjects();
     bool ActivateAllPassiveTools();
     void DeactivateAllPassiveTools();
