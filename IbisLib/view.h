@@ -140,7 +140,6 @@ protected:
     void ReleaseAllObjects();
     void GetPositionAndModifier( int & x, int & y, unsigned & modifier );
     void AdjustCameraDistance( double viewAngle );
-    void ApplyReferenceTransform();
 
     QString Name;
     vtkQtRenderWindow * RenderWindow;
