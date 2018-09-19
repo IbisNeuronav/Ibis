@@ -290,8 +290,6 @@ public:
     // Description
     // Utility functions
     static QString FindUniqueName( QString wantedName, QStringList & otherNames );
-    // for debugging only
-    int GetRefCount();
 
     // navigation
     void EnablePointerNavigation( bool on);
