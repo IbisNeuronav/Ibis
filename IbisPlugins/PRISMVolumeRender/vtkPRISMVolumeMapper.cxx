@@ -12,6 +12,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include "vtkPRISMVolumeMapper.h"
 
+#include "vtk_glew.h"
+
 #include "vtkObjectFactory.h"
 #include "vtkCamera.h"
 #include "vtkLightCollection.h"
@@ -30,7 +32,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "DrawableTexture.h"
 #include "GlslShader.h"
 #include "vtkColoredCube.h"
-#include "vtk_glew.h"
 #include "vtkOpenGLError.h"
 #include "vtkOpenGLState.h"
 #include "vtkOpenGLRenderWindow.h"
@@ -203,8 +204,6 @@ void vtkPRISMVolumeMapper::Render( vtkRenderer * ren, vtkVolume * vol )
     ColoredCube->UpdateGeometry( ren, vol->GetMatrix() );
     ColoredCube->Render();
 
-    vtkOpenGLCheckErrorMacro("tmp 5, " );
-
     BackfaceTexture->DrawToTexture( false );
 
     vtkOpenGLCheckErrorMacro("vtkPRISMVolumeMapper: Failed after rendering cube backface, " );
@@ -323,7 +322,7 @@ void vtkPRISMVolumeMapper::Render( vtkRenderer * ren, vtkVolume * vol )
     vtkOpenGLCheckErrorMacro("End vtkPRISMVolumeMapper::Render, " );
 }
 
-void vtkPRISMVolumeMapper::ReleaseGraphicsResources( vtkWindow * )
+void vtkPRISMVolumeMapper::ReleaseGraphicsResources( vtkWindow * w )
 {
     if( BackfaceTexture )
     {
@@ -357,6 +356,7 @@ void vtkPRISMVolumeMapper::ReleaseGraphicsResources( vtkWindow * )
         pv.TranferFunctionTextureId = 0;
         pv.SavedTextureInput = 0;
     }
+    this->ColoredCube->ReleaseGraphicsResources( w );
 }
 
 int vtkPRISMVolumeMapper::GetNumberOfInputs()
