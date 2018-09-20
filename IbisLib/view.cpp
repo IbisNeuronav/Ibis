@@ -22,10 +22,12 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "vtkRendererCollection.h"
 #include "vtkObjectCallback.h"
 #include "vtkqtrenderwindow.h"
+#include "vtkMatrix4x4Operators.h"
 #include "scenemanager.h"
 #include "sceneobject.h"
 #include "imageobject.h"
 #include "SVL.h"
+#include "ibismath.h"
 
 vtkCxxSetObjectMacro(View,Picker,vtkCellPicker);
 
@@ -33,7 +35,7 @@ ObjectSerializationMacro( View );
 
 const char DefaultViewNames[4][20] = { "Sagittal\0", "Coronal\0", "Transverse\0", "ThreeD" };
 
-View::View() 
+View::View()
 {
     this->Name = "";
     this->SetName( DefaultViewNames[THREED_VIEW_TYPE] );
@@ -544,6 +546,8 @@ void View::ReferenceTransformChanged()
 
 void View::WindowStartsRendering()
 {
+    if( this->GetType() != THREED_VIEW_TYPE  )
+        this->Adjust2DViews();
     this->Renderer->ResetCameraClippingRange();
 }
 
@@ -586,4 +590,45 @@ void View::AdjustCameraDistance( double viewAngle )
     Vec3 newPos = pos + ( dr - du ) * ndir;
     cam->SetPosition( newPos.Ref() );
     cam->SetViewAngle( viewAngle );
+}
+
+void View::Adjust2DViews()
+{
+    if( this->Manager )
+    {
+        vtkSmartPointer<vtkTransform> transform = vtkSmartPointer<vtkTransform>::New();
+        ImageObject * obj = this->Manager->GetReferenceDataObject();
+        if( obj )
+        {
+            transform = this->Manager->GetReferenceTransform();
+        }
+
+        vtkCamera * cam = this->Renderer->GetActiveCamera();
+        Vec3 pos( cam->GetPosition() );
+        Vec3 fp( cam->GetFocalPoint() );
+        Vec3 vup( cam->GetViewUp() );
+        Vec3 dir = fp - pos;
+        double dist = len( dir );
+        Vec3 normal( 0, 0, 0 );
+
+        switch( this->Type )
+        {
+            case SAGITTAL_VIEW_TYPE:
+                normal[0] = 1;
+                break;
+            case CORONAL_VIEW_TYPE:
+            normal[1] = 1;
+                break;
+            case TRANSVERSE_VIEW_TYPE:
+            normal[2] = 1;
+               break;
+            case THREED_VIEW_TYPE:
+                return;
+        }
+        Vec3 newPos = fp + normal * dist;
+        Vec3 newVup;
+        vtkMatrix4x4Operators::MultiplyVector( transform->GetMatrix(), normal.Ref(), newVup.Ref() );
+        cam->SetPosition( newPos.Ref() );
+        cam->SetViewUp( vup.Ref() );
+    }
 }

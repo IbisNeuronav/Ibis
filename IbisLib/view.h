@@ -52,24 +52,24 @@ public:
 
 class View : public QObject, public vtkObject
 {
-   
+
 Q_OBJECT
 
 public:
-    
+
     static View * New() { return new View; }
-    
+
     vtkTypeMacro(View,vtkObject);
 
 
     View();
     ~View();
-    
+
     virtual void Serialize( Serializer * ser );
 
     void SetName( QString name ) { this->Name = name; }
     QString GetName() { return this->Name; }
-    
+
     vtkGetMacro(Type,int);
     void SetType( int type );
 
@@ -79,10 +79,10 @@ public:
     // Control rendering of the view
     void Render();
     void SetRenderingEnabled( bool b );
-    
+
     vtkRenderWindowInteractor * GetInteractor();
     void SetInteractor( vtkRenderWindowInteractor * interactor );
-    
+
     vtkRenderer * GetRenderer( int level );
     vtkRenderer * GetRenderer();
     vtkRenderer * GetOverlayRenderer();
@@ -90,15 +90,15 @@ public:
 
     vtkGetObjectMacro(Picker,vtkCellPicker);
     void SetPicker( vtkCellPicker * picker );
-    
+
     vtkInteractorStyle * GetInteractorStyle();
     void SetInteractorStyle( vtkInteractorStyle * style );
-    
+
     vtkGetObjectMacro(Manager,SceneManager);
     void SetManager( SceneManager * manager );
-    
+
     void SetBackgroundColor( double * color );
-    
+
     void ReleaseView();
     void TakeControl( ViewController * c );
     void ReleaseControl( ViewController * c );
@@ -109,11 +109,11 @@ public:
     void ProcessInteractionEvents( vtkObject * caller, unsigned long event, void * calldata );
 
     void WorldToWindow( double world[3], double & xWin, double & yWin );
-    
+
 signals:
 
     void ViewModified();
-    
+
 public slots:
 
     // Description:
@@ -129,17 +129,18 @@ public slots:
     void ZoomCamera( double factor );
     double GetViewAngle();
     void SetViewAngle( double angle );
-    
+
 private slots:
 
     void WindowStartsRendering();
 
 protected:
-    
+
     void SetupAllObjects();
     void ReleaseAllObjects();
     void GetPositionAndModifier( int & x, int & y, unsigned & modifier );
     void AdjustCameraDistance( double viewAngle );
+    void Adjust2DViews();
 
     QString Name;
     vtkQtRenderWindow * RenderWindow;
