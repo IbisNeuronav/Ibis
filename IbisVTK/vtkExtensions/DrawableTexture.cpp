@@ -54,20 +54,20 @@ bool DrawableTexture::Init( int width, int height, vtkOpenGLState * s )
 
 	// init texture
 	glGenTextures( 1, &m_texId );
-    glBindTexture( GL_TEXTURE_2D, m_texId );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+    glBindTexture( GL_TEXTURE_RECTANGLE, m_texId );
+    glTexParameteri( GL_TEXTURE_RECTANGLE, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+    glTexParameteri( GL_TEXTURE_RECTANGLE, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
     if( m_isFloatTexture )
-        glTexImage2D( GL_TEXTURE_2D, 0, pixelInternalFormat, width, height, 0, pixelFormat, pixelType, 0 );
+        glTexImage2D( GL_TEXTURE_RECTANGLE, 0, pixelInternalFormat, width, height, 0, pixelFormat, pixelType, 0 );
     else
-        glTexImage2D( GL_TEXTURE_2D, 0, pixelInternalFormatByte, width, height, 0, pixelFormat, pixelTypeByte, 0 );
-    glBindTexture( GL_TEXTURE_2D, 0 );
+        glTexImage2D( GL_TEXTURE_RECTANGLE, 0, pixelInternalFormatByte, width, height, 0, pixelFormat, pixelTypeByte, 0 );
+    glBindTexture( GL_TEXTURE_RECTANGLE, 0 );
 
 	// Init framebuffer
 	bool success = true;
     glGenFramebuffers( 1, &m_fbId );
     BindFramebuffer();
-    glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_texId, 0 );
+    glFramebufferTexture2D( GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_RECTANGLE, m_texId, 0 );
 
     GLenum ret = glCheckFramebufferStatus( GL_FRAMEBUFFER );
     if( ret != GL_FRAMEBUFFER_COMPLETE )
@@ -88,12 +88,12 @@ void DrawableTexture::Resize( int width, int height )
 	{
 		m_width = width;
 		m_height = height;
-        glBindTexture( GL_TEXTURE_2D, m_texId );
+        glBindTexture( GL_TEXTURE_RECTANGLE, m_texId );
         if( m_isFloatTexture )
-            glTexImage2D( GL_TEXTURE_2D, 0, pixelInternalFormat, width, height, 0, pixelFormat, pixelType, 0 );
+            glTexImage2D( GL_TEXTURE_RECTANGLE, 0, pixelInternalFormat, width, height, 0, pixelFormat, pixelType, 0 );
         else
-            glTexImage2D( GL_TEXTURE_2D, 0, pixelInternalFormatByte, width, height, 0, pixelFormat, pixelTypeByte, 0 );
-        glBindTexture( GL_TEXTURE_2D, 0 );
+            glTexImage2D( GL_TEXTURE_RECTANGLE, 0, pixelInternalFormatByte, width, height, 0, pixelFormat, pixelTypeByte, 0 );
+        glBindTexture( GL_TEXTURE_RECTANGLE, 0 );
 
         BindFramebuffer();
 		glClearColor( 0.0, 0.0, 0.0, 0.0 );
@@ -179,7 +179,7 @@ void DrawableTexture::PasteToScreen( int px, int py, int pwidth, int pheight )
     m_pasteShader->UseProgram( true );
 
     // Bind the texture
-    glBindTexture( GL_TEXTURE_2D, m_texId );
+    glBindTexture( GL_TEXTURE_RECTANGLE, m_texId );
 
     // Vertices
     glEnableVertexAttribArray( 0 );
@@ -237,7 +237,7 @@ void DrawableTexture::Clear( int px, int py, int pwidth, int pheight )
     m_clearShader->UseProgram( true );
 
     // Bind the texture
-    glBindTexture( GL_TEXTURE_2D, m_texId );
+    glBindTexture( GL_TEXTURE_RECTANGLE, m_texId );
 
     // Vertices
     glEnableVertexAttribArray( 0 );
