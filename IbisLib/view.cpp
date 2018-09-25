@@ -629,7 +629,10 @@ void View::Adjust2DViews()
             case THREED_VIEW_TYPE:
                 return;
         }
-        Vec3 newPos = fp + normal * dist;
+        Vec3 distVec = normal * dist;
+        Vec3 newNormal;
+        vtkMatrix4x4Operators::MultiplyVector( transform->GetMatrix(), distVec.Ref(), newNormal.Ref() );
+        Vec3 newPos = fp + newNormal;
         Vec3 newVup;
         vtkMatrix4x4Operators::MultiplyVector( transform->GetMatrix(), up.Ref(), newVup.Ref() );
         cam->SetPosition( newPos.Ref() );
