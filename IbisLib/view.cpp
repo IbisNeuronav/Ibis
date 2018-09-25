@@ -610,25 +610,29 @@ void View::Adjust2DViews()
         Vec3 dir = fp - pos;
         double dist = len( dir );
         Vec3 normal( 0, 0, 0 );
+        Vec3 up( 0, 0, 0 );
 
         switch( this->Type )
         {
             case SAGITTAL_VIEW_TYPE:
-                normal[0] = 1;
+                normal[0] = -1;
+                up[2] = 1;
                 break;
             case CORONAL_VIEW_TYPE:
-            normal[1] = 1;
+                normal[1] = 1;
+                up[2] = 1;
                 break;
             case TRANSVERSE_VIEW_TYPE:
-            normal[2] = 1;
+                normal[2] = 1;
+                up[1] = 1;
                break;
             case THREED_VIEW_TYPE:
                 return;
         }
         Vec3 newPos = fp + normal * dist;
         Vec3 newVup;
-        vtkMatrix4x4Operators::MultiplyVector( transform->GetMatrix(), normal.Ref(), newVup.Ref() );
+        vtkMatrix4x4Operators::MultiplyVector( transform->GetMatrix(), up.Ref(), newVup.Ref() );
         cam->SetPosition( newPos.Ref() );
-        cam->SetViewUp( vup.Ref() );
+        cam->SetViewUp( newVup.Ref() );
     }
 }
