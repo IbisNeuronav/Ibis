@@ -27,7 +27,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "sceneobject.h"
 #include "imageobject.h"
 #include "SVL.h"
-#include "ibismath.h"
 
 vtkCxxSetObjectMacro(View,Picker,vtkCellPicker);
 
