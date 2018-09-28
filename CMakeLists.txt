@@ -73,6 +73,8 @@ include(${VTK_USE_FILE})
 set( vtkEncodeStringExeFile vtkEncodeString-${VTK_MAJOR_VERSION}.${VTK_MINOR_VERSION} )
 find_program( VTK_ENCODESTRING_EXE ${vtkEncodeStringExeFile} PATHS
               ${VTK_DIR}/bin/
+              ${VTK_DIR}/bin/Debug/
+              ${VTK_DIR}/bin/Release/
               ${VTK_INSTALL_PREFIX}/bin
               NO_DEFAULT_PATH )
 if( NOT VTK_ENCODESTRING_EXE )

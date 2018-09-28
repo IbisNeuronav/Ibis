@@ -294,7 +294,7 @@ void IbisHardwareIGSIO::OnDeviceNew( vtkObject*, unsigned long, void*, void * ca
     igtlioDevicePointer device = reinterpret_cast<igtlioDevice*>( callData );
     QString toolName, toolPart;
     QString deviceName( device->GetDeviceName().c_str() );
-    cout << "New device: " << deviceName.toUtf8().data() << endl;
+    std::cout << "New device: " << deviceName.toUtf8().data() << std::endl;
     m_deviceToolAssociations.ToolAndPartFromDevice( deviceName, toolName, toolPart );
     if( toolName.isEmpty() )
         return;
@@ -302,7 +302,7 @@ void IbisHardwareIGSIO::OnDeviceNew( vtkObject*, unsigned long, void*, void * ca
     if( toolIndex == -1 )
         return;
 
-    cout << "----> Connected to tool ( " << toolName.toUtf8().data() << " ), part ( " << toolPart.toUtf8().data() << " )" << std::endl;
+    std::cout << "----> Connected to tool ( " << toolName.toUtf8().data() << " ), part ( " << toolPart.toUtf8().data() << " )" << std::endl;
 
     // Assign image data of new device to the video input of the scene object
     if( toolPart == "ImageAndTransform" || toolPart == "Image" )
