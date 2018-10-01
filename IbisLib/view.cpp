@@ -482,6 +482,8 @@ void View::SetBackgroundColor( double * color )
 
 void View::ResetCamera()
 {
+    if( this->GetType() != THREED_VIEW_TYPE  )
+        this->Reset2DView();
     double prevViewAngle = this->Renderer->GetActiveCamera()->GetViewAngle();
     this->Renderer->ResetCamera();
     AdjustCameraDistance( prevViewAngle );
@@ -545,8 +547,6 @@ void View::ReferenceTransformChanged()
 
 void View::WindowStartsRendering()
 {
-    if( this->GetType() != THREED_VIEW_TYPE  )
-        this->Adjust2DViews();
     this->Renderer->ResetCameraClippingRange();
 }
 
@@ -591,7 +591,7 @@ void View::AdjustCameraDistance( double viewAngle )
     cam->SetViewAngle( viewAngle );
 }
 
-void View::Adjust2DViews()
+void View::Reset2DView()
 {
     if( this->Manager )
     {
@@ -606,8 +606,7 @@ void View::Adjust2DViews()
         Vec3 pos( cam->GetPosition() );
         Vec3 fp( cam->GetFocalPoint() );
         Vec3 vup( cam->GetViewUp() );
-        Vec3 dir = fp - pos;
-        double dist = len( dir );
+        double dist = cam->GetDistance();
         Vec3 normal( 0, 0, 0 );
         Vec3 up( 0, 0, 0 );
 
