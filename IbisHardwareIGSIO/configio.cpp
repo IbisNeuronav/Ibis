@@ -29,6 +29,8 @@ void ToolConfig::Serialize( Serializer * ser )
 {
     ::Serialize( ser, "ToolName", ToolName );
     ::Serialize( ser, "ToolType", ToolType );
+    ::Serialize( ser, "ToolModelFile", ToolModelFile);
+    ::Serialize(ser, "ToolParamFile", ToolParamFile);
 }
 
 void DeviceToolAssociation::Serialize( Serializer * ser )
@@ -96,6 +98,18 @@ QString ConfigIO::GetToolType( int index )
 {
     Q_ASSERT( index >=0 && index < m_tools.size() );
     return m_tools[index].ToolType;
+}
+
+QString ConfigIO::GetToolModelFile(int index)
+{
+    Q_ASSERT(index >= 0 && index < m_tools.size());
+    return m_tools[index].ToolModelFile;
+}
+
+QString ConfigIO::GetToolParamFile(int index)
+{
+    Q_ASSERT(index >= 0 && index < m_tools.size());
+    return m_tools[index].ToolParamFile;
 }
 
 DeviceToolMap ConfigIO::GetAssociations()

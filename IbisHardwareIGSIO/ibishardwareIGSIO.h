@@ -23,6 +23,7 @@ class qIGTLIOClientWidget;
 class PlusServerInterface;
 class vtkEventQtSlotConnect;
 class IbisHardwareIGSIOSettingsWidget;
+class PolyDataObject;
 
 class IbisHardwareIGSIO : public HardwareModule
 {
@@ -99,6 +100,8 @@ protected:
     // Utility functions
     int FindToolByName( QString name );
     TrackedSceneObject * InstanciateSceneObjectFromType( QString objectName, QString objectType );
+    vtkSmartPointer<PolyDataObject> InstanciateToolModel(QString filename);
+    void ReadToolConfig(QString filename,vtkSmartPointer<TrackedSceneObject> tool);
     bool IsDeviceImage( igtlioDevicePointer device );
     bool IsDeviceTransform( igtlioDevicePointer device );
     bool IsDeviceVideo( igtlioDevicePointer device );
@@ -106,6 +109,7 @@ protected:
     struct Tool
     {
         vtkSmartPointer<TrackedSceneObject> sceneObject;
+        vtkSmartPointer<PolyDataObject> toolModel;
         igtlioDevicePointer transformDevice;
         igtlioDevicePointer imageDevice;
     };
