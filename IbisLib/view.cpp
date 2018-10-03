@@ -22,6 +22,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "vtkRendererCollection.h"
 #include "vtkObjectCallback.h"
 #include "vtkqtrenderwindow.h"
+#include "vtkMatrix4x4Operators.h"
 #include "scenemanager.h"
 #include "sceneobject.h"
 #include "imageobject.h"
@@ -31,9 +32,9 @@ vtkCxxSetObjectMacro(View,Picker,vtkCellPicker);
 
 ObjectSerializationMacro( View );
 
-const char DefaultViewNames[4][20] = { "Sagittal\0", "Coronal\0", "Transverse\0", "ThreeD" };
+const char DefaultViewNames[4][20] = { "Sagittal\0", "Coronal\0", "Transverse\0", "ThreeD\0" };
 
-View::View() 
+View::View()
 {
     this->Name = "";
     this->SetName( DefaultViewNames[THREED_VIEW_TYPE] );
@@ -481,6 +482,8 @@ void View::SetBackgroundColor( double * color )
 
 void View::ResetCamera()
 {
+    if( this->GetType() != THREED_VIEW_TYPE  )
+        this->Reset2DView();
     double prevViewAngle = this->Renderer->GetActiveCamera()->GetViewAngle();
     this->Renderer->ResetCamera();
     AdjustCameraDistance( prevViewAngle );
@@ -586,4 +589,51 @@ void View::AdjustCameraDistance( double viewAngle )
     Vec3 newPos = pos + ( dr - du ) * ndir;
     cam->SetPosition( newPos.Ref() );
     cam->SetViewAngle( viewAngle );
+}
+
+void View::Reset2DView()
+{
+    if( this->Manager )
+    {
+        vtkSmartPointer<vtkTransform> transform = vtkSmartPointer<vtkTransform>::New();
+        ImageObject * obj = this->Manager->GetReferenceDataObject();
+        if( obj )
+        {
+            transform = this->Manager->GetReferenceTransform();
+        }
+
+        vtkCamera * cam = this->Renderer->GetActiveCamera();
+        Vec3 pos( cam->GetPosition() );
+        Vec3 fp( cam->GetFocalPoint() );
+        Vec3 vup( cam->GetViewUp() );
+        double dist = cam->GetDistance();
+        Vec3 normal( 0, 0, 0 );
+        Vec3 up( 0, 0, 0 );
+
+        switch( this->Type )
+        {
+            case SAGITTAL_VIEW_TYPE:
+                normal[0] = -1;
+                up[2] = 1;
+                break;
+            case CORONAL_VIEW_TYPE:
+                normal[1] = 1;
+                up[2] = 1;
+                break;
+            case TRANSVERSE_VIEW_TYPE:
+                normal[2] = 1;
+                up[1] = 1;
+               break;
+            case THREED_VIEW_TYPE:
+                return;
+        }
+        Vec3 distVec = normal * dist;
+        Vec3 newNormal;
+        vtkMatrix4x4Operators::MultiplyVector( transform->GetMatrix(), distVec.Ref(), newNormal.Ref() );
+        Vec3 newPos = fp + newNormal;
+        Vec3 newVup;
+        vtkMatrix4x4Operators::MultiplyVector( transform->GetMatrix(), up.Ref(), newVup.Ref() );
+        cam->SetPosition( newPos.Ref() );
+        cam->SetViewUp( newVup.Ref() );
+    }
 }
