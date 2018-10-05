@@ -99,11 +99,11 @@ void IbisHardwareIGSIO::StartConfig( QString configFile )
         Tool * newTool = new Tool;
         newTool->sceneObject = InstanciateSceneObjectFromType( in.GetToolName(i), in.GetToolType( i ) );
         newTool->toolModel = InstanciateToolModel(in.GetToolModelFile(i));
-        if (newTool->toolModel)
-            newTool->sceneObject->AddChild(newTool->toolModel);
         ReadToolConfig( in.GetToolParamFile(i), newTool->sceneObject );
         m_tools.append( newTool );
         GetIbisAPI()->AddObject( newTool->sceneObject );
+        if (newTool->toolModel)
+            GetIbisAPI()->AddObject(newTool->toolModel, newTool->sceneObject);
     }
 
     // Keep track of Plus device to Ibis tool association
@@ -461,8 +461,7 @@ TrackedSceneObject * IbisHardwareIGSIO::InstanciateSceneObjectFromType( QString 
 vtkSmartPointer<PolyDataObject> IbisHardwareIGSIO::InstanciateToolModel( QString filename )
 {
     vtkSmartPointer<PolyDataObject> model;
-    QString configDir = GetIbisAPI()->GetConfigDirectory();
-    QString toolModelDir = configDir + "/ToolModels";
+    QString toolModelDir = m_plusConfigDirectory + "/ToolModels";
     QString modelFileName = toolModelDir + "/" + filename;
     if (QFile::exists(modelFileName))
     {
