@@ -483,6 +483,9 @@ vtkSmartPointer<PolyDataObject> IbisHardwareIGSIO::InstanciateToolModel( QString
 
 void IbisHardwareIGSIO::ReadToolConfig(QString filename, vtkSmartPointer<TrackedSceneObject> tool)
 {
+    if (filename.isEmpty())
+        return;
+
     QString path = m_ibisPlusConfigFilesDirectory + "/" + filename;
 
     // Make sure the config file exists
