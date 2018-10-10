@@ -29,6 +29,8 @@ public:
     void Serialize( Serializer * ser );
     QString ToolName;
     QString ToolType;
+    QString ToolModelFile;
+    QString ToolParamFile;
 };
 
 ObjectSerializationHeaderMacro( ToolConfig );
@@ -70,6 +72,8 @@ public:
     int GetNumberOfTools() { return m_tools.size(); }
     QString GetToolName( int index );
     QString GetToolType( int index );
+    QString GetToolModelFile(int index);
+    QString GetToolParamFile(int index);
 
     // Associations
     DeviceToolMap GetAssociations();

@@ -50,8 +50,10 @@ void IbisHardwareIGSIOSettingsWidget::UpdateUI()
 void IbisHardwareIGSIOSettingsWidget::on_applyConfigFileButton_clicked()
 {
     QString configFileName = ui->configFileComboBox->currentText();
-    if( configFileName != "None" )
-        m_igsio->StartConfig( configFileName );
+    if (configFileName != "None")
+        m_igsio->StartConfig(configFileName);
+    else
+        m_igsio->ClearConfig();
 }
 
 void IbisHardwareIGSIOSettingsWidget::on_autoStartLastConfigCheckBox_toggled( bool checked )

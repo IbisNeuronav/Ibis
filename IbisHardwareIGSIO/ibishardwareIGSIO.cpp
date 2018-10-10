@@ -16,6 +16,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "pointerobject.h"
 #include "usprobeobject.h"
 #include "cameraobject.h"
+#include "polydataobject.h"
 
 #include <QDir>
 #include <QMenu>
@@ -28,6 +29,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "vtkTransform.h"
 #include "vtkImageData.h"
 #include "vtkEventQtSlotConnect.h"
+#include "vtkPLYReader.h"
 
 #include "igtlioLogic.h"
 #include "igtlioTransformDevice.h"
@@ -96,8 +98,12 @@ void IbisHardwareIGSIO::StartConfig( QString configFile )
     {
         Tool * newTool = new Tool;
         newTool->sceneObject = InstanciateSceneObjectFromType( in.GetToolName(i), in.GetToolType( i ) );
+        newTool->toolModel = InstanciateToolModel(in.GetToolModelFile(i));
+        ReadToolConfig( in.GetToolParamFile(i), newTool->sceneObject );
         m_tools.append( newTool );
         GetIbisAPI()->AddObject( newTool->sceneObject );
+        if (newTool->toolModel)
+            GetIbisAPI()->AddObject(newTool->toolModel, newTool->sceneObject);
     }
 
     // Keep track of Plus device to Ibis tool association
@@ -261,6 +267,7 @@ void IbisHardwareIGSIO::OpenSettingsWidget()
         m_clientWidget->setLogic( m_logic );
         m_clientWidget->setGeometry(0,0, 859, 811);
         m_clientWidget->setAttribute( Qt::WA_DeleteOnClose );
+        m_clientWidget->setWindowFlag( Qt::WindowStaysOnTopHint, true);
         connect( m_clientWidget, SIGNAL(destroyed(QObject*)), this, SLOT(OnSettingsWidgetClosed()));
     }
 
@@ -279,6 +286,7 @@ void IbisHardwareIGSIO::OpenConfigFileWidget()
         m_settingsWidget = new IbisHardwareIGSIOSettingsWidget;
         m_settingsWidget->SetIgsio( this );
         m_settingsWidget->setAttribute( Qt::WA_DeleteOnClose );
+        m_settingsWidget->setWindowFlag(Qt::WindowStaysOnTopHint, true);
         connect( m_settingsWidget, SIGNAL(destroyed(QObject*)), this, SLOT(OnConfigFileWidgetClosed()));
     }
     m_settingsWidget->show();
@@ -448,6 +456,49 @@ TrackedSceneObject * IbisHardwareIGSIO::InstanciateSceneObjectFromType( QString 
     res->SetHardwareModule( this );
 
     return res;
+}
+
+vtkSmartPointer<PolyDataObject> IbisHardwareIGSIO::InstanciateToolModel( QString filename )
+{
+    vtkSmartPointer<PolyDataObject> model;
+    QString toolModelDir = m_plusConfigDirectory + "/ToolModels";
+    QString modelFileName = toolModelDir + "/" + filename;
+    if (QFile::exists(modelFileName))
+    {
+        vtkPLYReader * reader = vtkPLYReader::New();
+        reader->SetFileName(modelFileName.toUtf8().data());
+        reader->Update();
+        model = vtkSmartPointer<PolyDataObject>::New();
+        model->SetNameChangeable(false);
+        model->SetCanChangeParent(false);
+        model->SetObjectManagedBySystem(true);
+        model->SetObjectManagedByTracker(true);
+        model->SetPolyData(reader->GetOutput());
+        model->SetScalarsVisible(true);
+        reader->Delete();
+        model->SetName("3D Model");
+    }
+    return model;
+}
+
+void IbisHardwareIGSIO::ReadToolConfig(QString filename, vtkSmartPointer<TrackedSceneObject> tool)
+{
+    if (filename.isEmpty())
+        return;
+
+    QString path = m_ibisPlusConfigFilesDirectory + "/" + filename;
+
+    // Make sure the config file exists
+    QFileInfo info(path);
+    if (!info.exists() || !info.isReadable())
+        return;
+
+    // Read config file
+    SerializerReader reader;
+    reader.SetFilename(path.toUtf8().data());
+    reader.Start();
+    tool->Serialize(&reader);
+    reader.Finish();
 }
 
 bool IbisHardwareIGSIO::IsDeviceImage( igtlioDevicePointer device )
