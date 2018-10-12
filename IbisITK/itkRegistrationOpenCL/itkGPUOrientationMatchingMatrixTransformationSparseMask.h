@@ -23,6 +23,16 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "itkListSample.h"
 #include "itkHistogram.h"
 
+#include "itkImageSample.h"
+#include "itkImageSamplerBase.h"
+#include "itkImageRandomSamplerBase.h"
+#include "itkImageRandomSampler.h"
+#include "itkImageGridSampler.h"
+#include "itkImageFullSampler.h"
+
+#include "itkImageMaskSpatialObject.h"
+#include "itkImageRegionIteratorWithIndex.h"
+
 namespace itk
 {
 
@@ -137,7 +147,35 @@ public:
   typedef itk::Statistics::SampleToHistogramFilter<FixedGradientMagnitudeSampleType, HistogramType> 
                                                             SampleToHistogramFilterType;
 
-  void Update(void);  
+  /** Image Sampler typedefs */
+  using ImageSamplerType = itk::ImageSamplerBase< FixedImageType >;
+  using RandomImageSamplerType = itk::ImageRandomSampler< FixedImageType >;
+  using GridImageSamplerType = itk::ImageGridSampler< FixedImageType >;
+  using FullImageSamplerType = itk::ImageFullSampler< FixedImageType >;
+
+  using SampleContainerType = typename ImageSamplerType::ImageSampleContainerType;
+  using SampleType = typename ImageSamplerType::ImageSampleType;
+  using GridSpacingType = typename GridImageSamplerType::SampleGridSpacingType;
+
+  enum SamplingStrategyType { RANDOM = 0, GRID = 1, FULL = 2 };
+
+  itkSetMacro(SamplingStrategy, SamplingStrategyType);
+  void SetSamplingStrategyToRandom()    { this->m_SamplingStrategy = RANDOM; }
+  void SetSamplingStrategyToGrid()      { this->m_SamplingStrategy = GRID; }
+  void SetSamplingStrategyToFull()      { this->m_SamplingStrategy = FULL; }
+
+  using FixedImageMaskSpatialObjectType = itk::ImageMaskSpatialObject< FixedImageDimension >;
+  using FixedImageMaskSpatialObjectPointer = typename FixedImageMaskSpatialObjectType::Pointer;
+  using FixedImageMaskType = typename FixedImageMaskSpatialObjectType::ImageType;
+  using FixedImageMaskPointer = typename FixedImageMaskType::Pointer;
+
+  itkSetMacro(FixedImageMaskSpatialObject, FixedImageMaskSpatialObjectPointer);
+  itkSetMacro(UseImageMask, bool)
+
+  using FixedImageMaskIteratorType = itk::ImageRegionConstIteratorWithIndex< FixedImageMaskType >;
+  using FixedImageIteratorType = itk::ImageRegionConstIteratorWithIndex< FixedImageType >;
+
+  void Update(void);
 
   unsigned int NextPow2( unsigned int x );
 protected:
@@ -156,6 +194,7 @@ protected:
   cl_kernel CreateKernelFromFile(const char * filename, const char * cPreamble, const char * kernelname, const char * cOptions);
   cl_kernel CreateKernelFromString(const char * cOriginalSourceString, const char * cPreamble, const char * kernelname, const char * cOptions);
 
+  void PrepareGPUImages(void);
 
   unsigned int      m_NumberOfPixels;
   double            m_Percentile;
@@ -169,6 +208,8 @@ protected:
 
   unsigned int      m_Blocks;
   unsigned int      m_Threads;
+
+  SamplingStrategyType  m_SamplingStrategy;
 
   FixedImagePointer   m_FixedImage;
   cl_mem              m_FixedImageGPUBuffer;
@@ -224,6 +265,17 @@ protected:
   cl_program        m_Program;
   
   cl_uint m_NumberOfDevices, m_NumberOfPlatforms;
+
+  FixedImageMaskSpatialObjectPointer     m_FixedImageMaskSpatialObject;
+  bool                                   m_UseImageMask;
+
+  InternalRealType *          m_cpuMovingImageBuffer;
+  cl_mem                      m_MovingGPUImage;
+  InternalRealType *          m_cpuFixedImageBuffer;
+  cl_mem                      m_FixedGPUImage;
+
+  InternalRealType*             m_convertionMatrices;
+  cl_mem                        m_gpuConvertionMatrices;
 
 private:
   GPUOrientationMatchingMatrixTransformationSparseMask(const Self &);   //purposely not implemented

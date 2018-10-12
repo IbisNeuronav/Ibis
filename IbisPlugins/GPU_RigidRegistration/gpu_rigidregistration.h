@@ -25,6 +25,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "itkSPSAOptimizer.h"
 #include "itkCMAEvolutionStrategyOptimizer.h"
 
+#include "itkImageMaskSpatialObject.h"
+
 typedef itk::CMAEvolutionStrategyOptimizer            OptimizerType;
 
 typedef itk::GPU3DRigidSimilarityMetric<IbisItkFloat3ImageType,IbisItkFloat3ImageType>
@@ -41,6 +43,9 @@ class GPU_RigidRegistration
 {
 
 public:
+
+    using ImageMaskType = itk::ImageMaskSpatialObject< 3 >;
+    using ImageMaskPointer = ImageMaskType::Pointer;
 
     explicit GPU_RigidRegistration();
     ~GPU_RigidRegistration();
@@ -71,6 +76,15 @@ public:
     vtkTransform * GetResultTransform() { return m_resultTransform; }
     bool GetUseMask() { return m_useMask; }
 
+    using SamplingStrategy = GPUMetricType::SamplingStrategyType;
+    void SetSamplingStrategyToRandom()    { this->m_samplingStrategy = SamplingStrategy::RANDOM; }
+    void SetSamplingStrategyToGrid()      { this->m_samplingStrategy = SamplingStrategy::GRID; }
+    void SetSamplingStrategyToFull()      { this->m_samplingStrategy = SamplingStrategy::FULL; }
+    SamplingStrategy GetSamplingStrategy() { return this->m_samplingStrategy; }
+
+
+    void SetTargetMask(ImageMaskPointer mask) { this->m_targetSpatialObjectMask = mask;}
+
 private:
 
     void updateTagsDistance();
@@ -82,6 +96,8 @@ private:
 
     IbisItkFloat3ImageType::Pointer m_itkSourceImage;
     IbisItkFloat3ImageType::Pointer m_itkTargetImage;
+
+    ImageMaskPointer m_targetSpatialObjectMask;
 
     vtkTransform * m_sourceVtkTransform;
     vtkTransform * m_targetVtkTransform;
@@ -95,7 +111,7 @@ private:
     unsigned int m_populationSize;
 
     vtkTransform * m_parentVtkTransform;
-
+    SamplingStrategy m_samplingStrategy;
 
 };
 

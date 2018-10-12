@@ -12,16 +12,16 @@ SET( IBIS_ITK_REGISTRATION_OPENCL_SRC
 )
 
 SET( IBIS_ITK_REGISTRATION_OPENCL_HDR
-	itkOpenCLUtil.h
-	itkGPUOrientationMatchingMatrixTransformationSparseMask.h	
-  itkGPU2D3DOrientationMatchingMatrixTransformationSparseMask.h 
-  #itkGPUOrientationMatchingUSCalibration.h
+    itkOpenCLUtil.h
+    itkGPUOrientationMatchingMatrixTransformationSparseMask.h
+    itkGPU2D3DOrientationMatchingMatrixTransformationSparseMask.h
+    #itkGPUOrientationMatchingUSCalibration.h
 )
 
 set( LibCL GPUDiscreteGaussianGradientImageFilter 
-          GPUOrientationMatchingMatrixTransformationSparseMaskKernel 
-          GPU2D3DOrientationMatchingMatrixTransformationSparseMaskKernel 
-          GPUOrientationMatchingUSCalibrationKernel 
+    GPUOrientationMatchingMatrixTransformationSparseMaskKernel
+    GPU2D3DOrientationMatchingMatrixTransformationSparseMaskKernel
+    GPUOrientationMatchingUSCalibrationKernel
 )
 
 #================================

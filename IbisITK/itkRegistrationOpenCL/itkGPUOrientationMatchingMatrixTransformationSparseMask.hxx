@@ -34,6 +34,8 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
 ::GPUOrientationMatchingMatrixTransformationSparseMask()
 {
 
+  m_Debug = false;
+
   if(!itk::IsGPUAvailable())
   {
     itkExceptionMacro(<< "OpenCL-enabled GPU is not present.");
@@ -58,8 +60,12 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
   m_Transform = NULL;
   m_MetricValue = 0;
 
-  m_Debug = false;
+  m_UseImageMask = false;
+  m_FixedImageMaskSpatialObject = 0;
+  SetSamplingStrategyToGrid();
 
+  m_MovingGPUImage = NULL;
+  m_FixedGPUImage = NULL;
 }
 
 
@@ -200,7 +206,8 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
     paramValue = new char[paramValueSize+1];
     clGetProgramBuildInfo(m_Program, 0, CL_PROGRAM_BUILD_LOG, paramValueSize, paramValue, NULL);
     paramValue[paramValueSize] = '\0';
-    std::cerr << paramValue << std::endl;
+    if(m_Debug)
+        std::cerr << paramValue << std::endl;
     free( paramValue );
     OpenCLCheckError(errid, __FILE__, __LINE__, ITK_LOCATION);
     itkExceptionMacro(<<"Cannot Build Program");
@@ -311,7 +318,7 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
   }
 
   std::string kernelname = "SeparableNeighborOperatorFilter";
-  if(m_ComputeMask)
+  if((m_ComputeMask) & (!m_UseImageMask))
   {
       kernelname = "SeparableNeighborOperatorFilterThresholder";
   }
@@ -363,6 +370,25 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
   errid = clFinish(m_CommandQueue[0]);
   OpenCLCheckError(errid, __FILE__, __LINE__, ITK_LOCATION);
 
+  if(m_UseImageMask)
+     {
+     typename FixedImageMaskType::ConstPointer constFixedImage = m_FixedImageMaskSpatialObject->GetImage();
+     FixedImageMaskIteratorType imageIterator( constFixedImage, constFixedImage->GetRequestedRegion() );
+     for (imageIterator.GoToBegin(); !imageIterator.IsAtEnd(); ++imageIterator)
+        {
+        unsigned int idx = static_cast<unsigned int>(constFixedImage->ComputeOffset(imageIterator.GetIndex()));
+
+        if(imageIterator.Get() > 0)
+           {
+           cpuFixedGradientBuffer[idx*4 + 3] = (InternalRealType)1.0;
+           }
+        else
+           {
+           cpuFixedGradientBuffer[idx*4 + 3] = (InternalRealType)0.0;
+           }
+        }
+     }
+
   clockGPUKernel.Stop();
   if(m_Debug)
     std::cerr << "Fixed Image Gradient GPU Kernel took:\t" << clockGPUKernel.GetMean() << std::endl;
@@ -373,56 +399,103 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
   itk::TimeProbe clock;
   clock.Start();
 
-  unsigned int nbrOfPixelsForHistogram =  100000;
-
-  if(m_Debug)
-    std::cerr << nbrOfPixelsForHistogram << "\t" << nbrOfPixelsInFixedImage << std::endl;
-  unsigned int testCntr = 0;
-  if(nbrOfPixelsForHistogram < nbrOfPixelsInFixedImage)
+  // process full sampling separately
+  if ( m_SamplingStrategy == FULL )
     {
-    unsigned int pixelCntr = 0;
-    while(pixelCntr<nbrOfPixelsForHistogram)
-      {
-      unsigned int idx = ( rand() % nbrOfPixelsInFixedImage );
-      MeasurementVectorType tempSample;
-      InternalRealType magnitudeValue = 0;
-      for (unsigned int d = 0; d < FixedImageDimension; ++d)
-       {
-         magnitudeValue += pow( cpuFixedGradientBuffer[idx*4 + d] /  kernelNorms[d], 2.0);
-       }
-       magnitudeValue = sqrt(magnitudeValue);
-       tempSample[0] = magnitudeValue;
-       if(!m_ComputeMask || (m_ComputeMask && (cpuFixedGradientBuffer[idx*4 + 3] > (InternalRealType)0.0)))
+    typename FixedImageType::RegionType region = m_FixedImage->GetRequestedRegion();
+    typename FixedImageType::SizeType size = region.GetSize();
+    typename FixedImageType::IndexType start = region.GetIndex();
+    region.SetIndex(start);
+    region.SetSize(size);
+
+    FixedImageIteratorType imageIterator( m_FixedImage, region );
+    for (imageIterator.GoToBegin(); !imageIterator.IsAtEnd(); ++imageIterator)
         {
-        sample->PushBack(tempSample);
-        maskIdxSample->PushBack(idx);
-        pixelCntr++;
+        unsigned int idx = static_cast<unsigned int>(m_FixedImage->ComputeOffset(imageIterator.GetIndex()));
+
+        if(!m_ComputeMask || (m_ComputeMask && (cpuFixedGradientBuffer[idx*4 + 3] > (InternalRealType)0.0)))
+            {
+            InternalRealType magnitudeValue = 0;
+            MeasurementVectorType tempSample;
+
+            for ( unsigned int d = 0; d < FixedImageDimension; ++d )
+                {
+                magnitudeValue += pow( cpuFixedGradientBuffer[idx*4 + d] /  kernelNorms[d], 2.0);
+                }
+            magnitudeValue = sqrt(magnitudeValue);
+            tempSample[0] = magnitudeValue;
+
+            if (imageIterator.Get() > 0)
+               {
+               sample->PushBack(tempSample);
+               maskIdxSample->PushBack(idx);
+               }
+            }
         }
-       testCntr++;
-      }
     }
   else
     {
-    for(unsigned int i=0; i<nbrOfPixelsInFixedImage; i++)
-      {
-      MeasurementVectorType tempSample;
-      InternalRealType magnitudeValue = 0;
-      for (unsigned int d = 0; d < FixedImageDimension; ++d)
-       {
-         magnitudeValue += pow( cpuFixedGradientBuffer[i*4 + d] /  kernelNorms[d], 2.0);
-       }
-       magnitudeValue = sqrt(magnitudeValue);
-       tempSample[0] = magnitudeValue;
-       if(!m_ComputeMask || (m_ComputeMask && (cpuFixedGradientBuffer[i*4 + 3] > (InternalRealType)0.0)))
+    typename ImageSamplerType::Pointer imageSampler = 0;
+    typename SampleContainerType::Pointer imageSampleContainer = SampleContainerType::New();
+    SampleType imageSample;
+    typename FixedImageType::RegionType bufferedRegion = m_FixedImage->GetBufferedRegion();
+    typename FixedImageType::IndexType imageIndex;
+    unsigned int nbrOfPixelsForHistogram =  100000;
+
+    if ( (m_SamplingStrategy == RANDOM) )
         {
-        sample->PushBack(tempSample);
-        maskIdxSample->PushBack(i);
+        typename RandomImageSamplerType::Pointer temporaryImageSampler = RandomImageSamplerType::New();
+        temporaryImageSampler->SetNumberOfSamples( nbrOfPixelsForHistogram );
+        imageSampler = temporaryImageSampler;
         }
+    else if ( m_SamplingStrategy == GRID )
+        {
+        typename GridImageSamplerType::Pointer temporaryImageSampler = GridImageSamplerType::New();
+        temporaryImageSampler->SetNumberOfSamples( nbrOfPixelsForHistogram );
+        imageSampler = temporaryImageSampler;
+        }
+
+   imageSampler->SetInput( m_FixedImage );
+   imageSampler->SetInputImageRegion( bufferedRegion );
+
+    try
+      {
+      imageSampler->Update();
       }
-    }
+    catch (itk::ExceptionObject & err)
+      {
+      std::cerr << err << std::endl;
+      std::cerr << "Cannot grid sample the image" << std::endl;
+      }
+
+    imageSampleContainer = imageSampler->GetOutput();
+
+    for (unsigned int i = 0; i < imageSampleContainer->Size(); ++i)
+      {
+      imageSample = imageSampleContainer->ElementAt( i );
+      m_FixedImage->TransformPhysicalPointToIndex( imageSample.m_ImageCoordinates, imageIndex);
+      if (bufferedRegion.IsInside(imageIndex))
+         {
+         InternalRealType magnitudeValue = 0;
+         MeasurementVectorType tempSample;
+         unsigned int idx = static_cast<unsigned int>(m_FixedImage->ComputeOffset(imageIndex));
+         for ( unsigned int d = 0; d < FixedImageDimension; ++d )
+            {
+            magnitudeValue += pow( cpuFixedGradientBuffer[idx*4 + d] /  kernelNorms[d], 2.0);
+            }
+         magnitudeValue = sqrt(magnitudeValue);
+         tempSample[0] = magnitudeValue;
+         if(!m_ComputeMask || (m_ComputeMask && (cpuFixedGradientBuffer[idx*4 + 3] > (InternalRealType)0.0)))
+            {
+            sample->PushBack(tempSample);
+            maskIdxSample->PushBack(idx);
+            }
+         }
+      }
+   }
+
   if(m_Debug)
     {
-      std::cerr << "Test Counter:\t" << testCntr << std::endl;
       std::cerr << "Sample Size:\t" << sample->Size() << std::endl;
     }
 
@@ -434,8 +507,8 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
   SampleToHistogramFilterType::HistogramSizeType histogramSize(1);
   histogramSize.Fill(100);
   sampleToHistogramFilter->SetHistogramSize(histogramSize);
- 
-  sampleToHistogramFilter->Update();  
+
+  sampleToHistogramFilter->Update();
   HistogramType::ConstPointer histogram = sampleToHistogramFilter->GetOutput();
 
   InternalRealType magnitudeThreshold = histogram->Quantile(0, m_Percentile);
@@ -457,32 +530,120 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
   m_cpuFixedLocationSamples = (InternalRealType*)malloc(m_Blocks * m_Threads * 4 * sizeof(InternalRealType));
   memset(m_cpuFixedLocationSamples, (InternalRealType)0, 4 * m_Blocks * m_Threads * sizeof(InternalRealType));
 
-  unsigned int pixelCntr = 0;
-  while(pixelCntr < m_NumberOfPixels)
-  {
-  unsigned int idx = ( rand() % nbrOfPixelsInFixedImage );
-   if(!m_ComputeMask || (m_ComputeMask && (cpuFixedGradientBuffer[idx*4 + 3] > (InternalRealType)0.0)))
-    {
-    InternalRealType magnitudeValue = 0.0;
-    for (unsigned int d = 0; d < FixedImageDimension; ++d)
-     {
-       magnitudeValue += pow( cpuFixedGradientBuffer[idx*4 + d] /  kernelNorms[d], 2.0);
-     }
-    magnitudeValue = sqrt(magnitudeValue);
-    if(magnitudeValue > magnitudeThreshold)
+  unsigned int numberOfSamples = m_Blocks * m_Threads;
+
+  // process full sampling separately
+  if ( m_SamplingStrategy == FULL )
       {
-        typename FixedImageType::PointType fixedLocation;
-        this->m_FixedImage->TransformIndexToPhysicalPoint(m_FixedImage->ComputeIndex(idx), fixedLocation);
-        for (unsigned int d = 0; d < FixedImageDimension; ++d)
-          {
-          m_cpuFixedGradientSamples[4*pixelCntr+d] = cpuFixedGradientBuffer[idx*4 + d];
-          m_cpuFixedLocationSamples[4*pixelCntr+d] = (InternalRealType)fixedLocation[d];
-          }
-        m_cpuFixedLocationSamples[4*pixelCntr+3] = (InternalRealType)1.0;
-        pixelCntr++;
+      typename FixedImageType::RegionType region = m_FixedImage->GetRequestedRegion();
+      typename FixedImageType::SizeType size = region.GetSize();
+      typename FixedImageType::IndexType start = region.GetIndex();
+      region.SetIndex(start);
+      region.SetSize(size);
+
+      FixedImageIteratorType imageIterator( m_FixedImage, region );
+      unsigned int pixelCntr = 0;
+
+      for (imageIterator.GoToBegin(); !imageIterator.IsAtEnd() & (pixelCntr < numberOfSamples); ++imageIterator)
+         {
+         unsigned int idx = static_cast<unsigned int>(m_FixedImage->ComputeOffset(imageIterator.GetIndex()));
+
+         if(!m_ComputeMask || (m_ComputeMask && (cpuFixedGradientBuffer[idx*4 + 3] > (InternalRealType)0.0)))
+            {
+
+            InternalRealType magnitudeValue = 0;
+
+            for ( unsigned int d = 0; d < FixedImageDimension; ++d )
+                {
+                magnitudeValue += pow( cpuFixedGradientBuffer[idx*4 + d] /  kernelNorms[d], 2.0);
+                }
+            magnitudeValue = sqrt(magnitudeValue);
+
+            if(magnitudeValue > magnitudeThreshold)
+               {
+               typename FixedImageType::PointType fixedLocation;
+               this->m_FixedImage->TransformIndexToPhysicalPoint(imageIterator.GetIndex(), fixedLocation);
+               for (unsigned int d = 0; d < FixedImageDimension; ++d)
+                  {
+                  m_cpuFixedGradientSamples[4*pixelCntr+d] = cpuFixedGradientBuffer[idx*4 + d];
+                  m_cpuFixedLocationSamples[4*pixelCntr+d] = (InternalRealType)fixedLocation[d];
+                  }
+               m_cpuFixedLocationSamples[4*pixelCntr+3] = (InternalRealType)1.0;
+               pixelCntr++;
+               }
+            }
+         }
       }
-    }
-  }
+   else
+      {
+      typename ImageSamplerType::Pointer imageSampler = 0;
+      typename SampleContainerType::Pointer imageSampleContainer = SampleContainerType::New();
+      SampleType imageSample;
+      typename FixedImageType::RegionType bufferedRegion = m_FixedImage->GetBufferedRegion();
+      typename FixedImageType::IndexType imageIndex;
+
+      if ( m_SamplingStrategy == RANDOM )
+         {
+         typename RandomImageSamplerType::Pointer temporaryImageSampler = RandomImageSamplerType::New();
+         temporaryImageSampler->SetNumberOfSamples( m_NumberOfPixels );
+         imageSampler = temporaryImageSampler;
+         }
+      else if ( m_SamplingStrategy == GRID )
+         {
+         typename GridImageSamplerType::Pointer temporaryImageSampler = GridImageSamplerType::New();
+         temporaryImageSampler->SetNumberOfSamples( m_NumberOfPixels );
+         imageSampler = temporaryImageSampler;
+         }
+
+      imageSampler->SetInput( m_FixedImage );
+      imageSampler->SetInputImageRegion( bufferedRegion );
+
+      try
+         {
+         imageSampler->Update();
+         }
+      catch (itk::ExceptionObject & err)
+         {
+         std::cerr << err << std::endl;
+         std::cerr << "Cannot grid sample the image" << std::endl;
+         }
+
+      imageSampleContainer = imageSampler->GetOutput();
+
+      unsigned int pixelCntr = 0;
+      for (unsigned int i = 0; i < imageSampleContainer->Size(); ++i)
+         {
+         if (imageSampleContainer->GetElementIfIndexExists( i, &imageSample ) )
+            {
+            m_FixedImage->TransformPhysicalPointToIndex( imageSample.m_ImageCoordinates, imageIndex);
+            if (bufferedRegion.IsInside(imageIndex))
+               {
+               unsigned int idx = static_cast<unsigned int>(m_FixedImage->ComputeOffset(imageIndex));
+               if(!m_ComputeMask || (m_ComputeMask && (cpuFixedGradientBuffer[idx*4 + 3] > (InternalRealType)0.0)))
+                  {
+                  InternalRealType magnitudeValue = 0.0;
+                  for (unsigned int d = 0; d < FixedImageDimension; ++d)
+                     {
+                     magnitudeValue += pow( cpuFixedGradientBuffer[idx*4 + d] /  kernelNorms[d], 2.0);
+                     }
+                  magnitudeValue = sqrt(magnitudeValue);
+                  if(magnitudeValue > magnitudeThreshold)
+                     {
+                     typename FixedImageType::PointType fixedLocation;
+                     this->m_FixedImage->TransformIndexToPhysicalPoint(m_FixedImage->ComputeIndex(idx), fixedLocation);
+                     for (unsigned int d = 0; d < FixedImageDimension; ++d)
+                        {
+                        m_cpuFixedGradientSamples[4*pixelCntr+d] = cpuFixedGradientBuffer[idx*4 + d];
+                        m_cpuFixedLocationSamples[4*pixelCntr+d] = (InternalRealType)fixedLocation[d];
+                        }
+                     m_cpuFixedLocationSamples[4*pixelCntr+3] = (InternalRealType)1.0;
+                     pixelCntr++;
+                     }
+                  }
+               }
+            }
+         }
+      }
 
   clock.Stop();
   if(m_Debug)
@@ -674,7 +835,6 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
 
   m_OrientationMatchingKernel = CreateKernelFromString( GPUOrientationMatchingMatrixTransformationSparseMaskKernel,  
     defines2.str().c_str(), "OrientationMatchingMetricSparseMask","");  
-
 }
 
 /**
@@ -732,6 +892,12 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
                           m_Blocks * m_Threads * 4 * sizeof(InternalRealType),
                           m_cpuFixedLocationSamples, &errid);
   OpenCLCheckError(errid, __FILE__, __LINE__, ITK_LOCATION);  
+
+  m_convertionMatrices = (InternalRealType*)malloc( 36* sizeof(InternalRealType));
+  memset(m_convertionMatrices, 0, 36 * sizeof(InternalRealType));
+  m_gpuConvertionMatrices = clCreateBuffer(m_Context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
+                          36 * sizeof(InternalRealType),
+                          m_convertionMatrices, &errid);
 }
 
 
@@ -743,28 +909,27 @@ void
 GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage >
 ::UpdateGPUTransformVariables(void)
 {
-  m_TransformMatrix = m_Transform->GetMatrix();
-  m_TransformOffset = m_Transform->GetOffset();  
+    m_TransformMatrix = m_Transform->GetMatrix();
+    m_TransformOffset = m_Transform->GetOffset();
 
-  m_matrixDummy = m_locToIdx * m_TransformMatrix.GetVnlMatrix();  
-  m_matrixTranspose = m_TransformMatrix.GetVnlMatrix().transpose();
-  m_OffsetOrigin = m_TransformOffset.GetVnlVector() - m_mOrigin;
-  m_vectorDummy = m_locToIdx * m_OffsetOrigin;
-  for ( unsigned int i = 0; i < MovingImageDimension; i++ )
-    {
-      for (unsigned int j=0; j < MovingImageDimension; j++)
-      {
-        m_cpuDummy[4*i+j] = m_matrixDummy[i][j];
-        m_cpuDummy[4*i+j+12] = m_matrixTranspose[i][j];
+    m_matrixDummy = m_locToIdx * m_TransformMatrix.GetVnlMatrix();
+    m_matrixTranspose = m_TransformMatrix.GetVnlMatrix().transpose();
+    m_OffsetOrigin = m_TransformOffset.GetVnlVector() - m_mOrigin;
+    m_vectorDummy = m_locToIdx * m_OffsetOrigin;
+    for ( unsigned int i = 0; i < MovingImageDimension; i++ )
+       {
+       for (unsigned int j=0; j < MovingImageDimension; j++)
+          {
+          m_cpuDummy[4*i+j] = m_matrixDummy[i][j];
+          m_cpuDummy[4*i+j+12] = m_matrixTranspose[i][j];
+          }
+       m_cpuDummy[4*i+3] = m_vectorDummy[i];
+       }
 
-      }
-      m_cpuDummy[4*i+3] = m_vectorDummy[i];
-    }
-  
-  cl_int errid;
-  errid = clEnqueueWriteBuffer(m_CommandQueue[0], m_gpuDummy, CL_TRUE, 0, 
+    cl_int errid;
+    errid = clEnqueueWriteBuffer(m_CommandQueue[0], m_gpuDummy, CL_TRUE, 0,
     24 * sizeof(InternalRealType), m_cpuDummy, 0, NULL, NULL);
-  OpenCLCheckError(errid, __FILE__, __LINE__, ITK_LOCATION);
+    OpenCLCheckError(errid, __FILE__, __LINE__, ITK_LOCATION);
 }
 
 /**
@@ -776,64 +941,73 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
 ::Update(void)
 {
 
-  if(!m_Transform)
-  {
+    if(!m_Transform)
+    {
     itkExceptionMacro(<< "Transform is not set." );
-  }
+    }
 
-  if(!m_MovingImageGradientGPUImage)
-  {
-    if(m_Debug)
-        std::cout << "Preparing to Compute Gradients.." << std::endl;
-    this->ComputeFixedImageGradient();  
-    this->ComputeMovingImageGradient();  
-  }
+    if(m_UseImageMask)
+    {
+    if(!m_FixedImageMaskSpatialObject)
+       {
+       itkWarningMacro(<< "m_FixedImageMaskSpatialObject was not found, UseImageMask is set to OFF" );
+       m_UseImageMask = false;
+       }
+    m_ComputeMask = true;
+    }
 
-  if(m_TransformMatrix == m_Transform->GetMatrix() && m_TransformOffset == m_TransformOffset)
-  {
-    return;
-  }
+    if(!m_MovingImageGradientGPUImage)
+    {
+       if(m_Debug)
+          std::cout << "Preparing to Compute Gradients.." << std::endl;
+       this->ComputeFixedImageGradient();
+       this->ComputeMovingImageGradient();
+    }
 
-  this->UpdateGPUTransformVariables();
+    if(m_TransformMatrix == m_Transform->GetMatrix() && m_TransformOffset == m_TransformOffset)
+       {
+       return;
+       }
 
-  size_t globalSize[1];
-  size_t localSize[1];
+    this->UpdateGPUTransformVariables();
 
-  globalSize[0] = m_Blocks * m_Threads;
-  localSize[0] = m_Threads;
+    size_t globalSize[1];
+    size_t localSize[1];
 
-  int argidx = 0;
-  clSetKernelArg(m_OrientationMatchingKernel, argidx++, sizeof(cl_mem), (void *)&m_gpuDummy);
-  clSetKernelArg(m_OrientationMatchingKernel, argidx++, sizeof(cl_mem), (void *)&m_gpuFixedGradientSamples);
-  clSetKernelArg(m_OrientationMatchingKernel, argidx++, sizeof(cl_mem), (void *)&m_gpuFixedLocationSamples);
-  clSetKernelArg(m_OrientationMatchingKernel, argidx++, sizeof(cl_mem), (void *)&m_MovingImageGradientGPUImage);
-  clSetKernelArg(m_OrientationMatchingKernel, argidx++, sizeof(cl_mem), (void *)&m_gpuMetricAccum);
-  clSetKernelArg(m_OrientationMatchingKernel, argidx++, sizeof(InternalRealType) * m_Threads, NULL);
+    globalSize[0] = m_Blocks * m_Threads;
+    localSize[0] = m_Threads;
 
-  clEnqueueNDRangeKernel(m_CommandQueue[0], m_OrientationMatchingKernel, 1, NULL, globalSize, localSize, 0, NULL, NULL);
+    int argidx = 0;
 
-  cl_int errid;
-  errid = clFinish(m_CommandQueue[0]);
-  OpenCLCheckError(errid, __FILE__, __LINE__, ITK_LOCATION);
+    clSetKernelArg(m_OrientationMatchingKernel, argidx++, sizeof(cl_mem), (void *)&m_gpuDummy);
+    clSetKernelArg(m_OrientationMatchingKernel, argidx++, sizeof(cl_mem), (void *)&m_gpuFixedGradientSamples);
+    clSetKernelArg(m_OrientationMatchingKernel, argidx++, sizeof(cl_mem), (void *)&m_gpuFixedLocationSamples);
+    clSetKernelArg(m_OrientationMatchingKernel, argidx++, sizeof(cl_mem), (void *)&m_MovingImageGradientGPUImage);
+    clSetKernelArg(m_OrientationMatchingKernel, argidx++, sizeof(cl_mem), (void *)&m_gpuMetricAccum);
+    clSetKernelArg(m_OrientationMatchingKernel, argidx++, sizeof(InternalRealType) * m_Threads, NULL);
 
-  m_cpuMetricAccum = (InternalRealType *)clEnqueueMapBuffer( m_CommandQueue[0], m_gpuMetricAccum, CL_TRUE,
+    clEnqueueNDRangeKernel(m_CommandQueue[0], m_OrientationMatchingKernel, 1, NULL, globalSize, localSize, 0, NULL, NULL);
+
+    cl_int errid;
+    errid = clFinish(m_CommandQueue[0]);
+    OpenCLCheckError(errid, __FILE__, __LINE__, ITK_LOCATION);
+
+    m_cpuMetricAccum = (InternalRealType *)clEnqueueMapBuffer( m_CommandQueue[0], m_gpuMetricAccum, CL_TRUE,
                                   CL_MAP_READ, 0, m_Blocks * sizeof(InternalRealType),
                                   0, NULL, NULL, &errid);
-  OpenCLCheckError(errid, __FILE__, __LINE__, ITK_LOCATION);
+    OpenCLCheckError(errid, __FILE__, __LINE__, ITK_LOCATION);
 
-    
-  InternalRealType metricSum = 0;  
-  for(unsigned int i=0; i<m_Blocks; i++)
-  {
-    metricSum += m_cpuMetricAccum[i];
-  }
 
-  m_MetricValue = 0;
-  if( metricSum >0 )
-    m_MetricValue = (InternalRealType) (metricSum/((InternalRealType)globalSize[0]));
+    InternalRealType metricSum = 0;
+    for(unsigned int i=0; i<m_Blocks; i++)
+        {
+        metricSum += m_cpuMetricAccum[i];
+        }
+
+    m_MetricValue = 0;
+    if( metricSum >0 )
+        m_MetricValue = (InternalRealType) (metricSum/((InternalRealType)globalSize[0]));
   
-
-
 }
 
 

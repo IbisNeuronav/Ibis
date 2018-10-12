@@ -83,7 +83,7 @@ endif()
 set( itkLibsToUse ${ITK_LIBRARIES} )
 
 set( itkLibsToUse ${itkLibsToUse} itkRegistration )
-
+set( itkLibsToUse ${itkLibsToUse} itkSamplers )
 
 IF( OPENCL_FOUND )
     set( itkLibsToUse ${itkLibsToUse} itkRegistrationOpenCL)
