@@ -113,7 +113,6 @@ include(${CMAKE_COMMON_DIR}/OpenCLMacros.cmake)
 # including in vtk extension classes.
 add_subdirectory( svl )
 #==================================================================
-add_subdirectory( IbisITK )
 add_subdirectory( IbisVTK )
 if( IBIS_USE_OPENCV )
     add_subdirectory( IbisOpenCV )
