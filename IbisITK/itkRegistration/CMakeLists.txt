@@ -99,9 +99,4 @@ target_link_libraries( itkRegistration ${ITK_LIBRARIES} )
 #================================
 target_include_directories( itkRegistration PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} )
 
-# install
-if( IBIS_INSTALL_LIBS_AND_HEADERS )
-    INSTALL_TARGETS(/lib itkRegistration)
-    INSTALL_FILES(/include FILES ${IBIS_ITK_REGISTRATION_HDR})
-endif( IBIS_INSTALL_LIBS_AND_HEADERS )
 
