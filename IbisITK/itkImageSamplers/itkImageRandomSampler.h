@@ -12,42 +12,45 @@
 
 ======================================================================*/
 
-#ifndef __ImageFullSamplerRandomOffset_h
-#define __ImageFullSamplerRandomOffset_h
+#ifndef __ImageRandomSampler_h
+#define __ImageRandomSampler_h
 
-#include "itkImageSamplerBase.h"
+#include "itkImageRandomSamplerBase.h"
+
 
 namespace itk
 {
 
-  /** \class ImageFullSamplerRandomOffset
+  /** \class ImageRandomSampler
    *
-   * \brief Samples all voxels in the InputImageRegion.
+   * \brief Samples randomly some voxels of an image.
    *
-   * This ImageSampler samples all voxels in the InputImageRegion.
-   * If a mask is given: only those voxels within the mask AND the
-   * InputImageRegion.
+   * This image sampler randomly samples 'NumberOfSamples' voxels in
+   * the InputImageRegion. Voxels may be selected multiple times.
+   * If a mask is given, the sampler tries to find samples within the
+   * mask. If the mask is very sparse, this may take some time. In this case,
+   * consider using the ImageRandomSamplerSparseMask.
    *
 	 * \ingroup ImageSamplers
-   */
+	 * */
 
   template < class TInputImage >
-  class ImageFullSamplerRandomOffset :
-    public ImageSamplerBase< TInputImage >
+  class ImageRandomSampler :
+    public ImageRandomSamplerBase< TInputImage >
   {
   public:
 
     /** Standard ITK-stuff. */
-    typedef ImageFullSamplerRandomOffset                  Self;
-    typedef ImageSamplerBase< TInputImage >   Superclass;
-    typedef SmartPointer<Self>                Pointer;
-    typedef SmartPointer<const Self>          ConstPointer;
+    typedef ImageRandomSampler                     Self;
+    typedef ImageRandomSamplerBase< TInputImage >  Superclass;
+    typedef SmartPointer<Self>                     Pointer;
+    typedef SmartPointer<const Self>               ConstPointer;
 
     /** Method for creation through the object factory. */
     itkNewMacro( Self );
 
     /** Run-time type information (and related methods). */
-    itkTypeMacro( ImageFullSamplerRandomOffset, ImageSamplerBase );
+    itkTypeMacro( ImageRandomSampler, ImageRandomSamplerBase );
 
     /** Typedefs inherited from the superclass. */
     typedef typename Superclass::DataObjectPointer            DataObjectPointer;
@@ -66,33 +69,16 @@ namespace itk
     itkStaticConstMacro( InputImageDimension, unsigned int,
       Superclass::InputImageDimension );
 
-    /** Other typdefs. */
+    /** Other typedefs. */
     typedef typename InputImageType::IndexType    InputImageIndexType;
     typedef typename InputImageType::PointType    InputImagePointType;
-
-    /** Selecting new samples makes no sense if nothing changed.
-     * The same samples would be selected anyway.
-     */
-    virtual bool SelectNewSamplesOnUpdate(void)
-    {
-      return false;
-    };
-
-    /** Returns whether the sampler supports SelectNewSamplesOnUpdate(). */
-    virtual bool SelectingNewSamplesOnUpdateSupported( void ) const
-    {
-      return false;
-    }
 
   protected:
 
     /** The constructor. */
-    ImageFullSamplerRandomOffset() {};
+    ImageRandomSampler(){};
     /** The destructor. */
-    virtual ~ImageFullSamplerRandomOffset() {};
-
-    /** PrintSelf. */
-    void PrintSelf( std::ostream& os, Indent indent ) const;
+    virtual ~ImageRandomSampler() {};
 
     /** Function that does the work. */
     virtual void GenerateData( void );
@@ -100,18 +86,18 @@ namespace itk
   private:
 
     /** The private constructor. */
-    ImageFullSamplerRandomOffset( const Self& );          // purposely not implemented
+    ImageRandomSampler( const Self& );          // purposely not implemented
     /** The private copy constructor. */
     void operator=( const Self& );            // purposely not implemented
 
-  }; // end class ImageFullSamplerRandomOffset
+  }; // end class ImageRandomSampler
 
 
 } // end namespace itk
 
 #ifndef ITK_MANUAL_INSTANTIATION
-#include "itkImageFullSamplerRandomOffset.txx"
+#include "itkImageRandomSampler.hxx"
 #endif
 
-#endif // end #ifndef __ImageFullSamplerRandomOffset_h
+#endif // end #ifndef __ImageRandomSampler_h
 

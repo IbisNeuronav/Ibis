@@ -142,9 +142,12 @@ GPU_RigidRegistration::GPU_RigidRegistration( ) :
     m_parentVtkTransform(0),
     m_sourceVtkTransform(0),
     m_targetVtkTransform(0),
-    m_resultTransform(0)
+    m_resultTransform(0),
+    m_targetSpatialObjectMask(0),
+    m_itkSourceImage(0),
+    m_itkTargetImage(0)
 {
-
+    m_samplingStrategy = SamplingStrategy::RANDOM;
 }
 
 GPU_RigidRegistration::~GPU_RigidRegistration()
@@ -191,9 +194,6 @@ void GPU_RigidRegistration::runRegistration()
     vtkTransform * sourceVtkTransform = m_sourceVtkTransform;
     vtkTransform * targetVtkTransform = m_targetVtkTransform;
 
-//    vtkTransform * transform = m_targetVtkTransform;
-
-
     itk::TimeProbesCollectorBase timer;
 
 
@@ -219,6 +219,13 @@ void GPU_RigidRegistration::runRegistration()
     GPUMetricPointer metric = GPUMetricType::New();
     metric->SetFixedImage(itkTargetImage);
     metric->SetMovingImage(itkSourceImage);
+
+    if ( m_targetSpatialObjectMask )
+    {
+        std::cout << "Using mask" << std::endl;
+        metric->SetFixedImageMaskSpatialObject(m_targetSpatialObjectMask);
+        metric->SetUseImageMask(true);
+    }
 
     // Initialize Transform
     vtkSmartPointer<vtkMatrix4x4> localMatrix = vtkSmartPointer<vtkMatrix4x4>::New();
@@ -282,6 +289,7 @@ void GPU_RigidRegistration::runRegistration()
     itkTransform->SetCenter(center);
     itkTransform->SetParameters(params);
 
+    metric->SetSamplingStrategy(m_samplingStrategy);
     metric->SetTransform( itkTransform );
     metric->SetNumberOfPixels( numberOfPixels );
     metric->SetPercentile( percentile );
@@ -307,10 +315,11 @@ void GPU_RigidRegistration::runRegistration()
     scales[0] = 3500;  scales[1] = 3500;  scales[2] = 3500;
     scales[3] = 0.1;  scales[4] = 0.1;  scales[5] = 0.1;
     optimizer->SetScales( scales );
-    optimizer->SetUseCovarianceMatrixAdaptation( true );
+    optimizer->SetUseCovarianceMatrixAdaptation( false );
     optimizer->SetUpdateBDPeriod( 0 );
     optimizer->SetValueTolerance(0.001);
-    optimizer->SetMaximumDeviation( 1 );
+    optimizer->SetMaximumDeviation( 2 );
+    optimizer->SetMinimumDeviation( 1 );
     optimizer->SetUseScales( true );
     optimizer->SetPopulationSize( populationSize );
     optimizer->SetNumberOfParents( 0 );

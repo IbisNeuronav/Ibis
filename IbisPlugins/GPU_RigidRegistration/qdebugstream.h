@@ -42,6 +42,12 @@ public:
      }
   m_stream.rdbuf(m_old_buf);
  }
+ void setStream(std::ostream &stream, QTextEdit* text_edit)
+ {
+    log_window = text_edit;
+    m_old_buf = stream.rdbuf();
+    stream.rdbuf(this);
+ }
 
 protected:
  virtual int_type overflow(int_type v)
