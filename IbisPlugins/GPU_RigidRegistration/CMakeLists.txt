@@ -8,6 +8,14 @@ set( PluginSrc
 set( PluginHdrMoc gpu_rigidregistrationwidget.h gpu_rigidregistrationplugininterface.h )
 set( PluginUi gpu_rigidregistrationwidget.ui )
 
+add_subdirectory( itkRegistration )
+
+add_subdirectory( itkImageSamplers )
+
+if ( ${OPENCL_FOUND} )
+    add_subdirectory( itkRegistrationOpenCL )
+endif()
+
 IF( NOT OPENCL_FOUND )
   message( SEND_ERROR "OpenCL has not been found. This library is mandatory for the GPU Rigid Registration Plugin to build.\n" )
 ENDIF()
