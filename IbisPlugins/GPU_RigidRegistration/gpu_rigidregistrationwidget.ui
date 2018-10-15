@@ -93,6 +93,9 @@
      <property name="text">
       <string>Compute Mask Image from Fixed Image (e.g. for Ultrasound)</string>
      </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
     </widget>
    </item>
    <item>
@@ -117,7 +120,7 @@
           <number>8000</number>
          </property>
          <property name="value">
-          <number>16000</number>
+          <number>128000</number>
          </property>
          <property name="wrapping">
           <bool>false</bool>
@@ -143,7 +146,7 @@
           <number>16</number>
          </property>
          <property name="value">
-          <number>2</number>
+          <number>16</number>
          </property>
          <property name="notchesVisible">
           <bool>true</bool>
@@ -160,6 +163,9 @@
           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Optimizer Population Size&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-style:italic;&quot;&gt;Characterizes the number of candidate transformations evaluate at each iteration of the optimization.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
          <property name="maximum">
+          <number>60</number>
+         </property>
+         <property name="value">
           <number>60</number>
          </property>
          <property name="notchesVisible">
