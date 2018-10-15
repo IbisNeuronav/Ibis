@@ -29,11 +29,6 @@ SET( IBIS_ITK_NONRIGID_REGISTRATION_HDR
     itkGradientOrientationDifferenceFilter.h
 )
 
-# install
-if( IBIS_INSTALL_LIBS_AND_HEADERS )
-    INSTALL_FILES(/include FILES ${IBIS_ITK_NONRIGID_REGISTRATION_HDR})
-endif( IBIS_INSTALL_LIBS_AND_HEADERS )
-
 #================================
 # Define include dir for
 # dependent projects

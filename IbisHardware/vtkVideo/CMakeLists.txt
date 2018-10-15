@@ -59,8 +59,3 @@ CONFIGURE_FILE( ${CMAKE_CURRENT_SOURCE_DIR}/vtkVideoConfigure.h.in ${CMAKE_CURRE
 ADD_LIBRARY( vtkVideo ${VIDEO_SRC} ${VIDEO_HDR} )
 target_link_libraries( vtkVideo vtkExtensions )
 target_include_directories( vtkVideo PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} PRIVATE ${CMAKE_CURRENT_BINARY_DIR} )  # to include vtkVideoConfigure.h
-
-if( IBIS_INSTALL_LIBS_AND_HEADERS )
-    INSTALL_TARGETS(/lib vtkVideo)
-    INSTALL_FILES(/include FILES ${VIDEO_HDR})
-endif( IBIS_INSTALL_LIBS_AND_HEADERS )

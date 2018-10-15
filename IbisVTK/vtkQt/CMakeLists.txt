@@ -31,11 +31,6 @@ IF( CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64" )
   SET_TARGET_PROPERTIES( vtkQt PROPERTIES COMPILE_FLAGS "-fPIC")
 ENDIF( CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64" )
 
-if( IBIS_INSTALL_LIBS_AND_HEADERS )
-    INSTALL_TARGETS(/lib vtkQt)
-    INSTALL_FILES(/include FILES ${IBIS_VTK_QT_HDR} )
-endif( IBIS_INSTALL_LIBS_AND_HEADERS )
-
 #================================
 # Build plugin that allows
 # QtDesigner and QtCreator to

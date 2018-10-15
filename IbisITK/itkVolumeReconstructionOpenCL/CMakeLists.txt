@@ -46,9 +46,4 @@ target_link_libraries( itkVolumeReconstructionOpenCL ${ITK_LIBRARIES}  ${OPENCL_
 #================================
 target_include_directories( itkVolumeReconstructionOpenCL PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR} ${OPENCL_INCLUDE_DIRS} )
 
-# install
-if( IBIS_INSTALL_LIBS_AND_HEADERS )
-    INSTALL_TARGETS(/lib itkVolumeReconstructionOpenCL)
-    INSTALL_FILES(/include FILES ${IBIS_ITK_VOLUME_RECONSTRUCTION_OPENCL_HDR})
-endif( IBIS_INSTALL_LIBS_AND_HEADERS )
 

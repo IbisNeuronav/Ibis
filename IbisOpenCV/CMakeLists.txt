@@ -20,10 +20,3 @@ ENDIF( BUILD_SHARED_LIBS )
 
 target_link_libraries( ibisVTKOpenCVBridge svl vtkExtensions )
 target_include_directories( ibisVTKOpenCVBridge PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${OpenCV_INCLUDE_DIRS} )
-
-# install
-if( IBIS_INSTALL_LIBS_AND_HEADERS )
-    INSTALL_TARGETS(/lib ibisVTKOpenCVBridge)
-    INSTALL_FILES(/include FILES ${VTKOPENCV_HDR} )
-endif( IBIS_INSTALL_LIBS_AND_HEADERS )
-

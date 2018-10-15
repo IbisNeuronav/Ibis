@@ -54,12 +54,6 @@ ENDIF( BUILD_SHARED_LIBS )
 
 target_link_libraries( itkRegistrationOpenCL ${ITK_LIBRARIES}  ${OPENCL_LIBRARIES})
 
-# install
-if( IBIS_INSTALL_LIBS_AND_HEADERS )
-    INSTALL_TARGETS(/lib itkRegistrationOpenCL)
-    INSTALL_FILES(/include FILES ${IBIS_ITK_REGISTRATION_OPENCL_HDR})
-endif( IBIS_INSTALL_LIBS_AND_HEADERS )
-
 #================================
 # Define include dir for
 # dependent projects
