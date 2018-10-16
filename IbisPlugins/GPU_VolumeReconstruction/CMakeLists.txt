@@ -19,3 +19,7 @@ ENDIF()
 # Create plugin
 DefinePlugin( "${PluginSrc}" "${PluginHdr}" "${PluginHdrMoc}" "${PluginUi}" )
 target_link_libraries( ${PluginName} itkVolumeReconstructionOpenCL )
+
+IF( OPENCL_FOUND )
+    set( itkLibsToUse ${itkLibsToUse} itkVolumeReconstructionOpenCL)
+ENDIF()
