@@ -25,9 +25,3 @@ DefinePlugin( "${PluginSrc}" "${PluginHdr}" "${PluginHdrMoc}" "${PluginUi}" )
 
 #add library specific to this plugin
 target_link_libraries( ${PluginName} itkSamplers itkRegistration itkRegistrationOpenCL )
-
-set( itkLibsToUse ${itkLibsToUse} itkRegistration )
-set( itkLibsToUse ${itkLibsToUse} itkSamplers )
-IF( OPENCL_FOUND )
-    set( itkLibsToUse ${itkLibsToUse} itkRegistrationOpenCL)
-ENDIF()
