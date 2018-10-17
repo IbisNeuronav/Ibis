@@ -2,13 +2,11 @@
 # Define sources
 #================================
 SET( IBIS_ITK_REGISTRATION_OPENCL_SRC
-    itkOpenCLUtil.cxx
     itkGPUOrientationMatchingMatrixTransformationSparseMask.hxx
     itkGPU3DRigidSimilarityMetric.h
 )
 
 SET( IBIS_ITK_REGISTRATION_OPENCL_HDR
-    itkOpenCLUtil.h
     itkGPUOrientationMatchingMatrixTransformationSparseMask.h
 )
 

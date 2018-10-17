@@ -3,12 +3,10 @@
 #================================
 SET( IBIS_ITK_VOLUME_RECONSTRUCTION_OPENCL_SRC
     itkGPUVolumeReconstruction.hxx
-    itkOpenCLUtil.cxx
 )
 
 SET( IBIS_ITK_VOLUME_RECONSTRUCTION_OPENCL_HDR
   	itkGPUVolumeReconstruction.h 
-  	itkOpenCLUtil.h
 )
 
 set( LibCL GPUVolumeReconstructionKernel )
