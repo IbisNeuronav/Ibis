@@ -5,7 +5,6 @@ SET( IBIS_ITK_REGISTRATION_OPENCL_SRC
     itkOpenCLUtil.cxx
     itkGPUOrientationMatchingMatrixTransformationSparseMask.hxx
     itkGPU3DRigidSimilarityMetric.h
-    itkGPUUSCalibrationSimilarityMetric.h    
 )
 
 SET( IBIS_ITK_REGISTRATION_OPENCL_HDR
@@ -15,7 +14,6 @@ SET( IBIS_ITK_REGISTRATION_OPENCL_HDR
 
 set( LibCL GPUDiscreteGaussianGradientImageFilter 
     GPUOrientationMatchingMatrixTransformationSparseMaskKernel
-    GPUOrientationMatchingUSCalibrationKernel
 )
 
 #================================
