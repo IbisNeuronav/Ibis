@@ -13,6 +13,7 @@ ExternalProject_Add( ${itk_name}
                -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
                -DBUILD_TESTING:BOOL=FALSE
                -DBUILD_EXAMPLES:BOOL=FALSE
+               -DITK_USE_GPU:BOOL=TRUE
                -DITKV3_COMPATIBILITY:BOOL=TRUE
                -DModule_ITKIOMINC=ON
                -DModule_ITKReview=ON )
