@@ -15,6 +15,11 @@ if( IBIS_INSTALL_OPENCV )
     include( External_OpenCV.cmake )
 endif()
 
+# Get and build elastix
+if( IBIS_BUILD_ELASTIX )
+    include( External_Elastix.cmake )
+endif()
+
 # Get and build OpenIGTLink and OpenIGTLinkIO
 if( IBIS_BUILD_IGTL_HARDWARE_SUPPORT )
   include( External_OpenIGTLink.cmake )
