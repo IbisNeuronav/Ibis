@@ -45,6 +45,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QPushButton>
 #include <QApplication>
 #include <QMenu>
+#include <QDirIterator>
 
 Application * Application::m_uniqueInstance = NULL;
 const QString Application::m_appName("ibis");
@@ -697,26 +698,37 @@ bool Application::GetOpenFileSequence( QStringList & filenames, QString extensio
         nbDigits++;
     }
 
-    bool ok = true;
-    int firstNumber = firstFilename.mid( it + 1, nbDigits ).toInt( &ok );
-    if( !ok )
-        return false;
-
     QString basePath = firstFilename.left( it + 1 );
 
-    // find the number of files
-    bool done = false;
-    int fileNumber = firstNumber;
-    while( !done )
+    // get absolute directory path
+    QFileInfo fi(firstFilename);
+    QString absoluteDirPath = fi.absoluteDir().absolutePath();
+
+    // creating a pattern reg expression by replacing the digits with "?" symbols
+    fi.setFile(basePath);
+    QString  pattern = fi.fileName();
+    for (int i = 0; i < nbDigits; ++i)
     {
-        QString name = QString( basePath + "%1" + trailer ).arg( fileNumber, nbDigits, 10, QChar('0') );
-        if( !QFile::exists( name ) )
-            done = true;
-        else
-        {
-            ++fileNumber;
-            filenames.push_back( name );
-        }
+        pattern += "?";
+    }
+    pattern += trailer;
+
+    // iterate though folder to get files matching the pattern
+    QDirIterator dit(absoluteDirPath, QStringList() << pattern, QDir::Files, QDirIterator::NoIteratorFlags);
+
+    // add the files to temporary QStringList
+    QStringList allUSSequence;
+    while (dit.hasNext())
+    {
+        allUSSequence.push_back( dit.next() );
+    }
+
+    // sort file names alphabetically
+    allUSSequence.sort();
+    int idx = allUSSequence.indexOf(firstFilename);
+
+    for (int i = idx; i < allUSSequence.size(); ++i) {
+       filenames.push_back( allUSSequence.at(i) );
     }
     return true;
 }
