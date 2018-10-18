@@ -13,6 +13,7 @@ include(ExternalProject)
 # Optional builds
 option( IBIS_BUILD_IGTL_HARDWARE_SUPPORT "Build hardware module based on OpenIGTLink and dependencies (OpenIGTLink and OpenIGTLinkIO)" ON )
 option( IBIS_INSTALL_OPENCV "Install OpenCV library needed in some plugins" OFF )
+option( IBIS_BUILD_ELASTIX "Build the Elastix library needed in some plugins" OFF )
 
 # Build All External Dependencies except Qt (vtk, Itk, minc, etc.)
 set( vtk_name vtk-${IBIS_VTK_LONG_VERSION} )
@@ -21,6 +22,8 @@ set( itk_name itk-${IBIS_ITK_LONG_VERSION} )
 set( IBIS_ITK_DIR ${CMAKE_CURRENT_BINARY_DIR}/IbisDeps/${itk_name}/build )
 set( opencv_name opencv-${IBIS_OPENCV_LONG_VERSION} )
 set( IBIS_OPENCV_DIR ${CMAKE_CURRENT_BINARY_DIR}/IbisDeps/${opencv_name}/build )
+set( elastix_name elastix-${IBIS_ELASTIX_LONG_VERSION} )
+set( IBIS_ELASTIX_DIR ${CMAKE_CURRENT_BINARY_DIR}/IbisDeps/${elastix_name}/build )
 set( openigtlink_name OpenIGTLink )
 set( IBIS_OPENIGTLINK_DIR ${CMAKE_CURRENT_BINARY_DIR}/IbisDeps/${openigtlink_name}/build )
 set( openigtlinkio_name OpenIGTLinkIO )
@@ -32,6 +35,9 @@ set( CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR}/Ibis-install )
 set( ibis_dependencies ${vtk_name} ${itk_name} )
 if( IBIS_INSTALL_OPENCV )
     list( APPEND ibis_dependencies ${opencv_name} )
+endif()
+if( IBIS_BUILD_ELASTIX )
+    list( APPEND ibis_dependencies ${elastix_name} )
 endif()
 if( IBIS_BUILD_IGTL_HARDWARE_SUPPORT )
     list( APPEND ibis_dependencies ${openigtlink_name} ${openigtlinkio_name} )
@@ -50,6 +56,8 @@ ExternalProject_Add(
                -DQt5_DIR:PATH=${Qt5_DIR}
                -DVTK_DIR:PATH=${IBIS_VTK_DIR}
                -DITK_DIR:PATH=${IBIS_ITK_DIR}
+               -DElastix_DIR:PATH=${IBIS_ELASTIX_DIR}
+               -DIBIS_USE_ELASTIX:BOOL=${IBIS_BUILD_ELASTIX}
                -DOpenIGTLink_DIR:PATH=${IBIS_OPENIGTLINK_DIR}
                -DOpenIGTLinkIO_DIR:PATH=${IBIS_OPENIGTLINKIO_DIR}
                -DIBIS_BUILD_IGSIO_HARDWARE_MODULE:BOOL=${IBIS_BUILD_IGTL_HARDWARE_SUPPORT}

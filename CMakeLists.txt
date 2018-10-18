@@ -91,9 +91,19 @@ include( ${ITK_USE_FILE} )
 #==================================================================
 # Look for OpenCV (required by some plugins, but not the main app)
 #==================================================================
+OPTION( IBIS_USE_OPENCV "Use OpenCV library" OFF )
 if( IBIS_USE_OPENCV )
     set( AutoOpenCVPath ${IBIS_EXTERNAL_DEPENDENCIES_DIR}/opencv-${IBIS_OPENCV_LONG_VERSION}/build )
     find_package( OpenCV ${IBIS_OPENCV_LONG_VERSION} REQUIRED EXACT PATHS ${AutoOpenCVPath} )
+endif()
+
+#==================================================================
+# Look for Elastix (required by some plugins, but not the main app)
+#==================================================================
+option( IBIS_USE_ELASTIX "Use Elastix library" OFF )
+if( IBIS_USE_ELASTIX )
+    set( AutoElastixPath ${IBIS_EXTERNAL_DEPENDENCIES_DIR}/elastix-${IBIS_ELASTIX_LONG_VERSION}/build )
+    find_package( Elastix ${IBIS_ELASTIX_LONG_VERSION} REQUIRED EXACT PATHS ${AutoOpenCVPath} )
 endif()
 
 #==================================================================
@@ -103,7 +113,6 @@ if(UNIX AND NOT APPLE)
     OPTION( IBIS_BUILD_DEFAULT_HARDWARE_MODULE "Build default hardware module on Linux." ON )
 endif()
 OPTION( IBIS_BUILD_IGSIO_HARDWARE_MODULE "Build hardware module that allows connection to OpenIGTLinkServers" OFF )
-OPTION( IBIS_USE_OPENCV "Use OpenCV library" OFF )
 
 find_package ( OpenCL QUIET )
 include(${CMAKE_COMMON_DIR}/OpenCLMacros.cmake)
