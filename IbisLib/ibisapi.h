@@ -43,6 +43,7 @@ public:
     void SetCurrentObject( SceneObject * cur  );
     SceneObject * GetCurrentObject( );
     SceneObject * GetObjectByID( int id );
+    void RemoveObjectByID( int id );
     SceneObject * GetSceneRoot();
     PointerObject *GetNavigationPointerObject( );
     int  GetNumberOfUserObjects();
@@ -58,6 +59,7 @@ public:
     void GetAllPointsObjects( QList<PointsObject*> & objects );
     void GetAllPointerObjects( QList<PointerObject*> & all );
     void GetAllTrackedObjects( QList<TrackedSceneObject*> & all );
+    void GetAllListableNonTrackedObjects( QList<SceneObject*> & all );
     void GetAllObjectsOfType( const char * typeName, QList<SceneObject*> & all );
 
     View * GetViewByID( int id );
