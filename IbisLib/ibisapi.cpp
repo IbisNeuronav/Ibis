@@ -70,6 +70,11 @@ SceneObject * IbisAPI::GetObjectByID( int id )
     return m_sceneManager->GetObjectByID( id );
 }
 
+void IbisAPI::RemoveObjectByID( int id )
+{
+    m_sceneManager->RemoveObjectById( id );
+}
+
 SceneObject * IbisAPI::GetSceneRoot()
 {
     return m_sceneManager->GetSceneRoot();
@@ -128,6 +133,11 @@ void IbisAPI::GetAllPointerObjects( QList<PointerObject*> & all )
 void IbisAPI::GetAllTrackedObjects( QList<TrackedSceneObject*> & all )
 {
     return m_sceneManager->GetAllTrackedObjects( all );
+}
+
+void IbisAPI::GetAllListableNonTrackedObjects( QList<SceneObject*> & all )
+{
+    return m_sceneManager->GetAllListableNonTrackedObjects( all );
 }
 
 void IbisAPI::GetAllPointsObjects( QList<PointsObject*> & objects )
