@@ -35,6 +35,7 @@ SET( IBISLIB_SRC
                      ibismath.cpp
                      ibisplugin.cpp
                      ibisitkvtkconverter.cpp
+                     ibispreferences.cpp
                      gui/aboutbicigns.cpp
                      gui/aboutpluginswidget.cpp
                      gui/trackerstatusdialog.cpp
@@ -60,7 +61,9 @@ SET( IBISLIB_SRC
                      gui/cameraobjectsettingswidget.cpp
                      gui/triplecutplaneobjectsettingswidget.cpp
                      gui/triplecutplaneobjectmixerwidget.cpp
-                     gui/pointercalibrationdialog.cpp )
+                     gui/pointercalibrationdialog.cpp
+                     gui/preferencewidget.cpp
+                     gui/pathform.cpp )
 
 SET( IBISLIB_HDR
                      trackedvideobuffer.h
@@ -101,6 +104,7 @@ SET( IBISLIB_HDR_MOC
                          pointerobject.h
                          cameraobject.h
                          usacquisitionobject.h
+                         ibispreferences.h
                          gui/aboutbicigns.h
                          gui/aboutpluginswidget.h
                          gui/trackerstatusdialog.h
@@ -126,7 +130,9 @@ SET( IBISLIB_HDR_MOC
                          gui/triplecutplaneobjectsettingswidget.h
                          gui/triplecutplaneobjectmixerwidget.h
                          gui/usprobeobjectsettingswidget.h
-                         gui/pointercalibrationdialog.h )
+                         gui/pointercalibrationdialog.h
+                         gui/preferencewidget.h
+                         gui/pathform.h )
 
 set( IBISLIB_UI
             gui/aboutbicigns.ui
@@ -149,7 +155,9 @@ set( IBISLIB_UI
             gui/triplecutplaneobjectsettingswidget.ui
             gui/triplecutplaneobjectmixerwidget.ui
             gui/usprobeobjectsettingswidget.ui
-            gui/pointercalibrationdialog.ui )
+            gui/pointercalibrationdialog.ui
+            gui/preferencewidget.ui
+            gui/pathform.ui )
 
 
 # moc Qt source file without a ui file

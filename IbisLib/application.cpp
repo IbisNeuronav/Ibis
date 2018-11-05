@@ -33,6 +33,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "filereader.h"
 #include "imageobject.h"
 #include "lookuptablemanager.h"
+#include "ibispreferences.h"
 #include <QDir>
 #include <QFileInfo>
 #include <QSettings>
@@ -118,15 +119,16 @@ void ApplicationSettings::SaveSettings( QSettings & settings )
 
 Application::Application( )
 {
-    m_mainWindow = 0;
-    m_sceneManager = 0;
+    m_mainWindow = nullptr;
+    m_sceneManager = nullptr;
     m_viewerOnly = false;
-    m_fileReader = 0;
-    m_fileOpenProgressDialog = 0;
-    m_progressDialogUpdateTimer = 0;
-    m_ibisAPI = 0;
-    m_updateManager = 0;
-    m_lookupTableManager = 0;
+    m_fileReader = nullptr;
+    m_fileOpenProgressDialog = nullptr;
+    m_progressDialogUpdateTimer = nullptr;
+    m_ibisAPI = nullptr;
+    m_updateManager = nullptr;
+    m_lookupTableManager = nullptr;
+    m_preferences = nullptr;
 }
 
 void Application::SetMainWindow( MainWindow * mw )
@@ -148,6 +150,10 @@ void Application::Init( bool viewerOnly )
     // Load application settings
     QSettings settings( m_appOrganisation, m_appName );
     m_settings.LoadSettings( settings );
+
+    // Load custom paths and other preferences
+    m_preferences = new IbisPreferences;
+    m_preferences->LoadSettings( settings );
 
     // Create the object that will manage the 3D scene in the visualizer
     m_sceneManager = SceneManager::New();
@@ -202,6 +208,7 @@ Application::~Application()
     {
         allPlugins[i]->Delete(); // this is called because otherwise plugins destructors are never called, Qt bug. The codde has to be revised once Qt is fixed.
     }
+    delete m_preferences;
 }
 
 void Application::ApplyApplicationSettings()
@@ -255,6 +262,7 @@ void Application::SaveSettings()
     // Save settings
     QSettings settings( m_appOrganisation, m_appName );
     m_settings.SaveSettings( settings );
+    m_preferences->SaveSettings( settings );
     m_mainWindow->SaveSettings( settings );
 
     // Save plugins settings
