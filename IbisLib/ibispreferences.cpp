@@ -25,6 +25,7 @@ void IbisPreferences::LoadSettings( QSettings & settings )
 void IbisPreferences::SaveSettings( QSettings & settings )
 {
     settings.beginGroup( "CustomPaths" );
+    settings.remove( "" );
     if( m_customPaths.count() > 0 )
     {
         QMap< QString, QString >::iterator it;

@@ -71,8 +71,10 @@ void PreferenceWidget::RemovePath( QString pathName )
 void PreferenceWidget::RemoveAllCustomPathsWidgets()
 {
     QLayoutItem* child;
-    while ( (child = m_customPathsLayout->takeAt(0)) != 0 )
+    while ( m_customPathsLayout->count() > 0 )
     {
+        child = m_customPathsLayout->itemAt(0);
+        m_customPathsLayout->removeItem( child );
         delete child;
     }
 }
