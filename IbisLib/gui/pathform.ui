@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>43</height>
+    <height>45</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -102,10 +102,29 @@
        </property>
       </widget>
      </item>
+     <item>
+      <widget class="QPushButton" name="removePushButton">
+       <property name="maximumSize">
+        <size>
+         <width>25</width>
+         <height>25</height>
+        </size>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="../IbisLib.qrc">
+         <normaloff>:/Icons/edit-clear.png</normaloff>:/Icons/edit-clear.png</iconset>
+       </property>
+      </widget>
+     </item>
     </layout>
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="../IbisLib.qrc"/>
+ </resources>
  <connections/>
 </ui>

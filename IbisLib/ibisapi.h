@@ -21,6 +21,8 @@ class ObjectPluginInterface;
 class View;
 class USAcquisitionObject;
 class GlobalEventHandler;
+class IbisPreferences;
+
 class vtkMatrix4x4;
 
 class QProgressDialog;
@@ -114,6 +116,8 @@ public:
     void SetRightPanelVisibility( bool v );
     void AddBottomWidget( QWidget * w );
     void RemoveBottomWidget( QWidget * w );
+
+    IbisPreferences *GetIbisPreferences();
 
 public slots:
     void ObjectAddedSlot( int id );

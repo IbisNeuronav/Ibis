@@ -41,6 +41,19 @@ void IbisPreferences::RegisterPath(QString name, QString path )
     m_customPaths.insert( name, path );
 }
 
+void IbisPreferences::UnRegisterPath( QString & pathName )
+{
+    m_customPaths.remove( pathName );
+}
+
+QString IbisPreferences::GetPath( QString & pathName )
+{
+    QMap< QString, QString >::const_iterator it = m_customPaths.find( pathName );
+    if( it != m_customPaths.end() )
+       return it.value();
+    return QString::null;
+}
+
 void IbisPreferences::ShowPreferenceDialog()
 {
     m_prefWidget = new PreferenceWidget;

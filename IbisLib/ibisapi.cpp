@@ -380,3 +380,7 @@ void IbisAPI::RemoveBottomWidget( QWidget * w )
     m_application->RemoveBottomWidget( w );
 }
 
+IbisPreferences * IbisAPI::GetIbisPreferences()
+{
+    return m_application->GetIbisPreferences();
+}

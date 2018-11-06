@@ -21,8 +21,12 @@ public:
 
     void SetPath( QString labelText, QString pathText );
 
+signals:
+    void PathToRemove( QString );
+
 private slots:
     void on_browsePushButton_clicked();
+    void on_removePushButton_clicked();
     void PathLineEditChanged();
 
 private:

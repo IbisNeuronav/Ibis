@@ -2,12 +2,13 @@
 #include "ui_preferencewidget.h"
 #include "ibisapi.h"
 #include "pathform.h"
-#include <QHBoxLayout>
+#include <QVBoxLayout>
 #include <QMap>
 #include <QLabel>
 #include <QLineEdit>
 #include <QDir>
 #include <QMessageBox>
+#include <QLayoutItem>
 
 PreferenceWidget::PreferenceWidget(QWidget *parent) :
     QWidget(parent),
@@ -34,7 +35,13 @@ void PreferenceWidget::UpdateUI(  )
 {
     if( m_preferences )
     {
-        m_customPathsLayout = new QHBoxLayout;
+        if( m_customPathsLayout )
+        {
+            this->RemoveAllCustomPathsWidgets();
+            delete m_customPathsLayout;
+        }
+        m_customPathsLayout = new QVBoxLayout;
+        m_customPathsLayout->setSpacing( 8 );
         ui->customPathsGroupBox->setLayout( m_customPathsLayout );
         QMap< QString, QString> paths = m_preferences->GetCustomPaths();
         if( !paths.isEmpty() )
@@ -49,8 +56,24 @@ void PreferenceWidget::UpdateUI(  )
                 PathForm *nextPath = new PathForm;
                 nextPath->SetPath( it.key(), validPath );
                 m_customPathsLayout->addWidget( nextPath, 0, Qt::AlignTop );
+                connect( nextPath, SIGNAL( PathToRemove(QString) ), this, SLOT( RemovePath(QString) ) );
             }
         }
+    }
+}
+
+void PreferenceWidget::RemovePath( QString pathName )
+{
+    m_preferences->UnRegisterPath( pathName );
+    this->UpdateUI();
+}
+
+void PreferenceWidget::RemoveAllCustomPathsWidgets()
+{
+    QLayoutItem* child;
+    while ( (child = m_customPathsLayout->takeAt(0)) != 0 )
+    {
+        delete child;
     }
 }
 

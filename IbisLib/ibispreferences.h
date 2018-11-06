@@ -17,6 +17,8 @@ public:
     void LoadSettings( QSettings & settings );
     void SaveSettings( QSettings & settings );
     void RegisterPath( QString name, QString path );
+    void UnRegisterPath( QString & pathName );
+    QString GetPath( QString & pathName );
 
     void ShowPreferenceDialog();
     QMap< QString, QString > GetCustomPaths( ) { return m_customPaths; }

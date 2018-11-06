@@ -4,7 +4,7 @@
 #include <QWidget>
 #include "ibispreferences.h"
 
-class QHBoxLayout;
+class QVBoxLayout;
 
 namespace Ui {
 class PreferenceWidget;
@@ -26,10 +26,12 @@ protected:
     void UpdateUI();
 
 private slots:
+    void RemovePath( QString pathName );
 
 private:
     Ui::PreferenceWidget *ui;
-    QHBoxLayout *m_customPathsLayout;
+    QVBoxLayout *m_customPathsLayout;
+    void RemoveAllCustomPathsWidgets();
 };
 
 #endif // PREFERENCEWIDGET_H
