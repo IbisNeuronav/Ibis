@@ -38,9 +38,9 @@ public:
     virtual QString GetPluginDescription();
 
     //Custom paths
-//    virtual void RegisterCustomPath( QString & pathName, QString & directoryPath ) {};
-//    virtual void UnRegisterCustomPath( QString & pathName ) {};
-//    virtual QString GetCustomPath( QString & pathName ) {};
+    void RegisterCustomPath( QString & pathName, QString & directoryPath ) {};
+    void UnRegisterCustomPath( QString & pathName ) {};
+    QString GetCustomPath( QString & pathName ) {};
 
 signals:
 
