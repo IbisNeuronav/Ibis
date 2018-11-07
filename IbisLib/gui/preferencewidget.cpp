@@ -41,7 +41,8 @@ void PreferenceWidget::UpdateUI(  )
             delete m_customPathsLayout;
         }
         m_customPathsLayout = new QVBoxLayout;
-        m_customPathsLayout->setSpacing( 8 );
+        m_customPathsLayout->setSpacing( 4 );
+        m_customPathsLayout->setAlignment( Qt::AlignTop );
         ui->customPathsGroupBox->setLayout( m_customPathsLayout );
         QMap< QString, QString> paths = m_preferences->GetCustomPaths();
         if( !paths.isEmpty() )
@@ -74,8 +75,9 @@ void PreferenceWidget::RemoveAllCustomPathsWidgets()
     while ( m_customPathsLayout->count() > 0 )
     {
         child = m_customPathsLayout->itemAt(0);
-        m_customPathsLayout->removeItem( child );
-        delete child;
+        child->widget()->deleteLater();
+        child->widget()->hide();
+        child->widget()->setParent( nullptr );
     }
 }
 
