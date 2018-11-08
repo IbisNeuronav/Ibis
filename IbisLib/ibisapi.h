@@ -38,6 +38,8 @@ public:
     ~IbisAPI();
 
     static const int InvalidId;
+    static const QString MINCToolsPath;
+    static const QString MINCToolsPathVarName;
 
     // from SceneManager:
     void AddObject( SceneObject * object, SceneObject * attachTo = 0 );
@@ -118,6 +120,11 @@ public:
     void RemoveBottomWidget( QWidget * w );
 
     IbisPreferences *GetIbisPreferences();
+
+    //Custom paths
+    void RegisterCustomPath( const QString & pathName, const QString & directoryPath );
+    void UnRegisterCustomPath( const QString & pathName );
+    const QString GetCustomPath( const QString & pathName );
 
 public slots:
     void ObjectAddedSlot( int id );

@@ -413,6 +413,7 @@ void Application::OpenFiles( OpenFileParams * params, bool addToScene )
     // Create Reader that reads files in another thread
     m_fileReader = new FileReader;
     m_fileReader->SetParams( params );
+    m_fileReader->SetIbisAPI( m_ibisAPI );
     for( int i = 0; i < params->filesParams.size(); ++i )
     {
         OpenFileParams::SingleFileParam & cur = params->filesParams[i];

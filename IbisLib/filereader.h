@@ -24,6 +24,7 @@ class vtkImageData;
 class vtkMatrix4x4;
 class ImageObject;
 class PointsObject;
+class IbisAPI;
 
 class OpenFileParams
 {
@@ -86,6 +87,8 @@ public:
     bool GetFrameDataFromMINCFile(QString filename, vtkImageData *img , vtkMatrix4x4 *mat );
     bool GetPointsDataFromTagFile( QString filename, PointsObject *pts1, PointsObject *pts2 );
 
+    void SetIbisAPI(IbisAPI *api );
+
 private slots:
 
     void OnReaderProgress( vtkObject*, unsigned long );
@@ -126,6 +129,9 @@ protected:
     // Path to mincconvert
     QString m_mincconvert;
     QString m_minccalc;
+
+    // IbisAPI to get preferences
+    IbisAPI *m_ibisAPI;
 };
 
 #endif

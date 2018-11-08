@@ -37,17 +37,17 @@ void IbisPreferences::SaveSettings( QSettings & settings )
     settings.endGroup();
 }
 
-void IbisPreferences::RegisterPath(QString name, QString path )
+void IbisPreferences::RegisterPath( const QString  & name, const QString & path )
 {
     m_customPaths.insert( name, path );
 }
 
-void IbisPreferences::UnRegisterPath( QString & pathName )
+void IbisPreferences::UnRegisterPath( const QString & pathName )
 {
     m_customPaths.remove( pathName );
 }
 
-QString IbisPreferences::GetPath( QString & pathName )
+const QString IbisPreferences::GetPath( const QString & pathName )
 {
     QMap< QString, QString >::const_iterator it = m_customPaths.find( pathName );
     if( it != m_customPaths.end() )

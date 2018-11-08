@@ -26,6 +26,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "imageobject.h"
 #include "polydataobject.h"
 #include "pointsobject.h"
+#include "ibisapi.h"
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
@@ -42,8 +43,9 @@ FileReader::FileReader(QObject *parent)
     m_currentFileIndex = 0;
     m_progress = 0.0;
     m_selfAllocParams = false;
-    m_params = 0;
+    m_params = nullptr;
     m_fileProgressEvent = vtkEventQtSlotConnect::New();
+    m_ibisAPI = nullptr;
 }
 
 FileReader::~FileReader()
@@ -51,6 +53,11 @@ FileReader::~FileReader()
     m_fileProgressEvent->Delete();
     if( m_params && m_selfAllocParams )
         delete m_params;
+}
+
+void FileReader::SetIbisAPI( IbisAPI *api )
+{
+    m_ibisAPI = api;
 }
 
 #include <QStringList>
