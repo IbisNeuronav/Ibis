@@ -362,6 +362,9 @@ void Application::AddHardwareSettingsMenuEntries( QMenu * menu )
         module->AddSettingsMenuEntries( menu );
         ++index;
     }
+    menu->addSeparator();
+    QAction *preferences = menu->addAction( tr("&Preferences"), this, SLOT( Preferences() ), QKeySequence::Preferences );
+    preferences->setMenuRole( QAction::PreferencesRole );
 }
 
 void Application::AddToolObjectsToScene()
@@ -1014,4 +1017,7 @@ void Application::SaveScene( QString fileName )
     m_sceneManager->SaveScene( fileName );
 }
 
-
+void Application::Preferences()
+{
+    m_preferences->ShowPreferenceDialog();
+}

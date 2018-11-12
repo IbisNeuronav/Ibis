@@ -92,6 +92,15 @@ QString FindExecutable( QStringList & candidatePaths )
 
 bool FileReader::FindMincConverter()
 {
+    if( m_ibisAPI )
+    {
+        QString  mincDir = m_ibisAPI->GetCustomPath( IbisAPI::MINCToolsPathVarName );
+        if( mincDir.isEmpty() )
+        {
+            m_ibisAPI->RegisterCustomPath( IbisAPI::MINCToolsPathVarName, IbisAPI::MINCToolsPath  );
+            mincDir = IbisAPI::MINCToolsPath;
+        }
+    }
     m_mincconvert = FindExecutable( mincConvertPaths );
     m_minccalc = FindExecutable( mincCalcPaths );
     return ( !m_mincconvert.isEmpty() && !m_minccalc.isEmpty() );

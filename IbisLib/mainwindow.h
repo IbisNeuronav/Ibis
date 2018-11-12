@@ -92,7 +92,6 @@ private slots:
     void GeneratePluginsMenuActionTriggered();
     void MainSplitterMoved( int pos, int index );
     void SaveScene(bool);
-    void Preferences();
 
 protected:
 
@@ -123,7 +122,6 @@ protected:
     QMenu * m_pluginMenu;
 
     static const QString m_appName;
-    QString m_pathSettings;
 
     QTabWidget * m_rightPanel;
     QSplitter * m_mainSplitter;

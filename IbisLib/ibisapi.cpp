@@ -17,8 +17,8 @@
 #include <QString>
 
 const int IbisAPI::InvalidId = SceneManager::InvalidId;
-const QString MINCToolsPath = "/usr/local/bin";
-const QString MINCToolsPathVarName = "MINCToolsDirectory";
+const QString IbisAPI::MINCToolsPath = "/usr/local/bin/";
+const QString IbisAPI::MINCToolsPathVarName = "MINCToolsDirectory";
 
 
 IbisAPI::IbisAPI()
@@ -46,7 +46,6 @@ void IbisAPI::SetApplication( Application * app )
     connect( m_sceneManager, SIGNAL( ReferenceTransformChanged() ), this, SLOT( ReferenceTransformChangedSlot() ) );
     connect( m_sceneManager, SIGNAL( CursorPositionChanged() ), this, SLOT( CursorPositionChangedSlot() ) );
     connect( m_application, SIGNAL( IbisClockTick() ), this, SLOT( IbisClockTickSlot() ) );
-//    this->RegisterCustomPath( IbisAPI::MINCToolsPathVarName, IbisAPI::MINCToolsPath  );
 }
 
 void IbisAPI::AddObject( SceneObject * object, SceneObject * attachTo )

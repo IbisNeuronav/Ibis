@@ -96,9 +96,6 @@ MainWindow::MainWindow( QWidget * parent )
     fileMenu->addAction( tr("&Load Scene"), this, SLOT( fileLoadScene() ));
     fileMenu->addAction( tr("&New Scene"), this, SLOT( fileNewScene() ));
     fileMenu->addSeparator();
-    QAction *preferences = fileMenu->addAction( tr("&Preferences"), this, SLOT( Preferences() ), QKeySequence::Preferences );
-    preferences->setMenuRole( QAction::PreferencesRole );
-    fileMenu->addSeparator();
     fileMenu->addAction( tr("&Exit"), this, SLOT( close() ), QKeySequence::Quit );
 
     connect( fileMenu, SIGNAL( aboutToShow() ), this, SLOT( ModifyFileMenu() ) );
@@ -933,10 +930,4 @@ void MainWindow::SaveSettings( QSettings & s )
     s.setValue( "MainWindowRightPanelSize", m_rightPanelSize );
     m_4Views->SaveSettings( s );
     s.endGroup();
-}
-
-#include "ibispreferences.h"
-void MainWindow::Preferences()
-{
-    Application::GetInstance().GetIbisPreferences()->ShowPreferenceDialog();
 }

@@ -179,6 +179,7 @@ public slots:
 private slots:
 
     void OpenFilesProgress();
+    void Preferences();
 
 signals:
 
