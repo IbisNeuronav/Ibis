@@ -430,7 +430,7 @@ void Application::OpenFiles( OpenFileParams * params, bool addToScene )
         }
         if( m_fileReader->IsMINC1( cur.fileName.toUtf8().data() ) )
         {
-            if( m_fileReader->FindMincConverter() )
+            if( m_fileReader->CheckMincConverter() )
             {
                 if( m_settings.ShowMINCConversionWarning )
                     this->ShowMinc1Warning( true );
@@ -535,6 +535,7 @@ bool Application::GetImageDataFromVideoFrame(QString fileName, vtkImageData *img
     Q_ASSERT(img);
     Q_ASSERT(mat);
     m_fileReader = new FileReader;
+    m_fileReader->SetIbisAPI( m_ibisAPI );
     QFileInfo fi( fileName );
     if( !(fi.isReadable()) )
     {
@@ -1002,7 +1003,7 @@ void Application::ShowMinc1Warning( bool cando)
     }
     else
     {
-        msgBox.setText( tr("Tool mincconvert not found,\nMINC 1 files cannot be processed.") );
+        msgBox.setText( tr("Tool mincconvert not found,\nOpen Settings/Preferences and set path to the directory containing MINC tools.\n") );
         int ret = msgBox.exec();
     }
 }

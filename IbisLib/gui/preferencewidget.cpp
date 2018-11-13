@@ -58,6 +58,7 @@ void PreferenceWidget::UpdateUI(  )
                 nextPath->SetPath( it.key(), validPath );
                 m_customPathsLayout->addWidget( nextPath, 0, Qt::AlignTop );
                 connect( nextPath, SIGNAL( PathToRemove(QString) ), this, SLOT( RemovePath(QString) ) );
+                connect( nextPath, SIGNAL( PathChanged(QString, QString) ), this, SLOT( ResetPath(QString, QString) ) );
             }
         }
     }
@@ -67,6 +68,12 @@ void PreferenceWidget::RemovePath( QString pathName )
 {
     m_preferences->UnRegisterPath( pathName );
     this->UpdateUI();
+}
+
+void PreferenceWidget::ResetPath( QString pathName, QString path )
+{
+    m_preferences->UnRegisterPath( pathName );
+    m_preferences->RegisterPath( pathName, path );
 }
 
 void PreferenceWidget::RemoveAllCustomPathsWidgets()

@@ -23,6 +23,7 @@ public:
 
 signals:
     void PathToRemove( QString );
+    void PathChanged( QString, QString );
 
 private slots:
     void on_browsePushButton_clicked();

@@ -81,7 +81,7 @@ public:
     QString GetCurrentlyReadFile();
 
     void PrintMetadata(itk::MetaDataDictionary &dict);
-    bool FindMincConverter();
+    bool CheckMincConverter();
     bool IsMINC1( QString fileName );
     bool ConvertMINC1toMINC2(QString &inputileName, QString &outputileName , bool isVideoFrame = false );
     bool GetFrameDataFromMINCFile(QString filename, vtkImageData *img , vtkMatrix4x4 *mat );
@@ -111,6 +111,8 @@ protected:
 
     void SetObjectName( SceneObject * obj, QString objName, QString filename );
     void ReportWarning( QString warning );
+
+    bool FindMINCTool( QString candidate );
 
     // Progress report
     int m_currentFileIndex;

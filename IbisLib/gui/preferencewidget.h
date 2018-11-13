@@ -27,6 +27,7 @@ protected:
 
 private slots:
     void RemovePath( QString pathName );
+    void ResetPath( QString pathName, QString path );
 
 private:
     Ui::PreferenceWidget *ui;

@@ -38,7 +38,6 @@ public:
     ~IbisAPI();
 
     static const int InvalidId;
-    static const QString MINCToolsPath;
     static const QString MINCToolsPathVarName;
 
     // from SceneManager:

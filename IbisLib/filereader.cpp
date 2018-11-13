@@ -32,6 +32,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QFileInfo>
 #include <QApplication>
 #include <QProcess>
+#include <QStringList>
 #include <QMessageBox>
 
 #include <itkImageIOFactory.h>
@@ -55,55 +56,56 @@ FileReader::~FileReader()
         delete m_params;
 }
 
+bool FileReader::FindMINCTool( QString candidate )
+{
+    QFileInfo info( candidate );
+    if( info.exists() && info.isExecutable() )
+    {
+        return true;
+    }
+    return false;
+}
+
 void FileReader::SetIbisAPI( IbisAPI *api )
 {
     m_ibisAPI = api;
-}
-
-#include <QStringList>
-static QStringList mincConvertPaths = QStringList()
-        << "/usr/bin/mincconvert"
-        << "/usr/local/bin/mincconvert"
-        << "/usr/local/minc/bin/mincconvert"
-        << "/usr/local/mni/minc/bin/mincconvert"
-        << "/opt/minc/bin/mincconvert"
-        << "/opt/minc-itk4/bin/mincconvert";
-
-static QStringList mincCalcPaths = QStringList()
-        << "/usr/bin/minccalc"
-        << "/usr/local/bin/minccalc"
-        << "/usr/local/minc/bin/minccalc"
-        << "/usr/local/mni/minc/bin/minccalc"
-        << "/opt/minc/bin/minccalc"
-        << "/opt/minc-itk4/bin/minccalc";
-
-QString FindExecutable( QStringList & candidatePaths )
-{
-    foreach( QString path, candidatePaths )
-    {
-        QFileInfo info( path );
-        if( info.exists() && info.isExecutable() )
-        {
-            return path;
-        }
-    }
-    return QString("");
-}
-
-bool FileReader::FindMincConverter()
-{
     if( m_ibisAPI )
     {
         QString  mincDir = m_ibisAPI->GetCustomPath( IbisAPI::MINCToolsPathVarName );
-        if( mincDir.isEmpty() )
+        if( mincDir != QString::null && !mincDir.isEmpty() )
         {
-            m_ibisAPI->RegisterCustomPath( IbisAPI::MINCToolsPathVarName, IbisAPI::MINCToolsPath  );
-            mincDir = IbisAPI::MINCToolsPath;
+            if( mincDir.at( mincDir.count()-1 ) != '/' )
+                mincDir.append( "/" );
+            m_mincconvert.clear();
+            m_mincconvert.append( mincDir );
+            m_mincconvert.append( "mincconvert" );
+            bool ok = FindMINCTool( m_mincconvert );
+            m_minccalc.clear();
+            m_minccalc.append( mincDir );
+            m_minccalc.append( "minccalc" );
+            ok = ok && FindMINCTool( m_minccalc );
+            if( !ok )
+            {
+                m_ibisAPI->UnRegisterCustomPath( IbisAPI::MINCToolsPathVarName );
+                m_ibisAPI->RegisterCustomPath( IbisAPI::MINCToolsPathVarName, "" );
+                m_mincconvert.clear();
+                m_minccalc.clear();
+            }
+        }
+        else
+        {
+            m_ibisAPI->RegisterCustomPath( IbisAPI::MINCToolsPathVarName, "" );
+            m_mincconvert.clear();
+            m_minccalc.clear();
         }
     }
-    m_mincconvert = FindExecutable( mincConvertPaths );
-    m_minccalc = FindExecutable( mincCalcPaths );
-    return ( !m_mincconvert.isEmpty() && !m_minccalc.isEmpty() );
+}
+
+bool FileReader::CheckMincConverter()
+{
+    if( !m_mincconvert.isEmpty() )
+        return true;
+    return false;
 }
 
 bool FileReader::IsMINC1( QString fileName )
@@ -300,12 +302,10 @@ bool FileReader::OpenFile( QList<SceneObject*> & readObjects, QString filename, 
         if( this->IsMINC1( filename ) )
         {
             if( this->m_mincconvert.isEmpty())
-                this->FindMincConverter();
-            if( this->m_mincconvert.isEmpty())
             {
                 QString tmp("File ");
                 tmp.append( filename + " is  of MINC1 type and needs to be coverted to MINC2.\n" +
-                            "Tool mincconvert was not found in standard paths on your file system.\n" );
+                            "Open Settings/Preferences and set path to the directory containing MINC tools.\n" );
                 QMessageBox::critical( 0, "Error", tmp, 1, 0 );
                 return false;
             }
@@ -695,12 +695,10 @@ bool FileReader::GetFrameDataFromMINCFile(QString filename, vtkImageData *img , 
     if( this->IsMINC1( filename ) )
     {
         if( this->m_mincconvert.isEmpty())
-            this->FindMincConverter();
-        if( this->m_mincconvert.isEmpty())
         {
             QString tmp("File ");
             tmp.append( filename + " is an acquired frame of MINC1 type and needs to be coverted to MINC2.\n" +
-                        "Tools mincconvert and minccalc were not found in standard paths on your file system.\n" );
+                        "Open Settings/Preferences and set path to the directory containing MINC tools.\n" );
             QMessageBox::critical( 0, "Error", tmp, 1, 0 );
             return false;
         }

@@ -32,7 +32,10 @@ void PathForm::on_browsePushButton_clicked()
 {
     QString outputDir = QFileDialog::getExistingDirectory( this, "Custom Path", QDir::homePath() );
     if( !outputDir.isEmpty() ) // otherwise dialog was cancelled an we want to keep the old directory
+    {
         ui->pathLineEdit->setText( outputDir );
+        emit PathChanged( ui->label->text(), ui->pathLineEdit->text() );
+    }
 }
 
 void PathForm::on_removePushButton_clicked()
@@ -51,4 +54,5 @@ void PathForm::PathLineEditChanged()
         QMessageBox::critical( 0, "Error", tmp, 1, 0 );
         ui->pathLineEdit->setText( "" );
     }
+    emit PathChanged( ui->label->text(), ui->pathLineEdit->text() );
 }
