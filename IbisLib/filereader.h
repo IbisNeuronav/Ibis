@@ -24,6 +24,7 @@ class vtkImageData;
 class vtkMatrix4x4;
 class ImageObject;
 class PointsObject;
+class IbisAPI;
 
 class OpenFileParams
 {
@@ -81,10 +82,13 @@ public:
 
     void PrintMetadata(itk::MetaDataDictionary &dict);
     bool FindMincConverter();
+    bool HasMincConverter();
     bool IsMINC1( QString fileName );
     bool ConvertMINC1toMINC2(QString &inputileName, QString &outputileName , bool isVideoFrame = false );
     bool GetFrameDataFromMINCFile(QString filename, vtkImageData *img , vtkMatrix4x4 *mat );
     bool GetPointsDataFromTagFile( QString filename, PointsObject *pts1, PointsObject *pts2 );
+
+    void SetIbisAPI(IbisAPI *api );
 
 private slots:
 
@@ -109,6 +113,8 @@ protected:
     void SetObjectName( SceneObject * obj, QString objName, QString filename );
     void ReportWarning( QString warning );
 
+    bool FindMINCTool( QString candidate );
+
     // Progress report
     int m_currentFileIndex;
     double m_progress;
@@ -126,6 +132,9 @@ protected:
     // Path to mincconvert
     QString m_mincconvert;
     QString m_minccalc;
+
+    // IbisAPI to get preferences
+    IbisAPI *m_ibisAPI;
 };
 
 #endif

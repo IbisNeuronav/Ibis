@@ -33,6 +33,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "filereader.h"
 #include "imageobject.h"
 #include "lookuptablemanager.h"
+#include "ibispreferences.h"
 #include <QDir>
 #include <QFileInfo>
 #include <QSettings>
@@ -118,15 +119,16 @@ void ApplicationSettings::SaveSettings( QSettings & settings )
 
 Application::Application( )
 {
-    m_mainWindow = 0;
-    m_sceneManager = 0;
+    m_mainWindow = nullptr;
+    m_sceneManager = nullptr;
     m_viewerOnly = false;
-    m_fileReader = 0;
-    m_fileOpenProgressDialog = 0;
-    m_progressDialogUpdateTimer = 0;
-    m_ibisAPI = 0;
-    m_updateManager = 0;
-    m_lookupTableManager = 0;
+    m_fileReader = nullptr;
+    m_fileOpenProgressDialog = nullptr;
+    m_progressDialogUpdateTimer = nullptr;
+    m_ibisAPI = nullptr;
+    m_updateManager = nullptr;
+    m_lookupTableManager = nullptr;
+    m_preferences = nullptr;
 }
 
 void Application::SetMainWindow( MainWindow * mw )
@@ -148,6 +150,10 @@ void Application::Init( bool viewerOnly )
     // Load application settings
     QSettings settings( m_appOrganisation, m_appName );
     m_settings.LoadSettings( settings );
+
+    // Load custom paths and other preferences
+    m_preferences = new IbisPreferences;
+    m_preferences->LoadSettings( settings );
 
     // Create the object that will manage the 3D scene in the visualizer
     m_sceneManager = SceneManager::New();
@@ -202,6 +208,7 @@ Application::~Application()
     {
         allPlugins[i]->Delete(); // this is called because otherwise plugins destructors are never called, Qt bug. The codde has to be revised once Qt is fixed.
     }
+    delete m_preferences;
 }
 
 void Application::ApplyApplicationSettings()
@@ -255,6 +262,7 @@ void Application::SaveSettings()
     // Save settings
     QSettings settings( m_appOrganisation, m_appName );
     m_settings.SaveSettings( settings );
+    m_preferences->SaveSettings( settings );
     m_mainWindow->SaveSettings( settings );
 
     // Save plugins settings
@@ -354,6 +362,9 @@ void Application::AddHardwareSettingsMenuEntries( QMenu * menu )
         module->AddSettingsMenuEntries( menu );
         ++index;
     }
+    menu->addSeparator();
+    QAction *preferences = menu->addAction( tr("&Preferences"), this, SLOT( Preferences() ), QKeySequence::Preferences );
+    preferences->setMenuRole( QAction::PreferencesRole );
 }
 
 void Application::AddToolObjectsToScene()
@@ -405,6 +416,7 @@ void Application::OpenFiles( OpenFileParams * params, bool addToScene )
     // Create Reader that reads files in another thread
     m_fileReader = new FileReader;
     m_fileReader->SetParams( params );
+    m_fileReader->SetIbisAPI( m_ibisAPI );
     for( int i = 0; i < params->filesParams.size(); ++i )
     {
         OpenFileParams::SingleFileParam & cur = params->filesParams[i];
@@ -418,7 +430,7 @@ void Application::OpenFiles( OpenFileParams * params, bool addToScene )
         }
         if( m_fileReader->IsMINC1( cur.fileName.toUtf8().data() ) )
         {
-            if( m_fileReader->FindMincConverter() )
+            if( m_fileReader->HasMincConverter() )
             {
                 if( m_settings.ShowMINCConversionWarning )
                     this->ShowMinc1Warning( true );
@@ -523,6 +535,7 @@ bool Application::GetImageDataFromVideoFrame(QString fileName, vtkImageData *img
     Q_ASSERT(img);
     Q_ASSERT(mat);
     m_fileReader = new FileReader;
+    m_fileReader->SetIbisAPI( m_ibisAPI );
     QFileInfo fi( fileName );
     if( !(fi.isReadable()) )
     {
@@ -990,7 +1003,7 @@ void Application::ShowMinc1Warning( bool cando)
     }
     else
     {
-        msgBox.setText( tr("Tool mincconvert not found,\nMINC 1 files cannot be processed.") );
+        msgBox.setText( tr("Tool mincconvert not found,\nOpen Settings/Preferences and set path to the directory containing MINC tools.\n") );
         int ret = msgBox.exec();
     }
 }
@@ -1005,4 +1018,7 @@ void Application::SaveScene( QString fileName )
     m_sceneManager->SaveScene( fileName );
 }
 
-
+void Application::Preferences()
+{
+    m_preferences->ShowPreferenceDialog();
+}

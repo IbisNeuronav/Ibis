@@ -21,6 +21,8 @@ class ObjectPluginInterface;
 class View;
 class USAcquisitionObject;
 class GlobalEventHandler;
+class IbisPreferences;
+
 class vtkMatrix4x4;
 
 class QProgressDialog;
@@ -36,6 +38,7 @@ public:
     ~IbisAPI();
 
     static const int InvalidId;
+    static const QString MINCToolsPathVarName;
 
     // from SceneManager:
     void AddObject( SceneObject * object, SceneObject * attachTo = 0 );
@@ -114,6 +117,13 @@ public:
     void SetRightPanelVisibility( bool v );
     void AddBottomWidget( QWidget * w );
     void RemoveBottomWidget( QWidget * w );
+
+    IbisPreferences *GetIbisPreferences();
+
+    //Custom paths
+    void RegisterCustomPath( const QString & pathName, const QString & directoryPath );
+    void UnRegisterCustomPath( const QString & pathName );
+    const QString GetCustomPath( const QString & pathName );
 
 public slots:
     void ObjectAddedSlot( int id );

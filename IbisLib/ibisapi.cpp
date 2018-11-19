@@ -8,6 +8,7 @@
 #include "pointerobject.h"
 #include "usprobeobject.h"
 #include "cameraobject.h"
+#include "ibispreferences.h"
 #include "view.h"
 #include "usacquisitionobject.h"
 #include "toolplugininterface.h"
@@ -16,6 +17,7 @@
 #include <QString>
 
 const int IbisAPI::InvalidId = SceneManager::InvalidId;
+const QString IbisAPI::MINCToolsPathVarName = "MINCToolsDirectory";
 
 
 IbisAPI::IbisAPI()
@@ -380,3 +382,23 @@ void IbisAPI::RemoveBottomWidget( QWidget * w )
     m_application->RemoveBottomWidget( w );
 }
 
+IbisPreferences * IbisAPI::GetIbisPreferences()
+{
+    return m_application->GetIbisPreferences();
+}
+
+//Custom paths
+void IbisAPI::RegisterCustomPath( const QString & pathName, const QString & directoryPath )
+{
+    m_application->GetIbisPreferences()->RegisterPath( pathName, directoryPath );
+}
+
+void IbisAPI::UnRegisterCustomPath( const QString & pathName )
+{
+    m_application->GetIbisPreferences()->UnRegisterPath( pathName );
+}
+
+const QString IbisAPI::GetCustomPath(const QString &pathName )
+{
+    return m_application->GetIbisPreferences()->GetPath( pathName );
+}

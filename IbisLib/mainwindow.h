@@ -122,7 +122,6 @@ protected:
     QMenu * m_pluginMenu;
 
     static const QString m_appName;
-    QString m_pathSettings;
 
     QTabWidget * m_rightPanel;
     QSplitter * m_mainSplitter;
