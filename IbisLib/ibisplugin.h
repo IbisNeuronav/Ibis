@@ -37,11 +37,6 @@ public:
     QString GetPluginTypeAsString();
     virtual QString GetPluginDescription();
 
-    //Custom paths
-    void RegisterCustomPath( const QString & pathName, const QString & directoryPath ) {};
-    void UnRegisterCustomPath( const QString & pathName ) {};
-    const QString GetCustomPath( const QString & pathName ) {};
-
 signals:
 
     void PluginModified();
