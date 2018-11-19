@@ -430,7 +430,7 @@ void Application::OpenFiles( OpenFileParams * params, bool addToScene )
         }
         if( m_fileReader->IsMINC1( cur.fileName.toUtf8().data() ) )
         {
-            if( m_fileReader->CheckMincConverter() )
+            if( m_fileReader->HasMincConverter() )
             {
                 if( m_settings.ShowMINCConversionWarning )
                     this->ShowMinc1Warning( true );

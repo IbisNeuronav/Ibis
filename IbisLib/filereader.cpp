@@ -56,6 +56,47 @@ FileReader::~FileReader()
         delete m_params;
 }
 
+static QStringList mincConvertPaths = QStringList()
+        << "/usr/bin/mincconvert"
+        << "/usr/local/bin/mincconvert"
+        << "/usr/local/minc/bin/mincconvert"
+        << "/usr/local/mni/minc/bin/mincconvert"
+        << "/opt/minc/bin/mincconvert"
+        << "/opt/minc-itk4/bin/mincconvert";
+
+static QStringList mincCalcPaths = QStringList()
+        << "/usr/bin/minccalc"
+        << "/usr/local/bin/minccalc"
+        << "/usr/local/minc/bin/minccalc"
+        << "/usr/local/mni/minc/bin/minccalc"
+        << "/opt/minc/bin/minccalc"
+        << "/opt/minc-itk4/bin/minccalc";
+
+QString FindExecutable( QStringList & candidatePaths )
+{
+    foreach( QString path, candidatePaths )
+    {
+        QFileInfo info( path );
+        if( info.exists() && info.isExecutable() )
+        {
+            return path;
+        }
+    }
+    return QString("");
+}
+
+bool FileReader::FindMincConverter()
+{
+    m_mincconvert = FindExecutable( mincConvertPaths );
+    m_minccalc = FindExecutable( mincCalcPaths );
+    return ( !m_mincconvert.isEmpty() && !m_minccalc.isEmpty() );
+}
+
+bool FileReader::HasMincConverter()
+{
+    return !m_mincconvert.isEmpty();
+}
+
 bool FileReader::FindMINCTool( QString candidate )
 {
     QFileInfo info( candidate );
@@ -87,25 +128,36 @@ void FileReader::SetIbisAPI( IbisAPI *api )
             if( !ok )
             {
                 m_ibisAPI->UnRegisterCustomPath( IbisAPI::MINCToolsPathVarName );
+                ok = FindMincConverter();
+                if( ok )
+                {
+                    QFileInfo fi( m_mincconvert );
+                    m_ibisAPI->RegisterCustomPath( IbisAPI::MINCToolsPathVarName, fi.absolutePath() );
+                }
+                else
+                {
+                    m_ibisAPI->RegisterCustomPath( IbisAPI::MINCToolsPathVarName, "" );
+                    m_mincconvert.clear();
+                    m_minccalc.clear();
+                }
+            }
+        }
+        else
+        {
+            bool ok = FindMincConverter();
+            if( ok )
+            {
+                QFileInfo fi( m_mincconvert );
+                m_ibisAPI->RegisterCustomPath( IbisAPI::MINCToolsPathVarName, fi.absolutePath() );
+            }
+            else
+            {
                 m_ibisAPI->RegisterCustomPath( IbisAPI::MINCToolsPathVarName, "" );
                 m_mincconvert.clear();
                 m_minccalc.clear();
             }
         }
-        else
-        {
-            m_ibisAPI->RegisterCustomPath( IbisAPI::MINCToolsPathVarName, "" );
-            m_mincconvert.clear();
-            m_minccalc.clear();
-        }
     }
-}
-
-bool FileReader::CheckMincConverter()
-{
-    if( !m_mincconvert.isEmpty() )
-        return true;
-    return false;
 }
 
 bool FileReader::IsMINC1( QString fileName )
