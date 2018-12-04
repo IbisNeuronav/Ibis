@@ -264,6 +264,11 @@ bool FileReader::ConvertMINC1toMINC2( QString &inputileName, QString &outputileN
     }
 }
 
+void FileReader::SetParams( OpenFileParams * params )
+{
+    m_params = params;
+}
+
 void FileReader::SetFileNames( QStringList & filenames )
 {
     m_params = new OpenFileParams;

@@ -17,7 +17,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "aboutbicigns.h"
 #include "quadviewwindow.h"
 #include "opendatafiledialog.h"
-#include "filereader.h"
+#include "ibisapi.h"
 #include "worldobject.h"
 #include "ibisconfig.h"
 #include "toolplugininterface.h"

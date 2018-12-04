@@ -28,6 +28,43 @@ class vtkMatrix4x4;
 class QProgressDialog;
 class QString;
 
+class OpenFileParams
+{
+
+public:
+
+    struct SingleFileParam
+    {
+        SingleFileParam() : isReference(false), isLabel(false), loadedObject(0), secondaryObject(0), parent(0) {}
+        QString fileName;
+        QString objectName;
+        bool isReference;
+        bool isLabel;  // load image as label image instead of floats.
+        SceneObject * loadedObject;
+        SceneObject * secondaryObject;  // This is a hack to attach the second point object that can be found in PointsObjects
+        SceneObject * parent;
+    };
+    OpenFileParams() : defaultParent(0) {}
+    ~OpenFileParams() {}
+    void AddInputFile( QString filename, QString objectName = QString() )
+    {
+        SingleFileParam p;
+        p.fileName = filename;
+        p.objectName = objectName;
+        filesParams.push_back( p );
+    }
+    void SetAllFileNames( const QStringList & inFiles )
+    {
+        for( int i = 0; i < inFiles.size(); ++i )
+        {
+            AddInputFile( inFiles[i] );
+        }
+    }
+    QList<SingleFileParam> filesParams;
+    QString lastVisitedDir;
+    SceneObject * defaultParent;
+};
+
 class IbisAPI : public QObject
 {
 
@@ -43,6 +80,7 @@ public:
     // from SceneManager:
     void AddObject( SceneObject * object, SceneObject * attachTo = 0 );
     void RemoveObject( SceneObject * object , bool viewChange = true);
+    void RemoveAllChildrenObjects( SceneObject *obj );
     void SetCurrentObject( SceneObject * cur  );
     SceneObject * GetCurrentObject( );
     SceneObject * GetObjectByID( int id );
@@ -108,7 +146,9 @@ public:
     void RemoveGlobalEventHandler( GlobalEventHandler * h );
 
     // Data loading utilities
-    bool OpenTransformFile( QString filename, vtkMatrix4x4 * mat );
+    bool OpenTransformFile( const QString & filename, vtkMatrix4x4 * mat );
+    bool OpenTransformFile( const QString & filename, SceneObject * obj = 0 );
+    void OpenFiles( OpenFileParams * params, bool addToScene = true );
 
     // Control layout of Main Window
     void SetMainWindowFullscreen( bool f );
