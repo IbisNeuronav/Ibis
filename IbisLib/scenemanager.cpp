@@ -38,6 +38,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "pointerobject.h"
 #include "usprobeobject.h"
 #include "filereader.h"
+#include "ibisapi.h"
 #include "application.h"
 #include "hardwaremodule.h"
 #include "objectplugininterface.h"

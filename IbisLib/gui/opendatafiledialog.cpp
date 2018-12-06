@@ -13,7 +13,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QFileDialog>
 #include "vtkTransform.h"
 #include "sceneobject.h"
-#include "filereader.h"
+#include "ibisapi.h"
 #include "scenemanager.h"
     
 OpenDataFileDialog::OpenDataFileDialog( QWidget* parent, Qt::WindowFlags fl, SceneManager * man, OpenFileParams *params )

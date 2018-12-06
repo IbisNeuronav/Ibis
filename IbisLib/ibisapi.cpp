@@ -1,5 +1,6 @@
 #include "ibisapi.h"
 #include "application.h"
+#include "filereader.h"
 #include "scenemanager.h"
 #include "mainwindow.h"
 #include "sceneobject.h"
@@ -55,6 +56,11 @@ void IbisAPI::AddObject( SceneObject * object, SceneObject * attachTo )
 void IbisAPI::RemoveObject( SceneObject * object , bool viewChange )
 {
     m_sceneManager->RemoveObject( object, viewChange );
+}
+
+void IbisAPI::RemoveAllChildrenObjects( SceneObject *obj )
+{
+    m_sceneManager->RemoveAllChildrenObjects( obj );
 }
 
 SceneObject *IbisAPI::GetCurrentObject( )
@@ -336,9 +342,19 @@ void IbisAPI::RemoveGlobalEventHandler( GlobalEventHandler * h )
     m_application->RemoveGlobalEventHandler( h );
 }
 
-bool IbisAPI::OpenTransformFile( QString filename, vtkMatrix4x4 * mat )
+bool IbisAPI::OpenTransformFile( const QString & filename, vtkMatrix4x4 * mat )
 {
     return m_application->OpenTransformFile( filename.toUtf8().data(), mat );
+}
+
+bool IbisAPI::OpenTransformFile( const QString & filename, SceneObject * obj )
+{
+    return m_application->OpenTransformFile( filename.toUtf8().data(), obj );
+}
+
+void IbisAPI::OpenFiles( OpenFileParams * params, bool addToScene )
+{
+    m_application->OpenFiles( params, addToScene );
 }
 
 void IbisAPI::SetMainWindowFullscreen( bool f )
