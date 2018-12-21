@@ -13,6 +13,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include "ibistypes.h"
 #include "vtkObject.h"
+#include "viewinteractor.h"
 #include <QObject>
 #include <QString>
 
@@ -21,7 +22,7 @@ class Application;
 class QSettings;
 
 
-class IbisPlugin : public QObject, public vtkObject
+class IbisPlugin : public QObject, public vtkObject, public ViewInteractor
 {
 
     Q_OBJECT

@@ -64,12 +64,12 @@ public:
     vtkTypeMacro( CameraObject, TrackedSceneObject );
 
     CameraObject();
-    ~CameraObject();
+    ~CameraObject() override;
 
     virtual void Serialize( Serializer * ser ) override;
     virtual void SerializeTracked( Serializer * ser ) override;
     virtual void Export() override;
-    bool Import( QString & directory, QProgressDialog * progressDlg=0 );
+    bool Import( QString & directory, QProgressDialog * progressDlg=nullptr );
     virtual bool IsExportable()  override { return true; }
 
     // Replacing direct interface to tracked video source
@@ -84,6 +84,11 @@ public:
     virtual void Setup( View * view ) override;
     virtual void Release( View * view ) override;
     virtual void CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets) override;
+
+    // Mouse interaction with AR view
+    virtual bool OnLeftButtonPressed( View * v, int x, int y, unsigned modifiers ) override;
+    virtual bool OnLeftButtonReleased( View *, int, int, unsigned ) override;
+    virtual bool OnMouseMoved( View *, int, int, unsigned ) override;
 
     void SetIntrinsicEditable( bool e ) { m_intrinsicEditable = e; }
     bool IsIntrinsicEditable() { return m_intrinsicEditable; }
@@ -137,14 +142,16 @@ public:
     // ViewController implementation
     void ReleaseControl( View * v ) override;
 
-    // Transform point from world to image space
+    // Transform point from world and window to image space
     void WorldToImage( double * worldPos, double & xIm, double & yIm );
+    void WindowToImage( int x, int y, View * v, double & xIm, double & yIm );
 
     // Drawing overlay on the image
     void DrawLine( double x1, double y1, double x2, double y2, double color[4] );
     void DrawPath( std::vector< Vec2 > & points, double color[4] );
     void DrawWorldPath( std::vector< Vec3 > & points, double color[4] );
     void DrawRect( double x, double y, double width, double height, double color[4] );
+    void DrawTarget( double x, double y, double radius, double color[4] );
     void ClearDrawing();
 
 signals:
@@ -207,6 +214,7 @@ protected:
     bool m_trackedTransparencyCenter;
     double m_transparencyCenter[2];
     double m_transparencyRadius[2];
+    bool m_mouseMovingTransparency;
 
     vtkSmartPointer<vtkPassThrough> m_videoInputSwitch;
 

@@ -13,6 +13,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include "vtkObject.h"
 #include <QObject>
+#include "viewinteractor.h"
 #include <QString>
 #include <QVector>
 #include "serializer.h"
@@ -29,7 +30,7 @@ class QWidget;
 class SceneManager;
 class vtkEventQtSlotConnect;
 
-class SceneObject : public QObject, public vtkObject
+class SceneObject : public QObject, public vtkObject, public ViewInteractor
 {
     
 Q_OBJECT
@@ -125,15 +126,8 @@ public:
 
     vtkGetObjectMacro( Manager, SceneManager );
 
-    // For interactive objects. To get callback from the view in subclasses, you need to reimplement
-    // any of the functions you need and then register your object with the view in the setup function
-    virtual bool OnLeftButtonPressed( View * v, int x, int y, unsigned modifiers ) { return false; }
-    virtual bool OnLeftButtonReleased( View * v, int x, int y, unsigned modifiers ) { return false; }
-    virtual bool OnRightButtonPressed( View * v, int x, int y, unsigned modifiers ) { return false; }
-    virtual bool OnRightButtonReleased( View * v, int x, int y, unsigned modifiers ) { return false; }
-    virtual bool OnMiddleButtonPressed( View * v, int x, int y, unsigned modifiers ) { return false; }
-    virtual bool OnMiddleButtonReleased( View * v, int x, int y, unsigned modifiers ) { return false; }
-    virtual bool OnMouseMoved( View * v, int x, int y, unsigned modifiers ) { return false; }
+    // Try to pick a 3D position only on that particular SceneObject
+    virtual bool Pick( View * v, int x, int y, double pickedPos[3] ) { return false; }
 
     vtkGetMacro( RenderLayer, int );
     vtkSetMacro( RenderLayer, int );
