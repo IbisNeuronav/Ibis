@@ -45,13 +45,19 @@ public:
     vtkSetClampMacro(Radius,double,0.000001,VTK_DOUBLE_MAX);
     vtkGetMacro(Radius,double);
 
+    // Description:
+    // Get/Set center of the circle
+    vtkSetVector3Macro(Center,double);
+    vtkGetVector3Macro(Center,double);
+
 protected:
 
-    vtkCircleWithCrossSource( int res = 0, double radius = 1.0 );
-    ~vtkCircleWithCrossSource() { };
+    vtkCircleWithCrossSource();
+    ~vtkCircleWithCrossSource() {}
 
     virtual int RequestData(vtkInformation* request, vtkInformationVector** inInfo, vtkInformationVector* outInfo);
 
+    double Center[3];
     double Radius;
     int Resolution;
 

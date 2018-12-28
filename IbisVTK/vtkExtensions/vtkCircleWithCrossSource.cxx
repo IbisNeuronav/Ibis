@@ -26,10 +26,13 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 vtkStandardNewMacro(vtkCircleWithCrossSource);
 
-vtkCircleWithCrossSource::vtkCircleWithCrossSource( int res, double radius )
+vtkCircleWithCrossSource::vtkCircleWithCrossSource()
 {
-    this->Radius = ( radius <= 0.0 ? 0.0 : radius );
-    this->Resolution = (res < 0 ? 0 : res);
+    this->Radius = 1.0;
+    this->Resolution = 0;
+    this->Center[0] = 0.0;
+    this->Center[1] = 0.0;
+    this->Center[2] = 0.0;
     this->SetNumberOfInputPorts(0);
 }
 
@@ -54,9 +57,9 @@ int vtkCircleWithCrossSource::RequestData( vtkInformation *vtkNotUsed(request),
         double newPoint[3];
         for (int i = 0; i < numPts; i++)
         {
-            newPoint[0] = this->Radius * sin(delta * i);
-            newPoint[1] = this->Radius * cos(delta * i);
-            newPoint[2] = 0.0;
+            newPoint[0] = Center[0] + this->Radius * sin(delta * i);
+            newPoint[1] = Center[1] + this->Radius * cos(delta * i);
+            newPoint[2] = Center[2] + 0.0;
             newPoints->SetPoint(i, newPoint);
         }
     }

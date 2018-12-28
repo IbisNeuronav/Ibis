@@ -9,6 +9,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
 #include "view.h"
+#include "viewinteractor.h"
 #include "vtkRenderer.h"
 #include "vtkCamera.h"
 #include "vtkRenderWindow.h"
@@ -347,21 +348,18 @@ void View::Fullscreen()
     this->RenderWindow->showFullScreen();
 }
 
-void View::AddInteractionObject( SceneObject * obj, double priority )
+void View::AddInteractionObject( ViewInteractor * obj, double priority )
 {
-    if( obj )
-        obj->Register( this );
-    m_interactionObjects.insert( std::pair<double,SceneObject*>( priority, obj ) );
+    m_interactionObjects.insert( std::pair<double,ViewInteractor*>( priority, obj ) );
 }
 
-void View::RemoveInteractionObject( SceneObject * obj )
+void View::RemoveInteractionObject( ViewInteractor * obj )
 {
     InteractionObjectContainer::iterator it = m_interactionObjects.begin();
     while( it != m_interactionObjects.end() )
     {
         if( (*it).second == obj )
         {
-            obj->UnRegister( this );
             m_interactionObjects.erase( it );
             break;
         }
@@ -415,11 +413,11 @@ void View::ProcessInteractionEvents( vtkObject * caller, unsigned long event, vo
         }
     }*/
 
-    InteractionObjectContainer::iterator it = m_interactionObjects.begin();
-    while( it != m_interactionObjects.end() )
+    InteractionObjectContainer::reverse_iterator it = m_interactionObjects.rbegin();
+    while( it != m_interactionObjects.rend() )
     {
         bool swallow = false;
-        SceneObject * obj = (*it).second;
+        ViewInteractor * obj = (*it).second;
         switch ( event )
         {
         case vtkCommand::LeftButtonPressEvent:
@@ -478,6 +476,11 @@ void View::SetBackgroundColor( double * color )
 {
     this->Renderer->SetBackground( color );
     this->NotifyNeedRender();
+}
+
+int * View::GetWindowSize( )
+{
+    return this->RenderWindow->GetRenderWindow()->GetSize();
 }
 
 void View::ResetCamera()

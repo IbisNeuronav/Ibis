@@ -18,6 +18,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "serializer.h"
 #include "vtkSmartPointer.h"
 
+class ViewInteractor;
 class vtkInteractorStyle;
 class vtkRenderWindowInteractor;
 class vtkRenderer;
@@ -63,7 +64,7 @@ public:
 
 
     View();
-    ~View();
+    virtual ~View() override;
 
     virtual void Serialize( Serializer * ser );
 
@@ -98,14 +99,15 @@ public:
     void SetManager( SceneManager * manager );
 
     void SetBackgroundColor( double * color );
+    int * GetWindowSize();
 
     void ReleaseView();
     void TakeControl( ViewController * c );
     void ReleaseControl( ViewController * c );
     void Fullscreen();
 
-    void AddInteractionObject( SceneObject * obj, double priority );
-    void RemoveInteractionObject( SceneObject * obj );
+    void AddInteractionObject( ViewInteractor * obj, double priority );
+    void RemoveInteractionObject( ViewInteractor * obj );
     void ProcessInteractionEvents( vtkObject * caller, unsigned long event, void * calldata );
 
     void WorldToWindow( double world[3], double & xWin, double & yWin );
@@ -160,7 +162,7 @@ protected:
     // Manage mouse and keyboard interaction with sceneobject
     vtkSmartPointer< vtkObjectCallback<View> > InteractionCallback;
     double Priority;
-    typedef std::multimap<double,SceneObject*> InteractionObjectContainer;
+    typedef std::multimap<double,ViewInteractor*> InteractionObjectContainer;
     InteractionObjectContainer m_interactionObjects;
     bool m_leftButtonDown;
     bool m_middleButtonDown;

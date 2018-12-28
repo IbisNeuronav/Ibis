@@ -29,6 +29,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "vtkXFMWriter.h"
 #include "vtkXFMReader.h"
 #include "vtkPassThrough.h"
+#include "vtkPicker.h"
 #include "application.h"
 #include "hardwaremodule.h"
 #include "scenemanager.h"
@@ -296,8 +297,11 @@ void CameraObject::Setup( View * view )
         // turn on live video acquisition
         AddClient();
 
+        // Make sure we receive interaction event from this view
+        view->AddInteractionObject( this, 0.5 );
+
         PerViewElements perView;
-        perView.cameraBackup = 0;
+        perView.cameraBackup = nullptr;
 
         vtkPolyDataMapper * camMapper = vtkPolyDataMapper::New();
         camMapper->SetInputData( m_cameraPolyData );
@@ -369,6 +373,7 @@ void CameraObject::Release( View * view )
             disconnect( this, SIGNAL(ObjectModified()), view, SLOT(NotifyNeedRender()) );
 
             RemoveClient();
+            view->RemoveInteractionObject(this);
         }
     }
 }
@@ -380,6 +385,42 @@ void CameraObject::CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *
     dlg->SetCamera(this);
     dlg->setObjectName("Properties");
     widgets->append(dlg);
+}
+
+
+bool CameraObject::OnLeftButtonPressed( View * v, int x, int y, unsigned )
+{
+    if( GetTrackCamera() && IsUsingTransparency() && v->GetType() == THREED_VIEW_TYPE && !m_trackedTransparencyCenter )
+    {
+        double xIm, yIm;
+        WindowToImage( x, y, v, xIm, yIm );
+        SetTransparencyCenter( xIm / GetImageWidth(), yIm / GetImageHeight() );
+        m_mouseMovingTransparency = true;
+        return true;
+    }
+    return false;
+}
+
+bool CameraObject::OnLeftButtonReleased( View *, int, int, unsigned )
+{
+    if( m_mouseMovingTransparency )
+    {
+        m_mouseMovingTransparency = false;
+        return true;
+    }
+    return false;
+}
+
+bool CameraObject::OnMouseMoved( View * v, int x, int y, unsigned )
+{
+    if( m_mouseMovingTransparency )
+    {
+        double xIm, yIm;
+        WindowToImage( x, y, v, xIm, yIm );
+        SetTransparencyCenter( xIm / GetImageWidth(), yIm / GetImageHeight() );
+        return true;
+    }
+    return false;
 }
 
 void CameraObject::Hide()
@@ -800,6 +841,16 @@ void CameraObject::WorldToImage( double * worldPos, double & xIm, double & yIm )
     yIm = GetImageHeight() - yIm - 1.0;
 }
 
+void CameraObject::WindowToImage( int x, int y, View * v, double & xIm, double & yIm )
+{
+    int * winSize = v->GetWindowSize();
+    double imScale = static_cast<double>(m_cachedImageSize[1]) / winSize[1];
+    yIm = y * imScale;
+    double winImWidth = winSize[1] * m_cachedImageSize[0] / m_cachedImageSize[1];
+    double offset = (winSize[0] - winImWidth) * 0.5;
+    xIm = (x - offset) * imScale;
+}
+
 #include "simplepropcreator.h"
 static double zMin = 0.01;
 
@@ -886,6 +937,27 @@ void CameraObject::DrawRect( double x, double y, double width, double height, do
     DrawLine( x + width, y, x + width, y + height, color );
     DrawLine( x + width, y + height, x, y + height, color );
     DrawLine( x, y + height, x, y, color );
+}
+
+void CameraObject::DrawTarget( double x, double y, double radius, double color[4] )
+{
+    double center[3] = { 0.0, 0.0, 0.0 };
+    center[0] = x;
+    center[1] = y;
+    PerViewElementCont::iterator it = m_perViewElements.begin();
+    while( it != m_perViewElements.end() )
+    {
+        View * v = (*it).first;
+        if( v->GetType() == THREED_VIEW_TYPE )
+        {
+            vtkProp3D * p1 = SimplePropCreator::CreateTarget( center, 10.0, color );
+            p1->SetUserTransform( m_imageTransform );
+            GetCurrentRenderer(v)->AddViewProp( p1 );
+            PerViewElements & elem = (*it).second;
+            elem.anotations.push_back( p1 );
+        }
+        ++it;
+    }
 }
 
 void CameraObject::ClearDrawing()
