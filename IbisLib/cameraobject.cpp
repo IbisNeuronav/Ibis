@@ -440,6 +440,8 @@ void CameraObject::Hide()
 
         ++it;
     }
+
+    emit ObjectModified();
 }
 
 void CameraObject::Show()
@@ -459,6 +461,8 @@ void CameraObject::Show()
 
         ++it;
     }
+
+    emit ObjectModified();
 }
 
 void CameraObject::SetIntrinsicParams( const CameraIntrinsicParams & params )
