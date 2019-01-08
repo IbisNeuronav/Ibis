@@ -139,6 +139,7 @@ CameraObject::CameraObject()
     m_transparencyCenter[1] = 0.5;
     m_transparencyRadius[0] = 0.03;
     m_transparencyRadius[1] = 0.3;
+    m_mouseMovingTransparency = false;
     CreateCameraRepresentation();
 
     m_cachedImageSize[ 0 ] = DefaultImageSize[0];
