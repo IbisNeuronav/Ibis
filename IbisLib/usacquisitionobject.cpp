@@ -849,7 +849,7 @@ void USAcquisitionObject::GetItkImage(IbisItkUnsignedChar3ImageType::Pointer itk
     }
 
     //convert to ITK image
-    IbisItkVtkConverter *converter = IbisItkVtkConverter::New();
+    vtkSmartPointer<IbisItkVtkConverter> converter = vtkSmartPointer<IbisItkVtkConverter>::New();
     converter->ConvertVtkImageToItkImage( itkOutputImage, imageToConvert, frameMatrix );
 }
 
@@ -903,7 +903,7 @@ void USAcquisitionObject:: GetItkRGBImage(IbisRGBImageType::Pointer itkOutputIma
     }
 
     //convert to ITK image
-    IbisItkVtkConverter *converter = IbisItkVtkConverter::New();
+    vtkSmartPointer<IbisItkVtkConverter> converter = vtkSmartPointer<IbisItkVtkConverter>::New();
     converter->ConvertVtkImageToItkImage( itkOutputImage, imageToConvert, frameMatrix );
 }
 
