@@ -128,6 +128,7 @@ public:
 
     // Ibis Plugin management
     void LoadPlugins();
+    void SerializePlugins( Serializer * ser );
     IbisPlugin * GetPluginByName( QString name );
     void ActivatePluginByName( const char * name, bool active );
     ObjectPluginInterface *GetObjectPluginByName( QString className );
