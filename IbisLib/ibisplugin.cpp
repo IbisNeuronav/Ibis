@@ -12,6 +12,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "ibisapi.h"
 #include <QSettings>
 
+ObjectSerializationMacro( IbisPlugin );
+
 IbisPlugin::IbisPlugin()
 {
     m_ibisAPI = 0;
