@@ -53,9 +53,9 @@ void IbisAPI::AddObject( SceneObject * object, SceneObject * attachTo )
     m_sceneManager->AddObject( object, attachTo );
 }
 
-void IbisAPI::RemoveObject( SceneObject * object , bool viewChange )
+void IbisAPI::RemoveObject(SceneObject * object )
 {
-    m_sceneManager->RemoveObject( object, viewChange );
+    m_sceneManager->RemoveObject( object );
 }
 
 void IbisAPI::RemoveAllChildrenObjects( SceneObject *obj )

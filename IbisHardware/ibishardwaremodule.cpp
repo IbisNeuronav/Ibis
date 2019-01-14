@@ -190,8 +190,8 @@ void IbisHardwareModule::ReadHardwareConfig()
     reader.SetFilename( filename.toUtf8().data() );
     reader.Start();
 
-    Serialize( &reader, "TrackerSettings", m_tracker );
-    Serialize( &reader, "TrackedVideoSourceSettings", m_trackedVideoSource );
+    ::Serialize( &reader, "TrackerSettings", m_tracker );
+    ::Serialize( &reader, "TrackedVideoSourceSettings", m_trackedVideoSource );
 
     reader.Finish();
 }
@@ -245,8 +245,8 @@ void IbisHardwareModule::InternalWriteHardwareConfig( QString filename )
     SerializerWriter writer0;
     writer0.SetFilename( filename.toUtf8().data() );
     writer0.Start();
-    Serialize( &writer0, "TrackerSettings", m_tracker );
-    Serialize( &writer0, "TrackedVideoSourceSettings", m_trackedVideoSource );
+    ::Serialize( &writer0, "TrackerSettings", m_tracker );
+    ::Serialize( &writer0, "TrackedVideoSourceSettings", m_trackedVideoSource );
     writer0.EndSection();
     writer0.Finish();
 }

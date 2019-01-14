@@ -772,7 +772,7 @@ void SceneManager::RemoveObjectById( int objectId )
         RemoveObject( obj );
 }
 
-void SceneManager::RemoveObject( SceneObject * object , bool )
+void SceneManager::RemoveObject( SceneObject * object )
 {
     int objId = object->GetObjectID();
 
