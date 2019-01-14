@@ -79,7 +79,7 @@ public:
 
     // from SceneManager:
     void AddObject( SceneObject * object, SceneObject * attachTo = 0 );
-    void RemoveObject( SceneObject * object , bool viewChange = true);
+    void RemoveObject( SceneObject * object );
     void RemoveAllChildrenObjects( SceneObject *obj );
     void SetCurrentObject( SceneObject * cur  );
     SceneObject * GetCurrentObject( );
