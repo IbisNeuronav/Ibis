@@ -4,10 +4,13 @@
 SET( IBIS_ITK_REGISTRATION_OPENCL_SRC
     itkGPUOrientationMatchingMatrixTransformationSparseMask.hxx
     itkGPU3DRigidSimilarityMetric.h
+    itkGPUSliceRigidSimilarityMetric.h
+    itkGPUSliceOrientationMatchingMatrixTransformationSparseMask.hxx
 )
 
 SET( IBIS_ITK_REGISTRATION_OPENCL_HDR
     itkGPUOrientationMatchingMatrixTransformationSparseMask.h
+    itkGPUSliceOrientationMatchingMatrixTransformationSparseMask.h
 )
 
 set( LibCL GPUDiscreteGaussianGradientImageFilter 

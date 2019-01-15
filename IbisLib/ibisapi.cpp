@@ -12,6 +12,8 @@
 #include "usacquisitionobject.h"
 #include "toolplugininterface.h"
 #include "objectplugininterface.h"
+#include "triplecutplaneobject.h"
+#include "vtkMultiImagePlaneWidget.h"
 
 #include <QString>
 
@@ -380,3 +382,32 @@ void IbisAPI::RemoveBottomWidget( QWidget * w )
     m_application->RemoveBottomWidget( w );
 }
 
+void IbisAPI::RotateSagittalCutPlane(double angle[3], double point[3])
+{
+    SceneManager *sm = m_application->GetSceneManager();
+    vtkSmartPointer<TripleCutPlaneObject> tripleCutPlanes = sm->GetMainCutPlanes();
+    std::cout << "** sagittal\n";
+
+    vtkSmartPointer<vtkMultiImagePlaneWidget> sagittalPlane = tripleCutPlanes->GetSagittalPlane();
+    double *sgtpt = sagittalPlane->RotatePlaneOrientation(angle);
+
+    std::cout << "** axial\n";
+    vtkSmartPointer<vtkMultiImagePlaneWidget> axialPlane = tripleCutPlanes->GetAxialPlane();
+    double *axpt = axialPlane->RotatePlaneOrientation(angle);
+
+    PointsObject *pobj = PointsObject::New();
+    pobj->SetName("Points");
+    pobj->AddPoint("Sagittal position", sgtpt);
+    pobj->AddPoint("Axial position", axpt);
+    this->AddObject(pobj);
+
+}
+
+void IbisAPI::EnablePlaneRotation(bool on)
+{
+    SceneManager *sm = m_application->GetSceneManager();
+    if (sm)
+    {
+        sm->EnableRotation(on);
+    }
+}

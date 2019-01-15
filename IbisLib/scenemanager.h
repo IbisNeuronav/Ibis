@@ -298,6 +298,11 @@ public:
     bool GetNavigationState() {return this->IsNavigating; }
     PointerObject *GetNavigationPointerObject( );
     bool IsLoadingScene() { return LoadingScene; }
+
+    void EnableRotation( bool on );
+
+    vtkSmartPointer<TripleCutPlaneObject> GetMainCutPlanes() { return this->MainCutPlanes; }
+
 public slots:
 
     void EmitSignalObjectRenamed(QString, QString);
@@ -377,6 +382,7 @@ protected:
     // navigation
     int NavigationPointerID;
     bool IsNavigating;
+    bool IsRotationEnabled;
 
     bool LoadingScene;
 

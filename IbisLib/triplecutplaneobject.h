@@ -94,6 +94,16 @@ public:
     // in the plane if it is closer than .5 * voxel size of the reference volume.
     bool IsInPlane( VIEWTYPES planeType, double pos[3] );
 
+    // Get planes
+    vtkSmartPointer<vtkMultiImagePlaneWidget> GetSagittalPlane() { return this->Planes[SAGITTAL_VIEW_TYPE]; }
+    vtkSmartPointer<vtkMultiImagePlaneWidget> GetCoronalPlane() { return this->Planes[CORONAL_VIEW_TYPE]; }
+    vtkSmartPointer<vtkMultiImagePlaneWidget> GetAxialPlane() { return this->Planes[TRANSVERSE_VIEW_TYPE]; }
+
+    // Manage plane rotations
+    void RotateSagittalPlane(double);
+    void RotateAxialPlane(double);
+    void RotateCoronalPlane(double);
+
 public slots:
 
     void SetPlanesPosition( double * );

@@ -9,28 +9,29 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
 // Thanks to Dante De Nigris for writing this class
-#include "gpu_rigidregistration.h"
+#include "gpu_slicerigidregistration.h"
 #include "vnl/algo/vnl_symmetric_eigensystem.h"
 #include "vnl/algo/vnl_real_eigensystem.h"
 #include "vtkSmartPointer.h"
 #include "itkTimeProbesCollectorBase.h"
+#include "itkCastImageFilter.h"
 
-class CommandIterationUpdateOpenCL : public itk::Command
+class SliceCommandIterationUpdateOpenCL : public itk::Command
 {
 public:
-  typedef  CommandIterationUpdateOpenCL   Self;
+  typedef  SliceCommandIterationUpdateOpenCL   Self;
   typedef  itk::Command             Superclass;
   typedef itk::SmartPointer<Self>  Pointer;
   itkNewMacro( Self );
 
 protected:
-  CommandIterationUpdateOpenCL() {};
+  SliceCommandIterationUpdateOpenCL() {};
 
 public:
 
-  typedef const GPU_RigidRegistration::OptimizerType                         *OptimizerPointer;
-  typedef const GPU_RigidRegistration::GPUCostFunctionType                   *GPUConstCostFunctionPointer;
-  typedef GPU_RigidRegistration::ItkRigidTransformType::Pointer              ItkRigidTransformPointer;
+  typedef const GPU_SliceRigidRegistration::OptimizerType                         *OptimizerPointer;
+  typedef const GPU_SliceRigidRegistration::GPUCostFunctionType                   *GPUConstCostFunctionPointer;
+  typedef GPU_SliceRigidRegistration::ItkRigidTransformType::Pointer              ItkRigidTransformPointer;
   vtkTransform                                        * m_targetImageVtkTransform;
   vtkTransform                                        * m_vtktransform;
   vtkTransform                                        * m_parentTransform;
@@ -63,8 +64,7 @@ public:
 
   void Execute(const itk::Object * object, const itk::EventObject & event)
   {
-    OptimizerPointer optimizer =
-                         dynamic_cast< OptimizerPointer >( object );
+    OptimizerPointer optimizer = dynamic_cast< OptimizerPointer >( object );
     GPUConstCostFunctionPointer   metric = dynamic_cast< GPUConstCostFunctionPointer >( optimizer->GetCostFunction() );
 
     if( ! itk::IterationEvent().CheckEvent( &event ) )
@@ -75,10 +75,10 @@ public:
     if(m_Debug)
       std::cout << "Optimizer Value:\t" << optimizer->GetCurrentValue() << std::endl;
 
-    ItkRigidTransformPointer itkTransform = GPU_RigidRegistration::ItkRigidTransformType::New();
+    ItkRigidTransformPointer itkTransform = GPU_SliceRigidRegistration::ItkRigidTransformType::New();
 
-    GPU_RigidRegistration::ItkRigidTransformType::ParametersType params = optimizer->GetCurrentPosition();
-    GPU_RigidRegistration::ItkRigidTransformType::CenterType center = metric->GetCenter();
+    GPU_SliceRigidRegistration::ItkRigidTransformType::ParametersType params = optimizer->GetCurrentPosition();
+    GPU_SliceRigidRegistration::ItkRigidTransformType::CenterType center = metric->GetCenter();
     itkTransform->SetCenter(center);
     itkTransform->SetParameters(params);
 
@@ -88,10 +88,10 @@ public:
     vtkTransform * targetImageVtktransform = m_targetImageVtkTransform;
 
 
-    GPU_RigidRegistration::ItkRigidTransformType::MatrixType matrix =
+    GPU_SliceRigidRegistration::ItkRigidTransformType::MatrixType matrix =
     itkTransform->GetMatrix();
 
-    GPU_RigidRegistration::ItkRigidTransformType::OffsetType offset =
+    GPU_SliceRigidRegistration::ItkRigidTransformType::OffsetType offset =
     itkTransform->GetOffset();
 
     vtkSmartPointer<vtkMatrix4x4> localMatrix_inv = vtkSmartPointer<vtkMatrix4x4>::New();
@@ -123,13 +123,10 @@ public:
     finalMatrix->Multiply4x4( localMatrix_inv, targetLocalMatrix, finalMatrix );
     vtktransform->SetMatrix( finalMatrix );
     vtktransform->Modified();
-
   }
-
 };
 
-
-GPU_RigidRegistration::GPU_RigidRegistration( ) :
+GPU_SliceRigidRegistration::GPU_SliceRigidRegistration( ) :
     m_OptimizationRunning(false),
     m_debug(false),
     m_useMask(false),
@@ -145,28 +142,27 @@ GPU_RigidRegistration::GPU_RigidRegistration( ) :
     m_resultTransform(0),
     m_targetSpatialObjectMask(0),
     m_itkSourceImage(0),
-    m_itkTargetImage(0)
+    m_itkTargetImage(0),
+    m_targetUSAcquisition(0)
 {
     m_samplingStrategy = SamplingStrategy::RANDOM;
 }
 
-GPU_RigidRegistration::~GPU_RigidRegistration()
+GPU_SliceRigidRegistration::~GPU_SliceRigidRegistration()
 {
 }
 
 
-void GPU_RigidRegistration::runRegistration()
+void GPU_SliceRigidRegistration::runRegistration()
 {
-
-
     // Make sure all params have been specified
-    if ( !m_itkTargetImage )
+    if ( !m_targetUSAcquisition )
     {
-        std::cerr << "Fixed image is invalid " << m_itkTargetImage << std::endl;
-        std::cerr << "Use SetItkTargetImage( )" << std::endl;
+        std::cerr << "Ultrasound Acquisition is invalid " << std::endl;
+        std::cerr << "Use SetTargetUSAcquisition( )" << std::endl;
         return;
     }
-    IbisItkFloat3ImageType::Pointer itkTargetImage = m_itkTargetImage;
+//    IbisItkFloat3ImageType::Pointer itkTargetImage = m_itkTargetImage;
 
     if ( !m_itkSourceImage )
     {
@@ -183,7 +179,7 @@ void GPU_RigidRegistration::runRegistration()
 
     if ( m_targetVtkTransform == 0 )
     {
-        m_targetVtkTransform = this->GetVtkTransformFromItkImage(itkTargetImage);
+        m_targetVtkTransform = m_targetUSAcquisition->GetLocalTransform();
     }
 
     if ( m_resultTransform == 0 )
@@ -217,15 +213,82 @@ void GPU_RigidRegistration::runRegistration()
     unsigned int populationSize = m_populationSize;
 
     GPUMetricPointer metric = GPUMetricType::New();
-    metric->SetFixedImage(itkTargetImage);
+
+    using ImageCastFilterUC2F = itk::CastImageFilter< IbisItkUnsignedChar3ImageType, IbisItkFloat3ImageType >;
+    ImageCastFilterUC2F::Pointer caster = ImageCastFilterUC2F::New();
+    IbisItkFloat3ImageType::PointType centerPoint;
+    centerPoint.Fill(0);
+    IbisItkFloat3ImageType::IndexType centerIndex;
+    centerIndex[0] = m_targetUSAcquisition->GetSliceHeight() / 2;
+    centerIndex[1] = m_targetUSAcquisition->GetSliceWidth() / 2;
+    centerIndex[2] = 0;
+
+    IbisItkFloat3ImageType::SizeType maskSize;
+    IbisItkFloat3ImageType::SpacingType maskSpacing;
+
+    metric->SetNumberOfSlices( m_targetUSAcquisition->GetNumberOfSlices() );
+    for (int i = 0; i < m_targetUSAcquisition->GetNumberOfSlices(); ++i) {
+       IbisItkFloat3ImageType::Pointer itkImage = IbisItkFloat3ImageType::New();
+       IbisItkUnsignedChar3ImageType::Pointer itkUCImage = IbisItkUnsignedChar3ImageType::New();
+
+       m_targetUSAcquisition->GetItkImage(itkUCImage, i, true, true); // maybe use calibrated transform?
+       caster->SetInput(itkUCImage);
+       caster->Update();
+       itkImage = caster->GetOutput();
+       metric->SetFixedSlice(i, itkImage);
+
+       IbisItkFloat3ImageType::PointType currentPoint;
+       itkImage->TransformIndexToPhysicalPoint(centerIndex, currentPoint);
+       centerPoint[0] += currentPoint[0];
+       centerPoint[1] += currentPoint[1];
+       centerPoint[2] += currentPoint[2];
+
+       if( i == 0){
+           maskSpacing = itkImage->GetSpacing();
+           maskSize = itkImage->GetLargestPossibleRegion().GetSize();
+       }
+    }
+
+    centerPoint[0] = 0; //centerPoint[0] / m_targetUSAcquisition->GetNumberOfSlices();
+    centerPoint[1] = 0; //centerPoint[1] / m_targetUSAcquisition->GetNumberOfSlices();
+    centerPoint[2] = 0; //centerPoint[2] / m_targetUSAcquisition->GetNumberOfSlices();
+
+//    vtkImageData * vtkMask = m_targetUSAcquisition->GetMask();
+//    IbisItkFloat3ImageType::Pointer itkFMask = IbisItkFloat3ImageType::New();
+//    IbisItkVtkConverter * itktovtkConverter = IbisItkVtkConverter::New();
+//    vtkMatrix4x4 *tmpMat = vtkMatrix4x4::New();
+//    itktovtkConverter->ConvertVtkImageToItkImage(itkFMask, vtkMask, tmpMat);
+//    metric->SetFixedSliceMask(itkFMask);
+
+    IbisItkFloat3ImageType::Pointer itkFMask = IbisItkFloat3ImageType::New();
+    IbisItkFloat3ImageType::RegionType maskRegion;
+    IbisItkFloat3ImageType::IndexType maskIndex;
+    maskIndex.Fill(0);
+    maskRegion.SetIndex(maskIndex);
+    maskRegion.SetSize(maskSize);
+    itkFMask->SetSpacing(maskSpacing);
+    itkFMask->SetBufferedRegion(maskRegion);
+    itkFMask->Allocate();
+    itkFMask->FillBuffer(0);
+
+    for(unsigned int r = 100; r < 350; r++)
+      {
+          for(unsigned int c = 240; c < 400; c++)
+          {
+              maskIndex[0] = c; maskIndex[1] = r;
+              itkFMask->SetPixel(maskIndex, 1);
+          }
+      }
+    metric->SetFixedSliceMask(itkFMask);
+
     metric->SetMovingImage(itkSourceImage);
 
-    if ( m_targetSpatialObjectMask )
-    {
-        std::cout << "Using mask" << std::endl;
-        metric->SetFixedImageMaskSpatialObject(m_targetSpatialObjectMask);
-        metric->SetUseImageMask(true);
-    }
+//    if ( m_targetSpatialObjectMask )
+//    {
+//        std::cout << "Using mask" << std::endl;
+//        metric->SetFixedImageMaskSpatialObject(m_targetSpatialObjectMask);
+//        metric->SetUseImageMask(true);
+//    }
 
     // Initialize Transform
     vtkSmartPointer<vtkMatrix4x4> localMatrix = vtkSmartPointer<vtkMatrix4x4>::New();
@@ -272,9 +335,13 @@ void GPU_RigidRegistration::runRegistration()
     params[0] = angleX; params[1] = angleY; params[2] = angleZ;
 
     ItkRigidTransformType::CenterType center;
-    center[0] = itkTargetImage->GetOrigin()[0] + itkTargetImage->GetSpacing()[0] * itkTargetImage->GetBufferedRegion().GetSize()[0] / 2.0;
-    center[1] = itkTargetImage->GetOrigin()[1] + itkTargetImage->GetSpacing()[1] * itkTargetImage->GetBufferedRegion().GetSize()[1] / 2.0;
-    center[2] = itkTargetImage->GetOrigin()[2] + itkTargetImage->GetSpacing()[2] * itkTargetImage->GetBufferedRegion().GetSize()[2] / 2.0;  
+//    center[0] = itkTargetImage->GetOrigin()[0] + itkTargetImage->GetSpacing()[0] * itkTargetImage->GetBufferedRegion().GetSize()[0] / 2.0;
+//    center[1] = itkTargetImage->GetOrigin()[1] + itkTargetImage->GetSpacing()[1] * itkTargetImage->GetBufferedRegion().GetSize()[1] / 2.0;
+//    center[2] = itkTargetImage->GetOrigin()[2] + itkTargetImage->GetSpacing()[2] * itkTargetImage->GetBufferedRegion().GetSize()[2] / 2.0;
+    center[0] = centerPoint[0];
+    center[1] = centerPoint[1];
+    center[2] = centerPoint[2];
+
 
 
     for( unsigned int i = 0; i < 3; i++ )
@@ -294,7 +361,7 @@ void GPU_RigidRegistration::runRegistration()
     metric->SetNumberOfPixels( numberOfPixels );
     metric->SetPercentile( percentile );
     metric->SetN( orientationSelectivity );
-    metric->SetComputeMask( m_useMask );
+//    metric->SetComputeMask( m_useMask );
     metric->SetMaskThreshold( 0.5 );
     metric->SetGradientScale( gradientScale );
     GPUCostFunctionPointer costFunction = GPUCostFunctionType::New();
@@ -312,21 +379,24 @@ void GPU_RigidRegistration::runRegistration()
     optimizer->SetCostFunction( costFunction ); 
     optimizer->SetInitialPosition( itkTransform->GetParameters() );
     OptimizerType::ScalesType   scales =  OptimizerType::ScalesType(itkTransform->GetNumberOfParameters());
+//    scales[0] = 3500;  scales[1] = 3500;  scales[2] = 3500;
+//    scales[3] = 0.1;  scales[4] = 0.1;  scales[5] = 0.1;
     scales[0] = 3500;  scales[1] = 3500;  scales[2] = 3500;
-    scales[3] = 0.1;  scales[4] = 0.1;  scales[5] = 0.1;
+    scales[3] = 0.001;  scales[4] = 0.001;  scales[5] = 0.001;
+    scales = scales * 100;
     optimizer->SetScales( scales );
     optimizer->SetUseCovarianceMatrixAdaptation( false );
     optimizer->SetUpdateBDPeriod( 0 );
-    optimizer->SetValueTolerance(0.001);
-    optimizer->SetMaximumDeviation( 2 );
-    optimizer->SetMinimumDeviation( 1 );
+    optimizer->SetValueTolerance(0.01);
+    optimizer->SetMaximumDeviation( 1 );
+//    optimizer->SetMinimumDeviation( 1 );
     optimizer->SetUseScales( true );
     optimizer->SetPopulationSize( populationSize );
     optimizer->SetNumberOfParents( 0 );
     optimizer->SetMaximumNumberOfIterations( 300 );
     optimizer->SetInitialSigma( initialSigma );
 
-    CommandIterationUpdateOpenCL::Pointer observer = CommandIterationUpdateOpenCL::New();
+    SliceCommandIterationUpdateOpenCL::Pointer observer = SliceCommandIterationUpdateOpenCL::New();
     observer->SetVtkTransform( m_resultTransform );
     observer->SetTargetImageVtkTransform( targetVtkTransform );
     observer->SetParentTransform( m_parentVtkTransform );
@@ -364,7 +434,7 @@ void GPU_RigidRegistration::runRegistration()
 }
 
 
-vtkTransform * GPU_RigidRegistration::GetVtkTransformFromItkImage(IbisItkFloat3ImageType::Pointer itkImage, bool load_translation)
+vtkTransform * GPU_SliceRigidRegistration::GetVtkTransformFromItkImage(IbisItkFloat3ImageType::Pointer itkImage, bool load_translation)
 {
     vnl_matrix<double> vnlMatrix = itkImage->GetDirection().GetVnlMatrix();
     vtkSmartPointer<vtkMatrix4x4> vtkMatrix = vtkMatrix4x4::New();

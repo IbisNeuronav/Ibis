@@ -832,6 +832,7 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
   defines2 << "#define SEL " << m_N << std::endl;
   defines2 << "#define N " << m_Blocks * m_Threads << std::endl;
   defines2 << "#define LOCALSIZE " << m_Threads << std::endl;
+  defines2 << "#define DIM_3 " << std::endl;
 
   m_OrientationMatchingKernel = CreateKernelFromString( GPUOrientationMatchingMatrixTransformationSparseMaskKernel,  
     defines2.str().c_str(), "OrientationMatchingMetricSparseMask","");  

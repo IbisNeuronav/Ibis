@@ -749,3 +749,57 @@ void TripleCutPlaneObject::UpdatePlanesVisibility( View *view )
         break;
     }
 }
+
+void TripleCutPlaneObject::RotateSagittalPlane(double angle)
+{
+    std::cout << "Sagittal rotation: " << std::endl;
+    double sagittalRotation[3] = {
+        this->GetAxialPlane()->GetCurrentRotationAngles()[0],
+        0,
+        angle};
+    vtkSmartPointer<vtkMultiImagePlaneWidget> sagittalPlane = this->GetSagittalPlane();
+    sagittalPlane->RotatePlaneOrientation(sagittalRotation);
+
+    // update other axes
+//    double currentOrientation[3] = {
+//        this->GetSagittalPlane()->GetCurrentRotationAngles()[2],
+//        this->GetAxialPlane()->GetCurrentRotationAngles()[0],
+//        0
+//    };
+
+//    this->GetAxialPlane()->UpdateCursorWithOrientation(currentOrientation);
+//    this->GetCoronalPlane()->UpdateCursorWithOrientation(currentOrientation);
+
+}
+
+void TripleCutPlaneObject::RotateAxialPlane(double angle)
+{
+//    double currentOrientation[3] = {
+//        this->GetSagittalPlane()->GetCurrentRotationAngles()[2],
+//        this->GetAxialPlane()->GetCurrentRotationAngles()[0],
+//        0
+//    };
+
+    std::cout << "Axial rotation: " << std::endl;
+    double axialRotation[3] = {
+        angle,
+        0,
+        this->GetSagittalPlane()->GetCurrentRotationAngles()[2]
+    };
+    vtkSmartPointer<vtkMultiImagePlaneWidget> axialPlane = this->GetAxialPlane();
+    axialPlane->RotatePlaneOrientation(axialRotation);
+
+    // update other axes
+
+
+//    this->GetSagittalPlane()->UpdateCursorWithOrientation(currentOrientation);
+//    this->GetCoronalPlane()->UpdateCursorWithOrientation(currentOrientation);
+
+
+}
+
+void TripleCutPlaneObject::RotateCoronalPlane(double angle)
+{
+    ///TODO: in which orientation to rotate coronal?
+
+}

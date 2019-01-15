@@ -10,15 +10,15 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 // Adapted from Dante De Nigris GPU Registration plugin
 
-#ifndef __GPU_RigidRegistration_h_
-#define __GPU_RigidRegistration_h_
+#ifndef __GPU_SliceRigidRegistration_h_
+#define __GPU_SliceRigidRegistration_h_
 
 
 #include "imageobject.h"
 #include "vtkTransform.h"
 #include "vtkMatrix4x4.h"
 
-#include "itkGPU3DRigidSimilarityMetric.h"
+#include "itkGPUSliceRigidSimilarityMetric.h"
 #include "itkEuler3DTransform.h"
 
 #include "itkAmoebaOptimizer.h"
@@ -26,16 +26,18 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "itkCMAEvolutionStrategyOptimizer.h"
 
 #include "itkImageMaskSpatialObject.h"
+#include "usacquisitionobject.h"
 
+class USAcquisitionObject;
 
-class GPU_RigidRegistration
+class GPU_SliceRigidRegistration
 {
 
 public:
 
     typedef itk::CMAEvolutionStrategyOptimizer            OptimizerType;
 
-    typedef itk::GPU3DRigidSimilarityMetric<IbisItkFloat3ImageType,IbisItkFloat3ImageType>
+    typedef itk::GPUSliceRigidSimilarityMetric<IbisItkFloat3ImageType,IbisItkFloat3ImageType>
                                                         GPUCostFunctionType;
     typedef GPUCostFunctionType::Pointer                GPUCostFunctionPointer;
 
@@ -47,8 +49,8 @@ public:
     using ImageMaskType = itk::ImageMaskSpatialObject< 3 >;
     using ImageMaskPointer = ImageMaskType::Pointer;
 
-    explicit GPU_RigidRegistration();
-    ~GPU_RigidRegistration();
+    explicit GPU_SliceRigidRegistration();
+    ~GPU_SliceRigidRegistration();
 
     void runRegistration();
 
@@ -82,8 +84,10 @@ public:
     void SetSamplingStrategyToFull()      { this->m_samplingStrategy = SamplingStrategy::FULL; }
     SamplingStrategy GetSamplingStrategy() { return this->m_samplingStrategy; }
 
-
     void SetTargetMask(ImageMaskPointer mask) { this->m_targetSpatialObjectMask = mask;}
+
+    void SetTargetUSAcquisition(USAcquisitionObject * acq) {this->m_targetUSAcquisition = acq;}
+    USAcquisitionObject * SetTargetUSAcquisition() { return this->m_targetUSAcquisition; }
 
 private:
 
@@ -96,6 +100,7 @@ private:
 
     IbisItkFloat3ImageType::Pointer m_itkSourceImage;
     IbisItkFloat3ImageType::Pointer m_itkTargetImage;
+    USAcquisitionObject             * m_targetUSAcquisition;
 
     ImageMaskPointer m_targetSpatialObjectMask;
 

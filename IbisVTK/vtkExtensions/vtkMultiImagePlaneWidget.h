@@ -375,6 +375,15 @@ public:
     vtkSetClampMacro(RightButtonShiftAction,int, NO_ACTION, SLICE_MOTION_ACTION);
 	vtkGetMacro(RightButtonShiftAction, int);
 
+    double * GetCurrentRotationAngles(){ return this->CurrentRotationAngles; }
+    void SetCurrentRotationAngles(double angles[3])
+    {
+        this->CurrentRotationAngles[0] = angles[0];
+        this->CurrentRotationAngles[1] = angles[1];
+        this->CurrentRotationAngles[2] = angles[2];
+    }
+
+    void UpdateCursorWithOrientation();
 
 	enum PlaneMoveMethod
 	{
@@ -382,6 +391,8 @@ public:
 		Move3D
 	};
 	void SetPlaneMoveMethod( int rendererIndex, PlaneMoveMethod moveMethod );
+
+    double * RotatePlaneOrientation(double angles[]);
 
 protected:
 
@@ -471,6 +482,9 @@ protected:
 	int  ShowHighlightedPlaneOutline;
 	int  ShowPlaneOutline;
 	std::vector< PlaneMoveMethod > PlaneMoveMethods;
+
+    double CurrentRotationAngles[3];
+    double PreviousRotationAngles[3];
 
     typedef std::vector<vtkActor*> ActorVec;
     typedef std::vector<vtkPolyDataMapper*> PolyDataMapperVec;

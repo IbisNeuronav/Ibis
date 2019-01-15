@@ -40,6 +40,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include "vtkPolyData.h"
 #include "vtkPointData.h"
+#include "vtkTransformPolyDataFilter.h"
 
 #include <sstream>
 
@@ -75,7 +76,7 @@ vtkMultiImagePlaneWidget::vtkMultiImagePlaneWidget() : vtkMulti3DWidget()
     this->ResliceInterpolate       = VTK_LINEAR_RESLICE;
     this->UserControlledLookupTable= 0;
     this->DisplayText              = 0;
-	this->DisableRotatingAndSpinning = 0;
+    this->DisableRotatingAndSpinning = 0;
 	this->MarginSize = 0.05;
 	this->ShowHighlightedPlaneOutline = 1;
     this->ShowPlaneOutline = 0;
@@ -83,6 +84,12 @@ vtkMultiImagePlaneWidget::vtkMultiImagePlaneWidget() : vtkMulti3DWidget()
     this->MarginSelectMode         = 8;
     this->BoundingImage            = 0;
     this->BoundingTransform        = vtkTransform::New();
+    this->CurrentRotationAngles[0] = 0;
+    this->CurrentRotationAngles[1] = 0;
+    this->CurrentRotationAngles[2] = 0;
+    this->PreviousRotationAngles[0] = 0;
+    this->PreviousRotationAngles[1] = 0;
+    this->PreviousRotationAngles[2] = 0;
 
     // Represent the plane's outline geometry
     //
@@ -1401,6 +1408,64 @@ void vtkMultiImagePlaneWidget::SetPlaneOrientation(int i)
     this->UpdateNormal();
 }
 
+double * vtkMultiImagePlaneWidget::RotatePlaneOrientation(double angles[])
+{
+    double rotAmount[3];
+
+    for (int i = 0; i < 3; ++i) {
+        rotAmount[i] = this->CurrentRotationAngles[i] - angles[i];
+        this->CurrentRotationAngles[i] = angles[i];
+    }
+
+    vtkTransform * transform = vtkTransform::New();
+    transform->Identity();
+
+    if (this->CurrentRendererIndex < 0)
+    {
+        this->State = vtkMultiImagePlaneWidget::Outside;
+        return 0;
+    }
+
+    int index = this->GetNumberOfRenderers() - 1;
+    vtkRenderer * currentRenderer = this->GetRenderer(index); // check if currentIndex is updated
+    vtkCamera *camera = currentRenderer->GetActiveCamera();
+    double *focal = camera->GetFocalPoint();
+    double *pos = camera->GetPosition();
+
+    vtkTransform * cameraTransform = vtkTransform::New();
+    cameraTransform->Identity();
+    cameraTransform->Translate(focal[0], focal[1], focal[2]);
+
+    transform->RotateWXYZ(vtkMath::Norm(rotAmount), rotAmount);
+    cameraTransform->RotateWXYZ(vtkMath::Norm(rotAmount), rotAmount);
+
+    cameraTransform->Translate(-focal[0], -focal[1], -focal[2]);
+
+//    cameraTransform->TransformPoint(pos, pos);
+//    camera->SetPosition(pos);
+
+    double newNormal[3];
+    transform->TransformPoint(this->PlaneSource->GetNormal(), newNormal);
+    this->PlaneSource->SetNormal(newNormal);
+
+    double distance = camera->GetDistance();
+    vtkMath::MultiplyScalar(newNormal, distance);
+    vtkMath::Add(focal, newNormal, pos);
+    camera->SetPosition(pos);
+
+//    double o[3], p[3], viewup[3];
+//    this->PlaneSource->GetOrigin(o);
+//    this->PlaneSource->GetPoint2(p);
+//    vtkMath::Subtract(p, o, viewup);
+//    camera->SetViewUp(viewup);
+
+    this->UpdateCursor();
+//    this->UpdateCursorWithOrientation();
+    this->UpdatePlacement();
+
+    return pos;
+
+}
 
 void vtkMultiImagePlaneWidget::ComputeBounds( double globalBounds[] )
 {		
@@ -2045,6 +2110,133 @@ void vtkMultiImagePlaneWidget::UpdateCursor()
     cursorPts->SetPoint(2,c);
     cursorPts->SetPoint(3,d);
 
+    this->CursorPolyData->Modified();
+}
+
+// Use angles to update 3d data of geometry representing the cursor.
+void vtkMultiImagePlaneWidget::UpdateCursorWithOrientation()
+{
+    //*
+    double p1[3];
+    this->PlaneSource->GetPoint1(p1);
+    double p2[3];
+    this->PlaneSource->GetPoint2(p2);
+    double o[3];
+    this->PlaneSource->GetOrigin(o);
+
+    double d1[3];
+    vtkMath::Subtract( p1, o, d1 );
+    double d2[3];
+    vtkMath::Subtract( p2, o, d2 );
+
+    double a[3];
+    double b[3];
+    double c[3];
+    double d[3];
+
+    for( int i = 0; i < 3; i++)
+    {
+        a[i] = o[i]  + this->CursorPosition[1] * d2[i];   // left
+        b[i] = p1[i] + this->CursorPosition[1] * d2[i];   // right
+        c[i] = o[i]  + this->CursorPosition[0] * d1[i];   // bottom
+        d[i] = p2[i] + this->CursorPosition[0] * d1[i];   // top
+    }
+
+    double r1, r2;
+    double tanx = 0, tany = 0;
+
+    switch(this->PlaneOrientation)
+    {
+        case 0:
+//            tanx = std::tan(vtkMath::RadiansFromDegrees(this->CurrentRotationAngles[1]));
+//            tany = std::tan(vtkMath::RadiansFromDegrees(this->CurrentRotationAngles[1]));
+            break;
+        case 1:
+//            tanx = 0; //std::tan(vtkMath::RadiansFromDegrees(this->CurrentRotationAngles[0]));
+//            tany = 0; //std::tan(vtkMath::RadiansFromDegrees(this->CurrentRotationAngles[2]));
+            break;
+        case 2:
+            tanx = std::tan(vtkMath::RadiansFromDegrees(this->CurrentRotationAngles[2]));
+            tany = 0; //std::tan(vtkMath::RadiansFromDegrees(this->CurrentRotationAngles[2]));
+//            std::cout << "--- PlaneOrientation: " << this->PlaneOrientation << std::endl;
+//            std::cout << "--- CurrentRotationAngles: [" << this->CurrentRotationAngles[0] << " , " <<
+//                      this->CurrentRotationAngles[1] << " , " << this->CurrentRotationAngles[2] << "]" << std::endl;
+            break;
+    }
+
+//    double cursor3d[3];
+//    vtkMath::Add(a, c, cursor3d);
+//    vtkMath::Subtract(cursor3d, o, cursor3d);
+
+    double rv = vtkMath::Distance2BetweenPoints(o, c);
+    double sv = vtkMath::Distance2BetweenPoints(c, p1);
+
+    double rh = vtkMath::Distance2BetweenPoints(o, a);
+    double sh = vtkMath::Distance2BetweenPoints(a, p2);
+
+//    double fb = (rv - rh * tanx ) / vtkMath::Distance2BetweenPoints(o, p1);
+    double fb = (rv) / vtkMath::Distance2BetweenPoints(o, p1);
+    double op1[3];
+    vtkMath::Subtract(p1, o, op1);
+    vtkMath::MultiplyScalar(op1, fb);
+    vtkMath::Add(o, op1, c);
+
+    double ft = (rv + sh * tanx ) / vtkMath::Distance2BetweenPoints(o, p1);
+    vtkMath::Subtract(p1, o, op1);
+    vtkMath::MultiplyScalar(op1, ft);
+    vtkMath::Add(p2, op1, d);
+
+    double fl = (rh - rv * tany ) / vtkMath::Distance2BetweenPoints(o, p2);
+    double op2[3];
+    vtkMath::Subtract(p2, o, op2);
+    vtkMath::MultiplyScalar(op2, fl);
+//    vtkMath::Add(o, op2, a);
+
+    double fr = (rh + sv * tany ) / vtkMath::Distance2BetweenPoints(o, p2);
+    vtkMath::Subtract(p2, o, op2);
+    vtkMath::MultiplyScalar(op2, fr);
+//    vtkMath::Add(p1, op2, b);
+
+//    std::cout << "--- ft: " << ft << " fb: " << fb << " fl: " << fl << " fr: " << fr << std::endl;
+
+
+//    for( int i = 0; i < 3; i++)
+//    {
+//        r2 = this->CursorPosition[1] * d2[i];
+//        r1 = this->CursorPosition[0] * d1[i];
+
+//        // left
+//        a[i] = o[i]  + r2 + r1 * tany;
+//        // right
+//        b[i] = p1[i] + r2 + (d1[i] - r1) * tany;
+//        // bottom
+//        c[i] = o[i]  + r1 + r2 * tanx;
+//        // top
+//        d[i] = p2[i] + r1 - (d2[i] - r2) * tanx;
+//    }
+
+    vtkPoints * cursorPts = this->CursorPolyData->GetPoints();
+
+    cursorPts->SetPoint(0,a);
+    cursorPts->SetPoint(1,b);
+    cursorPts->SetPoint(2,c);
+    cursorPts->SetPoint(3,d);
+    //*/
+
+
+//    vtkSmartPointer<vtkTransform> transform = vtkSmartPointer<vtkTransform>::New();
+//    double deltaAngles[3];
+//    vtkMath::Subtract(this->CurrentRotationAngles, this->PreviousRotationAngles, deltaAngles);
+//    transform->RotateWXYZ(vtkMath::Norm(deltaAngles), deltaAngles);
+//    vtkSmartPointer<vtkTransformPolyDataFilter> transformFilter = vtkSmartPointer<vtkTransformPolyDataFilter>::New();
+//    transformFilter->SetInputData(this->CursorPolyData);
+//    transformFilter->SetTransform(transform);
+//    transformFilter->Update();
+//    this->CursorPolyData = transformFilter->GetOutput();
+
+//    this->PreviousRotationAngles[0] = this->CurrentRotationAngles[0];
+//    this->PreviousRotationAngles[1] = this->CurrentRotationAngles[1];
+//    this->PreviousRotationAngles[2] = this->CurrentRotationAngles[2];
     this->CursorPolyData->Modified();
 }
 

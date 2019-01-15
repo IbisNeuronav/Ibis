@@ -22,6 +22,8 @@ class View;
 class USAcquisitionObject;
 class GlobalEventHandler;
 class vtkMatrix4x4;
+#include "pointsobject.h"
+class PointsObject;
 
 class QProgressDialog;
 class QString;
@@ -114,6 +116,10 @@ public:
     void SetRightPanelVisibility( bool v );
     void AddBottomWidget( QWidget * w );
     void RemoveBottomWidget( QWidget * w );
+
+    // Rotate cut planes
+    void RotateSagittalCutPlane(double angle[3], double point[3]);
+    void EnablePlaneRotation(bool);
 
 public slots:
     void ObjectAddedSlot( int id );

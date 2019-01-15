@@ -68,6 +68,7 @@ SceneManager::SceneManager()
     this->NavigationPointerID = SceneManager::InvalidId;
     this->IsNavigating = false;
     this->LoadingScene = false;
+    this->IsRotationEnabled = false;
 
     m_referenceTransform = vtkTransform::New();
     m_invReferenceTransform = vtkTransform::New();
@@ -1763,6 +1764,37 @@ void SceneManager::ClockTick()
     if( navPointer  &&  this->IsNavigating )
     {
         this->SetCursorWorldPosition( navPointer->GetTipPosition() );
+        if (this->IsRotationEnabled)
+        {
+            vtkTransform *pointerTransform = navPointer->GetLocalTransform();
+            vtkTransform *currentVolumeTransform = this->GetCurrentObject()->GetLocalTransform();
+
+            currentVolumeTransform->Inverse();
+
+            vtkTransform *transform = vtkTransform::New();
+            vtkMatrix4x4 *mat = vtkMatrix4x4::New();
+            mat->Multiply4x4(currentVolumeTransform->GetMatrix(), pointerTransform->GetMatrix(), mat);
+            transform->SetMatrix(mat);
+            double orientations[3];
+            transform->GetOrientation(orientations);
+
+            // constrain plane rotations
+//            double sagittalRotation[3] = {0, 0, orientations[0]};
+//            double axialRotation[3] = {orientations[1], 0, 0};
+//            double coronalRotation[3] = {0, orientations[2], 0};
+
+            vtkSmartPointer<TripleCutPlaneObject> tripleCutPlanes = this->GetMainCutPlanes();
+            tripleCutPlanes->RotateSagittalPlane(orientations[0]);
+            tripleCutPlanes->RotateAxialPlane(orientations[1]);
+
+//            vtkSmartPointer<vtkMultiImagePlaneWidget> sagittalPlane = tripleCutPlanes->GetSagittalPlane();
+//            sagittalPlane->RotatePlaneOrientation(sagittalRotation);
+//            vtkSmartPointer<vtkMultiImagePlaneWidget> axialPlane = tripleCutPlanes->GetAxialPlane();
+//            axialPlane->RotatePlaneOrientation(axialRotation);
+//            vtkSmartPointer<vtkMultiImagePlaneWidget> coronalPlane = tripleCutPlanes->GetCoronalPlane();
+//            coronalPlane->RotatePlaneOrientation(coronalRotation);
+
+        }
     }
 }
 
@@ -1778,6 +1810,13 @@ void SceneManager::SetNavigationPointerID( int id )
 {
     this->NavigationPointerID = id;
     emit NavigationPointerChanged();
+}
+
+void SceneManager::EnableRotation(bool on)
+{
+    PointerObject * navPointer = this->GetNavigationPointerObject();
+    if( navPointer )
+        IsRotationEnabled = on;
 }
 
 PointerObject *SceneManager::GetNavigationPointerObject( )
