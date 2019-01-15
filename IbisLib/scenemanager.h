@@ -168,7 +168,7 @@ public:
     // Manage Objects
     void AddObject( SceneObject * object, SceneObject * attachTo = 0 );
     void RemoveObjectById( int objectId );
-    void RemoveObject( SceneObject * object , bool viewChange = true);
+    void RemoveObject(SceneObject * object );
     void ChangeParent( SceneObject * object, SceneObject * newParent, int newChildIndex );
     int  GetNumberOfImageObjects();
     void GetAllImageObjects( QList<ImageObject*> & objects );

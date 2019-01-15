@@ -13,6 +13,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include "ibistypes.h"
 #include "vtkObject.h"
+#include "viewinteractor.h"
+#include "serializer.h"
 #include <QObject>
 #include <QString>
 
@@ -21,7 +23,7 @@ class Application;
 class QSettings;
 
 
-class IbisPlugin : public QObject, public vtkObject
+class IbisPlugin : public QObject, public vtkObject, public ViewInteractor
 {
 
     Q_OBJECT
@@ -36,6 +38,8 @@ public:
     virtual IbisPluginTypes GetPluginType() = 0;
     QString GetPluginTypeAsString();
     virtual QString GetPluginDescription();
+
+    virtual void Serialize( Serializer * ser ) {}
 
 signals:
 
@@ -77,5 +81,7 @@ private:
 };
 
 Q_DECLARE_INTERFACE( IbisPlugin, "Ibis.IbisPluginInterface/1.0" );
+
+ObjectSerializationHeaderMacro( IbisPlugin );
 
 #endif

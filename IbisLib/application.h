@@ -46,6 +46,7 @@ class MainWindow;
 class ImageObject;
 class PointsObject;
 class QMenu;
+class IbisPreferences;
 
 struct ApplicationSettings
 {
@@ -127,6 +128,7 @@ public:
 
     // Ibis Plugin management
     void LoadPlugins();
+    void SerializePlugins( Serializer * ser );
     IbisPlugin * GetPluginByName( QString name );
     void ActivatePluginByName( const char * name, bool active );
     ObjectPluginInterface *GetObjectPluginByName( QString className );
@@ -169,6 +171,8 @@ public:
     void LoadScene( QString fileName );
     void SaveScene( QString fileName );
 
+    IbisPreferences *GetIbisPreferences() { return m_preferences; }
+
 public slots:
     void UpdateProgress( QProgressDialog*, int current );
     void SaveSettings();
@@ -176,6 +180,7 @@ public slots:
 private slots:
 
     void OpenFilesProgress();
+    void Preferences();
 
 signals:
 
@@ -212,6 +217,7 @@ private:
     QList<GlobalEventHandler*>    m_globalEventHandlers;
 
     ApplicationSettings m_settings;
+    IbisPreferences *m_preferences;
 
     // Data file to load when the application starts up (typically specified on the command line)
     QStringList m_initialDataFiles;

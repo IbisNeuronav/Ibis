@@ -38,6 +38,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "pointerobject.h"
 #include "usprobeobject.h"
 #include "filereader.h"
+#include "ibisapi.h"
 #include "application.h"
 #include "hardwaremodule.h"
 #include "objectplugininterface.h"
@@ -106,9 +107,9 @@ void SceneManager::Init()
 {
     this->NextObjectID = 0;
     this->NextSystemObjectID = -2;
-    this->CurrentObject = 0;
-    this->SceneRoot = 0;
-    this->ReferenceDataObject = 0;
+    this->CurrentObject = nullptr;
+    this->SceneRoot = nullptr;
+    this->ReferenceDataObject = nullptr;
 
     // Root
     this->SceneRoot = WorldObject::New();
@@ -171,7 +172,7 @@ void SceneManager::Init()
     this->SetCurrentObject( this->GetSceneRoot() );
 
     this->InteractorStyle3D = InteractorStyleTrackball;
-    m_sceneLoadSaveProgressDialog = 0;
+    m_sceneLoadSaveProgressDialog = nullptr;
 }
 
 void SceneManager::Clear()
@@ -181,7 +182,7 @@ void SceneManager::Clear()
     this->RemoveAllSceneObjects();
     Q_ASSERT_X( AllObjects.size() == 0, "SceneManager::~SceneManager()", "Objects are left in the global list.");
     this->SceneRoot->Delete();
-    this->SceneRoot = 0;
+    this->SceneRoot = nullptr;
 }
 
 void SceneManager::ClearScene()
@@ -220,7 +221,7 @@ void SceneManager::InternalClearScene()
 void SceneManager::RemoveAllSceneObjects()
 {
     this->RemoveObject( this->SceneRoot );
-    this->MainCutPlanes = 0;
+    this->MainCutPlanes = nullptr;
 }
 
 void SceneManager::RemoveAllChildrenObjects(SceneObject *obj)
@@ -258,7 +259,7 @@ void SceneManager::LoadScene(QString & fileName, bool interactive )
         reader.EndSection();
         reader.Finish();
         QString message = "SaveScene version from file (" + reader.GetVersionFromFile() + ") is more recent than supported (" + this->SupportedSceneSaveVersion + ")\n";
-        QMessageBox::warning( 0, "Error", message, 1, 0 );
+        QMessageBox::warning( nullptr, "Error", message, 1, 0 );
         SetRenderingEnabled( true );
         this->LoadingScene = false;
         return;
@@ -266,7 +267,7 @@ void SceneManager::LoadScene(QString & fileName, bool interactive )
     else if( reader.FileVersionIsLowerThan( QString::number(6.0) ) )
     {
         QString message = "This scene version is older than 6.0. This is not supported anymore. Scene may not be restored.\n";
-        QMessageBox::warning( 0, "Error", message, 1, 0 );
+        QMessageBox::warning( nullptr, "Error", message, 1, 0 );
         SetRenderingEnabled( true );
         this->LoadingScene = false;
         return;
@@ -308,6 +309,8 @@ void SceneManager::LoadScene(QString & fileName, bool interactive )
     this->SetCursorColor( cursorColor );
 
     Application::GetInstance().GetMainWindow()->Serialize( &reader );
+    Application::GetInstance().SerializePlugins( &reader );
+
     reader.EndSection();
     reader.Finish();
     this->SetSceneFile( fileName );
@@ -320,7 +323,7 @@ void SceneManager::LoadScene(QString & fileName, bool interactive )
     // Stop progress
     if( interactive )
         Application::GetInstance().StopProgress(m_sceneLoadSaveProgressDialog);
-    m_sceneLoadSaveProgressDialog = 0;
+    m_sceneLoadSaveProgressDialog = nullptr;
 
     // Tell plugins new scene finished loading
     NotifyPluginsSceneFinishedLoading();
@@ -346,7 +349,7 @@ void SceneManager::NewScene()
 void SceneManager::CancelProgress()
 {
     Application::GetInstance().StopProgress(m_sceneLoadSaveProgressDialog);
-    m_sceneLoadSaveProgressDialog = 0;
+    m_sceneLoadSaveProgressDialog = nullptr;
     this->ClearScene();
 }
 
@@ -372,7 +375,7 @@ void SceneManager::SaveScene( QString & fileName )
     this->GetAllListableNonTrackedObjects(listedObjects);
     int numberOfSceneObjects = listedObjects.count();
     m_sceneLoadSaveProgressDialog = Application::GetInstance().StartProgress(numberOfSceneObjects+3, tr("Saving Scene..."));
-    m_sceneLoadSaveProgressDialog->setCancelButton(0);
+    m_sceneLoadSaveProgressDialog->setCancelButton(nullptr);
     SerializerWriter writer;
     writer.SetFilename( fileName.toUtf8().data() );
     writer.Start();
@@ -400,11 +403,12 @@ void SceneManager::SaveScene( QString & fileName )
     ::Serialize( &writer, "CutPlanesCursorColor_b", color );
 
     Application::GetInstance().GetMainWindow()->Serialize( &writer );
+    Application::GetInstance().SerializePlugins( &writer );
 
     writer.EndSection();
     writer.Finish();
     Application::GetInstance().StopProgress(m_sceneLoadSaveProgressDialog);
-    m_sceneLoadSaveProgressDialog = 0;
+    m_sceneLoadSaveProgressDialog = nullptr;
 
     NotifyPluginsSceneFinishedSaving();
     this->SetCurrentObject( currentObject);
@@ -447,7 +451,7 @@ void SceneManager::Serialize( Serializer * ser )
                 ::Serialize( ser, "ViewID", viewID );
                 ::Serialize( ser, "ViewType", type );
                 ::Serialize( ser, "Name", name );
-                view = Views.key( viewID, NULL );
+                view = Views.key( viewID, nullptr );
                 Q_ASSERT( view );
                 view->Serialize( ser );
                 ser->EndSection();
@@ -498,7 +502,7 @@ void SceneManager::PostSceneRead( int n )
 
 QWidget * SceneManager::CreateQuadViewWindow( QWidget * parent )
 {
-    QuadViewWindow * res = 0;
+    QuadViewWindow * res = nullptr;
     res = new QuadViewWindow( parent );
     res->setAttribute(Qt::WA_DeleteOnClose);
     res->SetSceneManager( this );
@@ -524,7 +528,7 @@ QWidget * SceneManager::CreateTrackedToolsStatusWidget( QWidget * parent )
 
 View * SceneManager::GetViewByID( int id )
 {
-    return Views.key( id, NULL );
+    return Views.key( id, nullptr );
 }
 
 View * SceneManager::CreateView( int type, QString name, int id )
@@ -587,22 +591,22 @@ View * SceneManager::CreateView( int type, QString name, int id )
 
 View * SceneManager::GetMain3DView()
 {
-    return Views.key( this->Main3DViewID, NULL );
+    return Views.key( this->Main3DViewID, nullptr );
 }
 
 View * SceneManager::GetMainCoronalView()
 {
-    return Views.key( this->MainCoronalViewID, NULL );
+    return Views.key( this->MainCoronalViewID, nullptr );
 }
 
 View * SceneManager::GetMainSagittalView()
 {
-    return Views.key( this->MainSagittalViewID, NULL );
+    return Views.key( this->MainSagittalViewID, nullptr );
 }
 
 View * SceneManager::GetMainTransverseView()
 {
-    return Views.key( this->MainTransverseViewID, NULL );
+    return Views.key( this->MainTransverseViewID, nullptr );
 }
 
 View * SceneManager::GetViewFromInteractor( vtkRenderWindowInteractor * interactor )
@@ -614,7 +618,7 @@ View * SceneManager::GetViewFromInteractor( vtkRenderWindowInteractor * interact
             return view;
         }
     }
-    return NULL;
+    return nullptr;
 }
 
 void SceneManager::SetViewBackgroundColor( double * color )
@@ -769,7 +773,7 @@ void SceneManager::RemoveObjectById( int objectId )
         RemoveObject( obj );
 }
 
-void SceneManager::RemoveObject( SceneObject * object , bool viewChange)
+void SceneManager::RemoveObject( SceneObject * object )
 {
     int objId = object->GetObjectID();
 
@@ -802,7 +806,7 @@ void SceneManager::RemoveObject( SceneObject * object , bool viewChange)
     // Set ReferenceDataObject if needed
     if (object == this->ReferenceDataObject)
     {
-        this->ReferenceDataObject  = 0;
+        this->ReferenceDataObject  = nullptr;
         m_referenceTransform->Identity();
         m_invReferenceTransform->Identity();
         QList< ImageObject* > imObjects;
@@ -956,13 +960,13 @@ void SceneManager::GetAllObjectsOfType( const char * typeName, QList<SceneObject
 SceneObject * SceneManager::GetObjectByID( int id )
 {
     if( id == SceneManager::InvalidId )
-        return 0;
+        return nullptr;
     for( int i = 0; i < this->AllObjects.size(); ++i )
     {
         if( this->AllObjects[i]->GetObjectID() == id )
             return this->AllObjects[i];
     }
-    return 0;
+    return nullptr;
 }
 
 void SceneManager::SetCurrentObject( SceneObject * obj )
@@ -979,7 +983,7 @@ void SceneManager::SetReferenceDataObject( SceneObject *  refObject )
 {
     if( refObject != this->ReferenceDataObject )
     {
-        ImageObject * referenceObject = 0;
+        ImageObject * referenceObject = nullptr;
         if( refObject )
         {
             referenceObject = ImageObject::SafeDownCast( refObject );
@@ -1154,7 +1158,7 @@ QString SceneManager::FindUniqueName( QString wantedName, QStringList & otherNam
 
 void SceneManager::AssignInteractorStyleToView( InteractorStyle style, View * v )
 {
-    vtkInteractorStyle * styleObject = 0;
+    vtkInteractorStyle * styleObject = nullptr;
     if( style == InteractorStyleTerrain )
         styleObject = vtkInteractorStyleTerrain::New();
     else if( style == InteractorStyleTrackball )
@@ -1162,7 +1166,7 @@ void SceneManager::AssignInteractorStyleToView( InteractorStyle style, View * v 
     else if( style == InteractorStyleJoystick )
         styleObject = vtkInteractorStyleJoystickCamera::New();
 
-    if( styleObject != 0 )
+    if( styleObject != nullptr )
         v->SetInteractorStyle( styleObject );
     styleObject->Delete();
 }
@@ -1245,10 +1249,10 @@ void SceneManager::ReferenceTransformChangedSlot()
 
 vtkRenderer *SceneManager::GetViewRenderer(int viewID )
 {
-    View *v = Views.key( viewID, NULL );
+    View *v = Views.key( viewID, nullptr );
     if( v )
         return v->GetRenderer();
-    return NULL;
+    return nullptr;
 }
 
 void SceneManager::SetRenderingEnabled( bool r )
@@ -1439,7 +1443,7 @@ void SceneManager::ObjectReader( Serializer * ser, bool interactive )
         ::Serialize( ser, "FullFileName", filePath );
         ::Serialize( ser, "ObjectID", oldId );
         ::Serialize( ser, "ParentID", oldParentId );
-        parentObject = 0;
+        parentObject = nullptr;
         if( oldParentId != SceneManager::InvalidId ) // only World does not have parent
         {
             parentObject = this->GetObjectByID(oldParentId);
@@ -1494,7 +1498,7 @@ void SceneManager::ObjectReader( Serializer * ser, bool interactive )
                         message += warnings[i];
                         message += QString("\n");
                     }
-                    QMessageBox::warning( 0, "Error", message );
+                    QMessageBox::warning( nullptr, "Error", message );
                 }
             }
             delete fileReader;
@@ -1539,7 +1543,7 @@ void SceneManager::ObjectReader( Serializer * ser, bool interactive )
                 obj->Serialize(ser);
                 QString msg("Incomplete data, ignoring object:  ");
                 msg.append(obj->GetName());
-                QMessageBox::warning( 0, "Error",msg , 1, 0 );
+                QMessageBox::warning( nullptr, "Error",msg , 1, 0 );
                 obj->Delete();
             }
             else if (QString::compare(className, QString("SceneObject"), Qt::CaseSensitive) == 0) // Transform object or whatever scene object
@@ -1636,7 +1640,7 @@ void SceneManager::ObjectWriter( Serializer * ser )
                     QString program("cp");
                     QStringList arguments;
                     arguments << "-p" << oldPath << newPath;
-                    QProcess *copyProcess = new QProcess(0);
+                    QProcess *copyProcess = new QProcess(nullptr);
                     copyProcess->start(program, arguments);
                     if (copyProcess->waitForStarted())
                         copyProcess->waitForFinished();
@@ -1822,13 +1826,13 @@ void SceneManager::EnableRotation(bool on)
 PointerObject *SceneManager::GetNavigationPointerObject( )
 {
     if( this->NavigationPointerID == SceneManager::InvalidId )
-        return 0;
+        return nullptr;
     SceneObject *obj =  this->GetObjectByID( this->NavigationPointerID );
     if( obj )
     {
         return PointerObject::SafeDownCast( obj );
     }
-    return 0;
+    return nullptr;
 }
 
 void SceneManager::ValidatePointerObject()

@@ -16,11 +16,14 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 class vtkMatrix4x4;
 
-namespace IbisMath
+class IbisMath
 {
-	static const double pi = 3.14159265358979323846;
-	static const double pi2 = 0.5 * IbisMath::pi;
-	static const double pi4 = 0.25 * IbisMath::pi;
+
+public:
+
+    static constexpr const double pi = 3.14159265358979323846;
+    static constexpr const double pi2 = 0.5 * IbisMath::pi;
+    static constexpr const double pi4 = 0.25 * IbisMath::pi;
 
     // Scalar operations
     static double Average( std::vector<double> & samples );

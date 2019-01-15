@@ -1,5 +1,6 @@
 #include "ibisapi.h"
 #include "application.h"
+#include "filereader.h"
 #include "scenemanager.h"
 #include "mainwindow.h"
 #include "sceneobject.h"
@@ -8,6 +9,7 @@
 #include "pointerobject.h"
 #include "usprobeobject.h"
 #include "cameraobject.h"
+#include "ibispreferences.h"
 #include "view.h"
 #include "usacquisitionobject.h"
 #include "toolplugininterface.h"
@@ -18,6 +20,7 @@
 #include <QString>
 
 const int IbisAPI::InvalidId = SceneManager::InvalidId;
+const QString IbisAPI::MINCToolsPathVarName = "MINCToolsDirectory";
 
 
 IbisAPI::IbisAPI()
@@ -52,9 +55,14 @@ void IbisAPI::AddObject( SceneObject * object, SceneObject * attachTo )
     m_sceneManager->AddObject( object, attachTo );
 }
 
-void IbisAPI::RemoveObject( SceneObject * object , bool viewChange )
+void IbisAPI::RemoveObject(SceneObject * object )
 {
-    m_sceneManager->RemoveObject( object, viewChange );
+    m_sceneManager->RemoveObject( object );
+}
+
+void IbisAPI::RemoveAllChildrenObjects( SceneObject *obj )
+{
+    m_sceneManager->RemoveAllChildrenObjects( obj );
 }
 
 SceneObject *IbisAPI::GetCurrentObject( )
@@ -336,9 +344,19 @@ void IbisAPI::RemoveGlobalEventHandler( GlobalEventHandler * h )
     m_application->RemoveGlobalEventHandler( h );
 }
 
-bool IbisAPI::OpenTransformFile( QString filename, vtkMatrix4x4 * mat )
+bool IbisAPI::OpenTransformFile( const QString & filename, vtkMatrix4x4 * mat )
 {
     return m_application->OpenTransformFile( filename.toUtf8().data(), mat );
+}
+
+bool IbisAPI::OpenTransformFile( const QString & filename, SceneObject * obj )
+{
+    return m_application->OpenTransformFile( filename.toUtf8().data(), obj );
+}
+
+void IbisAPI::OpenFiles( OpenFileParams * params, bool addToScene )
+{
+    m_application->OpenFiles( params, addToScene );
 }
 
 void IbisAPI::SetMainWindowFullscreen( bool f )
@@ -410,4 +428,25 @@ void IbisAPI::EnablePlaneRotation(bool on)
     {
         sm->EnableRotation(on);
     }
+}
+
+IbisPreferences * IbisAPI::GetIbisPreferences()
+{
+    return m_application->GetIbisPreferences();
+}
+
+//Custom paths
+void IbisAPI::RegisterCustomPath( const QString & pathName, const QString & directoryPath )
+{
+    m_application->GetIbisPreferences()->RegisterPath( pathName, directoryPath );
+}
+
+void IbisAPI::UnRegisterCustomPath( const QString & pathName )
+{
+    m_application->GetIbisPreferences()->UnRegisterPath( pathName );
+}
+
+const QString IbisAPI::GetCustomPath(const QString &pathName )
+{
+    return m_application->GetIbisPreferences()->GetPath( pathName );
 }

@@ -17,7 +17,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "aboutbicigns.h"
 #include "quadviewwindow.h"
 #include "opendatafiledialog.h"
-#include "filereader.h"
+#include "ibisapi.h"
 #include "worldobject.h"
 #include "ibisconfig.h"
 #include "toolplugininterface.h"
@@ -25,6 +25,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "generatorplugininterface.h"
 #include "aboutpluginswidget.h"
 #include "serializer.h"
+#include "preferencewidget.h"
 
 #include <QApplication>
 #include <QDesktopWidget>
@@ -96,6 +97,7 @@ MainWindow::MainWindow( QWidget * parent )
     fileMenu->addAction( tr("&New Scene"), this, SLOT( fileNewScene() ));
     fileMenu->addSeparator();
     fileMenu->addAction( tr("&Exit"), this, SLOT( close() ), QKeySequence::Quit );
+
     connect( fileMenu, SIGNAL( aboutToShow() ), this, SLOT( ModifyFileMenu() ) );
     connect( newObjectFileMenu, SIGNAL( aboutToShow() ), this, SLOT( ModifyNewObjectFileMenu() ) );
     connect( fileGenerateMenu, SIGNAL(aboutToShow()), this, SLOT(FileGenerateMenuAboutToShow()) );

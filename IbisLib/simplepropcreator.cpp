@@ -16,6 +16,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "vtkActor.h"
 #include "vtkProperty.h"
 #include "vtkSphereSource.h"
+#include "vtkCircleWithCrossSource.h"
+#include "vtkNew.h"
 
 vtkProp3D * SimplePropCreator::CreateLine( double start[3], double end[3], double color[4] )
 {
@@ -98,4 +100,18 @@ vtkProp3D * SimplePropCreator::CreateSphere( double center[3], double radius, do
     mapper->Delete();
 
     return prop;
+}
+
+vtkProp3D * SimplePropCreator::CreateTarget( double center[3], double radius, double color[4] )
+{
+    vtkNew<vtkCircleWithCrossSource> source;
+    source->SetRadius( radius );
+    source->SetCenter( center );
+    source->SetResolution( 4 );
+    vtkNew<vtkPolyDataMapper> mapper;
+    mapper->SetInputConnection( source->GetOutputPort() );
+    vtkActor * actor = vtkActor::New();
+    actor->SetMapper( mapper.GetPointer() );
+    actor->GetProperty()->SetColor( color );
+    return actor;
 }
