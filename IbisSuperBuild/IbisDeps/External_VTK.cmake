@@ -17,5 +17,5 @@ ExternalProject_Add( ${vtk_name}
                -DVTK_QT_VERSION:STRING=5
                -DModule_vtkGUISupportQt:BOOL=ON
                -DQt5_DIR:PATH=${Qt5_DIR}
-               -DVTK_LEGACY_REMOVE:BOOL=ON
+               -DVTK_LEGACY_SILENT:BOOL=ON
                -DVTK_RENDERING_BACKEND:STRING=OpenGL )
