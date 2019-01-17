@@ -29,7 +29,7 @@ SET( VTK_EXTENSIONS_HDR
     vtkMultiTextureMapToPlane.h
     vtkPiecewiseFunctionLookupTable.h
     vtkInteractorStyleImage2.h
-    vtkOBJReader2.h 
+    vtkOBJReader2.h
     vtkSimpleMapper3D.h
     vtkSimpleProp3D.h
     vtkGenericParam.h
@@ -41,18 +41,15 @@ SET( VTK_EXTENSIONS_HDR
 #================================
 # Process GLSL shader files
 #================================
-set( LibGlsl vtkIbisImagePlaneMapper_FS )
-foreach( file ${LibGlsl} )
-  set( shader_src ${CMAKE_CURRENT_SOURCE_DIR}/${file}.glsl )
-  set( shader_cxx ${CMAKE_CURRENT_BINARY_DIR}/${file}.cxx )
-  set( shader_h ${CMAKE_CURRENT_BINARY_DIR}/${file}.h )
-  add_custom_command(
-    OUTPUT ${shader_cxx} ${shader_h}
-    DEPENDS ${shader_src}
-    COMMAND ${VTK_ENCODESTRING_EXE}
-    ARGS ${shader_cxx} ${shader_src} ${file} --build-header " " vtkSystemIncludes.h )
-  set( LibGlslSrc ${LibGlslSrc} ${shader_src} ${shader_h} ${shader_cxx} )
-endforeach(file)
+set( LibGlsl vtkIbisImagePlaneMapper_FS.glsl )
+set( LibGlslSrc )
+foreach (shader_file IN LISTS LibGlsl)
+  vtk_encode_string(
+    INPUT         "${shader_file}"
+    HEADER_OUTPUT shader_h
+    SOURCE_OUTPUT shader_cxx)
+  list(APPEND LibGlslSrc ${shader_file} ${shader_h} ${shader_cxx})
+endforeach ()
 
 #================================
 # Define output

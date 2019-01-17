@@ -4,19 +4,19 @@
 # C string literal in a header
 # file.
 #================================
-set( LibGlsl vtkPRISMVolumeRaycast_FS vtkPRISMVolumeRaycast_VS vtkPRISMVolumeMapperBackface_FS vtkPRISMVolumeMapperBackface_VS )
-
-foreach( file ${LibGlsl} )
-  set( shader_src ${CMAKE_CURRENT_SOURCE_DIR}/${file}.glsl )
-  set( shader_cxx ${CMAKE_CURRENT_BINARY_DIR}/${file}.cxx )
-  set( shader_h ${CMAKE_CURRENT_BINARY_DIR}/${file}.h )
-  add_custom_command(
-    OUTPUT ${shader_cxx} ${shader_h}
-    DEPENDS ${shader_src}
-    COMMAND ${VTK_ENCODESTRING_EXE}
-    ARGS ${shader_cxx} ${shader_src} ${file} --build-header " " vtkSystemIncludes.h )
-  set( LibGlslSrc ${LibGlslSrc} ${shader_src} ${shader_h} ${shader_cxx} )
-endforeach(file)
+set( LibGlsl vtkPRISMVolumeRaycast_FS.glsl
+             vtkPRISMVolumeRaycast_VS.glsl
+             vtkPRISMVolumeMapperBackface_FS.glsl
+             vtkPRISMVolumeMapperBackface_VS.glsl )
+             
+set( LibGlslSrc )
+foreach (shader_file IN LISTS LibGlsl)
+  vtk_encode_string(
+    INPUT         "${shader_file}"
+    HEADER_OUTPUT shader_h
+    SOURCE_OUTPUT shader_cxx)
+  list(APPEND LibGlslSrc ${shader_file} ${shader_h} ${shader_cxx})
+endforeach ()
 
 # define sources
 set( PluginSrc  PRISMVolumeRenderPluginInterface.cpp
