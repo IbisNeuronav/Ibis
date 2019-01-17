@@ -22,7 +22,7 @@ int main( int argc, char** argv )
 {
     // Disable VTK warnings unless not wanted
 #ifdef VTK_NO_WARNINGS
-    vtkObject::SetGlobalWarningDisplay( 0 );
+    //vtkObject::SetGlobalWarningDisplay( 0 );
 #endif
 
     // Create Qt app
@@ -31,7 +31,7 @@ int main( int argc, char** argv )
 
     // Warning : IBIS IS NOT APPROVED FOR CLINICAL USE.
     if( !QFile::exists( QDir::homePath() + QString("/.ibis/no-clinical-warning.txt")  ) )
-        QMessageBox::warning( 0, "WARNING!", QString("The Ibis platform is not approved for clinical use.") );
+        QMessageBox::warning( nullptr, "WARNING!", QString("The Ibis platform is not approved for clinical use.") );
 	
 	// On Mac, we always do Viewer-mode only without command-line params for now
     // Parse command-line arguments
