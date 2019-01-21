@@ -48,6 +48,7 @@ public:
     virtual void PostSceneRead();
     virtual void Export();
     virtual bool IsExportable() { return false; }
+    virtual bool IsValid() { return true; }
 
     vtkSetMacro( ObjectID, int );
     vtkGetMacro( ObjectID, int );

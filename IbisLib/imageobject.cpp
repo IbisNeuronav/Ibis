@@ -799,5 +799,13 @@ vtkImageAccumulate * ImageObject::GetHistogramComputer()
     return HistogramComputer;
 }
 
-
-
+bool ImageObject::IsValid()
+{
+    if( !(this->lutRange[0] >= 0.0 && this->lutRange[1] >= 0.0 ) )
+    {
+        QString message = "Invalid Scene Object: " + this->Name + ".\nObject will not be added to the scene.";
+        QMessageBox::warning( nullptr, "Error", message, 1, 0 );
+        return false;
+    }
+    return true;
+}

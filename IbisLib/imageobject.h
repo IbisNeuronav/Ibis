@@ -51,6 +51,8 @@ public:
     virtual void Serialize( Serializer * ser ) override;
     virtual void Export() override;
     virtual bool IsExportable()  override { return true; }
+    virtual bool IsValid() override;
+
     void SaveImageData(QString &name);
 
     bool IsLabelImage();
