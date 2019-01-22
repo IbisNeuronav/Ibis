@@ -463,7 +463,7 @@ vtkSmartPointer<PolyDataObject> IbisHardwareIGSIO::InstanciateToolModel( QString
     vtkSmartPointer<PolyDataObject> model;
     QString toolModelDir = m_plusConfigDirectory + "/ToolModels";
     QString modelFileName = toolModelDir + "/" + filename;
-    if (QFile::exists(modelFileName))
+    if (QFile::exists(modelFileName) && !filename.isEmpty())
     {
         vtkPLYReader * reader = vtkPLYReader::New();
         reader->SetFileName(modelFileName.toUtf8().data());
