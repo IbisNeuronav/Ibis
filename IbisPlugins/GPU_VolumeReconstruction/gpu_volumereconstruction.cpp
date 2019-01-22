@@ -6,7 +6,7 @@
 
 GPU_VolumeReconstruction::GPU_VolumeReconstruction()
 {
-    m_VolReconstructor = VolumeReconstructionType::New();
+    m_VolReconstructor = GPU_VolumeReconstruction::VolumeReconstructionType::New();
     m_VolReconstructor->SetDebug( false );
 }
 
@@ -55,8 +55,8 @@ void GPU_VolumeReconstruction::SetFixedSlice( int index, vtkImageData *slice, vt
 void GPU_VolumeReconstruction::SetTransform( vtkMatrix4x4 *transformMatrix )
 {
     //First convert to itk
-    ItkRigidTransformType::Pointer itkTransform = ItkRigidTransformType::New();
-    ItkRigidTransformType::OffsetType offset;
+    GPU_VolumeReconstruction::ItkRigidTransformType::Pointer itkTransform = GPU_VolumeReconstruction::ItkRigidTransformType::New();
+    GPU_VolumeReconstruction::ItkRigidTransformType::OffsetType offset;
     vnl_matrix<double> M(3,3);
     for(unsigned int i=0; i<3; i++ )
      {
@@ -88,10 +88,10 @@ void GPU_VolumeReconstruction::SetTransform( vtkMatrix4x4 *transformMatrix )
       angleY = vcl_atan2(y, x);
       }
 
-    ItkRigidTransformType::ParametersType params = ItkRigidTransformType::ParametersType(6);
+    GPU_VolumeReconstruction::ItkRigidTransformType::ParametersType params = GPU_VolumeReconstruction::ItkRigidTransformType::ParametersType(6);
     params[0] = angleX; params[1] = angleY; params[2] = angleZ;
 
-    ItkRigidTransformType::CenterType center;
+    GPU_VolumeReconstruction::ItkRigidTransformType::CenterType center;
     center.Fill(0.0);
 
     for( unsigned int i = 0; i < 3; i++ )

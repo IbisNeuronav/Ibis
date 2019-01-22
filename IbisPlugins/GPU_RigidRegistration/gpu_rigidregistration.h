@@ -27,22 +27,22 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include "itkImageMaskSpatialObject.h"
 
-typedef itk::CMAEvolutionStrategyOptimizer            OptimizerType;
-
-typedef itk::GPU3DRigidSimilarityMetric<IbisItkFloat3ImageType,IbisItkFloat3ImageType>
-                                                    GPUCostFunctionType;
-typedef GPUCostFunctionType::Pointer                GPUCostFunctionPointer;
-
-typedef  GPUCostFunctionType::GPUMetricType         GPUMetricType;
-typedef  GPUCostFunctionType::GPUMetricPointer      GPUMetricPointer;
-
-typedef itk::Euler3DTransform<double>                ItkRigidTransformType;
-
 
 class GPU_RigidRegistration
 {
 
 public:
+
+    typedef itk::CMAEvolutionStrategyOptimizer            OptimizerType;
+
+    typedef itk::GPU3DRigidSimilarityMetric<IbisItkFloat3ImageType,IbisItkFloat3ImageType>
+                                                        GPUCostFunctionType;
+    typedef GPUCostFunctionType::Pointer                GPUCostFunctionPointer;
+
+    typedef  GPUCostFunctionType::GPUMetricType         GPUMetricType;
+    typedef  GPUCostFunctionType::GPUMetricPointer      GPUMetricPointer;
+
+    typedef itk::Euler3DTransform<double>                ItkRigidTransformType;
 
     using ImageMaskType = itk::ImageMaskSpatialObject< 3 >;
     using ImageMaskPointer = ImageMaskType::Pointer;
