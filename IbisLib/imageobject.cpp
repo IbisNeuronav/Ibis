@@ -129,6 +129,10 @@ void ImageObject::Serialize( Serializer * ser )
     if( !ser->IsReader() )
     {
         labelImage = this->IsLabelImage();
+        if( !isnan(this->lutRange[0]) )
+            this->lutRange[0] = 0.0;
+        if( !isnan(this->lutRange[1]) )
+            this->lutRange[1] = 0.0;
     }
     ::Serialize( ser, "LabelImage", labelImage );
     ::Serialize( ser, "ViewOutline", this->viewOutline );
@@ -174,6 +178,10 @@ void ImageObject::Serialize( Serializer * ser )
         m_volumeProperty->SetSpecular( specular );
         m_volumeProperty->SetSpecularPower( specularPower );
         m_volumeProperty->SetDisableGradientOpacity( enableGradientOpacity ? 0 : 1 );
+        if( isnan(this->lutRange[0]) )
+            this->lutRange[0] = 0.0;
+        if( isnan(this->lutRange[1]) )
+            this->lutRange[1] = 0.0;
     }
     ::Serialize( ser, "ScalarOpacity", m_volumeProperty->GetScalarOpacity() );
     ::Serialize( ser, "GradientOpacity", m_volumeProperty->GetGradientOpacity() );
