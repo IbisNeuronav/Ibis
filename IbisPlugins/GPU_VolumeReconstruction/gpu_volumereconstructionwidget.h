@@ -45,7 +45,7 @@ private:
     void UpdateUi();
 
     Ui::GPU_VolumeReconstructionWidget * ui;
-    VolumeReconstructionPointer m_Reconstructor;
+    GPU_VolumeReconstruction::VolumeReconstructionPointer m_Reconstructor;
     QElapsedTimer               m_ReconstructionTimer;
     GPU_VolumeReconstruction   * m_VolumeReconstructor;
     GPU_VolumeReconstructionPluginInterface *m_pluginInterface;
