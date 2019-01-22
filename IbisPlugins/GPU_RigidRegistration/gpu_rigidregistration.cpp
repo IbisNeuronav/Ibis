@@ -28,9 +28,9 @@ protected:
 
 public:
 
-  typedef const OptimizerType                         *OptimizerPointer;
-  typedef const GPUCostFunctionType                   *GPUConstCostFunctionPointer;
-  typedef ItkRigidTransformType::Pointer              ItkRigidTransformPointer;
+  typedef const GPU_RigidRegistration::OptimizerType                         *OptimizerPointer;
+  typedef const GPU_RigidRegistration::GPUCostFunctionType                   *GPUConstCostFunctionPointer;
+  typedef GPU_RigidRegistration::ItkRigidTransformType::Pointer              ItkRigidTransformPointer;
   vtkTransform                                        * m_targetImageVtkTransform;
   vtkTransform                                        * m_vtktransform;
   vtkTransform                                        * m_parentTransform;
@@ -75,10 +75,10 @@ public:
     if(m_Debug)
       std::cout << "Optimizer Value:\t" << optimizer->GetCurrentValue() << std::endl;
 
-    ItkRigidTransformPointer itkTransform = ItkRigidTransformType::New();
+    ItkRigidTransformPointer itkTransform = GPU_RigidRegistration::ItkRigidTransformType::New();
 
-    ItkRigidTransformType::ParametersType params = optimizer->GetCurrentPosition();
-    ItkRigidTransformType::CenterType center = metric->GetCenter();
+    GPU_RigidRegistration::ItkRigidTransformType::ParametersType params = optimizer->GetCurrentPosition();
+    GPU_RigidRegistration::ItkRigidTransformType::CenterType center = metric->GetCenter();
     itkTransform->SetCenter(center);
     itkTransform->SetParameters(params);
 
@@ -88,10 +88,10 @@ public:
     vtkTransform * targetImageVtktransform = m_targetImageVtkTransform;
 
 
-    ItkRigidTransformType::MatrixType matrix =
+    GPU_RigidRegistration::ItkRigidTransformType::MatrixType matrix =
     itkTransform->GetMatrix();
 
-    ItkRigidTransformType::OffsetType offset =
+    GPU_RigidRegistration::ItkRigidTransformType::OffsetType offset =
     itkTransform->GetOffset();
 
     vtkSmartPointer<vtkMatrix4x4> localMatrix_inv = vtkSmartPointer<vtkMatrix4x4>::New();
