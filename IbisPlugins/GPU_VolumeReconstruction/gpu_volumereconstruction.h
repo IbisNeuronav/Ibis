@@ -11,17 +11,18 @@
 class vtkImageData;
 class vtkMatrix4x4;
 
-typedef itk::Euler3DTransform<float>                ItkRigidTransformType;
-
-typedef itk::GPUVolumeReconstruction<IbisItkFloat3ImageType>
-                                                    VolumeReconstructionType;
-typedef VolumeReconstructionType::Pointer           VolumeReconstructionPointer;
 
 class GPU_VolumeReconstruction : public QThread, public vtkObject
 {
     Q_OBJECT
 
 public:
+
+    typedef itk::Euler3DTransform<float>                ItkRigidTransformType;
+
+    typedef itk::GPUVolumeReconstruction<IbisItkFloat3ImageType>
+                                                        VolumeReconstructionType;
+    typedef VolumeReconstructionType::Pointer           VolumeReconstructionPointer;
 
     static GPU_VolumeReconstruction * New() { return new GPU_VolumeReconstruction; }
 
