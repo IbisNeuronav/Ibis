@@ -229,9 +229,6 @@ void ImageObject::SetItkImage( IbisItkFloat3ImageType::Pointer image )
     ImageType::PixelType maxPix = imageCalculatorFilter->GetMaximum();
     if( isnan(minPix) || isnan(maxPix) || isinf(minPix) || isinf(maxPix) )
     {
-        QString msg( "Incomplete data, ignoring object:  " );
-        msg.append( this->GetName() );
-        QMessageBox::warning( nullptr, "Error",msg , 1, 0 );
         return;
     }
 

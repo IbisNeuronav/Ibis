@@ -73,16 +73,24 @@ void GPU_VolumeReconstructionWidget::slot_finished()
     reconstructedImage->SetName("Reconstructed Volume");
     reconstructedImage->SetItkImage( m_VolumeReconstructor->GetReconstructedImage() );
 
-    ibisAPI->AddObject(reconstructedImage, selectedUSAcquisitionObject->GetParent()->GetParent() );
-    ibisAPI->SetCurrentObject( reconstructedImage );
+    if( reconstructedImage->GetImage() != nullptr )
+    {
+        ibisAPI->AddObject(reconstructedImage, selectedUSAcquisitionObject->GetParent()->GetParent() );
+        ibisAPI->SetCurrentObject( reconstructedImage );
 
 #ifdef DEBUG
     std::cerr << "Done..." << std::endl;
     std::cout << "Volume Reconstruction took " << qreal(reconstructionTime)/1000.0 << "secs"<< std::endl;
 #endif
 
-    QString feedbackString = QString("Volume Reconstruction finished in %1 secs").arg(qreal(reconstructionTime)/1000.0);
-    ui->userFeedbackLabel->setText(feedbackString);
+        QString feedbackString = QString("Volume Reconstruction finished in %1 secs").arg(qreal(reconstructionTime)/1000.0);
+        ui->userFeedbackLabel->setText(feedbackString);
+    }
+    else
+    {
+        QString feedbackString = QString("Reconstruction failed.");
+        ui->userFeedbackLabel->setText(feedbackString);
+    }
 
     ui->progressBar->hide();
 }

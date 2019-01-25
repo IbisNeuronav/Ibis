@@ -507,9 +507,15 @@ bool FileReader::OpenItkFile( QList<SceneObject*> & readObjects, QString filenam
 //    this->PrintMetadata(dictionary);
 
     if( image->GetImage() != nullptr )
+    {
         readObjects.push_back( image );
-
-    ReaderProgress( 1.0 );
+        ReaderProgress( 1.0 );
+    }
+    else
+    {
+        this->ReportWarning( "Ignoring incomplete data." );
+        return false;
+   }
 
     return true;
 }
