@@ -57,9 +57,9 @@ ImageObject::PerViewElements::~PerViewElements()
 
 ImageObject::ImageObject()
 {
-    this->Image = 0;
-    this->ItkImage = 0;
-    this->ItkLabelImage = 0;
+    this->Image = nullptr;
+    this->ItkImage = nullptr;
+    this->ItkLabelImage = nullptr;
     this->OutlineFilter = vtkSmartPointer<vtkOutlineFilter>::New();
     this->viewOutline = 0;
     this->outlineWasVisible = 0;
@@ -129,10 +129,6 @@ void ImageObject::Serialize( Serializer * ser )
     if( !ser->IsReader() )
     {
         labelImage = this->IsLabelImage();
-        if( !isnan(this->lutRange[0]) )
-            this->lutRange[0] = 0.0;
-        if( !isnan(this->lutRange[1]) )
-            this->lutRange[1] = 0.0;
     }
     ::Serialize( ser, "LabelImage", labelImage );
     ::Serialize( ser, "ViewOutline", this->viewOutline );
@@ -178,10 +174,6 @@ void ImageObject::Serialize( Serializer * ser )
         m_volumeProperty->SetSpecular( specular );
         m_volumeProperty->SetSpecularPower( specularPower );
         m_volumeProperty->SetDisableGradientOpacity( enableGradientOpacity ? 0 : 1 );
-        if( isnan(this->lutRange[0]) )
-            this->lutRange[0] = 0.0;
-        if( isnan(this->lutRange[1]) )
-            this->lutRange[1] = 0.0;
     }
     ::Serialize( ser, "ScalarOpacity", m_volumeProperty->GetScalarOpacity() );
     ::Serialize( ser, "GradientOpacity", m_volumeProperty->GetGradientOpacity() );
@@ -223,8 +215,26 @@ bool ImageObject::IsLabelImage()
     return false;
 }
 
+#include "itkMinimumMaximumImageCalculator.h"
+using ImageType = itk::Image<float, 3>;
 void ImageObject::SetItkImage( IbisItkFloat3ImageType::Pointer image )
 {
+
+    using ImageCalculatorFilterType = itk::MinimumMaximumImageCalculator <ImageType>;
+    ImageCalculatorFilterType::Pointer imageCalculatorFilter
+          = ImageCalculatorFilterType::New ();
+    imageCalculatorFilter->SetImage(image);
+    imageCalculatorFilter->Compute();
+    ImageType::PixelType minPix = imageCalculatorFilter->GetMinimum();
+    ImageType::PixelType maxPix = imageCalculatorFilter->GetMaximum();
+    if( isnan(minPix) || isnan(maxPix) || isinf(minPix) || isinf(maxPix) )
+    {
+        QString msg( "Incomplete data, ignoring object:  " );
+        msg.append( this->GetName() );
+        QMessageBox::warning( nullptr, "Error",msg , 1, 0 );
+        return;
+    }
+
     this->ItkImage = image;
     if( this->ItkImage )
     {

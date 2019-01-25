@@ -500,13 +500,14 @@ bool FileReader::OpenItkFile( QList<SceneObject*> & readObjects, QString filenam
 
     IbisItkFloat3ImageType::Pointer itkImage = reader->GetOutput();
     ImageObject * image = ImageObject::New();
+    SetObjectName( image, dataObjectName, filename );
     image->SetItkImage( itkImage );
 
 //    itk::MetaDataDictionary &dictionary = itkImage->GetMetaDataDictionary();
 //    this->PrintMetadata(dictionary);
 
-    SetObjectName( image, dataObjectName, filename );
-    readObjects.push_back( image );
+    if( image->GetImage() != nullptr )
+        readObjects.push_back( image );
 
     ReaderProgress( 1.0 );
 
