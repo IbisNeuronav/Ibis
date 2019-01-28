@@ -255,7 +255,7 @@ bool ImageObject::SetItkImage( IbisItkFloat3ImageType::Pointer image )
     if( !SanityCheck( image ) )
         return false;
     this->ItkImage = image;
-   if( this->ItkImage )
+    if( this->ItkImage )
     {
         vtkTransform * rotTrans = vtkTransform::New();
         this->SetImage( this->ItktovtkConverter->ConvertItkImageToVtkImage( this->ItkImage, rotTrans ) );
