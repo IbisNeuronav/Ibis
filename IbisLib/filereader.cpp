@@ -500,17 +500,18 @@ bool FileReader::OpenItkFile( QList<SceneObject*> & readObjects, QString filenam
 
     IbisItkFloat3ImageType::Pointer itkImage = reader->GetOutput();
     ImageObject * image = ImageObject::New();
-    image->SetItkImage( itkImage );
-
-//    itk::MetaDataDictionary &dictionary = itkImage->GetMetaDataDictionary();
-//    this->PrintMetadata(dictionary);
-
     SetObjectName( image, dataObjectName, filename );
-    readObjects.push_back( image );
+    if( image->SetItkImage( itkImage ) )
+    {
+        readObjects.push_back( image );
+        ReaderProgress( 1.0 );
+        //    itk::MetaDataDictionary &dictionary = itkImage->GetMetaDataDictionary();
+        //    this->PrintMetadata(dictionary);
 
-    ReaderProgress( 1.0 );
-
-    return true;
+        return true;
+    }
+    this->ReportWarning( "Ignoring incomplete data." );
+    return false;
 }
 
 bool FileReader::OpenItkLabelFile( QList<SceneObject*> & readObjects, QString filename, const QString & dataObjectName )
@@ -533,14 +534,17 @@ bool FileReader::OpenItkLabelFile( QList<SceneObject*> & readObjects, QString fi
 
     IbisItkUnsignedChar3ImageType::Pointer itkImage = reader->GetOutput();
     ImageObject * image = ImageObject::New();
-    image->SetItkLabelImage( itkImage );
+    if( image->SetItkLabelImage( itkImage ) )
+    {
+        SetObjectName( image, dataObjectName, filename );
+        readObjects.push_back( image );
 
-    SetObjectName( image, dataObjectName, filename );
-    readObjects.push_back( image );
+        ReaderProgress( 1.0 );
 
-    ReaderProgress( 1.0 );
-
-    return true;
+        return true;
+    }
+    this->ReportWarning( "Ignoring incomplete data." );
+    return false;
 }
 
 bool FileReader::OpenObjFile( QList<SceneObject*> & readObjects, QString filename, const QString & dataObjectName )
