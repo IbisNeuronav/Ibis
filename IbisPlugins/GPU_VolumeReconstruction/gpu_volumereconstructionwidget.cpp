@@ -71,9 +71,7 @@ void GPU_VolumeReconstructionWidget::slot_finished()
     //Add Reconstructed Volume to Scene
     vtkSmartPointer<ImageObject> reconstructedImage = vtkSmartPointer<ImageObject>::New();
     reconstructedImage->SetName("Reconstructed Volume");
-    reconstructedImage->SetItkImage( m_VolumeReconstructor->GetReconstructedImage() );
-
-    if( reconstructedImage->GetImage() != nullptr )
+    if( reconstructedImage->SetItkImage( m_VolumeReconstructor->GetReconstructedImage() ) )
     {
         ibisAPI->AddObject(reconstructedImage, selectedUSAcquisitionObject->GetParent()->GetParent() );
         ibisAPI->SetCurrentObject( reconstructedImage );

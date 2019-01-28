@@ -216,11 +216,10 @@ bool ImageObject::IsLabelImage()
 }
 
 #include "itkMinimumMaximumImageCalculator.h"
-using ImageType = itk::Image<float, 3>;
-void ImageObject::SetItkImage( IbisItkFloat3ImageType::Pointer image )
+bool ImageObject::SanityCheck( IbisItkFloat3ImageType::Pointer image )
 {
-
-    using ImageCalculatorFilterType = itk::MinimumMaximumImageCalculator <ImageType>;
+    using ImageType = IbisItkFloat3ImageType;
+    using ImageCalculatorFilterType = itk::MinimumMaximumImageCalculator <IbisItkFloat3ImageType>;
     ImageCalculatorFilterType::Pointer imageCalculatorFilter
           = ImageCalculatorFilterType::New ();
     imageCalculatorFilter->SetImage(image);
@@ -229,21 +228,47 @@ void ImageObject::SetItkImage( IbisItkFloat3ImageType::Pointer image )
     ImageType::PixelType maxPix = imageCalculatorFilter->GetMaximum();
     if( isnan(minPix) || isnan(maxPix) || isinf(minPix) || isinf(maxPix) )
     {
-        return;
+        return false;
     }
+    return true;
+}
 
+bool ImageObject::SanityCheck( IbisItkUnsignedChar3ImageType::Pointer image )
+{
+    using ImageType = IbisItkUnsignedChar3ImageType;
+    using ImageCalculatorFilterType = itk::MinimumMaximumImageCalculator <IbisItkUnsignedChar3ImageType>;
+    ImageCalculatorFilterType::Pointer imageCalculatorFilter
+          = ImageCalculatorFilterType::New ();
+    imageCalculatorFilter->SetImage(image);
+    imageCalculatorFilter->Compute();
+    ImageType::PixelType minPix = imageCalculatorFilter->GetMinimum();
+    ImageType::PixelType maxPix = imageCalculatorFilter->GetMaximum();
+    if( isnan(minPix) || isnan(maxPix) || isinf(minPix) || isinf(maxPix) )
+    {
+        return false;
+    }
+    return true;
+}
+
+bool ImageObject::SetItkImage( IbisItkFloat3ImageType::Pointer image )
+{
+    if( !SanityCheck( image ) )
+        return false;
     this->ItkImage = image;
-    if( this->ItkImage )
+   if( this->ItkImage )
     {
         vtkTransform * rotTrans = vtkTransform::New();
         this->SetImage( this->ItktovtkConverter->ConvertItkImageToVtkImage( this->ItkImage, rotTrans ) );
         this->SetLocalTransform( rotTrans );
         rotTrans->Delete();
     }
+    return true;
 }
 
-void ImageObject::SetItkLabelImage( IbisItkUnsignedChar3ImageType::Pointer image )
+bool ImageObject::SetItkLabelImage( IbisItkUnsignedChar3ImageType::Pointer image )
 {
+    if( !SanityCheck( image ) )
+        return false;
     this->ItkLabelImage = image;
     if( this->ItkLabelImage )
     {

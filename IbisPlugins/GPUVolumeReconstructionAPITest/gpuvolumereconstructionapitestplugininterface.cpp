@@ -65,12 +65,16 @@ QWidget * GPUVolumeReconstructionAPITestPluginInterface::CreateFloatingWidget()
             reconstructor->wait();
 
             vtkSmartPointer<ImageObject> reconstructedImage = vtkSmartPointer<ImageObject>::New();
-            reconstructedImage->SetItkImage( reconstructor->GetReconstructedImage() );
-            QString volName("ReconstructedVolume");
-            volName.append( QString::number( i ) );
-            reconstructedImage->SetName(volName);
-            ibisAPI->AddObject(reconstructedImage, acq->GetParent()->GetParent() );
-            ibisAPI->SetCurrentObject( reconstructedImage );
+            if( reconstructedImage->SetItkImage( reconstructor->GetReconstructedImage() ) )
+            {
+                QString volName("ReconstructedVolume");
+                volName.append( QString::number( i ) );
+                reconstructedImage->SetName(volName);
+                ibisAPI->AddObject(reconstructedImage, acq->GetParent()->GetParent() );
+                ibisAPI->SetCurrentObject( reconstructedImage );
+            }
+            else
+                QMessageBox::warning( 0, "Error", "Reconstruction failed." );
         }
         reconstructor->Delete();
         return 0;
