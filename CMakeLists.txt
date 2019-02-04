@@ -136,19 +136,8 @@ if( CMAKE_BUILD_TYPE MATCHES "Debug" )
     set( IBIS_BUILD_QUALIFIER "Debug" )
 endif( CMAKE_BUILD_TYPE MATCHES "Debug" )
 
-# a custom target that is always built
-add_custom_target(gitversion ALL
-    DEPENDS version_git_hash)
-# creates githash.h using cmake script
-add_custom_command(OUTPUT version_git_hash
-    COMMAND ${CMAKE_COMMAND} -DSOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}
-                         -P ${CMAKE_CURRENT_SOURCE_DIR}/CMakeCommon/getgithash.cmake)
-
-# githash.h is a generated file
-set_source_files_properties(${CMAKE_CURRENT_BINARY_DIR}/githash.h
-    PROPERTIES GENERATED TRUE
-    HEADER_FILE_ONLY TRUE)
-
+# Track state of local git repository
+include(${CMAKE_COMMON_DIR}/gitwatcher.cmake)
 
 # configure version file
 configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/version.h.in ${CMAKE_CURRENT_BINARY_DIR}/version.h )
