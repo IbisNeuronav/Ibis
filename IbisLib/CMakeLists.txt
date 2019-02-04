@@ -179,6 +179,7 @@ set( IBISLIB_all_src ${IBISLIB_SRC} ${IBISLIB_MOC} ${IBISLIB_HDR} ${IBISLIB_HDR_
 ADD_LIBRARY( IbisLib ${IBISLIB_all_src})
 
 target_link_libraries( IbisLib svl vtkQt vtkMNI vtkExtensions)
+add_dependencies( IbisLib check_git_repository )
 target_include_directories( IbisLib PUBLIC  ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/gui
     PRIVATE ${ibis_BINARY_DIR} )
 IF( CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64" )

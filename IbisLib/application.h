@@ -114,7 +114,10 @@ public:
     QString GetFullVersionString();
     QString GetVersionString();
     static QString GetConfigDirectory();
+    static QString GetGitHash();
     static QString GetGitHashShort();
+    static bool GitCodeHasModifications();
+    static bool GitInfoIsValid();
 
     static SceneManager * GetSceneManager();
     static LookupTableManager * GetLookupTableManager();
