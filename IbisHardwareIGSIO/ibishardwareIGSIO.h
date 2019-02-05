@@ -115,7 +115,6 @@ protected:
         vtkSmartPointer<PolyDataObject> toolModel;
         igtlioDevicePointer transformDevice;
         igtlioDevicePointer imageDevice;
-//        igtlio
     };
     typedef QList< Tool* > toolList;
     toolList m_tools;
