@@ -155,8 +155,8 @@ void TransformEditWidget::EditMatrixButtonToggled( bool isOn )
             m_matrixDialog->setAttribute( Qt::WA_DeleteOnClose );
             m_matrixDialog->SetMatrix( t->GetMatrix() );
             m_matrixDialog->show();
-            connect( m_matrixDialog, SIGNAL(Modified()), m_sceneObject, SLOT(NotifyTransformChanged()) );
-            connect( m_matrixDialog, SIGNAL(Modified()), this, SLOT(UpdateUi()) );
+            connect( m_matrixDialog, SIGNAL(MatrixModified()), m_sceneObject, SLOT(NotifyTransformChanged()) );
+            connect( m_matrixDialog, SIGNAL(MatrixModified()), this, SLOT(UpdateUi()) );
             connect( m_matrixDialog, SIGNAL(destroyed()), this, SLOT(EditMatrixDialogClosed()) );
         }
     }
