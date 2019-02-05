@@ -167,7 +167,7 @@ void IbisHardwareIGSIO::Update()
                 igtlioImageDevice * imageDevice = igtlioImageDevice::SafeDownCast( tool->transformDevice );
                 tool->sceneObject->SetInputMatrix( imageDevice->GetContent().transform );
                 // Copy transform status from metadata to node attributes
-                for (igtl::MessageBase::MetaDataMap::const_iterator iter = transformDevice->GetMetaData().begin(); iter != transformDevice->GetMetaData().end(); ++iter)
+                for (igtl::MessageBase::MetaDataMap::const_iterator iter = imageDevice->GetMetaData().begin(); iter != imageDevice->GetMetaData().end(); ++iter)
                 {
                   if (iter->first.find("Status") != std::string::npos)
                   {
