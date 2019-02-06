@@ -38,6 +38,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "igtlioImageConverter.h"
 #include "igtlioTransformConverter.h"
 #include "igtlioVideoConverter.h"
+#include "igtlioStatusDevice.h"
 
 IbisHardwareIGSIO::IbisHardwareIGSIO()
 {
@@ -78,6 +79,7 @@ void IbisHardwareIGSIO::Init()
     m_logicController->setLogic( m_logic );
     m_logicCallbacks->Connect( m_logic, igtlioLogic::NewDeviceEvent, this, SLOT(OnDeviceNew(vtkObject*, unsigned long, void*, void*)) );
     m_logicCallbacks->Connect( m_logic, igtlioLogic::RemovedDeviceEvent, this, SLOT(OnDeviceRemoved(vtkObject*, unsigned long, void*, void*)) );
+
 
     // Initialize with last config file
     if( m_autoStartLastConfig )
@@ -139,10 +141,13 @@ void IbisHardwareIGSIO::ClearConfig()
 
 TrackerToolState StatusStringToState( const std::string & status )
 {
-    if( status == "true" )
+    QString qstatus(status.c_str());
+    if( qstatus.toUpper().toStdString() == "OK" )
         return Ok;
-    if( status == "false" )
+    if( qstatus.toUpper().toStdString() == "OUTOFVOLUME" )
         return OutOfView;
+    if( qstatus.toUpper().toStdString() == "MISSING" )
+        return Missing;
     return Undefined;
 }
 
@@ -154,20 +159,34 @@ void IbisHardwareIGSIO::Update()
     // Push images, transforms and states to the TrackedSceneObjects
     foreach( Tool * tool, m_tools )
     {
+
         if( tool->transformDevice )
         {
             if( tool->transformDevice->GetDeviceType() == igtlioImageConverter::GetIGTLTypeName() )
             {
                 igtlioImageDevice * imageDevice = igtlioImageDevice::SafeDownCast( tool->transformDevice );
                 tool->sceneObject->SetInputMatrix( imageDevice->GetContent().transform );
-                tool->sceneObject->SetState( Ok );
+                // Copy transform status from metadata to node attributes
+                for (igtl::MessageBase::MetaDataMap::const_iterator iter = imageDevice->GetMetaData().begin(); iter != imageDevice->GetMetaData().end(); ++iter)
+                {
+                  if (iter->first.find("Status") != std::string::npos)
+                  {
+                    tool->sceneObject->SetState( StatusStringToState( iter->second.second.c_str() ) );
+                  }
+                }
             }
             else if( tool->transformDevice->GetDeviceType() == igtlioTransformConverter::GetIGTLTypeName() )
             {
                 igtlioTransformDevice * transformDevice = igtlioTransformDevice::SafeDownCast( tool->transformDevice );
                 tool->sceneObject->SetInputMatrix( transformDevice->GetContent().transform );
-                //tool->sceneObject->SetState( StatusStringToState( transformDevice->GetContent().transformStatus ) );
-                tool->sceneObject->SetState( Ok );
+                // Copy transform status from metadata to node attributes
+                for (igtl::MessageBase::MetaDataMap::const_iterator iter = transformDevice->GetMetaData().begin(); iter != transformDevice->GetMetaData().end(); ++iter)
+                {
+                  if (iter->first.find("Status") != std::string::npos)
+                  {
+                    tool->sceneObject->SetState( StatusStringToState( iter->second.second.c_str() ) );
+                  }
+                }
             }
         }
         if( tool->imageDevice )
@@ -408,7 +427,28 @@ void IbisHardwareIGSIO::Connect( std::string ip, int port )
     igtlioConnectorPointer c = m_logic->CreateConnector();
     c->SetTypeClient( ip, port );
     c->Start();
+    m_logicCallbacks->Connect( c , igtlioConnector::ConnectedEvent, this, SLOT(OnConnectionEstablished(vtkObject*, unsigned long, void*, void*)) );
 }
+
+void IbisHardwareIGSIO::OnConnectionEstablished(vtkObject* caller, unsigned long, void*, void *)
+{
+    // send a dummy message with metadata to force v2 message exchange
+    igtlioConnectorPointer connector = reinterpret_cast<igtlioConnector *>(caller);
+    igtlioDeviceKeyType key;
+    key.name = "";
+    key.type = "STATUS";
+    vtkSmartPointer<igtlioStatusDevice> statusDevice = igtlioStatusDevice::SafeDownCast(connector->GetDevice(key));
+    if (!statusDevice)
+    {
+      statusDevice = vtkSmartPointer<igtlioStatusDevice>::New();
+      connector->AddDevice(statusDevice);
+    }
+
+    statusDevice->SetMetaDataElement("dummy", "dummy"); // existence of metadata makes the IO connector send a header v2 message
+    connector->SendMessage(igtlioDeviceKeyType::CreateDeviceKey(statusDevice));
+    connector->RemoveDevice(statusDevice);
+}
+
 
 void IbisHardwareIGSIO::DisconnectAllServers()
 {
@@ -515,3 +555,4 @@ bool IbisHardwareIGSIO::IsDeviceVideo( igtlioDevicePointer device )
 {
     return device->GetDeviceType() == igtlioVideoConverter::GetIGTLTypeName();
 }
+
