@@ -274,9 +274,6 @@ protected:
   InternalRealType *          m_cpuFixedImageBuffer;
   cl_mem                      m_FixedGPUImage;
 
-  InternalRealType*             m_convertionMatrices;
-  cl_mem                        m_gpuConvertionMatrices;
-
 private:
   GPUOrientationMatchingMatrixTransformationSparseMask(const Self &);   //purposely not implemented
   void operator=(const Self &); //purposely not implemented

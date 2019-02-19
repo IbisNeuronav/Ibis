@@ -893,12 +893,6 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
                           m_Blocks * m_Threads * 4 * sizeof(InternalRealType),
                           m_cpuFixedLocationSamples, &errid);
   OpenCLCheckError(errid, __FILE__, __LINE__, ITK_LOCATION);  
-
-  m_convertionMatrices = (InternalRealType*)malloc( 36* sizeof(InternalRealType));
-  memset(m_convertionMatrices, 0, 36 * sizeof(InternalRealType));
-  m_gpuConvertionMatrices = clCreateBuffer(m_Context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
-                          36 * sizeof(InternalRealType),
-                          m_convertionMatrices, &errid);
 }
 
 
