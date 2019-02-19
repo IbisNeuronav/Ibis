@@ -527,23 +527,29 @@ void View::ReferenceTransformChanged()
     if( this->Manager && ( this->GetType() != THREED_VIEW_TYPE || this->Manager->Is3DViewFollowingReferenceVolume() ) )
     {
         ImageObject * obj = this->Manager->GetReferenceDataObject();
+        vtkSmartPointer<vtkTransform> t = vtkSmartPointer<vtkTransform>::New();
+        vtkCamera * cam = this->Renderer->GetActiveCamera();
         if( obj && this->Renderer )
         {
-            vtkTransform * t = vtkTransform::New();
-
             vtkTransform * refTransform = obj->GetWorldTransform();
             t->SetInput( refTransform );
             t->Concatenate( this->PrevViewingTransform );
 
-            vtkCamera * cam = this->Renderer->GetActiveCamera();
             cam->ApplyTransform( t );
-            t->Delete();
 
             // backup inverted current transform
             this->PrevViewingTransform->DeepCopy( refTransform->GetMatrix() );
             this->PrevViewingTransform->Invert();
 
             NotifyNeedRender();
+        }
+        else
+        {
+            t->Identity();
+            t->Concatenate( this->PrevViewingTransform );
+            cam->ApplyTransform( t );
+            // backup inverted current transform
+            this->PrevViewingTransform->Identity();
         }
     }
 }
