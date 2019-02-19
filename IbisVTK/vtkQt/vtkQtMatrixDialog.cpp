@@ -171,7 +171,7 @@ void vtkQtMatrixDialog::SetMatrixElements( )
         }
     }
     m_matrix->Modified();
-    emit Modified();
+    emit MatrixModified();
 }
 
 void vtkQtMatrixDialog::InvertButtonClicked()
@@ -180,7 +180,7 @@ void vtkQtMatrixDialog::InvertButtonClicked()
     {
         m_copy_matrix->DeepCopy( m_matrix );
         m_matrix->Invert();
-        emit Modified();
+        emit MatrixModified();
     }
 }
 
@@ -191,7 +191,7 @@ void vtkQtMatrixDialog::IdentityButtonClicked()
     {
         m_copy_matrix->DeepCopy( m_matrix );
         m_matrix->Identity();
-        emit Modified();
+        emit MatrixModified();
     }
 }
 
@@ -202,7 +202,7 @@ void vtkQtMatrixDialog::RevertButtonClicked()
     {
         m_matrix->DeepCopy( m_copy_matrix );
         m_copy_matrix->Identity();
-        emit Modified();
+        emit MatrixModified();
     }
     UpdateUI();
 }
@@ -276,7 +276,7 @@ void vtkQtMatrixDialog::LoadButtonClicked()
                 m_matrix->DeepCopy( mat );
             mat->Delete();
             UpdateUI();
-            emit Modified();
+            emit MatrixModified();
         }
         else
         {

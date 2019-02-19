@@ -201,7 +201,7 @@ public:
     SceneObject * GetObjectByID( int id );
 
     // Current object
-    SceneObject * GetCurrentObject( ) { return CurrentObject; }
+    SceneObject * GetCurrentObject( ) { return m_currentObject; }
     void SetCurrentObject( SceneObject * cur  );
 
     // Reference object
@@ -334,13 +334,13 @@ protected:
     void NotifyPluginsSceneAboutToSave();
     void NotifyPluginsSceneFinishedSaving();
 
-    int NextObjectID;
-    int NextSystemObjectID;
-    SceneObject * CurrentObject;
-    ImageObject * ReferenceDataObject;
+    int m_nextObjectID;
+    int m_nextSystemObjectID;
+    SceneObject * m_currentObject;
+    ImageObject * m_referenceDataObject;
     vtkTransform * m_referenceTransform;
     vtkTransform * m_invReferenceTransform;
-    WorldObject * SceneRoot;
+    WorldObject * m_sceneRoot;
     InteractorStyle InteractorStyle3D;
 
     // Description:

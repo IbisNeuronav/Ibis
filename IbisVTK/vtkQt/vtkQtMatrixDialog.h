@@ -50,7 +50,7 @@ public:
 
 signals:
 
-    void Modified();
+    void MatrixModified();
 
 public slots:
     
