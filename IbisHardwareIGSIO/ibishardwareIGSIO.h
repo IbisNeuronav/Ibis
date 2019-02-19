@@ -16,6 +16,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "configio.h"
 
 class igtlioLogic;
+class igtlioConnector;
 
 class QMenu;
 class qIGTLIOLogicController;
@@ -86,6 +87,7 @@ private slots:
     void OnConfigFileWidgetClosed();
     void OnDeviceNew( vtkObject*, unsigned long, void*, void* );
     void OnDeviceRemoved( vtkObject*, unsigned long, void*, void* );
+    void OnConnectionEstablished( vtkObject*, unsigned long, void*, void* );
 
 protected:
 
@@ -105,6 +107,7 @@ protected:
     bool IsDeviceImage( igtlioDevicePointer device );
     bool IsDeviceTransform( igtlioDevicePointer device );
     bool IsDeviceVideo( igtlioDevicePointer device );
+
 
     struct Tool
     {

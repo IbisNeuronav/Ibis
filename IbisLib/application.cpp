@@ -383,7 +383,12 @@ QString Application::GetFullVersionString()
     QString versionQualifier( IBIS_VERSION_QUALIFIER );
     QString buildQualifier( IBIS_BUILD_QUALIFIER );
     QString version;
-    version = QString("%1.%2.%3 %4 %5\nrev. %6").arg(IBIS_MAJOR_VERSION).arg(IBIS_MINOR_VERSION).arg(IBIS_PATCH_VERSION).arg(versionQualifier).arg(buildQualifier).arg(IBIS_GIT_HASH);
+    version = QString("%1.%2.%3 %4 %5\nrev. %6").arg(IBIS_MAJOR_VERSION)
+                                                .arg(IBIS_MINOR_VERSION)
+                                                .arg(IBIS_PATCH_VERSION)
+                                                .arg(versionQualifier)
+                                                .arg(buildQualifier)
+                                                .arg(GetGitHash());
     return version;
 }
 
@@ -401,10 +406,25 @@ QString Application::GetConfigDirectory()
     return configDir;
 }
 
+QString Application::GetGitHash()
+{
+    return QString(GIT_HEAD_SHA1);
+}
+
 QString Application::GetGitHashShort()
 {
-    QString hash = IBIS_GIT_HASH_SHORT;
-    return hash;
+    QString hash = GetGitHash();
+    return hash.left(7);
+}
+
+bool Application::GitCodeHasModifications()
+{
+    return GIT_IS_DIRTY;
+}
+
+bool Application::GitInfoIsValid()
+{
+    return GIT_RETRIEVED_STATE;
 }
 
 void Application::OpenFiles( OpenFileParams * params, bool addToScene )

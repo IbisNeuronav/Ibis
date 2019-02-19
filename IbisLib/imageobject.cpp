@@ -57,9 +57,9 @@ ImageObject::PerViewElements::~PerViewElements()
 
 ImageObject::ImageObject()
 {
-    this->Image = 0;
-    this->ItkImage = 0;
-    this->ItkLabelImage = 0;
+    this->Image = nullptr;
+    this->ItkImage = nullptr;
+    this->ItkLabelImage = nullptr;
     this->OutlineFilter = vtkSmartPointer<vtkOutlineFilter>::New();
     this->viewOutline = 0;
     this->outlineWasVisible = 0;
@@ -215,8 +215,45 @@ bool ImageObject::IsLabelImage()
     return false;
 }
 
-void ImageObject::SetItkImage( IbisItkFloat3ImageType::Pointer image )
+#include "itkMinimumMaximumImageCalculator.h"
+bool ImageObject::SanityCheck( IbisItkFloat3ImageType::Pointer image )
 {
+    using ImageType = IbisItkFloat3ImageType;
+    using ImageCalculatorFilterType = itk::MinimumMaximumImageCalculator <IbisItkFloat3ImageType>;
+    ImageCalculatorFilterType::Pointer imageCalculatorFilter
+          = ImageCalculatorFilterType::New ();
+    imageCalculatorFilter->SetImage(image);
+    imageCalculatorFilter->Compute();
+    ImageType::PixelType minPix = imageCalculatorFilter->GetMinimum();
+    ImageType::PixelType maxPix = imageCalculatorFilter->GetMaximum();
+    if( isnan(minPix) || isnan(maxPix) || isinf(minPix) || isinf(maxPix) )
+    {
+        return false;
+    }
+    return true;
+}
+
+bool ImageObject::SanityCheck( IbisItkUnsignedChar3ImageType::Pointer image )
+{
+    using ImageType = IbisItkUnsignedChar3ImageType;
+    using ImageCalculatorFilterType = itk::MinimumMaximumImageCalculator <IbisItkUnsignedChar3ImageType>;
+    ImageCalculatorFilterType::Pointer imageCalculatorFilter
+          = ImageCalculatorFilterType::New ();
+    imageCalculatorFilter->SetImage(image);
+    imageCalculatorFilter->Compute();
+    ImageType::PixelType minPix = imageCalculatorFilter->GetMinimum();
+    ImageType::PixelType maxPix = imageCalculatorFilter->GetMaximum();
+    if( isnan(minPix) || isnan(maxPix) || isinf(minPix) || isinf(maxPix) )
+    {
+        return false;
+    }
+    return true;
+}
+
+bool ImageObject::SetItkImage( IbisItkFloat3ImageType::Pointer image )
+{
+    if( !SanityCheck( image ) )
+        return false;
     this->ItkImage = image;
     if( this->ItkImage )
     {
@@ -225,10 +262,13 @@ void ImageObject::SetItkImage( IbisItkFloat3ImageType::Pointer image )
         this->SetLocalTransform( rotTrans );
         rotTrans->Delete();
     }
+    return true;
 }
 
-void ImageObject::SetItkLabelImage( IbisItkUnsignedChar3ImageType::Pointer image )
+bool ImageObject::SetItkLabelImage( IbisItkUnsignedChar3ImageType::Pointer image )
 {
+    if( !SanityCheck( image ) )
+        return false;
     this->ItkLabelImage = image;
     if( this->ItkLabelImage )
     {

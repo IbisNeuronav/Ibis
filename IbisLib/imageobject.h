@@ -44,7 +44,7 @@ public:
         
     static ImageObject * New() { return new ImageObject; }
     vtkTypeMacro(ImageObject,SceneObject);
-    
+
     ImageObject();
     virtual ~ImageObject();
     
@@ -56,8 +56,8 @@ public:
     bool IsLabelImage();
     
     vtkImageData* GetImage( );
-    void SetItkImage( IbisItkFloat3ImageType::Pointer image );  // for all others
-    void SetItkLabelImage( IbisItkUnsignedChar3ImageType::Pointer image );  // for labels
+    bool SetItkImage( IbisItkFloat3ImageType::Pointer image );  // for all others
+    bool SetItkLabelImage( IbisItkUnsignedChar3ImageType::Pointer image );  // for labels
     IbisItkFloat3ImageType::Pointer GetItkImage() { return this->ItkImage; }
     IbisItkUnsignedChar3ImageType::Pointer GetItkLabelImage() { return this->ItkLabelImage; }
     void SetImage( vtkImageData * image );
@@ -172,6 +172,9 @@ protected:
     
     typedef std::map<View*,PerViewElements*> ImageObjectViewAssociation;
     ImageObjectViewAssociation imageObjectInstances;
+
+    bool SanityCheck( IbisItkFloat3ImageType::Pointer image );
+    bool SanityCheck( IbisItkUnsignedChar3ImageType::Pointer image );
 };
 
 ObjectSerializationHeaderMacro( ImageObject );
