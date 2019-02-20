@@ -85,9 +85,6 @@ public:
 
     vtkTransform * vtktransform = m_vtktransform;
 
-    vtkTransform * targetImageVtktransform = m_targetImageVtkTransform;
-
-
     GPU_RigidRegistration::ItkRigidTransformType::MatrixType matrix =
     itkTransform->GetMatrix();
 
@@ -117,7 +114,6 @@ public:
         finalMatrix->Multiply4x4( parentWorldMatrix, localMatrix_inv, localMatrix_inv );
     }
 
-//    finalMatrix->Multiply4x4( localMatrix_inv, targetLocalMatrix, finalMatrix );
     vtktransform->SetMatrix( localMatrix_inv );
     vtktransform->Modified();
 
