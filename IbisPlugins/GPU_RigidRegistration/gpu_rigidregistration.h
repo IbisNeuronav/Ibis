@@ -88,7 +88,6 @@ public:
 private:
 
     void updateTagsDistance();
-    vtkTransform * GetVtkTransformFromItkImage(IbisItkFloat3ImageType::Pointer, bool load_translation=false);
 
     bool m_OptimizationRunning;
     bool m_debug;
