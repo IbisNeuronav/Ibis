@@ -85,9 +85,6 @@ public:
 
     vtkTransform * vtktransform = m_vtktransform;
 
-    vtkTransform * targetImageVtktransform = m_targetImageVtkTransform;
-
-
     GPU_RigidRegistration::ItkRigidTransformType::MatrixType matrix =
     itkTransform->GetMatrix();
 
@@ -108,9 +105,6 @@ public:
     }
     localMatrix_inv->Invert();
 
-    vtkSmartPointer<vtkMatrix4x4> targetLocalMatrix = vtkSmartPointer<vtkMatrix4x4>::New();
-    targetImageVtktransform->GetMatrix( targetLocalMatrix );
-
     vtkSmartPointer<vtkMatrix4x4> finalMatrix = vtkSmartPointer<vtkMatrix4x4>::New();
 
     if( m_parentTransform != 0 )
@@ -120,8 +114,7 @@ public:
         finalMatrix->Multiply4x4( parentWorldMatrix, localMatrix_inv, localMatrix_inv );
     }
 
-    finalMatrix->Multiply4x4( localMatrix_inv, targetLocalMatrix, finalMatrix );
-    vtktransform->SetMatrix( finalMatrix );
+    vtktransform->SetMatrix( localMatrix_inv );
     vtktransform->Modified();
 
   }
@@ -178,12 +171,12 @@ void GPU_RigidRegistration::runRegistration()
 
     if ( m_sourceVtkTransform == 0 )
     {
-        m_sourceVtkTransform = this->GetVtkTransformFromItkImage(itkSourceImage);
+        m_sourceVtkTransform = vtkTransform::New();
     }
 
     if ( m_targetVtkTransform == 0 )
     {
-        m_targetVtkTransform = this->GetVtkTransformFromItkImage(itkTargetImage);
+        m_targetVtkTransform = vtkTransform::New();
     }
 
     if ( m_resultTransform == 0 )
@@ -228,11 +221,8 @@ void GPU_RigidRegistration::runRegistration()
     }
 
     // Initialize Transform
-    vtkSmartPointer<vtkMatrix4x4> localMatrix = vtkSmartPointer<vtkMatrix4x4>::New();
-    sourceVtkTransform->GetInverse(localMatrix);
-
     vtkSmartPointer<vtkMatrix4x4> finalMatrix = vtkSmartPointer<vtkMatrix4x4>::New();
-    finalMatrix->Multiply4x4( targetVtkTransform->GetMatrix(), localMatrix, finalMatrix);
+    sourceVtkTransform->GetInverse(finalMatrix);
 
     ItkRigidTransformType::OffsetType offset;
  
@@ -274,7 +264,7 @@ void GPU_RigidRegistration::runRegistration()
     ItkRigidTransformType::CenterType center;
     center[0] = itkTargetImage->GetOrigin()[0] + itkTargetImage->GetSpacing()[0] * itkTargetImage->GetBufferedRegion().GetSize()[0] / 2.0;
     center[1] = itkTargetImage->GetOrigin()[1] + itkTargetImage->GetSpacing()[1] * itkTargetImage->GetBufferedRegion().GetSize()[1] / 2.0;
-    center[2] = itkTargetImage->GetOrigin()[2] + itkTargetImage->GetSpacing()[2] * itkTargetImage->GetBufferedRegion().GetSize()[2] / 2.0;  
+    center[2] = itkTargetImage->GetOrigin()[2] + itkTargetImage->GetSpacing()[2] * itkTargetImage->GetBufferedRegion().GetSize()[2] / 2.0;
 
 
     for( unsigned int i = 0; i < 3; i++ )
@@ -288,6 +278,7 @@ void GPU_RigidRegistration::runRegistration()
 
     itkTransform->SetCenter(center);
     itkTransform->SetParameters(params);
+
 
     metric->SetSamplingStrategy(m_samplingStrategy);
     metric->SetTransform( itkTransform );
@@ -361,24 +352,4 @@ void GPU_RigidRegistration::runRegistration()
     m_OptimizationRunning = false;
 
 
-}
-
-
-vtkTransform * GPU_RigidRegistration::GetVtkTransformFromItkImage(IbisItkFloat3ImageType::Pointer itkImage, bool load_translation)
-{
-    vnl_matrix<double> vnlMatrix = itkImage->GetDirection().GetVnlMatrix();
-    vtkSmartPointer<vtkMatrix4x4> vtkMatrix = vtkMatrix4x4::New();
-
-    for (int i = 0; i < vnlMatrix.rows(); ++i) {
-        if (load_translation)
-        {
-            vtkMatrix->SetElement(i,3, itkImage->GetOrigin()[i]);
-        }
-        for (int j = 0; j < vnlMatrix.cols() ; ++j) {
-            vtkMatrix->SetElement(i,j, vnlMatrix[i][j]);
-        }
-    }
-    vtkTransform * vtktransform = vtkTransform::New();
-    vtktransform->SetMatrix(vtkMatrix);
-    return vtktransform;
 }
