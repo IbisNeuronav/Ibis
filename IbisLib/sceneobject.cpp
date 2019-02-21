@@ -513,6 +513,7 @@ QWidget * SceneObject::CreateTransformEditWidget( QWidget * parent )
 {
     TransformEditWidget * transformEditWidget = new TransformEditWidget( parent );
     transformEditWidget->SetSceneObject( this );
+    connect( this, SIGNAL(WorldTransformChangedSignal()), transformEditWidget, SLOT(UpdateUi()));
     return transformEditWidget;
 }
 

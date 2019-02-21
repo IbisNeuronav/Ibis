@@ -47,10 +47,12 @@ private:
     vtkQtMatrixDialog * m_matrixDialog;
     vtkQtMatrixDialog * m_worldMatrixDialog;
 
+public slots:
+    void UpdateUi();         // take data in transform and put it in ui
+
 private slots:
 
     void UpdateTransform();  // take data in ui and put it in transform
-    void UpdateUi();         // take data in transform and put it in ui
     void EditMatrixButtonToggled( bool isOn );
     void EditMatrixDialogClosed();
     void WorldMatrixButtonToggled( bool isOn );
