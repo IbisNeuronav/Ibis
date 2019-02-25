@@ -9,6 +9,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
 #include <sstream>
+#include <math.h>
 #include "vtkOutlineFilter.h"
 #include "vtkPolyDataMapper.h"
 #include "vtkRenderer.h"
@@ -226,7 +227,7 @@ bool ImageObject::SanityCheck( IbisItkFloat3ImageType::Pointer image )
     imageCalculatorFilter->Compute();
     ImageType::PixelType minPix = imageCalculatorFilter->GetMinimum();
     ImageType::PixelType maxPix = imageCalculatorFilter->GetMaximum();
-    if( isnan(minPix) || isnan(maxPix) || isinf(minPix) || isinf(maxPix) )
+    if( std::isnan(minPix) || std::isnan(maxPix) || std::isinf(minPix) || std::isinf(maxPix) )
     {
         return false;
     }
@@ -243,7 +244,7 @@ bool ImageObject::SanityCheck( IbisItkUnsignedChar3ImageType::Pointer image )
     imageCalculatorFilter->Compute();
     ImageType::PixelType minPix = imageCalculatorFilter->GetMinimum();
     ImageType::PixelType maxPix = imageCalculatorFilter->GetMaximum();
-    if( isnan(minPix) || isnan(maxPix) || isinf(minPix) || isinf(maxPix) )
+    if( std::isnan(minPix) || std::isnan(maxPix) || std::isinf(minPix) || std::isinf(maxPix) )
     {
         return false;
     }
