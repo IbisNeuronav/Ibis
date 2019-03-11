@@ -122,6 +122,8 @@ public:
 
     void GetCursorPosition( double pos[3] );
     void SetCursorPosition( double *pos );
+    void GetCursorWorldPosition( double pos[3] );
+    void SetCursorWorldPosition( double * );
 
     // from Application
     QProgressDialog * StartProgress( int max, const QString & caption = QString() );
