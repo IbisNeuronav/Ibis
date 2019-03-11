@@ -31,7 +31,8 @@ file( GLOB allPluginDeclareFiles RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "${CMAKE_C
 # find all extra plugin directories
 get_filename_component( baseIbisDir ${CMAKE_CURRENT_SOURCE_DIR} DIRECTORY )
 file( GLOB extraPluginDeclareFiles "${baseIbisDir}/IbisPluginsExtra*/*/declare-plugin.cmake" )
-list( APPEND allPluginDeclareFiles ${extraPluginDeclareFiles} )
+file( GLOB examplePluginDeclareFiles "${baseIbisDir}/IbisPlugins/Examples/*/declare-plugin.cmake" )
+list( APPEND allPluginDeclareFiles ${extraPluginDeclareFiles} ${examplePluginDeclareFiles} )
 foreach( pluginDeclareFile ${allPluginDeclareFiles} )
     include( ${pluginDeclareFile} )
     list( APPEND allIbisPlugins ${ibisPluginName} )
