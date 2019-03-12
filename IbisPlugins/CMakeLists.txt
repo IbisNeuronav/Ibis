@@ -25,13 +25,22 @@ macro( DeclarePlugin pluginName OnByDefault )
     set( ${ibisPluginName}Declared TRUE )
 endmacro()
 
+# Find if there are examples
+unset ( pluginsExamplesPath CACHE )
+find_path( pluginsExamplesPath "" "${CMAKE_CURRENT_SOURCE_DIR}/Examples" NO_DEFAULT_PATH )
+if( IS_DIRECTORY ${pluginsExamplesPath} )
+    OPTION( IBIS_BUILD_PLUGIN_EXAMPLES "Build plugin examples." OFF )
+endif()
+
 # 1 - Find all plugin decaration cmake files
 set( allIbisPlugins )
 file( GLOB allPluginDeclareFiles RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "${CMAKE_CURRENT_SOURCE_DIR}/*/declare-plugin.cmake" )
 # find all extra plugin directories
 get_filename_component( baseIbisDir ${CMAKE_CURRENT_SOURCE_DIR} DIRECTORY )
 file( GLOB extraPluginDeclareFiles "${baseIbisDir}/IbisPluginsExtra*/*/declare-plugin.cmake" )
-file( GLOB examplePluginDeclareFiles "${baseIbisDir}/IbisPlugins/Examples/*/declare-plugin.cmake" )
+if( IBIS_BUILD_PLUGIN_EXAMPLES )
+    file( GLOB examplePluginDeclareFiles "${baseIbisDir}/IbisPlugins/Examples/*/declare-plugin.cmake" )
+endif()
 list( APPEND allPluginDeclareFiles ${extraPluginDeclareFiles} ${examplePluginDeclareFiles} )
 foreach( pluginDeclareFile ${allPluginDeclareFiles} )
     include( ${pluginDeclareFile} )
