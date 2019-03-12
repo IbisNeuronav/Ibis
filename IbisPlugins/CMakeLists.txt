@@ -26,9 +26,7 @@ macro( DeclarePlugin pluginName OnByDefault )
 endmacro()
 
 # Find if there are examples
-unset ( pluginsExamplesPath CACHE )
-find_path( pluginsExamplesPath "" "${CMAKE_CURRENT_SOURCE_DIR}/Examples" NO_DEFAULT_PATH )
-if( IS_DIRECTORY ${pluginsExamplesPath} )
+if( EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/Examples/" )
     OPTION( IBIS_BUILD_PLUGIN_EXAMPLES "Build plugin examples." OFF )
 endif()
 
