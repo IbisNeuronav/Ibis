@@ -61,7 +61,7 @@ bool Maximas::load()
     {
         for( int j( 0 ); j < m_bands; ++j )
         {
-            if(!std::isnan(pData[j * datasetSize + i]))
+            if(!std::isnan((float)(pData[j * datasetSize + i])))
                 m_fileFloatData[i * m_bands + j] = pData[j * datasetSize + i];
         }
     }

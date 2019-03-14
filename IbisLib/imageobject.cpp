@@ -227,7 +227,7 @@ bool ImageObject::SanityCheck( IbisItkFloat3ImageType::Pointer image )
     imageCalculatorFilter->Compute();
     ImageType::PixelType minPix = imageCalculatorFilter->GetMinimum();
     ImageType::PixelType maxPix = imageCalculatorFilter->GetMaximum();
-    if( std::isnan(minPix) || std::isnan(maxPix) || std::isinf(minPix) || std::isinf(maxPix) )
+    if( std::isnan((float)minPix) || std::isnan((float)maxPix) || std::isinf((float)minPix) || std::isinf((float)maxPix) )
     {
         return false;
     }
@@ -244,7 +244,7 @@ bool ImageObject::SanityCheck( IbisItkUnsignedChar3ImageType::Pointer image )
     imageCalculatorFilter->Compute();
     ImageType::PixelType minPix = imageCalculatorFilter->GetMinimum();
     ImageType::PixelType maxPix = imageCalculatorFilter->GetMaximum();
-    if( std::isnan(minPix) || std::isnan(maxPix) || std::isinf(minPix) || std::isinf(maxPix) )
+    if( std::isnan((float)minPix) || std::isnan((float)maxPix) || std::isinf((float)minPix) || std::isinf((float)maxPix) )
     {
         return false;
     }
