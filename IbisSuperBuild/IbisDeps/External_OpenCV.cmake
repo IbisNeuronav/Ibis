@@ -13,6 +13,7 @@ ExternalProject_Add( ${opencv_name}
                -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
                -DBUILD_PERF_TESTS:BOOL=FALSE
                -DBUILD_SHARED_LIBS:BOOL=FALSE
+               -DBUILD_WITH_STATIC_CRT:BOOL=FALSE
                -DBUILD_TESTS:BOOL=FALSE
                -DWITH_TIFF:BOOL=FALSE
                -DWITH_JASPER:BOOL=FALSE
