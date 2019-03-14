@@ -237,6 +237,18 @@ void IbisAPI::SetCursorPosition( double *pos )
     m_sceneManager->SetCursorPosition( pos );
 }
 
+void IbisAPI::GetCursorWorldPosition( double pos[3] )
+{
+    double curPos[3];
+    m_sceneManager->GetCursorPosition( curPos );
+    m_sceneManager->ReferenceToWorld( curPos, pos );
+}
+
+void IbisAPI::SetCursorWorldPosition( double * pos )
+{
+    m_sceneManager->SetCursorWorldPosition( pos );
+}
+
 // slots
 void IbisAPI::ObjectAddedSlot( int id )
 {
