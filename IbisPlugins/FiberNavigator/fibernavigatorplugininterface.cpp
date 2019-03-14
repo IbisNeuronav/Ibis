@@ -604,7 +604,7 @@ double FiberNavigatorPluginInterface::computeAngleBetweenSegment(Vec3 &PP, Vec3 
     double radAngle = acos(cosValue);
 
     //An invalid ArcCosinus will results in a stopping of the streamline
-    if(std::isnan(radAngle))
+    if(std::isnan((float)radAngle))
         return 90;
     else
         return radAngle*180.0/vl_pi;
