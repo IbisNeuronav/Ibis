@@ -39,11 +39,11 @@ GPUVolumeReconstruction< TImage >
   }
 
   m_Debug = false;
+  m_VolumeReconstructionPopulatingKernel = 0;
 
   /* Initialize GPU Context */
   this->InitializeGPUContext();
 
-  m_VolumeReconstructionPopulatingKernel = 0;
   m_NumberOfSlices = 0;  
 
   m_USSearchRadius = 0;
