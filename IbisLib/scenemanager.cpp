@@ -297,7 +297,6 @@ void SceneManager::LoadScene(QString & fileName, bool interactive )
     if( interactive )
         this->UpdateProgress(numberOfSceneObjects+1);
     ::Serialize( &reader, "SceneManager", this );
-    SceneObject *currentObject = this->GetCurrentObject();
     if( interactive )
         this->UpdateProgress(numberOfSceneObjects+1);
 
@@ -339,7 +338,6 @@ void SceneManager::LoadScene(QString & fileName, bool interactive )
     NotifyPluginsSceneFinishedLoading();
 
     SetRenderingEnabled( true );
-    this->SetCurrentObject( currentObject);
     this->LoadingScene = false;
 }
 
