@@ -23,6 +23,9 @@ class vtkMatrix4x4;
 class vtkActor;
 class PointsObject;
 class Tracker;
+class vtkAmoebaMinimizer;
+class vtkDoubleArray;
+class vtkCriticalSection;
 
 class PointerObject : public TrackedSceneObject
 {
@@ -48,6 +51,7 @@ public:
 
     // Tip calibration
     void StartTipCalibration();
+    int InsertNextCalibrationPoint();
     bool IsCalibratingTip();
     double GetTipCalibrationRMSError();
     void CancelTipCalibration();
@@ -87,6 +91,13 @@ protected:
     double m_pointerAxis[3];
     double m_pointerUpDir[3];
     double m_tipLength;
+
+    int m_calibrating;
+    vtkCriticalSection * m_calibrationMutex;
+    vtkAmoebaMinimizer * m_minimizer;
+    vtkDoubleArray * m_calibrationArray;
+
+    friend void vtkTrackerToolCalibrationFunction(void *userData);
 
     struct PerViewElements
     {
