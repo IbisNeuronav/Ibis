@@ -17,6 +17,9 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "vtkAxes.h"
 #include "vtkMath.h"
 #include <vtkProperty.h>
+#include "vtkDoubleArray.h"
+#include "vtkAmoebaMinimizer.h"
+#include "vtkObjectFactory.h"
 #include "scenemanager.h"
 #include "pointerobjectsettingsdialog.h"
 #include "pointsobject.h"
@@ -40,6 +43,11 @@ PointerObject::PointerObject()
     m_backupCalibrationRMS = 0.0;
     m_backupCalibrationMatrix = vtkSmartPointer<vtkMatrix4x4>::New();
 
+    m_calibrating = 0;
+    m_minimizer = vtkAmoebaMinimizer::New();
+    m_calibrationArray = vtkDoubleArray::New();
+    m_calibrationArray->SetNumberOfComponents(16);
+
     m_pointerAxis[0] = 0.0;
     m_pointerAxis[1] = 0.0;
     m_pointerAxis[2] = 1.0;
@@ -55,6 +63,8 @@ PointerObject::PointerObject()
 
 PointerObject::~PointerObject()
 {
+    m_calibrationArray->Delete();
+    m_minimizer->Delete();
 }
 
 void PointerObject::Setup( View * view )
@@ -141,21 +151,97 @@ void PointerObject::StartTipCalibration()
 {
     m_backupCalibrationRMS = m_lastTipCalibrationRMS;
     m_backupCalibrationMatrix->DeepCopy( GetCalibrationMatrix() );
-    GetHardwareModule()->StartTipCalibration( this );
+    m_calibrationArray->SetNumberOfTuples(0);
+    m_calibrating = 1;
     connect( &Application::GetInstance(), SIGNAL(IbisClockTick()), this, SLOT(UpdateTipCalibration()) );
+}
+
+//----------------------------------------------------------------------------
+void vtkTrackerToolCalibrationFunction(void *userData)
+{
+    PointerObject *self = (PointerObject *)userData;
+
+    int i;
+    int n = self->m_calibrationArray->GetNumberOfTuples();
+
+    double x = self->m_minimizer->GetParameterValue("x");
+    double y = self->m_minimizer->GetParameterValue("y");
+    double z = self->m_minimizer->GetParameterValue("z");
+    double nx,ny,nz,sx,sy,sz,sxx,syy,szz;
+
+    double matrix[4][4];
+
+    sx = sy = sz = 0.0;
+    sxx = syy = szz = 0.0;
+
+    for (i = 0; i < n; i++)
+    {
+        self->m_calibrationArray->GetTuple(i,*matrix);
+
+        nx = matrix[0][0]*x + matrix[0][1]*y + matrix[0][2]*z + matrix[0][3];
+        ny = matrix[1][0]*x + matrix[1][1]*y + matrix[1][2]*z + matrix[1][3];
+        nz = matrix[2][0]*x + matrix[2][1]*y + matrix[2][2]*z + matrix[2][3];
+
+        sx += nx;
+        sy += ny;
+        sz += nz;
+
+        sxx += nx*nx;
+        syy += ny*ny;
+        szz += nz*nz;
+    }
+
+    double r;
+
+    if (n > 1)
+    {
+        r = sqrt((sxx - sx*sx/n)/(n-1) +
+                 (syy - sy*sy/n)/(n-1) +
+                 (szz - sz*sz/n)/(n-1));
+    }
+    else
+    {
+        r = 0;
+    }
+
+    self->m_minimizer->SetFunctionValue(r);
+    /*
+    cerr << self->Minimizer->GetIterations() << " (" << x << ", " << y << ", " << z << ")" << " " << r << " " << (sxx - sx*sx/n)/(n-1) << (syy - sy*sy/n)/(n-1) << (szz - sz*sz/n)/(n-1) << "\n";
+    */
 }
 
 void PointerObject::UpdateTipCalibration()
 {
     vtkMatrix4x4 * mat = vtkMatrix4x4::New();
-    m_lastTipCalibrationRMS = GetHardwareModule()->DoTipCalibration( this, mat );
+    //do tip calibration:
+    this->m_minimizer->Initialize();
+    this->m_minimizer->SetFunction(vtkTrackerToolCalibrationFunction,this);
+    this->m_minimizer->SetFunctionArgDelete(NULL);
+    this->m_minimizer->SetParameterValue("x",0);
+    this->m_minimizer->SetParameterScale("x",1000);
+    this->m_minimizer->SetParameterValue("y",0);
+    this->m_minimizer->SetParameterScale("y",1000);
+    this->m_minimizer->SetParameterValue("z",0);
+    this->m_minimizer->SetParameterScale("z",1000);
+
+    this->m_minimizer->Minimize();
+    m_lastTipCalibrationRMS = this->m_minimizer->GetFunctionValue();
+
+    double x = this->m_minimizer->GetParameterValue("x");
+    double y = this->m_minimizer->GetParameterValue("y");
+    double z = this->m_minimizer->GetParameterValue("z");
+
+    mat->SetElement(0,3,x);
+    mat->SetElement(1,3,y);
+    mat->SetElement(2,3,z);
+
     SetCalibrationMatrix( mat );
     emit ObjectModified();
 }
 
 bool PointerObject::IsCalibratingTip()
 {
-    return GetHardwareModule()->IsCalibratingTip( this );
+    return m_calibrating  > 0 ? true : false;
 }
 
 double PointerObject::GetTipCalibrationRMSError()
@@ -165,14 +251,14 @@ double PointerObject::GetTipCalibrationRMSError()
 
 void PointerObject::CancelTipCalibration()
 {
-    GetHardwareModule()->StopTipCalibration( this );
+    m_calibrating = 0;
     m_lastTipCalibrationRMS = m_backupCalibrationRMS;
     SetCalibrationMatrix( m_backupCalibrationMatrix );
 }
 
 void PointerObject::StopTipCalibration()
 {
-    GetHardwareModule()->StopTipCalibration( this );
+    m_calibrating = 0;
 }
 
 void PointerObject::CreatePointerPickedPointsObject()
@@ -271,6 +357,10 @@ void PointerObject::UpdateSettings()
 // simtodo : this should not be needed
 void PointerObject::UpdateTip()
 {
+    if( m_calibrating )
+    {
+        this->InsertNextCalibrationPoint();
+    }
     if( this->ObjectHidden )
         return;
     View * view = this->GetManager()->GetMain3DView();
@@ -285,4 +375,16 @@ void PointerObject::UpdateTip()
             emit ObjectModified();
         }
     }
+}
+
+//----------------------------------------------------------------------------
+// Insert the latest matrix in the buffer in the calibration array
+int PointerObject::InsertNextCalibrationPoint()
+{
+    int ret = -1;
+    vtkTransform * transform = this->GetUncalibratedTransform();
+    vtkMatrix4x4 * mat = vtkMatrix4x4::New();
+    transform->GetMatrix( mat );
+    ret = m_calibrationArray->InsertNextTuple( *mat->Element );
+    return ret;
 }
