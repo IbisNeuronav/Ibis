@@ -20,7 +20,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "vtkDoubleArray.h"
 #include "vtkAmoebaMinimizer.h"
 #include "vtkObjectFactory.h"
-#include "vtkCriticalSection.h"
 #include "scenemanager.h"
 #include "pointerobjectsettingsdialog.h"
 #include "pointsobject.h"
@@ -45,7 +44,6 @@ PointerObject::PointerObject()
     m_backupCalibrationMatrix = vtkSmartPointer<vtkMatrix4x4>::New();
 
     m_calibrating = 0;
-    m_calibrationMutex = vtkCriticalSection::New();
     m_minimizer = vtkAmoebaMinimizer::New();
     m_calibrationArray = vtkDoubleArray::New();
     m_calibrationArray->SetNumberOfComponents(16);
@@ -65,7 +63,6 @@ PointerObject::PointerObject()
 
 PointerObject::~PointerObject()
 {
-    m_calibrationMutex->Delete();
     m_calibrationArray->Delete();
     m_minimizer->Delete();
 }
@@ -154,10 +151,8 @@ void PointerObject::StartTipCalibration()
 {
     m_backupCalibrationRMS = m_lastTipCalibrationRMS;
     m_backupCalibrationMatrix->DeepCopy( GetCalibrationMatrix() );
-    m_calibrationMutex->Lock();
     m_calibrationArray->SetNumberOfTuples(0);
     m_calibrating = 1;
-    m_calibrationMutex->Unlock();
     connect( &Application::GetInstance(), SIGNAL(IbisClockTick()), this, SLOT(UpdateTipCalibration()) );
 }
 
@@ -229,9 +224,7 @@ void PointerObject::UpdateTipCalibration()
     this->m_minimizer->SetParameterValue("z",0);
     this->m_minimizer->SetParameterScale("z",1000);
 
-    this->m_calibrationMutex->Lock();
     this->m_minimizer->Minimize();
-    this->m_calibrationMutex->Unlock();
     m_lastTipCalibrationRMS = this->m_minimizer->GetFunctionValue();
 
     double x = this->m_minimizer->GetParameterValue("x");
@@ -392,9 +385,6 @@ int PointerObject::InsertNextCalibrationPoint()
     vtkTransform * transform = this->GetUncalibratedTransform();
     vtkMatrix4x4 * mat = vtkMatrix4x4::New();
     transform->GetMatrix( mat );
-    m_calibrationMutex->Lock();
     ret = m_calibrationArray->InsertNextTuple( *mat->Element );
-    m_calibrationMutex->Unlock();
-
     return ret;
 }

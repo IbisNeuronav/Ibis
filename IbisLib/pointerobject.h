@@ -25,7 +25,6 @@ class PointsObject;
 class Tracker;
 class vtkAmoebaMinimizer;
 class vtkDoubleArray;
-class vtkCriticalSection;
 
 class PointerObject : public TrackedSceneObject
 {
@@ -93,7 +92,6 @@ protected:
     double m_tipLength;
 
     int m_calibrating;
-    vtkCriticalSection * m_calibrationMutex;
     vtkAmoebaMinimizer * m_minimizer;
     vtkDoubleArray * m_calibrationArray;
 
