@@ -59,7 +59,7 @@ void WorldObjectSettingsWidget::on_changeColorButton_clicked()
 
 void WorldObjectSettingsWidget::on_change3DColorButton_clicked()
 {
-    QColor initial( m_worldObject->GetBackgroundColor() );
+    QColor initial( m_worldObject->Get3DBackgroundColor() );
     QColor newColor = QColorDialog::getColor( initial );
     if( newColor.isValid() )
     {
