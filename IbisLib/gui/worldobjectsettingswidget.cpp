@@ -46,7 +46,7 @@ void WorldObjectSettingsWidget::SetWorldObject( WorldObject * obj )
     }
 }
 
-void WorldObjectSettingsWidget::OnBackgroundColorButtonClicked()
+void WorldObjectSettingsWidget::on_changeColorButton_clicked()
 {
     QColor initial( m_worldObject->GetBackgroundColor() );
     QColor newColor = QColorDialog::getColor( initial );
@@ -57,7 +57,18 @@ void WorldObjectSettingsWidget::OnBackgroundColorButtonClicked()
     }
 }
 
-void WorldObjectSettingsWidget::OnCursorColorButtonClicked()
+void WorldObjectSettingsWidget::on_change3DColorButton_clicked()
+{
+    QColor initial( m_worldObject->GetBackgroundColor() );
+    QColor newColor = QColorDialog::getColor( initial );
+    if( newColor.isValid() )
+    {
+        m_worldObject->Set3DBackgroundColor( newColor );
+        UpdateUi();
+    }
+}
+
+void WorldObjectSettingsWidget::on_changeCursorColorButton_clicked()
 {
     QColor initial( m_worldObject->GetCursorColor() );
     QColor newColor = QColorDialog::getColor( initial );
@@ -68,14 +79,14 @@ void WorldObjectSettingsWidget::OnCursorColorButtonClicked()
     }
 }
 
-void WorldObjectSettingsWidget::OnShowAxesCheckBoxToggled( bool checked )
+void WorldObjectSettingsWidget::on_showAxesCheckBox_toggled( bool checked )
 {
     if( m_worldObject )
         m_worldObject->SetAxesHidden( !checked );
     UpdateUi();
 }
 
-void WorldObjectSettingsWidget::OnShowCursorCheckBoxToggled( bool checked )
+void WorldObjectSettingsWidget::on_showCursorCheckBox_toggled( bool checked )
 {
     if( m_worldObject )
         m_worldObject->SetCursorVisible( checked );
@@ -99,6 +110,10 @@ void WorldObjectSettingsWidget::UpdateUi()
     QString style = QString("border-width: 2px; border-style: solid; border-radius: 7;" );
     styleColor += style;
     ui->changeColorButton->setStyleSheet( styleColor );
+    color = m_worldObject->Get3DBackgroundColor();
+    styleColor = QString("background-color: rgb(%1,%2,%3);").arg( color.red() ).arg( color.green() ).arg( color.blue() );
+    styleColor += style;
+    ui->change3DColorButton->setStyleSheet( styleColor );
     color = m_worldObject->GetCursorColor();
     styleColor = QString("background-color: rgb(%1,%2,%3);").arg( color.red() ).arg( color.green() ).arg( color.blue() );
     style = QString("border-width: 2px; border-style: solid; border-radius: 7;" );

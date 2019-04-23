@@ -52,6 +52,8 @@ public:
     QColor GetCursorColor();
     void SetBackgroundColor( const QColor & c );
     QColor GetBackgroundColor();
+    void Set3DBackgroundColor( const QColor & c );
+    QColor Get3DBackgroundColor();
 
     void Set3DInteractorStyle( InteractorStyle style );
     InteractorStyle Get3DInteractorStyle();

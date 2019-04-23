@@ -110,6 +110,25 @@ QColor WorldObject::GetBackgroundColor()
     return ret;
 }
 
+void WorldObject::Set3DBackgroundColor( const QColor & c )
+{
+    Q_ASSERT( this->GetManager() );
+    double newColorfloat[3] = { 1, 1, 1 };
+    newColorfloat[0] = double( c.red() ) / 255.0;
+    newColorfloat[1] = double( c.green() ) / 255.0;
+    newColorfloat[2] = double( c.blue() ) / 255.0;
+    this->GetManager()->SetView3DBackgroundColor( newColorfloat );
+}
+
+QColor WorldObject::Get3DBackgroundColor()
+{
+    Q_ASSERT( this->GetManager() );
+    double color[3];
+    this->GetManager()->GetView3DBackgroundColor( color );
+    QColor ret( (int)(color[0] * 255), (int)(color[1] * 255), (int)(color[2] * 255) );
+    return ret;
+}
+
 void WorldObject::Set3DInteractorStyle( InteractorStyle style )
 {
     Q_ASSERT( this->GetManager() );

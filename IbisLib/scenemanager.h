@@ -110,8 +110,10 @@ public:
     void Set3DViewFollowingReferenceVolume( bool follow ) { m_viewFollowsReferenceObject = follow; }
     bool Is3DViewFollowingReferenceVolume() { return m_viewFollowsReferenceObject; }
     void SetViewBackgroundColor( double * color );
+    void SetView3DBackgroundColor( double * color );
     void UpdateBackgroundColor();
     vtkGetVector3Macro( ViewBackgroundColor, double );
+    vtkGetVector3Macro( View3DBackgroundColor, double );
     vtkRenderer *GetViewRenderer(int viewID);
     void SetRenderingEnabled( bool r );
     double Get3DCameraViewAngle();
@@ -365,6 +367,7 @@ protected:
     ObjectList AllObjects;
 
     double ViewBackgroundColor[3];
+    double View3DBackgroundColor[3];
     double CameraViewAngle3D;
 
     // scene basic settings
