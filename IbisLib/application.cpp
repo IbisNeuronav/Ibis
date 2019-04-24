@@ -105,9 +105,9 @@ void ApplicationSettings::SaveSettings( QSettings & settings )
     settings.setValue( "ViewBackgroundColor_r", ViewBackgroundColor.red() );
     settings.setValue( "ViewBackgroundColor_g", ViewBackgroundColor.green() );
     settings.setValue( "ViewBackgroundColor_b", ViewBackgroundColor.blue() );
-    settings.setValue( "ViewBackgroundColor_r", View3DBackgroundColor.red() );
-    settings.setValue( "ViewBackgroundColor_g", View3DBackgroundColor.green() );
-    settings.setValue( "ViewBackgroundColor_b", View3DBackgroundColor.blue() );
+    settings.setValue( "View3DBackgroundColor_r", View3DBackgroundColor.red() );
+    settings.setValue( "View3DBackgroundColor_g", View3DBackgroundColor.green() );
+    settings.setValue( "View3DBackgroundColor_b", View3DBackgroundColor.blue() );
     settings.setValue( "CutPlanesCursorColor_r", CutPlanesCursorColor.red() );
     settings.setValue( "CutPlanesCursorColor_g", CutPlanesCursorColor.green() );
     settings.setValue( "CutPlanesCursorColor_b", CutPlanesCursorColor.blue() );
