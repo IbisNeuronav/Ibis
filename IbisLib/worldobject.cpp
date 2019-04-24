@@ -99,6 +99,7 @@ void WorldObject::SetBackgroundColor( const QColor & c )
     newColorfloat[1] = double( c.green() ) / 255.0;
     newColorfloat[2] = double( c.blue() ) / 255.0;
     this->GetManager()->SetViewBackgroundColor( newColorfloat );
+    this->GetManager()->SetView3DBackgroundColor( newColorfloat );
 }
 
 QColor WorldObject::GetBackgroundColor()

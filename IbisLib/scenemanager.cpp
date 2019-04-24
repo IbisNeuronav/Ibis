@@ -640,8 +640,7 @@ void SceneManager::SetViewBackgroundColor( double * color )
     this->ViewBackgroundColor[2] = color[2];
     foreach( View* view, Views.keys() )
     {
-        if( view != this->GetMain3DView() )
-            view->SetBackgroundColor( color );
+        view->SetBackgroundColor( color );
     }
 }
 

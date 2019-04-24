@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>278</width>
-    <height>508</height>
+    <width>387</width>
+    <height>496</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -40,7 +40,7 @@
         </size>
        </property>
        <property name="text">
-        <string>Background Color: </string>
+        <string>All Views Bckg. Color:</string>
        </property>
       </widget>
      </item>

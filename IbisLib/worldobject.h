@@ -50,9 +50,9 @@ public:
     void SetCursorColor( const QColor & c );
     void SetCursorColor( double[3] );
     QColor GetCursorColor();
-    void SetBackgroundColor( const QColor & c );
+    void SetBackgroundColor( const QColor & c ); // Set background color of all views
     QColor GetBackgroundColor();
-    void Set3DBackgroundColor( const QColor & c );
+    void Set3DBackgroundColor( const QColor & c ); // Set background color of 3D view only
     QColor Get3DBackgroundColor();
 
     void Set3DInteractorStyle( InteractorStyle style );
