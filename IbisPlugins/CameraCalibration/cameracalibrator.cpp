@@ -663,12 +663,12 @@ void ComputeReprojection( vector<Point2f> & imagePoints, vector<Point3f> & world
     {
         double dz = -cameraPoints[i].z;  // distance between camera and 3D point plane
 
-        double xim = imagePoints[i].x;
+        double xim = imagePoints[i].x / imageSize[0];
         double cx = center[0];
         double fx = focal[0];
         double xw = dz * ( xim - cx ) / fx;
 
-        double yim = ((double)imageSize[1]) - imagePoints[i].y - 1.0;
+        double yim = (((double)imageSize[1]) - imagePoints[i].y - 1.0) / imageSize[1];
         double cy = center[1];
         double fy = focal[1];
         double yw = dz * ( yim - cy ) / fy;
@@ -698,7 +698,7 @@ void ComputeReprojection( vector<Point2f> & imagePoints, vector<Point3f> & world
     // Flip projection point's x-axis : Has to do with the way OpenCV is projecting that is different from
     // what is done in vtk. This is also affecting the way OpenCV's rotation and translations are converted in vtkMatrix4x4
     for( unsigned i = 0; i < projectedPoints.size(); ++i )
-        projectedPoints[i].x = ((double)imageSize[0]) - projectedPoints[i].x - 1.0;
+        projectedPoints[i].x = 1. - projectedPoints[i].x;
 }
 
 double CameraCalibrator::ComputeCrossValidation( double translationScale, double rotationScale, double & stdDevReprojError, double & minDist, double & maxDist, QProgressDialog * progressDlg )
