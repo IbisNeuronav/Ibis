@@ -67,9 +67,16 @@ void ApplicationSettings::LoadSettings( QSettings & settings )
     WorkingDirectory = settings.value( "WorkingDirectory", workDir).toString();
 
     // Should be able to load and save a QColor directly, but doesn't work well on linux: to check: anything to do with the fact that destructor can be called after QApplication's destructor?
+    // first all the 2D views
     ViewBackgroundColor.setRed( settings.value("ViewBackgroundColor_r", 50 ).toInt() );
     ViewBackgroundColor.setGreen( settings.value("ViewBackgroundColor_g", 50 ).toInt() );
     ViewBackgroundColor.setBlue( settings.value("ViewBackgroundColor_b", 50 ).toInt() );
+    //then 3D view, if not found in settings, set the same as 2D.
+    double bgColor[3];
+    ViewBackgroundColor.getRgbF( &bgColor[0], &bgColor[1], &bgColor[2] );
+    View3DBackgroundColor.setRed( settings.value("View3DBackgroundColor_r", int(bgColor[0]*255) ).toInt() );
+    View3DBackgroundColor.setGreen( settings.value("View3DBackgroundColor_g", int(bgColor[1]*255) ).toInt() );
+    View3DBackgroundColor.setBlue( settings.value("View3DBackgroundColor_b", int(bgColor[2]*255) ).toInt() );
 
     CutPlanesCursorColor.setRed( settings.value("CutPlanesCursorColor_r", 50 ).toInt() );
     CutPlanesCursorColor.setGreen( settings.value("CutPlanesCursorColor_g", 50 ).toInt() );
@@ -98,6 +105,9 @@ void ApplicationSettings::SaveSettings( QSettings & settings )
     settings.setValue( "ViewBackgroundColor_r", ViewBackgroundColor.red() );
     settings.setValue( "ViewBackgroundColor_g", ViewBackgroundColor.green() );
     settings.setValue( "ViewBackgroundColor_b", ViewBackgroundColor.blue() );
+    settings.setValue( "View3DBackgroundColor_r", View3DBackgroundColor.red() );
+    settings.setValue( "View3DBackgroundColor_g", View3DBackgroundColor.green() );
+    settings.setValue( "View3DBackgroundColor_b", View3DBackgroundColor.blue() );
     settings.setValue( "CutPlanesCursorColor_r", CutPlanesCursorColor.red() );
     settings.setValue( "CutPlanesCursorColor_g", CutPlanesCursorColor.green() );
     settings.setValue( "CutPlanesCursorColor_b", CutPlanesCursorColor.blue() );
@@ -215,6 +225,8 @@ void Application::ApplyApplicationSettings()
     double bgColor[3];
     m_settings.ViewBackgroundColor.getRgbF( &bgColor[0], &bgColor[1], &bgColor[2] );
     m_sceneManager->SetViewBackgroundColor( bgColor );
+    m_settings.View3DBackgroundColor.getRgbF( &bgColor[0], &bgColor[1], &bgColor[2] );
+    m_sceneManager->SetView3DBackgroundColor( bgColor );
     m_sceneManager->Set3DCameraViewAngle( m_settings.CameraViewAngle3D );
 
     double cursorColor[3];
@@ -239,6 +251,8 @@ void Application::UpdateApplicationSettings()
 {
     double * backgroundColor = m_sceneManager->GetViewBackgroundColor();
     m_settings.ViewBackgroundColor = QColor( int(backgroundColor[0] * 255), int(backgroundColor[1] * 255), int(backgroundColor[2] * 255) );
+    backgroundColor = m_sceneManager->GetView3DBackgroundColor();
+    m_settings.View3DBackgroundColor = QColor( int(backgroundColor[0] * 255), int(backgroundColor[1] * 255), int(backgroundColor[2] * 255) );
     WorldObject * world = WorldObject::SafeDownCast(m_sceneManager->GetSceneRoot());
     m_settings.CutPlanesCursorColor =  world->GetCursorColor();
     m_settings.InteractorStyle3D = m_sceneManager->Get3DInteractorStyle();

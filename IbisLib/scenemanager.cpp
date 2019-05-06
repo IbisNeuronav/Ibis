@@ -64,6 +64,9 @@ SceneManager::SceneManager()
     this->ViewBackgroundColor[0] = 0;
     this->ViewBackgroundColor[1] = 0;
     this->ViewBackgroundColor[2] = 0;
+    this->View3DBackgroundColor[0] = 0;
+    this->View3DBackgroundColor[1] = 0;
+    this->View3DBackgroundColor[2] = 0;
     this->CameraViewAngle3D = 30.0;
     this->SupportedSceneSaveVersion = IBIS_SCENE_SAVE_VERSION;
     this->NavigationPointerID = SceneManager::InvalidId;
@@ -434,6 +437,7 @@ void SceneManager::Serialize( Serializer * ser )
     ::Serialize( ser, "CurrentObjectID", id );
     ::Serialize( ser, "ReferenceObjectID", refObjID );
     ::Serialize( ser, "ViewBackgroundColor", this->ViewBackgroundColor, 3 );
+    ::Serialize( ser, "View3DBackgroundColor", this->View3DBackgroundColor, 3 );
 
     ser->BeginSection("Views");
     int numberOfViews = Views.size();
@@ -446,6 +450,7 @@ void SceneManager::Serialize( Serializer * ser )
     {
         this->SetCurrentObject(this->GetObjectByID(id));
         this->SetViewBackgroundColor( this->ViewBackgroundColor );
+        this->SetView3DBackgroundColor( this->View3DBackgroundColor );
         if( refObjID != SceneManager::InvalidId )
             this->SetReferenceDataObject( this->GetObjectByID(refObjID) );
         View *view;
@@ -639,12 +644,23 @@ void SceneManager::SetViewBackgroundColor( double * color )
     }
 }
 
+void SceneManager::SetView3DBackgroundColor( double * color )
+{
+    this->View3DBackgroundColor[0] = color[0];
+    this->View3DBackgroundColor[1] = color[1];
+    this->View3DBackgroundColor[2] = color[2];
+    if( this->GetMain3DView() )
+        this->GetMain3DView()->SetBackgroundColor( color );
+}
+
 void SceneManager::UpdateBackgroundColor( )
 {
     foreach( View* view, Views.keys() )
     {
-        view->SetBackgroundColor( this->ViewBackgroundColor );
+        if( view != this->GetMain3DView() )
+            view->SetBackgroundColor( this->ViewBackgroundColor );
     }
+    this->GetMain3DView()->SetBackgroundColor( this->View3DBackgroundColor );
 }
 
 void SceneManager::AddObject( SceneObject * object, SceneObject * attachTo )

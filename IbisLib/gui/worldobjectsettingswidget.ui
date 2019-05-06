@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>278</width>
-    <height>543</height>
+    <width>387</width>
+    <height>496</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -40,7 +40,7 @@
         </size>
        </property>
        <property name="text">
-        <string>Background Color: </string>
+        <string>All Views Bckg. Color:</string>
        </property>
       </widget>
      </item>
@@ -71,6 +71,79 @@ border-radius: 7;</string>
      </item>
      <item>
       <spacer name="spacer1">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::MinimumExpanding</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>16</width>
+         <height>16</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="_3">
+     <property name="spacing">
+      <number>2</number>
+     </property>
+     <property name="leftMargin">
+      <number>2</number>
+     </property>
+     <property name="topMargin">
+      <number>2</number>
+     </property>
+     <property name="rightMargin">
+      <number>2</number>
+     </property>
+     <property name="bottomMargin">
+      <number>2</number>
+     </property>
+     <item>
+      <widget class="QLabel" name="label_3">
+       <property name="minimumSize">
+        <size>
+         <width>150</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>3D View Bckg. Color:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="change3DColorButton">
+       <property name="minimumSize">
+        <size>
+         <width>80</width>
+         <height>27</height>
+        </size>
+       </property>
+       <property name="autoFillBackground">
+        <bool>false</bool>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">background-color: green; 
+border-width: 2px;
+border-style: solid;
+border-radius: 7;</string>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="flat">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="spacer1_3">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
@@ -343,8 +416,8 @@ border-radius: 7;</string>
      </property>
      <property name="sizeHint" stdset="0">
       <size>
-       <width>20</width>
-       <height>345</height>
+       <width>257</width>
+       <height>24</height>
       </size>
      </property>
     </spacer>
@@ -353,54 +426,6 @@ border-radius: 7;</string>
  </widget>
  <resources/>
  <connections>
-  <connection>
-   <sender>changeColorButton</sender>
-   <signal>clicked()</signal>
-   <receiver>WorldObjectSettingsWidget</receiver>
-   <slot>OnBackgroundColorButtonClicked()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>197</x>
-     <y>24</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>293</x>
-     <y>50</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>showAxesCheckBox</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>WorldObjectSettingsWidget</receiver>
-   <slot>OnShowAxesCheckBoxToggled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>89</x>
-     <y>56</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>291</x>
-     <y>112</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>showCursorCheckBox</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>WorldObjectSettingsWidget</receiver>
-   <slot>OnShowCursorCheckBoxToggled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>145</x>
-     <y>84</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>145</x>
-     <y>215</y>
-    </hint>
-   </hints>
-  </connection>
   <connection>
    <sender>interactionStyleButtonGroup</sender>
    <signal>buttonClicked(int)</signal>
@@ -417,29 +442,9 @@ border-radius: 7;</string>
     </hint>
    </hints>
   </connection>
-  <connection>
-   <sender>changeCursorColorButton</sender>
-   <signal>clicked(bool)</signal>
-   <receiver>WorldObjectSettingsWidget</receiver>
-   <slot>OnCursorColorButtonClicked()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>203</x>
-     <y>115</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>135</x>
-     <y>205</y>
-    </hint>
-   </hints>
-  </connection>
  </connections>
  <slots>
-  <slot>OnBackgroundColorButtonClicked()</slot>
-  <slot>OnShowAxesCheckBoxToggled(bool)</slot>
-  <slot>OnShowCursorCheckBoxToggled(bool)</slot>
   <slot>On3DInteractionButtonClicked(int)</slot>
-  <slot>OnCursorColorButtonClicked()</slot>
  </slots>
  <buttongroups>
   <buttongroup name="interactionStyleButtonGroup"/>

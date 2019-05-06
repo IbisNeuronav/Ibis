@@ -33,10 +33,6 @@ public:
 
 public slots:
 
-    void OnBackgroundColorButtonClicked();
-    void OnCursorColorButtonClicked();
-    void OnShowAxesCheckBoxToggled(bool);
-    void OnShowCursorCheckBoxToggled(bool);
     void On3DInteractionButtonClicked(int);
 
 private slots:
@@ -45,6 +41,11 @@ private slots:
     void on_viewFollowsReferenceCheckBox_toggled(bool checked);
     void on_cameraAngleSlider_valueChanged(int value);
     void on_cameraAngleSpinBox_valueChanged(int arg1);
+    void on_changeColorButton_clicked();
+    void on_change3DColorButton_clicked();
+    void on_changeCursorColorButton_clicked();
+    void on_showAxesCheckBox_toggled(bool);
+    void on_showCursorCheckBox_toggled(bool);
 
 private:
 

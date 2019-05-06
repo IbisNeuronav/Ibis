@@ -110,6 +110,7 @@ public:
     View * GetMainTransverseView();
     QMap<View*, int> GetAllViews( );
     double * GetViewBackgroundColor();
+    double * GetView3DBackgroundColor();
 
     void ChangeParent( SceneObject * object, SceneObject * newParent, int newChildIndex );
 

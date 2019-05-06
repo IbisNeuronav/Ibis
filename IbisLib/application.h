@@ -56,6 +56,7 @@ struct ApplicationSettings
     void SaveSettings( QSettings & settings );
     QString WorkingDirectory;
     QColor ViewBackgroundColor;
+    QColor View3DBackgroundColor;
     QColor CutPlanesCursorColor;
     InteractorStyle InteractorStyle3D;
     double CameraViewAngle3D;
