@@ -278,6 +278,7 @@ bool ImageObject::SetItkLabelImage( IbisItkUnsignedChar3ImageType::Pointer image
         this->SetLocalTransform( rotTrans );
         rotTrans->Delete();
     }
+    return true;
 }
 
 void ImageObject::SetImage(vtkImageData * image)
