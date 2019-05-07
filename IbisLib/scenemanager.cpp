@@ -183,15 +183,7 @@ void SceneManager::Clear()
 {
     disconnect( this->MainCutPlanes, SIGNAL(PlaneMoved(int)), this, SLOT(OnCutPlanesPositionChanged()) );
     disconnect( this, SIGNAL(ReferenceObjectChanged()), this->MainCutPlanes, SLOT(AdjustAllImages()) );
-    std::cout << "BEFORE" << std::endl;
-    for(int i = 0 ; i < AllObjects.size() ; i++ ){
-        std::cout << AllObjects.at(i)->GetName().toStdString() << std::endl;
-    }
     this->RemoveAllSceneObjects();
-    std::cout << "AFTER" << std::endl;
-    for(int i = 0 ; i < AllObjects.size() ; i++ ){
-        std::cout << AllObjects.at(i)->GetName().toStdString() << std::endl;
-    }
     Q_ASSERT_X( AllObjects.size() == 0, "SceneManager::~SceneManager()", "Objects are left in the global list.");
     m_sceneRoot->Delete();
     m_sceneRoot = nullptr;
