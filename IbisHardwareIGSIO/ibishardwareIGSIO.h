@@ -74,11 +74,6 @@ public:
     virtual void AddTrackedVideoClient( TrackedSceneObject * obj ) override;
     virtual void RemoveTrackedVideoClient( TrackedSceneObject * obj) override;
 
-    virtual void StartTipCalibration( PointerObject * p ) override;
-    virtual double DoTipCalibration( PointerObject * p, vtkMatrix4x4 * calibMat ) override;
-    virtual bool IsCalibratingTip( PointerObject * p ) override;
-    virtual void StopTipCalibration( PointerObject * p ) override;
-
 private slots:
 
     void OpenSettingsWidget();

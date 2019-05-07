@@ -96,19 +96,6 @@ public:
   vtkMatrix4x4 *GetCalibrationMatrix();
 
   // Description:
-  // Perform a calibration of the position of the tool tip.  To accomplish
-  // this, first call StartTipCalibration() to start accumulating points
-  // then call DoToolTipCalibration to compute calib matrix with points
-  // already accumulated. The value returned by DoToolTipCalibration()
-  // is the uncertainty (one standard deviation) in the position of the
-  // origin for any particular measurement.
-  void StartTipCalibration();
-  int InsertNextCalibrationPoint();
-  double DoToolTipCalibration( vtkMatrix4x4 * calibMat );
-  void StopTipCalibration();
-  vtkGetMacro(Calibrating,int);
-
-  // Description:
   // Get additional information about the transform for the latest update:
   // <p>Missing:     there is no tool plugged into this port.
   // <p>OutOfView:   tracker is temporarily unable to supply a transform.
@@ -191,11 +178,6 @@ protected:
   vtkMatrix4x4 *CalibrationMatrix;
   bool UpdateLocked;
 
-  int Calibrating;
-  vtkCriticalSection * CalibrationMutex;
-  vtkAmoebaMinimizer *Minimizer;
-  vtkDoubleArray *CalibrationArray;
-
   int Flags;
 
   double TimeStamp;
@@ -211,10 +193,6 @@ protected:
   char *ToolManufacturer;
 
   vtkTrackerBuffer *Buffer;
-
-//BTX
-  friend void vtkTrackerToolCalibrationFunction(void *userData);
-//ETX
 
 private:
   vtkTrackerTool(const vtkTrackerTool&);
