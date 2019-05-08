@@ -502,8 +502,7 @@ void TripleCutPlaneObject::SetWorldPlanesPosition( double * pos )
     ImageObject *ref = this->GetManager()->GetReferenceDataObject();
     if (ref && pos)
     {
-        vtkLinearTransform *inverseReg = ref->GetWorldTransform()->GetLinearInverse();
-        double *newPos = inverseReg->TransformDoublePoint(pos);
+        double *newPos = this->GetManager()->GetInverseReferenceTransform()->TransformDoublePoint(pos);
         this->SetPlanesPosition(newPos);
     }
 }
