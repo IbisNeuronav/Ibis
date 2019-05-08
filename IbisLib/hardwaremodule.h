@@ -51,11 +51,6 @@ public:
     virtual void AddTrackedVideoClient( TrackedSceneObject * obj ) = 0;
     virtual void RemoveTrackedVideoClient( TrackedSceneObject * obj) = 0;
 
-    virtual void StartTipCalibration( PointerObject * p ) = 0;
-    virtual double DoTipCalibration( PointerObject * p, vtkMatrix4x4 * calibMat ) = 0;
-    virtual bool IsCalibratingTip( PointerObject * p ) = 0;
-    virtual void StopTipCalibration( PointerObject * p ) = 0;
-
 };
 
 #endif

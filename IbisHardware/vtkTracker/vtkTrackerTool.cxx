@@ -73,12 +73,6 @@ vtkTrackerTool::vtkTrackerTool()
     this->TimeStamp = 0;
     this->CalibrationMatrix = vtkMatrix4x4::New();
 
-    this->Calibrating = 0;
-    this->CalibrationMutex = vtkCriticalSection::New();
-    this->Minimizer = vtkAmoebaMinimizer::New();
-    this->CalibrationArray = vtkDoubleArray::New();
-    this->CalibrationArray->SetNumberOfComponents(16);
-
     this->LED1 = 0;
     this->LED2 = 0;
     this->LED3 = 0;
@@ -107,9 +101,6 @@ vtkTrackerTool::~vtkTrackerTool()
 {
     this->Transform->Delete();
     this->CalibrationMatrix->Delete();
-    this->CalibrationMutex->Delete();
-    this->CalibrationArray->Delete();
-    this->Minimizer->Delete();
     this->TempMatrix->Delete();
     this->RawMatrix->Delete();
     if (this->ToolType)
@@ -195,133 +186,7 @@ void vtkTrackerTool::Update()
 
 void vtkTrackerTool::NewMatrixAvailable()
 {
-    if( this->Calibrating )
-    {
-        this->InsertNextCalibrationPoint();
-    }
 }
-
-
-//----------------------------------------------------------------------------
-void vtkTrackerTool::StartTipCalibration()
-{
-    this->CalibrationMutex->Lock();
-    this->CalibrationArray->SetNumberOfTuples(0);
-    this->Calibrating = 1;
-    this->CalibrationMutex->Unlock();
-}
-
-//----------------------------------------------------------------------------
-// Insert the latest matrix in the buffer in the calibration array
-int vtkTrackerTool::InsertNextCalibrationPoint()
-{
-    this->Buffer->Lock();
-    this->Buffer->GetUncalibratedMatrix(this->TempMatrix, 0);
-    long flags = this->Buffer->GetFlags( 0 );
-    this->Buffer->Unlock();
-    int flagsOk = 1;
-    int ret = 0;
-    if( (flags & TR_MISSING) != 0 ) flagsOk = 0 ;
-    if( (flags & TR_OUT_OF_VIEW) != 0) flagsOk = 0;
-    if( (flags & TR_OUT_OF_VOLUME) != 0) flagsOk = 0;
-    if( flagsOk )
-    {
-        this->CalibrationMutex->Lock();
-        ret = this->CalibrationArray->InsertNextTuple(*this->TempMatrix->Element);
-        this->CalibrationMutex->Unlock();
-    }
-    return ret;
-}
-
-//----------------------------------------------------------------------------
-void vtkTrackerToolCalibrationFunction(void *userData)
-{
-    vtkTrackerTool *self = (vtkTrackerTool *)userData;
-
-    int i;
-    int n = self->CalibrationArray->GetNumberOfTuples();
-
-    double x = self->Minimizer->GetParameterValue("x");
-    double y = self->Minimizer->GetParameterValue("y");
-    double z = self->Minimizer->GetParameterValue("z");
-    double nx,ny,nz,sx,sy,sz,sxx,syy,szz;
-
-    double matrix[4][4];
-
-    sx = sy = sz = 0.0;
-    sxx = syy = szz = 0.0;
-
-    for (i = 0; i < n; i++)
-    {
-        self->CalibrationArray->GetTuple(i,*matrix);
-
-        nx = matrix[0][0]*x + matrix[0][1]*y + matrix[0][2]*z + matrix[0][3];
-        ny = matrix[1][0]*x + matrix[1][1]*y + matrix[1][2]*z + matrix[1][3];
-        nz = matrix[2][0]*x + matrix[2][1]*y + matrix[2][2]*z + matrix[2][3];
-
-        sx += nx;
-        sy += ny;
-        sz += nz;
-
-        sxx += nx*nx;
-        syy += ny*ny;
-        szz += nz*nz;
-    }
-
-    double r;
-
-    if (n > 1)
-    {
-        r = sqrt((sxx - sx*sx/n)/(n-1) +
-                 (syy - sy*sy/n)/(n-1) +
-                 (szz - sz*sz/n)/(n-1));
-    }
-    else
-    {
-        r = 0;
-    }
-
-    self->Minimizer->SetFunctionValue(r);
-    /*
-    cerr << self->Minimizer->GetIterations() << " (" << x << ", " << y << ", " << z << ")" << " " << r << " " << (sxx - sx*sx/n)/(n-1) << (syy - sy*sy/n)/(n-1) << (szz - sz*sz/n)/(n-1) << "\n";
-    */
-}
-
-//----------------------------------------------------------------------------
-double vtkTrackerTool::DoToolTipCalibration( vtkMatrix4x4 * calibMat )
-{
-    this->Minimizer->Initialize();
-    this->Minimizer->SetFunction(vtkTrackerToolCalibrationFunction,this);
-    this->Minimizer->SetFunctionArgDelete(NULL);
-    this->Minimizer->SetParameterValue("x",0);
-    this->Minimizer->SetParameterScale("x",1000);
-    this->Minimizer->SetParameterValue("y",0);
-    this->Minimizer->SetParameterScale("y",1000);
-    this->Minimizer->SetParameterValue("z",0);
-    this->Minimizer->SetParameterScale("z",1000);
-
-    this->CalibrationMutex->Lock();
-    this->Minimizer->Minimize();
-    this->CalibrationMutex->Unlock();
-    double minimum = this->Minimizer->GetFunctionValue();
-
-    double x = this->Minimizer->GetParameterValue("x");
-    double y = this->Minimizer->GetParameterValue("y");
-    double z = this->Minimizer->GetParameterValue("z");
-
-    calibMat->SetElement(0,3,x);
-    calibMat->SetElement(1,3,y);
-    calibMat->SetElement(2,3,z);
-
-    return minimum;
-}
-
-
-void vtkTrackerTool::StopTipCalibration()
-{
-    this->Calibrating = 0;
-}
-
 
 //----------------------------------------------------------------------------
 void vtkTrackerTool::SetCalibrationMatrix(vtkMatrix4x4 *vmat)

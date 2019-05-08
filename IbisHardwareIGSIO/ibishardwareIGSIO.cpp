@@ -260,24 +260,6 @@ void IbisHardwareIGSIO::RemoveTrackedVideoClient( TrackedSceneObject * obj )
 {
 }
 
-void IbisHardwareIGSIO::StartTipCalibration( PointerObject * p )
-{
-}
-
-double IbisHardwareIGSIO::DoTipCalibration( PointerObject * p, vtkMatrix4x4 * calibMat )
-{
-    return 0.0;
-}
-
-bool IbisHardwareIGSIO::IsCalibratingTip( PointerObject * p )
-{
-    return false;
-}
-
-void IbisHardwareIGSIO::StopTipCalibration( PointerObject * p )
-{
-}
-
 void IbisHardwareIGSIO::OpenSettingsWidget()
 {
     if( !m_clientWidget )

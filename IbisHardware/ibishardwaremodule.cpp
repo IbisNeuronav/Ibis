@@ -112,34 +112,6 @@ void IbisHardwareModule::RemoveTrackedVideoClient( TrackedSceneObject * obj )
     return m_tracker->GetVideoSource( obj )->RemoveClient();
 }
 
-void IbisHardwareModule::StartTipCalibration( PointerObject * p )
-{
-    vtkTrackerTool * tool = m_tracker->GetTool( p );
-    Q_ASSERT( tool );
-    tool->StartTipCalibration();
-}
-
-double IbisHardwareModule::DoTipCalibration( PointerObject * p, vtkMatrix4x4 * calibMat )
-{
-    vtkTrackerTool * tool = m_tracker->GetTool( p );
-    Q_ASSERT( tool );
-    return tool->DoToolTipCalibration( calibMat );
-}
-
-bool IbisHardwareModule::IsCalibratingTip( PointerObject * p )
-{
-    vtkTrackerTool * tool = m_tracker->GetTool( p );
-    Q_ASSERT( tool );
-    return tool->GetCalibrating() > 0 ? true : false;
-}
-
-void IbisHardwareModule::StopTipCalibration( PointerObject * p )
-{
-    vtkTrackerTool * tool = m_tracker->GetTool( p );
-    Q_ASSERT( tool );
-    tool->StopTipCalibration();
-}
-
 void IbisHardwareModule::OpenVideoSettingsDialog()
 {
     QDialog * dialog = new QDialog();
