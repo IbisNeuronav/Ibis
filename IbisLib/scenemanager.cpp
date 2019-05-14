@@ -149,6 +149,8 @@ void SceneManager::Init()
     Application::GetInstance().GetAllGlobalObjectInstances( globalObjects );
     for( int i = 0; i < globalObjects.size(); ++i )
     {
+        // Global objects cannot keep ids between scenes because it will cause duplicated ids
+        globalObjects[i]->SetObjectID( InvalidId );
         AddObject( globalObjects[i], m_sceneRoot );
     }
 
