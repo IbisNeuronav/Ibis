@@ -26,7 +26,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 ObjectSerializationMacro( SceneObject );
 
 SceneObject::SceneObject()
-    : ObjectManagedBySystem(false)
 { 
     this->Parent = 0;
     this->AllowChildren = true;
@@ -38,6 +37,7 @@ SceneObject::SceneObject()
     this->ObjectDeletable = true;
     this->NameChangeable = true;
     this->ObjectListable = true;
+    this->ObjectManagedBySystem = false;
     this->ObjectManagedByTracker = false;
     this->AllowManualTransformEdit = true;
     this->LocalTransform = vtkTransform::New();  // by default, we have a vtkTransform that can be manipulated manually. Could be changed in certain object types.
@@ -59,28 +59,16 @@ SceneObject::~SceneObject()
 void SceneObject::Serialize( Serializer * ser )
 {
     vtkMatrix4x4 * local = this->LocalTransform->GetMatrix();
-    bool allowChildren = true;
-    bool allowChangeParent = true;
-    bool objectManagedBySystem = false;
-    bool objectHidden = false;
-    bool allowHiding = true;
-    bool objectDeletable = true;
-    bool nameChangeable = true;
-    bool objectListable = true;
-    bool allowManualTransformEdit = true;
-
-    if( !ser->IsReader())
-    {
-        allowChildren = this->AllowChildren;
-        allowChangeParent = this->AllowChangeParent;
-        objectManagedBySystem = this->ObjectManagedBySystem;
-        objectHidden = this->ObjectHidden;
-        allowHiding = this->AllowHiding;
-        objectDeletable = this->ObjectDeletable;
-        nameChangeable = this->NameChangeable;
-        objectListable = this->ObjectListable;
-        allowManualTransformEdit = this->AllowManualTransformEdit;
-    }
+    //initialize to default object params set when the object was created
+    bool allowChildren = this->AllowChildren;
+    bool allowChangeParent = this->AllowChangeParent;
+    bool objectManagedBySystem = this->ObjectManagedBySystem;
+    bool objectHidden = this->ObjectHidden;
+    bool allowHiding = this->AllowHiding;
+    bool objectDeletable = this->ObjectDeletable;
+    bool nameChangeable = this->NameChangeable;
+    bool objectListable = this->ObjectListable;
+    bool allowManualTransformEdit = this->AllowManualTransformEdit;
     ::Serialize( ser, "ObjectName", this->Name );
     ::Serialize( ser, "AllowChildren", allowChildren);
     ::Serialize( ser, "AllowChangeParent", allowChangeParent);
@@ -92,7 +80,6 @@ void SceneObject::Serialize( Serializer * ser )
     ::Serialize( ser, "ObjectListable", objectListable);
     ::Serialize( ser, "AllowManualTransformEdit", allowManualTransformEdit);
     ::Serialize( ser, "LocalTransform", local );
-
 
     if( ser->IsReader())
     {
