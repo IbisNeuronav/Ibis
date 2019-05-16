@@ -19,7 +19,7 @@ ToolUI::ToolUI( QWidget * parent )
     , SnapshotMatrixWidget( 0 )
 {
     this->ToolLayout = new QHBoxLayout( this );
-    
+
     this->ToolNameLabel = new QLabel( this );
     this->ToolNameLabel->setMinimumSize( QSize( 150, 0 ) );
     this->ToolLayout->addWidget( this->ToolNameLabel );
@@ -42,7 +42,7 @@ ToolUI::ToolUI( QWidget * parent )
     this->SnapshotButton->setText("S");
     this->ToolLayout->addWidget( this->SnapshotButton );
     connect( this->SnapshotButton, SIGNAL(clicked()), this, SLOT(SnapshotButtonClicked()) );
-    
+
     this->m_toolObjectId = SceneManager::InvalidId;
 }
 
@@ -90,6 +90,14 @@ void ToolUI::UpdateUI()
         this->ToolStateLabel->setText( "Out of view" );
         this->ToolStateLabel->setStyleSheet("background-color: red");
         break;
+	  case HighError:
+		    this->ToolStateLabel->setText( "High error" );
+		    this->ToolStateLabel->setStyleSheet("background-color: red");
+		    break;
+	  case Disabled:
+		    this->ToolStateLabel->setText( "Disabled" );
+		    this->ToolStateLabel->setStyleSheet("background-color: grey");
+		    break;
     case Undefined:
         this->ToolStateLabel->setText( "Undefined" );
         this->ToolStateLabel->setStyleSheet("background-color: grey");
@@ -128,10 +136,10 @@ TrackerStatusDialog::TrackerStatusDialog( QWidget * parent ) : QWidget( parent )
     setWindowTitle("Tracker status");
 
 	this->setSizePolicy( QSizePolicy::MinimumExpanding, QSizePolicy::Fixed );
-    
+
     // General layout
     m_trackerStatusDialogLayout = new QVBoxLayout( this );
-    
+
     // navigation layout
     QVBoxLayout * layout1 = new QVBoxLayout();
 
@@ -219,7 +227,7 @@ void TrackerStatusDialog::OnNavigationCheckboxToggled( bool navigate )
     Q_ASSERT( m_sceneManager );
     m_sceneManager->EnablePointerNavigation( navigate );
 }
-   
+
 void TrackerStatusDialog::ClearAllTools()
 {
     for( int i = 0; i < m_toolsWidget.size(); ++i )
