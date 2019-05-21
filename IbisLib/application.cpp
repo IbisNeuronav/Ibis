@@ -215,7 +215,7 @@ Application::~Application()
     this->GetAllPlugins( allPlugins );
     for( int i = 0; i < allPlugins.size(); ++i )
     {
-        allPlugins[i]->Delete(); // this is called because otherwise plugins destructors are never called, Qt bug. The codde has to be revised once Qt is fixed.
+        allPlugins[i]->Delete(); // this is called because otherwise plugins destructors are never called, Qt bug. The code has to be revised once Qt is fixed.
     }
     delete m_preferences;
 }
