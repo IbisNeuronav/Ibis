@@ -348,6 +348,7 @@ void SceneManager::NewScene()
     SetRenderingEnabled( false );
     //Save current application settings
     Application::GetInstance().UpdateApplicationSettings();
+    Application::GetInstance().DeActivateAllToolPlugins();
     // Clear the scene
     InternalClearScene();
     //re-apply global ibis settings

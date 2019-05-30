@@ -982,6 +982,18 @@ void Application::GetAllToolPlugins( QList<ToolPluginInterface*> & allTools )
     }
 }
 
+void Application::DeActivateAllToolPlugins()
+{
+     foreach( QObject * plugin, QPluginLoader::staticInstances() )
+     {
+         IbisPlugin * p = qobject_cast< IbisPlugin* >( plugin );
+         if( p && p->GetPluginType() == IbisPluginTypeTool )
+         {
+             ToolPluginInterface * tool = ToolPluginInterface::SafeDownCast( p );
+             emit QueryActivatePluginSignal( tool, false );
+         }
+     }
+}
 void Application::GetAllObjectPlugins( QList<ObjectPluginInterface*> & allObjects )
 {
     allObjects.clear();
