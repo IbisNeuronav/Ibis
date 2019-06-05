@@ -144,16 +144,6 @@ void SceneManager::Init()
     connect( this->MainCutPlanes, SIGNAL(PlaneMoved(int)), this, SLOT(OnCutPlanesPositionChanged()) );
     connect( this, SIGNAL(ReferenceObjectChanged()), this->MainCutPlanes, SLOT(AdjustAllImages()) );
 
-    // Add all global objects from plugins
-    QList<SceneObject*> globalObjects;
-    Application::GetInstance().GetAllGlobalObjectInstances( globalObjects );
-    for( int i = 0; i < globalObjects.size(); ++i )
-    {
-        // Global objects cannot keep ids between scenes because it will cause duplicated ids
-        globalObjects[i]->SetObjectID( InvalidId );
-        AddObject( globalObjects[i], m_sceneRoot );
-    }
-
     // Axes
     vtkSmartPointer<vtkAxes> axesSource = vtkSmartPointer<vtkAxes>::New();
     axesSource->SetScaleFactor( 150 );
@@ -174,6 +164,14 @@ void SceneManager::Init()
     axesObject->SetHidden( false );
     this->AddObject( axesObject );
     this->SetAxesObject( axesObject );
+
+    // Add all global objects from plugins
+    QList<SceneObject*> globalObjects;
+    Application::GetInstance().GetAllGlobalObjectInstances( globalObjects );
+    for( int i = 0; i < globalObjects.size(); ++i )
+    {
+        AddObject( globalObjects[i], m_sceneRoot );
+    }
 
     this->SetCurrentObject( this->GetSceneRoot() );
 
@@ -691,7 +689,11 @@ void SceneManager::AddObjectUsingID( SceneObject * object, SceneObject * attachT
     {
         // if the object has already been assigned an id, keep it
         if( object->GetObjectID() != SceneManager::InvalidId )
+        {
             id = object->GetObjectID();
+            if( object->IsManagedBySystem() && id >= m_nextSystemObjectID )
+                id = m_nextSystemObjectID--;
+        }
         else if( object->IsManagedBySystem() )
             id = m_nextSystemObjectID--;
         else
