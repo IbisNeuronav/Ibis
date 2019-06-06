@@ -1622,8 +1622,7 @@ void SceneManager::ObjectReader( Serializer * ser, bool interactive )
     for( int t = 0; t < allTools.size(); ++t )
     {
         ToolPluginInterface * toolModule = allTools[t];
-        bool sectionFound = ser->BeginSection( toolModule->GetPluginName().toUtf8().data() );
-        if( sectionFound )
+        if( ser->BeginSection( toolModule->GetPluginName().toUtf8().data() ) )
         {
             toolModule->Serialize(ser);
             ser->EndSection();
