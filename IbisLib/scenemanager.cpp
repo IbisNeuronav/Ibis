@@ -144,14 +144,6 @@ void SceneManager::Init()
     connect( this->MainCutPlanes, SIGNAL(PlaneMoved(int)), this, SLOT(OnCutPlanesPositionChanged()) );
     connect( this, SIGNAL(ReferenceObjectChanged()), this->MainCutPlanes, SLOT(AdjustAllImages()) );
 
-    // Add all global objects from plugins
-    QList<SceneObject*> globalObjects;
-    Application::GetInstance().GetAllGlobalObjectInstances( globalObjects );
-    for( int i = 0; i < globalObjects.size(); ++i )
-    {
-        AddObject( globalObjects[i], m_sceneRoot );
-    }
-
     // Axes
     vtkSmartPointer<vtkAxes> axesSource = vtkSmartPointer<vtkAxes>::New();
     axesSource->SetScaleFactor( 150 );
@@ -172,6 +164,14 @@ void SceneManager::Init()
     axesObject->SetHidden( false );
     this->AddObject( axesObject );
     this->SetAxesObject( axesObject );
+
+    // Add all global objects from plugins
+    QList<SceneObject*> globalObjects;
+    Application::GetInstance().GetAllGlobalObjectInstances( globalObjects );
+    for( int i = 0; i < globalObjects.size(); ++i )
+    {
+        AddObject( globalObjects[i], m_sceneRoot );
+    }
 
     this->SetCurrentObject( this->GetSceneRoot() );
 
@@ -688,7 +688,11 @@ void SceneManager::AddObjectUsingID( SceneObject * object, SceneObject * attachT
     {
         // if the object has already been assigned an id, keep it
         if( object->GetObjectID() != SceneManager::InvalidId )
+        {
             id = object->GetObjectID();
+            if( object->IsManagedBySystem() && id >= m_nextSystemObjectID )
+                id = m_nextSystemObjectID--;
+        }
         else if( object->IsManagedBySystem() )
             id = m_nextSystemObjectID--;
         else
@@ -1618,10 +1622,11 @@ void SceneManager::ObjectReader( Serializer * ser, bool interactive )
     for( int t = 0; t < allTools.size(); ++t )
     {
         ToolPluginInterface * toolModule = allTools[t];
-        bool sectionFound = ser->BeginSection( toolModule->GetPluginName().toUtf8().data() );
-        toolModule->Serialize(ser);
-        if( sectionFound )
+        if( ser->BeginSection( toolModule->GetPluginName().toUtf8().data() ) )
+        {
+            toolModule->Serialize(ser);
             ser->EndSection();
+        }
     }
     ser->EndSection();
 }
