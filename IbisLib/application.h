@@ -145,8 +145,6 @@ public:
     void GetAllObjectPlugins( QList<ObjectPluginInterface*> & allObjects );
     void GetAllGeneratorPlugins( QList<GeneratorPluginInterface*> & allObjects );
 
-    void DeActivateAllToolPlugins();
-
     // Data file to load when the application starts up (typically specified on the command line)
     void SetInitialDataFiles( const QStringList & files ) { m_initialDataFiles = files; }
     const QStringList & GetInitialDataFiles() { return m_initialDataFiles; }
