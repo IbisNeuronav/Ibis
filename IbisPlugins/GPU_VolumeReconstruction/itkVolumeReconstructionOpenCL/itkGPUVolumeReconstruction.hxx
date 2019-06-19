@@ -99,6 +99,8 @@ GPUVolumeReconstruction< TImage >
     {
 #ifdef __APPLE__
     m_CommandQueue[i] = clCreateCommandQueue(m_Context, m_Devices[i], 0, &errid);
+#elif defined(WIN32) || defined(_WIN32)
+	  m_CommandQueue[i] = clCreateCommandQueue(m_Context, m_Devices[i], 0, &errid);
 #else
     m_CommandQueue[i] = clCreateCommandQueueWithProperties(m_Context, m_Devices[i], 0, &errid);
 #endif
