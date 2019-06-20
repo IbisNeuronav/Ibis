@@ -44,6 +44,7 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
   /* Initialize GPU Context */
   this->InitializeGPUContext();
 
+  m_OrientationMatchingKernel = 0;
   m_Percentile = 0.9;
   m_N = 2;
 
