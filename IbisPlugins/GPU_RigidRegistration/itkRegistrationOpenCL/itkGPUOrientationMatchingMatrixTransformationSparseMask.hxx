@@ -44,6 +44,7 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
   /* Initialize GPU Context */
   this->InitializeGPUContext();
 
+  m_OrientationMatchingKernel = 0;
   m_Percentile = 0.9;
   m_N = 2;
 
@@ -114,6 +115,8 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
     {
 #ifdef __APPLE__
     m_CommandQueue[i] = clCreateCommandQueue(m_Context, m_Devices[i], 0, &errid);
+#elif defined(WIN32) || defined(_WIN32)
+	  m_CommandQueue[i] = clCreateCommandQueue(m_Context, m_Devices[i], 0, &errid);
 #else
     m_CommandQueue[i] = clCreateCommandQueueWithProperties(m_Context, m_Devices[i], 0, &errid);
 #endif
