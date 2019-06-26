@@ -313,7 +313,7 @@ void USManualCalibrationWidget::OnManipulatorsModified()
         // Compute each manipulator's center point position in phantom coordinate
         vtkMatrix4x4 * phantomToWorldMat = vtkMatrix4x4::New();
         m_pluginInterface->GetCalibrationPhantomObject()->GetWorldTransform()->GetMatrix( phantomToWorldMat );
-        double manipWorldCoords[4][3];
+        double manipWorldCoords[4][4];
         for( int i = 0; i < 4; ++i )
         {
             // Get phantom space coord
