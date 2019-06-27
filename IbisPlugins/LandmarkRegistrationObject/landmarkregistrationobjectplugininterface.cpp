@@ -22,15 +22,18 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 LandmarkRegistrationObjectPluginInterface::LandmarkRegistrationObjectPluginInterface()
 {
+	m_landmarkRegistrationObject = vtkSmartPointer<LandmarkRegistrationObject>::New();
+	m_landmarkRegistrationObject->SetName("Landmark Registration");
+	m_landmarkRegistrationObject->SetCanEditTransformManually(false);
 }
 
 LandmarkRegistrationObjectPluginInterface::~LandmarkRegistrationObjectPluginInterface()
 {
+	m_landmarkRegistrationObject = 0;
 }
 
 SceneObject *LandmarkRegistrationObjectPluginInterface::CreateObject()
 {
-    m_landmarkRegistrationObject = 0;
     IbisAPI *ibisAPI = GetIbisAPI();
     Q_ASSERT(ibisAPI);
     vtkSmartPointer<PointsObject>sourcePoints = vtkSmartPointer<PointsObject>::New();
@@ -47,9 +50,6 @@ SceneObject *LandmarkRegistrationObjectPluginInterface::CreateObject()
     targetPoints->SetSelectedColor(color1);
     double color2[3] = {0.3, 0.3, 1.0};
     targetPoints->SetDisabledColor(color2);
-    m_landmarkRegistrationObject = vtkSmartPointer<LandmarkRegistrationObject>::New();
-    m_landmarkRegistrationObject->SetName( "Landmark Registration" );
-    m_landmarkRegistrationObject->SetCanEditTransformManually( false );
     ibisAPI->AddObject( m_landmarkRegistrationObject );
     ibisAPI->AddObject( sourcePoints, m_landmarkRegistrationObject );
     ibisAPI->AddObject( targetPoints, ibisAPI->GetSceneRoot() );
