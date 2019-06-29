@@ -55,7 +55,7 @@ public:
     QString GetLastIbisPlusConfigFilename() { return m_lastIbisPlusConfigFile; }
     void StartConfig( QString configFile );
     void ClearConfig();
-
+	
     // Implementation of the HardwareModule interface
     virtual void AddSettingsMenuEntries( QMenu * menu ) override;
     virtual void Init() override;
@@ -103,7 +103,6 @@ protected:
     bool IsDeviceTransform( igtlioDevicePointer device );
     bool IsDeviceVideo( igtlioDevicePointer device );
 
-
     struct Tool
     {
         vtkSmartPointer<TrackedSceneObject> sceneObject;
@@ -113,6 +112,9 @@ protected:
     };
     typedef QList< Tool* > toolList;
     toolList m_tools;
+
+	void WriteToolConfig();
+	void InternalWriteToolConfig(QString, Tool*);
 
     DeviceToolMap m_deviceToolAssociations;
 
@@ -141,6 +143,8 @@ protected:
     QString m_plusToolkitPathsFilename;
     // Default directory where Plus Toolkit config files are located
     QString m_plusConfigFilesDirectory;
+	// Current ibisplus config file loaded
+	QString m_currentIbisPlusConfigFile;
 };
 
 #endif
