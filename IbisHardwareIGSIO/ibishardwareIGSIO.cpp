@@ -21,6 +21,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QDir>
 #include <QMenu>
 #include <QSettings>
+#include <QMessageBox>
 
 #include "qIGTLIOLogicController.h"
 #include "qIGTLIOClientWidget.h"
@@ -48,6 +49,7 @@ IbisHardwareIGSIO::IbisHardwareIGSIO()
     m_logicCallbacks = vtkSmartPointer<vtkEventQtSlotConnect>::New();
     m_settingsWidget = 0;
     m_autoStartLastConfig = false;
+	m_currentIbisPlusConfigFile = "";
 }
 
 IbisHardwareIGSIO::~IbisHardwareIGSIO()
@@ -94,6 +96,7 @@ void IbisHardwareIGSIO::StartConfig( QString configFile )
     // Read config
     QString configFilePath = m_ibisPlusConfigFilesDirectory + configFile;
     ConfigIO in( configFilePath );
+	m_currentIbisPlusConfigFile = configFile;
 
     // Instanciate Ibis scene objects specified in config file
     for( int i = 0; i < in.GetNumberOfTools(); ++i )
@@ -206,11 +209,13 @@ void IbisHardwareIGSIO::Update()
 
 bool IbisHardwareIGSIO::ShutDown()
 {
+	WriteToolConfig();
     ClearConfig();
 
     delete m_logicController;
     m_logicController = 0;
     m_logic = 0;
+	m_currentIbisPlusConfigFile = "";
 
     return true;
 }
@@ -538,3 +543,36 @@ bool IbisHardwareIGSIO::IsDeviceVideo( igtlioDevicePointer device )
     return device->GetDeviceType() == igtlioVideoConverter::GetIGTLTypeName();
 }
 
+void IbisHardwareIGSIO::WriteToolConfig()
+{
+	QString configFilePath = m_ibisPlusConfigFilesDirectory + m_currentIbisPlusConfigFile;
+	ConfigIO in(configFilePath);
+
+	// Instanciate Ibis scene objects specified in config file
+	for (int i = 0; i < in.GetNumberOfTools(); ++i)
+	{
+		QString filename = in.GetToolParamFile(i);
+		QFileInfo info(filename);
+		if (info.exists() && !info.isWritable())
+		{
+			QString message;
+			message = QString("Hardware config file %1 is not writable.").arg(filename);
+			message += QString(" Hardware config for device %1 will not be saved").arg(in.GetToolName(i));
+			QMessageBox::warning(0, "Warning", message);
+			return;
+		}
+		QString generalConfigFileName = m_ibisPlusConfigFilesDirectory + filename;
+		InternalWriteToolConfig(generalConfigFileName, m_tools[ i ]);
+	}
+}
+
+
+void IbisHardwareIGSIO::InternalWriteToolConfig(QString filename, Tool* tool)
+{
+	SerializerWriter writer0;
+	writer0.SetFilename(filename.toUtf8().data());
+	writer0.Start();
+	tool->sceneObject->SerializeTracked(&writer0);
+	writer0.EndSection();
+	writer0.Finish();
+}
