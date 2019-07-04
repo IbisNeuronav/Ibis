@@ -281,7 +281,6 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
     s = s*s;
     opers[dim].SetVariance(m_GradientScale / s);
     
-    opers[dim].SetMaximumKernelWidth(5);
     opers[dim].CreateDirectional();  
 
     unsigned int numberOfElements = 1;  
@@ -715,7 +714,6 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
     s = s*s;
     opers[dim].SetVariance(m_GradientScale / s);
     
-    opers[dim].SetMaximumKernelWidth(5);
     opers[dim].CreateDirectional();  
 
     unsigned int numberOfElements = 1;  
