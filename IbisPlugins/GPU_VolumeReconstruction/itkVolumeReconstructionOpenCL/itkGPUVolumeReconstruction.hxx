@@ -21,6 +21,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "itkOpenCLUtil.h"
 
 #include "GPUVolumeReconstructionKernel.h"
+#include "itkImageDuplicator.h"
 
 
 namespace itk
@@ -428,7 +429,12 @@ GPUVolumeReconstruction< TImage >
 
   if( m_FixedSliceMask == nullptr )
   {
-    itkExceptionMacro(<< "Slice Mask has not been set." );
+	  using DuplicatorType = itk::ImageDuplicator< ImageType >;
+	  typename DuplicatorType::Pointer duplicator = DuplicatorType::New();
+	  duplicator->SetInputImage(m_FixedSlices[0]);
+	  duplicator->Update();
+	  m_FixedSliceMask = duplicator->GetOutput();
+	  m_FixedSliceMask->FillBuffer(1);
   }
   m_FixedSliceMask->Update();
 

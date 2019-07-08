@@ -146,13 +146,6 @@ void GPU_VolumeReconstructionWidget::on_startButton_clicked()
 	{
 		m_VolumeReconstructor->SetFixedSliceMask(selectedUSAcquisitionObject->GetMask());
 	}
-	else
-	{
-		vtkSmartPointer<vtkImageData> img = vtkSmartPointer<vtkImageData>::New();
-		vtkMatrix4x4 *mat = vtkMatrix4x4::New();
-		selectedUSAcquisitionObject->GetFrameData(0, img, mat);
-		m_VolumeReconstructor->SetFixedSliceMask(img);
-	}
     m_VolumeReconstructor->SetUSSearchRadius( usSearchRadius );
     m_VolumeReconstructor->SetVolumeSpacing( usVolumeSpacing );
     m_VolumeReconstructor->SetKernelStdDev( usVolumeSpacing/2.0 );
