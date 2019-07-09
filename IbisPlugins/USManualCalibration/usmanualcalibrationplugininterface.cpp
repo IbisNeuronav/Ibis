@@ -171,7 +171,7 @@ void USManualCalibrationPluginInterface::BuildCalibrationPhantomRepresentation()
 void USManualCalibrationPluginInterface::StartPhantomRegistration()
 {
     const char * pointNames[4] = { "One", "Two", "Three", "Four" };
-    double pointCoords[4][3] = { { 2.5, 2.5, 48.0 }, { 2.5, 47.5, 48 }, { 47.5, 2.5, 48 }, {  47.5, 47.5, 48 } };
+    double pointCoords[4][3] = { { 0, -17.5, 53 }, { 50, -17.5, 53 }, { 42, 112.5, 53 }, {  10, 80, 53 } };
 
     if( m_calibrationPhantomObjectId == IbisAPI::InvalidId )
         BuildCalibrationPhantomRepresentation();
