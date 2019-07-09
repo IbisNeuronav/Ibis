@@ -142,7 +142,10 @@ void GPU_VolumeReconstructionWidget::on_startButton_clicked()
     std::cerr << "Constructing m_Reconstructor..." << std::endl;
 #endif
     m_VolumeReconstructor->SetNumberOfSlices( nbrOfSlices );
-    m_VolumeReconstructor->SetFixedSliceMask( selectedUSAcquisitionObject->GetMask() );
+	if (selectedUSAcquisitionObject->IsUsingMask())
+	{
+		m_VolumeReconstructor->SetFixedSliceMask(selectedUSAcquisitionObject->GetMask());
+	}
     m_VolumeReconstructor->SetUSSearchRadius( usSearchRadius );
     m_VolumeReconstructor->SetVolumeSpacing( usVolumeSpacing );
     m_VolumeReconstructor->SetKernelStdDev( usVolumeSpacing/2.0 );
