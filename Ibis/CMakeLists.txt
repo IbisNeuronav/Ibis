@@ -114,6 +114,7 @@ if( APPLE )
        execute_process( COMMAND ${MacDeployQtExec} ${CMAKE_INSTALL_PREFIX}/${ExecName}.app -dmg )
        execute_process( COMMAND mv ${CMAKE_INSTALL_PREFIX}/${ExecName}.dmg ${CMAKE_INSTALL_PREFIX}/${DmgFileName} )" )
 elseif( WIN32 )
+   install( TARGETS ${exec_name} DESTINATION . )
    # on Windows, we use WinDeployQt. CPack below is creating an installer using NSIS
    include(${CMAKE_COMMON_DIR}/windeployqt.cmake)
    windeployqt( ${exec_name} . )
