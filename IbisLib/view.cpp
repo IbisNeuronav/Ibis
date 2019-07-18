@@ -142,7 +142,7 @@ void View::SetType( int type )
             break;
         case CORONAL_VIEW_TYPE:
             this->Renderer->GetActiveCamera()->ParallelProjectionOn();
-            this->Renderer->GetActiveCamera()->SetPosition( 0, 1, 0 ); // left on right
+            this->Renderer->GetActiveCamera()->SetPosition( 0, 0, -1); // left on right
             this->Renderer->GetActiveCamera()->SetFocalPoint( 0, 0, 0 );
             this->Renderer->GetActiveCamera()->SetViewUp( 0, 0, 1 ); 
             if (this->InteractorStyle)
