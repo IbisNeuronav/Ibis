@@ -39,6 +39,19 @@
        </property>
       </widget>
      </item>
+     <item>
+      <widget class="QCheckBox" name="useMaskCheckBox">
+       <property name="maximumSize">
+        <size>
+         <width>80</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Use mask</string>
+       </property>
+      </widget>
+     </item>
     </layout>
    </item>
    <item>
