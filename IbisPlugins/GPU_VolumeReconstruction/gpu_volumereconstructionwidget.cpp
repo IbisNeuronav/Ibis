@@ -142,7 +142,7 @@ void GPU_VolumeReconstructionWidget::on_startButton_clicked()
     std::cerr << "Constructing m_Reconstructor..." << std::endl;
 #endif
     m_VolumeReconstructor->SetNumberOfSlices( nbrOfSlices );
-	if (selectedUSAcquisitionObject->IsUsingMask())
+    if (ui->useMaskCheckBox->isChecked())
 	{
 		m_VolumeReconstructor->SetFixedSliceMask(selectedUSAcquisitionObject->GetMask());
 	}
