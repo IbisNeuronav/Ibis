@@ -105,9 +105,17 @@ void UsProbeObjectSettingsWidget::UpdateToolStatus()
         ui->probeStatusLabel->setText( "Out of view" );
         ui->probeStatusLabel->setStyleSheet( "background-color: red" );
         break;
+	case HighError:
+		ui->probeStatusLabel->setText("High error");
+		ui->probeStatusLabel->setStyleSheet("background-color: red");
+		break;
+	case Disabled:
+		ui->probeStatusLabel->setText("Disabled");
+		ui->probeStatusLabel->setStyleSheet("background-color: grey");
+		break;
     case Undefined:
         ui->probeStatusLabel->setText( "Ultrasound probe not initialized" );
-        ui->probeStatusLabel->setStyleSheet( "background-color: red" );
+        ui->probeStatusLabel->setStyleSheet( "background-color: grey" );
         break;
     }
 }

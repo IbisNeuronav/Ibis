@@ -147,8 +147,14 @@ TrackerToolState StatusStringToState( const std::string & status )
     QString qstatus(status.c_str());
     if( qstatus.toUpper().toStdString() == "OK" )
         return Ok;
+	if ( qstatus.toUpper().toStdString() == "OUTOFVIEW" )
+		return OutOfView;
     if( qstatus.toUpper().toStdString() == "OUTOFVOLUME" )
-        return OutOfView;
+        return OutOfVolume;
+	if ( qstatus.toUpper().toStdString() == "HIGHERROR" )
+		return HighError;
+	if ( qstatus.toUpper().toStdString() == "DISABLED" )
+		return Disabled;
     if( qstatus.toUpper().toStdString() == "MISSING" )
         return Missing;
     return Undefined;
@@ -174,6 +180,7 @@ void IbisHardwareIGSIO::Update()
                 {
                   if (iter->first.find("Status") != std::string::npos)
                   {
+					std::cout << iter->second.second.c_str() << std::endl;
                     tool->sceneObject->SetState( StatusStringToState( iter->second.second.c_str() ) );
                   }
                 }

@@ -297,9 +297,17 @@ void USManualCalibrationWidget::UpdateUSProbeStatus()
         ui->statusLabel->setText( "Out of view" );
         ui->statusLabel->setStyleSheet("background-color: red");
         break;
+	case HighError:
+		ui->statusLabel->setText( "High error" );
+		ui->statusLabel->setStyleSheet("background-color: red");
+		break;
+	case Disabled:
+		ui->statusLabel->setText( "Disabled" );
+		ui->statusLabel->setStyleSheet("background-color: grey");
+		break;
     case Undefined:
         ui->statusLabel->setText( "Tracker not initialized" );
-        ui->statusLabel->setStyleSheet("background-color: red");
+        ui->statusLabel->setStyleSheet("background-color: grey");
         break;
     }
 }
