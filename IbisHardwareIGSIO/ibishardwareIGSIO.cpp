@@ -41,6 +41,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "igtlioVideoConverter.h"
 #include "igtlioStatusDevice.h"
 
+const QString IbisHardwareIGSIO::PlusServerExecutablePathName = QString("PlusServer Executable path");
+
 IbisHardwareIGSIO::IbisHardwareIGSIO()
 {
     m_logicController = 0;
@@ -386,23 +388,33 @@ void IbisHardwareIGSIO::InitPlugin()
 {
     m_plusConfigDirectory = GetIbisAPI()->GetConfigDirectory() + QString("PlusToolkit/");
     m_ibisPlusConfigFilesDirectory = m_plusConfigDirectory + QString("IbisPlusConfigFiles/");
-    m_plusToolkitPathsFilename = m_plusConfigDirectory + QString("plus-toolkit-paths.txt");
     m_plusConfigFilesDirectory = m_plusConfigDirectory + QString("PlusConfigFiles/");
 
-    // Look for the Plus Toolkit path
-    if( QFile::exists( m_plusToolkitPathsFilename ) )
-    {
-        QFile pathFile( m_plusToolkitPathsFilename );
-        pathFile.open( QIODevice::ReadOnly | QIODevice::Text );
-        QTextStream pathIn( &pathFile );
-        pathIn >> m_plusServerExec;
-    }
+	// Check whether the path to the PlusServer executable has been registered with the system
+	QString plusServerPath = GetIbisAPI()->GetCustomPath(PlusServerExecutablePathName);
+	if (plusServerPath.isNull())
+		GetIbisAPI()->RegisterCustomPath(PlusServerExecutablePathName, QString(""));
 }
 
 bool IbisHardwareIGSIO::LauchLocalServer( int port, QString plusConfigFile )
 {
+	// First, check that we can locate the PlusServer executable
+	QString PlusServerDir = GetIbisAPI()->GetCustomPath(PlusServerExecutablePathName);
+	if (PlusServerDir.isNull() || PlusServerDir.isEmpty())
+	{
+		QString msg = QString("PlusServer executable not specified. Set the path using Settings->Preferences menu.");
+		GetIbisAPI()->Warning("Error", msg);
+		return false;
+	}
+
     vtkSmartPointer<PlusServerInterface> plusLauncher = vtkSmartPointer<PlusServerInterface>::New();
-    plusLauncher->SetServerExecutable( m_plusServerExec );
+	QString PlusServerPath = PlusServerDir + QDir::separator() + "PlusServer";
+	// TODO: Allow custom paths to contain files and let user point directly to the
+	// executable instead of adding the .exe extension on Windows.
+#ifdef WIN32
+	PlusServerPath += ".exe";
+#endif 
+    plusLauncher->SetServerExecutable(PlusServerPath);
     m_plusLaunchers.push_back( plusLauncher );
 
     QString plusConfigFileFullPath = m_plusConfigFilesDirectory + plusConfigFile;

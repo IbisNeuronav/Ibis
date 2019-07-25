@@ -131,16 +131,14 @@ protected:
 
     // Useful paths
 
-    // Full path of the executable of plus server
-    QString m_plusServerExec;
+	// Name of the custom path used to store the PlusServer location
+	static const QString PlusServerExecutablePathName;
     // Last ibisplus config file loaded
     QString m_lastIbisPlusConfigFile;
     // Default directory where all config files needed for Plus support in Ibis are located
     QString m_plusConfigDirectory;
     // Default directory where IbisPlus configuration files, i.e. files that contain the specification of plus servers, are located.
     QString m_ibisPlusConfigFilesDirectory;
-    // Name and path of the text file that contains the location of the Plus server
-    QString m_plusToolkitPathsFilename;
     // Default directory where Plus Toolkit config files are located
     QString m_plusConfigFilesDirectory;
 	// Current ibisplus config file loaded
