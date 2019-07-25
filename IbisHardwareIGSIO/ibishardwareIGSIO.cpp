@@ -386,16 +386,42 @@ void IbisHardwareIGSIO::InitPlugin()
 {
     m_plusConfigDirectory = GetIbisAPI()->GetConfigDirectory() + QString("PlusToolkit/");
     m_ibisPlusConfigFilesDirectory = m_plusConfigDirectory + QString("IbisPlusConfigFiles/");
-    m_plusToolkitPathsFilename = m_plusConfigDirectory + QString("plus-toolkit-paths.txt");
     m_plusConfigFilesDirectory = m_plusConfigDirectory + QString("PlusConfigFiles/");
 
-    // Look for the Plus Toolkit path
-    if( QFile::exists( m_plusToolkitPathsFilename ) )
+    // Look for the Plus Toolkit path and Plus Server executable
+    QString plusServerExecPath = GetIbisAPI()->GetCustomPath( IbisAPI::PlusServerExecutablePath );
+    bool ok = true;
+    if( plusServerExecPath != QString::null && !plusServerExecPath.isEmpty() )
     {
-        QFile pathFile( m_plusToolkitPathsFilename );
-        pathFile.open( QIODevice::ReadOnly | QIODevice::Text );
-        QTextStream pathIn( &pathFile );
-        pathIn >> m_plusServerExec;
+        m_plusServerExec =  plusServerExecPath + "/PlusServer";
+        QFileInfo fi( m_plusServerExec );
+        if( !fi.isExecutable() )
+            ok = false;
+    }
+    else
+    {
+        m_plusToolkitPathsFilename = m_plusConfigDirectory + QString("plus-toolkit-paths.txt");
+        if( QFile::exists( m_plusToolkitPathsFilename ) )
+        {
+            QFile pathFile( m_plusToolkitPathsFilename );
+            pathFile.open( QIODevice::ReadOnly | QIODevice::Text );
+            QTextStream pathIn( &pathFile );
+            pathIn >> m_plusServerExec;
+            QFileInfo fi( m_plusServerExec );
+            if( fi.isExecutable() )
+                GetIbisAPI()->RegisterCustomPath( IbisAPI::PlusServerExecutablePath, fi.absolutePath() );
+            else
+                ok = false;
+        }
+    }
+    if( !ok )
+    {
+        GetIbisAPI()->UnRegisterCustomPath( IbisAPI::PlusServerExecutablePath );
+        GetIbisAPI()->RegisterCustomPath( IbisAPI::PlusServerExecutablePath, "" );
+        QString message;
+        message = QString("PlusServer not found.\n");
+        message += QString("Go to Settings/Preferences and set PlusServer executable directory.");
+        QMessageBox::warning(0, "Warning", message);
     }
 }
 
@@ -583,3 +609,4 @@ void IbisHardwareIGSIO::InternalWriteToolConfig(QString filename, Tool* tool)
 	writer0.EndSection();
 	writer0.Finish();
 }
+

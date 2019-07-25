@@ -19,6 +19,7 @@
 
 const int IbisAPI::InvalidId = SceneManager::InvalidId;
 const QString IbisAPI::MINCToolsPathVarName = "MINCToolsDirectory";
+const QString IbisAPI::PlusServerExecutablePath = "PlusServerExecutablePath";
 
 
 IbisAPI::IbisAPI()

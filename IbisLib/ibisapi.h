@@ -76,6 +76,7 @@ public:
 
     static const int InvalidId;
     static const QString MINCToolsPathVarName;
+    static const QString PlusServerExecutablePath;
 
     // from SceneManager:
     void AddObject( SceneObject * object, SceneObject * attachTo = 0 );
