@@ -61,12 +61,6 @@ public:
     // Returning false will cause the plugin not to close.
     virtual bool WidgetAboutToClose() { return true; }
 
-    // Give plugin a chance to react before/after scene loading/saving
-    virtual void SceneAboutToLoad() {}
-    virtual void SceneFinishedLoading() {}
-    virtual void SceneAboutToSave() {}
-    virtual void SceneFinishedSaving() {}
-    
 protected:
 
     virtual void PluginTypeLoadSettings( QSettings & s ) override;

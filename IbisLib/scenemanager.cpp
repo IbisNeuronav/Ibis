@@ -346,10 +346,16 @@ void SceneManager::NewScene()
     SetRenderingEnabled( false );
     //Save current application settings
     Application::GetInstance().UpdateApplicationSettings();
+
+    NotifyPluginsSceneAboutToLoad();
+
     // Clear the scene
-    InternalClearScene();
+    this->ClearScene();
     //re-apply global ibis settings
     Application::GetInstance().ApplyApplicationSettings();
+
+    NotifyPluginsSceneFinishedLoading();
+
     SetRenderingEnabled( true );
     this->SetCurrentObject( this->GetSceneRoot() );
 }
