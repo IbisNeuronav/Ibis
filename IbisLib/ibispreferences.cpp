@@ -4,6 +4,7 @@
 #include <QApplication>
 #include <QDesktopWidget>
 #include <QRect>
+#include <QFileInfo>
 
 IbisPreferences::IbisPreferences(QObject *parent) : QObject(parent)
 {
@@ -13,11 +14,19 @@ IbisPreferences::IbisPreferences(QObject *parent) : QObject(parent)
 void IbisPreferences::LoadSettings( QSettings & settings )
 {
     settings.beginGroup( "CustomPaths" );
-    m_customPaths.clear();
+    m_customVariables.clear();
     QStringList names = settings.allKeys();
     for( int i = 0; i < names.count(); i++ )
     {
-        m_customPaths.insert( names[i], settings.value( names[i] ).toString() );
+        QString customVariable = settings.value( names[i] ).toString();
+        QFileInfo f(customVariable);
+        VARIABLE_TYPE varType = IbisPreferences::DIRECTORY_VARIABLE_TYPE;
+        if( f.isFile() )
+            varType = IbisPreferences::FILE_VARIABLE_TYPE;
+        TypedVariable tvar;
+        tvar.name = customVariable;
+        tvar.varType = varType;
+        m_customVariables.insert( names[i], tvar );
     }
     settings.endGroup();
 }
@@ -26,32 +35,43 @@ void IbisPreferences::SaveSettings( QSettings & settings )
 {
     settings.beginGroup( "CustomPaths" );
     settings.remove( "" );
-    if( m_customPaths.count() > 0 )
+    if( m_customVariables.count() > 0 )
     {
-        QMap< QString, QString >::iterator it;
-        for( it = m_customPaths.begin(); it != m_customPaths.end(); ++it )
+        QMap< QString, TypedVariable >::iterator it;
+        for( it = m_customVariables.begin(); it != m_customVariables.end(); ++it )
         {
-            settings.setValue( it.key(), it.value() );
+            TypedVariable tvar = it.value();
+            settings.setValue( it.key(), tvar.name );
         }
     }
     settings.endGroup();
 }
 
-void IbisPreferences::RegisterPath( const QString  & name, const QString & path )
+void IbisPreferences::RegisterCustomVariable(const QString  & varName, const QString & customVariable )
 {
-    m_customPaths.insert( name, path );
+    TypedVariable tvar;
+    tvar.name = customVariable;
+    QFileInfo fi(customVariable);
+    if( fi.isFile() )
+        tvar.varType = FILE_VARIABLE_TYPE;
+    else
+        tvar.varType = DIRECTORY_VARIABLE_TYPE;
+    m_customVariables.insert( varName, tvar );
 }
 
-void IbisPreferences::UnRegisterPath( const QString & pathName )
+void IbisPreferences::UnRegisterCustomVariable( const QString & varName )
 {
-    m_customPaths.remove( pathName );
+    m_customVariables.remove( varName );
 }
 
-const QString IbisPreferences::GetPath( const QString & pathName )
+const QString IbisPreferences::GetCustomVariable(const QString & varName )
 {
-    QMap< QString, QString >::const_iterator it = m_customPaths.find( pathName );
-    if( it != m_customPaths.end() )
-       return it.value();
+    QMap< QString, TypedVariable >::const_iterator it = m_customVariables.find( varName );
+    if( it != m_customVariables.end() )
+    {
+       TypedVariable tvar = it.value();
+       return tvar.name;
+    }
     return QString::null;
 }
 

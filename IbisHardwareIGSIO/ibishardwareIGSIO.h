@@ -41,6 +41,8 @@ public:
     IbisHardwareIGSIO();
     ~IbisHardwareIGSIO();
 
+    static const QString PlusServerExecutablePath;
+
     // Implementation of IbisPlugin interface
     virtual QString GetPluginName() override { return QString("IbisHardwareIGSIO"); }
 

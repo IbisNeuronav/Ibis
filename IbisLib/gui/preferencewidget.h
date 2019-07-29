@@ -26,13 +26,13 @@ protected:
     void UpdateUI();
 
 private slots:
-    void RemovePath( QString pathName );
-    void ResetPath( QString pathName, QString path );
+    void RemoveCustomVariable( QString varName );
+    void ResetCustomVariable( QString customVarName, QString customVar );
 
 private:
     Ui::PreferenceWidget *ui;
-    QVBoxLayout *m_customPathsLayout;
-    void RemoveAllCustomPathsWidgets();
+    QVBoxLayout *m_customVariablesLayout;
+    void RemoveAllCustomVariablesWidgets();
 };
 
 #endif // PREFERENCEWIDGET_H

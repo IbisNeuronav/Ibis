@@ -58,7 +58,7 @@
       </spacer>
      </item>
      <item>
-      <widget class="QLineEdit" name="pathLineEdit">
+      <widget class="QLineEdit" name="customVariableLineEdit">
        <property name="minimumSize">
         <size>
          <width>0</width>

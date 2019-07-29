@@ -16,18 +16,25 @@ public:
 
     void LoadSettings( QSettings & settings );
     void SaveSettings( QSettings & settings );
-    void RegisterPath( const QString  & name, const QString & path );
-    void UnRegisterPath(const QString &pathName );
-    const QString GetPath(const QString &pathName );
+    void RegisterCustomVariable( const QString  & varName, const QString & customVariable );
+    void UnRegisterCustomVariable(const QString &varName );
+    const QString GetCustomVariable(const QString &varName );
+
+    enum VARIABLE_TYPE{ FILE_VARIABLE_TYPE, DIRECTORY_VARIABLE_TYPE, UNKNOWN_VARIABLE_TYPE };
+    struct TypedVariable
+    {
+        QString name;
+        VARIABLE_TYPE varType;
+    };
 
     void ShowPreferenceDialog();
-    QMap< QString, QString > GetCustomPaths( ) { return m_customPaths; }
-    void SetCustomPaths( QMap< QString, QString > &map ) { m_customPaths = map; }
+    QMap< QString, TypedVariable > GetCustomVariables( ) { return m_customVariables; }
+    void SetCustomPaths( QMap< QString, TypedVariable > &map ) { m_customVariables = map; }
 signals:
 
 protected:
-    typedef QMap< QString, QString > CustomPathsMap;
-    CustomPathsMap m_customPaths;
+    typedef QMap< QString, TypedVariable > CustomVariablesMap;
+    CustomVariablesMap m_customVariables;
 
 private slots:
     void OnPreferenceWidgetClosed();

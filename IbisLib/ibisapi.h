@@ -5,6 +5,8 @@
 #include <QList>
 #include <QMap>
 
+#include "ibispreferences.h"
+
 class Application;
 class SceneManager;
 class SceneObject;
@@ -75,8 +77,6 @@ public:
     ~IbisAPI();
 
     static const int InvalidId;
-    static const QString MINCToolsPathVarName;
-    static const QString PlusServerExecutablePath;
 
     // from SceneManager:
     void AddObject( SceneObject * object, SceneObject * attachTo = 0 );
@@ -165,9 +165,9 @@ public:
     IbisPreferences *GetIbisPreferences();
 
     //Custom paths
-    void RegisterCustomPath( const QString & pathName, const QString & directoryPath );
-    void UnRegisterCustomPath( const QString & pathName );
-    const QString GetCustomPath( const QString & pathName );
+    void RegisterCustomVariable(const QString & varName, const QString & customVariable);
+    void UnRegisterCustomVariable( const QString & varName );
+    const QString GetCustomVariable( const QString & pathName );
 
 public slots:
     void ObjectAddedSlot( int id );

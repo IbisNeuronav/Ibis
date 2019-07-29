@@ -3,18 +3,20 @@
 #include <QFileDialog>
 #include <QDir>
 #include <QMessageBox>
+#include "ibispreferences.h"
 
-const QString PathForm::LabelWidgetName = "CustomPathName";
-const QString PathForm::PathWidgetName = "CustomPath";
+const QString PathForm::LabelWidgetName = "CustomVariableName";
+const QString PathForm::CustomVariableWidgetName = "CustomVariable";
 
 PathForm::PathForm(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::PathForm)
 {
     ui->setupUi(this);
+    m_variableType = IbisPreferences::DIRECTORY_VARIABLE_TYPE;
     ui->label->setObjectName( PathForm::LabelWidgetName );
-    ui->pathLineEdit->setObjectName( PathForm::PathWidgetName );
-    connect( ui->pathLineEdit, SIGNAL(returnPressed()), this, SLOT( PathLineEditChanged() ) );
+    ui->customVariableLineEdit->setObjectName( PathForm::CustomVariableWidgetName );
+    connect( ui->customVariableLineEdit, SIGNAL(returnPressed()), this, SLOT( CustomVariableLineEditChanged() ) );
 }
 
 PathForm::~PathForm()
@@ -22,37 +24,57 @@ PathForm::~PathForm()
     delete ui;
 }
 
-void PathForm::SetPath( QString labelText, QString pathText )
+void PathForm::SetCustomVariable(QString labelText, QString customVariableText , IbisPreferences::VARIABLE_TYPE varType)
 {
+    m_variableType = varType;
     ui->label->setText( labelText );
-    ui->pathLineEdit->setText( pathText );
+    ui->customVariableLineEdit->setText( customVariableText );
 }
 
 void PathForm::on_browsePushButton_clicked()
 {
-    QString outputDir = QFileDialog::getExistingDirectory( this, "Custom Path", QDir::homePath() );
-    if( !outputDir.isEmpty() ) // otherwise dialog was cancelled an we want to keep the old directory
+    QString outputText;
+    if( m_variableType == IbisPreferences::DIRECTORY_VARIABLE_TYPE )
+        outputText = QFileDialog::getExistingDirectory( this, "Custom Path", QDir::homePath() );
+    else
+        outputText = QFileDialog::getOpenFileName( this, "File", QDir::homePath() );
+    if( !outputText.isEmpty() ) // otherwise dialog was cancelled an we want to keep the old variable
     {
-        ui->pathLineEdit->setText( outputDir );
-        emit PathChanged( ui->label->text(), ui->pathLineEdit->text() );
+        ui->customVariableLineEdit->setText( outputText );
+        emit CustomVariableChanged( ui->label->text(), ui->customVariableLineEdit->text() );
     }
 }
 
 void PathForm::on_removePushButton_clicked()
 {
-    emit PathToRemove( ui->label->text() );
+    emit CustomVariableToRemove( ui->label->text() );
 }
 
-void PathForm::PathLineEditChanged()
+void PathForm::CustomVariableLineEditChanged()
 {
-    QDir dir( ui->pathLineEdit->text() );
-    if( !dir.exists() )
+    if( m_variableType == IbisPreferences::DIRECTORY_VARIABLE_TYPE )
     {
-        QString tmp("Directory:\n");
-        tmp.append( ui->pathLineEdit->text() );
-        tmp.append( "\ndoes not exist. Please enter a valid path." );
-        QMessageBox::critical( 0, "Error", tmp, 1, 0 );
-        ui->pathLineEdit->setText( "" );
+        QDir dir( ui->customVariableLineEdit->text() );
+        if( !dir.exists() )
+        {
+            QString tmp("Directory:\n");
+            tmp.append( ui->customVariableLineEdit->text() );
+            tmp.append( "\ndoes not exist. Please enter a valid path." );
+            QMessageBox::critical( 0, "Error", tmp, 1, 0 );
+            ui->customVariableLineEdit->setText( "" );
+        }
     }
-    emit PathChanged( ui->label->text(), ui->pathLineEdit->text() );
+    else
+    {
+        QFile f( ui->customVariableLineEdit->text() );
+        if( !f.exists() )
+        {
+            QString tmp("File:\n");
+            tmp.append( ui->customVariableLineEdit->text() );
+            tmp.append( "\ndoes not exist. Please enter a valid filr name." );
+            QMessageBox::critical( 0, "Error", tmp, 1, 0 );
+            ui->customVariableLineEdit->setText( "" );
+        }
+    }
+    emit CustomVariableChanged( ui->label->text(), ui->customVariableLineEdit->text() );
 }

@@ -18,9 +18,6 @@
 #include <QString>
 
 const int IbisAPI::InvalidId = SceneManager::InvalidId;
-const QString IbisAPI::MINCToolsPathVarName = "MINCToolsDirectory";
-const QString IbisAPI::PlusServerExecutablePath = "PlusServerExecutablePath";
-
 
 IbisAPI::IbisAPI()
 {
@@ -421,18 +418,18 @@ IbisPreferences * IbisAPI::GetIbisPreferences()
     return m_application->GetIbisPreferences();
 }
 
-//Custom paths
-void IbisAPI::RegisterCustomPath( const QString & pathName, const QString & directoryPath )
+//Custom variables
+void IbisAPI::RegisterCustomVariable(const QString & varName, const QString & customVariable )
 {
-    m_application->GetIbisPreferences()->RegisterPath( pathName, directoryPath );
+    m_application->GetIbisPreferences()->RegisterCustomVariable( varName, customVariable );
 }
 
-void IbisAPI::UnRegisterCustomPath( const QString & pathName )
+void IbisAPI::UnRegisterCustomVariable( const QString & varName )
 {
-    m_application->GetIbisPreferences()->UnRegisterPath( pathName );
+    m_application->GetIbisPreferences()->UnRegisterCustomVariable( varName );
 }
 
-const QString IbisAPI::GetCustomPath(const QString &pathName )
+const QString IbisAPI::GetCustomVariable(const QString &varName )
 {
-    return m_application->GetIbisPreferences()->GetPath( pathName );
+    return m_application->GetIbisPreferences()->GetCustomVariable( varName );
 }

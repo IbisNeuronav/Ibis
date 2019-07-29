@@ -16,12 +16,12 @@ PreferenceWidget::PreferenceWidget(QWidget *parent) :
 {
     ui->setupUi(this);
     m_preferences = nullptr;
-    m_customPathsLayout = nullptr;
+    m_customVariablesLayout = nullptr;
 }
 
 PreferenceWidget::~PreferenceWidget()
 {
-    delete m_customPathsLayout;
+    delete m_customVariablesLayout;
     delete ui;
 }
 
@@ -35,53 +35,56 @@ void PreferenceWidget::UpdateUI(  )
 {
     if( m_preferences )
     {
-        if( m_customPathsLayout )
+        if( m_customVariablesLayout )
         {
-            this->RemoveAllCustomPathsWidgets();
-            delete m_customPathsLayout;
+            this->RemoveAllCustomVariablesWidgets();
+            delete m_customVariablesLayout;
         }
-        m_customPathsLayout = new QVBoxLayout;
-        m_customPathsLayout->setSpacing( 4 );
-        m_customPathsLayout->setAlignment( Qt::AlignTop );
-        ui->customPathsGroupBox->setLayout( m_customPathsLayout );
-        QMap< QString, QString> paths = m_preferences->GetCustomPaths();
+        m_customVariablesLayout = new QVBoxLayout;
+        m_customVariablesLayout->setSpacing( 4 );
+        m_customVariablesLayout->setAlignment( Qt::AlignTop );
+        ui->customPathsGroupBox->setLayout( m_customVariablesLayout );
+        QMap< QString, IbisPreferences::TypedVariable> paths = m_preferences->GetCustomVariables();
         if( !paths.isEmpty() )
         {
-            QMap< QString, QString >::iterator it;
+            QMap< QString, IbisPreferences::TypedVariable >::iterator it;
             for( it = paths.begin(); it != paths.end(); ++it )
             {
-                QString validPath( it.value() );
-                QDir validDir( validPath );
-                if( !validDir.exists( ) )
-                    validPath = "";
+                IbisPreferences::TypedVariable tvar = it.value();
+                QString validVar = tvar.name;
+                IbisPreferences::VARIABLE_TYPE  varType= tvar.varType;
+                QFileInfo fi( validVar );
+                if( !fi.exists( ) || !( fi.isDir() || fi.isFile() ) )
+                    validVar = "";
+
                 PathForm *nextPath = new PathForm;
-                nextPath->SetPath( it.key(), validPath );
-                m_customPathsLayout->addWidget( nextPath, 0, Qt::AlignTop );
-                connect( nextPath, SIGNAL( PathToRemove(QString) ), this, SLOT( RemovePath(QString) ) );
-                connect( nextPath, SIGNAL( PathChanged(QString, QString) ), this, SLOT( ResetPath(QString, QString) ) );
+                nextPath->SetCustomVariable( it.key(), validVar, varType );
+                m_customVariablesLayout->addWidget( nextPath, 0, Qt::AlignTop );
+                connect( nextPath, SIGNAL( CustomVariableToRemove(QString) ), this, SLOT( RemoveCustomVariable(QString) ) );
+                connect( nextPath, SIGNAL( CustomVariableChanged(QString, QString) ), this, SLOT( ResetCustomVariable(QString, QString) ) );
             }
         }
     }
 }
 
-void PreferenceWidget::RemovePath( QString pathName )
+void PreferenceWidget::RemoveCustomVariable(QString varName )
 {
-    m_preferences->UnRegisterPath( pathName );
+    m_preferences->UnRegisterCustomVariable( varName );
     this->UpdateUI();
 }
 
-void PreferenceWidget::ResetPath( QString pathName, QString path )
+void PreferenceWidget::ResetCustomVariable(QString customVarName, QString customVar )
 {
-    m_preferences->UnRegisterPath( pathName );
-    m_preferences->RegisterPath( pathName, path );
+    m_preferences->UnRegisterCustomVariable( customVarName );
+    m_preferences->RegisterCustomVariable( customVarName, customVar );
 }
 
-void PreferenceWidget::RemoveAllCustomPathsWidgets()
+void PreferenceWidget::RemoveAllCustomVariablesWidgets()
 {
     QLayoutItem* child;
-    while ( m_customPathsLayout->count() > 0 )
+    while ( m_customVariablesLayout->count() > 0 )
     {
-        child = m_customPathsLayout->itemAt(0);
+        child = m_customVariablesLayout->itemAt(0);
         child->widget()->deleteLater();
         child->widget()->hide();
         child->widget()->setParent( nullptr );
@@ -91,30 +94,39 @@ void PreferenceWidget::RemoveAllCustomPathsWidgets()
 void PreferenceWidget::closeEvent( QCloseEvent * event )
 {
     bool ok = true;
-    if( m_preferences && !m_customPathsLayout->isEmpty() )
+    if( m_preferences && !m_customVariablesLayout->isEmpty() )
     {
-        QMap< QString, QString > paths;
+        QMap< QString, IbisPreferences::TypedVariable > paths;
         QWidget *w;
-        for( int i = 0; i < m_customPathsLayout->count(); i++ )
+        for( int i = 0; i < m_customVariablesLayout->count(); i++ )
         {
-            w = m_customPathsLayout->itemAt( i )->widget();
+            w = m_customVariablesLayout->itemAt( i )->widget();
             Q_ASSERT(w);
             QLabel *label = w->findChild<QLabel *>( PathForm::LabelWidgetName );
             Q_ASSERT(label);
-            QLineEdit * lineEdit = w->findChild<QLineEdit *>( PathForm::PathWidgetName );
+            QLineEdit * lineEdit = w->findChild<QLineEdit *>( PathForm::CustomVariableWidgetName );
             Q_ASSERT(lineEdit);
-            QDir validDir( lineEdit->text() );
-            if( !validDir.exists( ) )
+            QFileInfo fi(lineEdit->text());
+            IbisPreferences::TypedVariable tvar;
+            tvar.name = lineEdit->text();
+            tvar.varType = IbisPreferences::DIRECTORY_VARIABLE_TYPE;
+            if( !fi.exists( ) || !(fi.isDir() || fi.isFile() ) )
             {
-                QString tmp("Directory:\n");
+                QString tmp("File or directory:\n");
                 tmp.append( lineEdit->text() );
-                tmp.append( "\ndoes not exist. Please enter a valid path." );
+                tmp.append( "\ndoes not exist. Please enter a valid name." );
                 QMessageBox::critical( 0, "Error", tmp, 1, 0 );
                 lineEdit->setText( "" );
                 ok = false;
             }
-            paths.insert( label->text(), lineEdit->text() );
+            else
+            {
+                if( fi.isFile() )
+                    tvar.varType = IbisPreferences::FILE_VARIABLE_TYPE;
+                paths.insert( label->text(), tvar );
+            }
         }
+        if (ok)
         m_preferences->SetCustomPaths( paths );
     }
     if( ok )

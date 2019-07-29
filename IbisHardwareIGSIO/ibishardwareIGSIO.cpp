@@ -41,6 +41,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "igtlioVideoConverter.h"
 #include "igtlioStatusDevice.h"
 
+const QString IbisHardwareIGSIO::PlusServerExecutablePath = "PlusServerExecutablePath";
+
 IbisHardwareIGSIO::IbisHardwareIGSIO()
 {
     m_logicController = 0;
@@ -389,7 +391,7 @@ void IbisHardwareIGSIO::InitPlugin()
     m_plusConfigFilesDirectory = m_plusConfigDirectory + QString("PlusConfigFiles/");
 
     // Look for the Plus Toolkit path and Plus Server executable
-    QString plusServerExecPath = GetIbisAPI()->GetCustomPath( IbisAPI::PlusServerExecutablePath );
+    QString plusServerExecPath = GetIbisAPI()->GetCustomVariable( PlusServerExecutablePath );
     bool ok = true;
     if( plusServerExecPath != QString::null && !plusServerExecPath.isEmpty() )
     {
@@ -409,15 +411,15 @@ void IbisHardwareIGSIO::InitPlugin()
             pathIn >> m_plusServerExec;
             QFileInfo fi( m_plusServerExec );
             if( fi.isExecutable() )
-                GetIbisAPI()->RegisterCustomPath( IbisAPI::PlusServerExecutablePath, fi.absolutePath() );
+                GetIbisAPI()->RegisterCustomVariable( PlusServerExecutablePath, fi.absolutePath() );
             else
                 ok = false;
         }
     }
     if( !ok )
     {
-        GetIbisAPI()->UnRegisterCustomPath( IbisAPI::PlusServerExecutablePath );
-        GetIbisAPI()->RegisterCustomPath( IbisAPI::PlusServerExecutablePath, "" );
+        GetIbisAPI()->UnRegisterCustomVariable( PlusServerExecutablePath );
+        GetIbisAPI()->RegisterCustomVariable( PlusServerExecutablePath, "" );
         QString message;
         message = QString("PlusServer not found.\n");
         message += QString("Go to Settings/Preferences and set PlusServer executable directory.");

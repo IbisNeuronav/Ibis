@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QString>
+#include "ibispreferences.h"
 
 namespace Ui {
 class PathForm;
@@ -17,21 +18,22 @@ public:
     ~PathForm();
 
     static const QString LabelWidgetName;
-    static const QString PathWidgetName;
+    static const QString CustomVariableWidgetName;
 
-    void SetPath( QString labelText, QString pathText );
+    void SetCustomVariable( QString labelText, QString customVariableText, IbisPreferences::VARIABLE_TYPE varType = IbisPreferences::DIRECTORY_VARIABLE_TYPE );
 
 signals:
-    void PathToRemove( QString );
-    void PathChanged( QString, QString );
+    void CustomVariableToRemove( QString );
+    void CustomVariableChanged( QString, QString );
 
 private slots:
     void on_browsePushButton_clicked();
     void on_removePushButton_clicked();
-    void PathLineEditChanged();
+    void CustomVariableLineEditChanged();
 
 private:
     Ui::PathForm *ui;
+    int m_variableType;
 };
 
 #endif // PATHFORM_H
