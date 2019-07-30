@@ -20,11 +20,11 @@ public:
     static const QString LabelWidgetName;
     static const QString CustomVariableWidgetName;
 
-    void SetCustomVariable( QString labelText, QString customVariableText, IbisPreferences::VARIABLE_TYPE varType = IbisPreferences::DIRECTORY_VARIABLE_TYPE );
+    void SetCustomVariable( QString labelText, QString customVariableText, VARIABLE_TYPE varType = VARIABLE_TYPE::DIRECTORY_VARIABLE_TYPE );
 
 signals:
     void CustomVariableToRemove( QString );
-    void CustomVariableChanged( QString, QString );
+    void CustomVariableChanged( QString, QString, VARIABLE_TYPE varType );
 
 private slots:
     void on_browsePushButton_clicked();
@@ -33,7 +33,7 @@ private slots:
 
 private:
     Ui::PathForm *ui;
-    int m_variableType;
+    VARIABLE_TYPE m_variableType;
 };
 
 #endif // PATHFORM_H

@@ -27,7 +27,7 @@ protected:
 
 private slots:
     void RemoveCustomVariable( QString varName );
-    void ResetCustomVariable( QString customVarName, QString customVar );
+    void ResetCustomVariable(QString customVarName, QString customVar , VARIABLE_TYPE varType);
 
 private:
     Ui::PreferenceWidget *ui;

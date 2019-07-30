@@ -13,7 +13,7 @@ PathForm::PathForm(QWidget *parent) :
     ui(new Ui::PathForm)
 {
     ui->setupUi(this);
-    m_variableType = IbisPreferences::DIRECTORY_VARIABLE_TYPE;
+    m_variableType = VARIABLE_TYPE::DIRECTORY_VARIABLE_TYPE;
     ui->label->setObjectName( PathForm::LabelWidgetName );
     ui->customVariableLineEdit->setObjectName( PathForm::CustomVariableWidgetName );
     connect( ui->customVariableLineEdit, SIGNAL(returnPressed()), this, SLOT( CustomVariableLineEditChanged() ) );
@@ -24,7 +24,7 @@ PathForm::~PathForm()
     delete ui;
 }
 
-void PathForm::SetCustomVariable(QString labelText, QString customVariableText , IbisPreferences::VARIABLE_TYPE varType)
+void PathForm::SetCustomVariable(QString labelText, QString customVariableText , VARIABLE_TYPE varType)
 {
     m_variableType = varType;
     ui->label->setText( labelText );
@@ -34,14 +34,14 @@ void PathForm::SetCustomVariable(QString labelText, QString customVariableText ,
 void PathForm::on_browsePushButton_clicked()
 {
     QString outputText;
-    if( m_variableType == IbisPreferences::DIRECTORY_VARIABLE_TYPE )
+    if( m_variableType == VARIABLE_TYPE::DIRECTORY_VARIABLE_TYPE )
         outputText = QFileDialog::getExistingDirectory( this, "Custom Path", QDir::homePath() );
     else
         outputText = QFileDialog::getOpenFileName( this, "File", QDir::homePath() );
     if( !outputText.isEmpty() ) // otherwise dialog was cancelled an we want to keep the old variable
     {
         ui->customVariableLineEdit->setText( outputText );
-        emit CustomVariableChanged( ui->label->text(), ui->customVariableLineEdit->text() );
+        emit CustomVariableChanged( ui->label->text(), ui->customVariableLineEdit->text(), m_variableType );
     }
 }
 
@@ -52,7 +52,7 @@ void PathForm::on_removePushButton_clicked()
 
 void PathForm::CustomVariableLineEditChanged()
 {
-    if( m_variableType == IbisPreferences::DIRECTORY_VARIABLE_TYPE )
+    if( m_variableType == VARIABLE_TYPE::DIRECTORY_VARIABLE_TYPE )
     {
         QDir dir( ui->customVariableLineEdit->text() );
         if( !dir.exists() )
@@ -76,5 +76,5 @@ void PathForm::CustomVariableLineEditChanged()
             ui->customVariableLineEdit->setText( "" );
         }
     }
-    emit CustomVariableChanged( ui->label->text(), ui->customVariableLineEdit->text() );
+    emit CustomVariableChanged( ui->label->text(), ui->customVariableLineEdit->text(), m_variableType );
 }

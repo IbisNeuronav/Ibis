@@ -165,7 +165,7 @@ public:
     IbisPreferences *GetIbisPreferences();
 
     //Custom paths
-    void RegisterCustomVariable(const QString & varName, const QString & customVariable);
+    void RegisterCustomVariable(const QString & varName, const QString & customVariable, VARIABLE_TYPE varType = VARIABLE_TYPE::DIRECTORY_VARIABLE_TYPE );
     void UnRegisterCustomVariable( const QString & varName );
     const QString GetCustomVariable( const QString & pathName );
 

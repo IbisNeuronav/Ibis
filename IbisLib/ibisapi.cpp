@@ -419,9 +419,9 @@ IbisPreferences * IbisAPI::GetIbisPreferences()
 }
 
 //Custom variables
-void IbisAPI::RegisterCustomVariable(const QString & varName, const QString & customVariable )
+void IbisAPI::RegisterCustomVariable(const QString & varName, const QString & customVariable, VARIABLE_TYPE varType )
 {
-    m_application->GetIbisPreferences()->RegisterCustomVariable( varName, customVariable );
+    m_application->GetIbisPreferences()->RegisterCustomVariable( varName, customVariable, varType );
 }
 
 void IbisAPI::UnRegisterCustomVariable( const QString & varName )

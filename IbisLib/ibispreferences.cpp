@@ -20,9 +20,9 @@ void IbisPreferences::LoadSettings( QSettings & settings )
     {
         QString customVariable = settings.value( names[i] ).toString();
         QFileInfo f(customVariable);
-        VARIABLE_TYPE varType = IbisPreferences::DIRECTORY_VARIABLE_TYPE;
+        VARIABLE_TYPE varType = VARIABLE_TYPE::DIRECTORY_VARIABLE_TYPE;
         if( f.isFile() )
-            varType = IbisPreferences::FILE_VARIABLE_TYPE;
+            varType = VARIABLE_TYPE::FILE_VARIABLE_TYPE;
         TypedVariable tvar;
         tvar.name = customVariable;
         tvar.varType = varType;
@@ -47,15 +47,12 @@ void IbisPreferences::SaveSettings( QSettings & settings )
     settings.endGroup();
 }
 
-void IbisPreferences::RegisterCustomVariable(const QString  & varName, const QString & customVariable )
+void IbisPreferences::RegisterCustomVariable(const QString  & varName, const QString & customVariable, VARIABLE_TYPE varType )
 {
     TypedVariable tvar;
     tvar.name = customVariable;
     QFileInfo fi(customVariable);
-    if( fi.isFile() )
-        tvar.varType = FILE_VARIABLE_TYPE;
-    else
-        tvar.varType = DIRECTORY_VARIABLE_TYPE;
+        tvar.varType = varType;
     m_customVariables.insert( varName, tvar );
 }
 
