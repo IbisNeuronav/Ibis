@@ -51,8 +51,8 @@ void PreferenceWidget::UpdateUI(  )
             for( it = paths.begin(); it != paths.end(); ++it )
             {
                 QString validPath( it.value() );
-                QDir validDir( validPath );
-                if( !validDir.exists( ) )
+                QFile validFile( validPath );
+                if( !validFile.exists( ) )
                     validPath = "";
                 PathForm *nextPath = new PathForm;
                 nextPath->SetPath( it.key(), validPath );
@@ -103,10 +103,10 @@ void PreferenceWidget::closeEvent( QCloseEvent * event )
             Q_ASSERT(label);
             QLineEdit * lineEdit = w->findChild<QLineEdit *>( PathForm::PathWidgetName );
             Q_ASSERT(lineEdit);
-            QDir validDir( lineEdit->text() );
-            if( !validDir.exists( ) )
+            QFile validFile( lineEdit->text() );
+            if( !validFile.exists( ) )
             {
-                QString tmp("Directory:\n");
+                QString tmp("File/Directory:\n");
                 tmp.append( lineEdit->text() );
                 tmp.append( "\ndoes not exist. Please enter a valid path." );
                 QMessageBox::critical( 0, "Error", tmp, 1, 0 );
