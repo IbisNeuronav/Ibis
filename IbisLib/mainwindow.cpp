@@ -25,7 +25,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "generatorplugininterface.h"
 #include "aboutpluginswidget.h"
 #include "serializer.h"
-#include "preferencewidget.h"
 
 #include <QApplication>
 #include <QDesktopWidget>

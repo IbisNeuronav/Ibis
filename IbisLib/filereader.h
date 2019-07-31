@@ -36,6 +36,8 @@ public:
     FileReader( QObject * parent = 0 );
     ~FileReader();
 
+    static const QString MINCToolsPathVarName;
+
     void SetParams( OpenFileParams * params );
     void SetFileNames( QStringList & filenames );  // helper that eventually call SetParams
     void GetReadObjects( QList<SceneObject*> & objects );  // helper

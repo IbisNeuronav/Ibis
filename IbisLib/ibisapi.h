@@ -75,7 +75,6 @@ public:
     ~IbisAPI();
 
     static const int InvalidId;
-    static const QString MINCToolsPathVarName;
 
     // from SceneManager:
     void AddObject( SceneObject * object, SceneObject * attachTo = 0 );
