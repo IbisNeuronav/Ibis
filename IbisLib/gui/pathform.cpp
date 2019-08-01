@@ -48,8 +48,8 @@ void PathForm::on_removePushButton_clicked()
 
 void PathForm::PathLineEditChanged()
 {
-    QFile f( ui->pathLineEdit->text() );
-    if( !f.exists() )
+    QFileInfo fi( ui->pathLineEdit->text() );
+    if( !fi.exists() )
     {
         QString tmp("File/Directory:\n");
         tmp.append( ui->pathLineEdit->text() );

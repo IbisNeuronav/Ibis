@@ -29,9 +29,9 @@
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout">
        <item>
-        <widget class="QPushButton" name="selectPushButton">
+        <widget class="QPushButton" name="cancelPushButton">
          <property name="text">
-          <string>Select</string>
+          <string>Cancel</string>
          </property>
         </widget>
        </item>
@@ -49,9 +49,12 @@
         </spacer>
        </item>
        <item>
-        <widget class="QPushButton" name="cancelPushButton">
+        <widget class="QPushButton" name="selectPushButton">
          <property name="text">
-          <string>Cancel</string>
+          <string>Select</string>
+         </property>
+         <property name="default">
+          <bool>false</bool>
          </property>
         </widget>
        </item>
