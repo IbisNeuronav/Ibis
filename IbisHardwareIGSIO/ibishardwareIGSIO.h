@@ -133,8 +133,6 @@ protected:
 
     // Useful paths
 
-    // Full path of the executable of plus server
-    QString m_plusServerExec;
     // Last ibisplus config file loaded
     QString m_lastIbisPlusConfigFile;
     // Default directory where all config files needed for Plus support in Ibis are located

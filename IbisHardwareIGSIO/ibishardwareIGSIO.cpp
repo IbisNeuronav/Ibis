@@ -391,20 +391,22 @@ void IbisHardwareIGSIO::InitPlugin()
     m_plusConfigFilesDirectory = m_plusConfigDirectory + QString("PlusConfigFiles/");
 
     // Look for the Plus Toolkit path and Plus Server executable
-    m_plusServerExec = GetIbisAPI()->GetCustomPath( PlusServerExecutable );
-    bool ok = false;
-    if( m_plusServerExec != QString::null && !m_plusServerExec.isEmpty() )
+    // Full path of the executable of plus server
+    QString plusServerExec = GetIbisAPI()->GetCustomPath( PlusServerExecutable );
+    bool ok = true;
+    if( plusServerExec != QString::null && !plusServerExec.isEmpty() )
     {
-        QFileInfo fi( m_plusServerExec );
+        QFileInfo fi( plusServerExec );
         if( !( fi.isFile() && fi.isExecutable() ) )
         {
-            GetIbisAPI()->UnRegisterCustomPath( PlusServerExecutable );
+            ok = false;
         }
-        else
-            ok = true;
     }
+    else
+        ok = false;
     if( !ok )
     {
+        GetIbisAPI()->UnRegisterCustomPath( PlusServerExecutable );
         GetIbisAPI()->RegisterCustomPath( PlusServerExecutable, "" );
     }
 }
@@ -412,10 +414,10 @@ void IbisHardwareIGSIO::InitPlugin()
 bool IbisHardwareIGSIO::LaunchLocalServer( int port, QString plusConfigFile )
 {
     bool ok = true;
-    m_plusServerExec = GetIbisAPI()->GetCustomPath( PlusServerExecutable );
-    if( m_plusServerExec != QString::null && !m_plusServerExec.isEmpty() )
+    QString plusServerExec = GetIbisAPI()->GetCustomPath( PlusServerExecutable );
+    if( plusServerExec != QString::null && !plusServerExec.isEmpty() )
     {
-        QFileInfo fi( m_plusServerExec );
+        QFileInfo fi( plusServerExec );
             if( !( fi.isFile() && fi.isExecutable() ) )
                 ok = false;
     }
@@ -430,7 +432,7 @@ bool IbisHardwareIGSIO::LaunchLocalServer( int port, QString plusConfigFile )
         return false;
     }
     vtkSmartPointer<PlusServerInterface> plusLauncher = vtkSmartPointer<PlusServerInterface>::New();
-    plusLauncher->SetServerExecutable( m_plusServerExec );
+    plusLauncher->SetServerExecutable( plusServerExec );
     m_plusLaunchers.push_back( plusLauncher );
 
     QString plusConfigFileFullPath = m_plusConfigFilesDirectory + plusConfigFile;
