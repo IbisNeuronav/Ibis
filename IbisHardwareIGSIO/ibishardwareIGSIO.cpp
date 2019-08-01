@@ -396,7 +396,7 @@ void IbisHardwareIGSIO::InitPlugin()
     if( m_plusServerExec != QString::null && !m_plusServerExec.isEmpty() )
     {
         QFileInfo fi( m_plusServerExec );
-        if( !fi.isExecutable() )
+        if( !( fi.isFile() && fi.isExecutable() ) )
             ok = false;
     }
     else
@@ -409,8 +409,8 @@ void IbisHardwareIGSIO::InitPlugin()
             QTextStream pathIn( &pathFile );
             pathIn >> m_plusServerExec;
             QFileInfo fi( m_plusServerExec );
-            if( fi.isExecutable() )
-                GetIbisAPI()->RegisterCustomPath( PlusServerExecutable, fi.absolutePath() );
+            if( fi.isFile() && fi.isExecutable() )
+                GetIbisAPI()->RegisterCustomPath( PlusServerExecutable, fi.absoluteFilePath() );
             else
                 ok = false;
         }
@@ -422,13 +422,31 @@ void IbisHardwareIGSIO::InitPlugin()
         GetIbisAPI()->RegisterCustomPath( PlusServerExecutable, "" );
         QString message;
         message = QString("PlusServer not found.\n");
-        message += QString("Go to Settings/Preferences and set PlusServer executable directory.");
+        message += QString("Go to Settings/Preferences and set PlusServer executable.");
         QMessageBox::warning(0, "Warning", message);
     }
 }
 
 bool IbisHardwareIGSIO::LaunchLocalServer( int port, QString plusConfigFile )
 {
+    bool ok = true;
+    m_plusServerExec = GetIbisAPI()->GetCustomPath( PlusServerExecutable );
+    if( m_plusServerExec != QString::null && !m_plusServerExec.isEmpty() )
+    {
+        QFileInfo fi( m_plusServerExec );
+            if( !( fi.isFile() && fi.isExecutable() ) )
+                ok = false;
+    }
+    else
+        ok = false;
+    if( !ok )
+    {
+        QString message;
+        message = QString("PlusServer not found.\n");
+        message = QString("Go to Settings/Preferences and set PlusServer executable.");
+        QMessageBox::warning(0, "Warning", message);
+        return false;
+    }
     vtkSmartPointer<PlusServerInterface> plusLauncher = vtkSmartPointer<PlusServerInterface>::New();
     plusLauncher->SetServerExecutable( m_plusServerExec );
     m_plusLaunchers.push_back( plusLauncher );
