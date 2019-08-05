@@ -386,27 +386,14 @@ void IbisHardwareIGSIO::OnDeviceRemoved( vtkObject*, unsigned long, void*, void 
 
 void IbisHardwareIGSIO::InitPlugin()
 {
+    // Look for the Plus Toolkit path and Plus Server executable
     m_plusConfigDirectory = GetIbisAPI()->GetConfigDirectory() + QString("PlusToolkit/");
     m_ibisPlusConfigFilesDirectory = m_plusConfigDirectory + QString("IbisPlusConfigFiles/");
     m_plusConfigFilesDirectory = m_plusConfigDirectory + QString("PlusConfigFiles/");
 
-    // Look for the Plus Toolkit path and Plus Server executable
-    // Full path of the executable of plus server
-    QString plusServerExec = GetIbisAPI()->GetCustomPath( PlusServerExecutable );
-    bool ok = true;
-    if( plusServerExec != QString::null && !plusServerExec.isEmpty() )
+    // Is PlusServer registered, if not, make a placeholder in custom preferences
+    if( !GetIbisAPI()->IsCustomPathRegistered( PlusServerExecutable ) )
     {
-        QFileInfo fi( plusServerExec );
-        if( !( fi.isFile() && fi.isExecutable() ) )
-        {
-            ok = false;
-        }
-    }
-    else
-        ok = false;
-    if( !ok )
-    {
-        GetIbisAPI()->UnRegisterCustomPath( PlusServerExecutable );
         GetIbisAPI()->RegisterCustomPath( PlusServerExecutable, "" );
     }
 }
@@ -415,20 +402,21 @@ bool IbisHardwareIGSIO::LaunchLocalServer( int port, QString plusConfigFile )
 {
     bool ok = true;
     QString plusServerExec = GetIbisAPI()->GetCustomPath( PlusServerExecutable );
-    if( plusServerExec != QString::null && !plusServerExec.isEmpty() )
-    {
-        QFileInfo fi( plusServerExec );
-            if( !( fi.isFile() && fi.isExecutable() ) )
-                ok = false;
-    }
-    else
-        ok = false;
-    if( !ok )
+    if( plusServerExec == QString::null || plusServerExec.isEmpty() )
     {
         QString message;
-        message = QString("PlusServer not found.\n");
+        message = QString("PlusServer executable path not defined.\n");
         message = QString("Go to Settings/Preferences and set PlusServer executable.");
-        QMessageBox::warning(0, "Warning", message);
+        QMessageBox::warning(0, "Error", message);
+        GetIbisAPI()->RegisterCustomPath( PlusServerExecutable, "" );
+        return false;
+    }
+    QFileInfo fi( plusServerExec );
+    if( !( fi.isFile() && fi.isExecutable() ) )
+    {
+        QString message = QString("Can't execute PlusServer: %1").arg(plusServerExec);
+        QMessageBox::warning(0,"Error", message );
+        GetIbisAPI()->RegisterCustomPath( PlusServerExecutable, "" );
         return false;
     }
     vtkSmartPointer<PlusServerInterface> plusLauncher = vtkSmartPointer<PlusServerInterface>::New();

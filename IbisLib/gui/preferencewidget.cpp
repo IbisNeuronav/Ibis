@@ -72,7 +72,6 @@ void PreferenceWidget::RemovePath( QString pathName )
 
 void PreferenceWidget::ResetPath( QString pathName, QString path )
 {
-    m_preferences->UnRegisterPath( pathName );
     m_preferences->RegisterPath( pathName, path );
 }
 
