@@ -31,6 +31,7 @@ void PathForm::SetPath( QString labelText, QString pathText )
 void PathForm::SetOnlyPathText( QString pathText )
 {
     ui->pathLineEdit->setText( pathText );
+    emit PathChanged( ui->label->text(), ui->pathLineEdit->text() );
 }
 
 void PathForm::on_browsePushButton_clicked()
@@ -39,11 +40,6 @@ void PathForm::on_browsePushButton_clicked()
     tree->setAttribute(Qt::WA_DeleteOnClose);
     tree->SetPathForm( this );
     tree->show();
-}
-
-void PathForm::on_removePushButton_clicked()
-{
-    emit PathToRemove( ui->label->text() );
 }
 
 void PathForm::PathLineEditChanged()

@@ -408,7 +408,6 @@ bool IbisHardwareIGSIO::LaunchLocalServer( int port, QString plusConfigFile )
         message = QString("PlusServer executable path not defined.\n");
         message = QString("Go to Settings/Preferences and set PlusServer executable.");
         QMessageBox::warning(0, "Error", message);
-        GetIbisAPI()->RegisterCustomPath( PlusServerExecutable, "" );
         return false;
     }
     QFileInfo fi( plusServerExec );
@@ -416,7 +415,6 @@ bool IbisHardwareIGSIO::LaunchLocalServer( int port, QString plusConfigFile )
     {
         QString message = QString("Can't execute PlusServer: %1").arg(plusServerExec);
         QMessageBox::warning(0,"Error", message );
-        GetIbisAPI()->RegisterCustomPath( PlusServerExecutable, "" );
         return false;
     }
     vtkSmartPointer<PlusServerInterface> plusLauncher = vtkSmartPointer<PlusServerInterface>::New();
