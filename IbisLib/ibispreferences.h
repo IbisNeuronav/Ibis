@@ -19,6 +19,7 @@ public:
     void RegisterPath( const QString  & name, const QString & path );
     void UnRegisterPath(const QString &pathName );
     const QString GetPath(const QString &pathName );
+    bool IsPathRegistered( const QString &pathName );
 
     void ShowPreferenceDialog();
     QMap< QString, QString > GetCustomPaths( ) { return m_customPaths; }

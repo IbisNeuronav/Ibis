@@ -166,6 +166,7 @@ public:
     void RegisterCustomPath( const QString & pathName, const QString & directoryPath );
     void UnRegisterCustomPath( const QString & pathName );
     const QString GetCustomPath( const QString & pathName );
+    bool IsCustomPathRegistered( const QString &pathName );
 
 public slots:
     void ObjectAddedSlot( int id );

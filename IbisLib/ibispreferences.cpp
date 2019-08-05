@@ -55,6 +55,11 @@ const QString IbisPreferences::GetPath( const QString & pathName )
     return QString::null;
 }
 
+bool IbisPreferences::IsPathRegistered( const QString &pathName )
+{
+
+}
+
 void IbisPreferences::ShowPreferenceDialog()
 {
     m_prefWidget = new PreferenceWidget;
