@@ -41,6 +41,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "igtlioVideoConverter.h"
 #include "igtlioStatusDevice.h"
 
+const QString IbisHardwareIGSIO::PlusServerExecutable = "PlusServerExecutable";
+
 IbisHardwareIGSIO::IbisHardwareIGSIO()
 {
     m_logicController = 0;
@@ -120,7 +122,7 @@ void IbisHardwareIGSIO::StartConfig( QString configFile )
         // If the server is local and should be launched automatically, then launch it
         if( in.GetServerIPAddress(i) == "localhost" && in.GetStartAuto(i) )
         {
-            LauchLocalServer( in.GetServerPort(i), in.GetPlusConfigFile(i) );
+            LaunchLocalServer( in.GetServerPort(i), in.GetPlusConfigFile(i) );
         }
 
         // Now try to connect to server
@@ -384,25 +386,39 @@ void IbisHardwareIGSIO::OnDeviceRemoved( vtkObject*, unsigned long, void*, void 
 
 void IbisHardwareIGSIO::InitPlugin()
 {
+    // Look for the Plus Toolkit path and Plus Server executable
     m_plusConfigDirectory = GetIbisAPI()->GetConfigDirectory() + QString("PlusToolkit/");
     m_ibisPlusConfigFilesDirectory = m_plusConfigDirectory + QString("IbisPlusConfigFiles/");
-    m_plusToolkitPathsFilename = m_plusConfigDirectory + QString("plus-toolkit-paths.txt");
     m_plusConfigFilesDirectory = m_plusConfigDirectory + QString("PlusConfigFiles/");
 
-    // Look for the Plus Toolkit path
-    if( QFile::exists( m_plusToolkitPathsFilename ) )
+    // Is PlusServer registered, if not, make a placeholder in custom preferences
+    if( !GetIbisAPI()->IsCustomPathRegistered( PlusServerExecutable ) )
     {
-        QFile pathFile( m_plusToolkitPathsFilename );
-        pathFile.open( QIODevice::ReadOnly | QIODevice::Text );
-        QTextStream pathIn( &pathFile );
-        pathIn >> m_plusServerExec;
+        GetIbisAPI()->RegisterCustomPath( PlusServerExecutable, "" );
     }
 }
 
-bool IbisHardwareIGSIO::LauchLocalServer( int port, QString plusConfigFile )
+bool IbisHardwareIGSIO::LaunchLocalServer( int port, QString plusConfigFile )
 {
+    bool ok = true;
+    QString plusServerExec = GetIbisAPI()->GetCustomPath( PlusServerExecutable );
+    if( plusServerExec == QString::null || plusServerExec.isEmpty() )
+    {
+        QString message;
+        message = QString("PlusServer executable path not defined.\n");
+        message = QString("Go to Settings/Preferences and set PlusServer executable.");
+        QMessageBox::warning(0, "Error", message);
+        return false;
+    }
+    QFileInfo fi( plusServerExec );
+    if( !( fi.isFile() && fi.isExecutable() ) )
+    {
+        QString message = QString("Can't execute PlusServer: %1").arg(plusServerExec);
+        QMessageBox::warning(0,"Error", message );
+        return false;
+    }
     vtkSmartPointer<PlusServerInterface> plusLauncher = vtkSmartPointer<PlusServerInterface>::New();
-    plusLauncher->SetServerExecutable( m_plusServerExec );
+    plusLauncher->SetServerExecutable( plusServerExec );
     m_plusLaunchers.push_back( plusLauncher );
 
     QString plusConfigFileFullPath = m_plusConfigFilesDirectory + plusConfigFile;
@@ -583,3 +599,4 @@ void IbisHardwareIGSIO::InternalWriteToolConfig(QString filename, Tool* tool)
 	writer0.EndSection();
 	writer0.Finish();
 }
+

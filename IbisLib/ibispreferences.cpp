@@ -37,9 +37,9 @@ void IbisPreferences::SaveSettings( QSettings & settings )
     settings.endGroup();
 }
 
-void IbisPreferences::RegisterPath( const QString  & name, const QString & path )
+void IbisPreferences::RegisterPath( const QString  & name, const QString & pathName )
 {
-    m_customPaths.insert( name, path );
+    m_customPaths.insert( name, pathName );
 }
 
 void IbisPreferences::UnRegisterPath( const QString & pathName )
@@ -53,6 +53,14 @@ const QString IbisPreferences::GetPath( const QString & pathName )
     if( it != m_customPaths.end() )
        return it.value();
     return QString::null;
+}
+
+bool IbisPreferences::IsPathRegistered( const QString &pathName )
+{
+    QMap< QString, QString >::const_iterator it = m_customPaths.find( pathName );
+    if( it != m_customPaths.end() )
+       return true;
+    return false;
 }
 
 void IbisPreferences::ShowPreferenceDialog()

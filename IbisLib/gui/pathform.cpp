@@ -1,8 +1,8 @@
 #include "pathform.h"
 #include "ui_pathform.h"
-#include <QFileDialog>
-#include <QDir>
+#include <QFile>
 #include <QMessageBox>
+#include "filesystemtree.h"
 
 const QString PathForm::LabelWidgetName = "CustomPathName";
 const QString PathForm::PathWidgetName = "CustomPath";
@@ -28,27 +28,26 @@ void PathForm::SetPath( QString labelText, QString pathText )
     ui->pathLineEdit->setText( pathText );
 }
 
-void PathForm::on_browsePushButton_clicked()
+void PathForm::SetOnlyPathText( QString pathText )
 {
-    QString outputDir = QFileDialog::getExistingDirectory( this, "Custom Path", QDir::homePath() );
-    if( !outputDir.isEmpty() ) // otherwise dialog was cancelled an we want to keep the old directory
-    {
-        ui->pathLineEdit->setText( outputDir );
-        emit PathChanged( ui->label->text(), ui->pathLineEdit->text() );
-    }
+    ui->pathLineEdit->setText( pathText );
+    emit PathChanged( ui->label->text(), ui->pathLineEdit->text() );
 }
 
-void PathForm::on_removePushButton_clicked()
+void PathForm::on_browsePushButton_clicked()
 {
-    emit PathToRemove( ui->label->text() );
+    FileSystemTree *tree = new FileSystemTree;
+    tree->setAttribute(Qt::WA_DeleteOnClose);
+    tree->SetPathForm( this );
+    tree->show();
 }
 
 void PathForm::PathLineEditChanged()
 {
-    QDir dir( ui->pathLineEdit->text() );
-    if( !dir.exists() )
+    QFileInfo fi( ui->pathLineEdit->text() );
+    if( !fi.exists() )
     {
-        QString tmp("Directory:\n");
+        QString tmp("File/Directory:\n");
         tmp.append( ui->pathLineEdit->text() );
         tmp.append( "\ndoes not exist. Please enter a valid path." );
         QMessageBox::critical( 0, "Error", tmp, 1, 0 );

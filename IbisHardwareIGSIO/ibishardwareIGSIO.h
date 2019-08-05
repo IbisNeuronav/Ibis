@@ -41,6 +41,8 @@ public:
     IbisHardwareIGSIO();
     ~IbisHardwareIGSIO();
 
+    static const QString PlusServerExecutable;
+
     // Implementation of IbisPlugin interface
     virtual QString GetPluginName() override { return QString("IbisHardwareIGSIO"); }
 
@@ -89,7 +91,7 @@ protected:
     virtual void InitPlugin() override;
 
     // Launch a Plus server and connect
-    bool LauchLocalServer( int port, QString plusConfigFile );
+    bool LaunchLocalServer( int port, QString plusConfigFile );
     void Connect( std::string ip, int port );
     void DisconnectAllServers();
     void ShutDownLocalServers();
@@ -131,8 +133,6 @@ protected:
 
     // Useful paths
 
-    // Full path of the executable of plus server
-    QString m_plusServerExec;
     // Last ibisplus config file loaded
     QString m_lastIbisPlusConfigFile;
     // Default directory where all config files needed for Plus support in Ibis are located

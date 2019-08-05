@@ -18,8 +18,6 @@
 #include <QString>
 
 const int IbisAPI::InvalidId = SceneManager::InvalidId;
-const QString IbisAPI::MINCToolsPathVarName = "MINCToolsDirectory";
-
 
 IbisAPI::IbisAPI()
 {
@@ -431,7 +429,12 @@ void IbisAPI::UnRegisterCustomPath( const QString & pathName )
     m_application->GetIbisPreferences()->UnRegisterPath( pathName );
 }
 
-const QString IbisAPI::GetCustomPath(const QString &pathName )
+const QString IbisAPI::GetCustomPath( const QString &pathName )
 {
     return m_application->GetIbisPreferences()->GetPath( pathName );
+}
+
+bool IbisAPI::IsCustomPathRegistered( const QString &pathName )
+{
+    return m_application->GetIbisPreferences()->IsPathRegistered( pathName );
 }

@@ -4,6 +4,8 @@
 #include <QWidget>
 #include <QString>
 
+class FileSystemTree;
+
 namespace Ui {
 class PathForm;
 }
@@ -20,14 +22,13 @@ public:
     static const QString PathWidgetName;
 
     void SetPath( QString labelText, QString pathText );
+    void SetOnlyPathText( QString pathText );
 
 signals:
-    void PathToRemove( QString );
     void PathChanged( QString, QString );
 
 private slots:
     void on_browsePushButton_clicked();
-    void on_removePushButton_clicked();
     void PathLineEditChanged();
 
 private:

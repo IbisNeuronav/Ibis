@@ -63,6 +63,7 @@ SET( IBISLIB_SRC
                      gui/triplecutplaneobjectmixerwidget.cpp
                      gui/pointercalibrationdialog.cpp
                      gui/preferencewidget.cpp
+                     gui/filesystemtree.cpp
                      gui/pathform.cpp )
 
 SET( IBISLIB_HDR
@@ -132,6 +133,7 @@ SET( IBISLIB_HDR_MOC
                          gui/usprobeobjectsettingswidget.h
                          gui/pointercalibrationdialog.h
                          gui/preferencewidget.h
+                         gui/filesystemtree.h
                          gui/pathform.h )
 
 set( IBISLIB_UI
@@ -157,6 +159,7 @@ set( IBISLIB_UI
             gui/usprobeobjectsettingswidget.ui
             gui/pointercalibrationdialog.ui
             gui/preferencewidget.ui
+            gui/filesystemtree.ui
             gui/pathform.ui )
 
 

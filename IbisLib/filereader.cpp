@@ -37,6 +37,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include <itkImageIOFactory.h>
 
+const QString FileReader::MINCToolsPathVarName = "MINCToolsDirectory";
+
 FileReader::FileReader(QObject *parent)
     : QThread(parent)
 
@@ -112,7 +114,7 @@ void FileReader::SetIbisAPI( IbisAPI *api )
     m_ibisAPI = api;
     if( m_ibisAPI )
     {
-        QString  mincDir = m_ibisAPI->GetCustomPath( IbisAPI::MINCToolsPathVarName );
+        QString  mincDir = m_ibisAPI->GetCustomPath( MINCToolsPathVarName );
         if( mincDir != QString::null && !mincDir.isEmpty() )
         {
             if( mincDir.at( mincDir.count()-1 ) != '/' )
@@ -127,16 +129,16 @@ void FileReader::SetIbisAPI( IbisAPI *api )
             ok = ok && FindMINCTool( m_minccalc );
             if( !ok )
             {
-                m_ibisAPI->UnRegisterCustomPath( IbisAPI::MINCToolsPathVarName );
+                m_ibisAPI->UnRegisterCustomPath( MINCToolsPathVarName );
                 ok = FindMincConverter();
                 if( ok )
                 {
                     QFileInfo fi( m_mincconvert );
-                    m_ibisAPI->RegisterCustomPath( IbisAPI::MINCToolsPathVarName, fi.absolutePath() );
+                    m_ibisAPI->RegisterCustomPath( MINCToolsPathVarName, fi.absolutePath() );
                 }
                 else
                 {
-                    m_ibisAPI->RegisterCustomPath( IbisAPI::MINCToolsPathVarName, "" );
+                    m_ibisAPI->RegisterCustomPath( MINCToolsPathVarName, "" );
                     m_mincconvert.clear();
                     m_minccalc.clear();
                 }
@@ -148,11 +150,11 @@ void FileReader::SetIbisAPI( IbisAPI *api )
             if( ok )
             {
                 QFileInfo fi( m_mincconvert );
-                m_ibisAPI->RegisterCustomPath( IbisAPI::MINCToolsPathVarName, fi.absolutePath() );
+                m_ibisAPI->RegisterCustomPath( MINCToolsPathVarName, fi.absolutePath() );
             }
             else
             {
-                m_ibisAPI->RegisterCustomPath( IbisAPI::MINCToolsPathVarName, "" );
+                m_ibisAPI->RegisterCustomPath( MINCToolsPathVarName, "" );
                 m_mincconvert.clear();
                 m_minccalc.clear();
             }
