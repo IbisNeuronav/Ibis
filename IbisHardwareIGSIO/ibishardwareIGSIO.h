@@ -91,19 +91,10 @@ protected:
     virtual void InitPlugin() override;
 
     // Launch a Plus server and connect
-    bool LaunchLocalServer( int port, QString plusConfigFile );
+    bool LaunchLocalServer( QString plusConfigFile );
     void Connect( std::string ip, int port );
     void DisconnectAllServers();
     void ShutDownLocalServers();
-
-    // Utility functions
-    int FindToolByName( QString name );
-    TrackedSceneObject * InstanciateSceneObjectFromType( QString objectName, QString objectType );
-    vtkSmartPointer<PolyDataObject> InstanciateToolModel(QString filename);
-    void ReadToolConfig(QString filename,vtkSmartPointer<TrackedSceneObject> tool);
-    bool IsDeviceImage( igtlioDevicePointer device );
-    bool IsDeviceTransform( igtlioDevicePointer device );
-    bool IsDeviceVideo( igtlioDevicePointer device );
 
     struct Tool
     {
@@ -115,8 +106,18 @@ protected:
     typedef QList< Tool* > toolList;
     toolList m_tools;
 
-	void WriteToolConfig();
-	void InternalWriteToolConfig(QString, Tool*);
+    // Utility functions
+    int FindToolByName( QString name );
+    void AssignDeviceImageToTool( igtlioDevicePointer device, Tool * tool );
+    TrackedSceneObject * InstanciateSceneObjectFromType( QString objectName, QString objectType );
+    vtkSmartPointer<PolyDataObject> InstanciateToolModel(QString filename);
+    void ReadToolConfig(QString filename,vtkSmartPointer<TrackedSceneObject> tool);
+    bool IsDeviceImage( igtlioDevicePointer device );
+    bool IsDeviceTransform( igtlioDevicePointer device );
+    bool IsDeviceVideo( igtlioDevicePointer device );
+
+    void WriteToolConfig();
+    void InternalWriteToolConfig(QString, Tool*);
 
     DeviceToolMap m_deviceToolAssociations;
 
