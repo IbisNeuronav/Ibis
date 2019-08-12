@@ -598,3 +598,23 @@ void IbisHardwareIGSIO::InternalWriteToolConfig(QString filename, Tool* tool)
 	writer0.Finish();
 }
 
+void IbisHardwareIGSIO::SceneAboutToLoad()
+{
+    this->ClearConfig();
+}
+
+void IbisHardwareIGSIO::SceneFinishedLoading()
+{
+    StartConfig( m_lastIbisPlusConfigFile );
+}
+
+void IbisHardwareIGSIO::SceneAboutToSave()
+{
+
+}
+
+void IbisHardwareIGSIO::SceneFinishedSaving()
+{
+
+}
+
