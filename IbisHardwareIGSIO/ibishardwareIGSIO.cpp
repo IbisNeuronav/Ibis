@@ -608,13 +608,3 @@ void IbisHardwareIGSIO::SceneFinishedLoading()
     StartConfig( m_lastIbisPlusConfigFile );
 }
 
-void IbisHardwareIGSIO::SceneAboutToSave()
-{
-
-}
-
-void IbisHardwareIGSIO::SceneFinishedSaving()
-{
-
-}
-
