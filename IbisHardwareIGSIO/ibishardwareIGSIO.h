@@ -76,6 +76,9 @@ public:
     virtual void AddTrackedVideoClient( TrackedSceneObject * obj ) override;
     virtual void RemoveTrackedVideoClient( TrackedSceneObject * obj) override;
 
+    virtual void SceneAboutToLoad();
+    virtual void SceneFinishedLoading();
+
 private slots:
 
     void OpenSettingsWidget();

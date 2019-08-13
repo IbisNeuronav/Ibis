@@ -346,10 +346,12 @@ void SceneManager::NewScene()
     SetRenderingEnabled( false );
     //Save current application settings
     Application::GetInstance().UpdateApplicationSettings();
+
     // Clear the scene
-    InternalClearScene();
+    this->ClearScene();
     //re-apply global ibis settings
     Application::GetInstance().ApplyApplicationSettings();
+
     SetRenderingEnabled( true );
     this->SetCurrentObject( this->GetSceneRoot() );
 }
@@ -1732,24 +1734,21 @@ void SceneManager::ObjectWriter( Serializer * ser )
 
 void SceneManager::NotifyPluginsSceneAboutToLoad()
 {
-    QList<ToolPluginInterface*> allTools;
-    Application::GetInstance().GetAllToolPlugins( allTools );
-    for( int i = 0; i < allTools.size(); ++i )
+    QList<IbisPlugin*> allPlugins;
+    Application::GetInstance().GetAllPlugins( allPlugins );
+    for( int i = 0; i < allPlugins.size(); ++i )
     {
-        ToolPluginInterface * toolModule = allTools[i];
-        toolModule->SceneAboutToLoad();
+        allPlugins[i]->SceneAboutToLoad();
     }
 }
 
 void SceneManager::NotifyPluginsSceneFinishedLoading()
 {
-    // Tell plugins new scene finished loading
-    QList<ToolPluginInterface*> allTools;
-    Application::GetInstance().GetAllToolPlugins( allTools );
-    for( int i = 0; i < allTools.size(); ++i )
+    QList<IbisPlugin*> allPlugins;
+    Application::GetInstance().GetAllPlugins( allPlugins );
+    for( int i = 0; i < allPlugins.size(); ++i )
     {
-        ToolPluginInterface * toolModule = allTools[i];
-        toolModule->SceneFinishedLoading();
+        allPlugins[i]->SceneFinishedLoading();
     }
 }
 

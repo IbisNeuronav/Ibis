@@ -41,6 +41,12 @@ public:
 
     virtual void Serialize( Serializer * ser ) {}
 
+    // Give plugin a chance to react before/after scene loading/saving
+    virtual void SceneAboutToLoad() {}
+    virtual void SceneFinishedLoading() {}
+    virtual void SceneAboutToSave() {}
+    virtual void SceneFinishedSaving() {}
+
 signals:
 
     void PluginModified();
