@@ -42,7 +42,8 @@ void DeviceToolAssociation::Serialize( Serializer * ser )
 
 void DeviceToolMap::ToolAndPartFromDevice( const QString & device, QString & tool, QString & part )
 {
-    QPair<QString,QString> val = value( device );
+	QPair<QString, QString> defaultValue( QString(""), QString("") );
+    QPair<QString,QString> val = value( device, defaultValue );
     tool = val.first;
     part = val.second;
 }
