@@ -438,6 +438,10 @@ void IbisHardwareIGSIO::DisconnectAllServers()
     {
         m_logic->GetConnector( static_cast<unsigned>(i) )->Stop();
     }
+
+    // Clear all connectors
+    while( m_logic->GetNumberOfConnectors() > 0 )
+      m_logic->RemoveConnector( 0 );
 }
 
 void IbisHardwareIGSIO::ShutDownLocalServers()
