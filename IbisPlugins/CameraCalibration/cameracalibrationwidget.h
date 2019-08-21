@@ -51,7 +51,7 @@ private slots:
     void on_computeDistortionCheckBox_toggled(bool checked);
     void on_computeExtrinsicCheckBox_toggled(bool checked);
     void on_accumulateCheckBox_toggled(bool checked);
-    void on_captureViewButton_toggled(bool checked);
+    void on_captureViewButton_clicked();
 
 private:
 

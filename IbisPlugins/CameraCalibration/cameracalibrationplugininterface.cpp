@@ -216,6 +216,16 @@ void CameraCalibrationPluginInterface::StartAccumulating()
     m_isAccumulating = true;
 }
 
+int CameraCalibrationPluginInterface::GetNumberOfAccumulatedViews()
+{
+    return m_cameraCalibrator->GetNumberOfAccumulatedViews();
+}
+
+int CameraCalibrationPluginInterface::GetNumberOfViewsToAccumulate()
+{
+    return m_numberOfViewsToAccumulate;
+}
+
 void CameraCalibrationPluginInterface::AccumulateView( vtkImageData * imageVtk, std::vector<cv::Point2f> imagePoints, vtkMatrix4x4 * trackerMatrix )
 {
     m_cameraCalibrator->AccumulateView( imagePoints, trackerMatrix );
@@ -252,6 +262,7 @@ void CameraCalibrationPluginInterface::ImportCalibrationData( QString dir )
 void CameraCalibrationPluginInterface::ClearCalibrationData()
 {
     m_cameraCalibrator->ClearCalibrationData();
+    UpdateCameraViewsObjects();
 }
 
 void CameraCalibrationPluginInterface::CaptureCalibrationView()

@@ -35,7 +35,7 @@ CameraCalibrationWidget::CameraCalibrationWidget(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::CameraCalibrationWidget)
 {
-    m_pluginInterface = 0;
+    m_pluginInterface = nullptr;
 
     ui->setupUi(this);
 
@@ -106,7 +106,6 @@ void CameraCalibrationWidget::UpdateDisplay()
     if( m_pluginInterface->IsAccumulating() && m_accumulationTime->elapsed() > 4000 )
     {
         m_pluginInterface->CancelAccumulation();
-        UpdateUi();
     }
 
     CameraObject * currentCam = m_pluginInterface->GetCurrentCameraObject();
@@ -131,8 +130,6 @@ void CameraCalibrationWidget::UpdateDisplay()
             {
                 vtkMatrix4x4 * trackerMatrix = currentCam->GetUncalibratedTransform()->GetMatrix();
                 m_pluginInterface->AccumulateView( imageVtk, currentImagePoints, trackerMatrix );
-                if( !m_pluginInterface->IsAccumulating() )  // finished accumulating
-                    UpdateUi();
             }
 
             // update the position of markers
@@ -150,6 +147,7 @@ void CameraCalibrationWidget::UpdateDisplay()
         }
     }
 
+    this->UpdateUi();
     this->GetRenderWindow()->Render();
 }
 
@@ -256,26 +254,40 @@ void CameraCalibrationWidget::UpdateUi()
 {
     Q_ASSERT( m_pluginInterface );
 
+    bool isAccum = m_pluginInterface->IsAccumulating();
+
     // calibration options
     ui->computeCenterCheckBox->blockSignals( true );
+    ui->computeCenterCheckBox->setEnabled( !isAccum );
     ui->computeCenterCheckBox->setChecked( m_pluginInterface->GetComputeCenter() );
     ui->computeCenterCheckBox->blockSignals( false );
+
     ui->computeDistortionCheckBox->blockSignals( true );
+    ui->computeDistortionCheckBox->setEnabled( !isAccum );
     ui->computeDistortionCheckBox->setChecked( m_pluginInterface->GetComputeDistortion() );
     ui->computeDistortionCheckBox->blockSignals( false );
+
     ui->computeExtrinsicCheckBox->blockSignals( true );
+    ui->computeExtrinsicCheckBox->setEnabled( !isAccum );
     ui->computeExtrinsicCheckBox->setChecked( m_pluginInterface->GetComputeExtrinsic() );
     ui->computeExtrinsicCheckBox->blockSignals( false );
+
     ui->accumulateCheckBox->blockSignals( true );
+    ui->accumulateCheckBox->setEnabled( !isAccum );
     ui->accumulateCheckBox->setChecked( m_pluginInterface->IsUsingAccumulation() );
     ui->accumulateCheckBox->blockSignals( false );
-    ui->captureViewButton->blockSignals( true );
-    ui->captureViewButton->setCheckable( m_pluginInterface->IsUsingAccumulation() );
-    if( m_pluginInterface->IsUsingAccumulation() )
-        ui->captureViewButton->setChecked( m_pluginInterface->IsAccumulating() );
+
+    // Capture View button
+    ui->captureViewButton->setEnabled( !isAccum );
+    if( isAccum )
+    {
+        QString bt = QString("%1 of %2").arg( m_pluginInterface->GetNumberOfAccumulatedViews() ).arg( m_pluginInterface->GetNumberOfViewsToAccumulate() );
+        ui->captureViewButton->setText( bt );
+    }
     else
-        ui->captureViewButton->setChecked( false );
-    ui->captureViewButton->blockSignals( false );
+    {
+        ui->captureViewButton->setText("Capture");
+    }
 
     // Calibration results
     CameraObject * currentCamera = m_pluginInterface->GetCurrentCameraObject();
@@ -333,12 +345,12 @@ void CameraCalibrationWidget::on_accumulateCheckBox_toggled(bool checked)
 {
     Q_ASSERT( m_pluginInterface );
     m_pluginInterface->SetUseAccumulation( checked );
+    UpdateUi();
 }
 
-void CameraCalibrationWidget::on_captureViewButton_toggled( bool checked )
+void CameraCalibrationWidget::on_captureViewButton_clicked()
 {
     Q_ASSERT( m_pluginInterface );
-    Q_ASSERT( checked );  // uncheck should be done only programmatically, this should be called only when checked.
 
     if( m_pluginInterface->IsUsingAccumulation() )  // start accumulating
     {
@@ -348,6 +360,5 @@ void CameraCalibrationWidget::on_captureViewButton_toggled( bool checked )
     else // capture
     {
         m_pluginInterface->CaptureCalibrationView();
-        UpdateUi();
     }
 }
