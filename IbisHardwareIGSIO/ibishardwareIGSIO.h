@@ -25,6 +25,7 @@ class PlusServerInterface;
 class vtkEventQtSlotConnect;
 class IbisHardwareIGSIOSettingsWidget;
 class PolyDataObject;
+class Logger;
 
 class IbisHardwareIGSIO : public HardwareModule
 {
@@ -76,8 +77,10 @@ public:
     virtual void AddTrackedVideoClient( TrackedSceneObject * obj ) override;
     virtual void RemoveTrackedVideoClient( TrackedSceneObject * obj) override;
 
-    virtual void SceneAboutToLoad();
-    virtual void SceneFinishedLoading();
+    virtual void SceneAboutToLoad() override;
+    virtual void SceneFinishedLoading() override;
+
+    const Logger * GetLogger() { return m_log; }
 
 private slots:
 
@@ -130,6 +133,9 @@ protected:
     qIGTLIOLogicController * m_logicController;
 
     bool m_autoStartLastConfig;
+
+    // log server output
+    Logger * m_log;
 
     // Settings widgets
     qIGTLIOClientWidget * m_clientWidget;

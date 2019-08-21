@@ -1,12 +1,18 @@
 #include "plusserverinterface.h"
+#include "logger.h"
 #include <vtkObjectFactory.h>
 #include <QFileInfo>
+#include <QThread>
+#include <QTime>
+#include <QApplication>
 
 vtkStandardNewMacro(PlusServerInterface);
 
 PlusServerInterface::PlusServerInterface() : m_serverLogLevel( 3 )
 {
-    m_CurrentServerInstance = 0;
+    m_CurrentServerInstance = nullptr;
+    m_state = Idle;
+    m_logger = nullptr;
 }
 
 PlusServerInterface::~PlusServerInterface()
@@ -17,7 +23,7 @@ PlusServerInterface::~PlusServerInterface()
 //-----------------------------------------------------------------------------
 bool PlusServerInterface::StartServer(const QString& configFilePath)
 {
-    if (m_CurrentServerInstance != NULL)
+    if (m_CurrentServerInstance != nullptr)
     {
         StopServer();
     }
@@ -62,27 +68,37 @@ bool PlusServerInterface::StartServer(const QString& configFilePath)
     // Un-requested log entries that are captured from the PlusServer executable are parsed and dropped from output
     QString cmdLine = QString("\"%1\" --config-file=\"%2\" --verbose=%3").arg(m_plusServerExecutable).arg(configFilePath).arg(m_serverLogLevel);
     m_CurrentServerInstance->start(cmdLine);
-    m_CurrentServerInstance->waitForFinished(500);
+    m_CurrentServerInstance->waitForStarted();
 
     // During waitForFinished an error signal may be emitted, which may delete m_CurrentServerInstance,
     // therefore we need to check if m_CurrentServerInstance is still not NULL
-    if (m_CurrentServerInstance && m_CurrentServerInstance->state() == QProcess::Running)
+    if( m_CurrentServerInstance && m_CurrentServerInstance->state() == QProcess::Running )
     {
-        LogInfo("Server process started successfully");
-        return true;
+        SetState(Starting);
     }
     else
     {
-        SetLastErrorMessage("Failed to start server process");
-        LogError("Failed to start server process");
+        LogMessage("Failed to start server process");
         return false;
     }
+
+    // Wait for the server to be listening or fail
+    QThread * thread = QThread::currentThread();
+    QTime timeWaited;
+    timeWaited.start();
+    while( timeWaited.elapsed() < 20000 && m_state == Starting )
+    {
+        thread->msleep( 100 );
+        QApplication::processEvents();
+    }
+
+    return GetState() == Running;
 }
 
-//-----------------------------------------------------------------------------
+
 bool PlusServerInterface::StopServer()
 {
-    if (m_CurrentServerInstance == NULL)
+    if (!m_CurrentServerInstance)
     {
         // already stopped
         return true;
@@ -99,12 +115,12 @@ bool PlusServerInterface::StopServer()
         m_CurrentServerInstance->terminate();
         if (m_CurrentServerInstance->state() == QProcess::Running)
         {
-            LogInfo("Server process stop request sent successfully");
+            LogMessage("Server process stop request sent successfully");
         }
         const int totalTimeoutSec = 15;
         const double retryDelayTimeoutSec = 0.3;
         double timePassedSec = 0;
-        while (!m_CurrentServerInstance->waitForFinished(retryDelayTimeoutSec * 1000))
+        while (!m_CurrentServerInstance->waitForFinished(static_cast<int>(retryDelayTimeoutSec * 1000)))
         {
             m_CurrentServerInstance->terminate(); // in release mode on Windows the first terminate request may go unnoticed
             timePassedSec += retryDelayTimeoutSec;
@@ -112,17 +128,18 @@ bool PlusServerInterface::StopServer()
             {
                 // graceful termination was not successful, force the process to quit
                 QString msg = QString("Server process did not stop on request for %1 seconds, force it to quit now.").arg( timePassedSec );
-                LogWarning( msg );
+                LogMessage( msg );
                 m_CurrentServerInstance->kill();
                 forcedShutdown = true;
                 break;
             }
         }
-        LogInfo("Server process stopped successfully");
+        LogMessage("Server process stopped successfully");
     }
     delete m_CurrentServerInstance;
-    m_CurrentServerInstance = NULL;
-    m_Suffix.clear();
+    m_CurrentServerInstance = nullptr;
+
+    SetState(Idle);
     return (!forcedShutdown);
 }
 
@@ -132,21 +149,21 @@ bool PlusServerInterface::StopServer()
 void PlusServerInterface::StdOutMsgReceived()
 {
     QByteArray strData = m_CurrentServerInstance->readAllStandardOutput();
-    SendServerOutputToLogger(strData);
+    ParseServerOutput(strData);
 }
 
 //-----------------------------------------------------------------------------
 void PlusServerInterface::StdErrMsgReceived()
 {
     QByteArray strData = m_CurrentServerInstance->readAllStandardError();
-    SendServerOutputToLogger(strData);
+    ParseServerOutput(strData);
 }
 
 //-----------------------------------------------------------------------------
 void PlusServerInterface::ErrorReceived(QProcess::ProcessError errorCode)
 {
     const char* errorString = "unknown";
-    switch ((QProcess::ProcessError)errorCode)
+    switch (static_cast<QProcess::ProcessError>(errorCode))
     {
     case QProcess::FailedToStart:
         errorString = "FailedToStart";
@@ -164,129 +181,55 @@ void PlusServerInterface::ErrorReceived(QProcess::ProcessError errorCode)
         errorString = "ReadError";
         break;
     case QProcess::UnknownError:
-    default:
         errorString = "UnknownError";
+        break;
     }
-    LogError( QString("Server process error: %1").arg( errorString ) );
+    std::cout << "Server process error: " << errorString << std::endl;
+    LogMessage( QString("Server process error: %1").arg( errorString ) );
 }
 
-//-----------------------------------------------------------------------------
-void PlusServerInterface::ServerExecutableFinished(int returnCode, QProcess::ExitStatus status)
+void PlusServerInterface::ServerExecutableFinished(int returnCode, QProcess::ExitStatus )
 {
     if (returnCode == 0)
     {
-        LogInfo("Server process terminated.");
+        std::cout << "Server Terminated normally" << std::endl;
+        LogMessage("Server process terminated.");
     }
     else
     {
-        LogError( QString("Server stopped unexpectedly. Return code: %1").arg( returnCode ) );
+        std::cout << "Server terminated with error code " << returnCode << std::endl;
+        LogMessage( QString("Server stopped unexpectedly. Return code: %1").arg( returnCode ) );
     }
+    SetState(Idle);
 }
 
-//----------------------------------------------------------------------------
-/*void PlusServerInterface::ParseContent(const std::string& message)
+void PlusServerInterface::SetState( ServerState s )
 {
-    // Input is the format: message
-    // Plus OpenIGTLink server listening on IPs:
-    // 169.254.100.247
-    // 169.254.181.13
-    // 129.100.44.163
-    // 192.168.199.1
-    // 192.168.233.1
-    // 127.0.0.1 -- port 18944
-    if (message.find("Plus OpenIGTLink server listening on IPs:") != std::string::npos)
+    if( s != m_state )
     {
-        m_Suffix.append(message);
-        m_Suffix.append("\n");
-        m_DeviceSetSelectorWidget->SetDescriptionSuffix(QString(m_Suffix.c_str()));
+        m_state = s;
+        emit StateChanged();
     }
-    else if (message.find("Server status: Server(s) are running.") != std::string::npos)
+}
+
+void PlusServerInterface::LogMessage( const QString & s )
+{
+    if( m_logger )
     {
-        m_DeviceSetSelectorWidget->SetConnectionSuccessful(true);
-        m_DeviceSetSelectorWidget->SetConnectButtonText(QString("Stop server"));
+        m_logger->AddLog( s );
     }
-    else if (message.find("Server status: ") != std::string::npos)
-    {
-        // pull off server status and display it
-        this->m_DeviceSetSelectorWidget->SetDescriptionSuffix(QString(message.c_str()));
-    }
-}*/
-
-void PlusServerInterface::LogInfo( const QString l )
-{
-    emit ServerOutputReceived( l );
 }
 
-void PlusServerInterface::LogWarning( const QString l )
-{
-    emit ServerOutputReceived( l );
-}
-
-void PlusServerInterface::LogError( const QString l )
-{
-    emit ServerOutputReceived( l );
-}
-
-void PlusServerInterface::SendServerOutputToLogger(const QByteArray& strData)
+void PlusServerInterface::ParseServerOutput(const QByteArray& strData)
 {
     QString s(strData);
-    emit ServerOutputReceived( strData );
 
-    /*typedef std::vector<std::string> StringList;
+    std::cout << "Server output: " << s.toUtf8().data() << std::endl;
 
-    QString string(strData);
-    std::string logString(string.toLatin1().constData());
-
-    if (logString.empty())
+    if( s.contains( "Server status: Server(s) are running." ) )
     {
-        return;
+        SetState(Running);
     }
 
-    // De-windows-ifiy
-    ReplaceStringInPlace(logString, "\r\n", "\n");
-    StringList tokens;
-
-    if (logString.find('|') != std::string::npos)
-    {
-        PlusCommon::SplitStringIntoTokens(logString, '|', tokens, false);
-        // Remove empty tokens
-        for (StringList::iterator it = tokens.begin(); it != tokens.end(); ++it)
-        {
-            if (PlusCommon::Trim(*it).empty())
-            {
-                tokens.erase(it);
-                it = tokens.begin();
-            }
-        }
-        for (unsigned int index = 0; index < tokens.size(); ++index)
-        {
-            if (vtkPlusLogger::GetLogLevelType(tokens[index]) != vtkPlusLogger::LOG_LEVEL_UNDEFINED)
-            {
-                vtkPlusLogger::LogLevelType logLevel = vtkPlusLogger::GetLogLevelType(tokens[index++]);
-                std::string timeStamp = tokens[index++];
-                std::string message = tokens[index++];
-                std::string location = tokens[index++];
-
-                std::string file = location.substr(4, location.find_last_of('(') - 4);
-                int lineNumber(0);
-                std::stringstream lineNumberStr(location.substr(location.find_last_of('(') + 1, location.find_last_of(')') - location.find_last_of('(') - 1));
-                lineNumberStr >> lineNumber;
-
-                // Only parse for content if the line was successfully parsed for logging
-                this->ParseContent(message);
-
-                vtkPlusLogger::Instance()->LogMessage(logLevel, message.c_str(), file.c_str(), lineNumber, "SERVER");
-            }
-        }
-    }
-    else
-    {
-        PlusCommon::SplitStringIntoTokens(logString, '\n', tokens, false);
-        for (StringList::iterator it = tokens.begin(); it != tokens.end(); ++it)
-        {
-            vtkPlusLogger::Instance()->LogMessage(vtkPlusLogger::LOG_LEVEL_INFO, *it, "SERVER");
-            this->ParseContent(*it);
-        }
-        return;
-    } */
+    LogMessage( s );
 }

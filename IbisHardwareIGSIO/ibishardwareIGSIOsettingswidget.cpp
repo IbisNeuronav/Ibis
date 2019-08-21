@@ -1,11 +1,13 @@
 #include "ibishardwareIGSIOsettingswidget.h"
 #include "ui_ibishardwareIGSIOsettingswidget.h"
 #include "ibishardwareIGSIO.h"
+#include "logger.h"
+
 #include <QDir>
 
 IbisHardwareIGSIOSettingsWidget::IbisHardwareIGSIOSettingsWidget(QWidget *parent) :
     QWidget(parent),
-    m_igsio(0),
+    m_igsio(nullptr),
     ui(new Ui::IbisHardwareIGSIOSettingsWidget)
 {
     ui->setupUi(this);
@@ -19,6 +21,13 @@ IbisHardwareIGSIOSettingsWidget::~IbisHardwareIGSIOSettingsWidget()
 void IbisHardwareIGSIOSettingsWidget::SetIgsio( IbisHardwareIGSIO * igsio )
 {
     m_igsio = igsio;
+
+    // Fill log textbox with current log text and watch
+    ui->logTextEdit->setText( m_igsio->GetLogger()->GetAll() );
+    connect( m_igsio->GetLogger(), SIGNAL(LogAdded(const QString&)), this, SLOT(OnLogAdded(const QString&)) );
+    connect( m_igsio->GetLogger(), SIGNAL(LogCleared()), this, SLOT(OnLogCleared()) );
+
+    // Update rest of gui
     UpdateUI();
 }
 
@@ -45,6 +54,9 @@ void IbisHardwareIGSIOSettingsWidget::UpdateUI()
     }
 
     ui->autoStartLastConfigCheckBox->setChecked( m_igsio->GetAutoStartLastConfig() );
+
+    // Display HW module log in the textEdit box
+    //ui->logTextEdit
 }
 
 void IbisHardwareIGSIOSettingsWidget::on_applyConfigFileButton_clicked()
@@ -59,4 +71,14 @@ void IbisHardwareIGSIOSettingsWidget::on_applyConfigFileButton_clicked()
 void IbisHardwareIGSIOSettingsWidget::on_autoStartLastConfigCheckBox_toggled( bool checked )
 {
     m_igsio->SetAutoStartLastConfig( checked );
+}
+
+void IbisHardwareIGSIOSettingsWidget::OnLogAdded(const QString & text)
+{
+    ui->logTextEdit->append( text );
+}
+
+void IbisHardwareIGSIOSettingsWidget::OnLogCleared()
+{
+    ui->logTextEdit->clear();
 }

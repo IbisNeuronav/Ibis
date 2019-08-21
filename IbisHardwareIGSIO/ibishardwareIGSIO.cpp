@@ -11,6 +11,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "ibishardwareIGSIO.h"
 #include "plusserverinterface.h"
 #include "configio.h"
+#include "logger.h"
 
 #include "ibisapi.h"
 #include "pointerobject.h"
@@ -52,10 +53,12 @@ IbisHardwareIGSIO::IbisHardwareIGSIO()
     m_settingsWidget = nullptr;
     m_autoStartLastConfig = false;
 	m_currentIbisPlusConfigFile = "";
+    m_log = new Logger;
 }
 
 IbisHardwareIGSIO::~IbisHardwareIGSIO()
 {
+    delete m_log;
 }
 
 void IbisHardwareIGSIO::LoadSettings( QSettings & s )
@@ -134,6 +137,7 @@ void IbisHardwareIGSIO::StartConfig( QString configFile )
 
 void IbisHardwareIGSIO::ClearConfig()
 {
+    m_log->ClearLog();
     m_currentIbisPlusConfigFile.clear();
     RemoveToolObjectsFromScene();
     DisconnectAllServers();
@@ -391,6 +395,8 @@ bool IbisHardwareIGSIO::LaunchLocalServer( QString plusConfigFile )
     }
     vtkSmartPointer<PlusServerInterface> plusLauncher = vtkSmartPointer<PlusServerInterface>::New();
     plusLauncher->SetServerExecutable( plusServerExec );
+    plusLauncher->SetServerWorkingDirectory( m_plusConfigFilesDirectory );
+    plusLauncher->SetLogger( m_log );
     m_plusLaunchers.push_back( plusLauncher );
 
     QString plusConfigFileFullPath = m_plusConfigFilesDirectory + plusConfigFile;

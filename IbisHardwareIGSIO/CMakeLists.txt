@@ -15,9 +15,9 @@ set( AutoIgtlIOPath ${IBIS_EXTERNAL_DEPENDENCIES_DIR}/OpenIGTLinkIO/build )
 find_package( OpenIGTLinkIO REQUIRED PATHS ${AutoIgtlIOPath} )
 
 # Define sources
-set( IbisHardwareIgsioSrc ibishardwareIGSIO.cpp plusserverinterface.cpp configio.cpp ibishardwareIGSIOsettingswidget.cpp )
+set( IbisHardwareIgsioSrc ibishardwareIGSIO.cpp plusserverinterface.cpp configio.cpp ibishardwareIGSIOsettingswidget.cpp logger.cpp )
 set( IbisHardwareIgsioHdr configio.h )
-set( IbisHardwareIgsioHdrMoc ibishardwareIGSIO.h plusserverinterface.h ibishardwareIGSIOsettingswidget.h )
+set( IbisHardwareIgsioHdrMoc ibishardwareIGSIO.h plusserverinterface.h ibishardwareIGSIOsettingswidget.h logger.h )
 set( IbisHardwareIgsioUi ibishardwareIGSIOsettingswidget.ui )
 
 # moc Qt source file without a ui file
