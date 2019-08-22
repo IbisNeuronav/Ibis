@@ -44,6 +44,7 @@ CameraCalibrationPluginInterface::CameraCalibrationPluginInterface()
     m_computeCenter = false;
     m_computeK1 = false;
     m_computeExtrinsic = true;
+    m_computeIntrinsic = true;
     m_extrinsicTranslationScale = 500.0;
     m_extrinsicRotationScale = 10.0;
 
@@ -194,10 +195,14 @@ void CameraCalibrationPluginInterface::SetComputeDistorsion( bool c )
     DoCalibration();
 }
 
+void CameraCalibrationPluginInterface::SetComputeIntrinsic( bool c )
+{
+    m_computeIntrinsic = c;
+}
+
 void CameraCalibrationPluginInterface::SetComputeExtrinsic( bool c )
 {
     m_computeExtrinsic = c;
-    DoCalibration();
 }
 
 void CameraCalibrationPluginInterface::SetExtrinsicTranslationScale( double s )

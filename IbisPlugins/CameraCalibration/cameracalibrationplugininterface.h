@@ -70,6 +70,8 @@ public:
     bool GetComputeCenter() { return m_computeCenter; }
     void SetComputeDistorsion( bool c );
     bool GetComputeDistortion() { return m_computeK1; }
+    void SetComputeIntrinsic( bool c );
+    bool GetComputeIntrinsic() { return m_computeIntrinsic; }
     void SetComputeExtrinsic( bool c );
     bool GetComputeExtrinsic() { return m_computeExtrinsic; }
     void SetExtrinsicTranslationScale( double s );
@@ -139,6 +141,7 @@ protected:
     // Calibration params
     bool m_computeCenter;
     bool m_computeK1;
+    bool m_computeIntrinsic;
     bool m_computeExtrinsic;
     double m_extrinsicTranslationScale;
     double m_extrinsicRotationScale;
