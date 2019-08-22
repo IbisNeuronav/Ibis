@@ -25,6 +25,7 @@ class PlusServerInterface;
 class vtkEventQtSlotConnect;
 class IbisHardwareIGSIOSettingsWidget;
 class PolyDataObject;
+class Logger;
 
 class IbisHardwareIGSIO : public HardwareModule
 {
@@ -76,8 +77,10 @@ public:
     virtual void AddTrackedVideoClient( TrackedSceneObject * obj ) override;
     virtual void RemoveTrackedVideoClient( TrackedSceneObject * obj) override;
 
-    virtual void SceneAboutToLoad();
-    virtual void SceneFinishedLoading();
+    virtual void SceneAboutToLoad() override;
+    virtual void SceneFinishedLoading() override;
+
+    const Logger * GetLogger() { return m_log; }
 
 private slots:
 
@@ -101,15 +104,21 @@ protected:
 
     struct Tool
     {
+        Tool() { lastTimeStamp = 0.0; lastTimeStampModifiedTime = 0.0; }
         vtkSmartPointer<TrackedSceneObject> sceneObject;
         vtkSmartPointer<PolyDataObject> toolModel;
         igtlioDevicePointer transformDevice;
         igtlioDevicePointer imageDevice;
+
+        // timestamps used to compute tool status when not in Metadata
+        double lastTimeStamp;              // The timestamp of the last message we received
+        double lastTimeStampModifiedTime;  // The last time the timestamp has changed
     };
     typedef QList< Tool* > toolList;
     toolList m_tools;
 
     // Utility functions
+    TrackerToolState ComputeToolStatus( igtlioDevicePointer dev, Tool * t );
     int FindToolByName( QString name );
     void AssignDeviceImageToTool( igtlioDevicePointer device, Tool * tool );
     TrackedSceneObject * InstanciateSceneObjectFromType( QString objectName, QString objectType );
@@ -130,6 +139,13 @@ protected:
     qIGTLIOLogicController * m_logicController;
 
     bool m_autoStartLastConfig;
+
+    // log server output
+    Logger * m_log;
+
+    // When determining tool status from timestamp, time after which we
+    // consider the tool missing
+    static const double MaxTimeBetweenTransformSamples;
 
     // Settings widgets
     qIGTLIOClientWidget * m_clientWidget;

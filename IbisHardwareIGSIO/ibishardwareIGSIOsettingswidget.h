@@ -28,6 +28,8 @@ private slots:
 
     void on_applyConfigFileButton_clicked();
     void on_autoStartLastConfigCheckBox_toggled(bool checked);
+    void OnLogAdded(const QString &);
+    void OnLogCleared();
 
 private:
 

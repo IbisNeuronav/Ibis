@@ -29,12 +29,12 @@ public:
     vtkTypeMacro( ToolPluginInterface, IbisPlugin );
     
     ToolPluginInterface() {}
-    virtual ~ToolPluginInterface() {}
+    virtual ~ToolPluginInterface() override {}
 
     // Implementation of IbisPlugin interface
     IbisPluginTypes GetPluginType()  override { return IbisPluginTypeTool; }
 
-    virtual void Serialize( Serializer * serializer );
+    virtual void Serialize( Serializer * serializer ) override;
 
     // System functions
     struct Settings
@@ -54,8 +54,8 @@ public:
     virtual QString GetMenuEntryString() = 0;
 
     // Plugins should create one (and only one) of those widgets. Widgets are managed by the system.
-    virtual QWidget * CreateFloatingWidget() { return 0; }
-    virtual QWidget * CreateTab() { return 0; }
+    virtual QWidget * CreateFloatingWidget() { return nullptr; }
+    virtual QWidget * CreateTab() { return nullptr; }
 
     // Give plugin a chance to react when the widget (either tab or floating widget) is about to be closed
     // Returning false will cause the plugin not to close.

@@ -11,6 +11,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "ibishardwareIGSIO.h"
 #include "plusserverinterface.h"
 #include "configio.h"
+#include "logger.h"
 
 #include "ibisapi.h"
 #include "pointerobject.h"
@@ -31,6 +32,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "vtkImageData.h"
 #include "vtkEventQtSlotConnect.h"
 #include "vtkPLYReader.h"
+#include "vtkTimerLog.h"
 
 #include "igtlioLogic.h"
 #include "igtlioTransformDevice.h"
@@ -41,6 +43,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "igtlioVideoConverter.h"
 #include "igtlioStatusDevice.h"
 
+const double IbisHardwareIGSIO::MaxTimeBetweenTransformSamples = 0.2;
 const QString IbisHardwareIGSIO::PlusServerExecutable = "PlusServerExecutable";
 
 IbisHardwareIGSIO::IbisHardwareIGSIO()
@@ -52,10 +55,12 @@ IbisHardwareIGSIO::IbisHardwareIGSIO()
     m_settingsWidget = nullptr;
     m_autoStartLastConfig = false;
 	m_currentIbisPlusConfigFile = "";
+    m_log = new Logger;
 }
 
 IbisHardwareIGSIO::~IbisHardwareIGSIO()
 {
+    delete m_log;
 }
 
 void IbisHardwareIGSIO::LoadSettings( QSettings & s )
@@ -134,6 +139,7 @@ void IbisHardwareIGSIO::StartConfig( QString configFile )
 
 void IbisHardwareIGSIO::ClearConfig()
 {
+    m_log->ClearLog();
     m_currentIbisPlusConfigFile.clear();
     RemoveToolObjectsFromScene();
     DisconnectAllServers();
@@ -145,24 +151,6 @@ void IbisHardwareIGSIO::ClearConfig()
     ShutDownLocalServers();
 }
 
-TrackerToolState StatusStringToState( const std::string & status )
-{
-    QString qstatus(status.c_str());
-    if( qstatus.toUpper().toStdString() == "OK" )
-        return Ok;
-    if ( qstatus.toUpper().toStdString() == "OUTOFVIEW" )
-        return OutOfView;
-    if( qstatus.toUpper().toStdString() == "OUTOFVOLUME" )
-        return OutOfVolume;
-    if ( qstatus.toUpper().toStdString() == "HIGHERROR" )
-        return HighError;
-    if ( qstatus.toUpper().toStdString() == "DISABLED" )
-        return Disabled;
-    if( qstatus.toUpper().toStdString() == "MISSING" )
-        return Missing;
-    return Undefined;
-}
-
 void IbisHardwareIGSIO::Update()
 {
     // Update everything
@@ -171,36 +159,19 @@ void IbisHardwareIGSIO::Update()
     // Push images, transforms and states to the TrackedSceneObjects
     foreach( Tool * tool, m_tools )
     {
-
         if( tool->transformDevice )
         {
             if( tool->transformDevice->GetDeviceType() == igtlioImageConverter::GetIGTLTypeName() )
             {
                 igtlioImageDevice * imageDevice = igtlioImageDevice::SafeDownCast( tool->transformDevice );
                 tool->sceneObject->SetInputMatrix( imageDevice->GetContent().transform );
-                // Copy transform status from metadata to node attributes
-                for (igtl::MessageBase::MetaDataMap::const_iterator iter = imageDevice->GetMetaData().begin(); iter != imageDevice->GetMetaData().end(); ++iter)
-                {
-                  if (iter->first.find("Status") != std::string::npos)
-                  {
-                    std::cout << iter->second.second.c_str() << std::endl;
-                    tool->sceneObject->SetState( StatusStringToState( iter->second.second.c_str() ) );
-                  }
-                }
             }
             else if( tool->transformDevice->GetDeviceType() == igtlioTransformConverter::GetIGTLTypeName() )
             {
                 igtlioTransformDevice * transformDevice = igtlioTransformDevice::SafeDownCast( tool->transformDevice );
                 tool->sceneObject->SetInputMatrix( transformDevice->GetContent().transform );
-                // Copy transform status from metadata to node attributes
-                for (igtl::MessageBase::MetaDataMap::const_iterator iter = transformDevice->GetMetaData().begin(); iter != transformDevice->GetMetaData().end(); ++iter)
-                {
-                  if (iter->first.find("Status") != std::string::npos)
-                  {
-                    tool->sceneObject->SetState( StatusStringToState( iter->second.second.c_str() ) );
-                  }
-                }
             }
+            tool->sceneObject->SetState( ComputeToolStatus( tool->transformDevice, tool ) );
         }
         if( tool->imageDevice )
         {
@@ -391,17 +362,14 @@ bool IbisHardwareIGSIO::LaunchLocalServer( QString plusConfigFile )
     }
     vtkSmartPointer<PlusServerInterface> plusLauncher = vtkSmartPointer<PlusServerInterface>::New();
     plusLauncher->SetServerExecutable( plusServerExec );
+    plusLauncher->SetServerWorkingDirectory( m_plusConfigFilesDirectory );
+    plusLauncher->SetLogger( m_log );
     m_plusLaunchers.push_back( plusLauncher );
 
     QString plusConfigFileFullPath = m_plusConfigFilesDirectory + plusConfigFile;
     bool didLaunch = plusLauncher->StartServer( plusConfigFileFullPath );
-    if( !didLaunch )
-    {
-        QString msg = QString("Coulnd't launch the Plus Server to communicate with hardware: %1").arg( plusLauncher->GetLastErrorMessage() );
-        GetIbisAPI()->Warning("Error", msg);
-        return false;
-    }
-    return true;
+
+    return didLaunch;
 }
 
 void IbisHardwareIGSIO::Connect( std::string ip, int port )
@@ -438,6 +406,10 @@ void IbisHardwareIGSIO::DisconnectAllServers()
     {
         m_logic->GetConnector( static_cast<unsigned>(i) )->Stop();
     }
+
+    // Clear all connectors
+    while( m_logic->GetNumberOfConnectors() > 0 )
+      m_logic->RemoveConnector( 0 );
 }
 
 void IbisHardwareIGSIO::ShutDownLocalServers()
@@ -447,6 +419,59 @@ void IbisHardwareIGSIO::ShutDownLocalServers()
         m_plusLaunchers[i]->StopServer();
     }
     m_plusLaunchers.clear();
+}
+
+TrackerToolState StatusStringToState( const std::string & status )
+{
+    QString qstatus(status.c_str());
+    if( qstatus.toUpper().toStdString() == "OK" )
+        return Ok;
+    if ( qstatus.toUpper().toStdString() == "OUTOFVIEW" )
+        return OutOfView;
+    if( qstatus.toUpper().toStdString() == "OUTOFVOLUME" )
+        return OutOfVolume;
+    if ( qstatus.toUpper().toStdString() == "HIGHERROR" )
+        return HighError;
+    if ( qstatus.toUpper().toStdString() == "DISABLED" )
+        return Disabled;
+    if( qstatus.toUpper().toStdString() == "MISSING" )
+        return Missing;
+    return Undefined;
+}
+
+std::string GetMetaData( igtlioDevicePointer dev, const std::string & key )
+{
+    for (igtl::MessageBase::MetaDataMap::const_iterator iter = dev->GetMetaData().begin(); iter != dev->GetMetaData().end(); ++iter)
+    {
+        if (iter->first.find(key) != std::string::npos)
+        {
+            return iter->second.second.c_str();
+        }
+    }
+    return std::string("");
+}
+
+TrackerToolState IbisHardwareIGSIO::ComputeToolStatus( igtlioDevicePointer dev, Tool * t )
+{
+    // First, try to find a status in the metadata
+    std::string statusString = GetMetaData( dev, "Status" );
+    if( !statusString.empty() )
+        return StatusStringToState( statusString );
+
+    // If status is not found in metadata, use timestamps to guess
+    double newTimeStamp = dev->GetTimestamp();
+    bool timeStampChanged = newTimeStamp > t->lastTimeStamp;
+    double now = vtkTimerLog::GetUniversalTime();
+    if( timeStampChanged )
+    {
+        t->lastTimeStamp = newTimeStamp;
+        t->lastTimeStampModifiedTime = now;
+    }
+    double timeSinceLastTimeStampChanged = now - t->lastTimeStampModifiedTime;
+
+    if( timeSinceLastTimeStampChanged < MaxTimeBetweenTransformSamples )
+        return Ok;
+    return Missing;
 }
 
 int IbisHardwareIGSIO::FindToolByName( QString name )
