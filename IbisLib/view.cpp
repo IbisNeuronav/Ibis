@@ -142,7 +142,7 @@ void View::SetType( int type )
             break;
         case CORONAL_VIEW_TYPE:
             this->Renderer->GetActiveCamera()->ParallelProjectionOn();
-            this->Renderer->GetActiveCamera()->SetPosition( 0, 1, 0 ); // left on right
+            this->Renderer->GetActiveCamera()->SetPosition( 0, -1, 0 ); // left on right
             this->Renderer->GetActiveCamera()->SetFocalPoint( 0, 0, 0 );
             this->Renderer->GetActiveCamera()->SetViewUp( 0, 0, 1 ); 
             if (this->InteractorStyle)
@@ -153,7 +153,7 @@ void View::SetType( int type )
             break;
         case TRANSVERSE_VIEW_TYPE: // axial
             this->Renderer->GetActiveCamera()->ParallelProjectionOn();
-            this->Renderer->GetActiveCamera()->SetPosition( 0, 0, -1 ); //left on right
+            this->Renderer->GetActiveCamera()->SetPosition( 0, 0, 1 ); //left on right
             this->Renderer->GetActiveCamera()->SetFocalPoint( 0, 0, 0 );
             this->Renderer->GetActiveCamera()->SetViewUp( 0, 1, 0 ); //nose up
             if (this->InteractorStyle)
@@ -626,7 +626,7 @@ void View::Reset2DView()
                 up[2] = 1;
                 break;
             case CORONAL_VIEW_TYPE:
-                normal[1] = 1;
+                normal[1] = -1;
                 up[2] = 1;
                 break;
             case TRANSVERSE_VIEW_TYPE:
