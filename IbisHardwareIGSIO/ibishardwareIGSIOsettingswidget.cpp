@@ -54,9 +54,6 @@ void IbisHardwareIGSIOSettingsWidget::UpdateUI()
     }
 
     ui->autoStartLastConfigCheckBox->setChecked( m_igsio->GetAutoStartLastConfig() );
-
-    // Display HW module log in the textEdit box
-    //ui->logTextEdit
 }
 
 void IbisHardwareIGSIOSettingsWidget::on_applyConfigFileButton_clicked()
