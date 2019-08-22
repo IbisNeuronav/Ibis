@@ -401,13 +401,8 @@ bool IbisHardwareIGSIO::LaunchLocalServer( QString plusConfigFile )
 
     QString plusConfigFileFullPath = m_plusConfigFilesDirectory + plusConfigFile;
     bool didLaunch = plusLauncher->StartServer( plusConfigFileFullPath );
-    if( !didLaunch )
-    {
-        QString msg = QString("Coulnd't launch the Plus Server to communicate with hardware: %1").arg( plusLauncher->GetLastErrorMessage() );
-        GetIbisAPI()->Warning("Error", msg);
-        return false;
-    }
-    return true;
+
+    return didLaunch;
 }
 
 void IbisHardwareIGSIO::Connect( std::string ip, int port )
