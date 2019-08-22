@@ -104,15 +104,21 @@ protected:
 
     struct Tool
     {
+        Tool() { lastTimeStamp = 0.0; lastTimeStampModifiedTime = 0.0; }
         vtkSmartPointer<TrackedSceneObject> sceneObject;
         vtkSmartPointer<PolyDataObject> toolModel;
         igtlioDevicePointer transformDevice;
         igtlioDevicePointer imageDevice;
+
+        // timestamps used to compute tool status when not in Metadata
+        double lastTimeStamp;              // The timestamp of the last message we received
+        double lastTimeStampModifiedTime;  // The last time the timestamp has changed
     };
     typedef QList< Tool* > toolList;
     toolList m_tools;
 
     // Utility functions
+    TrackerToolState ComputeToolStatus( igtlioDevicePointer dev, Tool * t );
     int FindToolByName( QString name );
     void AssignDeviceImageToTool( igtlioDevicePointer device, Tool * tool );
     TrackedSceneObject * InstanciateSceneObjectFromType( QString objectName, QString objectType );
@@ -136,6 +142,10 @@ protected:
 
     // log server output
     Logger * m_log;
+
+    // When determining tool status from timestamp, time after which we
+    // consider the tool missing
+    static const double MaxTimeBetweenTransformSamples;
 
     // Settings widgets
     qIGTLIOClientWidget * m_clientWidget;
