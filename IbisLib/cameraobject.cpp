@@ -678,6 +678,8 @@ void CameraObject::SetTrackCamera( bool t )
 
             ++it;
         }
+
+        UpdateVtkCamera();
     }
     else
     {

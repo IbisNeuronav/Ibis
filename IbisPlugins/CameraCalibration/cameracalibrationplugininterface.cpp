@@ -44,6 +44,7 @@ CameraCalibrationPluginInterface::CameraCalibrationPluginInterface()
     m_computeCenter = false;
     m_computeK1 = false;
     m_computeExtrinsic = true;
+    m_computeIntrinsic = true;
     m_extrinsicTranslationScale = 500.0;
     m_extrinsicRotationScale = 10.0;
 
@@ -194,10 +195,14 @@ void CameraCalibrationPluginInterface::SetComputeDistorsion( bool c )
     DoCalibration();
 }
 
+void CameraCalibrationPluginInterface::SetComputeIntrinsic( bool c )
+{
+    m_computeIntrinsic = c;
+}
+
 void CameraCalibrationPluginInterface::SetComputeExtrinsic( bool c )
 {
     m_computeExtrinsic = c;
-    DoCalibration();
 }
 
 void CameraCalibrationPluginInterface::SetExtrinsicTranslationScale( double s )
@@ -214,6 +219,16 @@ void CameraCalibrationPluginInterface::StartAccumulating()
 {
     Q_ASSERT( !m_isAccumulating );
     m_isAccumulating = true;
+}
+
+int CameraCalibrationPluginInterface::GetNumberOfAccumulatedViews()
+{
+    return m_cameraCalibrator->GetNumberOfAccumulatedViews();
+}
+
+int CameraCalibrationPluginInterface::GetNumberOfViewsToAccumulate()
+{
+    return m_numberOfViewsToAccumulate;
 }
 
 void CameraCalibrationPluginInterface::AccumulateView( vtkImageData * imageVtk, std::vector<cv::Point2f> imagePoints, vtkMatrix4x4 * trackerMatrix )
@@ -252,6 +267,7 @@ void CameraCalibrationPluginInterface::ImportCalibrationData( QString dir )
 void CameraCalibrationPluginInterface::ClearCalibrationData()
 {
     m_cameraCalibrator->ClearCalibrationData();
+    UpdateCameraViewsObjects();
 }
 
 void CameraCalibrationPluginInterface::CaptureCalibrationView()

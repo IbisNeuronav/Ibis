@@ -69,7 +69,9 @@ public:
     void SetComputeCenter( bool c );
     bool GetComputeCenter() { return m_computeCenter; }
     void SetComputeDistorsion( bool c );
-    double GetComputeDistortion() { return m_computeK1; }
+    bool GetComputeDistortion() { return m_computeK1; }
+    void SetComputeIntrinsic( bool c );
+    bool GetComputeIntrinsic() { return m_computeIntrinsic; }
     void SetComputeExtrinsic( bool c );
     bool GetComputeExtrinsic() { return m_computeExtrinsic; }
     void SetExtrinsicTranslationScale( double s );
@@ -82,6 +84,8 @@ public:
     bool IsAccumulating() { return m_isAccumulating; }
     void StartAccumulating();
     void AccumulateView( vtkImageData * imageVtk, std::vector<cv::Point2f> imagePoints, vtkMatrix4x4 * trackerMatrix );
+    int GetNumberOfAccumulatedViews();
+    int GetNumberOfViewsToAccumulate();
     void CancelAccumulation();
 
     // Do Calibration
@@ -137,6 +141,7 @@ protected:
     // Calibration params
     bool m_computeCenter;
     bool m_computeK1;
+    bool m_computeIntrinsic;
     bool m_computeExtrinsic;
     double m_extrinsicTranslationScale;
     double m_extrinsicRotationScale;

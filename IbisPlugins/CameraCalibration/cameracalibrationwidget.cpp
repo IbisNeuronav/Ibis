@@ -35,7 +35,7 @@ CameraCalibrationWidget::CameraCalibrationWidget(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::CameraCalibrationWidget)
 {
-    m_pluginInterface = 0;
+    m_pluginInterface = nullptr;
 
     ui->setupUi(this);
 
@@ -106,7 +106,6 @@ void CameraCalibrationWidget::UpdateDisplay()
     if( m_pluginInterface->IsAccumulating() && m_accumulationTime->elapsed() > 4000 )
     {
         m_pluginInterface->CancelAccumulation();
-        UpdateUi();
     }
 
     CameraObject * currentCam = m_pluginInterface->GetCurrentCameraObject();
@@ -131,8 +130,6 @@ void CameraCalibrationWidget::UpdateDisplay()
             {
                 vtkMatrix4x4 * trackerMatrix = currentCam->GetUncalibratedTransform()->GetMatrix();
                 m_pluginInterface->AccumulateView( imageVtk, currentImagePoints, trackerMatrix );
-                if( !m_pluginInterface->IsAccumulating() )  // finished accumulating
-                    UpdateUi();
             }
 
             // update the position of markers
@@ -150,6 +147,7 @@ void CameraCalibrationWidget::UpdateDisplay()
         }
     }
 
+    this->UpdateUi();
     this->GetRenderWindow()->Render();
 }
 
@@ -237,9 +235,9 @@ void CameraCalibrationWidget::RenderFirst()
 {
     int * extent = m_imageActor->GetInput()->GetExtent();
     int diffx = extent[1] - extent[0] + 1;
-    double scalex = (double)diffx / 2.0;
+    double scalex = static_cast<double>(diffx) / 2.0;
     int diffy = extent[3] - extent[2] + 1;
-    double scaley = (double)diffy / 2.0;
+    double scaley = static_cast<double>(diffy) / 2.0;
 
     vtkCamera * cam = m_renderer->GetActiveCamera();
     cam->ParallelProjectionOn();
@@ -256,26 +254,56 @@ void CameraCalibrationWidget::UpdateUi()
 {
     Q_ASSERT( m_pluginInterface );
 
-    // calibration options
+    bool isAccum = m_pluginInterface->IsAccumulating();
+
+    // Calibration group
+    ui->calibrateGroupBox->setEnabled( !isAccum );
+
+    // capturing views can have different requirements depending on the mode
+    // so once views have been capture in one mode, we don't allow changing
+    bool hasViews = m_pluginInterface->GetCameraCalibrator()->GetNumberOfViews() > 0;
+    ui->calibrateGroupBox->setEnabled( !hasViews && !isAccum );
+
+    ui->intrinsicRadioButton->blockSignals( true );
+    ui->extrinsicRadioButton->blockSignals( true );
+    ui->bothRadioButton->blockSignals(true);
+    bool intrinsic = m_pluginInterface->GetComputeIntrinsic();
+    bool extrinsic = m_pluginInterface->GetComputeExtrinsic();
+    ui->intrinsicRadioButton->setChecked( intrinsic && !extrinsic );
+    ui->extrinsicRadioButton->setEnabled( false );  // For now it is not possible to do only extrinsic calib, this is work in progress
+    ui->extrinsicRadioButton->setChecked( extrinsic && !intrinsic );
+    ui->bothRadioButton->setChecked( intrinsic && extrinsic );
+    ui->intrinsicRadioButton->blockSignals( false );
+    ui->extrinsicRadioButton->blockSignals( false );
+    ui->bothRadioButton->blockSignals( false );
+
+    // Intrinsic group
+    ui->intrinsicGroupBox->setEnabled( !isAccum );
+
     ui->computeCenterCheckBox->blockSignals( true );
     ui->computeCenterCheckBox->setChecked( m_pluginInterface->GetComputeCenter() );
     ui->computeCenterCheckBox->blockSignals( false );
+
     ui->computeDistortionCheckBox->blockSignals( true );
     ui->computeDistortionCheckBox->setChecked( m_pluginInterface->GetComputeDistortion() );
     ui->computeDistortionCheckBox->blockSignals( false );
-    ui->computeExtrinsicCheckBox->blockSignals( true );
-    ui->computeExtrinsicCheckBox->setChecked( m_pluginInterface->GetComputeExtrinsic() );
-    ui->computeExtrinsicCheckBox->blockSignals( false );
+
+    // Views group
+    ui->viewsGroupBox->setEnabled( !isAccum );
+
     ui->accumulateCheckBox->blockSignals( true );
     ui->accumulateCheckBox->setChecked( m_pluginInterface->IsUsingAccumulation() );
     ui->accumulateCheckBox->blockSignals( false );
-    ui->captureViewButton->blockSignals( true );
-    ui->captureViewButton->setCheckable( m_pluginInterface->IsUsingAccumulation() );
-    if( m_pluginInterface->IsUsingAccumulation() )
-        ui->captureViewButton->setChecked( m_pluginInterface->IsAccumulating() );
+
+    if( isAccum )
+    {
+        QString bt = QString("%1 of %2").arg( m_pluginInterface->GetNumberOfAccumulatedViews() ).arg( m_pluginInterface->GetNumberOfViewsToAccumulate() );
+        ui->captureViewButton->setText( bt );
+    }
     else
-        ui->captureViewButton->setChecked( false );
-    ui->captureViewButton->blockSignals( false );
+    {
+        ui->captureViewButton->setText("Capture");
+    }
 
     // Calibration results
     CameraObject * currentCamera = m_pluginInterface->GetCurrentCameraObject();
@@ -322,23 +350,16 @@ void CameraCalibrationWidget::on_computeDistortionCheckBox_toggled( bool checked
     UpdateUi();
 }
 
-void CameraCalibrationWidget::on_computeExtrinsicCheckBox_toggled(bool checked)
-{
-    Q_ASSERT( m_pluginInterface );
-    m_pluginInterface->SetComputeExtrinsic( checked );
-    UpdateUi();
-}
-
 void CameraCalibrationWidget::on_accumulateCheckBox_toggled(bool checked)
 {
     Q_ASSERT( m_pluginInterface );
     m_pluginInterface->SetUseAccumulation( checked );
+    UpdateUi();
 }
 
-void CameraCalibrationWidget::on_captureViewButton_toggled( bool checked )
+void CameraCalibrationWidget::on_captureViewButton_clicked()
 {
     Q_ASSERT( m_pluginInterface );
-    Q_ASSERT( checked );  // uncheck should be done only programmatically, this should be called only when checked.
 
     if( m_pluginInterface->IsUsingAccumulation() )  // start accumulating
     {
@@ -348,6 +369,35 @@ void CameraCalibrationWidget::on_captureViewButton_toggled( bool checked )
     else // capture
     {
         m_pluginInterface->CaptureCalibrationView();
-        UpdateUi();
+    }
+}
+
+void CameraCalibrationWidget::on_intrinsicRadioButton_toggled(bool checked)
+{
+    Q_ASSERT( m_pluginInterface );
+    if( checked )
+    {
+        m_pluginInterface->SetComputeExtrinsic( false );
+        m_pluginInterface->SetComputeIntrinsic( true );
+    }
+}
+
+void CameraCalibrationWidget::on_extrinsicRadioButton_toggled(bool checked)
+{
+    Q_ASSERT( m_pluginInterface );
+    if( checked )
+    {
+        m_pluginInterface->SetComputeExtrinsic( true );
+        m_pluginInterface->SetComputeIntrinsic( false );
+    }
+}
+
+void CameraCalibrationWidget::on_bothRadioButton_toggled(bool checked)
+{
+    Q_ASSERT( m_pluginInterface );
+    if( checked )
+    {
+        m_pluginInterface->SetComputeExtrinsic( true );
+        m_pluginInterface->SetComputeIntrinsic( true );
     }
 }
