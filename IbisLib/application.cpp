@@ -321,6 +321,11 @@ void Application::RemoveBottomWidget( QWidget * w )
     m_mainWindow->RemoveBottomWidget( w );
 }
 
+void Application::ShowFloatingDock( QWidget * w )
+{
+    m_mainWindow->ShowFloatingDock( w );
+}
+
 void Application::OnStartMainLoop()
 {
     Q_ASSERT( m_sceneManager );

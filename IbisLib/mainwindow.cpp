@@ -53,21 +53,21 @@ const QString MainWindow::m_appName( "Intraoperative Brain Imaging System" );
 
 MainWindow::MainWindow( QWidget * parent )
     : QMainWindow( parent )
-    , m_4Views(0)
-    , m_viewXPlaneAction(0)
-    , m_viewYPlaneAction(0)
-    , m_viewZPlaneAction(0)
-    , m_showAllPlanesAction(0)
-    , m_hideAllPlanesAction(0)
-    , m_pluginMenu(0)
-    , m_rightPanel(0)
-    , m_mainSplitter(0)
+    , m_4Views(nullptr)
+    , m_viewXPlaneAction(nullptr)
+    , m_viewYPlaneAction(nullptr)
+    , m_viewZPlaneAction(nullptr)
+    , m_showAllPlanesAction(nullptr)
+    , m_hideAllPlanesAction(nullptr)
+    , m_pluginMenu(nullptr)
+    , m_rightPanel(nullptr)
+    , m_mainSplitter(nullptr)
     , m_leftPanelSize(150)
     , m_rightPanelSize(150)
-    , m_leftFrame(0)
-    , m_leftLayout(0)
-    , m_objectSettingsScrollArea(0)
-    , m_leftEndSpacer(0)
+    , m_leftFrame(nullptr)
+    , m_leftLayout(nullptr)
+    , m_objectSettingsScrollArea(nullptr)
+    , m_leftEndSpacer(nullptr)
     , m_windowClosing( false )
 {
     // Set main window title
@@ -173,7 +173,7 @@ MainWindow::MainWindow( QWidget * parent )
     // -----------------------------------------
     // Create main QuadView window
     // -----------------------------------------
-    m_4Views = (QuadViewWindow*)Application::GetSceneManager()->CreateQuadViewWindow( this );
+    m_4Views = dynamic_cast<QuadViewWindow*>(Application::GetSceneManager()->CreateQuadViewWindow( this ));
 
     // -----------------------------------------
     // Create right panel (1 tab per plugin)
@@ -311,7 +311,7 @@ void MainWindow::fileOpenFile()
     OpenFileParams params;
     params.lastVisitedDir = lastVisitedDir;
     params.defaultParent = Application::GetSceneManager()->GetSceneRoot();
-    OpenDataFileDialog * dialog = new OpenDataFileDialog( this, 0, Application::GetSceneManager(), &params );
+    OpenDataFileDialog * dialog = new OpenDataFileDialog( this, nullptr, Application::GetSceneManager(), &params );
 
     int result = dialog->exec();
 
@@ -758,7 +758,7 @@ void MainWindow::GeneratePluginsMenuActionTriggered()
     p->Run();
 }
 
-void MainWindow::MainSplitterMoved( int pos, int index )
+void MainWindow::MainSplitterMoved( int /*pos*/, int /*index*/ )
 {
     QList<int> sizes = m_mainSplitter->sizes();
     m_leftPanelSize = sizes[0];
@@ -878,6 +878,18 @@ void MainWindow::RemoveBottomWidget( QWidget * w )
     m_4Views->RemoveBottomWidget( w );
 }
 
+void MainWindow::ShowFloatingDock( QWidget * w )
+{
+    QDockWidget * dock = new QDockWidget( this );
+    dock->setWindowTitle( w->windowTitle() );
+    dock->resize( w->size() );
+    dock->setAttribute( Qt::WA_DeleteOnClose );
+    dock->setAllowedAreas( Qt::NoDockWidgetArea );
+    dock->setFloating( true );
+    dock->setWidget( w );
+    dock->show();
+}
+
 void MainWindow::SetShowToolbar( bool show )
 {
     m_4Views->SetShowToolbar( show );
@@ -906,7 +918,9 @@ void MainWindow::LoadSettings( QSettings & s )
     if( geometry.isEmpty() )
     {
         const QRect availableGeometry = QApplication::desktop()->availableGeometry(this);
-        resize( (int)(availableGeometry.width() * 0.7) , (int)(availableGeometry.height() * 0.6 ) );
+        int w = static_cast<int>(availableGeometry.width() * 0.7);
+        int h = static_cast<int>(availableGeometry.height() * 0.6);
+        resize( w , h );
         move( (availableGeometry.width() - width()) / 2, (availableGeometry.height() - height()) / 2 );
     }
     else

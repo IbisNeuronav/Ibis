@@ -264,13 +264,12 @@ void IbisHardwareIGSIO::OpenConfigFileWidget()
 {
     if( !m_settingsWidget )
     {
-        m_settingsWidget = new IbisHardwareIGSIOSettingsWidget;
+        m_settingsWidget = new IbisHardwareIGSIOSettingsWidget();
         m_settingsWidget->SetIgsio( this );
         m_settingsWidget->setAttribute( Qt::WA_DeleteOnClose );
-        m_settingsWidget->setWindowFlag(Qt::WindowStaysOnTopHint, true);
         connect( m_settingsWidget, SIGNAL(destroyed(QObject*)), this, SLOT(OnConfigFileWidgetClosed()));
+        GetIbisAPI()->ShowFloatingDock( m_settingsWidget );
     }
-    m_settingsWidget->show();
 }
 
 void IbisHardwareIGSIO::OnConfigFileWidgetClosed()
