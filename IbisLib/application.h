@@ -97,6 +97,8 @@ public:
     void AddBottomWidget( QWidget * w );
     void RemoveBottomWidget( QWidget * w );
 
+    void ShowFloatingDock( QWidget * w );
+
     void OnStartMainLoop();
     void AddGlobalEventHandler( GlobalEventHandler * h );
     void RemoveGlobalEventHandler( GlobalEventHandler * h );

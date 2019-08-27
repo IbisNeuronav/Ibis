@@ -159,6 +159,7 @@ public:
     void SetRightPanelVisibility( bool v );
     void AddBottomWidget( QWidget * w );
     void RemoveBottomWidget( QWidget * w );
+    void ShowFloatingDock( QWidget * w );
 
     IbisPreferences *GetIbisPreferences();
 

@@ -413,6 +413,11 @@ void IbisAPI::RemoveBottomWidget( QWidget * w )
     m_application->RemoveBottomWidget( w );
 }
 
+void IbisAPI::ShowFloatingDock( QWidget * w )
+{
+    m_application->ShowFloatingDock( w );
+}
+
 IbisPreferences * IbisAPI::GetIbisPreferences()
 {
     return m_application->GetIbisPreferences();
