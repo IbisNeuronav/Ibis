@@ -635,7 +635,6 @@ void MainWindow::ToolPluginsMenuActionToggled( bool isOn )
                 pluginWidget->setWindowFlags( Qt::WindowStaysOnTopHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint | Qt::CustomizeWindowHint );
                 pluginWidget->setWindowTitle( toolPlugin->GetMenuEntryString() );
                 connect( pluginWidget, SIGNAL(destroyed()), this, SLOT(FloatingPluginWidgetClosed()) );
-                this->ShowFloatingDock( pluginWidget );
                 m_pluginWidgets[ action ] = pluginWidget;
                 toolPlugin->GetSettings().active = true;
                 if( toolPlugin->GetSettings().winSize != QSize( -1, -1 ) )
@@ -643,7 +642,7 @@ void MainWindow::ToolPluginsMenuActionToggled( bool isOn )
                     pluginWidget->resize( toolPlugin->GetSettings().winSize );
                     pluginWidget->move( toolPlugin->GetSettings().winPos );
                 }
-                pluginWidget->show();
+                this->ShowFloatingDock( pluginWidget );
             }
         }
     }
