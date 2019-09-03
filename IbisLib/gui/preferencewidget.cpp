@@ -103,12 +103,11 @@ void PreferenceWidget::closeEvent( QCloseEvent * event )
                 QMessageBox msgBox;
                 msgBox.setText( tmp );
                 msgBox.setInformativeText( "Please enter a valid path." );
-                msgBox.setStandardButtons( QMessageBox::Ignore | QMessageBox::Cancel | QMessageBox::Ok  );
-                msgBox.setDefaultButton( QMessageBox::Ok );
+                msgBox.setStandardButtons( QMessageBox::Ignore | QMessageBox::Cancel );
+                msgBox.setDefaultButton( QMessageBox::Ignore );
                 int ret = msgBox.exec();
                 lineEdit->setText( "" );
                 switch (ret) {
-                  case QMessageBox::Ok:
                   case QMessageBox::Ignore:
                       break;
                   case QMessageBox::Cancel:
