@@ -82,7 +82,6 @@ void PreferenceWidget::RemoveAllCustomPathsWidgets()
 
 void PreferenceWidget::closeEvent( QCloseEvent * event )
 {
-    bool ok = true;
     if( m_preferences && !m_customPathsLayout->isEmpty() )
     {
         QMap< QString, QString > paths;
@@ -100,17 +99,26 @@ void PreferenceWidget::closeEvent( QCloseEvent * event )
             {
                 QString tmp("File/Directory:\n");
                 tmp.append( lineEdit->text() );
-                tmp.append( "\ndoes not exist. Please enter a valid path." );
-                QMessageBox::critical( 0, "Error", tmp, 1, 0 );
+                tmp.append( "\ndoes not exist." );
+                QMessageBox msgBox;
+                msgBox.setText( tmp );
+                msgBox.setInformativeText( "Please enter a valid path." );
+                msgBox.setStandardButtons( QMessageBox::Ignore | QMessageBox::Cancel );
+                msgBox.setDefaultButton( QMessageBox::Ignore );
+                int ret = msgBox.exec();
                 lineEdit->setText( "" );
-                ok = false;
+                switch (ret) {
+                  case QMessageBox::Ignore:
+                      break;
+                  case QMessageBox::Cancel:
+                  default:
+                      event->ignore();
+                      return;
+                }
             }
             paths.insert( label->text(), lineEdit->text() );
         }
         m_preferences->SetCustomPaths( paths );
     }
-    if( ok )
-        event->accept();
-    else
-        event->ignore();
+    event->accept();
 }
