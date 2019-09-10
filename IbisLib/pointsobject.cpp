@@ -141,12 +141,7 @@ void PointsObject::Export()
         QString workingDirectory(this->GetManager()->GetSceneDirectory());
         if( !QFile::exists( workingDirectory ) )
         {
-            workingDirectory = QDir::homePath() + "/" + IBIS_CONFIGURATION_SUBDIRECTORY;
-            QDir configDir( workingDirectory );
-            if( !configDir.exists( ) )
-            {
-                configDir.mkdir( workingDirectory );
-            }
+            workingDirectory = QDir::homePath();
         }
         QString name(this->Name);
         name.append(".tag");
