@@ -141,40 +141,26 @@ void PointsObject::Export()
         QString workingDirectory(this->GetManager()->GetSceneDirectory());
         if( !QFile::exists( workingDirectory ) )
         {
-            workingDirectory = QDir::homePath() + IBIS_CONFIGURATION_SUBDIRECTORY;
-            QDir configDir( workingDirectory );
-            if( !configDir.exists( ) )
-            {
-                configDir.mkdir( workingDirectory );
-            }
+            workingDirectory = QDir::homePath();
         }
         QString name(this->Name);
         name.append(".tag");
-        QStringList filenames;
-        QFileInfo info;
-        QFileDialog fdialog(0, "Save Tag File", workingDirectory, "*.tag");
-        fdialog.selectFile(name);
-        if (fdialog.exec())
-            filenames = fdialog.selectedFiles();
-        if(!filenames.isEmpty() && !filenames[0].isEmpty() )
+        QString fullName(workingDirectory);
+        fullName.append("/");
+        fullName.append(name);
+        QString saveName = Application::GetInstance().GetFileNameSave( tr("Save Object"), fullName, tr("*.tag") );
+        if(saveName.isEmpty())
+            return;
+        if (QFile::exists(saveName))
         {
-            info.setFile(filenames[0]);
-            QString dirPath = info.dir().absolutePath();
-            QFileInfo info1( dirPath );
-            if (!info1.isWritable())
-            {
-                QString accessError = tr("No write permission:\n") + dirPath;
-                QMessageBox::warning( 0, "Error: ", accessError, 1, 0 );
+            int ret = QMessageBox::warning(0, tr("Save Points"), saveName,
+                                           QMessageBox::Yes | QMessageBox::Default,
+                                           QMessageBox::No | QMessageBox::Escape);
+            if (ret == QMessageBox::No)
                 return;
-            }
-            if (QString::compare(this->Name, info.baseName()))
-                this->SetName(info.baseName());
-            if (QString::compare(this->FullFileName, info.absoluteFilePath()))
-            {
-                this->SetFullFileName(info.absoluteFilePath());
-                this->SetDataFileName(info.fileName());
-            }
         }
+        QFileInfo info( saveName );
+        this->SetDataFileName(name);
         std::vector<std::string> pointNames;
         std::vector<std::string> timeStamps;
         for (int i = 0; i < m_pointCoordinates->GetNumberOfPoints(); i++)
