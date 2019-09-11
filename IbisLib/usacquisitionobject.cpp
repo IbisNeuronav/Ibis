@@ -1096,11 +1096,13 @@ bool USAcquisitionObject::Import()
     {
         if( this->LoadFramesFromMINCFile( filenames ) )
         {
-            this->SetName( "Acquisition" );
             this->SetCurrentFrame(0);
             // look for calibration transform
             m_calibrationTransform->Identity();
             QFileInfo fi( filenames.at(0) );
+            QStringList acqSuffix = fi.fileName().split(".");
+            QString acqName = tr("Acquisition_") + acqSuffix[0];
+            this->SetName( acqName );
             QString calibrationTransformFileName( fi.absolutePath() );
             calibrationTransformFileName.append( "/calibrationTransform.xfm" );
             if( QFile::exists( calibrationTransformFileName ) )
