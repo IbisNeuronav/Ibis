@@ -87,15 +87,7 @@ void GPU_RigidRegistrationWidget::on_startButton_clicked()
     bool debug = ui->debugCheckBox->isChecked();
 
     std::stringstream debugStringStream;
-
     QDebugStream qout(debugStringStream,  ui->registrationOutputTextEdit);
-
-    //debugStringStream << "output to debugStringStream" << std::endl;
-    //std::streambuf * buff = debugStringStream.rdbuf();
-    //std::stringstream *teststream;
-    ////teststream << buff;
-    //teststream = &debugStringStream;
-    //*teststream << "output to string stream 2" << std::endl;
 
     m_registrationTimer.start();
 
