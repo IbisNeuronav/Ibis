@@ -86,7 +86,16 @@ void GPU_RigidRegistrationWidget::on_startButton_clicked()
     */
     bool debug = ui->debugCheckBox->isChecked();
 
-    QDebugStream qout(std::cout,  ui->registrationOutputTextEdit);
+    std::stringstream debugStringStream;
+
+    QDebugStream qout(debugStringStream,  ui->registrationOutputTextEdit);
+
+    //debugStringStream << "output to debugStringStream" << std::endl;
+    //std::streambuf * buff = debugStringStream.rdbuf();
+    //std::stringstream *teststream;
+    ////teststream << buff;
+    //teststream = &debugStringStream;
+    //*teststream << "output to string stream 2" << std::endl;
 
     m_registrationTimer.start();
 
@@ -97,7 +106,7 @@ void GPU_RigidRegistrationWidget::on_startButton_clicked()
     m_rigidRegistrator->SetInitialSigma( ui->initialSigmaComboBox->itemData( ui->initialSigmaComboBox->currentIndex() ).toDouble() );
     m_rigidRegistrator->SetPercentile( ui->percentileComboBox->itemData( ui->percentileComboBox->currentIndex() ).toDouble() );
     m_rigidRegistrator->SetUseMask( ui->computeMaskCheckBox->isChecked() );
-    m_rigidRegistrator->SetDebug( debug );
+    m_rigidRegistrator->SetDebug( debug, &debugStringStream);
 
     // Set image inputs
     m_rigidRegistrator->SetItkSourceImage( itkSourceImage );
