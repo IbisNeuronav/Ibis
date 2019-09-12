@@ -1657,11 +1657,11 @@ void SceneManager::ObjectWriter( Serializer * ser )
         dataFileName.append(".");
         if (!oldPath.isEmpty() && !obj->GetDataFileName().isEmpty())
         {
-            if( !obj->IsA( "PointsObject" )) // from now on, we always save points in scene.xml
+            QFileInfo fi(obj->GetDataFileName());
+            dataFileName.append(fi.completeSuffix());
+            newPath.append(dataFileName);
+            if( obj->IsA( "PolyDataObject" )) // from now on, we always save points in scene.xml
             {
-                QFileInfo fi(obj->GetDataFileName());
-                dataFileName.append(fi.completeSuffix());
-                newPath.append(dataFileName);
                 // Copy or move object to the scene directory
                 if (!QFile::exists(newPath))
                 {
@@ -1674,6 +1674,12 @@ void SceneManager::ObjectWriter( Serializer * ser )
                         copyProcess->waitForFinished();
                     delete copyProcess;
                 }
+            }
+            else if( obj->IsA( "ImageObject" ))
+            {
+                ImageObject *img = ImageObject::SafeDownCast(obj);
+                Q_ASSERT( img );
+                img->SaveImageData( newPath );
             }
             else
             {
