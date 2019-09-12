@@ -26,7 +26,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "itkCMAEvolutionStrategyOptimizer.h"
 
 #include "itkImageMaskSpatialObject.h"
-
+#include <sstream>
 
 class GPU_RigidRegistration
 {
@@ -63,9 +63,13 @@ public:
     void SetOrientationSelectivity(unsigned int orientationSelectivity) { m_orientationSelectivity = orientationSelectivity; }
     void SetPopulationSize(unsigned int populationSize) { this->m_populationSize = populationSize; }
     void SetParentVtkTransform( vtkTransform * transform ) { this->m_parentVtkTransform = transform; }
-    void SetDebugOn() { m_debug = true; }
-    void SetDebugOff() { m_debug = false; }
-    void SetDebug(bool debug) { this->m_debug = debug; }
+    //void SetDebugOn() { m_debug = true; }
+    //void SetDebugOff() { m_debug = false; }
+    void SetDebug(bool debug, std::stringstream *strstream) 
+        { 
+        this->m_debug = debug;
+        this->m_debugStream = strstream;
+        }
     void SetUseMask(bool usemask) { this->m_useMask = usemask; }
 
     double GetPercentile() { return m_percentile; }
@@ -92,6 +96,7 @@ private:
     bool m_OptimizationRunning;
     bool m_debug;
     bool m_useMask;
+    std::stringstream *m_debugStream;
 
     IbisItkFloat3ImageType::Pointer m_itkSourceImage;
     IbisItkFloat3ImageType::Pointer m_itkTargetImage;

@@ -14,6 +14,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "vnl/algo/vnl_real_eigensystem.h"
 #include "vtkSmartPointer.h"
 #include "itkTimeProbesCollectorBase.h"
+#include <sstream>
 
 class CommandIterationUpdateOpenCL : public itk::Command
 {
@@ -24,7 +25,8 @@ public:
   itkNewMacro( Self );
 
 protected:
-  CommandIterationUpdateOpenCL() {};
+  CommandIterationUpdateOpenCL()
+    {};
 
 public:
 
@@ -35,10 +37,12 @@ public:
   vtkTransform                                        * m_vtktransform;
   vtkTransform                                        * m_parentTransform;
   bool                                                m_Debug;
+  std::stringstream                                   *m_debugStream;
 
-  void SetDebug(bool debug)
+  void SetDebug(bool debug, std::stringstream *strstream)
   {
     m_Debug = debug;
+    m_debugStream = strstream;
   }
 
   void SetVtkTransform( vtkTransform * vtkTransform )
@@ -73,7 +77,7 @@ public:
     }
 
     if(m_Debug)
-      std::cout << "Optimizer Value:\t" << optimizer->GetCurrentValue() << std::endl;
+        *this->m_debugStream << "Optimizer Value:\t" << optimizer->GetCurrentValue() << std::endl;
 
     ItkRigidTransformPointer itkTransform = GPU_RigidRegistration::ItkRigidTransformType::New();
 
@@ -192,8 +196,8 @@ void GPU_RigidRegistration::runRegistration()
 
     if(m_debug)
     {
-        std::cout << "Processing..(patience is a virtue)";
-        std::cout << "Setting up registration..." << std::endl;
+        *this->m_debugStream << "Processing..(patience is a virtue)";
+        *this->m_debugStream << "Setting up registration..." << std::endl;
         timer.Start("Pre-processing");
     }
 
@@ -215,7 +219,7 @@ void GPU_RigidRegistration::runRegistration()
 
     if ( m_targetSpatialObjectMask )
     {
-        std::cout << "Using mask" << std::endl;
+        *this->m_debugStream << "Using mask" << std::endl;
         metric->SetFixedImageMaskSpatialObject(m_targetSpatialObjectMask);
         metric->SetUseImageMask(true);
     }
@@ -321,18 +325,18 @@ void GPU_RigidRegistration::runRegistration()
     observer->SetVtkTransform( m_resultTransform );
     observer->SetTargetImageVtkTransform( targetVtkTransform );
     observer->SetParentTransform( m_parentVtkTransform );
-    observer->SetDebug(m_debug);
+    observer->SetDebug(m_debug, m_debugStream);
     optimizer->AddObserver( itk::IterationEvent(), observer );
 
     if(m_debug)
-      std::cout << "Starting registration..." << std::endl;
+        *this->m_debugStream << "Starting registration..." << std::endl;
 
     m_OptimizationRunning = true;
     try
     {
       optimizer->StartOptimization();
       if (m_debug)
-        std::cout << "Optimizer stop condition: " << optimizer->GetStopConditionDescription() << std::endl;
+          *this->m_debugStream << "Optimizer stop condition: " << optimizer->GetStopConditionDescription() << std::endl;
     }
     catch( itk::ExceptionObject & err )
     {
@@ -345,8 +349,8 @@ void GPU_RigidRegistration::runRegistration()
 
     if(m_debug)
     {
-      std::cout << "Done." << std::endl;
-      timer.Report(std::cout);
+        *this->m_debugStream << "Done." << std::endl;
+      timer.Report(*this->m_debugStream);
     }
 
     m_OptimizationRunning = false;
