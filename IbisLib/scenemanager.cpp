@@ -50,7 +50,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QFileInfo>
 #include <QMessageBox>
 #include <QPluginLoader>
-#include <QProcess>
 #include <QProgressDialog>
 #include <QApplication>
 
@@ -1665,14 +1664,7 @@ void SceneManager::ObjectWriter( Serializer * ser )
                 // Copy or move object to the scene directory
                 if (!QFile::exists(newPath))
                 {
-                    QString program("cp");
-                    QStringList arguments;
-                    arguments << "-p" << oldPath << newPath;
-                    QProcess *copyProcess = new QProcess(nullptr);
-                    copyProcess->start(program, arguments);
-                    if (copyProcess->waitForStarted())
-                        copyProcess->waitForFinished();
-                    delete copyProcess;
+                    QFile::copy(oldPath, newPath);
                 }
             }
             else if( obj->IsA( "ImageObject" ))
