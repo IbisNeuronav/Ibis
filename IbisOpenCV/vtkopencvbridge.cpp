@@ -11,7 +11,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "vtkopencvbridge.h"
 #include "vtkMatrix4x4.h"
 
-void VtkOpenCvBridge::RvecTvecToMatrix4x4( cv::Mat tVec, cv::Mat rVec, vtkMatrix4x4 * mat )
+void VtkOpenCvBridge::RvecTvecToMatrix4x4( const cv::Mat & tVec, const cv::Mat & rVec, vtkMatrix4x4 * mat )
 {
     // Rotation
     cv::Mat camRotation;
@@ -28,9 +28,9 @@ void VtkOpenCvBridge::RvecTvecToMatrix4x4( cv::Mat tVec, cv::Mat rVec, vtkMatrix
     // Translation inverse
     double translation[4];
     for( int elem = 0; elem < 3; ++elem )
-        translation[elem] = tVec.at<double>( 0, elem );
+        translation[elem] = tVec.at<double>( elem, 0 );
     translation[3] = 1.0;
-    double poseTranslation[3];
+    double poseTranslation[4];
     mat->MultiplyPoint( translation, poseTranslation );
 
     for( int elem = 0; elem < 3; ++elem )

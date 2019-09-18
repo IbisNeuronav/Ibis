@@ -20,7 +20,7 @@ class VtkOpenCvBridge
 
 public:
 
-    static void RvecTvecToMatrix4x4( cv::Mat tVec, cv::Mat rVec, vtkMatrix4x4 * mat );
+    static void RvecTvecToMatrix4x4( const cv::Mat & tVec, const cv::Mat & rVec, vtkMatrix4x4 * mat );
 
 };
 
