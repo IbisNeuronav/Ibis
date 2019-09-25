@@ -40,8 +40,8 @@ ToolDescription::ToolDescription() :
 {
     this->videoSourceIndex = 0;
     this->cachedSerialNumber = "";
-    this->sceneObject = 0;
-    this->toolModel = 0;
+    this->sceneObject = nullptr;
+    this->toolModel = nullptr;
 }
 
 ToolDescription::ToolDescription( const ToolDescription & orig )
@@ -106,19 +106,19 @@ void ToolDescription::ClearSceneObject()
     if( sceneObject )
     {
         sceneObject->Delete();
-        sceneObject = 0;
+        sceneObject = nullptr;
     }
     if( toolModel )
     {
         toolModel->Delete();
-        toolModel = 0;
+        toolModel = nullptr;
     }
 }
 
 Tracker::Tracker()
 {
-    m_hardwareModule = 0;
-    m_ibisAPI = 0;
+    m_hardwareModule = nullptr;
+    m_ibisAPI = nullptr;
     m_tracker = vtkPOLARISTracker::New();
     m_currentTool = -1;
     m_referenceTool = -1;
@@ -504,7 +504,7 @@ TrackerToolState Tracker::GetToolState( int toolIndex )
 
 QWidget * Tracker::CreateSettingsDialog( QWidget * parent )
 {
-    TrackerSettingsDialog * res = NULL;
+    TrackerSettingsDialog * res = nullptr;
     if( m_tracker->IsA( "vtkPOLARISTracker" ) )
     {
 		 res = new TrackerSettingsDialog( parent, "Tracker Settings" );
