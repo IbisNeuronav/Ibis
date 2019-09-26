@@ -1,5 +1,6 @@
 #include "ibispreferences.h"
 #include "preferencewidget.h"
+#include "application.h"
 
 #include <QApplication>
 #include <QDesktopWidget>
@@ -69,8 +70,8 @@ void IbisPreferences::ShowPreferenceDialog()
     m_prefWidget->SetPreferences( this );
     const QRect screenGeometry = QApplication::desktop()->screenGeometry();
     m_prefWidget->move( screenGeometry.width() / 3, screenGeometry.height() / 3 );
-    m_prefWidget->show();
     connect( m_prefWidget, SIGNAL(destroyed()), this, SLOT(OnPreferenceWidgetClosed()) );
+    Application::GetInstance().ShowFloatingDock( m_prefWidget );
 }
 
 void IbisPreferences::OnPreferenceWidgetClosed()

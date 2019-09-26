@@ -3,6 +3,7 @@
 #include <QFile>
 #include <QMessageBox>
 #include "filesystemtree.h"
+#include "application.h"
 
 const QString PathForm::LabelWidgetName = "CustomPathName";
 const QString PathForm::PathWidgetName = "CustomPath";
@@ -39,7 +40,7 @@ void PathForm::on_browsePushButton_clicked()
     FileSystemTree *tree = new FileSystemTree;
     tree->setAttribute(Qt::WA_DeleteOnClose);
     tree->SetPathForm( this );
-    tree->show();
+    Application::GetInstance().ShowFloatingDock( tree );
 }
 
 void PathForm::PathLineEditChanged()
