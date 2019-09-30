@@ -50,7 +50,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QFileInfo>
 #include <QMessageBox>
 #include <QPluginLoader>
-#include <QProcess>
 #include <QProgressDialog>
 #include <QApplication>
 
@@ -1657,29 +1656,20 @@ void SceneManager::ObjectWriter( Serializer * ser )
         dataFileName.append(".");
         if (!oldPath.isEmpty() && !obj->GetDataFileName().isEmpty())
         {
-            if( !obj->IsA( "PointsObject" )) // from now on, we always save points in scene.xml
-            {
-                QFileInfo fi(obj->GetDataFileName());
-                dataFileName.append(fi.completeSuffix());
-                newPath.append(dataFileName);
-                // Copy or move object to the scene directory
-                if (!QFile::exists(newPath))
-                {
-                    QString program("cp");
-                    QStringList arguments;
-                    arguments << "-p" << oldPath << newPath;
-                    QProcess *copyProcess = new QProcess(nullptr);
-                    copyProcess->start(program, arguments);
-                    if (copyProcess->waitForStarted())
-                        copyProcess->waitForFinished();
-                    delete copyProcess;
-                }
-            }
-            else
+            QFileInfo fi(obj->GetDataFileName());
+            dataFileName.append(fi.completeSuffix());
+            newPath.append(dataFileName);
+            if( obj->IsA( "PointsObject" )) // from now on, we always save points in scene.xml
             {
                 obj->SetFullFileName("");
                 obj->SetDataFileName("");
                 newPath = QString("none");
+            }
+            else
+            {
+                // Copy the object to the scene directory
+                if (!QFile::exists(newPath))
+                    QFile::copy(oldPath, newPath);
             }
         }
         else
