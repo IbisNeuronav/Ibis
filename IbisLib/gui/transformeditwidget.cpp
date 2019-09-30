@@ -15,14 +15,15 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "vtkQtMatrixDialog.h"
 #include "vtkMatrix4x4Operators.h"
 #include "sceneobject.h"
+#include "application.h"
 
 TransformEditWidget::TransformEditWidget(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::TransformEditWidget),
-    m_sceneObject(0),
+    m_sceneObject(nullptr),
     m_selfUpdating(false),
-    m_matrixDialog(0),
-    m_worldMatrixDialog(0)
+    m_matrixDialog(nullptr),
+    m_worldMatrixDialog(nullptr)
 {
     ui->setupUi(this);
     m_transformModifiedConnection = vtkEventQtSlotConnect::New();
@@ -33,12 +34,12 @@ TransformEditWidget::~TransformEditWidget()
     if( m_matrixDialog )
     {
         m_matrixDialog->close();
-        m_matrixDialog = 0;
+        m_matrixDialog = nullptr;
     }
     if( m_worldMatrixDialog )
     {
         m_worldMatrixDialog->close();
-        m_worldMatrixDialog = 0;
+        m_worldMatrixDialog = nullptr;
     }
 
     delete ui;
@@ -137,7 +138,7 @@ void TransformEditWidget::EditMatrixButtonToggled( bool isOn )
         if( m_matrixDialog )
         {
             m_matrixDialog->close();
-            m_matrixDialog = 0;
+            m_matrixDialog = nullptr;
         }
     }
     else
@@ -154,7 +155,7 @@ void TransformEditWidget::EditMatrixButtonToggled( bool isOn )
             m_matrixDialog->setWindowTitle( dialogTitle );
             m_matrixDialog->setAttribute( Qt::WA_DeleteOnClose );
             m_matrixDialog->SetMatrix( t->GetMatrix() );
-            m_matrixDialog->show();
+            Application::GetInstance().ShowFloatingDock( m_matrixDialog );
             connect( m_matrixDialog, SIGNAL(MatrixModified()), m_sceneObject, SLOT(NotifyTransformChanged()) );
             connect( m_matrixDialog, SIGNAL(MatrixModified()), this, SLOT(UpdateUi()) );
             connect( m_matrixDialog, SIGNAL(destroyed()), this, SLOT(EditMatrixDialogClosed()) );
@@ -164,7 +165,7 @@ void TransformEditWidget::EditMatrixButtonToggled( bool isOn )
 
 void TransformEditWidget::EditMatrixDialogClosed()
 {
-    m_matrixDialog = 0;
+    m_matrixDialog = nullptr;
     ui->EditMatrixPushButton->setChecked( false );
 }
 
@@ -175,7 +176,7 @@ void TransformEditWidget::WorldMatrixButtonToggled( bool isOn )
         if( m_worldMatrixDialog )
         {
             m_worldMatrixDialog->close();
-            m_worldMatrixDialog = 0;
+            m_worldMatrixDialog = nullptr;
         }
     }
     else
@@ -189,14 +190,14 @@ void TransformEditWidget::WorldMatrixButtonToggled( bool isOn )
         m_worldMatrixDialog->setWindowTitle( dialogTitle );
         m_worldMatrixDialog->setAttribute( Qt::WA_DeleteOnClose );
         m_worldMatrixDialog->SetMatrix( m_sceneObject->GetWorldTransform()->GetMatrix() );
-        m_worldMatrixDialog->show();
+        Application::GetInstance().ShowFloatingDock( m_worldMatrixDialog );
         connect( m_worldMatrixDialog, SIGNAL(destroyed()), this, SLOT(WorldMatrixDialogClosed()) );
     }
 }
 
 void TransformEditWidget::WorldMatrixDialogClosed()
 {
-    m_worldMatrixDialog = 0;
+    m_worldMatrixDialog = nullptr;
     ui->WorldMatrixPushButton->setChecked( false );
 }
 

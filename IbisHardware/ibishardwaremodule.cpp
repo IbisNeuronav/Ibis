@@ -114,24 +114,14 @@ void IbisHardwareModule::RemoveTrackedVideoClient( TrackedSceneObject * obj )
 
 void IbisHardwareModule::OpenVideoSettingsDialog()
 {
-    QDialog * dialog = new QDialog();
-    dialog->setAttribute(Qt::WA_DeleteOnClose);
-    dialog->setWindowTitle( "Video Settings" );
-    QVBoxLayout * layout = new QVBoxLayout( dialog );
-    QWidget * dlg = m_trackedVideoSource->CreateVideoSettingsDialog( dialog );
-    layout->addWidget( dlg );
-    dialog->show();
+    QWidget * dlg = m_trackedVideoSource->CreateVideoSettingsDialog( nullptr );
+    GetIbisAPI()->ShowFloatingDock( dlg );
 }
 
 void IbisHardwareModule::OpenTrackerSettingsDialog()
 {
-    QDialog * dialog = new QDialog();
-    dialog->setAttribute(Qt::WA_DeleteOnClose);
-    dialog->setWindowTitle( "Tracker Settings" );
-    QVBoxLayout * layout = new QVBoxLayout( dialog );
-    QWidget * dlg = m_tracker->CreateSettingsDialog( dialog );
-    layout->addWidget( dlg );
-    dialog->show();
+    QWidget * dlg = m_tracker->CreateSettingsDialog( nullptr );
+    GetIbisAPI()->ShowFloatingDock( dlg );
 }
 
 void IbisHardwareModule::OnWriteHardwareSettingsMenuActivated()

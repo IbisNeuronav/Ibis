@@ -796,7 +796,7 @@ void ImageObject::ShowMincInfo()
     w->setAttribute(Qt::WA_DeleteOnClose);
     w->SetImageObject( this );
     w->move( 0, 0 );
-    w->show();
+    Application::GetInstance().ShowFloatingDock( w );
 }
 
 //generic file writer

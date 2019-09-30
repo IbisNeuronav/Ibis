@@ -642,7 +642,7 @@ void MainWindow::ToolPluginsMenuActionToggled( bool isOn )
                     pluginWidget->resize( toolPlugin->GetSettings().winSize );
                     pluginWidget->move( toolPlugin->GetSettings().winPos );
                 }
-                pluginWidget->show();
+                this->ShowFloatingDock( pluginWidget );
             }
         }
     }
