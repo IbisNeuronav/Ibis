@@ -328,8 +328,12 @@ void DoubleViewWidget::UpdateInputs()
     // Compute slicing transform
     vtkSmartPointer<vtkTransform> concat = vtkSmartPointer<vtkTransform>::New();
     concat->Identity();
-    if( im )
-        concat->SetInput( im->GetWorldTransform()->GetLinearInverse() );
+    if (im)
+    {
+        vtkSmartPointer<vtkMatrix4x4> mat = vtkMatrix4x4::New();
+        im->GetWorldTransform()->GetInverse(mat);
+        concat->SetMatrix(mat);
+    }
     if( usTransform )
     {
         concat->Concatenate( usTransform );
@@ -339,8 +343,12 @@ void DoubleViewWidget::UpdateInputs()
     // Compute slice transform for the second MRI
     vtkSmartPointer<vtkTransform> concat2 = vtkSmartPointer<vtkTransform>::New();
     concat2->Identity();
-    if( im2 )
-        concat2->SetInput( im2->GetWorldTransform()->GetLinearInverse() );
+    if (im2)
+    {
+        vtkSmartPointer<vtkMatrix4x4> mat = vtkMatrix4x4::New();
+        im2->GetWorldTransform()->GetInverse(mat);
+        concat2->SetMatrix(mat);
+    }
     if( usTransform)
     {
         concat2->Concatenate( usTransform );
