@@ -33,8 +33,19 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "vtkImageStack.h"
 #include "vtkImageProperty.h"
 
+#include "vtkLineSource.h"
+#include "vtkPolyDataMapper.h"
+#include "vtkProperty.h"
+#include "vtkAlgorithm.h"
+#include "vtkAlgorithmOutput.h"
+#include "vtkCamera.h"
+
 DoubleViewWidget::DoubleViewWidget( QWidget * parent, Qt::WindowFlags f ) :
     QWidget(parent,f),
+    m_usLine1Actor(nullptr),
+    m_usLine2Actor(nullptr),
+    m_mriLine1Actor(nullptr),
+    m_mriLine2Actor(nullptr),
     ui(new Ui::DoubleViewWidget)
 {
     ui->setupUi(this);
@@ -231,6 +242,9 @@ void DoubleViewWidget::UpdateUi()
 
     // Render graphic windows
     this->UpdateViews();
+
+    // Update crosslines positions
+    this->MakeCrossLinesToShowProbeIsOutOfView();
 }
 
 void DoubleViewWidget::UpdateCurrentFrameUi()
@@ -384,11 +398,8 @@ void DoubleViewWidget::UpdatePipelineConnections()
     else
         m_usSlice->VisibilityOff();
     m_usSlice->GetProperty()->SetOpacity( m_pluginInterface->GetBlendingPercent() );
-}
 
-#include "vtkLineSource.h"
-#include "vtkPolyDataMapper.h"
-#include "vtkProperty.h"
+}
 
 void DoubleViewWidget::UpdateStatus()
 {
@@ -415,82 +426,145 @@ void DoubleViewWidget::UpdateStatus()
 
 void DoubleViewWidget::MakeCrossLinesToShowProbeIsOutOfView()
 {
-    double p1[3] = {0.0, 0.0, 0.0} , p2[3];
-    p2[0] = (double)ui->usImageWindow->width();
-    p2[1] = (double)ui->usImageWindow->height();
+    double wradius = (double)ui->usImageWindow->width() / 2.0;
+    double hradius = (double)ui->usImageWindow->height() / 2.0;
+    double *usfocal = m_usRenderer->GetActiveCamera()->GetFocalPoint();
+    
+    double p1[3], p2[3];
+    p1[0] = usfocal[0] - wradius;
+    p1[1] = usfocal[1] - hradius;
+    p1[2] = 0;
+
+    p2[0] = usfocal[0] + wradius;
+    p2[1] = usfocal[1] + hradius;
     p2[2] = 0;
-    vtkSmartPointer<vtkLineSource> line1 = vtkSmartPointer<vtkLineSource>::New();
-    line1->SetPoint1(p1);
-    line1->SetPoint2(p2);
 
-    vtkSmartPointer<vtkPolyDataMapper> mapper1 = vtkSmartPointer<vtkPolyDataMapper>::New();
-    mapper1->SetInputConnection(line1->GetOutputPort(0));
+    if (!m_usLine1Actor)
+    {
+        vtkSmartPointer<vtkLineSource> line1 = vtkSmartPointer<vtkLineSource>::New();
+        line1->SetPoint1(p1);
+        line1->SetPoint2(p2);
 
-    m_usLine1Actor = vtkSmartPointer<vtkActor>::New();
-    m_usLine1Actor->SetMapper( mapper1 );
-    m_usLine1Actor->GetProperty()->SetLineWidth(4.0);
-    m_usLine1Actor->GetProperty()->SetColor(1, 0, 0);
-    m_usLine1Actor->SetVisibility(0);
-    m_usRenderer->AddViewProp( m_usLine1Actor );
+        vtkSmartPointer<vtkPolyDataMapper> mapper1 = vtkSmartPointer<vtkPolyDataMapper>::New();
+        mapper1->SetInputConnection(line1->GetOutputPort(0));
+
+        m_usLine1Actor = vtkSmartPointer<vtkActor>::New();
+        m_usLine1Actor->SetMapper(mapper1);
+        m_usLine1Actor->GetProperty()->SetLineWidth(4.0);
+        m_usLine1Actor->GetProperty()->SetColor(1, 0, 0);
+        m_usLine1Actor->SetVisibility(0);
+        m_usRenderer->AddViewProp(m_usLine1Actor);
+    }
+    else
+    {
+        vtkSmartPointer<vtkAlgorithm> algorithm = m_usLine1Actor->GetMapper()->GetInputConnection(0,0)->GetProducer();
+        vtkSmartPointer<vtkLineSource> line1 = dynamic_cast<vtkLineSource*>(algorithm.GetPointer());
+        line1->SetPoint1(p1);
+        line1->SetPoint2(p2);
+        line1->Update();
+    }
 
     double p3[3], p4[3];
-    p3[0] = 0.0;
-    p3[1] = (double)ui->usImageWindow->height();
+    p3[0] = usfocal[0] - wradius;
+    p3[1] = usfocal[1] + hradius;
     p3[2] = 0.0;
-    p4[0] = (double)ui->usImageWindow->width();
-    p4[1] = 0.0;
+    p4[0] = usfocal[0] + wradius;
+    p4[1] = usfocal[1] - hradius;
     p4[2] = 0.0;
-    vtkSmartPointer<vtkLineSource> line2 = vtkSmartPointer<vtkLineSource>::New();
-    line2->SetPoint1(p3);
-    line2->SetPoint2(p4);
 
-    vtkSmartPointer<vtkPolyDataMapper> mapper2 = vtkSmartPointer<vtkPolyDataMapper>::New();
-    mapper2->SetInputConnection(line2->GetOutputPort(0));
+    if (!m_usLine2Actor)
+    {
+        vtkSmartPointer<vtkLineSource> line2 = vtkSmartPointer<vtkLineSource>::New();
+        line2->SetPoint1(p3);
+        line2->SetPoint2(p4);
 
-    m_usLine2Actor = vtkSmartPointer<vtkActor>::New();
-    m_usLine2Actor->SetMapper( mapper2 );
-    m_usLine2Actor->GetProperty()->SetLineWidth(4.0);
-    m_usLine2Actor->GetProperty()->SetColor(1, 0, 0);
-    m_usLine2Actor->SetVisibility(0);
-    m_usRenderer->AddViewProp( m_usLine2Actor );
+        vtkSmartPointer<vtkPolyDataMapper> mapper2 = vtkSmartPointer<vtkPolyDataMapper>::New();
+        mapper2->SetInputConnection(line2->GetOutputPort(0));
 
+        m_usLine2Actor = vtkSmartPointer<vtkActor>::New();
+        m_usLine2Actor->SetMapper(mapper2);
+        m_usLine2Actor->GetProperty()->SetLineWidth(4.0);
+        m_usLine2Actor->GetProperty()->SetColor(1, 0, 0);
+        m_usLine2Actor->SetVisibility(0);
+        m_usRenderer->AddViewProp(m_usLine2Actor);
+    }
+    else
+    {
+        vtkSmartPointer<vtkAlgorithm> algorithm = m_usLine2Actor->GetMapper()->GetInputConnection(0, 0)->GetProducer();
+        vtkSmartPointer<vtkLineSource> line2 = dynamic_cast<vtkLineSource*>(algorithm.GetPointer());
+        line2->SetPoint1(p3);
+        line2->SetPoint2(p4);
+        line2->Update();
+    }
 
-    p2[0] = (double)ui->mriImageWindow->width();
-    p2[1] = (double)ui->mriImageWindow->height();
+    wradius = (double)ui->mriImageWindow->width() / 2.0;
+    hradius = (double)ui->mriImageWindow->height() / 2.0;
+    double *mrifocal = m_mriRenderer->GetActiveCamera()->GetFocalPoint();
+
+    p1[0] = mrifocal[0] - wradius;
+    p1[1] = mrifocal[1] - hradius;
+    p1[2] = 0;
+    p2[0] = mrifocal[0] + wradius;
+    p2[1] = mrifocal[1] + hradius;
     p2[2] = 0;
-    vtkSmartPointer<vtkLineSource> line3 = vtkSmartPointer<vtkLineSource>::New();
-    line3->SetPoint1(p1);
-    line3->SetPoint2(p2);
 
-    vtkSmartPointer<vtkPolyDataMapper> mapper3 = vtkSmartPointer<vtkPolyDataMapper>::New();
-    mapper3->SetInputConnection(line3->GetOutputPort(0));
+    if (!m_mriLine1Actor)
+    {
+        vtkSmartPointer<vtkLineSource> line3 = vtkSmartPointer<vtkLineSource>::New();
+        line3->SetPoint1(p1);
+        line3->SetPoint2(p2);
 
-    m_mriLine1Actor = vtkSmartPointer<vtkActor>::New();
-    m_mriLine1Actor->SetMapper( mapper3 );
-    m_mriLine1Actor->GetProperty()->SetLineWidth(4.0);
-    m_mriLine1Actor->GetProperty()->SetColor(1, 0, 0);
-    m_mriLine1Actor->SetVisibility(0);
-    m_mriRenderer->AddViewProp( m_mriLine1Actor );
+        vtkSmartPointer<vtkPolyDataMapper> mapper3 = vtkSmartPointer<vtkPolyDataMapper>::New();
+        mapper3->SetInputConnection(line3->GetOutputPort(0));
 
-    p3[0] = 0.0;
-    p3[1] = (double)ui->mriImageWindow->height();
+        m_mriLine1Actor = vtkSmartPointer<vtkActor>::New();
+        m_mriLine1Actor->SetMapper(mapper3);
+        m_mriLine1Actor->GetProperty()->SetLineWidth(4.0);
+        m_mriLine1Actor->GetProperty()->SetColor(1, 0, 0);
+        m_mriLine1Actor->SetVisibility(0);
+        m_mriRenderer->AddViewProp(m_mriLine1Actor);
+    }
+    else
+    {
+        vtkSmartPointer<vtkAlgorithm> algorithm = m_mriLine1Actor->GetMapper()->GetInputConnection(0, 0)->GetProducer();
+        vtkSmartPointer<vtkLineSource> line3 = dynamic_cast<vtkLineSource*>(algorithm.GetPointer());
+        line3->SetPoint1(p1);
+        line3->SetPoint2(p2);
+        line3->Update();
+    }
+
+    p3[0] = mrifocal[0] - wradius;
+    p3[1] = mrifocal[1] + hradius;
     p3[2] = 0.0;
-    p4[0] = (double)ui->mriImageWindow->width();
-    p4[1] = 0.0;
+    p4[0] = mrifocal[0] + wradius;
+    p4[1] = mrifocal[1] - hradius;
     p4[2] = 0.0;
-    vtkSmartPointer<vtkLineSource> line4 = vtkSmartPointer<vtkLineSource>::New();
-    line4->SetPoint1(p3);
-    line4->SetPoint2(p4);
 
-    vtkSmartPointer<vtkPolyDataMapper> mapper4 = vtkSmartPointer<vtkPolyDataMapper>::New();
-    mapper4->SetInputConnection(line4->GetOutputPort(0));
+    if (!m_mriLine2Actor)
+    {
+        vtkSmartPointer<vtkLineSource> line4 = vtkSmartPointer<vtkLineSource>::New();
+        line4->SetPoint1(p3);
+        line4->SetPoint2(p4);
 
-    m_mriLine2Actor = vtkSmartPointer<vtkActor>::New();
-    m_mriLine2Actor->SetMapper( mapper4 );
-    m_mriLine2Actor->GetProperty()->SetLineWidth(4.0);
-    m_mriLine2Actor->GetProperty()->SetColor(1, 0, 0);
-    m_mriLine2Actor->SetVisibility(0);
-    m_mriRenderer->AddViewProp( m_mriLine2Actor );
+        vtkSmartPointer<vtkPolyDataMapper> mapper4 = vtkSmartPointer<vtkPolyDataMapper>::New();
+        mapper4->SetInputConnection(line4->GetOutputPort(0));
+
+        m_mriLine2Actor = vtkSmartPointer<vtkActor>::New();
+        m_mriLine2Actor->SetMapper(mapper4);
+        m_mriLine2Actor->GetProperty()->SetLineWidth(4.0);
+        m_mriLine2Actor->GetProperty()->SetColor(1, 0, 0);
+        m_mriLine2Actor->SetVisibility(0);
+        m_mriRenderer->AddViewProp(m_mriLine2Actor);
+    }
+    else
+    {
+        vtkSmartPointer<vtkAlgorithm> algorithm = m_mriLine2Actor->GetMapper()->GetInputConnection(0, 0)->GetProducer();
+        vtkSmartPointer<vtkLineSource> line4 = dynamic_cast<vtkLineSource*>(algorithm.GetPointer());
+        line4->SetPoint1(p3);
+        line4->SetPoint2(p4);
+        line4->Update();
+    }
+
 }
 
 void DoubleViewWidget::on_blendCheckBox_toggled( bool checked )
@@ -537,8 +611,6 @@ void DoubleViewWidget::on_maskAlphaSlider_valueChanged( int value )
     m_imageMask->SetMaskAlpha( maskPercent );
     UpdateUi();
 }
-
-#include "vtkCamera.h"
 
 void SetDefaultView( vtkSmartPointer<vtkImageSlice> actor, vtkSmartPointer<vtkRenderer> renderer )
 {
