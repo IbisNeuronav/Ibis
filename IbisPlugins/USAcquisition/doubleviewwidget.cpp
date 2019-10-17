@@ -309,7 +309,6 @@ void DoubleViewWidget::UpdateInputs()
     if( acq )
     {
         m_imageMask->SetMaskInputData( acq->GetMask() ); // ok so this about using mask function?
-        m_reslice->SetOutputExtent(0, acq->GetSliceWidth(), 0, acq->GetSliceHeight(), 0, 1);
         acq->disconnect( this, SLOT(UpdateViews()) );
     }
 
@@ -318,8 +317,11 @@ void DoubleViewWidget::UpdateInputs()
 
      // choose which source to use for display: live or acquisition
     UsProbeObject * probe = m_pluginInterface->GetCurrentUsProbe();
-    if( probe )
-        probe->disconnect( this, SLOT(UpdateViews()) );
+    if (probe)
+    {
+        m_reslice->SetOutputExtent(0, probe->GetVideoImageWidth(), 0, probe->GetVideoImageHeight(), 0, 1);
+        probe->disconnect(this, SLOT(UpdateViews()));
+    }
 
     if( m_pluginInterface->IsLive() )
     {
