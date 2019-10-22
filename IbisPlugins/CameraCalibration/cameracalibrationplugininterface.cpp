@@ -97,6 +97,7 @@ bool CameraCalibrationPluginInterface::WidgetAboutToClose()
         m_cameraCalibrationWidget->close();
 
     ClearCameraViews();
+    m_cameraCalibrator->ClearCalibrationData();
     GetIbisAPI()->RemoveObject( m_calibrationGridObject );
 
     disconnect( GetIbisAPI(), SIGNAL(ObjectAdded(int)), this, SLOT(OnObjectAddedOrRemoved()) );
