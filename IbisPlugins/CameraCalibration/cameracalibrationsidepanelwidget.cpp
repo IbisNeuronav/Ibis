@@ -107,14 +107,17 @@ void CameraCalibrationSidePanelWidget::UpdateUi()
     ui->viewListWidget->blockSignals( true );
     ui->viewListWidget->clear();
     CameraCalibrator * calib = m_pluginInterface->GetCameraCalibrator();
-    for( int i = 0; i < calib->GetNumberOfViews(); ++i )
+    if( calib->GetNumberOfAccumulatedViews() > 0 )
     {
-        QString itemName = QString( "V%1 - %2" ).arg( i ).arg( calib->GetViewReprojectionError( i ) );
-        QListWidgetItem * item = new QListWidgetItem( itemName, ui->viewListWidget );
-        if( calib->IsViewEnabled( i ) )
-            item->setCheckState( Qt::Checked );
-        else
-            item->setCheckState( Qt::Unchecked );
+        for( int i = 0; i < calib->GetNumberOfViews(); ++i )
+        {
+            QString itemName = QString( "V%1 - %2" ).arg( i ).arg( calib->GetViewReprojectionError( i ) );
+            QListWidgetItem * item = new QListWidgetItem( itemName, ui->viewListWidget );
+            if( calib->IsViewEnabled( i ) )
+                item->setCheckState( Qt::Checked );
+            else
+                item->setCheckState( Qt::Unchecked );
+        }
     }
     ui->viewListWidget->blockSignals( false );
 }
