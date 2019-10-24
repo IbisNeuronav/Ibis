@@ -169,7 +169,6 @@ void CameraCalibrationPluginInterface::SetCurrentCameraObjectId( int id )
     if( id != m_currentCameraObjectId )
     {
         m_currentCameraObjectId = id;
-        m_cameraCalibrator->ClearCalibrationData();
     }
     emit PluginModified();
 }
