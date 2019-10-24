@@ -231,18 +231,35 @@ bool CameraCalibrator::DetectGrid( vtkImageData * im, std::vector<cv::Point2f> &
     int dims[3];
     im->GetDimensions( dims );
 
+    // Convert input VTK image to a greyscale OpenCV image
     cv::Mat image( dims[1], dims[0], CV_8UC3, im->GetScalarPointer() );
     cv::Mat imageFliped;
     cv::flip( image, imageFliped, 0 );
-    cv::cvtColor( imageFliped, imageFliped, CV_RGB2BGR );
-    cv::Size patternSize( m_gridWidth, m_gridHeight );
-    bool found = cv::findChessboardCorners( imageFliped, patternSize, imagePoints, cv::CALIB_CB_ADAPTIVE_THRESH + cv::CALIB_CB_NORMALIZE_IMAGE + cv::CALIB_CB_FAST_CHECK );
+    cv::Mat imageGray;
+    cv::cvtColor( imageFliped, imageGray, COLOR_RGB2GRAY);
 
+    // Downsize image for faster initial detection (we aim for a 400px wide image)
+    double factor = 400.0 / dims[0];
+    cv::Mat imageSmall;
+    cv::resize(imageGray, imageSmall, Size(), factor, factor, INTER_AREA);
+
+    // Find the grid
+    cv::Size patternSize( m_gridWidth, m_gridHeight );
+    std::vector<cv::Point2f> pointsSmall;
+    bool found = cv::findChessboardCorners( imageSmall, patternSize, pointsSmall, cv::CALIB_CB_ADAPTIVE_THRESH + cv::CALIB_CB_NORMALIZE_IMAGE + cv::CALIB_CB_FAST_CHECK );
+
+    // if the grid is found, refine the positions
     if( found )
     {
-        cv::Mat imageGrey;
-        cv::cvtColor( imageFliped, imageGrey, CV_BGR2GRAY );
-        cv::cornerSubPix( imageGrey, imagePoints, cv::Size( 11, 11 ), cv::Size( -1, -1 ), cv::TermCriteria(CV_TERMCRIT_EPS + CV_TERMCRIT_ITER, 30, 0.1 ) );
+        // scale up the points
+        imagePoints.clear();
+        for (cv::Point2f ps : pointsSmall)
+        {
+            imagePoints.push_back(cv::Point2f(ps.x / factor, ps.y / factor));
+        }
+
+        // Fine-tune corner detection
+        cv::cornerSubPix( imageGray, imagePoints, cv::Size( 11, 11 ), cv::Size( -1, -1 ), cv::TermCriteria(CV_TERMCRIT_EPS + CV_TERMCRIT_ITER, 30, 0.1 ) );
     }
 
     return found;
