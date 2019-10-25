@@ -173,6 +173,7 @@ public slots:
     void ObjectAddedSlot( int id );
     void ObjectRemovedSlot( int id );
     void ReferenceTransformChangedSlot();
+    void ReferenceObjectChangedSlot();
     void CursorPositionChangedSlot();
     void IbisClockTickSlot();
 
@@ -181,6 +182,7 @@ signals:
     void ObjectAdded( int );
     void ObjectRemoved( int );
     void ReferenceTransformChanged();
+    void ReferenceObjectChanged();
     void CursorPositionChanged();
     void IbisClockTick();
 
