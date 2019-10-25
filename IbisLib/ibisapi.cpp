@@ -29,6 +29,7 @@ IbisAPI::~IbisAPI()
     disconnect( m_sceneManager, SIGNAL( ObjectAdded(int) ), this, SLOT( ObjectAddedSlot(int) ) );
     disconnect( m_sceneManager, SIGNAL( ObjectRemoved(int) ), this, SLOT( ObjectRemovedSlot(int) ) );
     disconnect( m_sceneManager, SIGNAL( ReferenceTransformChanged() ), this, SLOT( ReferenceTransformChangedSlot() ) );
+    disconnect( m_sceneManager, SIGNAL( ReferenceObjectChanged() ), this, SLOT( ReferenceObjectChangedSlot() ) );
     disconnect( m_sceneManager, SIGNAL( CursorPositionChanged() ), this, SLOT( CursorPositionChangedSlot() ) );
     disconnect( m_application, SIGNAL( IbisClockTick() ), this, SLOT( IbisClockTickSlot() ) );
 }
@@ -42,6 +43,7 @@ void IbisAPI::SetApplication( Application * app )
     connect( m_sceneManager, SIGNAL( ObjectAdded(int) ), this, SLOT( ObjectAddedSlot(int) ) );
     connect( m_sceneManager, SIGNAL( ObjectRemoved(int) ), this, SLOT( ObjectRemovedSlot(int) ) );
     connect( m_sceneManager, SIGNAL( ReferenceTransformChanged() ), this, SLOT( ReferenceTransformChangedSlot() ) );
+    connect( m_sceneManager, SIGNAL( ReferenceObjectChanged() ), this, SLOT( ReferenceObjectChangedSlot() ) );
     connect( m_sceneManager, SIGNAL( CursorPositionChanged() ), this, SLOT( CursorPositionChangedSlot() ) );
     connect( m_application, SIGNAL( IbisClockTick() ), this, SLOT( IbisClockTickSlot() ) );
 }
@@ -266,6 +268,11 @@ void IbisAPI::ObjectRemovedSlot( int id )
 void IbisAPI::ReferenceTransformChangedSlot()
 {
     emit ReferenceTransformChanged();
+}
+
+void IbisAPI::ReferenceObjectChangedSlot()
+{
+    emit ReferenceObjectChanged();
 }
 
 void IbisAPI::CursorPositionChangedSlot()
