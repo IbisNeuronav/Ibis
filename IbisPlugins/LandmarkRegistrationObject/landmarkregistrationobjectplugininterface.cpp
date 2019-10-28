@@ -56,5 +56,7 @@ SceneObject *LandmarkRegistrationObjectPluginInterface::CreateObject()
     m_landmarkRegistrationObject->SetTargetObjectID( ibisAPI->GetSceneRoot()->GetObjectID() );
     m_landmarkRegistrationObject->SetSourcePoints( sourcePoints );
     m_landmarkRegistrationObject->SetTargetPoints( targetPoints );
+    if( m_landmarkRegistrationObject->IsRegistered() ) //m_landmarkRegistrationObject is persistent, if we load scene, after scene we have to reset registration
+        m_landmarkRegistrationObject->RegisterObject( false );
     return m_landmarkRegistrationObject;
 }
