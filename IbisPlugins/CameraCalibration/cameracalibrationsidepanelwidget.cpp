@@ -107,7 +107,7 @@ void CameraCalibrationSidePanelWidget::UpdateUi()
     ui->viewListWidget->blockSignals( true );
     ui->viewListWidget->clear();
     CameraCalibrator * calib = m_pluginInterface->GetCameraCalibrator();
-    for( int i = 0; i < calib->GetNumberOfViews(); ++i )
+    for( int i = 0; i < calib->GetNumberOfAccumulatedViews(); ++i )
     {
         QString itemName = QString( "V%1 - %2" ).arg( i ).arg( calib->GetViewReprojectionError( i ) );
         QListWidgetItem * item = new QListWidgetItem( itemName, ui->viewListWidget );

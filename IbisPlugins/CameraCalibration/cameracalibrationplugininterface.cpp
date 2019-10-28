@@ -59,6 +59,7 @@ CameraCalibrationPluginInterface::~CameraCalibrationPluginInterface()
 {
     if( m_calibrationGridObject )
         m_calibrationGridObject->Delete();
+    m_cameraCalibrator->ClearCalibrationData();
     delete m_cameraCalibrator;
 }
 
