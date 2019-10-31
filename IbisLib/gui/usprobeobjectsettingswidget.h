@@ -51,6 +51,7 @@ private slots:
     void on_colorMapComboBox_currentIndexChanged(int index);
     void on_calibrationMatrixPushButton_toggled( bool on );
     void OnCalibrationMatrixDialogClosed();
+    void on_snapshotPushButton_clicked();
 
 private:
 

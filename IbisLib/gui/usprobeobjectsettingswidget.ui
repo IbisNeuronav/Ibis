@@ -46,6 +46,16 @@
     </layout>
    </item>
    <item>
+    <widget class="QPushButton" name="snapshotPushButton">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="text">
+      <string>Snapshot</string>
+     </property>
+    </widget>
+   </item>
+   <item>
     <widget class="QCheckBox" name="useMaskCheckBox">
      <property name="text">
       <string>Use Mask</string>

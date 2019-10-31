@@ -82,6 +82,8 @@ public:
     void SetCurrentLUTIndex( int index );
     int GetCurrentLUTIndex() { return m_lutIndex; }
 
+    void TakeSnapshot();
+
     struct CalibrationMatrixInfo
     {
         CalibrationMatrixInfo();
@@ -106,6 +108,8 @@ protected:
 
     bool m_maskOn;
     int m_lutIndex;
+    unsigned int m_screenShotIndex;
+
     vtkSmartPointer<vtkPassThrough>         m_videoInput;
     vtkSmartPointer<vtkPassThrough>         m_actorInput;
     USMask                 * m_mask;
