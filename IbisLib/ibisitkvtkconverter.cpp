@@ -50,7 +50,7 @@ IbisItkVtkConverter::~IbisItkVtkConverter()
         this->ItkToVtkImporter->Delete();
 }
 
-vtkImageData * IbisItkVtkConverter::ConvertItkImageToVtkImage(IbisItkFloat3ImageType::Pointer img , vtkTransform *tr = 0)
+vtkImageData * IbisItkVtkConverter::ConvertItkImageToVtkImage(IbisItkFloat3ImageType::Pointer img , vtkTransform *tr )
 {
     if( !this->ItkToVtkExporter )
     {
@@ -64,7 +64,7 @@ vtkImageData * IbisItkVtkConverter::ConvertItkImageToVtkImage(IbisItkFloat3Image
     return this->ItkToVtkImporter->GetOutput();
 }
 
-vtkImageData * IbisItkVtkConverter::ConvertItkImageToVtkImage( IbisRGBImageType::Pointer img, vtkTransform *tr = 0 )
+vtkImageData * IbisItkVtkConverter::ConvertItkImageToVtkImage( IbisRGBImageType::Pointer img, vtkTransform *tr )
 {
     if( !this->ItkRGBImageToVtkExporter )
     {
@@ -78,7 +78,7 @@ vtkImageData * IbisItkVtkConverter::ConvertItkImageToVtkImage( IbisRGBImageType:
     return this->ItkToVtkImporter->GetOutput();
 }
 
-vtkImageData * IbisItkVtkConverter::ConvertItkImageToVtkImage(IbisItkUnsignedChar3ImageType::Pointer img , vtkTransform *tr = 0)
+vtkImageData * IbisItkVtkConverter::ConvertItkImageToVtkImage(IbisItkUnsignedChar3ImageType::Pointer img , vtkTransform *tr )
 {
     if( !this->ItkToVtkUnsignedChar3lExporter )
     {

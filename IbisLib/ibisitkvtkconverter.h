@@ -48,9 +48,9 @@ public:
     IbisItkVtkConverter();
      virtual ~IbisItkVtkConverter();
 
-    vtkImageData *ConvertItkImageToVtkImage( IbisItkFloat3ImageType::Pointer img, vtkTransform *tr );
-    vtkImageData *ConvertItkImageToVtkImage(IbisRGBImageType::Pointer img , vtkTransform *tr);
-    vtkImageData *ConvertItkImageToVtkImage( IbisItkUnsignedChar3ImageType::Pointer img, vtkTransform *tr );
+    vtkImageData *ConvertItkImageToVtkImage( IbisItkFloat3ImageType::Pointer img, vtkTransform *tr = nullptr );
+    vtkImageData *ConvertItkImageToVtkImage(IbisRGBImageType::Pointer img , vtkTransform *tr = nullptr );
+    vtkImageData *ConvertItkImageToVtkImage( IbisItkUnsignedChar3ImageType::Pointer img, vtkTransform *tr = nullptr );
 
     bool ConvertVtkImageToItkImage( IbisItkFloat3ImageType::Pointer itkOutputImage, vtkImageData *image, vtkMatrix4x4 *imageMatrix );
     bool ConvertVtkImageToItkImage( IbisRGBImageType::Pointer itkOutputImage, vtkImageData *image, vtkMatrix4x4 *imageMatrix );
