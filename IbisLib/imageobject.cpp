@@ -299,6 +299,11 @@ void ImageObject::SetImage(vtkImageData * image)
     this->HistogramComputer->SetInputData( this->Image );
     SetupHistogramComputer();
     this->OutlineFilter->SetInputData( this->Image );
+    if( this->ItkImage == nullptr )
+    {
+        this->ItkImage  = IbisItkFloat3ImageType::New();
+        this->ItktovtkConverter->ConvertVtkImageToItkImage( this->ItkImage, image, this->GetWorldTransform()->GetMatrix() );
+    }
 }
 
 //================================================================================
