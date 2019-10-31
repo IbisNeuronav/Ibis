@@ -60,7 +60,7 @@ public:
     bool SetItkLabelImage( IbisItkUnsignedChar3ImageType::Pointer image );  // for labels
     IbisItkFloat3ImageType::Pointer GetItkImage() { return this->ItkImage; }
     IbisItkUnsignedChar3ImageType::Pointer GetItkLabelImage() { return this->ItkLabelImage; }
-    void SetImage( vtkImageData * image );
+    void SetImage( vtkImageData * image, vtkTransform * tr=0 );
     
     // Implementation of parent virtual method
     virtual void ObjectAddedToScene() override;
@@ -122,6 +122,8 @@ protected:
     void Release3DRepresentation( View * view );
     void Setup2DRepresentation( int i, View * view );
     void Release2DRepresentation( int i, View * view );
+
+    void SetInternalImage(vtkImageData *);
 
 	// Lookup table management
     void SetLut(vtkSmartPointer<vtkScalarsToColors> lut);
