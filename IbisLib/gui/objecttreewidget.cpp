@@ -228,7 +228,11 @@ void ObjectTreeWidget::contextMenuEvent( QContextMenuEvent * event )
                     contextMenu.addAction( tr("Set as Reference"), this, SLOT(MarkAsReferenceObject()) );
             }
             if( currentObj->IsA( "ImageObject") )
-                contextMenu.addAction( tr("Show MINC Info"), this, SLOT(ShowMincInfo()) );
+            {
+                ImageObject * obj = ImageObject::SafeDownCast( currentObj );
+                if ( obj->GetItkImage() )
+                    contextMenu.addAction( tr("Show MINC Info"), this, SLOT(ShowMincInfo()) );
+            }
             contextMenu.exec( event->globalPos() );
         }
     }
