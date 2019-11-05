@@ -532,10 +532,10 @@ void View::ReferenceTransformChanged()
         if( obj && this->Renderer )
         {
             vtkTransform * refTransform = obj->GetWorldTransform();
-            t->SetInput( refTransform );
-            t->Concatenate( this->PrevViewingTransform );
-
+            t->SetMatrix( this->PrevViewingTransform );
             cam->ApplyTransform( t );
+            NotifyNeedRender();
+            cam->ApplyTransform( refTransform );
 
             // backup inverted current transform
             this->PrevViewingTransform->DeepCopy( refTransform->GetMatrix() );
