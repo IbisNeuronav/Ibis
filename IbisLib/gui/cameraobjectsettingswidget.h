@@ -58,6 +58,8 @@ private slots:
     void on_calibrationMatrixButton_toggled( bool checked);
     void CalibrationMatrixDialogClosed();
 
+    void on_fxSpinBox_valueChanged(double arg1);
+    void on_fySpinBox_valueChanged(double arg1);
     void on_xImageCenterSpinBox_valueChanged(double arg1);
     void on_yImageCenterSpinBox_valueChanged(double arg1);
     void on_distortionSpinBox_valueChanged(double arg1);

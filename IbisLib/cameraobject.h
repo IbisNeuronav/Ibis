@@ -102,9 +102,10 @@ public:
     double GetImageDistance() { return m_imageDistance; }
     double GetGlobalOpacity() { return m_globalOpacity; }
     void SetGlobalOpacity( double opacity );
+    void SetFocalPix( double fx, double fy );
+    void GetFocalPix( double & fx, double & fy );
     void SetImageCenterPix( double x, double y );
     void GetImageCenterPix( double & x, double & y );
-    void GetFocalPix( double & x, double & y );
     double GetLensDistortion() { return m_intrinsicParams.m_distorsionK1; }
     void SetLensDistortion( double x );
     double GetLensDisplacement();

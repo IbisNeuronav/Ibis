@@ -499,6 +499,19 @@ void CameraObject::SetGlobalOpacity( double opacity )
     emit ParamsModified();
 }
 
+void CameraObject::SetFocalPix( double fx, double fy )
+{
+    m_intrinsicParams.m_focal[0] = fx / GetImageWidth();
+    m_intrinsicParams.m_focal[1] = fy / GetImageHeight();
+    UpdateGeometricRepresentation();
+}
+
+void CameraObject::GetFocalPix( double & x, double & y )
+{
+    x = m_intrinsicParams.m_focal[0] * GetImageWidth();
+    y = m_intrinsicParams.m_focal[1] * GetImageHeight();
+}
+
 void CameraObject::SetImageCenterPix( double x, double y )
 {
     m_intrinsicParams.m_center[0] = x / GetImageWidth();
@@ -510,12 +523,6 @@ void CameraObject::GetImageCenterPix( double & x, double & y )
 {
     x = m_intrinsicParams.m_center[0] * GetImageWidth();
     y = m_intrinsicParams.m_center[1] * GetImageHeight();
-}
-
-void CameraObject::GetFocalPix( double & x, double & y )
-{
-    x = m_intrinsicParams.m_focal[0] * GetImageWidth();
-    y = m_intrinsicParams.m_focal[1] * GetImageHeight();
 }
 
 void CameraObject::SetLensDistortion( double dist )

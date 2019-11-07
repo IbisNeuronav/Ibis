@@ -102,8 +102,8 @@ void CameraObjectSettingsWidget::UpdateUI()
     ui->imageDistanceSpinBox->setValue( m_camera->GetImageDistance() );
     ui->imageDistanceSpinBox->blockSignals( false );
 
-    ui->xFocalLineEdit->setText( QString::number( m_camera->GetIntrinsicParams().m_focal[0], 'f', 2 ) );
-    ui->yFocalLineEdit->setText( QString::number( m_camera->GetIntrinsicParams().m_focal[1], 'f', 2 ) );
+    //ui->xFocalLineEdit->setText( QString::number( m_camera->GetIntrinsicParams().m_focal[0], 'f', 2 ) );
+    //ui->yFocalLineEdit->setText( QString::number( m_camera->GetIntrinsicParams().m_focal[1], 'f', 2 ) );
 
     double center[2] = { 0.0, 0.0 };
     m_camera->GetImageCenterPix( center[0], center[1] );
@@ -343,6 +343,16 @@ void CameraObjectSettingsWidget::on_showMaskCheckBox_toggled(bool checked)
     m_camera->SetShowMask( checked );
 }
 
+void CameraObjectSettingsWidget::on_fxSpinBox_valueChanged(double arg1)
+{
+    Q_ASSERT( m_camera );
+}
+
+void CameraObjectSettingsWidget::on_fySpinBox_valueChanged(double arg1)
+{
+    Q_ASSERT( m_camera );
+}
+
 void CameraObjectSettingsWidget::on_xImageCenterSpinBox_valueChanged(double arg1)
 {
     Q_ASSERT( m_camera );
@@ -398,32 +408,32 @@ void CameraObjectSettingsWidget::on_extrinsicParamsGroupBox_toggled(bool arg1)
     UpdateUI();
 }
 
-void CameraObjectSettingsWidget::on_xtransSpinBox_valueChanged(double arg1)
+void CameraObjectSettingsWidget::on_xtransSpinBox_valueChanged(double )
 {
     UpdateExtrinsicTransform();
 }
 
-void CameraObjectSettingsWidget::on_ytransSpinBox_valueChanged(double arg1)
+void CameraObjectSettingsWidget::on_ytransSpinBox_valueChanged(double )
 {
     UpdateExtrinsicTransform();
 }
 
-void CameraObjectSettingsWidget::on_ztransSpinBox_valueChanged(double arg1)
+void CameraObjectSettingsWidget::on_ztransSpinBox_valueChanged(double )
 {
     UpdateExtrinsicTransform();
 }
 
-void CameraObjectSettingsWidget::on_xrotSpinBox_valueChanged(double arg1)
+void CameraObjectSettingsWidget::on_xrotSpinBox_valueChanged(double )
 {
     UpdateExtrinsicTransform();
 }
 
-void CameraObjectSettingsWidget::on_yrotSpinBox_valueChanged(double arg1)
+void CameraObjectSettingsWidget::on_yrotSpinBox_valueChanged(double )
 {
     UpdateExtrinsicTransform();
 }
 
-void CameraObjectSettingsWidget::on_zrotSpinBox_valueChanged(double arg1)
+void CameraObjectSettingsWidget::on_zrotSpinBox_valueChanged(double )
 {
     UpdateExtrinsicTransform();
 }
@@ -484,3 +494,4 @@ void CameraObjectSettingsWidget::on_lensDisplacementSpinBox_valueChanged(double 
     m_camera->SetLensDisplacement( arg1 );
     UpdateUI();
 }
+
