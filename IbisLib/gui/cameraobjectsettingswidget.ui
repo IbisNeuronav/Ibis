@@ -263,11 +263,14 @@
         </item>
         <item>
          <widget class="QDoubleSpinBox" name="fxSpinBox">
+          <property name="toolTip">
+           <string>Horizontal focal distance (pixels)</string>
+          </property>
           <property name="minimum">
            <double>0.000000000000000</double>
           </property>
           <property name="maximum">
-           <double>100.000000000000000</double>
+           <double>100000.000000000000000</double>
           </property>
           <property name="singleStep">
            <double>0.100000000000000</double>
@@ -289,11 +292,14 @@
         </item>
         <item>
          <widget class="QDoubleSpinBox" name="fySpinBox">
+          <property name="toolTip">
+           <string>Vertical focal distance (pixels)</string>
+          </property>
           <property name="minimum">
            <double>0.000000000000000</double>
           </property>
           <property name="maximum">
-           <double>100.000000000000000</double>
+           <double>100000.000000000000000</double>
           </property>
           <property name="singleStep">
            <double>0.100000000000000</double>
@@ -319,6 +325,9 @@
         </item>
         <item>
          <widget class="QDoubleSpinBox" name="xImageCenterSpinBox">
+          <property name="toolTip">
+           <string>x coordinate of image center</string>
+          </property>
           <property name="minimum">
            <double>-10000.000000000000000</double>
           </property>
@@ -345,6 +354,9 @@
         </item>
         <item>
          <widget class="QDoubleSpinBox" name="yImageCenterSpinBox">
+          <property name="toolTip">
+           <string>y coordinate of image center</string>
+          </property>
           <property name="minimum">
            <double>-10000.000000000000000</double>
           </property>
@@ -374,6 +386,9 @@
             <width>120</width>
             <height>16777215</height>
            </size>
+          </property>
+          <property name="toolTip">
+           <string>K1 lens distortion coefficient</string>
           </property>
           <property name="correctionMode">
            <enum>QAbstractSpinBox::CorrectToNearestValue</enum>
