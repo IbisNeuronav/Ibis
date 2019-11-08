@@ -56,7 +56,7 @@ CameraCalibrator::CameraCalibrator()
     m_gridHeight = 1;
     m_gridCellSize = 30.0;
     m_minimizer = vtkAmoebaMinimizer::New();
-    m_pluginInterface = 0;
+    m_pluginInterface = nullptr;
 }
 
 CameraCalibrator::~CameraCalibrator()
@@ -72,6 +72,16 @@ void CameraCalibrator::SetGridProperties( int width, int height, double cellSize
     m_gridCellSize = cellSize;
     InitGridWorldPoints();
     ClearCalibrationData();
+}
+
+bool CameraCalibrator::GetOptimizeGridDetection()
+{
+    return m_optimizeGridDetection;
+}
+
+void CameraCalibrator::SetOptimizeGridDetection( bool optimize )
+{
+    m_optimizeGridDetection = optimize;
 }
 
 void CameraCalibrator::ClearCalibrationData()
@@ -238,10 +248,18 @@ bool CameraCalibrator::DetectGrid( vtkImageData * im, std::vector<cv::Point2f> &
     cv::Mat imageGray;
     cv::cvtColor( imageFliped, imageGray, COLOR_RGB2GRAY);
 
-    // Downsize image for faster initial detection (we aim for a 400px wide image)
-    double factor = 400.0 / dims[0];
     cv::Mat imageSmall;
-    cv::resize(imageGray, imageSmall, Size(), factor, factor, INTER_AREA);
+    double factor = 1.0;
+    if( m_optimizeGridDetection )
+    {
+        // Downsize image for faster initial detection (we aim for a 400px wide image)
+        factor = 400.0 / dims[0];
+        cv::resize(imageGray, imageSmall, Size(), factor, factor, INTER_AREA);
+    }
+    else
+    {
+        imageSmall = imageGray;
+    }
 
     // Find the grid
     cv::Size patternSize( m_gridWidth, m_gridHeight );

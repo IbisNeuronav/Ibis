@@ -87,6 +87,8 @@ public:
     int GetNumberOfAccumulatedViews();
     int GetNumberOfViewsToAccumulate();
     void CancelAccumulation();
+    bool GetOptimizeGridDetection();
+    void SetOptimizeGridDetection( bool optimize );
 
     // Do Calibration
     void ImportCalibrationData( QString dir );

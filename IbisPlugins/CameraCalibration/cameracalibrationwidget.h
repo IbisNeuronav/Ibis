@@ -57,6 +57,8 @@ private slots:
     void on_captureViewButton_clicked();
     void on_clearCalibrationViewsButton_clicked();
 
+    void on_optimizeGridDetectCheckBox_toggled(bool checked);
+
 private:
 
     vtkRenderWindow * GetRenderWindow();

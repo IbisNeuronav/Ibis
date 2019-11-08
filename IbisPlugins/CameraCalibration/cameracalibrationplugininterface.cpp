@@ -110,6 +110,8 @@ void CameraCalibrationPluginInterface::LoadSettings( QSettings & s )
     m_calibrationGridWidth = s.value( "CalibrationGridWidth", 6 ).toInt();
     m_calibrationGridHeight = s.value( "CalibrationGridHeight", 8 ).toInt();
     m_calibrationGridCellSize = s.value( "CalibrationGridCellSize", 30.0 ).toDouble();
+    bool optimizeGridDetection = s.value( "OptimizeGridDetection", false ).toBool();
+    m_cameraCalibrator->SetOptimizeGridDetection( optimizeGridDetection );
 }
 
 void CameraCalibrationPluginInterface::SaveSettings( QSettings & s )
@@ -117,6 +119,7 @@ void CameraCalibrationPluginInterface::SaveSettings( QSettings & s )
     s.setValue( "CalibrationGridWidth", m_calibrationGridWidth );
     s.setValue( "CalibrationGridHeight", m_calibrationGridHeight );
     s.setValue( "CalibrationGridCellSize", m_calibrationGridCellSize );
+    s.setValue( "OptimizeGridDetection", m_cameraCalibrator->GetOptimizeGridDetection() );
 }
 
 void CameraCalibrationPluginInterface::StartCalibrationWidget( bool on )
@@ -246,6 +249,16 @@ void CameraCalibrationPluginInterface::CancelAccumulation()
 {
     m_isAccumulating = false;
     m_cameraCalibrator->ClearAccumulatedViews();
+}
+
+bool CameraCalibrationPluginInterface::GetOptimizeGridDetection()
+{
+    return m_cameraCalibrator->GetOptimizeGridDetection();
+}
+
+void CameraCalibrationPluginInterface::SetOptimizeGridDetection( bool optimize )
+{
+    m_cameraCalibrator->SetOptimizeGridDetection( optimize );
 }
 
 void CameraCalibrationPluginInterface::ImportCalibrationData( QString dir )
