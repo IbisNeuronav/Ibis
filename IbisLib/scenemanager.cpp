@@ -19,7 +19,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "vtkInteractorStyleTerrain.h"
 #include "vtkInteractorStyleJoystickCamera.h"
 #include "vtkTransform.h"
-#include "vtkLinearTransform.h"
 #include "vtkMultiImagePlaneWidget.h"
 #include "vtkImageData.h"
 #include "vtkAxes.h"
@@ -1019,6 +1018,10 @@ void SceneManager::SetReferenceDataObject( SceneObject *  refObject )
         if( m_referenceDataObject )
         {
             disconnect( m_referenceDataObject, SIGNAL(WorldTransformChangedSignal()), this, SLOT(ReferenceTransformChangedSlot()));
+            m_referenceTransform->Delete();
+            m_invReferenceTransform->Delete();
+            m_referenceTransform = vtkTransform::New();
+            m_invReferenceTransform = vtkTransform::New();
         }
         m_referenceDataObject = referenceObject;
         m_referenceTransform->Identity();
@@ -1363,7 +1366,7 @@ void SceneManager::ReferenceToWorld( double referencePoint[3], double worldPoint
     ImageObject * ref = GetReferenceDataObject();
     if( ref )
     {
-        vtkLinearTransform * transform = ref->GetWorldTransform();
+        vtkTransform * transform = ref->GetWorldTransform();
         transform->TransformPoint( referencePoint, worldPoint );
     }
     else
