@@ -1018,12 +1018,16 @@ void SceneManager::SetReferenceDataObject( SceneObject *  refObject )
         if( m_referenceDataObject )
         {
             disconnect( m_referenceDataObject, SIGNAL(WorldTransformChangedSignal()), this, SLOT(ReferenceTransformChangedSlot()));
-            m_referenceTransform->Delete();
-            m_invReferenceTransform->Delete();
-            m_referenceTransform = vtkTransform::New();
-            m_invReferenceTransform = vtkTransform::New();
         }
         m_referenceDataObject = referenceObject;
+        // reset inputs and inverse flag
+        vtkSmartPointer<vtkTransform> tmp = vtkSmartPointer<vtkTransform>::New();
+        tmp->Identity();
+        m_referenceTransform->SetInput(tmp);
+        m_invReferenceTransform->SetInput(tmp);
+        if( m_invReferenceTransform->GetInverseFlag() )
+            m_invReferenceTransform->Inverse();
+
         m_referenceTransform->Identity();
         m_invReferenceTransform->Identity();
         if( m_referenceDataObject )
