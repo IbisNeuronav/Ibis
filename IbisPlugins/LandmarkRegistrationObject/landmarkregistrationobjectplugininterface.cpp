@@ -22,20 +22,21 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 LandmarkRegistrationObjectPluginInterface::LandmarkRegistrationObjectPluginInterface()
 {
-	m_landmarkRegistrationObject = vtkSmartPointer<LandmarkRegistrationObject>::New();
-	m_landmarkRegistrationObject->SetName("Landmark Registration");
-	m_landmarkRegistrationObject->SetCanEditTransformManually(false);
 }
 
 LandmarkRegistrationObjectPluginInterface::~LandmarkRegistrationObjectPluginInterface()
 {
-	m_landmarkRegistrationObject = 0;
+    this->Clear();
 }
 
 SceneObject *LandmarkRegistrationObjectPluginInterface::CreateObject()
 {
     IbisAPI *ibisAPI = GetIbisAPI();
     Q_ASSERT(ibisAPI);
+    connect( ibisAPI, SIGNAL(ObjectRemoved(int)), this, SLOT(OnObjectRemoved(int)) );
+    LandmarkRegistrationObject *regObject = LandmarkRegistrationObject::New();
+    regObject->SetName("Landmark Registration");
+    regObject->SetCanEditTransformManually(false);
     vtkSmartPointer<PointsObject>sourcePoints = vtkSmartPointer<PointsObject>::New();
     sourcePoints->SetName( "RegistrationSourcePoints" );
     sourcePoints->SetListable( false );
@@ -50,13 +51,37 @@ SceneObject *LandmarkRegistrationObjectPluginInterface::CreateObject()
     targetPoints->SetSelectedColor(color1);
     double color2[3] = {0.3, 0.3, 1.0};
     targetPoints->SetDisabledColor(color2);
-    ibisAPI->AddObject( m_landmarkRegistrationObject );
-    ibisAPI->AddObject( sourcePoints, m_landmarkRegistrationObject );
+    ibisAPI->AddObject( regObject );
+    ibisAPI->AddObject( sourcePoints, regObject );
     ibisAPI->AddObject( targetPoints, ibisAPI->GetSceneRoot() );
-    m_landmarkRegistrationObject->SetTargetObjectID( ibisAPI->GetSceneRoot()->GetObjectID() );
-    m_landmarkRegistrationObject->SetSourcePoints( sourcePoints );
-    m_landmarkRegistrationObject->SetTargetPoints( targetPoints );
-    if( m_landmarkRegistrationObject->IsRegistered() ) //m_landmarkRegistrationObject is persistent, if we load scene, after scene we have to reset registration
-        m_landmarkRegistrationObject->RegisterObject( false );
-    return m_landmarkRegistrationObject;
+    regObject->SetTargetObjectID( ibisAPI->GetSceneRoot()->GetObjectID() );
+    regObject->SetSourcePoints( sourcePoints );
+    regObject->SetTargetPoints( targetPoints );
+    m_landmarkRegistrationObjectIds.push_back( regObject->GetObjectID() );
+    return regObject;
+}
+
+void LandmarkRegistrationObjectPluginInterface::SceneAboutToLoad()
+{
+    this->Clear();
+}
+
+void LandmarkRegistrationObjectPluginInterface::OnObjectRemoved( int objID )
+{
+    RegistrationObjectsContainer::iterator it = std::find( m_landmarkRegistrationObjectIds.begin(),
+                                                           m_landmarkRegistrationObjectIds.end(),
+                                                           objID );
+    if( it != m_landmarkRegistrationObjectIds.end() )
+        m_landmarkRegistrationObjectIds.erase( it );
+}
+
+void LandmarkRegistrationObjectPluginInterface::Clear()
+{
+    for( unsigned i = 0; i < m_landmarkRegistrationObjectIds.size(); i++ )
+    {
+        SceneObject * regObj = GetIbisAPI()->GetObjectByID( m_landmarkRegistrationObjectIds[i] );
+        if( regObj )
+            GetIbisAPI()->RemoveObject( regObj );
+     }
+    m_landmarkRegistrationObjectIds.clear();
 }

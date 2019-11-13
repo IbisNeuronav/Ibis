@@ -34,7 +34,7 @@ public:
     // ObjectPluginInterface
     QString GetMenuEntryString() { return QString("Contour Surface"); }
     SceneObject * CreateObject();
-    virtual bool CanBeActivated();
+    virtual bool CanBeActivated() override;
 
 protected:
     vtkSmartPointer<GeneratedSurface> m_generatedSurface;
