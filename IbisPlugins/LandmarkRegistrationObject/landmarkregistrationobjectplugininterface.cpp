@@ -34,7 +34,7 @@ SceneObject *LandmarkRegistrationObjectPluginInterface::CreateObject()
     IbisAPI *ibisAPI = GetIbisAPI();
     Q_ASSERT(ibisAPI);
     connect( ibisAPI, SIGNAL(ObjectRemoved(int)), this, SLOT(OnObjectRemoved(int)) );
-    LandmarkRegistrationObject *regObject = LandmarkRegistrationObject::New();
+    vtkSmartPointer<LandmarkRegistrationObject> regObject = vtkSmartPointer<LandmarkRegistrationObject>::New();
     regObject->SetName("Landmark Registration");
     regObject->SetCanEditTransformManually(false);
     vtkSmartPointer<PointsObject>sourcePoints = vtkSmartPointer<PointsObject>::New();
