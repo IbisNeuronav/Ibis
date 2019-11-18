@@ -14,6 +14,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QWidget>
 #include "objectplugininterface.h"
 #include "vtkSmartPointer.h"
+#include <vector>
 
 class LandmarkRegistrationObject;
 
@@ -40,9 +41,20 @@ public:
 
     virtual SceneObject * CreateObject();
 
+    virtual void SceneAboutToLoad() override;
+
+protected:
+    void Clear();
+
+public slots:
+
+    void OnObjectRemoved(int objID);
+
 protected:
 
-    vtkSmartPointer<LandmarkRegistrationObject> m_landmarkRegistrationObject;
+    typedef std::vector< int > RegistrationObjectsContainer;
+    RegistrationObjectsContainer m_landmarkRegistrationObjectIds;
+    int m_currentRegistrationObjectId;
 };
 
 #endif //LandmarkRegistrationObjectPluginInterface_H
