@@ -81,6 +81,9 @@ bool USManualCalibrationPluginInterface::WidgetAboutToClose()
 {
     if( m_landmarkRegistrationObjectId != IbisAPI::InvalidId )
     {
+        SceneObject *phantom = this->GetIbisAPI()->GetObjectByID( m_calibrationPhantomObjectId );
+        if( phantom )
+            this->GetIbisAPI()->RemoveObject( phantom );
         this->GetIbisAPI()->RemoveObject( this->GetIbisAPI()->GetObjectByID( m_landmarkRegistrationObjectId ) );
         m_calibrationPhantomObjectId = IbisAPI::InvalidId;
         m_phantomRegSourcePointsId = IbisAPI::InvalidId;
