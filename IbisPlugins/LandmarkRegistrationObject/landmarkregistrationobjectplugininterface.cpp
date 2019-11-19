@@ -26,7 +26,6 @@ LandmarkRegistrationObjectPluginInterface::LandmarkRegistrationObjectPluginInter
 
 LandmarkRegistrationObjectPluginInterface::~LandmarkRegistrationObjectPluginInterface()
 {
-    this->Clear();
 }
 
 SceneObject *LandmarkRegistrationObjectPluginInterface::CreateObject()
