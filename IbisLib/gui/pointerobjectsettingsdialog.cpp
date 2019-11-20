@@ -80,6 +80,7 @@ void PointerObjectSettingsDialog::on_savePositionPushButton_clicked()
             m_pointerPickedPointsObject->MoveCursorToPoint( index );
         if (delayAddObject)
             m_pointer->ManagerAddPointerPickedPointsObject();
+		this->UpdateUI();
     }
 }
 
