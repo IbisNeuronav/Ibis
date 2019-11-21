@@ -76,10 +76,10 @@ void PointerObjectSettingsDialog::on_savePositionPushButton_clicked()
         int index = m_pointerPickedPointsObject->GetNumberOfPoints();
         m_pointerPickedPointsObject->AddPoint(QString::number(index+1), pos);
         SceneManager *manager = m_pointer->GetManager();
-        if( manager->GetReferenceDataObject() ) // we can only move cursor if cut planes are displayed
-            m_pointerPickedPointsObject->MoveCursorToPoint( index );
         if (delayAddObject)
-            m_pointer->ManagerAddPointerPickedPointsObject();
+			m_pointer->ManagerAddPointerPickedPointsObject();
+		if (manager->GetReferenceDataObject()) // we can only move cursor if cut planes are displayed
+			m_pointerPickedPointsObject->MoveCursorToPoint(index);
 		this->UpdateUI();
     }
 }
