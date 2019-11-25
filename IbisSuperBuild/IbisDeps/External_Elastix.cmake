@@ -5,7 +5,7 @@ ExternalProject_Add( ${elastix_name}
     BINARY_DIR ${elastix_prefix}/build
     STAMP_DIR ${elastix_prefix}/stamp
     INSTALL_COMMAND ""
-    GIT_REPOSITORY "git@github.com:SuperElastix/elastix.git"
+    GIT_REPOSITORY "https://github.com/SuperElastix/elastix.git"
     GIT_TAG ${IBIS_ELASTIX_LONG_VERSION}
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=${external_project_dir}/${elastix_name}/install
                -DCMAKE_OSX_SYSROOT:PATH=${CMAKE_OSX_SYSROOT}
