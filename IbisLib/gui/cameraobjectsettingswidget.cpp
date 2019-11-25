@@ -94,17 +94,28 @@ void CameraObjectSettingsWidget::UpdateUI()
         }
     }
 
+    // Vertical angle (function of focals)
     ui->verticalAngleSpinBox->blockSignals( true );
     ui->verticalAngleSpinBox->setValue( m_camera->GetVerticalAngleDegrees() );
     ui->verticalAngleSpinBox->blockSignals( false );
 
+    // Image distance
     ui->imageDistanceSpinBox->blockSignals( true );
     ui->imageDistanceSpinBox->setValue( m_camera->GetImageDistance() );
     ui->imageDistanceSpinBox->blockSignals( false );
 
-    ui->xFocalLineEdit->setText( QString::number( m_camera->GetIntrinsicParams().m_focal[0], 'f', 2 ) );
-    ui->yFocalLineEdit->setText( QString::number( m_camera->GetIntrinsicParams().m_focal[1], 'f', 2 ) );
+    // Focal
+    double fx, fy;
+    m_camera->GetFocalPix(fx,fy);
+    ui->fxSpinBox->blockSignals( true );
+    ui->fxSpinBox->setValue( fx );
+    ui->fxSpinBox->blockSignals( false );
 
+    ui->fySpinBox->blockSignals( true );
+    ui->fySpinBox->setValue( fy );
+    ui->fySpinBox->blockSignals( false );
+
+    // Image center
     double center[2] = { 0.0, 0.0 };
     m_camera->GetImageCenterPix( center[0], center[1] );
 
@@ -343,7 +354,23 @@ void CameraObjectSettingsWidget::on_showMaskCheckBox_toggled(bool checked)
     m_camera->SetShowMask( checked );
 }
 
-void CameraObjectSettingsWidget::on_xImageCenterSpinBox_valueChanged(double arg1)
+void CameraObjectSettingsWidget::on_fxSpinBox_valueChanged(double )
+{
+    Q_ASSERT( m_camera );
+    double fx = ui->fxSpinBox->value();
+    double fy = ui->fySpinBox->value();
+    m_camera->SetFocalPix( fx, fy );
+}
+
+void CameraObjectSettingsWidget::on_fySpinBox_valueChanged(double )
+{
+    Q_ASSERT( m_camera );
+    double fx = ui->fxSpinBox->value();
+    double fy = ui->fySpinBox->value();
+    m_camera->SetFocalPix( fx, fy );
+}
+
+void CameraObjectSettingsWidget::on_xImageCenterSpinBox_valueChanged(double)
 {
     Q_ASSERT( m_camera );
     double x = ui->xImageCenterSpinBox->value();
@@ -351,7 +378,7 @@ void CameraObjectSettingsWidget::on_xImageCenterSpinBox_valueChanged(double arg1
     m_camera->SetImageCenterPix( x, y );
 }
 
-void CameraObjectSettingsWidget::on_yImageCenterSpinBox_valueChanged(double arg1)
+void CameraObjectSettingsWidget::on_yImageCenterSpinBox_valueChanged(double)
 {
     Q_ASSERT( m_camera );
     double x = ui->xImageCenterSpinBox->value();
@@ -359,7 +386,7 @@ void CameraObjectSettingsWidget::on_yImageCenterSpinBox_valueChanged(double arg1
     m_camera->SetImageCenterPix( x, y );
 }
 
-void CameraObjectSettingsWidget::on_distortionSpinBox_valueChanged(double arg1)
+void CameraObjectSettingsWidget::on_distortionSpinBox_valueChanged(double)
 {
     Q_ASSERT( m_camera );
     double dist = ui->distortionSpinBox->value();
@@ -398,32 +425,32 @@ void CameraObjectSettingsWidget::on_extrinsicParamsGroupBox_toggled(bool arg1)
     UpdateUI();
 }
 
-void CameraObjectSettingsWidget::on_xtransSpinBox_valueChanged(double arg1)
+void CameraObjectSettingsWidget::on_xtransSpinBox_valueChanged(double )
 {
     UpdateExtrinsicTransform();
 }
 
-void CameraObjectSettingsWidget::on_ytransSpinBox_valueChanged(double arg1)
+void CameraObjectSettingsWidget::on_ytransSpinBox_valueChanged(double )
 {
     UpdateExtrinsicTransform();
 }
 
-void CameraObjectSettingsWidget::on_ztransSpinBox_valueChanged(double arg1)
+void CameraObjectSettingsWidget::on_ztransSpinBox_valueChanged(double )
 {
     UpdateExtrinsicTransform();
 }
 
-void CameraObjectSettingsWidget::on_xrotSpinBox_valueChanged(double arg1)
+void CameraObjectSettingsWidget::on_xrotSpinBox_valueChanged(double )
 {
     UpdateExtrinsicTransform();
 }
 
-void CameraObjectSettingsWidget::on_yrotSpinBox_valueChanged(double arg1)
+void CameraObjectSettingsWidget::on_yrotSpinBox_valueChanged(double )
 {
     UpdateExtrinsicTransform();
 }
 
-void CameraObjectSettingsWidget::on_zrotSpinBox_valueChanged(double arg1)
+void CameraObjectSettingsWidget::on_zrotSpinBox_valueChanged(double )
 {
     UpdateExtrinsicTransform();
 }
@@ -484,3 +511,4 @@ void CameraObjectSettingsWidget::on_lensDisplacementSpinBox_valueChanged(double 
     m_camera->SetLensDisplacement( arg1 );
     UpdateUI();
 }
+

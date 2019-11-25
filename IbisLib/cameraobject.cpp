@@ -499,6 +499,19 @@ void CameraObject::SetGlobalOpacity( double opacity )
     emit ParamsModified();
 }
 
+void CameraObject::SetFocalPix( double fx, double fy )
+{
+    m_intrinsicParams.m_focal[0] = fx / GetImageWidth();
+    m_intrinsicParams.m_focal[1] = fy / GetImageHeight();
+    UpdateGeometricRepresentation();
+}
+
+void CameraObject::GetFocalPix( double & x, double & y )
+{
+    x = m_intrinsicParams.m_focal[0] * GetImageWidth();
+    y = m_intrinsicParams.m_focal[1] * GetImageHeight();
+}
+
 void CameraObject::SetImageCenterPix( double x, double y )
 {
     m_intrinsicParams.m_center[0] = x / GetImageWidth();
@@ -510,12 +523,6 @@ void CameraObject::GetImageCenterPix( double & x, double & y )
 {
     x = m_intrinsicParams.m_center[0] * GetImageWidth();
     y = m_intrinsicParams.m_center[1] * GetImageHeight();
-}
-
-void CameraObject::GetFocalPix( double & x, double & y )
-{
-    x = m_intrinsicParams.m_focal[0] * GetImageWidth();
-    y = m_intrinsicParams.m_focal[1] * GetImageHeight();
 }
 
 void CameraObject::SetLensDistortion( double dist )
@@ -1057,10 +1064,10 @@ void CameraObject::UpdateGeometricRepresentation()
     }
     m_camera->SetViewAngle( m_intrinsicParams.GetVerticalAngleDegrees() );
 
-    double angleRad = 0.5 * m_intrinsicParams.GetVerticalAngleRad();
-    double offsetY = m_imageDistance * tan( angleRad );
-    double offsetX = width / ((double)height) * offsetY;
-    double scaleFactor = ( 2 * offsetY ) / height;
+    double offsetY = m_imageDistance * 0.5 / m_intrinsicParams.m_focal[1];
+    double offsetX = m_imageDistance * 0.5 / m_intrinsicParams.m_focal[0];
+    double scaleFactorX = 2.0 * offsetX / static_cast<double>(width);
+    double scaleFactorY = 2.0 * offsetY / static_cast<double>(height);
 
     vtkPoints * pts = m_cameraPolyData->GetPoints();
     pts->SetPoint( 1, -offsetX, -offsetY, -m_imageDistance );
@@ -1071,7 +1078,7 @@ void CameraObject::UpdateGeometricRepresentation()
 
     m_imageTransform->Identity();
     m_imageTransform->Translate( -offsetX, -offsetY, -m_imageDistance );
-    m_imageTransform->Scale( scaleFactor, scaleFactor, scaleFactor );
+    m_imageTransform->Scale( scaleFactorX, scaleFactorY, 1.0 );
 
     m_cachedImageSize[ 0 ] = width;
     m_cachedImageSize[ 1 ] = height;

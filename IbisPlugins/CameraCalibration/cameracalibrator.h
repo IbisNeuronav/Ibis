@@ -53,6 +53,8 @@ public:
     double GetGridCellSize() { return m_gridCellSize; }
 
     // Do calibration and manage data
+    bool GetOptimizeGridDetection();
+    void SetOptimizeGridDetection( bool optimize );
     void ClearCalibrationData();
     void ExportCalibrationData( QString dirName, QProgressDialog * progressDlg );
     void ImportCalibrationData( QString dirName, QProgressDialog * progressDlg );
@@ -94,6 +96,7 @@ protected:
     double m_gridCellSize;
 
     // Calibration data
+    bool m_optimizeGridDetection;
     std::vector<cv::Point3f>  m_objectPointsOneView;
     std::vector<bool> m_viewEnabled;
     std::vector< std::vector<cv::Point3f> > m_objectPoints;

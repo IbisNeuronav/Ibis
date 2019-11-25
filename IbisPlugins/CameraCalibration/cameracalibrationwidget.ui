@@ -201,6 +201,25 @@
       </widget>
      </item>
      <item>
+      <widget class="QGroupBox" name="gridDetectionGroupBox">
+       <property name="title">
+        <string>Grid detection</string>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_3">
+        <item>
+         <widget class="QCheckBox" name="optimizeGridDetectCheckBox">
+          <property name="toolTip">
+           <string>If checked, input image is downsized before detecting grid to speed up detection. This is only useful with large resolution images</string>
+          </property>
+          <property name="text">
+           <string>Optimize</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
       <widget class="QTextEdit" name="calibrationResultTextEdit">
        <property name="readOnly">
         <bool>true</bool>

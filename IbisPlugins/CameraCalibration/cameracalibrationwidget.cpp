@@ -401,3 +401,9 @@ void CameraCalibrationWidget::on_bothRadioButton_toggled(bool checked)
         m_pluginInterface->SetComputeIntrinsic( true );
     }
 }
+
+void CameraCalibrationWidget::on_optimizeGridDetectCheckBox_toggled(bool checked)
+{
+    Q_ASSERT( m_pluginInterface );
+    m_pluginInterface->SetOptimizeGridDetection( checked );
+}

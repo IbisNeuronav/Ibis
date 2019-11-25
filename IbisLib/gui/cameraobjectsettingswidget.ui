@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>319</width>
-    <height>883</height>
+    <height>979</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -247,9 +247,9 @@
        </layout>
       </item>
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_14">
+       <layout class="QHBoxLayout" name="horizontalLayout_22">
         <item>
-         <widget class="QLabel" name="label_8">
+         <widget class="QLabel" name="fxLabel">
           <property name="maximumSize">
            <size>
             <width>20</width>
@@ -262,14 +262,23 @@
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="xFocalLineEdit">
-          <property name="readOnly">
-           <bool>true</bool>
+         <widget class="QDoubleSpinBox" name="fxSpinBox">
+          <property name="toolTip">
+           <string>Horizontal focal distance (pixels)</string>
+          </property>
+          <property name="minimum">
+           <double>0.000000000000000</double>
+          </property>
+          <property name="maximum">
+           <double>100000.000000000000000</double>
+          </property>
+          <property name="singleStep">
+           <double>0.100000000000000</double>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QLabel" name="label_9">
+         <widget class="QLabel" name="fyLabel">
           <property name="maximumSize">
            <size>
             <width>20</width>
@@ -282,9 +291,18 @@
          </widget>
         </item>
         <item>
-         <widget class="QLineEdit" name="yFocalLineEdit">
-          <property name="readOnly">
-           <bool>true</bool>
+         <widget class="QDoubleSpinBox" name="fySpinBox">
+          <property name="toolTip">
+           <string>Vertical focal distance (pixels)</string>
+          </property>
+          <property name="minimum">
+           <double>0.000000000000000</double>
+          </property>
+          <property name="maximum">
+           <double>100000.000000000000000</double>
+          </property>
+          <property name="singleStep">
+           <double>0.100000000000000</double>
           </property>
          </widget>
         </item>
@@ -307,6 +325,9 @@
         </item>
         <item>
          <widget class="QDoubleSpinBox" name="xImageCenterSpinBox">
+          <property name="toolTip">
+           <string>x coordinate of image center</string>
+          </property>
           <property name="minimum">
            <double>-10000.000000000000000</double>
           </property>
@@ -333,6 +354,9 @@
         </item>
         <item>
          <widget class="QDoubleSpinBox" name="yImageCenterSpinBox">
+          <property name="toolTip">
+           <string>y coordinate of image center</string>
+          </property>
           <property name="minimum">
            <double>-10000.000000000000000</double>
           </property>
@@ -362,6 +386,9 @@
             <width>120</width>
             <height>16777215</height>
            </size>
+          </property>
+          <property name="toolTip">
+           <string>K1 lens distortion coefficient</string>
           </property>
           <property name="correctionMode">
            <enum>QAbstractSpinBox::CorrectToNearestValue</enum>
