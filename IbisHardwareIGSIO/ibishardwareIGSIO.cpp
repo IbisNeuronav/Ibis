@@ -171,6 +171,7 @@ void IbisHardwareIGSIO::Update()
                 igtlioTransformDevice * transformDevice = igtlioTransformDevice::SafeDownCast( tool->transformDevice );
                 tool->sceneObject->SetInputMatrix( transformDevice->GetContent().transform );
             }
+            tool->sceneObject->SetTimestamp( tool->transformDevice->GetTimestamp() );
             tool->sceneObject->SetState( ComputeToolStatus( tool->transformDevice, tool ) );
         }
         if( tool->imageDevice )

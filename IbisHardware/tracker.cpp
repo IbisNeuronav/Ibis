@@ -769,6 +769,7 @@ void Tracker::PushTrackerStateToSceneObjects()
             }
             else
                 m_toolVec[i].sceneObject->SetState( GetToolState( i ) );
+            m_toolVec[i].sceneObject->SetTimestamp( GetTool(i)->GetTimeStamp() );
         }
     }
 }

@@ -12,6 +12,7 @@ ObjectSerializationMacro( TrackedSceneObject );
 
 TrackedSceneObject::TrackedSceneObject()
 {
+    m_timestamp = -1;
     m_hardwareModule = nullptr;
     m_state = Undefined;
     m_transform = vtkTransform::New();
