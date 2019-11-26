@@ -43,11 +43,13 @@ public:
     void SetInputTransform( vtkTransform * t );
     vtkTransform * GetUncalibratedTransform() { return m_transform; }
     void SetCalibrationMatrix( vtkMatrix4x4 * mat );
+    void SetTimestamp(double timestamp) { (timestamp < 0) ? m_timestamp = -1 : m_timestamp = timestamp; }
     vtkMatrix4x4 * GetCalibrationMatrix();
 
     vtkTransform * GetCalibrationTransform() { return m_calibrationTransform; }
     vtkTransform * GetUncalibratedWorldTransform() { return m_uncalibratedWorldTransform; }
     vtkTransform * GetReferenceToolTransform();
+    double GetLastTimestamp() { return m_timestamp; }
 
     bool IsTransformFrozen();
     void FreezeTransform();
@@ -67,6 +69,8 @@ protected:
     vtkTransform * m_transform;
     vtkTransform * m_calibrationTransform;
     vtkTransform * m_uncalibratedWorldTransform;
+
+    double m_timestamp;
 };
 
 ObjectSerializationHeaderMacro( TrackedSceneObject );
