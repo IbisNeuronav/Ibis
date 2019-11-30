@@ -132,9 +132,9 @@ CameraObject::CameraObject()
     m_saturation = 1.0;
     m_brightness = 1.0;
     m_useTransparency = false;
-    m_useGradient = true;
-    m_showMask = false;
-    m_trackedTransparencyCenter = false;
+    m_useGradientTargetTransparencyModulation = true;
+    m_showTargetTransparencyMask = false;
+    m_trackTargetTransparencyCenter = false;
     m_transparencyCenter[0] = 0.5;
     m_transparencyCenter[1] = 0.5;
     m_transparencyRadius[0] = 0.03;
@@ -160,6 +160,7 @@ void CameraObject::Serialize( Serializer * ser )
 {
     TrackedSceneObject::Serialize( ser );
     SerializeLocalParams( ser );
+    ::Serialize( ser, "TrackingCamera", m_trackingCamera );
 
     QString dataDirName = GetSceneDataDirectoryForThisObject( ser->GetSerializationDirectory() );
     m_videoBuffer->Serialize( ser, dataDirName );
@@ -332,8 +333,8 @@ void CameraObject::Setup( View * view )
         perView.cameraImageMapper->SetImageCenter( m_intrinsicParams.m_center[0] * GetImageWidth(), m_intrinsicParams.m_center[1] * GetImageHeight() );
         perView.cameraImageMapper->SetLensDistortion( m_intrinsicParams.m_distorsionK1 );
         perView.cameraImageMapper->SetUseTransparency( m_useTransparency );
-        perView.cameraImageMapper->SetUseGradient( m_useGradient );
-        perView.cameraImageMapper->SetShowMask( m_showMask );
+        perView.cameraImageMapper->SetUseGradient( m_useGradientTargetTransparencyModulation );
+        perView.cameraImageMapper->SetShowMask( m_showTargetTransparencyMask );
         perView.cameraImageMapper->SetTransparencyPosition( m_transparencyCenter[0], m_transparencyCenter[1] );
         perView.cameraImageMapper->SetTransparencyRadius( m_transparencyRadius[0], m_transparencyRadius[1] );
         perView.cameraImageActor->SetMapper( perView.cameraImageMapper );
@@ -367,7 +368,7 @@ void CameraObject::Release( View * view )
             perView.cameraImageActor->Delete();
             if( perView.cameraBackup )
             {
-                ReleaseControl( 0 );
+                ReleaseControl( nullptr );
             }
             ClearDrawingOneView( view, perView );
             m_perViewElements.erase( it );
@@ -379,7 +380,7 @@ void CameraObject::Release( View * view )
     }
 }
 
-void CameraObject::CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets )
+void CameraObject::CreateSettingsWidgets( QWidget * /*parent*/, QVector <QWidget*> *widgets )
 {
     CameraObjectSettingsWidget * dlg = new CameraObjectSettingsWidget;
     dlg->setAttribute(Qt::WA_DeleteOnClose);
@@ -391,7 +392,7 @@ void CameraObject::CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *
 
 bool CameraObject::OnLeftButtonPressed( View * v, int x, int y, unsigned )
 {
-    if( GetTrackCamera() && IsUsingTransparency() && v->GetType() == THREED_VIEW_TYPE && !m_trackedTransparencyCenter )
+    if( GetTrackCamera() && IsUsingTransparency() && v->GetType() == THREED_VIEW_TYPE && !m_trackTargetTransparencyCenter )
     {
         double xIm, yIm;
         WindowToImage( x, y, v, xIm, yIm );
@@ -429,17 +430,13 @@ void CameraObject::Hide()
     // turn off live video acquisition
     RemoveClient();
 
-    PerViewElementCont::iterator it = m_perViewElements.begin();
-    while( it != m_perViewElements.end() )
+    for( const auto &item : m_perViewElements )
     {
-        PerViewElements & elem = (*it).second;
-
+        const PerViewElements & elem = item.second;
         elem.cameraActor->VisibilityOff();
         elem.cameraImageActor->VisibilityOff();
         elem.cameraAxesActor->VisibilityOff();
         elem.cameraTrackerAxesActor->VisibilityOff();
-
-        ++it;
     }
 
     emit ObjectModified();
@@ -545,7 +542,7 @@ void CameraObject::SetLensDisplacement( double d )
 
 void CameraObject::SetTransparencyCenterTracked( bool t )
 {
-    m_trackedTransparencyCenter = t;
+    m_trackTargetTransparencyCenter = t;
     if( !IsDrivenByHardware() )
     {
         ListenForIbisClockTick( t );
@@ -582,12 +579,12 @@ void CameraObject::SetUseTransparency( bool use )
 
 void CameraObject::SetUseGradient( bool use )
 {
-    m_useGradient = use;
+    m_useGradientTargetTransparencyModulation = use;
     PerViewElementCont::iterator it = m_perViewElements.begin();
     while( it != m_perViewElements.end() )
     {
         PerViewElements & elem = (*it).second;
-        elem.cameraImageMapper->SetUseGradient( m_useGradient );
+        elem.cameraImageMapper->SetUseGradient( m_useGradientTargetTransparencyModulation );
         ++it;
     }
     emit ParamsModified();
@@ -595,12 +592,12 @@ void CameraObject::SetUseGradient( bool use )
 
 void CameraObject::SetShowMask( bool show )
 {
-    m_showMask = show;
+    m_showTargetTransparencyMask = show;
     PerViewElementCont::iterator it = m_perViewElements.begin();
     while( it != m_perViewElements.end() )
     {
         PerViewElements & elem = (*it).second;
-        elem.cameraImageMapper->SetShowMask( m_showMask );
+        elem.cameraImageMapper->SetShowMask( m_showTargetTransparencyMask );
         ++it;
     }
     emit ParamsModified();
@@ -650,10 +647,15 @@ void CameraObject::SetTrackCamera( bool t )
 {
     if( t == m_trackingCamera )
         return;
-    if( t )
-    {
-        m_trackingCamera = true;
+    m_trackingCamera = t;
+    InternalSetTrackCamera();
+    emit ParamsModified();
+}
 
+void CameraObject::InternalSetTrackCamera()
+{
+    if( m_trackingCamera )
+    {
         PerViewElementCont::iterator it = m_perViewElements.begin();
         while( it != m_perViewElements.end() )
         {
@@ -670,7 +672,7 @@ void CameraObject::SetTrackCamera( bool t )
             v->GetOverlayRenderer()->AddActor( elem.cameraImageActor );
 
             // Move anotations to overlay renderer
-            for( int i = 0; i < elem.anotations.size(); ++i )
+            for( unsigned i = 0; i < elem.anotations.size(); ++i )
             {
                 v->GetRenderer()->RemoveViewProp( elem.anotations[i] );
                 v->GetOverlayRenderer()->AddViewProp( elem.anotations[i] );
@@ -690,9 +692,8 @@ void CameraObject::SetTrackCamera( bool t )
     }
     else
     {
-        this->ReleaseControl( 0 );
+        this->ReleaseControl( nullptr );
     }
-    emit ParamsModified();
 }
 
 bool CameraObject::GetTrackCamera()
@@ -760,13 +761,13 @@ void CameraObject::ToggleRecording()
     {
         this->GetManager()->AddObject( m_recordingCamera );
         this->GetManager()->SetCurrentObject( m_recordingCamera );
-        m_recordingCamera = 0;
+        m_recordingCamera = nullptr;
     }
 }
 
 bool CameraObject::IsRecording()
 {
-    return m_recordingCamera != 0;
+    return m_recordingCamera != nullptr;
 }
 
 int CameraObject::GetNumberOfFrames()
@@ -812,7 +813,7 @@ void CameraObject::ReleaseControl( View * triggeredView )
         elem.cameraActor->VisibilityOn();
         elem.cameraAxesActor->VisibilityOn();
 
-        for( int i = 0; i < elem.anotations.size(); ++i )
+        for( unsigned i = 0; i < elem.anotations.size(); ++i )
         {
             v->GetOverlayRenderer()->RemoveViewProp( elem.anotations[i] );
             v->GetRenderer()->AddViewProp( elem.anotations[i] );
@@ -823,7 +824,7 @@ void CameraObject::ReleaseControl( View * triggeredView )
         v->GetOverlayRenderer()->SetActiveCamera( elem.cameraBackup );
         v->GetOverlayRenderer2()->SetActiveCamera( elem.cameraBackup );
         elem.cameraBackup->UnRegister( this );
-        elem.cameraBackup = 0;
+        elem.cameraBackup = nullptr;
 
         ++it;
     }
@@ -899,7 +900,7 @@ void CameraObject::DrawPath( std::vector< Vec2 > & points, double color[4] )
 {
     std::vector< Vec3 > p3d;
     p3d.reserve( points.size() );
-    for( int i = 0; i < points.size(); ++i )
+    for( unsigned i = 0; i < points.size(); ++i )
         p3d.push_back( Vec3( points[i], zMin ) );
 
     InternalDrawPath( p3d, color );
@@ -909,7 +910,7 @@ void CameraObject::DrawWorldPath( std::vector< Vec3 > & points, double color[4] 
 {
     std::vector< Vec3 > p3d;
     p3d.reserve( points.size() );
-    for( int i = 0; i < points.size(); ++i )
+    for( unsigned i = 0; i < points.size(); ++i )
     {
         double x, y;
         WorldToImage( points[i].Ref(), x, y );
@@ -953,7 +954,7 @@ void CameraObject::DrawRect( double x, double y, double width, double height, do
     DrawLine( x, y + height, x, y, color );
 }
 
-void CameraObject::DrawTarget( double x, double y, double radius, double color[4] )
+void CameraObject::DrawTarget( double x, double y, double /*radius*/, double color[4] )
 {
     double center[3] = { 0.0, 0.0, 0.0 };
     center[0] = x;
@@ -1005,7 +1006,7 @@ void CameraObject::VideoUpdatedSlot()
         UpdateGeometricRepresentation();
 
     // Get the position of the transparency center from projection of the tracked pointer
-    if( m_trackedTransparencyCenter )
+    if( m_trackTargetTransparencyCenter )
     {
         Q_ASSERT( this->GetManager() );
         PointerObject * navPointer = this->GetManager()->GetNavigationPointerObject();
@@ -1027,17 +1028,24 @@ void CameraObject::VideoUpdatedSlot()
     emit ObjectModified();
 }
 
+void CameraObject::InternalPostSceneRead()
+{
+    UpdateGeometricRepresentation();
+    if( GetTrackCamera() )
+        InternalSetTrackCamera();
+}
+
 void CameraObject::ObjectAddedToScene()
 {
-    if( IsDrivenByHardware() || m_trackedTransparencyCenter )
+    if( IsDrivenByHardware() || m_trackTargetTransparencyCenter )
         ListenForIbisClockTick( true );
 }
 
 void CameraObject::ObjectAboutToBeRemovedFromScene()
 {
-    if( IsDrivenByHardware() || m_trackedTransparencyCenter )
+    if( IsDrivenByHardware() || m_trackTargetTransparencyCenter )
         ListenForIbisClockTick( false );
-    if( m_trackingCamera )
+    if( GetTrackCamera() )
         SetTrackCamera( false );
 }
 
@@ -1111,6 +1119,13 @@ void CameraObject::SerializeLocalParams( Serializer * ser )
     ::Serialize( ser, "UseTransparency", m_useTransparency );
     ::Serialize( ser, "TransparencyCenter", m_transparencyCenter, 2 );
     ::Serialize( ser, "TransparencyRadius", m_transparencyRadius, 2 );
+    ::Serialize( ser, "ImageDistance", m_imageDistance );
+    ::Serialize( ser, "GlobalOpacity", m_globalOpacity );
+    ::Serialize( ser, "Saturation", m_saturation );
+    ::Serialize( ser, "Brightness", m_brightness );
+    ::Serialize( ser, "UseGradientTargetTransparencyModulation", m_useGradientTargetTransparencyModulation );
+    ::Serialize( ser, "ShowTargetTransparencyMask", m_showTargetTransparencyMask );
+    ::Serialize( ser, "TrackTargetTransparencyCenter", m_trackTargetTransparencyCenter );
 }
 
 void CameraObject::CreateCameraRepresentation()
@@ -1157,7 +1172,7 @@ QString CameraObject::FindNextSnapshotName()
 
 void CameraObject::ClearDrawingOneView( View * v, PerViewElements & elem )
 {
-    for( int i = 0; i < elem.anotations.size(); ++i )
+    for( unsigned i = 0; i < elem.anotations.size(); ++i )
     {
         vtkProp3D * anotProp = elem.anotations[i];
         GetCurrentRenderer( v )->RemoveViewProp( anotProp );

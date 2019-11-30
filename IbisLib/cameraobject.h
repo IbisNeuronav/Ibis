@@ -110,14 +110,14 @@ public:
     void SetLensDistortion( double x );
     double GetLensDisplacement();
     void SetLensDisplacement( double d );
-    bool IsTransparencyCenterTracked() { return m_trackedTransparencyCenter; }
+    bool IsTransparencyCenterTracked() { return m_trackTargetTransparencyCenter; }
     void SetTransparencyCenterTracked( bool t );
     void SetTransparencyCenter( double x, double y );
     bool IsUsingTransparency() { return m_useTransparency; }
     void SetUseTransparency( bool use );
-    bool IsUsingGradient() { return m_useGradient; }
+    bool IsUsingGradient() { return m_useGradientTargetTransparencyModulation; }
     void SetUseGradient( bool use );
-    bool IsShowingMask() { return m_showMask; }
+    bool IsShowingMask() { return m_showTargetTransparencyMask; }
     void SetShowMask( bool show );
     double GetSaturation() { return m_saturation; }
     void SetSaturation( double s );
@@ -169,12 +169,16 @@ protected:
 
     void ListenForIbisClockTick( bool listen );
     void InternalDrawPath( std::vector< Vec3 > & p3d, double color[4] );
+
+    // Base classes overrides
     virtual void Hide() override;
     virtual void Show() override;
-
     virtual void ObjectAddedToScene() override;
     virtual void ObjectAboutToBeRemovedFromScene() override;
+    virtual void InternalPostSceneRead() override;
+
     void InternalSetIntrinsicParams();
+    void InternalSetTrackCamera();
     void UpdateGeometricRepresentation();
     void UpdateVtkCamera();
     vtkRenderer * GetCurrentRenderer( View * v );
@@ -210,9 +214,9 @@ protected:
     double m_saturation;
     double m_brightness;
     bool m_useTransparency;
-    bool m_useGradient;
-    bool m_showMask;
-    bool m_trackedTransparencyCenter;
+    bool m_useGradientTargetTransparencyModulation;
+    bool m_showTargetTransparencyMask;
+    bool m_trackTargetTransparencyCenter;
     double m_transparencyCenter[2];
     double m_transparencyRadius[2];
     bool m_mouseMovingTransparency;

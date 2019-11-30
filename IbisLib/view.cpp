@@ -327,14 +327,14 @@ void View::TakeControl( ViewController * c )
     }
 
     CurrentController = c;
-    this->Interactor->SetInteractorStyle( 0 );
+    this->Interactor->SetInteractorStyle( nullptr );
 }
 
 void View::ReleaseControl( ViewController * c )
 {
     Q_ASSERT( CurrentController == c );
 
-    CurrentController = 0;
+    CurrentController = nullptr;
     this->Interactor->SetInteractorStyle( this->InteractorStyle );
 }
 
