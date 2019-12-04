@@ -122,19 +122,26 @@ bool TrackedVideoBuffer::Serialize( Serializer * ser, QString dataDirectory )
 {
     ::Serialize( ser, "CurrentFrame", m_currentFrame );
 
-    if( !ser->IsReader() )
-        WriteMatrices( m_matrices, dataDirectory );
-    else
-        ReadMatrices( m_matrices, dataDirectory );
+    // If we are writing and dir already exists, sequence has been saved so we can skip writing
+    // todo: find smarter way to handle this
+    QFileInfo info(dataDirectory);
+    bool needsSerialization = !( !ser->IsReader() && info.exists() && info.isDir() );
 
-    if( !ser->IsReader() )
-        WriteImages( dataDirectory );
-    else
-        ReadImages( m_matrices.size(), dataDirectory );
+    if( needsSerialization )
+    {
+        if( !ser->IsReader() )
+            WriteMatrices( m_matrices, dataDirectory );
+        else
+            ReadMatrices( m_matrices, dataDirectory );
 
-    if( ser->IsReader() )
-        if( m_currentFrame != -1 )
-            SetCurrentFrame( m_currentFrame );
+        if( !ser->IsReader() )
+            WriteImages( dataDirectory );
+        else
+            ReadImages( m_matrices.size(), dataDirectory );
+    }
+
+    if( ser->IsReader() && m_currentFrame != -1 )
+        SetCurrentFrame( m_currentFrame );
 
     return true;
 }
