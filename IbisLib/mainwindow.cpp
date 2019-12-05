@@ -886,6 +886,8 @@ void MainWindow::ShowFloatingDock( QWidget * w )
     dock->setAttribute( Qt::WA_DeleteOnClose );
     dock->setAllowedAreas( Qt::NoDockWidgetArea );
     dock->setFloating( true );
+    dock->move(this->pos().x() + this->size().width()/2 - dock->size().width()/2,
+               this->pos().y() + this->size().height()/2 - dock->size().height()/2);
     dock->setWidget( w );
     dock->show();
 }
