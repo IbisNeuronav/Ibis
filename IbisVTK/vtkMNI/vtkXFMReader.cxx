@@ -152,10 +152,10 @@ int vtkXFMReader::CanReadFile( const char * fname )
         return 0;
     }
     
-    char fileType[30];
-    f.getline( fileType, 30 );
+    std::string fileType;
+    std::getline( f, fileType);
     f.close();
-    if( strcmp( fileType, "MNI Transform File" ) != 0 )
+    if( fileType.find( "MNI Transform File" ) == std::string::npos )
     {
         vtkErrorMacro( << "This is not MNI XFM type file." << endl );
         return 0;
