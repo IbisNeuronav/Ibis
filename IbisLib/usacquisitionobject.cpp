@@ -1103,6 +1103,7 @@ bool USAcquisitionObject::Import()
             QStringList acqSuffix = fi.fileName().split(".");
             QString acqName = tr("Acquisition_") + acqSuffix[0];
             this->SetName( acqName );
+            this->SetFullFileName(fi.absoluteFilePath());
             QString calibrationTransformFileName( fi.absolutePath() );
             calibrationTransformFileName.append( "/calibrationTransform.xfm" );
             if( QFile::exists( calibrationTransformFileName ) )
