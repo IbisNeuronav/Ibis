@@ -45,6 +45,7 @@ SceneObject::SceneObject()
     this->IsModifyingTransform = false;
     this->TransformModified = false;
     this->RenderLayer = 0;
+    //This connections are a bad idea for vtk version 8.1 and lower. Both Identity() and Inverse() send Modified event before the matrix is changed.
     this->m_vtkConnections = vtkSmartPointer<vtkEventQtSlotConnect>::New();
     this->m_vtkConnections->Connect( this->LocalTransform, vtkCommand::ModifiedEvent, this, SLOT(NotifyTransformChanged()), 0, 0.0, Qt::DirectConnection );
     this->m_vtkConnections->Connect( this->WorldTransform, vtkCommand::ModifiedEvent, this, SLOT(NotifyTransformChanged()), 0, 0.0, Qt::DirectConnection );
