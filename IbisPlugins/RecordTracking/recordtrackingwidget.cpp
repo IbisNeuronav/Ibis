@@ -19,7 +19,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <iomanip>
 #include <chrono>
 #include <cstdio>
-#include <unistd.h>
 
 #include <QLabel>
 #include <QCheckBox>
@@ -35,8 +34,7 @@ RecordTrackingWidget::RecordTrackingWidget(QWidget *parent) :
     m_pluginInterface(nullptr),
     m_recording(false),
     m_frameId(0),
-    m_cummulativeTime(0),
-    m_recordfile(nullptr)
+    m_cummulativeTime(0)
 {
     m_temporaryFilename = "";
     ui->setupUi(this);
@@ -45,7 +43,7 @@ RecordTrackingWidget::RecordTrackingWidget(QWidget *parent) :
 
 RecordTrackingWidget::~RecordTrackingWidget()
 {
-    if (m_recordfile)
+    if( m_recordfile.is_open() )
         m_recordfile.close();
     delete ui;
 }
