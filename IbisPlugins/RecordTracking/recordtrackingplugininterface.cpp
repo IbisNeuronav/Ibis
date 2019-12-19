@@ -46,6 +46,7 @@ bool RecordTrackingPluginInterface::WidgetAboutToClose()
     IbisAPI *ibisApi = this->GetIbisAPI();
     disconnect( ibisApi, SIGNAL( ObjectAdded(int) ), this, SLOT( OnTrackedToolAdded(int) ) );
     disconnect( ibisApi, SIGNAL( ObjectRemoved(int) ), this, SLOT( OnTrackedToolRemoved(int) ) );
+    return true;
 }
 
 void RecordTrackingPluginInterface::OnTrackedToolAdded(int id)
