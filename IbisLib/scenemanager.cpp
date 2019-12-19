@@ -861,15 +861,15 @@ void SceneManager::RemoveObject( SceneObject * object )
         parent->RemoveChild( object );
     }
 
-    // remove the object from the global list
-    this->AllObjects.removeAt( indexAll );
-
     // Tell other this object is being removed
     object->RemoveFromScene();
     //at this moment object still exist, we send ObjectRemoved() signal
     //in order to let other objects to deal with the a still valid object,
     //unregister shoul trigger destruction of the object
     emit ObjectRemoved( objId );
+
+    // remove the object from the global list
+    this->AllObjects.removeAt( indexAll );
 
     object->UnRegister( this );
 
