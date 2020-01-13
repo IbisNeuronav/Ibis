@@ -1,3 +1,13 @@
+/*=========================================================================
+Ibis Neuronav
+Copyright (c) Simon Drouin, Anna Kochanowska, Louis Collins.
+All rights reserved.
+See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
+
+     This software is distributed WITHOUT ANY WARRANTY; without even
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+     PURPOSE.  See the above copyright notice for more information.
+=========================================================================*/
 #ifndef IBISAPI_H
 #define IBISAPI_H
 
@@ -65,6 +75,18 @@ public:
     SceneObject * defaultParent;
 };
 
+/**
+ * @class   IbisAPI
+ * @brief   interface to Application and SceneManager, to be used in ibis plugins
+ *
+ * IbisAPI provides 2 groups of functions. Functions from the first group,
+ * interfacing with SceneManager, are used to manipulate objects in the scene
+ * and some scene parameters, cursor color for example.
+ * The second group functiona, interfacing with Application, are used to manipulate
+ * GUI and application preferences.
+ * @sa
+ * Application SceneManager
+ */
 class IbisAPI : public QObject
 {
 
@@ -74,32 +96,118 @@ public:
     IbisAPI();
     ~IbisAPI();
 
+    /**
+     * @brief InvalidId is a constant used to define an invalid scene object, -1 is used
+     *
+     * Every object in scene has its id, we use negative integers < -1 for system objects
+     * and 0 or positive number for any other object. WorldObject is an example of system object.
+     *
+     */
     static const int InvalidId;
 
     // from SceneManager:
-    void AddObject( SceneObject * object, SceneObject * attachTo = 0 );
+    /**
+     * Add an object to the scene.  The object must be derived
+     * from SceneObject class.  If the second parameter, parenObject, is not null,
+     * the object will be added as a child of parenObject.
+     */
+    void AddObject( SceneObject * object, SceneObject * parenObject = nullptr );
+    /**
+     * Remove the object from the scene together with all its children.
+     */
     void RemoveObject( SceneObject * object );
+    /**
+     * Remove all object's children, leaving the object on the scene.
+     */
     void RemoveAllChildrenObjects( SceneObject *obj );
+    /**
+     * Set object as current and show the object's properties
+     * in the left side panel.
+     */
     void SetCurrentObject( SceneObject * cur  );
+    /**
+     * Return current object
+     */
     SceneObject * GetCurrentObject( );
+    /**
+     * Return object with a given Id
+     */
     SceneObject * GetObjectByID( int id );
+    /**
+     * Remove object with a given Id
+     */
     void RemoveObjectByID( int id );
+    /**
+     * WorldObject, the parent of all the objects in the scene is the root scene object
+     */
     SceneObject * GetSceneRoot();
+    /**
+     * Return the object used as current pointer to navigate the scene
+     */
     PointerObject *GetNavigationPointerObject( );
+    /**
+     * Return number of objects created by the user
+     */
     int  GetNumberOfUserObjects();
+    /**
+     * Return a list of objects created by the user
+     */
     void GetAllUserObjects(QList<SceneObject*> &);
+    /**
+     * In the scene there is one main object called Reference object. It is used
+     * for registration and it defines a bounding box in which other objects are displayed.
+     */
     ImageObject * GetReferenceDataObject( );
+    /**
+     * Return a list of objects of type ImageObject.
+     * ImageObject is derived from SceneOBject. It is used to represent volumes.
+     */
     void GetAllImageObjects( QList<ImageObject*> & objects );
+    /**
+     * Return a list of objects of type PolyDataObject.
+     * PolyDataObject is derived from SceneOBject. It is mostly used to represent surfaces.
+     */
     void GetAllPolyDataObjects( QList<PolyDataObject*> & objects );
+    /**
+     * Return a list of all objects in the scene.
+     */
     const QList< SceneObject* > & GetAllObjects();
+    /**
+     * Return a list of objects of type USAcquisitionObject.
+     * USAcquisitionObject is derived from SceneOBject. It is used to store UltraSound acquisition.
+     */
     void GetAllUSAcquisitionObjects( QList<USAcquisitionObject*> & all );
+    /**
+     * Return a list of objects of type UsProbeObject.
+     * UsProbeObject is derived from SceneOBject. It represents an UltraSound probe.
+     */
     void GetAllUsProbeObjects( QList<UsProbeObject*> & all );
+    /**
+     * Return a list of objects of type CameraObject.
+     * CameraObject is derived from SceneOBject. It represents a camera.
+     */
     void GetAllCameraObjects( QList<CameraObject*> & all );
-
+    /**
+     * Return a list of objects of type PointsObject.
+     * PointsObject is derived from SceneOBject. It is used to represent multiple points in the scene.
+     */
     void GetAllPointsObjects( QList<PointsObject*> & objects );
+    /**
+     * Return a list of objects of type PointerObject.
+     * PointerObject is derived from SceneOBject. It represents a pointer.
+     */
     void GetAllPointerObjects( QList<PointerObject*> & all );
+    /**
+     * Return a list of all objects that are tracked using a tracking system.
+     */
     void GetAllTrackedObjects( QList<TrackedSceneObject*> & all );
+    /**
+     * Return a list of all objects that are listed in the left side panel, except tracked objects..
+     */
     void GetAllListableNonTrackedObjects( QList<SceneObject*> & all );
+    /**
+     * Return a list of all objects of a given type.
+     */
     void GetAllObjectsOfType( const char * typeName, QList<SceneObject*> & all );
 
     View * GetViewByID( int id );
@@ -126,6 +234,7 @@ public:
     void SetCursorWorldPosition( double * );
 
     // from Application
+
     QProgressDialog * StartProgress( int max, const QString & caption = QString() );
     void StopProgress( QProgressDialog * progressDialog);
     void UpdateProgress( QProgressDialog*, int current );

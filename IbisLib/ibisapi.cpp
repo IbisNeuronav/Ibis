@@ -1,3 +1,13 @@
+/*=========================================================================
+Ibis Neuronav
+Copyright (c) Simon Drouin, Anna Kochanowska, Louis Collins.
+All rights reserved.
+See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
+
+     This software is distributed WITHOUT ANY WARRANTY; without even
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+     PURPOSE.  See the above copyright notice for more information.
+=========================================================================*/
 #include "ibisapi.h"
 #include "application.h"
 #include "filereader.h"
@@ -50,9 +60,9 @@ void IbisAPI::SetApplication( Application * app )
     connect( m_application, SIGNAL( IbisClockTick() ), this, SLOT( IbisClockTickSlot() ) );
 }
 
-void IbisAPI::AddObject( SceneObject * object, SceneObject * attachTo )
+void IbisAPI::AddObject(SceneObject * object, SceneObject * parenObject )
 {
-    m_sceneManager->AddObject( object, attachTo );
+    m_sceneManager->AddObject( object, parenObject );
 }
 
 void IbisAPI::RemoveObject(SceneObject * object )
