@@ -82,10 +82,14 @@ public:
  * IbisAPI provides 2 groups of functions. Functions from the first group,
  * interfacing with SceneManager, are used to manipulate objects in the scene
  * and some scene parameters, cursor color for example.
- * The second group functiona, interfacing with Application, are used to manipulate
+ * SceneManager also controls views.
+ * Ibis has 4 predefined views: 3D, Sagittal, Coronal and Transverse accessible either by type
+ * or by id. User created views are not yet implemented.
+ *
+ * The second group functions, interfacing with Application, are used to manipulate
  * GUI and application preferences.
  * @sa
- * Application SceneManager
+ * Application SceneManager View SceneObject ImageObject PolydataObject
  */
 class IbisAPI : public QObject
 {
@@ -210,19 +214,54 @@ public:
      */
     void GetAllObjectsOfType( const char * typeName, QList<SceneObject*> & all );
 
+    /**
+     * Get a View using its id.
+     */
     View * GetViewByID( int id );
+    /**
+     * @{
+     * Get one of the main application views.
+     */
     View * GetMain3DView();
     View * GetMainCoronalView();
     View * GetMainSagittalView();
     View * GetMainTransverseView();
+    /** @}*/
+    /**
+     * Get all views in QMap form.
+     */
     QMap<View*, int> GetAllViews( );
+    /**
+     * Get the background color of main 2D Views, they all have the same color.
+     */
     double * GetViewBackgroundColor();
+    /**
+     * Get the background color of 3D View, it may be different from 2D.
+     */
     double * GetView3DBackgroundColor();
-
+    /**
+     * Set the background color of all main views.
+     */
+    void SetViewBackgroundColor( double * color );
+    /**
+     * Set the background color of the main 3D view.
+     */
+    void SetView3DBackgroundColor( double * color );
+    /**
+     * Assign object to a different parent object.
+     */
     void ChangeParent( SceneObject * object, SceneObject * newParent, int newChildIndex );
-
+    /**
+     * Clear all the objects from the scene to prepare for a new scene.
+     */
     void NewScene();
+    /**
+     * Load a saved scene.
+     */
     void LoadScene( QString & filename, bool interactive = true );
+    /**
+     * Check if the scene is currently beeing loaded
+     */
     bool IsLoadingScene();
     const QString GetSceneDirectory();
 

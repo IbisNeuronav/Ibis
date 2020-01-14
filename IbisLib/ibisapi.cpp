@@ -214,6 +214,16 @@ double * IbisAPI::GetView3DBackgroundColor()
     return m_sceneManager->GetView3DBackgroundColor();
 }
 
+void IbisAPI::SetViewBackgroundColor( double * color )
+{
+    m_sceneManager->SetViewBackgroundColor( color );
+}
+
+void IbisAPI::SetView3DBackgroundColor( double * color )
+{
+    m_sceneManager->SetView3DBackgroundColor( color );
+}
+
 void IbisAPI::ChangeParent( SceneObject * object, SceneObject * newParent, int newChildIndex )
 {
     m_sceneManager->ChangeParent( object, newParent, newChildIndex );
