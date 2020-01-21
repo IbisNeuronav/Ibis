@@ -127,6 +127,8 @@ if( IBIS_USE_OPENCV )
     add_subdirectory( IbisOpenCV )
 endif()
 
+
+
 # define version and build info
 set( IBIS_MAJOR_VERSION 3 )
 set( IBIS_MINOR_VERSION 0 )
@@ -152,3 +154,37 @@ if( IBIS_BUILD_IGSIO_HARDWARE_MODULE )
 endif()
 add_subdirectory( IbisPlugins )
 add_subdirectory( Ibis )
+
+#
+# Build the documentation
+#
+option( IBIS_BUILD_DOCUMENTATION "Build ibis documentation using Doxygen" OFF )
+if( IBIS_BUILD_DOCUMENTATION )
+    option(DOXYGEN_SHORT_NAMES "Build Doxygen of VTK using short file names" OFF)
+    option(DOXYGEN_GENERATE_HTMLHELP "Generate HTML help (CHM) files" ON)
+    if(DOXYGEN_SHORT_NAMES)
+      set(DOXYGEN_SHORT_NAMES YES)
+    else()
+      set(DOXYGEN_SHORT_NAMES NO)
+    endif()
+    if(DOXYGEN_GENERATE_HTMLHELP)
+      set(DOXYGEN_GENERATE_HTMLHELP YES)
+    else()
+      set(DOXYGEN_GENERATE_HTMLHELP NO)
+    endif()
+    find_package(Doxygen REQUIRED)
+    if (DOXYGEN_FOUND)
+        set(DOXYGEN_IN ${CMAKE_CURRENT_SOURCE_DIR}/doxyfile.in)
+        set(DOXYGEN_OUT ${CMAKE_CURRENT_BINARY_DIR}/Doxygen/Doxyfile)
+        # configure Doxygen file
+        configure_file( ${DOXYGEN_IN} ${DOXYGEN_OUT} )
+        # note the option ALL which allows to build the docs together with the application
+        add_custom_target( doc_doxygen ALL
+            COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_OUT}
+            WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+            COMMENT "Generating API documentation with Doxygen"
+            VERBATIM )
+    else (DOXYGEN_FOUND)
+        message("Doxygen needs to be installed to generate documentation")
+    endif (DOXYGEN_FOUND)
+endif()
