@@ -28,7 +28,7 @@ namespace itk
    * The grid can be specified by an integer downsampling factor for
    * each dimension.
    *
-   * \parameter SampleGridSpacing: This parameter controls the spacing
+   * \param SampleGridSpacing: This parameter controls the spacing
    *    of the uniform grid in all dimensions. This should be given in
    *    index coordinates. \n
    *    example: <tt>(SampleGridSpacing 4 4 4)</tt> \n

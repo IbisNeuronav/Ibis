@@ -206,7 +206,7 @@ public:
      */
     void GetAllTrackedObjects( QList<TrackedSceneObject*> & all );
     /**
-     * Return a list of all objects that are listed in the left side panel, except tracked objects..
+     * Return a list of all objects that are listed in the left side panel, except tracked objects.
      */
     void GetAllListableNonTrackedObjects( QList<SceneObject*> & all );
     /**
