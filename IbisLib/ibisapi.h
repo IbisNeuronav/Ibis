@@ -130,7 +130,7 @@ public:
      */
     void SetCurrentObject( SceneObject * cur  );
     /**
-     * Return current object
+     * Return currently selected object
      */
     SceneObject * GetCurrentObject( );
     /**
@@ -263,6 +263,9 @@ public:
      * Check if the scene is currently beeing loaded
      */
     bool IsLoadingScene();
+    /**
+     * Return path to the scene directory
+     */
     const QString GetSceneDirectory();
 
     static QString FindUniqueName( QString wantedName, QStringList & otherNames );
