@@ -97,7 +97,7 @@ class IbisAPI : public QObject
     Q_OBJECT
 
 public:
-    IbisAPI();
+    IbisAPI( Application *app);
     ~IbisAPI();
 
     /**
@@ -269,41 +269,79 @@ public:
     const QString GetSceneDirectory();
 
     static QString FindUniqueName( QString wantedName, QStringList & otherNames );
-
+    /**
+     * @{
+     * Get/set cursor position.
+     */
     void GetCursorPosition( double pos[3] );
     void SetCursorPosition( double *pos );
     void GetCursorWorldPosition( double pos[3] );
     void SetCursorWorldPosition( double * );
+    /** @}*/
 
     // from Application
 
+    /**
+     * @{
+     * Manipulate progress.
+     */
     QProgressDialog * StartProgress( int max, const QString & caption = QString() );
     void StopProgress( QProgressDialog * progressDialog);
     void UpdateProgress( QProgressDialog*, int current );
+    /** @}*/
 
+    /**
+     * Display warning message
+     */
     void Warning( const QString &title, const QString & text );
-
+    /**
+     *  Check ibis execution mode,
+     *  ibis can be run without tracking, in a viewer mode.
+     */
     bool IsViewerOnly();
+    /**
+     * @{
+     * Manage directories and files
+     */
     QString GetWorkingDirectory();
     QString GetConfigDirectory();
     QString GetFileNameOpen( const QString & caption = QString(), const QString & dir = QString(), const QString & filter = QString() );
     QString GetFileNameSave( const QString & caption = QString(), const QString & dir = QString(), const QString & filter = QString() );
     QString GetExistingDirectory( const QString & caption = QString(), const QString & dir = QString() );
+    /** @}*/
+    /**
+     * Get ibis git revision
+     */
     QString GetGitHashShort();
+    /**
+     * @{
+     * Get plugins and global objects using their names
+     * Basic types of plugins in ibis are: tool, object and global object.
+     */
     ToolPluginInterface * GetToolPluginByName( QString name );
     ObjectPluginInterface *GetObjectPluginByName( QString className );
     SceneObject * GetGlobalObjectInstance( const QString & className );
-
-    // Allow plugins to listen for events (e.g. key press) on any window of Ibis
+    /** @}*/
+    /**
+     * @{
+     * Handle events in plugins
+     * Allow plugins to listen for events (e.g. key press) on any window of ibis
+     */
     void AddGlobalEventHandler( GlobalEventHandler * h );
     void RemoveGlobalEventHandler( GlobalEventHandler * h );
-
-    // Data loading utilities
+    /** @}*/
+    /**
+     * @{
+     * Data loading utilities
+     */
     bool OpenTransformFile( const QString & filename, vtkMatrix4x4 * mat );
     bool OpenTransformFile( const QString & filename, SceneObject * obj = 0 );
     void OpenFiles( OpenFileParams * params, bool addToScene = true );
-
-    // Control layout of Main Window
+    /** @}*/
+    /**
+     * @{
+     * Control layout of Main Window
+     */
     void SetMainWindowFullscreen( bool f );
     void SetToolbarVisibility( bool v );
     void SetLeftPanelVisibility( bool v );
@@ -311,14 +349,17 @@ public:
     void AddBottomWidget( QWidget * w );
     void RemoveBottomWidget( QWidget * w );
     void ShowFloatingDock( QWidget * w );
-
+    /** @}*/
+    /**
+     * @{
+     * Manage ibis preferences, e.g. path to MINC tools
+     */
     IbisPreferences *GetIbisPreferences();
-
-    //Custom paths
     void RegisterCustomPath( const QString & pathName, const QString & directoryPath );
     void UnRegisterCustomPath( const QString & pathName );
     const QString GetCustomPath( const QString & pathName );
     bool IsCustomPathRegistered( const QString &pathName );
+    /** @}*/
 
 public slots:
     void ObjectAddedSlot( int id );
@@ -343,7 +384,9 @@ private:
     Application  * m_application;
     SceneManager * m_sceneManager;
 
-    friend class Application;
+    /**
+     * Assure access to the core functionality of ibis
+     */
     void SetApplication( Application * app );
 };
 

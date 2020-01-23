@@ -29,9 +29,9 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 const int IbisAPI::InvalidId = SceneManager::InvalidId;
 
-IbisAPI::IbisAPI()
+IbisAPI::IbisAPI(Application *app)
 {
-
+    this->SetApplication( app );
 }
 
 IbisAPI::~IbisAPI()
@@ -45,7 +45,6 @@ IbisAPI::~IbisAPI()
     disconnect( m_application, SIGNAL( IbisClockTick() ), this, SLOT( IbisClockTickSlot() ) );
 }
 
-// from SceneManager
 void IbisAPI::SetApplication( Application * app )
 {
     m_application = app;
@@ -60,6 +59,7 @@ void IbisAPI::SetApplication( Application * app )
     connect( m_application, SIGNAL( IbisClockTick() ), this, SLOT( IbisClockTickSlot() ) );
 }
 
+// from SceneManager
 void IbisAPI::AddObject(SceneObject * object, SceneObject * parenObject )
 {
     m_sceneManager->AddObject( object, parenObject );
