@@ -16,6 +16,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "pointercalibrationdialog.h"
 #include "vtkQtMatrixDialog.h"
 #include "vtkTransform.h"
+#include "scenemanager.h"
 
 PointerObjectSettingsDialog::PointerObjectSettingsDialog(QWidget *parent) :
     QWidget(parent),
@@ -74,9 +75,12 @@ void PointerObjectSettingsDialog::on_savePositionPushButton_clicked()
         double *pos = m_pointer->GetTipPosition();
         int index = m_pointerPickedPointsObject->GetNumberOfPoints();
         m_pointerPickedPointsObject->AddPoint(QString::number(index+1), pos);
-        m_pointerPickedPointsObject->MoveCursorToPoint( index );
+        SceneManager *manager = m_pointer->GetManager();
         if (delayAddObject)
-            m_pointer->ManagerAddPointerPickedPointsObject();
+			m_pointer->ManagerAddPointerPickedPointsObject();
+		if (manager->GetReferenceDataObject()) // we can only move cursor if cut planes are displayed
+			m_pointerPickedPointsObject->MoveCursorToPoint(index);
+		this->UpdateUI();
     }
 }
 
