@@ -92,30 +92,37 @@ void UsProbeObjectSettingsWidget::UpdateToolStatus()
     case Ok:
         ui->probeStatusLabel->setText( "OK" );
         ui->probeStatusLabel->setStyleSheet( "background-color: lightGreen" );
+        ui->snapshotPushButton->setEnabled(true);
         break;
     case Missing:
         ui->probeStatusLabel->setText( "Missing" );
         ui->probeStatusLabel->setStyleSheet( "background-color: red" );
+        ui->snapshotPushButton->setEnabled(false);
         break;
     case OutOfVolume:
         ui->probeStatusLabel->setText( "Out of volume" );
         ui->probeStatusLabel->setStyleSheet( "background-color: yellow" );
+        ui->snapshotPushButton->setEnabled(true);
         break;
     case OutOfView:
         ui->probeStatusLabel->setText( "Out of view" );
         ui->probeStatusLabel->setStyleSheet( "background-color: red" );
+        ui->snapshotPushButton->setEnabled(false);
         break;
 	case HighError:
 		ui->probeStatusLabel->setText("High error");
 		ui->probeStatusLabel->setStyleSheet("background-color: red");
+        ui->snapshotPushButton->setEnabled(false);
 		break;
 	case Disabled:
 		ui->probeStatusLabel->setText("Disabled");
 		ui->probeStatusLabel->setStyleSheet("background-color: grey");
+        ui->snapshotPushButton->setEnabled(false);
 		break;
     case Undefined:
         ui->probeStatusLabel->setText( "Ultrasound probe not initialized" );
         ui->probeStatusLabel->setStyleSheet( "background-color: grey" );
+        ui->snapshotPushButton->setEnabled(false);
         break;
     }
 }
@@ -246,4 +253,11 @@ void UsProbeObjectSettingsWidget::OnCalibrationMatrixDialogClosed()
 {
     m_matrixDialog = 0;
     ui->calibrationMatrixPushButton->setChecked( false );
+}
+
+void UsProbeObjectSettingsWidget::on_snapshotPushButton_clicked()
+{
+    if (m_usProbeObject)
+        m_usProbeObject->TakeSnapshot();
+
 }

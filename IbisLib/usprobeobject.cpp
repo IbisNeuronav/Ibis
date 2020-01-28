@@ -74,6 +74,8 @@ bool UsProbeObject::CalibrationMatrixInfo::Serialize( Serializer * serializer )
 
 UsProbeObject::UsProbeObject()
 {
+    m_screenShotIndex = 0;
+
     this->SetCanChangeParent( false );
 
     m_currentCalibrationMatrixIndex = -1;
@@ -415,4 +417,25 @@ void UsProbeObject::UpdatePipeline()
         m_sliceStencil->SetInputConnection( m_constantPad->GetOutputPort() );
         m_actorInput->SetInputConnection( m_sliceStencil->GetOutputPort() );
     }
+}
+
+void UsProbeObject::TakeSnapshot()
+{
+    vtkSmartPointer<vtkTransform> transform = vtkTransform::New();
+    transform->SetMatrix(this->GetWorldTransform()->GetMatrix());
+    vtkSmartPointer<vtkImageData> image = vtkImageData::New();
+    image->DeepCopy(this->GetVideoOutput());
+    //if (this->GetUseMask())
+
+    QString name;
+    name.sprintf("US Screenshot %03d", m_screenShotIndex);
+
+    ImageObject * newObj = ImageObject::New();
+    newObj->SetName(name);
+    newObj->SetImage(image, transform);
+    newObj->Modified();
+
+    m_screenShotIndex++;
+
+    Application::GetInstance().GetSceneManager()->AddObject(newObj);
 }
