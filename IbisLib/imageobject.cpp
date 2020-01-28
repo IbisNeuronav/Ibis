@@ -259,7 +259,7 @@ bool ImageObject::SetItkImage( IbisItkFloat3ImageType::Pointer image )
     if( this->ItkImage )
     {
         vtkTransform * rotTrans = vtkTransform::New();
-        this->SetImage( this->ItktovtkConverter->ConvertItkImageToVtkImage( this->ItkImage, rotTrans ) );
+        this->SetInternalImage( this->ItktovtkConverter->ConvertItkImageToVtkImage( this->ItkImage, rotTrans ) );
         this->SetLocalTransform( rotTrans );
         rotTrans->Delete();
     }
@@ -274,31 +274,43 @@ bool ImageObject::SetItkLabelImage( IbisItkUnsignedChar3ImageType::Pointer image
     if( this->ItkLabelImage )
     {
         vtkTransform * rotTrans = vtkTransform::New();
-        this->SetImage( this->ItktovtkConverter->ConvertItkImageToVtkImage( this->ItkLabelImage, rotTrans ) );
+        this->SetInternalImage( this->ItktovtkConverter->ConvertItkImageToVtkImage( this->ItkLabelImage, rotTrans ) );
         this->SetLocalTransform( rotTrans );
         rotTrans->Delete();
     }
     return true;
 }
 
-void ImageObject::SetImage(vtkImageData * image)
+void ImageObject::SetImage(vtkImageData * image, vtkTransform * transform)
 {
-    if( this->Image == image )
+    if ((this->Image == image) || (!image))
     {
         return;
     }
 
+    // Convert vtkImageData to ItkImage and SetItkImage to ensure consistency
+    vtkMatrix4x4 *mat = vtkMatrix4x4::New();
+    if (transform)
+        transform->GetMatrix(mat);
+    IbisItkFloat3ImageType::Pointer itkImage = IbisItkFloat3ImageType::New();
+    this->ItktovtkConverter->ConvertVtkImageToItkImage(itkImage, image, mat);
+    this->SetItkImage(itkImage);
+    mat->Delete();
+}
+
+void ImageObject::SetInternalImage(vtkImageData * image)
+{
     this->Image = image;
-    if( this->Image )
+    if (this->Image)
     {
-        this->Image->GetBounds( m_volumeRenderingBounds );
+        this->Image->GetBounds(m_volumeRenderingBounds);
     }
 
     double range[2];
-    this->Image->GetScalarRange( range );
-    this->HistogramComputer->SetInputData( this->Image );
+    this->Image->GetScalarRange(range);
+    this->HistogramComputer->SetInputData(this->Image);
     SetupHistogramComputer();
-    this->OutlineFilter->SetInputData( this->Image );
+    this->OutlineFilter->SetInputData(this->Image);
 }
 
 //================================================================================
