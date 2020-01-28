@@ -135,6 +135,7 @@ public:
 signals:
 
     void NameChanged();
+    void VisibilityChanged(int);
     void ObjectModified();
     void RemovingFromScene();
     void WorldTransformChangedSignal();

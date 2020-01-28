@@ -107,7 +107,6 @@ public:
 signals:
 
     void LutChanged( int );
-    void VisibilityChanged( int );
 
 protected slots:
 
