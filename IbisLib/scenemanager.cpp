@@ -721,7 +721,7 @@ void SceneManager::AddObjectUsingID( SceneObject * object, SceneObject * attachT
         emit FinishAddingObject();
     }
     ValidatePointerObject();
-    connect( object, SIGNAL(VisibilityChanged(int)), this, SLOT(EmitSignalObjectVisibilityChanged(int)) );
+    connect( object, SIGNAL(AttributesChanged(SceneObject *)), this, SLOT(EmitSignalObjectAttributesChanged(SceneObject *)) );
     emit ObjectAdded( id );
 }
 
@@ -1446,9 +1446,9 @@ void SceneManager::EmitSignalObjectRenamed(QString oldName, QString newName)
     emit ObjectNameChanged(oldName, newName);
 }
 
-void SceneManager::EmitSignalObjectVisibilityChanged( int objID )
+void SceneManager::EmitSignalObjectAttributesChanged( SceneObject *obj )
 {
-    emit ObjectVisibilityChanged( this->GetObjectByID( objID ) );
+    emit ObjectAttributesChanged( obj );
 }
 
 void SceneManager::EmitShowGenericLabel( bool show)

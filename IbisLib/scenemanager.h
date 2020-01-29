@@ -308,7 +308,7 @@ private slots:
 
     void ReferenceTransformChangedSlot();
     void CancelProgress();
-    void EmitSignalObjectVisibilityChanged( int );
+    void EmitSignalObjectAttributesChanged( SceneObject* obj );
 
 signals:
 
@@ -324,7 +324,7 @@ signals:
     void CurrentObjectChanged();
     void ReferenceTransformChanged();
     void ReferenceObjectChanged();
-    void ObjectVisibilityChanged(  SceneObject* );
+    void ObjectAttributesChanged(  SceneObject* );
 
 protected:
 

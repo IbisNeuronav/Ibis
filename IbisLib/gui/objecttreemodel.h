@@ -84,7 +84,7 @@ private slots:
     void EndInserting();
     void BeginRemoving(  SceneObject * parent, int position );
     void EndRemoving();
-    void SetVisibilityCheck(SceneObject *obj );
+    void UpdateObjectAttributes(SceneObject *obj );
 
 private:
 
