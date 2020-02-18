@@ -175,6 +175,7 @@ public slots:
     void ReferenceTransformChangedSlot();
     void ReferenceObjectChangedSlot();
     void CursorPositionChangedSlot();
+    void NavigationPointerChangedSlot();
     void IbisClockTickSlot();
 
 signals:
@@ -184,6 +185,7 @@ signals:
     void ReferenceTransformChanged();
     void ReferenceObjectChanged();
     void CursorPositionChanged();
+    void NavigationPointerChanged();
     void IbisClockTick();
 
 private:
