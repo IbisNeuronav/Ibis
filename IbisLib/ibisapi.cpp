@@ -1,3 +1,13 @@
+/*=========================================================================
+Ibis Neuronav
+Copyright (c) Simon Drouin, Anna Kochanowska, Louis Collins.
+All rights reserved.
+See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
+
+     This software is distributed WITHOUT ANY WARRANTY; without even
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+     PURPOSE.  See the above copyright notice for more information.
+=========================================================================*/
 #include "ibisapi.h"
 #include "application.h"
 #include "filereader.h"
@@ -19,9 +29,9 @@
 
 const int IbisAPI::InvalidId = SceneManager::InvalidId;
 
-IbisAPI::IbisAPI()
+IbisAPI::IbisAPI(Application *app)
 {
-
+    this->SetApplication( app );
 }
 
 IbisAPI::~IbisAPI()
@@ -35,7 +45,6 @@ IbisAPI::~IbisAPI()
     disconnect( m_application, SIGNAL( IbisClockTick() ), this, SLOT( IbisClockTickSlot() ) );
 }
 
-// from SceneManager
 void IbisAPI::SetApplication( Application * app )
 {
     m_application = app;
@@ -50,9 +59,10 @@ void IbisAPI::SetApplication( Application * app )
     connect( m_application, SIGNAL( IbisClockTick() ), this, SLOT( IbisClockTickSlot() ) );
 }
 
-void IbisAPI::AddObject( SceneObject * object, SceneObject * attachTo )
+// from SceneManager
+void IbisAPI::AddObject(SceneObject * object, SceneObject * parenObject )
 {
-    m_sceneManager->AddObject( object, attachTo );
+    m_sceneManager->AddObject( object, parenObject );
 }
 
 void IbisAPI::RemoveObject(SceneObject * object )
@@ -202,6 +212,16 @@ double * IbisAPI::GetViewBackgroundColor()
 double * IbisAPI::GetView3DBackgroundColor()
 {
     return m_sceneManager->GetView3DBackgroundColor();
+}
+
+void IbisAPI::SetViewBackgroundColor( double * color )
+{
+    m_sceneManager->SetViewBackgroundColor( color );
+}
+
+void IbisAPI::SetView3DBackgroundColor( double * color )
+{
+    m_sceneManager->SetView3DBackgroundColor( color );
 }
 
 void IbisAPI::ChangeParent( SceneObject * object, SceneObject * newParent, int newChildIndex )

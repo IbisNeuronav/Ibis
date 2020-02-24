@@ -188,8 +188,7 @@ void Application::Init( bool viewerOnly )
         m_viewerOnly = true;
 
     // Create programming interface for plugins
-    m_ibisAPI = new IbisAPI();
-    m_ibisAPI->SetApplication( this );
+    m_ibisAPI = new IbisAPI( this );
 }
 
 Application::~Application()
