@@ -14,5 +14,5 @@ ExternalProject_Add( ${elastix_name}
                -DBUILD_TESTING:BOOL=FALSE
                -DITK_DIR:PATH=${IBIS_ITK_DIR}
                -DELASTIX_BUILD_EXECUTABLE:BOOL=FALSE
-               -DUSE_CMAEvolutionStrategy:BOOL=FALSE
+               -DUSE_CMAEvolutionStrategy:BOOL=TRUE
     DEPENDS ${itk_name} )

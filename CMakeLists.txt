@@ -103,7 +103,10 @@ endif()
 option( IBIS_USE_ELASTIX "Use Elastix library" OFF )
 if( IBIS_USE_ELASTIX )
     set( AutoElastixPath ${IBIS_EXTERNAL_DEPENDENCIES_DIR}/elastix-${IBIS_ELASTIX_LONG_VERSION}/build )
-    find_package( Elastix ${IBIS_ELASTIX_LONG_VERSION} REQUIRED EXACT PATHS ${AutoOpenCVPath} )
+    find_package( Elastix ${IBIS_ELASTIX_LONG_VERSION} REQUIRED EXACT PATHS ${AutoElastixPath} )
+    include( ${ELASTIX_USE_FILE} )
+    # Elastix 4.9 does not seem to include CMAEvolutionStrategy directory, we need to do it manually
+    include_directories( ${IBIS_EXTERNAL_DEPENDENCIES_DIR}/elastix-${IBIS_ELASTIX_LONG_VERSION}/src/Components/Optimizers/CMAEvolutionStrategy )
 endif()
 
 #==================================================================
