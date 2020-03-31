@@ -94,7 +94,7 @@ if( USE_POINT_GREY_CAMERA )
 endif()
 
 TARGET_LINK_LIBRARIES( ${exec_name} ${PluginLibs} ${PluginExternalLibs} ${HardwareModulesLibs} ${libsToUse} ${QT_LIBRARIES}
-                                    ${VTK_LIBRARIES} ${MINC4ITK_LIBRARIES}
+                                    ${VTK_LIBRARIES} ${MINC4ITK_LIBRARIES} ${ELASTIX_LIBRARIES}
                                     ${itkLibsToUse} ${OpenCV_LIBS} ${flycaptureLib} svl ${gpuLibs} )
 qt5_use_modules( ${exec_name} ${IbisQtModules} )
 

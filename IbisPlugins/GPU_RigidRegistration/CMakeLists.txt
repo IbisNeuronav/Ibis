@@ -4,8 +4,12 @@ set( PluginSrc
         gpu_rigidregistrationwidget.cpp
         gpu_rigidregistration.cpp
         qdebugstream.h
-)
-set( PluginHdrMoc gpu_rigidregistrationwidget.h gpu_rigidregistrationplugininterface.h gpu_rigidregistration.h )
+    )
+set( PluginHdrMoc 
+        gpu_rigidregistrationwidget.h
+        gpu_rigidregistrationplugininterface.h
+        gpu_rigidregistration.h
+    )
 set( PluginUi gpu_rigidregistrationwidget.ui )
 
 IF( NOT OPENCL_FOUND )
@@ -16,12 +20,14 @@ IF( NOT ITK_USE_GPU )
   message( SEND_ERROR "GPU_RigidRegistration plugin cannot build if ITK was built without ITK_USE_GPU enabled.\n" )
 ENDIF()
 
-add_subdirectory( itkRegistration )
-add_subdirectory( itkImageSamplers )
+IF( NOT IBIS_USE_ELASTIX )
+  message( SEND_ERROR "GPU_RigidRegistration plugin require Elastix library. Please enable IBIS_USE_ELASTIX.\n" )
+ENDIF()
+
 add_subdirectory( itkRegistrationOpenCL )
 
 # Create plugin
 DefinePlugin( "${PluginSrc}" "${PluginHdr}" "${PluginHdrMoc}" "${PluginUi}" )
 
 #add library specific to this plugin
-target_link_libraries( ${PluginName} itkSamplers itkRegistration itkRegistrationOpenCL )
+target_link_libraries( ${PluginName} itkRegistrationOpenCL )
