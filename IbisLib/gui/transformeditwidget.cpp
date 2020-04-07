@@ -71,14 +71,7 @@ void TransformEditWidget::UpdateTransform()
         m_selfUpdating = true;
         //m_sceneObject->StartModifyingTransform();
 
-        // local matrix may be concatenated and if it is, we have to modify matrix of concatenation
-        vtkMatrix4x4 * mat = m_sceneObject->GetLocalTransform()->GetMatrix();
-        int nct = m_sceneObject->GetLocalTransform()->GetNumberOfConcatenatedTransforms();
-        if( nct > 0 )
-        {
-            vtkLinearTransform *lt = m_sceneObject->GetLocalTransform()->GetConcatenatedTransform(0);
-            mat = lt->GetMatrix();
-        }
+        vtkMatrix4x4 * mat = vtkMatrix4x4::New();
         double rot[3];
         rot[0] = ui->rotateXSpinBox->value();
         rot[1] = ui->rotateYSpinBox->value();
@@ -88,10 +81,12 @@ void TransformEditWidget::UpdateTransform()
         trans[1] = ui->translateYSpinBox->value();
         trans[2] = ui->translateZSpinBox->value();
         vtkMatrix4x4Operators::TransRotToMatrix( trans, rot, mat );
+        m_sceneObject->GetLocalTransform()->SetMatrix( mat );
         m_sceneObject->GetLocalTransform()->Modified();
 
         //m_sceneObject->FinishModifyingTransform();
         m_selfUpdating = false;
+        mat->Delete();
     }
 }
 

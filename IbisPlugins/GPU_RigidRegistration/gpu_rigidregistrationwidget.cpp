@@ -65,14 +65,14 @@ void GPU_RigidRegistrationWidget::on_startButton_clicked()
     Q_ASSERT(ibisAPI);
     ImageObject * sourceImageObject = ImageObject::SafeDownCast( ibisAPI->GetObjectByID( sourceImageObjectId ) );
     Q_ASSERT_X( sourceImageObject, "GPU_RigidRegistrationWidget::on_startButton_clicked()", "Invalid source object" );
-    vtkTransform * sourceVtkTransform = vtkTransform::SafeDownCast( sourceImageObject->GetWorldTransform() );
+    vtkTransform * sourceVtkTransform =  sourceImageObject->GetWorldTransform();
 
     ImageObject * targetImageObject = ImageObject::SafeDownCast( ibisAPI->GetObjectByID( targetImageObjectId ) );
     Q_ASSERT_X( targetImageObject, "GPU_RigidRegistrationWidget::on_startButton_clicked()", "Invalid target object" );
-    vtkTransform * targetVtkTransform = vtkTransform::SafeDownCast( targetImageObject->GetWorldTransform() );
+    vtkTransform * targetVtkTransform = targetImageObject->GetWorldTransform();
 
-    SceneObject * transformObject = ibisAPI->GetObjectByID( transformObjectId );
-    vtkTransform * vtktransform = vtkTransform::SafeDownCast( transformObject->GetLocalTransform() );
+    SceneObject * transformObject = ibisAPI->GetObjectByID( transformObjectId );//    vtkTransform * vtktransform = vtkTransform::SafeDownCast( transformObject->GetLocalTransform() );
+    vtkTransform * vtktransform =  transformObject->GetLocalTransform();
     Q_ASSERT_X( vtktransform, "GPU_RigidRegistrationWidget::on_startButton_clicked()", "Invalid transform" );
 
     IbisItkFloat3ImageType::Pointer itkSourceImage = sourceImageObject->GetItkImage();
