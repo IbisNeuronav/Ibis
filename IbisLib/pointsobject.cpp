@@ -592,6 +592,7 @@ void PointsObject::RemovePoint(int index)
         else
         {
             m_selectedPointIndex = InvalidPointIndex;
+            emit ObjectModified(); // last point removed, we have to notify renderers
         }
     }
 
@@ -691,12 +692,6 @@ void PointsObject::ObjectAddedToScene()
 void PointsObject::ObjectAboutToBeRemovedFromScene()
 {
     Q_ASSERT( GetManager() );
-
-    // remove all point representations to scene
-    for( int i = 0; i < m_pointList.size(); ++i )
-    {
-        GetManager()->RemoveObject( m_pointList[i] );
-    }
 
     disconnect( this->GetManager(), SIGNAL(CurrentObjectChanged()), this, SLOT(OnCurrentObjectChanged()) );
     disconnect( this, SIGNAL(WorldTransformChangedSignal()), this, SLOT(UpdatePointsVisibility()) );
