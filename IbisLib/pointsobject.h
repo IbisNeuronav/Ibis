@@ -171,7 +171,6 @@ private:
    int m_movingPointIndex;
 
    vtkSmartPointer<PolyDataObject> m_lineToPointerTip;
-   vtkSmartPointer<vtkProperty> m_lineToPointerProperty;
    double m_lineToPointerColor[3];
 };
 
