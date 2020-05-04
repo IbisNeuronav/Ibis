@@ -63,10 +63,8 @@ PointsObject::PointsObject() : SceneObject()
     m_showLabels = true;
     m_computeDistance = false;
     m_lineToPointerTip = 0;
-    m_lineToPointerProperty = vtkSmartPointer<vtkProperty>::New();
     for ( int i = 0; i < 3; i++ )
         m_lineToPointerColor[i] = 1.0;
-    m_lineToPointerProperty->SetColor( m_lineToPointerColor[0], m_lineToPointerColor[1], m_lineToPointerColor[2] );
 }
 
 PointsObject::~PointsObject()
@@ -125,7 +123,6 @@ void PointsObject::Serialize( Serializer * ser )
             ser->EndSection();
             this->AddPointLocal( coords, pointName, timeStamp );
         }
-        m_lineToPointerProperty->SetColor( m_lineToPointerColor[0], m_lineToPointerColor[1], m_lineToPointerColor[2] );
         if( numberOfPoints > 0 && m_selectedPointIndex == InvalidPointIndex )
             m_selectedPointIndex = 0;
         this->SetSelectedPoint( m_selectedPointIndex );
@@ -762,7 +759,7 @@ void PointsObject::EnableComputeDistance( bool enable )
         m_lineToPointerTip->SetListable( false );
         m_lineToPointerTip->SetCanEditTransformManually( false );
         m_lineToPointerTip->SetObjectManagedByTracker( true );
-        //m_lineToPointerTip->SetProperty( m_lineToPointerProperty ); // simtodo : replace this
+        m_lineToPointerTip->SetColor( m_lineToPointerColor[0], m_lineToPointerColor[1], m_lineToPointerColor[2] );
         double pointPos[3];
         this->GetPointCoordinates( m_selectedPointIndex, pointPos );
         double worldCoords[3];
@@ -804,8 +801,6 @@ void PointsObject::SetLineToPointerColor( double color[3] )
 {
     for ( int i = 0; i < 3; i++ )
         m_lineToPointerColor[i] = color[i];
-    if( m_lineToPointerProperty )
-        m_lineToPointerProperty->SetColor(color[0], color[1], color[2]);
     emit ObjectModified();
 }
 
