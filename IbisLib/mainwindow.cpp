@@ -92,7 +92,7 @@ MainWindow::MainWindow( QWidget * parent )
     fileMenu->addSeparator();
     fileMenu->addAction( tr("Save S&cene"), this, SLOT( fileSaveScene() ), QKeySequence::Save );
     fileMenu->addAction( tr("Save S&cene As..."), this, SLOT( fileSaveSceneAs() ) );
-    fileMenu->addAction( tr("&Load Scene"), this, SLOT( fileLoadScene() ));
+    fileMenu->addAction( tr("&Load Scene"), this, SLOT( fileLoadScene() ), QKeySequence(Qt::CTRL + Qt::Key_L));
     fileMenu->addAction( tr("&New Scene"), this, SLOT( fileNewScene() ));
     fileMenu->addSeparator();
     fileMenu->addAction( tr("&Exit"), this, SLOT( close() ), QKeySequence::Quit );
