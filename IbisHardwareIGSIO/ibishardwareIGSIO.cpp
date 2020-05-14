@@ -630,6 +630,9 @@ void IbisHardwareIGSIO::SceneAboutToLoad()
 
 void IbisHardwareIGSIO::SceneFinishedLoading()
 {
-    StartConfig( m_lastIbisPlusConfigFile );
+    if (m_autoStartLastConfig)
+    {
+        StartConfig(m_lastIbisPlusConfigFile);
+    }
 }
 
