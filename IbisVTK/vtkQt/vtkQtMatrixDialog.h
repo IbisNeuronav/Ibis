@@ -50,7 +50,7 @@ public:
 
 signals:
 
-    void MatrixModified();
+    void MatrixModified( vtkMatrix4x4 * );
 
 public slots:
     

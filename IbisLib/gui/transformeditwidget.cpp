@@ -90,6 +90,17 @@ void TransformEditWidget::UpdateTransform()
     }
 }
 
+// Currently in ibis only some SceneObjects can show TransformEditWidget
+// The only transform  modifiable from GUI is LocalTransform
+void TransformEditWidget::SetUpdatedMatrix( vtkMatrix4x4 * mat )
+{
+    if( m_sceneObject )
+    {
+        m_sceneObject->GetLocalTransform()->SetMatrix( mat );
+    }
+    UpdateUi();
+}
+
 // take data in transform and put it in ui
 void TransformEditWidget::UpdateUi()
 {
@@ -114,7 +125,6 @@ void TransformEditWidget::UpdateUi()
         {
             if( m_sceneObject->CanEditTransformManually() )
                 EnableSpinBoxes( true );
-
             double t[3] = { 0.0, 0.0, 0.0 };
             double r[3] = { 0.0, 0.0, 0.0 };
             vtkMatrix4x4Operators::MatrixToTransRot( localTransform->GetMatrix(), t, r );
@@ -124,6 +134,14 @@ void TransformEditWidget::UpdateUi()
             ui->rotateXSpinBox->setValue( r[0] );
             ui->rotateYSpinBox->setValue( r[1] );
             ui->rotateZSpinBox->setValue( r[2] );
+            // m_matrixDialog was not clsed, we have to update it setting actual matrix
+//            if( m_matrixDialog )
+//            {
+//                vtkMatrix4x4 *tmpMat = vtkMatrix4x4::New();
+//                tmpMat->DeepCopy( localTransform->GetMatrix() );
+//                m_matrixDialog->SetMatrix( tmpMat );
+//                tmpMat->Delete();
+//            }
         }
         BlockSpinboxSignals(false);
     }
@@ -156,10 +174,18 @@ void TransformEditWidget::EditMatrixButtonToggled( bool isOn )
             m_matrixDialog = new vtkQtMatrixDialog( readOnly, 0 );
             m_matrixDialog->setWindowTitle( dialogTitle );
             m_matrixDialog->setAttribute( Qt::WA_DeleteOnClose );
-            m_matrixDialog->SetMatrix( t->GetMatrix() );
+            vtkMatrix4x4 *tmpMat = vtkMatrix4x4::New();
+            tmpMat->DeepCopy( t->GetMatrix() );
+            m_matrixDialog->SetMatrix( tmpMat );
+            //We cannot use the LocalTransform matrix as it may be a product of concatenation
+            //vtkQTMatrixDialog is setting matrix elements, which will not affect the concatenation
+            //In order to use the modified matrix, we have to get rid of concatenation, which is done in the call to SetMatrix()
+            //by callingTransformEditWidget::SetUpdatedMatrix()
+            //Once we modify the matrix, we will set it in the LocalTransform
+            tmpMat->Delete();
             Application::GetInstance().ShowFloatingDock( m_matrixDialog );
-            connect( m_matrixDialog, SIGNAL(MatrixModified()), m_sceneObject, SLOT(NotifyTransformChanged()) );
-            connect( m_matrixDialog, SIGNAL(MatrixModified()), this, SLOT(UpdateUi()) );
+            connect( m_matrixDialog, SIGNAL(MatrixModified(vtkMatrix4x4 *)), m_sceneObject, SLOT(NotifyTransformChanged()) );
+            connect( m_matrixDialog, SIGNAL(MatrixModified(vtkMatrix4x4 *)), this, SLOT(SetUpdatedMatrix(vtkMatrix4x4 *)) );
             connect( m_matrixDialog, SIGNAL(destroyed()), this, SLOT(EditMatrixDialogClosed()) );
         }
     }

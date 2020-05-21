@@ -15,6 +15,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 class vtkEventQtSlotConnect;
 class vtkQtMatrixDialog;
+class vtkMatrix4x4;
 class SceneObject;
 
 namespace Ui {
@@ -58,6 +59,7 @@ private slots:
     void WorldMatrixButtonToggled( bool isOn );
     void WorldMatrixDialogClosed();
     void SetIdentityButtonClicked();
+    void SetUpdatedMatrix(vtkMatrix4x4 * mat);
 
 };
 
