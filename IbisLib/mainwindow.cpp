@@ -128,7 +128,7 @@ MainWindow::MainWindow( QWidget * parent )
     viewMenu->addAction( tr("Botto&m"), this,  SLOT( View3DBottom() ), QKeySequence("Shift+Alt+m") );
     viewMenu->addSeparator();
     viewMenu->addAction( tr("Re&set Planes"), this,  SLOT( ViewResetPlanes() ), QKeySequence("Shift+Alt+s") );
-    viewMenu->addAction( "Fullscreen", this, SLOT( ViewFullscreen() ), Qt::CTRL + Qt::Key_F );
+    viewMenu->addAction( "Full Screen", this, SLOT( ViewFullscreen() ), Qt::CTRL + Qt::Key_F );
     connect( viewMenu, SIGNAL( aboutToShow() ), this, SLOT( ModifyViewMenu() ) );
     
     // -----------------------------------------
@@ -143,7 +143,7 @@ MainWindow::MainWindow( QWidget * parent )
     QMenu * helpMenu = menuBar()->addMenu( tr("&Help") );
     helpMenu->addSeparator();
     helpMenu->addAction( tr("About..."), this, SLOT(about()) );
-    QAction * aboutPluginAction = helpMenu->addAction( tr("About plugins..."), this, SLOT(AboutPlugins()) );
+    QAction * aboutPluginAction = helpMenu->addAction( tr("About Plugins..."), this, SLOT(AboutPlugins()) );
     aboutPluginAction->setMenuRole( QAction::ApplicationSpecificRole );
     
     // -----------------------------------------
