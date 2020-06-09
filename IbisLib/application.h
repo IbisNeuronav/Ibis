@@ -15,6 +15,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QSize>
 #include <QPoint>
 #include <QColor>
+#include <QDockWidget>
 #include "serializer.h"
 #include <vector>
 #include "ibistypes.h"
@@ -47,6 +48,7 @@ class ImageObject;
 class PointsObject;
 class QMenu;
 class IbisPreferences;
+class QDockWidget;
 
 struct ApplicationSettings
 {
@@ -97,7 +99,7 @@ public:
     void AddBottomWidget( QWidget * w );
     void RemoveBottomWidget( QWidget * w );
 
-    void ShowFloatingDock( QWidget * w );
+    void ShowFloatingDock( QWidget * w, QFlags<QDockWidget::DockWidgetFeature> features=QDockWidget::AllDockWidgetFeatures );
 
     void OnStartMainLoop();
     void AddGlobalEventHandler( GlobalEventHandler * h );
