@@ -14,6 +14,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QObject>
 #include <QList>
 #include <QMap>
+#include <QDockWidget>
 
 class Application;
 class SceneManager;
@@ -348,7 +349,7 @@ public:
     void SetRightPanelVisibility( bool v );
     void AddBottomWidget( QWidget * w );
     void RemoveBottomWidget( QWidget * w );
-    void ShowFloatingDock( QWidget * w );
+    void ShowFloatingDock( QWidget * w, QFlags<QDockWidget::DockWidgetFeature> features=QDockWidget::AllDockWidgetFeatures );
     /** @}*/
     /**
      * @{

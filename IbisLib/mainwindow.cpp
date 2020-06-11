@@ -34,7 +34,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QMessageBox>
 #include <QProgressDialog>
 #include <QSplitter>
-#include <QDockWidget>
 #include <QDir>
 #include <QLayout>
 #include <QFileInfo>
@@ -878,12 +877,13 @@ void MainWindow::RemoveBottomWidget( QWidget * w )
     m_4Views->RemoveBottomWidget( w );
 }
 
-void MainWindow::ShowFloatingDock( QWidget * w )
+void MainWindow::ShowFloatingDock( QWidget * w, QFlags<QDockWidget::DockWidgetFeature> features )
 {
     QDockWidget * dock = new QDockWidget( this );
     dock->setWindowTitle( w->windowTitle() );
     dock->resize( w->size() );
     dock->setAttribute( Qt::WA_DeleteOnClose );
+    dock->setFeatures( features );
     dock->setAllowedAreas( Qt::NoDockWidgetArea );
     dock->setFloating( true );
     dock->move(this->pos().x() + this->size().width()/2 - dock->size().width()/2,
