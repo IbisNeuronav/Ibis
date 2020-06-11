@@ -48,7 +48,6 @@ class ImageObject;
 class PointsObject;
 class QMenu;
 class IbisPreferences;
-class QDockWidget;
 
 struct ApplicationSettings
 {

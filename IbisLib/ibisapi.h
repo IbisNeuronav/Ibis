@@ -38,7 +38,6 @@ class vtkMatrix4x4;
 
 class QProgressDialog;
 class QString;
-class QDockWidget;
 
 class OpenFileParams
 {

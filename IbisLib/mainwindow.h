@@ -30,7 +30,6 @@ class ImageMixerWidget;
 class OpenFileParams;
 class ToolPluginInterface;
 class QuadViewWindow;
-class QDockWidget;
 
 class MainWindow : public QMainWindow
 {
