@@ -178,7 +178,7 @@ void ObjectTreeWidget::UpdateObjectSettingsWidget()
         ui->addTransformAllChildrenButton->setEnabled( object->GetNumberOfChildren() != 0 && canTransformAllChildren );
 
         SceneObject * parent = object->GetParent();
-        ui->addParentTransformButton->setEnabled( parent && parent->CanAppendChildren() );
+        ui->addParentTransformButton->setEnabled( parent && parent->CanAppendChildren() && object->CanChangeParent() );
     }
     else
     {
