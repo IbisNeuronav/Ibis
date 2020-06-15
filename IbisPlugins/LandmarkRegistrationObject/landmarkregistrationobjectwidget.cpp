@@ -22,7 +22,7 @@ LandmarkRegistrationObjectWidget::LandmarkRegistrationObjectWidget(QWidget *pare
 {
     ui->setupUi(this);
 
-    m_registrationObject = 0;
+    m_registrationObject = nullptr;
 
     ui->rmsDisplayLabel->setText( tr( "<font size=\"+3\">0.0</font>" ) );
 
@@ -44,10 +44,10 @@ LandmarkRegistrationObjectWidget::LandmarkRegistrationObjectWidget(QWidget *pare
 
 LandmarkRegistrationObjectWidget::~LandmarkRegistrationObjectWidget()
 {
-    delete ui;
     if (m_registrationObject)
-        m_registrationObject->UnRegister(0);
+        m_registrationObject->UnRegister(nullptr);
     delete m_model;
+    delete ui;
 }
 
 void LandmarkRegistrationObjectWidget::SetLandmarkRegistrationObject(LandmarkRegistrationObject *obj)
@@ -55,6 +55,7 @@ void LandmarkRegistrationObjectWidget::SetLandmarkRegistrationObject(LandmarkReg
     if (m_registrationObject == obj)
         return;
     m_registrationObject = obj;
+    m_registrationObject->Register(nullptr);
     this->UpdateUI();
 }
 

@@ -24,10 +24,12 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QStringList>
 #include <QString>
 #include <QAction>
+
 #include <QMenu>
 #include <QContextMenuEvent>
 #include <QPalette>
 #include <QDateTime>
+
 
 LandmarkRegistrationObjectSettingsWidget::LandmarkRegistrationObjectSettingsWidget(QWidget *parent) :
     QWidget(parent),
@@ -46,13 +48,15 @@ LandmarkRegistrationObjectSettingsWidget::LandmarkRegistrationObjectSettingsWidg
     ui->pointsTreeView->setAlternatingRowColors(true);
     ui->pointsTreeView->setSortingEnabled(false);
 
-    m_registrationObject = 0;
-    m_application = 0;
+    m_registrationObject = nullptr;
+    m_application = nullptr;
     m_capture_button_color = Qt::lightGray;
 }
 
 LandmarkRegistrationObjectSettingsWidget::~LandmarkRegistrationObjectSettingsWidget()
 {
+    if (m_registrationObject)
+        m_registrationObject->UnRegister(nullptr);
     delete ui;
     delete m_model;
 }
@@ -75,6 +79,7 @@ void LandmarkRegistrationObjectSettingsWidget::SetLandmarkRegistrationObject(Lan
     if (m_registrationObject == obj)
         return;
     m_registrationObject = obj;
+    m_registrationObject->Register(nullptr);
     this->UpdateUI();
 }
 
