@@ -24,6 +24,7 @@ ObjectTreeModel::ObjectTreeModel( SceneManager * man, QObject *parent)
     connect( m_sceneManager, SIGNAL(FinishAddingObject()), this, SLOT(EndInserting()) );
     connect( m_sceneManager, SIGNAL( StartRemovingObject( SceneObject*, int ) ), this, SLOT(BeginRemoving(SceneObject*,int)) );
     connect( m_sceneManager, SIGNAL(FinishRemovingObject()), this, SLOT(EndRemoving()) );
+    connect( m_sceneManager, SIGNAL(ObjectAttributesChanged( SceneObject*)), this, SLOT(UpdateObjectAttributes( SceneObject*)) );
     connect( this, SIGNAL(ObjectRenamed(QString, QString)), m_sceneManager, SLOT(EmitSignalObjectRenamed(QString, QString)));
 }
 
@@ -271,4 +272,9 @@ SceneObject * ObjectTreeModel::IndexToObject( const QModelIndex & index )
 		return item;
 	}
 	return 0;
+}
+
+void ObjectTreeModel::UpdateObjectAttributes( SceneObject *obj )
+{
+    emit dataChanged( ObjectToIndex(obj), ObjectToIndex(obj) );
 }

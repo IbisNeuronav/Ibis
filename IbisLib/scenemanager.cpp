@@ -721,6 +721,7 @@ void SceneManager::AddObjectUsingID( SceneObject * object, SceneObject * attachT
         emit FinishAddingObject();
     }
     ValidatePointerObject();
+    connect( object, SIGNAL(AttributesChanged(SceneObject *)), this, SLOT(EmitSignalObjectAttributesChanged(SceneObject *)) );
     emit ObjectAdded( id );
 }
 
@@ -1443,6 +1444,11 @@ void SceneManager::GetChildrenListableNonTrackedObjects( SceneObject * obj, QLis
 void SceneManager::EmitSignalObjectRenamed(QString oldName, QString newName)
 {
     emit ObjectNameChanged(oldName, newName);
+}
+
+void SceneManager::EmitSignalObjectAttributesChanged( SceneObject *obj )
+{
+    emit ObjectAttributesChanged( obj );
 }
 
 void SceneManager::EmitShowGenericLabel( bool show)

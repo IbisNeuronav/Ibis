@@ -472,6 +472,7 @@ void SceneObject::SetHidden( bool h )
             this->Hide();
         else
             this->Show();
+        emit AttributesChanged( this );
     }
 }
 
