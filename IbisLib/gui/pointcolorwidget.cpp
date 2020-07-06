@@ -10,9 +10,9 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 #include "pointcolorwidget.h"
 #include "ui_pointcolorwidget.h"
-#include <qcolordialog.h>
-#include <qlabel.h>
-#include <qslider.h>
+#include <QColorDialog>
+#include <QLabel>
+#include <QSlider>
 
 PointColorWidget::PointColorWidget(QWidget *parent) :
     QWidget(parent)

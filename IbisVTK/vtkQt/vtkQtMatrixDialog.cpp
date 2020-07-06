@@ -11,16 +11,16 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 // Thanks to Simon Drouin for writing this class
 
 #include "vtkQtMatrixDialog.h"
-#include <qlineedit.h>
-#include <qpushbutton.h>
-#include <qlayout.h>
-#include <qvariant.h>
-#include <qtooltip.h>
-#include <qwhatsthis.h>
-#include <qdir.h>
-#include <qfile.h>
-#include <qfiledialog.h>
-#include <qstring.h>
+#include <QLineEdit>
+#include <QPushButton>
+#include <QLayout>
+#include <QVariant>
+#include <QToolTip>
+#include <QWhatsThis>
+#include <QDir>
+#include <QFile>
+#include <QFileDialog>
+#include <QString>
 #include <QApplication>
 #include <QMimeData>
 #include <QClipboard>

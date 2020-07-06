@@ -16,6 +16,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QPoint>
 #include <QColor>
 #include <QDockWidget>
+#include <QObject>
 #include "serializer.h"
 #include <vector>
 #include "ibistypes.h"

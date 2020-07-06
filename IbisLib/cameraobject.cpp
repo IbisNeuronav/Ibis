@@ -36,6 +36,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "pointerobject.h"
 #include "trackedvideobuffer.h"
 #include <QMessageBox>
+#include <QProgressDialog>
 
 ObjectSerializationMacro( CameraObject );
 

@@ -14,6 +14,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #define __vtkQtPiecewiseFunctionWidget_h_
 
 #include <QWidget>
+#include <QObject>
 #include <vector>
 
 class QPaintEvent;

@@ -13,6 +13,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include <QWidget>
 #include <QLineEdit>
+#include <QObject>
 #include "usmask.h"
 #include <Constants.h>
 

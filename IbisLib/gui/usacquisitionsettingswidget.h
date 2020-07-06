@@ -12,6 +12,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #define __UsAcquisitionSettingsWidget_h_
 
 #include <QWidget>
+#include <QObject>
 
 namespace Ui {
 class UsAcquisitionSettingsWidget;

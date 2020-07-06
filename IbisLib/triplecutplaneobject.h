@@ -17,6 +17,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "sceneobject.h"
 #include "vtkSmartPointer.h"
 #include <QColor>
+#include <QObject>
 
 class ImageObject;
 class QWidget;

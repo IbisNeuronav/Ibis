@@ -15,7 +15,7 @@
 #define TAG_SAVEDIRECTORYDIALOG_H
 
 #include "entertextdialogbase.h"
-#include <qdialog.h>
+#include <QDialog>
 
 class SaveDirectoryDialog : public EnterTextDialogBase
 {

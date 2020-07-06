@@ -1,6 +1,6 @@
 #include "clearselectedpointdialogbase.h"
 
-#include <qvariant.h>
+#include <QVariant>
 /*
  *  Constructs a ClearSelectedPointDialogBase as a child of 'parent', with the
  *  name 'name' and widget flags set to 'f'.

@@ -25,6 +25,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "vtkAmoebaMinimizer.h"
 #include <QtGlobal>
 #include <QFileInfo>
+#include <QProgressDialog>
 
 using namespace std;
 using namespace cv;

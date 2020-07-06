@@ -8,7 +8,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
-#include <qlabel.h>
+#include <QLabel>
 #include "aboutbicigns.h"
 #include "ui_aboutbicigns.h"
 

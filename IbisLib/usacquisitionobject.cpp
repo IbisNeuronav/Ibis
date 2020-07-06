@@ -19,8 +19,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "usmask.h"
 #include <QDir>
 #include <QMessageBox>
-#include <qapplication.h>
-#include <qprogressdialog.h>
+#include <QApplication>
+#include <QProgressDialog>
 #include <QDateTime>
 #include "vtkImageData.h"
 #include "vtkImageShiftScale.h"

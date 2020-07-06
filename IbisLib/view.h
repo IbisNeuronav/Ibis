@@ -14,7 +14,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <list>
 #include <map>
 #include "vtkObject.h"
-#include <qobject.h>
+#include <QObject>
 #include "serializer.h"
 #include "vtkSmartPointer.h"
 

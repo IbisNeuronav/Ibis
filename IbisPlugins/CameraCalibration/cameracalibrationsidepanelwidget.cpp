@@ -20,6 +20,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QFileDialog>
 #include <QDir>
 #include <QMessageBox>
+#include <QProgressDialog>
 
 CameraCalibrationSidePanelWidget::CameraCalibrationSidePanelWidget(QWidget *parent) :
     QWidget(parent),

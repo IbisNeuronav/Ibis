@@ -14,12 +14,12 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "vtkObject.h"
 #include "vtkSmartPointer.h"
 #include "ibistypes.h"
-#include <QObject>
 #include <QString>
 #include <QStringList>
 #include <QList>
 #include <QMap>
 #include <QProgressDialog>
+#include <QObject>
 
 #include <vector>
 #include <algorithm>

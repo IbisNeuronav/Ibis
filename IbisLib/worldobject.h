@@ -14,6 +14,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "sceneobject.h"
 #include "ibistypes.h"
 #include <QColor>
+#include <QObject>
 #include "vtkSmartPointer.h"
 
 class PolyDataObject;

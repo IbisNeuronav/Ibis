@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QDirModel>
+#include <QObject>
 #include "pathform.h"
 
 namespace Ui {

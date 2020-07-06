@@ -14,6 +14,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QMainWindow>
 #include <QMap>
 #include <QDockWidget>
+#include <QObject>
 #include "serializer.h"
 
 class QAction;

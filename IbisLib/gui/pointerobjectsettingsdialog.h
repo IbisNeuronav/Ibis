@@ -13,6 +13,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include <QWidget>
 #include <QList>
+#include <QObject>
 #include "vtkSmartPointer.h"
 
 class vtkQtMatrixDialog;

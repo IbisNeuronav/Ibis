@@ -11,8 +11,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef __UpdateManager_h_
 #define __UpdateManager_h_
 
-#include <QObject>
 #include "vtkObject.h"
+#include <QObject>
 
 class QTimer;
 class QTime;

@@ -11,8 +11,10 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef OPENDATAFILEDIALOG_H
 #define OPENDATAFILEDIALOG_H
 
-#include <qstring.h>
+#include <QString>
 #include <QDialog>
+#include <QObject>
+
 class QStringList;
 class OpenFileParams;
 class SceneManager;

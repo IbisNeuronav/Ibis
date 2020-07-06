@@ -24,6 +24,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QtPlugin>
 #include <QSettings>
 #include <QTime>
+#include <QProgressDialog>
 #include <vector>
 #include "opencv2/opencv.hpp"
 #include "simplepropcreator.h"

@@ -13,6 +13,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef VTKQTIMAGEVIEWER_H
 #define VTKQTIMAGEVIEWER_H
 
+#include <QObject>
 #include "QVTKWidget.h"
 
 class vtkImageActor;

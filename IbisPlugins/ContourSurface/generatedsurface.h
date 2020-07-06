@@ -12,7 +12,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #define TAG_GENERATEDSURFACE_H_
 
 #include <QVector>
-#include <qstring.h>
+#include <QString>
 #include "serializer.h"
 #include "polydataobject.h"
 

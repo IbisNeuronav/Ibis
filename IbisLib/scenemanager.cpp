@@ -49,7 +49,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QFileInfo>
 #include <QMessageBox>
 #include <QPluginLoader>
-#include <QProgressDialog>
 #include <QApplication>
 
 ObjectSerializationMacro( SceneManager );

@@ -11,6 +11,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef IMAGEOBJECTSETTINGSDIALOG_H
 #define IMAGEOBJECTSETTINGSDIALOG_H
 
+#include <QObject>
 #include <vector>
 #include "ui_imageobjectsettingsdialog.h"
 

@@ -15,7 +15,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "serializer.h"
 #include "vtkObject.h"
 #include <QObject>
-#include <qstring.h>
+#include <QString>
 #include "trackerflags.h"
 #include "hardwaremodule.h"
 #include "trackedsceneobject.h"

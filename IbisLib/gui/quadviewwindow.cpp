@@ -10,10 +10,10 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 #include "quadviewwindow.h"
 
-#include <qvariant.h>
-#include <qsplitter.h>
-#include <qlayout.h>
-#include <qpushbutton.h>
+#include <QVariant>
+#include <QSplitter>
+#include <QLayout>
+#include <QPushButton>
 #include <QToolButton>
 #include <QHBoxLayout>
 #include <QVBoxLayout>

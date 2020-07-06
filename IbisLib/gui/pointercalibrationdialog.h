@@ -11,6 +11,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef __PointerCalibrationDialog_h_
 #define __PointerCalibrationDialog_h_
 
+#include <QObject>
 #include "ui_pointercalibrationdialog.h"
 
 class vtkMatrix4x4;

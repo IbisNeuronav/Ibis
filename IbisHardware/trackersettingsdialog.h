@@ -11,6 +11,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef TAG_TRACKERSETTINGSDIALOG_H
 #define TAG_TRACKERSETTINGSDIALOG_H
 
+#include <QObject>
 #include "ui_trackersettingsdialog.h"
 
 class Tracker;
