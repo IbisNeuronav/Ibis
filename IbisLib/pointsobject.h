@@ -18,8 +18,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "sceneobject.h"
 #include "serializer.h"
 #include "pointrepresentation.h"
-#include "vtkPoints.h"
-#include "vtkSmartPointer.h"
+#include <vtkPoints.h>
+#include <vtkSmartPointer.h>
 
 class View;
 class vtkActor;

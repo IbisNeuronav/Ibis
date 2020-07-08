@@ -11,8 +11,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "usprobeobjectsettingswidget.h"
 #include "ui_usprobeobjectsettingswidget.h"
 #include "usprobeobject.h"
-#include "vtkQtMatrixDialog.h"
-#include "vtkTransform.h"
+#include <vtkQtMatrixDialog.h>
+#include <vtkTransform.h>
 
 #include <QPushButton>
 #include <QLabel>

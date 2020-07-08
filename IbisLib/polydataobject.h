@@ -16,8 +16,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <map>
 #include <QVector>
 #include <QObject>
-#include "vtkProperty.h"
-#include "vtkSmartPointer.h"
+#include <vtkProperty.h>
+#include <vtkSmartPointer.h>
 
 class vtkPolyData;
 class vtkTransform;

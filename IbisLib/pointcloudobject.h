@@ -17,10 +17,10 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QObject>
 #include <QVector>
 
-#include "vtkSmartPointer.h"
-#include "vtkPolyDataMapper.h"
-#include "vtkVertexGlyphFilter.h"
-#include "vtkProperty.h"
+#include <vtkSmartPointer.h>
+#include <vtkPolyDataMapper.h>
+#include <vtkVertexGlyphFilter.h>
+#include <vtkProperty.h>
 
 
 class PointCloudObject : public SceneObject

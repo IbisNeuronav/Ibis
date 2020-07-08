@@ -9,15 +9,15 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
 #include "simplepropcreator.h"
-#include "vtkPoints.h"
-#include "vtkCellArray.h"
-#include "vtkPolyData.h"
-#include "vtkPolyDataMapper.h"
-#include "vtkActor.h"
-#include "vtkProperty.h"
-#include "vtkSphereSource.h"
+#include <vtkPoints.h>
+#include <vtkCellArray.h>
+#include <vtkPolyData.h>
+#include <vtkPolyDataMapper.h>
+#include <vtkActor.h>
+#include <vtkProperty.h>
+#include <vtkSphereSource.h>
+#include <vtkNew.h>
 #include "vtkCircleWithCrossSource.h"
-#include "vtkNew.h"
 
 vtkProp3D * SimplePropCreator::CreateLine( double start[3], double end[3], double color[4] )
 {

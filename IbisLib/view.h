@@ -16,7 +16,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "vtkObject.h"
 #include <QObject>
 #include "serializer.h"
-#include "vtkSmartPointer.h"
+#include <vtkSmartPointer.h>
 
 class ViewInteractor;
 class vtkInteractorStyle;

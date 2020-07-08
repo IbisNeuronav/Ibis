@@ -15,7 +15,7 @@ class vtkPolyData;
 class vtkPoints;
 class vtkCellArray;
 class vtkUnsignedCharArray;
-#include "vtkSmartPointer.h"
+#include <vtkSmartPointer.h>
 
 class LinesFactory
 {

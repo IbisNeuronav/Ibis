@@ -9,20 +9,20 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
 #include "filereader.h"
-#include "vtkMNIOBJReader.h"
-#include "vtkTagReader.h"
-#include "vtkPolyDataReader.h"
-#include "vtkProperty.h"
-#include "vtkXMLPolyDataReader.h"
-#include "vtkOBJReader2.h"
-#include "vtkPLYReader.h"
-#include "vtkDataObjectReader.h"
-#include "vtkStructuredPointsReader.h"
-#include "vtkErrorCode.h"
-#include "vtkImageData.h"
-#include "vtkTransform.h"
-#include "vtkSmartPointer.h"
-#include "vtkEventQtSlotConnect.h"
+#include <vtkMNIOBJReader.h>
+#include <vtkTagReader.h>
+#include <vtkPolyDataReader.h>
+#include <vtkProperty.h>
+#include <vtkXMLPolyDataReader.h>
+#include <vtkOBJReader2.h>
+#include <vtkPLYReader.h>
+#include <vtkDataObjectReader.h>
+#include <vtkStructuredPointsReader.h>
+#include <vtkErrorCode.h>
+#include <vtkImageData.h>
+#include <vtkTransform.h>
+#include <vtkSmartPointer.h>
+#include <vtkEventQtSlotConnect.h>
 #include "imageobject.h"
 #include "polydataobject.h"
 #include "pointsobject.h"

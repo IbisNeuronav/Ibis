@@ -28,20 +28,20 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "qIGTLIOClientWidget.h"
 #include "ibishardwareIGSIOsettingswidget.h"
 
-#include "vtkTransform.h"
-#include "vtkImageData.h"
-#include "vtkEventQtSlotConnect.h"
-#include "vtkPLYReader.h"
-#include "vtkTimerLog.h"
+#include <vtkTransform.h>
+#include <vtkImageData.h>
+#include <vtkEventQtSlotConnect.h>
+#include <vtkPLYReader.h>
+#include <vtkTimerLog.h>
 
-#include "igtlioLogic.h"
-#include "igtlioTransformDevice.h"
-#include "igtlioImageDevice.h"
-#include "igtlioVideoDevice.h"
-#include "igtlioImageConverter.h"
-#include "igtlioTransformConverter.h"
-#include "igtlioVideoConverter.h"
-#include "igtlioStatusDevice.h"
+#include <igtlioLogic.h>
+#include <igtlioTransformDevice.h>
+#include <igtlioImageDevice.h>
+#include <igtlioVideoDevice.h>
+#include <igtlioImageConverter.h>
+#include <igtlioTransformConverter.h>
+#include <igtlioVideoConverter.h>
+#include <igtlioStatusDevice.h>
 
 const double IbisHardwareIGSIO::MaxTimeBetweenTransformSamples = 0.2;
 const QString IbisHardwareIGSIO::PlusServerExecutable = "PlusServerExecutable";

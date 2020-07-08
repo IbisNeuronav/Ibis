@@ -9,10 +9,10 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
 #include "linesfactory.h"
-#include "vtkPolyData.h"
-#include "vtkCellArray.h"
-#include "vtkUnsignedCharArray.h"
-#include "vtkPointData.h"
+#include <vtkPolyData.h>
+#include <vtkCellArray.h>
+#include <vtkUnsignedCharArray.h>
+#include <vtkPointData.h>
 #include <QtGui>
 
 LinesFactory::LinesFactory()

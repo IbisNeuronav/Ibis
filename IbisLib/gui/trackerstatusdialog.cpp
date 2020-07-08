@@ -2,9 +2,9 @@
 #include "application.h"
 #include "pointerobject.h"
 #include "scenemanager.h"
-#include "vtkQtMatrixDialog.h"
-#include "vtkMatrix4x4.h"
-#include "vtkTransform.h"
+#include <vtkQtMatrixDialog.h>
+#include <vtkMatrix4x4.h>
+#include <vtkTransform.h>
 
 #include <QVariant>
 #include <QPushButton>

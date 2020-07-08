@@ -15,13 +15,13 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "quadviewwindow.h"
 #include "objecttreewidget.h"
 
-#include "vtkInteractorStyleImage.h"
-#include "vtkInteractorStyleTerrain.h"
-#include "vtkInteractorStyleJoystickCamera.h"
-#include "vtkTransform.h"
-#include "vtkMultiImagePlaneWidget.h"
-#include "vtkImageData.h"
-#include "vtkAxes.h"
+#include <vtkInteractorStyleImage.h>
+#include <vtkInteractorStyleTerrain.h>
+#include <vtkInteractorStyleJoystickCamera.h>
+#include <vtkTransform.h>
+#include <vtkMultiImagePlaneWidget.h>
+#include <vtkImageData.h>
+#include <vtkAxes.h>
 
 #include "view.h"
 #include "vtkRenderer.h"

@@ -1,11 +1,11 @@
 #include "ibisitkvtkconverter.h"
-#include "vtkImageImport.h"
-#include "vtkImageData.h"
-#include "vtkTransform.h"
-#include "vtkImageShiftScale.h"
-#include "vtkImageLuminance.h"
-#include "vtkMath.h"
-#include "vtkSmartPointer.h"
+#include <vtkImageImport.h>
+#include <vtkImageData.h>
+#include <vtkTransform.h>
+#include <vtkImageShiftScale.h>
+#include <vtkImageLuminance.h>
+#include <vtkMath.h>
+#include <vtkSmartPointer.h>
 
 template< class TInputImage >
 IbisItkVTKImageExport< TInputImage >::IbisItkVTKImageExport()

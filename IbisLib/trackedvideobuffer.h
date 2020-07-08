@@ -12,7 +12,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #define __TrackedVideoBuffer_h_
 
 #include <QList>
-#include "vtkSmartPointer.h"
+#include <vtkSmartPointer.h>
 
 class vtkImageData;
 class vtkAlgorithmOutput;

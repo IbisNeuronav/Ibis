@@ -15,7 +15,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "ibistypes.h"
 #include <QColor>
 #include <QObject>
-#include "vtkSmartPointer.h"
+#include <vtkSmartPointer.h>
 
 class PolyDataObject;
 

@@ -22,33 +22,33 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QApplication>
 #include <QProgressDialog>
 #include <QDateTime>
-#include "vtkImageData.h"
-#include "vtkImageShiftScale.h"
-#include "vtkImageLuminance.h"
-#include "vtkMatrix4x4.h"
-#include "vtkMath.h"
-#include "vtkTransform.h"
-#include "vtkImageStencil.h"
-#include "vtkImageToImageStencil.h"
-#include "vtkEventQtSlotConnect.h"
-#include "vtkImageConstantPad.h" // added Mar 2, 2016, Xiao
-#include "vtkPolyDataMapper.h"
-#include "vtkRenderer.h"
-#include "vtkActor.h"
-#include "vtkLookupTable.h"
-#include "vtkImageMapToColors.h"
-#include "vtkImageActor.h"
-#include "vtkImageMapper3D.h"
-#include "vtkImageProperty.h"
-#include "vtkLookupTable.h"
+#include <vtkImageData.h>
+#include <vtkImageShiftScale.h>
+#include <vtkImageLuminance.h>
+#include <vtkMatrix4x4.h>
+#include <vtkMath.h>
+#include <vtkTransform.h>
+#include <vtkImageStencil.h>
+#include <vtkImageToImageStencil.h>
+#include <vtkEventQtSlotConnect.h>
+#include <vtkImageConstantPad.h> // added Mar 2, 2016, Xiao
+#include <vtkPolyDataMapper.h>
+#include <vtkRenderer.h>
+#include <vtkActor.h>
+#include <vtkLookupTable.h>
+#include <vtkImageMapToColors.h>
+#include <vtkImageActor.h>
+#include <vtkImageMapper3D.h>
+#include <vtkImageProperty.h>
+#include <vtkLookupTable.h>
+#include <vtkPassThrough.h>
+#include <vtkSmartPointer.h>
 #include "view.h"
 #include "imageobject.h"
 #include "lookuptablemanager.h"
-#include "vtkSmartPointer.h"
 #include "exportacquisitiondialog.h"
 #include "vtkXFMReader.h"
 #include "vtkXFMWriter.h"
-#include "vtkPassThrough.h"
 #include "vtkPiecewiseFunctionLookupTable.h"
 
 ObjectSerializationMacro( USAcquisitionObject );

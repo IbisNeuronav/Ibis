@@ -11,8 +11,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "imageobjectvolumesettingswidget.h"
 #include "ui_imageobjectvolumesettingswidget.h"
 #include "imageobject.h"
-#include "vtkVolumeProperty.h"
-#include "vtkSmartVolumeMapper.h"
+#include <vtkVolumeProperty.h>
+#include <vtkSmartVolumeMapper.h>
 
 ImageObjectVolumeSettingsWidget::ImageObjectVolumeSettingsWidget(QWidget *parent) :
     QWidget(parent),

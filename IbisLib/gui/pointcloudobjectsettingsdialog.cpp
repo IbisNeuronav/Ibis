@@ -14,9 +14,9 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QtGui>
 #include <QFileDialog>
 #include <QDir>
+#include <vtkProperty.h>
 #include "pointcloudobject.h"
 #include "imageobject.h"
-#include "vtkProperty.h"
 #include "scenemanager.h"
 #include "application.h"
 

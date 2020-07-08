@@ -14,9 +14,9 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "pointsobject.h"
 #include "scenemanager.h"
 #include "pointercalibrationdialog.h"
-#include "vtkQtMatrixDialog.h"
-#include "vtkTransform.h"
 #include "scenemanager.h"
+#include <vtkQtMatrixDialog.h>
+#include <vtkTransform.h>
 
 PointerObjectSettingsDialog::PointerObjectSettingsDialog(QWidget *parent) :
     QWidget(parent),

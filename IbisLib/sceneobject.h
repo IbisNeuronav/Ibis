@@ -17,7 +17,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QVector>
 #include <QObject>
 #include "serializer.h"
-#include "vtkSmartPointer.h"
+#include <vtkSmartPointer.h>
 
 class vtkRenderWindowInteractor;
 class vtkRenderer;

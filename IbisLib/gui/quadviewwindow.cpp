@@ -20,18 +20,18 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QGridLayout>
 #include <QLabel>
 #include <QFont>
-#include "QVTKWidget.h"
+#include <QVTKWidget.h>
 #include <QApplication>
 #include <QSettings>
-#include "vtkqtrenderwindow.h"
-#include "vtkRenderer.h"
-#include "vtkRenderWindowInteractor.h"
-#include "vtkInteractorObserver.h"
-#include "vtkInteractorStyle.h"
+#include <vtkqtrenderwindow.h>
+#include <vtkRenderer.h>
+#include <vtkRenderWindowInteractor.h>
+#include <vtkInteractorObserver.h>
+#include <vtkInteractorStyle.h>
+#include <vtkRenderWindow.h>
+#include <vtkCornerAnnotation.h>
 #include "scenemanager.h"
 #include "view.h"
-#include "vtkRenderWindow.h"
-#include "vtkCornerAnnotation.h"
 
 ObjectSerializationMacro( QuadViewWindow );
 
@@ -174,7 +174,7 @@ QuadViewWindow::~QuadViewWindow()
 {
 }
 
-#include "QVTKInteractor.h"
+#include <QVTKInteractor.h>
 void QuadViewWindow::SetSceneManager( SceneManager * man )
 {
     Q_ASSERT( man );
