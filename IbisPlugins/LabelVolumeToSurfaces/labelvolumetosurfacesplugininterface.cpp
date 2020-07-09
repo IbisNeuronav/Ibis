@@ -19,14 +19,14 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QApplication>
 #include <QMessageBox>
 #include <QProgressDialog>
-#include "vtkImageAccumulate.h"
-#include "vtkPointData.h"
-#include "vtkMarchingContourFilter.h"
-#include "vtkDiscreteMarchingCubes.h"
-#include "vtkTriangleFilter.h"
-#include "vtkStripper.h"
-#include "vtkWindowedSincPolyDataFilter.h"
-#include "vtkImageData.h"
+#include <vtkImageAccumulate.h>
+#include <vtkPointData.h>
+#include <vtkMarchingContourFilter.h>
+#include <vtkDiscreteMarchingCubes.h>
+#include <vtkTriangleFilter.h>
+#include <vtkStripper.h>
+#include <vtkWindowedSincPolyDataFilter.h>
+#include <vtkImageData.h>
 #include "polydataobject.h"
 #include "ibisapi.h"
 

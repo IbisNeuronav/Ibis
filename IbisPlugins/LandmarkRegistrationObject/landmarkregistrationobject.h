@@ -14,7 +14,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QVector>
 #include "sceneobject.h"
 #include "pointsobject.h"
-#include "vtkSmartPointer.h"
+#include <vtkSmartPointer.h>
 
 class LandmarkTransform;
 class vtkPoints;

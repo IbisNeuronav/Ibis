@@ -13,7 +13,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "landmarkregistrationobject.h"
 #include "landmarktransform.h"
 #include "pointsobject.h"
-#include "vtkSmartPointer.h"
+#include <vtkSmartPointer.h>
 #include <QPalette>
 
 LandmarkRegistrationObjectWidget::LandmarkRegistrationObjectWidget(QWidget *parent, const char *name, Qt::WindowFlags f) :

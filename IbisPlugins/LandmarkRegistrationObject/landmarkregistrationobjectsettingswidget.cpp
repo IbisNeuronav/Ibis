@@ -16,8 +16,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "scenemanager.h"
 #include "pointerobject.h"
 
-#include "vtkPoints.h"
-#include "vtkSmartPointer.h"
+#include <vtkPoints.h>
+#include <vtkSmartPointer.h>
 
 #include <QMessageBox>
 #include <QFileDialog>
