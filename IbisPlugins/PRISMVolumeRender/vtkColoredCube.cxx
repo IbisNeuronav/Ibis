@@ -14,24 +14,24 @@
 =========================================================================*/
 #include "vtkColoredCube.h"
 
-#include "vtkTessellatedBoxSource.h"
-#include "vtkClipConvexPolyData.h"
-#include "vtkPlane.h"
-#include "vtkPlaneCollection.h"
+#include <vtkTessellatedBoxSource.h>
+#include <vtkClipConvexPolyData.h>
+#include <vtkPlane.h>
+#include <vtkPlaneCollection.h>
+#include <vtkTriangleFilter.h>
+#include <vtkPolyDataMapper.h>
+#include <vtkRenderer.h>
+#include <vtkCamera.h>
+#include <vtkMatrix4x4.h>
+#include <vtkMath.h>
+#include <vtkObjectFactory.h>  // for vtkStandardNewMacro
+#include <vtkNew.h>
+#include <vtkUnsignedIntArray.h>
+#include <vtkPointData.h>
+#include <vtkCellArray.h>
+#include <vtkOpenGL.h>
+#include <vtkSmartPointer.h>
 #include "vtkColorPolyData.h"
-#include "vtkTriangleFilter.h"
-#include "vtkPolyDataMapper.h"
-#include "vtkRenderer.h"
-#include "vtkCamera.h"
-#include "vtkMatrix4x4.h"
-#include "vtkMath.h"
-#include "vtkObjectFactory.h"  // for vtkStandardNewMacro
-#include "vtkNew.h"
-#include "vtkUnsignedIntArray.h"
-#include "vtkPointData.h"
-#include "vtkCellArray.h"
-#include "vtkOpenGL.h"
-#include "vtkSmartPointer.h"
 
 vtkStandardNewMacro(vtkColoredCube);
 

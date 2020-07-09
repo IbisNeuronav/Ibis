@@ -13,7 +13,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef __VolumeRenderingObject_h_
 #define __VolumeRenderingObject_h_
 
-#include "vtkSmartPointer.h"
+#include <vtkSmartPointer.h>
 #include <map>
 #include "sceneobject.h"
 #include "shadercontrib.h"

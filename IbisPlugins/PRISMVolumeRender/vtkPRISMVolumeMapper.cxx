@@ -12,25 +12,25 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include "vtkPRISMVolumeMapper.h"
 
-#include "vtkCamera.h"
-#include "vtkLightCollection.h"
-#include "vtkLight.h"
-#include "vtkColorTransferFunction.h"
-#include "vtkDataArray.h"
-#include "vtkImageData.h"
-#include "vtkMath.h"
-#include "vtkMatrix4x4.h"
-#include "vtkPiecewiseFunction.h"
-#include "vtkPointData.h"
-#include "vtkRenderer.h"
-#include "vtkVolume.h"
-#include "vtkVolumeProperty.h"
-#include "vtkOpenGLExtensionManager.h"
-#include "vtkExecutive.h"
+#include <vtkCamera.h>
+#include <vtkLightCollection.h>
+#include <vtkLight.h>
+#include <vtkColorTransferFunction.h>
+#include <vtkDataArray.h>
+#include <vtkImageData.h>
+#include <vtkMath.h>
+#include <vtkMatrix4x4.h>
+#include <vtkPiecewiseFunction.h>
+#include <vtkPointData.h>
+#include <vtkRenderer.h>
+#include <vtkVolume.h>
+#include <vtkVolumeProperty.h>
+#include <vtkOpenGLExtensionManager.h>
+#include <vtkExecutive.h>
 #include "DrawableTexture.h"
 #include "GlslShader.h"
 #include "vtkColoredCube.h"
-#include "vtkgl.h"
+#include <vtkgl.h>
 
 #include <sstream>
 
@@ -775,8 +775,8 @@ int vtkPRISMVolumeMapper::UpdateTransferFunctions( )
     return 1;
 }
 
-#include "vtkImageImport.h"
-#include "vtkPNGWriter.h"
+#include <vtkImageImport.h>
+#include <vtkPNGWriter.h>
 
 int vtkPRISMVolumeMapper::UpdateDepthBufferTexture( int width, int height )
 {
@@ -988,7 +988,7 @@ void vtkPRISMVolumeMapper::GetRenderSize( vtkRenderer * ren, int size[2] )
     }
 }
 
-#include "vtkInformation.h"
+#include <vtkInformation.h>
 
 int vtkPRISMVolumeMapper::FillInputPortInformation( int port, vtkInformation * info )
 {
