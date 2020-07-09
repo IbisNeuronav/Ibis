@@ -12,7 +12,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #define DOUBLEVIEWWIDGET_H
 
 #include <QWidget>
-#include "vtkSmartPointer.h"
+#include <vtkSmartPointer.h>
 
 namespace Ui {
 class DoubleViewWidget;

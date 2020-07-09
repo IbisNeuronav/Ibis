@@ -14,20 +14,20 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "stereotacticframewidget.h"
 #include <QtPlugin>
 #include "vtkNShapeCalibrationWidget.h"
-#include "vtkLandmarkTransform.h"
-#include "vtkPoints.h"
-#include "vtkCellArray.h"
-#include "vtkPolyData.h"
-#include "vtkEventQtSlotConnect.h"
-#include "vtkAxesActor.h"
-#include "vtkRenderer.h"
+#include <vtkLandmarkTransform.h>
+#include <vtkPoints.h>
+#include <vtkCellArray.h>
+#include <vtkPolyData.h>
+#include <vtkEventQtSlotConnect.h>
+#include <vtkAxesActor.h>
+#include <vtkRenderer.h>
 #include "ibisapi.h"
 #include "view.h"
 #include "polydataobject.h"
 #include "imageobject.h"
 #include "SVL.h"
-#include "vtkMatrix4x4.h"
-#include "vtkTransform.h"
+#include <vtkMatrix4x4.h>
+#include <vtkTransform.h>
 #include <float.h>
 
 const Vec3 FrameLocators[4][4] = { { Vec3( 10.0, 140.0, -90.0 ),

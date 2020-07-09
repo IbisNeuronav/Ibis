@@ -1,7 +1,7 @@
 #ifndef vtkColoredCube_h
 #define vtkColoredCube_h
 
-#include "vtkObject.h"
+#include <vtkObject.h>
 
 class vtkTessellatedBoxSource;
 class vtkClipConvexPolyData;

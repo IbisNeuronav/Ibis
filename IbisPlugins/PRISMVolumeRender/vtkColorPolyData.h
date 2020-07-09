@@ -18,7 +18,7 @@
 #ifndef vtkColorPolyData_h
 #define vtkColorPolyData_h
 
-#include "vtkDataSetAlgorithm.h"
+#include <vtkDataSetAlgorithm.h>
 
 class vtkColorPolyData : public vtkDataSetAlgorithm
 {
