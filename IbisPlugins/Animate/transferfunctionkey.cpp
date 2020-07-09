@@ -11,8 +11,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 // Thanks to Simon Drouin for writing this class
 
 #include "transferfunctionkey.h"
-#include "vtkColorTransferFunction.h"
-#include "vtkPiecewiseFunction.h"
+#include <vtkColorTransferFunction.h>
+#include <vtkPiecewiseFunction.h>
 #include "SVL.h"
 #include "serializerhelper.h"
 

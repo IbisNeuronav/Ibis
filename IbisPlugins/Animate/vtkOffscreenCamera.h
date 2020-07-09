@@ -19,7 +19,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef __vtkOffscreenCamera_h
 #define __vtkOffscreenCamera_h
 
-#include "vtkCamera.h"
+#include <vtkCamera.h>
 
 class vtkOffscreenCamera : public vtkCamera
 {

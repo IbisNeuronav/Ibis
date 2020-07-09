@@ -12,13 +12,13 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include "vtkOffscreenCamera.h"
 
-#include "vtkMatrix4x4.h"
-#include "vtkObjectFactory.h"
-#include "vtkOpenGLRenderer.h"
-#include "vtkOutputWindow.h"
-#include "vtkOpenGLRenderWindow.h"
+#include <vtkMatrix4x4.h>
+#include <vtkObjectFactory.h>
+#include <vtkOpenGLRenderer.h>
+#include <vtkOutputWindow.h>
+#include <vtkOpenGLRenderWindow.h>
+#include <vtkOpenGL.h>
 #include "DomeRenderer.h"
-#include "vtkOpenGL.h"
 
 #include <math.h>
 
