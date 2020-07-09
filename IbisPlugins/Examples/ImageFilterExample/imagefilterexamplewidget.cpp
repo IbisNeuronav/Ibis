@@ -16,7 +16,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "ibisapi.h"
 #include "sceneobject.h"
 #include "imageobject.h"
-#include "vtkTransform.h"
+#include <vtkTransform.h>
 #include <QComboBox>
 #include <QMessageBox>
 #include <unistd.h>

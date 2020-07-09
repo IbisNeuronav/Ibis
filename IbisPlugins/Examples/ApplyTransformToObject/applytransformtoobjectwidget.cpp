@@ -1,9 +1,9 @@
 #include "applytransformtoobjectwidget.h"
 #include "ui_applytransformtoobjectwidget.h"
 
-#include "vtkTransform.h"
-#include "vtkMatrix4x4.h"
-#include "vtkSmartPointer.h"
+#include <vtkTransform.h>
+#include <vtkMatrix4x4.h>
+#include <vtkSmartPointer.h>
 #include "ibisapi.h"
 #include "guiutilities.h"
 #include "sceneobject.h"
