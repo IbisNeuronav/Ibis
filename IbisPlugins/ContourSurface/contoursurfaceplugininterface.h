@@ -12,7 +12,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #define CONTOURSURFACEPLUGININTERFACE_H
 
 #include "objectplugininterface.h"
-#include "vtkSmartPointer.h"
+#include <vtkSmartPointer.h>
 
 class GeneratedSurface;
 

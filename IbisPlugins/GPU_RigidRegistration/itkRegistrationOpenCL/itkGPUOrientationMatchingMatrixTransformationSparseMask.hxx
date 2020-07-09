@@ -13,13 +13,13 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef __itkGPUOrientationMatchingMatrixTransformationSparseMask_hxx
 #define __itkGPUOrientationMatchingMatrixTransformationSparseMask_hxx
 
-#include "itkMacro.h"
+#include <itkMacro.h>
+#include <itkTimeProbe.h>
+#include <itkMatrix.h>
+#include <vnl/vnl_matrix.h>
+#include <itkGaussianDerivativeOperator.h>
+#include <itkOpenCLUtil.h>
 #include "itkGPUOrientationMatchingMatrixTransformationSparseMask.h"
-#include "itkTimeProbe.h"
-#include "itkMatrix.h"
-#include "vnl/vnl_matrix.h"
-#include "itkGaussianDerivativeOperator.h"
-#include "itkOpenCLUtil.h"
 
 #include "GPUDiscreteGaussianGradientImageFilter.h"
 #include "GPUOrientationMatchingMatrixTransformationSparseMaskKernel.h"

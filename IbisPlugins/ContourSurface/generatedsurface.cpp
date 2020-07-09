@@ -10,16 +10,16 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 #include <iostream>
 
-#include "vtkMarchingContourFilter.h"
-#include "vtkImageData.h"
-#include "vtkProperty.h"
-#include "vtkPolyData.h" 
-#include "vtkImageGaussianSmooth.h"
-#include "vtkImageAccumulate.h"
-#include "vtkScalarsToColors.h"
-#include "vtkTriangleFilter.h"
-#include "vtkDecimatePro.h"
-#include "vtkSmartPointer.h"
+#include <vtkMarchingContourFilter.h>
+#include <vtkImageData.h>
+#include <vtkProperty.h>
+#include <vtkPolyData.h>
+#include <vtkImageGaussianSmooth.h>
+#include <vtkImageAccumulate.h>
+#include <vtkScalarsToColors.h>
+#include <vtkTriangleFilter.h>
+#include <vtkDecimatePro.h>
+#include <vtkSmartPointer.h>
 
 #include "generatedsurface.h"
 #include "surfacesettingswidget.h"

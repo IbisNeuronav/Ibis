@@ -13,25 +13,25 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef __itkGPUOrientationMatchingMatrixTransformationSparseMask_h
 #define __itkGPUOrientationMatchingMatrixTransformationSparseMask_h
 
-#include "itkObject.h"
-#include "itkOpenCLUtil.h"
-#include "itkCovariantVector.h"
-#include "itkMatrixOffsetTransformBase.h"
-#include "itkGaussianDerivativeOperator.h"
-#include "itkImage.h"
-#include "itkSampleToHistogramFilter.h"
-#include "itkListSample.h"
-#include "itkHistogram.h"
+#include <itkObject.h>
+#include <itkOpenCLUtil.h>
+#include <itkCovariantVector.h>
+#include <itkMatrixOffsetTransformBase.h>
+#include <itkGaussianDerivativeOperator.h>
+#include <itkImage.h>
+#include <itkSampleToHistogramFilter.h>
+#include <itkListSample.h>
+#include <itkHistogram.h>
 
-#include "itkImageSample.h"
-#include "itkImageSamplerBase.h"
-#include "itkImageRandomSamplerBase.h"
-#include "itkImageRandomSampler.h"
-#include "itkImageGridSampler.h"
-#include "itkImageFullSampler.h"
+#include <itkImageSample.h>
+#include <itkImageSamplerBase.h>
+#include <itkImageRandomSamplerBase.h>
+#include <itkImageRandomSampler.h>
+#include <itkImageGridSampler.h>
+#include <itkImageFullSampler.h>
 
-#include "itkImageMaskSpatialObject.h"
-#include "itkImageRegionIteratorWithIndex.h"
+#include <itkImageMaskSpatialObject.h>
+#include <itkImageRegionIteratorWithIndex.h>
 
 namespace itk
 {

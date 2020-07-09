@@ -10,9 +10,9 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 // Thanks to Dante De Nigris for writing this class
 
-#include "itkEuler3DTransform.h"
+#include <itkEuler3DTransform.h>
+#include <itkSingleValuedCostFunction.h>
 #include "itkGPUOrientationMatchingMatrixTransformationSparseMask.h"
-#include "itkSingleValuedCostFunction.h"
 
 namespace itk
 {
