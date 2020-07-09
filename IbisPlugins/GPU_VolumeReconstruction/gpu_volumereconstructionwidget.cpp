@@ -14,17 +14,17 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "gpu_volumereconstructionwidget.h"
 #include <QComboBox>
 #include <QMessageBox>
-#include "vnl/algo/vnl_symmetric_eigensystem.h"
-#include "vnl/algo/vnl_real_eigensystem.h"
+#include <vnl/algo/vnl_symmetric_eigensystem.h>
+#include <vnl/algo/vnl_real_eigensystem.h>
 
 #include "sceneobject.h"
 #include "imageobject.h"
 #include "usacquisitionobject.h"
-#include "vtkImageData.h"
-#include "vtkTransform.h"
-#include "vtkMatrix4x4.h"
+#include <vtkImageData.h>
+#include <vtkTransform.h>
+#include <vtkMatrix4x4.h>
 
-#include "itkImageFileWriter.h"
+#include <itkImageFileWriter.h>
 #include "ibisapi.h"
 
 GPU_VolumeReconstructionWidget::GPU_VolumeReconstructionWidget(QWidget *parent) :

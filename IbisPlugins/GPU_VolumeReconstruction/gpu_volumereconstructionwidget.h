@@ -19,7 +19,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "gpu_volumereconstruction.h"
 
 #include "ibisitkvtkconverter.h"
-#include "vtkSmartPointer.h"
+#include <vtkSmartPointer.h>
 
 class GPU_VolumeReconstructionPluginInterface;
 

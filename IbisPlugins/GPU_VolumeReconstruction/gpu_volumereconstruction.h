@@ -2,10 +2,10 @@
 #define GPU_VOLUMERECONSTRUCTION_H
 
 #include <QThread>
-#include "vtkObject.h"
+#include <vtkObject.h>
 #include "imageobject.h"
-#include "vtkSmartPointer.h"
-#include "itkEuler3DTransform.h"
+#include <vtkSmartPointer.h>
+#include <itkEuler3DTransform.h>
 #include "itkGPUVolumeReconstruction.h"
 
 class vtkImageData;
