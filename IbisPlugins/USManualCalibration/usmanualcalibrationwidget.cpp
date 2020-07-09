@@ -13,16 +13,16 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "usmanualcalibrationwidget.h"
 #include "usmanualcalibrationplugininterface.h"
 #include "ui_usmanualcalibrationwidget.h"
-#include "vtkImageActor.h"
-#include "vtkRenderer.h"
-#include "vtkRenderWindow.h"
-#include "vtkInteractorStyleImage.h"
-#include "vtkImageData.h"
-#include "vtkCamera.h"
-#include "vtkTransform.h"
-#include "vtkNShapeCalibrationWidget.h"
-#include "vtkEventQtSlotConnect.h"
+#include <vtkImageActor.h>
+#include <vtkRenderer.h>
+#include <vtkRenderWindow.h>
+#include <vtkInteractorStyleImage.h>
+#include <vtkImageData.h>
+#include <vtkCamera.h>
+#include <vtkTransform.h>
+#include <vtkEventQtSlotConnect.h>
 #include <QTimer>
+#include "vtkNShapeCalibrationWidget.h"
 #include "ibisapi.h"
 
 USManualCalibrationWidget::USManualCalibrationWidget(QWidget *parent) :
