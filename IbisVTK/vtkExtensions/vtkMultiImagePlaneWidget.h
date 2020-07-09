@@ -96,7 +96,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include "vtkMulti3DWidget.h"
 #include <vector>
-#include "vtkMatrix4x4.h"
+#include <vtkMatrix4x4.h>
 
 class vtkActor;
 class vtkCellPicker;

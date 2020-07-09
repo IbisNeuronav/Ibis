@@ -10,16 +10,16 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 // Thanks to Simon Drouin for writing this class
 
-#include "vtkMulti3DWidget.h"
-#include "vtkObjectFactory.h"
+#include <vtkMulti3DWidget.h>
+#include <vtkObjectFactory.h>
+#include <vtkRenderWindowInteractor.h>
+#include <vtkRenderer.h>
+#include <vtkDataSet.h>
+#include <vtkAssembly.h>
+#include <vtkProp3DCollection.h>
+#include <vtkRendererCollection.h>
+#include <vtkRenderWindow.h>
 #include "vtkObjectCallback.h"
-#include "vtkRenderWindowInteractor.h"
-#include "vtkRenderer.h"
-#include "vtkDataSet.h"
-#include "vtkAssembly.h"
-#include "vtkProp3DCollection.h"
-#include "vtkRendererCollection.h"
-#include "vtkRenderWindow.h"
 
 vtkMulti3DWidget::vtkMulti3DWidget()
 {

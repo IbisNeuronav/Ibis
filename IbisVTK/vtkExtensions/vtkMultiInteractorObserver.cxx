@@ -13,10 +13,10 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "vtkMultiInteractorObserver.h"
 
 #include "vtkObjectCallback.h"
-#include "vtkObjectFactory.h"
-#include "vtkRenderer.h"
-#include "vtkRenderWindow.h"
-#include "vtkRenderWindowInteractor.h"
+#include <vtkObjectFactory.h>
+#include <vtkRenderer.h>
+#include <vtkRenderWindow.h>
+#include <vtkRenderWindowInteractor.h>
 
 
 vtkMultiInteractorObserver::vtkMultiInteractorObserver()

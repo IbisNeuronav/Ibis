@@ -22,7 +22,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef __vtkSimpleMapper3D_h
 #define __vtkSimpleMapper3D_h
 
-#include "vtkAbstractMapper3D.h"
+#include <vtkAbstractMapper3D.h>
 
 class vtkRenderer;
 class vtkWindow;

@@ -11,7 +11,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 // Thanks to Simon Drouin for writing this class
 
 #include "vtkSimpleMapper3D.h"
-#include "vtkInformation.h"
+#include <vtkInformation.h>
 
 vtkSimpleMapper3D::vtkSimpleMapper3D()
 {

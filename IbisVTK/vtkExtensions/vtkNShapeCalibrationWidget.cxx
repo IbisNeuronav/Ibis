@@ -12,26 +12,27 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include "vtkNShapeCalibrationWidget.h"
 
-#include "vtkActor.h"
-#include "vtkAssemblyNode.h"
-#include "vtkAssemblyPath.h"
-#include "vtkCallbackCommand.h"
-#include "vtkCamera.h"
-#include "vtkCellPicker.h"
-#include "vtkCommand.h"
-#include "vtkDoubleArray.h"
-#include "vtkFloatArray.h"
-#include "vtkMath.h"
-#include "vtkObjectFactory.h"
-#include "vtkPlanes.h"
-#include "vtkPointWidget.h"
-#include "vtkPolyData.h"
-#include "vtkPolyDataMapper.h"
-#include "vtkProperty.h"
-#include "vtkRenderWindow.h"
-#include "vtkRenderWindowInteractor.h"
-#include "vtkRenderer.h"
-#include "vtkDiskSource.h"
+#include <vtkActor.h>
+#include <vtkAssemblyNode.h>
+#include <vtkAssemblyPath.h>
+#include <vtkCallbackCommand.h>
+#include <vtkCamera.h>
+#include <vtkCellPicker.h>
+#include <vtkCommand.h>
+#include <vtkDoubleArray.h>
+#include <vtkFloatArray.h>
+#include <vtkMath.h>
+#include <vtkObjectFactory.h>
+#include <vtkPlanes.h>
+#include <vtkPointWidget.h>
+#include <vtkPolyData.h>
+#include <vtkPolyDataMapper.h>
+#include <vtkProperty.h>
+#include <vtkRenderWindow.h>
+#include <vtkRenderWindowInteractor.h>
+#include <vtkRenderer.h>
+#include <vtkDiskSource.h>
+
 #include "vtkCircleWithCrossSource.h"
 
 vtkStandardNewMacro(vtkNShapeCalibrationWidget);

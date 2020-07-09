@@ -21,7 +21,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef __vtkMultiTextureMapToPlane_h
 #define __vtkMultiTextureMapToPlane_h
 
-#include "vtkDataSetAlgorithm.h"
+#include <vtkDataSetAlgorithm.h>
 #include <vector>
 
 class vtkMultiTextureMapToPlane : public vtkDataSetAlgorithm

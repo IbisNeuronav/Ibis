@@ -39,7 +39,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef __vtkMultiInteractorObserver_h
 #define __vtkMultiInteractorObserver_h
 
-#include "vtkObject.h"
+#include <vtkObject.h>
 #include <vector>
 
 class vtkRenderWindowInteractor;

@@ -11,8 +11,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 // Thanks to Simon Drouin for writing this class
 
 #include "vtkMatrix4x4Operators.h"
-#include "vtkMatrix4x4.h"
-#include "vtkMath.h"
+#include <vtkMatrix4x4.h>
+#include <vtkMath.h>
 
 void vtkMatrix4x4Operators::AddMatrix( vtkMatrix4x4 * dst, vtkMatrix4x4 * src )
 {

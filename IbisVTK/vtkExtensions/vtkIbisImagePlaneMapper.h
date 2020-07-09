@@ -20,8 +20,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef __vtkIbisImagePlaneMapper_h
 #define __vtkIbisImagePlaneMapper_h
 
-#include "vtkSimpleMapper3D.h"
-#include "vtkTimeStamp.h"
+#include <vtkSimpleMapper3D.h>
+#include <vtkTimeStamp.h>
 
 class vtkRenderer;
 class vtkWindow;

@@ -10,9 +10,9 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 // Thanks to Simon Drouin for writing this class
 
-#include "vtkInteractorStyleImage2.h"
-#include "vtkObjectFactory.h"
-#include "vtkRenderWindowInteractor.h"
+#include <vtkInteractorStyleImage2.h>
+#include <vtkObjectFactory.h>
+#include <vtkRenderWindowInteractor.h>
 
 vtkStandardNewMacro(vtkInteractorStyleImage2);
 

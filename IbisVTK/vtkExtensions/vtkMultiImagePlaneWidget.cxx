@@ -12,34 +12,33 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include "vtkMultiImagePlaneWidget.h"
 
-#include "vtkActor.h"
-#include "vtkAssembly.h"
-#include "vtkAssemblyNode.h"
-#include "vtkAssemblyPath.h"
-#include "vtkCamera.h"
-#include "vtkCellArray.h"
-#include "vtkCellPicker.h"
-#include "vtkImageData.h"
-#include "vtkImageMapToColors.h"
-#include "vtkImageReslice.h"
-#include "vtkScalarsToColors.h"
-#include "vtkLookupTable.h"
-#include "vtkMath.h"
-#include "vtkMatrix4x4.h"
-#include "vtkObjectFactory.h"
-#include "vtkPlaneSource.h"
-#include "vtkPolyData.h"
-#include "vtkPolyDataMapper.h"
-#include "vtkProperty.h"
-#include "vtkRenderWindowInteractor.h"
-#include "vtkRenderer.h"
-#include "vtkTexture.h"
-#include "vtkMultiTextureMapToPlane.h"
-#include "vtkTransform.h"
-#include "vtkObjectCallback.h"
+#include <vtkActor.h>
+#include <vtkAssembly.h>
+#include <vtkAssemblyNode.h>
+#include <vtkAssemblyPath.h>
+#include <vtkCamera.h>
+#include <vtkCellArray.h>
+#include <vtkCellPicker.h>
+#include <vtkImageData.h>
+#include <vtkImageMapToColors.h>
+#include <vtkImageReslice.h>
+#include <vtkScalarsToColors.h>
+#include <vtkLookupTable.h>
+#include <vtkMath.h>
+#include <vtkObjectFactory.h>
+#include <vtkPlaneSource.h>
+#include <vtkPolyData.h>
+#include <vtkPolyDataMapper.h>
+#include <vtkProperty.h>
+#include <vtkRenderWindowInteractor.h>
+#include <vtkRenderer.h>
+#include <vtkTexture.h>
+#include <vtkTransform.h>
+#include <vtkPolyData.h>
+#include <vtkPointData.h>
 
-#include "vtkPolyData.h"
-#include "vtkPointData.h"
+#include "vtkMultiTextureMapToPlane.h"
+#include "vtkObjectCallback.h"
 
 #include <sstream>
 

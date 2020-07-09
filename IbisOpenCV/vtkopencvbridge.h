@@ -11,7 +11,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef __VtkOpenCvBridge_h_
 #define __VtkOpenCvBridge_h_
 
-#include "opencv2/opencv.hpp"
+#include <opencv2/opencv.hpp>
 
 class vtkMatrix4x4;
 
