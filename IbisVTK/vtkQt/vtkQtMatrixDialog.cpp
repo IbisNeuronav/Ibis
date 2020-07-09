@@ -25,11 +25,11 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QMimeData>
 #include <QClipboard>
 #include <QMessageBox>
-#include "vtkObject.h"
-#include "vtkMatrix4x4.h"
+#include <vtkObject.h>
+#include <vtkMatrix4x4.h>
+#include <vtkEventQtSlotConnect.h>
 #include "vtkXFMReader.h"
 #include "vtkXFMWriter.h"
-#include "vtkEventQtSlotConnect.h"
 
 vtkQtMatrixDialog::vtkQtMatrixDialog( bool readOnly, QWidget* parent )
     : QDialog( parent, Qt::WindowStaysOnTopHint )

@@ -17,9 +17,9 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <algorithm>
 
 #include "vtkQtHistogramWidget.h"
-#include "vtkImageAccumulate.h"
-#include "vtkColorTransferFunction.h"
-#include "vtkImageData.h"
+#include <vtkImageAccumulate.h>
+#include <vtkColorTransferFunction.h>
+#include <vtkImageData.h>
 
 const int vtkQtHistogramWidget::m_hotspotRadius = 10;
 const int vtkQtHistogramWidget::m_scalarBarHeight = 40;

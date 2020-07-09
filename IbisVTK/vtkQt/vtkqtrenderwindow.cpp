@@ -11,8 +11,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 // Thanks to Simon Drouin for writing this class
 
 #include "vtkqtrenderwindow.h"
-#include "vtkRenderWindow.h"
-#include "vtkUnsignedCharArray.h"
+#include <vtkRenderWindow.h>
+#include <vtkUnsignedCharArray.h>
 #include <QPainter>
 #include <QGestureEvent>
 #include <QPanGesture>

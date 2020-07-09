@@ -15,9 +15,9 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <cmath>
 #include <algorithm>
 
-#include "vtkQtColorTransferFunctionWidget.h"
-#include "vtkColorTransferFunction.h"
-#include "vtkImageData.h"
+#include <vtkQtColorTransferFunctionWidget.h>
+#include <vtkColorTransferFunction.h>
+#include <vtkImageData.h>
 
 const int vtkQtColorTransferFunctionWidget::m_hotspotRadius = 10;
 

@@ -11,19 +11,19 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 // Thanks to Simon Drouin for writing this class
 #include "vtkMNIOBJReader.h"
 
-#include "vtkObjectFactory.h"
-#include "vtkPointData.h"
-#include "vtkPolyData.h"
-#include "vtkPoints.h"
-#include "vtkUnsignedCharArray.h"
-#include "vtkDoubleArray.h"
-#include "vtkIntArray.h"
-#include "vtkCellArray.h"
-#include "vtkPolyData.h"
-#include "vtkProperty.h"
-#include "vtkInformation.h"
-#include "vtkInformationVector.h"
-#include "vtkStreamingDemandDrivenPipeline.h"
+#include <vtkObjectFactory.h>
+#include <vtkPointData.h>
+#include <vtkPolyData.h>
+#include <vtkPoints.h>
+#include <vtkUnsignedCharArray.h>
+#include <vtkDoubleArray.h>
+#include <vtkIntArray.h>
+#include <vtkCellArray.h>
+#include <vtkPolyData.h>
+#include <vtkProperty.h>
+#include <vtkInformation.h>
+#include <vtkInformationVector.h>
+#include <vtkStreamingDemandDrivenPipeline.h>
 
 
 vtkStandardNewMacro(vtkMNIOBJReader);

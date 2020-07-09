@@ -14,7 +14,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #define __vtkQtRenderWindow_h_
 
 #include <QObject>
-#include "QVTKWidget.h"
+#include <QVTKWidget.h>
 
 class QGestureEvent;
 class QPanGesture;

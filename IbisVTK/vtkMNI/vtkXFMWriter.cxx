@@ -9,7 +9,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
 #include "vtkXFMWriter.h"
-#include "vtkMatrix4x4.h"
+#include <vtkMatrix4x4.h>
 #include <fstream>
 
 vtkXFMWriter * vtkXFMWriter::New()

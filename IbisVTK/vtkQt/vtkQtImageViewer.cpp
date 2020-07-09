@@ -11,13 +11,13 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 // Thanks to Simon Drouin for writing this class
 
 #include "vtkQtImageViewer.h"
-#include "vtkImageActor.h"
-#include "vtkRenderer.h"
-#include "vtkCamera.h"
-#include "vtkRenderWindow.h"
-#include "vtkRenderWindowInteractor.h"
-#include "vtkInteractorStyleImage.h"
-#include "vtkImageData.h"
+#include <vtkImageActor.h>
+#include <vtkRenderer.h>
+#include <vtkCamera.h>
+#include <vtkRenderWindow.h>
+#include <vtkRenderWindowInteractor.h>
+#include <vtkInteractorStyleImage.h>
+#include <vtkImageData.h>
 
 vtkQtImageViewer::vtkQtImageViewer( QWidget * parent ) : QVTKWidget( parent )
 {

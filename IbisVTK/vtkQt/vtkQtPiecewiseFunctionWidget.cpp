@@ -11,7 +11,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 // Thanks to Simon Drouin for writing this class
 
 #include "vtkQtPiecewiseFunctionWidget.h"
-#include "vtkPiecewiseFunction.h"
+#include <vtkPiecewiseFunction.h>
 
 #include <QPainter>
 #include <QWheelEvent>
