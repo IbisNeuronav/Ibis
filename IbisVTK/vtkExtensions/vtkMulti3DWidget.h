@@ -26,7 +26,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #define __vtkMulti3DWidget_h
 
 
-#include "vtkSmartPointer.h"
+#include <vtkSmartPointer.h>
 #include "vtkMultiInteractorObserver.h"
 #include <vector>
 

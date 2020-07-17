@@ -12,6 +12,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #define POINTCOLORWIDGET_H
 
 #include <QWidget>
+#include <QObject>
 #include "pointsobject.h"
 
 namespace Ui {

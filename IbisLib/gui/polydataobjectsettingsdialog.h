@@ -12,6 +12,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #define POLYDATAOBJECTSETTINGSDIALOG_H
 
 #include <vector>
+#include <QObject>
 #include "ui_polydataobjectsettingsdialog.h"
 
 class PolyDataObject;

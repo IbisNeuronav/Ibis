@@ -11,7 +11,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "opendatafiledialog.h"
 #include "ui_opendatafiledialog.h"
 #include <QFileDialog>
-#include "vtkTransform.h"
+#include <vtkTransform.h>
 #include "sceneobject.h"
 #include "ibisapi.h"
 #include "scenemanager.h"

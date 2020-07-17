@@ -11,9 +11,9 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef USMASK_H
 #define USMASK_H
 
-#include <QObject>
 #include <vtkObject.h>
 #include <vtkSmartPointer.h>
+#include <QObject>
 #include "ibismath.h"
 #include "serializer.h"
 

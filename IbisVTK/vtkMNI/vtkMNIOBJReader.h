@@ -20,8 +20,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef __vtkMNIOBJReader_h
 #define __vtkMNIOBJReader_h
 
-#include "vtkPolyDataAlgorithm.h"
-#include "vtkSmartPointer.h"
+#include <vtkPolyDataAlgorithm.h>
+#include <vtkSmartPointer.h>
 
 class vtkProperty;
 class vtkCellArray;

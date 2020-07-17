@@ -16,7 +16,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "volumeshadereditorwidget.h"
 #include "application.h"
 #include "volumerenderingobject.h"
-#include "vtkVolumeProperty.h"
+#include <vtkVolumeProperty.h>
 
 static const double minFactor = 0.1;
 static const double maxFactor = 10.0;

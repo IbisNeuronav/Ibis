@@ -16,7 +16,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "hardwaremodule.h"
 #include <map>
 #include <QVector>
-#include "vtkSmartPointer.h"
+#include <QObject>
+#include <vtkSmartPointer.h>
 
 class vtkImageData;
 class vtkMatrix4x4;

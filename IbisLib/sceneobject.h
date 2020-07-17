@@ -12,12 +12,12 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #define TAG_SCENEOBJECT_H
 
 #include "vtkObject.h"
-#include <QObject>
 #include "viewinteractor.h"
 #include <QString>
 #include <QVector>
+#include <QObject>
 #include "serializer.h"
-#include "vtkSmartPointer.h"
+#include <vtkSmartPointer.h>
 
 class vtkRenderWindowInteractor;
 class vtkRenderer;

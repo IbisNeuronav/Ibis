@@ -11,10 +11,10 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef IBISAPI_H
 #define IBISAPI_H
 
-#include <QObject>
 #include <QList>
 #include <QMap>
 #include <QDockWidget>
+#include <QObject>
 
 class Application;
 class SceneManager;

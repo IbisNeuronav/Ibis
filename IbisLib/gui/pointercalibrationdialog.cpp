@@ -14,7 +14,7 @@
 #include "pointercalibrationdialog.h"
 #include <QPushButton>
 #include <QLineEdit>
-#include "vtkMatrix4x4.h"
+#include <vtkMatrix4x4.h>
 #include "pointerobject.h"
 #include "application.h"
 

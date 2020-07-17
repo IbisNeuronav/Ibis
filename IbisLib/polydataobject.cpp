@@ -11,24 +11,24 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QFileDialog>
 #include <QMessageBox>
 #include "polydataobject.h"
-#include "vtkPolyData.h"
-#include "vtkPolyDataMapper.h"
-#include "vtkRenderer.h"
-#include "vtkActor.h"
+#include <vtkPolyData.h>
+#include <vtkPolyDataMapper.h>
+#include <vtkRenderer.h>
+#include <vtkActor.h>
+#include <vtkTransform.h>
+#include <vtkAssembly.h>
+#include <vtkPolyDataWriter.h>
+#include <vtkImageData.h>
+#include <vtkPNGReader.h>
+#include <vtkDoubleArray.h>
+#include <vtkPoints.h>
+
+#include <vtkTextureMapToPlane.h>
+#include <vtkTextureMapToSphere.h>
+#include <vtkTextureMapToCylinder.h>
+
 #include "view.h"
-#include "vtkTransform.h"
-#include "vtkAssembly.h"
-#include "vtkPolyDataWriter.h"
-#include "vtkImageData.h"
-#include "vtkPNGReader.h"
-#include "vtkDoubleArray.h"
-#include "vtkPoints.h"
 #include "vtkPiecewiseFunctionLookupTable.h"
-
-#include "vtkTextureMapToPlane.h"
-#include "vtkTextureMapToSphere.h"
-#include "vtkTextureMapToCylinder.h"
-
 #include "polydataobjectsettingsdialog.h"
 #include "application.h"
 #include "scenemanager.h"

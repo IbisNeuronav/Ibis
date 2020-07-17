@@ -14,8 +14,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <iostream>
 #include <stdio.h>
 #include <stdarg.h>
-#include "vtkgl.h"
-#include "vtkMatrix4x4.h"
+#include <vtkgl.h>
+#include <vtkMatrix4x4.h>
 
 using namespace std;
 

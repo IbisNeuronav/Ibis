@@ -15,9 +15,9 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QFileDialog>
 #include <QDir>
 #include <QRadioButton>
+#include <vtkProperty.h>
 #include "polydataobject.h"
 #include "imageobject.h"
-#include "vtkProperty.h"
 #include "scenemanager.h"
 #include "application.h"
 #include "lookuptablemanager.h"

@@ -9,30 +9,30 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
 #include "usprobeobject.h"
-#include "vtkImageData.h"
-#include "vtkImageActor.h"
-#include "vtkImageMapper3D.h"
-#include "vtkRenderer.h"
-#include "view.h"
-#include "vtkTransform.h"
-#include "vtkImageProperty.h"
-#include "vtkImageMapToColors.h"
-#include "vtkImageToImageStencil.h"
-#include "vtkImageStencil.h"
+#include <vtkImageData.h>
+#include <vtkImageActor.h>
+#include <vtkImageMapper3D.h>
+#include <vtkRenderer.h>
+#include <vtkTransform.h>
+#include <vtkImageProperty.h>
+#include <vtkImageMapToColors.h>
+#include <vtkImageToImageStencil.h>
+#include <vtkImageStencil.h>
+#include <vtkImageConstantPad.h>
+#include <vtkPassThrough.h>
+#include <QDir>
+#include <QWidget>
 #include "scenemanager.h"
 #include "application.h"
 #include "hardwaremodule.h"
 #include "imageobject.h"
 #include "serializer.h"
 #include "serializerhelper.h"
-#include <QDir>
-#include <QWidget>
+#include "view.h"
 #include "usprobeobjectsettingswidget.h"
 #include "usmask.h"
 #include "usmasksettingswidget.h"
 #include "lookuptablemanager.h"
-#include "vtkImageConstantPad.h"
-#include "vtkPassThrough.h"
 #include "vtkPiecewiseFunctionLookupTable.h"
 
 ObjectSerializationMacro( UsProbeObject );

@@ -13,8 +13,9 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef MATRIXDIALOG_H
 #define MATRIXDIALOG_H
 
-#include <qvariant.h>
-#include <qdialog.h>
+#include <QVariant>
+#include <QDialog>
+#include <QObject>
 
 class QVBoxLayout; 
 class QHBoxLayout; 

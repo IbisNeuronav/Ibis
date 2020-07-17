@@ -10,28 +10,28 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 #include "quadviewwindow.h"
 
-#include <qvariant.h>
-#include <qsplitter.h>
-#include <qlayout.h>
-#include <qpushbutton.h>
+#include <QVariant>
+#include <QSplitter>
+#include <QLayout>
+#include <QPushButton>
 #include <QToolButton>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QGridLayout>
 #include <QLabel>
 #include <QFont>
-#include "QVTKWidget.h"
+#include <QVTKWidget.h>
 #include <QApplication>
 #include <QSettings>
-#include "vtkqtrenderwindow.h"
-#include "vtkRenderer.h"
-#include "vtkRenderWindowInteractor.h"
-#include "vtkInteractorObserver.h"
-#include "vtkInteractorStyle.h"
+#include <vtkqtrenderwindow.h>
+#include <vtkRenderer.h>
+#include <vtkRenderWindowInteractor.h>
+#include <vtkInteractorObserver.h>
+#include <vtkInteractorStyle.h>
+#include <vtkRenderWindow.h>
+#include <vtkCornerAnnotation.h>
 #include "scenemanager.h"
 #include "view.h"
-#include "vtkRenderWindow.h"
-#include "vtkCornerAnnotation.h"
 
 ObjectSerializationMacro( QuadViewWindow );
 
@@ -174,7 +174,7 @@ QuadViewWindow::~QuadViewWindow()
 {
 }
 
-#include "QVTKInteractor.h"
+#include <QVTKInteractor.h>
 void QuadViewWindow::SetSceneManager( SceneManager * man )
 {
     Q_ASSERT( man );

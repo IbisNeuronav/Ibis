@@ -16,7 +16,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "application.h"
 #include "mainwindow.h"
 #include "commandlinearguments.h"
-#include "vtkObject.h"
+#include <vtkObject.h>
 
 int main( int argc, char** argv )
 {

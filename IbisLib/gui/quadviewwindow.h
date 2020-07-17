@@ -11,9 +11,10 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef __QuadViewWindow_h_
 #define __QuadViewWindow_h_
 
-#include <qvariant.h>
-#include <qwidget.h>
+#include <QVariant>
+#include <QWidget>
 #include "serializer.h"
+#include <QObject>
 
 class QVBoxLayout;
 class QHBoxLayout;

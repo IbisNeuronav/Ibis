@@ -2,6 +2,7 @@
 #define PREFERENCEWIDGET_H
 
 #include <QWidget>
+#include <QCloseEvent>
 #include "ibispreferences.h"
 
 class QVBoxLayout;

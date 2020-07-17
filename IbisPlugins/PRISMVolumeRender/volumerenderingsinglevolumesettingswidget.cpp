@@ -14,7 +14,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "ui_volumerenderingsinglevolumesettingswidget.h"
 #include "scenemanager.h"
 #include "volumerenderingobject.h"
-#include "vtkVolumeProperty.h"
+#include <vtkVolumeProperty.h>
 #include "imageobject.h"
 #include "volumeshadereditorwidget.h"
 

@@ -10,15 +10,15 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 #include "videosettingsdialog.h"
 
-#include <qpushbutton.h>
-#include <qlabel.h>
-#include <qlineedit.h>
-#include <qcombobox.h>
-#include <qtextedit.h>
-#include <qgroupbox.h>
-#include <qspinbox.h>
-#include <qsplitter.h>
-#include <qlayout.h>
+#include <QPushButton>
+#include <QLabel>
+#include <QLineEdit>
+#include <QComboBox>
+#include <QTextEdit>
+#include <QGroupBox>
+#include <QSpinBox>
+#include <QSplitter>
+#include <QLayout>
 #include "videoviewdialog.h"
 #include "automaticgui.h"
 #include "vtkVideoSource2.h"

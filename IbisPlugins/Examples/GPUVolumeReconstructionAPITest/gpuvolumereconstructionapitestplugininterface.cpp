@@ -3,9 +3,9 @@
 #include <QtPlugin>
 #include <QMessageBox>
 
-#include "vtkTransform.h"
-#include "vtkImageData.h"
-#include "vtkSmartPointer.h"
+#include <vtkTransform.h>
+#include <vtkImageData.h>
+#include <vtkSmartPointer.h>
 #include "imageobject.h"
 #include "gpu_volumereconstructionplugininterface.h"
 #include "gpu_volumereconstruction.h"

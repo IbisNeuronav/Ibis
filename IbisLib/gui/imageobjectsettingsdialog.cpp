@@ -13,8 +13,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "imageobject.h"
 #include "application.h"
 #include "lookuptablemanager.h"
-#include "vtkScalarsToColors.h"
-#include "vtkPiecewiseFunctionLookupTable.h"
+#include <vtkScalarsToColors.h>
+#include <vtkPiecewiseFunctionLookupTable.h>
 
 ImageObjectSettingsDialog::ImageObjectSettingsDialog( QWidget* parent, Qt::WindowFlags fl )
     : QWidget( parent, fl )

@@ -13,8 +13,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef __vtkGenericParam_h_
 #define __vtkGenericParam_h_
 
-#include "vtkObject.h"
-#include "vtkSetGet.h"
+#include <vtkObject.h>
+#include <vtkSetGet.h>
 #include <vector>
 #include <string>
 #include <utility>

@@ -12,10 +12,10 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #define __Serializer_h
 
 #include <QDomDocument>
-#include <qfile.h>
+#include <QFile>
 #include <QFileInfo>
-#include <qtextstream.h>
-#include <qstringlist.h>
+#include <QTextStream>
+#include <QStringList>
 #include <vector>
 #include <utility>
 #include <map>

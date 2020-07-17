@@ -13,7 +13,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include <QThread>
 #include <QStringList>
-#include "itkMetaDataObject.h"
+#include <QObject>
+#include <itkMetaDataObject.h>
 #include <itkMetaDataDictionary.h>
 
 class SceneManager;

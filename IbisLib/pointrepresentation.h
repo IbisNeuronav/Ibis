@@ -12,9 +12,9 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #define __PointRepresentation_h_
 
 #include "serializer.h"
-#include <QObject>
 #include "sceneobject.h"
-#include "vtkSmartPointer.h"
+#include <vtkSmartPointer.h>
+#include <QObject>
 
 class vtkActor;
 class vtkProperty;

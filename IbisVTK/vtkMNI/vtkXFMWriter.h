@@ -15,7 +15,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef TAG_VTKXFMWRITER_H
 #define TAG_VTKXFMWRITER_H
 
-#include "vtkObject.h"
+#include <vtkObject.h>
 
 class vtkMatrix4x4;
 

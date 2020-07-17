@@ -1,9 +1,9 @@
 #include "trackedsceneobject.h"
-#include "vtkTransform.h"
-#include "vtkRenderer.h"
-#include "vtkAxes.h"
-#include "vtkPolyDataMapper.h"
-#include "vtkActor.h"
+#include <vtkTransform.h>
+#include <vtkRenderer.h>
+#include <vtkAxes.h>
+#include <vtkPolyDataMapper.h>
+#include <vtkActor.h>
 #include "serializerhelper.h"
 #include "view.h"
 #include "hardwaremodule.h"

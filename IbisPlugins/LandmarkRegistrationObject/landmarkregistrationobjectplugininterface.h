@@ -13,7 +13,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include <QWidget>
 #include "objectplugininterface.h"
-#include "vtkSmartPointer.h"
+#include <vtkSmartPointer.h>
 #include <vector>
 
 class LandmarkRegistrationObject;

@@ -13,7 +13,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QComboBox>
-#include "vtkGenericParam.h"
+#include <vtkGenericParam.h>
 #include <string>
 
 AutomaticGui::AutomaticGui( vtkGenericParamInterface * params, QWidget * parent )

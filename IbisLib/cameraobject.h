@@ -16,8 +16,9 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "view.h"
 #include <map>
 #include <QVector>
+#include <QObject>
 #include "SVL.h"
-#include "vtkSmartPointer.h"
+#include <vtkSmartPointer.h>
 
 class TrackedVideoBuffer;
 class vtkCamera;

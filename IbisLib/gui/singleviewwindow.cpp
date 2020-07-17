@@ -1,8 +1,8 @@
 #include "singleviewwindow.h"
 
-#include <qvariant.h>
-#include <qlayout.h>
-#include <qpushbutton.h>
+#include <QVariant>
+#include <QLayout>
+#include <QPushButton>
 //Added by qt3to4:
 #include <Q3HBoxLayout>
 #include <Q3VBoxLayout>

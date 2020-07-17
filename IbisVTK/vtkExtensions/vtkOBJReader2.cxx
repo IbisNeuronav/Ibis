@@ -12,13 +12,13 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include "vtkOBJReader2.h"
 
-#include "vtkCellArray.h"
-#include "vtkFloatArray.h"
-#include "vtkInformation.h"
-#include "vtkInformationVector.h"
-#include "vtkObjectFactory.h"
-#include "vtkPointData.h"
-#include "vtkPolyData.h"
+#include <vtkCellArray.h>
+#include <vtkFloatArray.h>
+#include <vtkInformation.h>
+#include <vtkInformationVector.h>
+#include <vtkObjectFactory.h>
+#include <vtkPointData.h>
+#include <vtkPolyData.h>
 #include <ctype.h>
 
 vtkStandardNewMacro(vtkOBJReader2);

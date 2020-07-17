@@ -26,6 +26,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "objectplugininterface.h"
 
 #include <QString>
+#include <QProgressDialog>
 
 const int IbisAPI::InvalidId = SceneManager::InvalidId;
 

@@ -13,15 +13,15 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef __itkGPUVolumeReconstruction_hxx
 #define __itkGPUVolumeReconstruction_hxx
 
-#include "itkMacro.h"
-#include "itkGPUVolumeReconstruction.h"
-#include "itkTimeProbe.h"
-#include "itkMatrix.h"
-#include "vnl/vnl_matrix.h"
-#include "itkOpenCLUtil.h"
+#include <itkMacro.h>
+#include <itkTimeProbe.h>
+#include <itkMatrix.h>
+#include <vnl/vnl_matrix.h>
+#include <itkOpenCLUtil.h>
+#include <itkImageDuplicator.h>
 
 #include "GPUVolumeReconstructionKernel.h"
-#include "itkImageDuplicator.h"
+#include "itkGPUVolumeReconstruction.h"
 
 
 namespace itk

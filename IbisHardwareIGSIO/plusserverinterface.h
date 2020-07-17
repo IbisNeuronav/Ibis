@@ -2,8 +2,8 @@
 #define PlusServerInterface_h
 
 #include <QObject>
-#include "vtkObject.h"
-#include "vtkSmartPointer.h"
+#include <vtkObject.h>
+#include <vtkSmartPointer.h>
 #include <QProcess>
 
 class Logger;

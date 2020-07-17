@@ -12,13 +12,13 @@
 =========================================================================*/
 #include "savedirectorydialog.h"
 
-#include <qvariant.h>
-#include <qpushbutton.h>
-#include <qlabel.h>
-#include <qlineedit.h>
-#include <qlayout.h>
-#include <qtooltip.h>
-#include <q3whatsthis.h>
+#include <QVariant>
+#include <QPushButton>
+#include <QLabel>
+#include <QLineEdit>
+#include <QLayout>
+#include <QToolTip>
+#include <QWhatsThis>
 
 SaveDirectoryDialog::SaveDirectoryDialog( QWidget* parent, const char* name, bool modal, Qt::WFlags fl )
     : EnterTextDialogBase( parent, name, modal, fl )

@@ -20,7 +20,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef __vtkCircleWithCrossSource_h
 #define __vtkCircleWithCrossSource_h
 
-#include "vtkPolyDataAlgorithm.h"
+#include <vtkPolyDataAlgorithm.h>
 
 class vtkPoints;
 class vtkInformationVector;

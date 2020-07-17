@@ -21,7 +21,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <streambuf>
 #include <string>
 #include <QCoreApplication>
-#include "qtextedit.h"
+#include <QTextEdit>
 
 class QDebugStream : public std::basic_streambuf<char>
 {

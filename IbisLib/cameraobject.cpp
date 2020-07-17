@@ -10,32 +10,33 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 #include "cameraobject.h"
 #include "cameraobjectsettingswidget.h"
-#include "vtkCamera.h"
-#include "vtkImageActor.h"
-#include "vtkPlanes.h"
-#include "vtkAxesActor.h"
-#include "vtkRenderer.h"
-#include "vtkTransform.h"
-#include "vtkMath.h"
-#include "vtkPolyDataMapper.h"
-#include "vtkPoints.h"
-#include "vtkPolyData.h"
-#include "vtkCellArray.h"
-#include "vtkMatrix4x4.h"
-#include "vtkEventQtSlotConnect.h"
-#include "vtkImageData.h"
-#include "vtkSimpleProp3D.h"
+#include <vtkCamera.h>
+#include <vtkImageActor.h>
+#include <vtkPlanes.h>
+#include <vtkAxesActor.h>
+#include <vtkRenderer.h>
+#include <vtkTransform.h>
+#include <vtkMath.h>
+#include <vtkPolyDataMapper.h>
+#include <vtkPoints.h>
+#include <vtkPolyData.h>
+#include <vtkCellArray.h>
+#include <vtkMatrix4x4.h>
+#include <vtkEventQtSlotConnect.h>
+#include <vtkImageData.h>
+#include <vtkSimpleProp3D.h>
+#include <vtkXFMWriter.h>
+#include <vtkXFMReader.h>
+#include <vtkPassThrough.h>
+#include <vtkPicker.h>
 #include "vtkIbisImagePlaneMapper.h"
-#include "vtkXFMWriter.h"
-#include "vtkXFMReader.h"
-#include "vtkPassThrough.h"
-#include "vtkPicker.h"
 #include "application.h"
 #include "hardwaremodule.h"
 #include "scenemanager.h"
 #include "pointerobject.h"
 #include "trackedvideobuffer.h"
 #include <QMessageBox>
+#include <QProgressDialog>
 
 ObjectSerializationMacro( CameraObject );
 

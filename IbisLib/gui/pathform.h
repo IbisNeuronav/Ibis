@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QString>
+#include <QObject>
 
 class FileSystemTree;
 

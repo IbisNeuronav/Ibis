@@ -13,6 +13,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include <QWidget>
 #include <QItemSelection>
+#include <QObject>
 
 namespace Ui {
     class ObjectTreeWidget;

@@ -1,10 +1,10 @@
 #ifndef IBISPREFERENCES_H
 #define IBISPREFERENCES_H
 
-#include <QObject>
 #include <QWidget>
 #include <QMap>
 #include <QSettings>
+#include <QObject>
 
 class PreferenceWidget;
 

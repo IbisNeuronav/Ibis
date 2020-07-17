@@ -23,8 +23,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef __vtkPRISMVolumeMapper_h
 #define __vtkPRISMVolumeMapper_h
 
-#include "vtkVolumeMapper.h"
-#include "vtkSmartPointer.h"
+#include <vtkVolumeMapper.h>
+#include <vtkSmartPointer.h>
 #include <vector>
 #include <string>
 

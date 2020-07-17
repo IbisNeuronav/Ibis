@@ -13,8 +13,8 @@
 
 #include "clearselectedpointdialog.h"
 
-#include <qlineedit.h>
-#include <qmessagebox.h>
+#include <QLineEdit>
+#include <QMessageBox>
 #include "removepointdialog.h"
 #include "pointsobject.h"
 

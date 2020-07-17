@@ -18,11 +18,11 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "application.h"
 #include "view.h"
 #include "ibisconfig.h"
+#include "vtkTagWriter.h"
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QDateTime>
-#include "vtkTransform.h"
-#include "vtkTagWriter.h"
+#include <vtkTransform.h>
 #include <vtkMath.h>
 #include <vtkCellArray.h>
 #include <vtkCellPicker.h>

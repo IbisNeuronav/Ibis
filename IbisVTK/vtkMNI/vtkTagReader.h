@@ -16,8 +16,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include <string>
 #include <vector>
-#include "vtkMatrix4x4.h"
-#include "vtkAlgorithm.h"
+#include <vtkMatrix4x4.h>
+#include <vtkAlgorithm.h>
 
 
 class vtkPoints;

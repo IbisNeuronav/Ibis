@@ -9,7 +9,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
 #include "ibisopencvmath.h"
-#include "vtkMatrix4x4.h"
+#include <vtkMatrix4x4.h>
 #include "vtkMatrix4x4Operators.h"
 
 cv::Point3f IbisMath::AverageCvPoint3f( std::vector<cv::Point3f> & all )

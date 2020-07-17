@@ -17,6 +17,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QWidget>
 #include <QObject>
 #include <QString>
+#include <QObject>
 #include "sceneobject.h"
 #include "scenemanager.h"
 #include "imageobject.h"

@@ -16,7 +16,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include <string>
 #include <vector>
-#include "vtkObject.h"
+#include <vtkObject.h>
 
 class vtkPoints;
 

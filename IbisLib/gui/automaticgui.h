@@ -12,6 +12,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #define __GuiGenerator_h_
 
 #include <QWidget>
+#include <QObject>
 
 class QComboBox;
 class vtkGenericParamInterface;

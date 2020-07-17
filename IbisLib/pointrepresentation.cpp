@@ -17,8 +17,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <vtkRenderer.h>
 #include <vtkFollower.h>
 #include <vtkVectorText.h>
-#include "vtkMatrix4x4.h"
-#include "vtkSmartPointer.h"
+#include <vtkMatrix4x4.h>
+#include <vtkSmartPointer.h>
 
 #include "pointrepresentation.h"
 #include "pointsobject.h"

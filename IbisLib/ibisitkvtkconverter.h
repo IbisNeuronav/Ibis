@@ -1,11 +1,11 @@
 #ifndef IBISITKVTKCONVERTER_H
 #define IBISITKVTKCONVERTER_H
 
-#include "itkVTKImageExport.h"
+#include <itkVTKImageExport.h>
 #include <itkImageRegionIterator.h>
 #include <itkImage.h>
-#include "itkRGBPixel.h"
-#include "vtkObject.h"
+#include <itkRGBPixel.h>
+#include <vtkObject.h>
 
 typedef itk::RGBPixel< unsigned char > RGBPixelType;
 typedef itk::Image< RGBPixelType, 3 > IbisRGBImageType;

@@ -3,6 +3,7 @@
 
 #include <QList>
 #include <QWidget>
+#include <QObject>
 
 class QVBoxLayout;
 class QHBoxLayout;

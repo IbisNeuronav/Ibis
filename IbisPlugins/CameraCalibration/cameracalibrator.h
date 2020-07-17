@@ -20,6 +20,7 @@ class vtkImageData;
 class vtkMatrix4x4;
 class vtkAmoebaMinimizer;
 class CameraCalibrationPluginInterface;
+class QProgressDialog;
 
 struct CameraExtrinsicParams
 {

@@ -14,20 +14,20 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "animatewidget.h"
 #include "timelinewidget.h"
 #include <QtPlugin>
+#include <vtkRenderer.h>
+#include <vtkCamera.h>
+#include <volumerenderingobject.h>
+#include <vtkVolumeProperty.h>
+#include <vtkColorTransferFunction.h>
+#include <vtkPiecewiseFunction.h>
+#include <QTimer>
+#include <QTime>
 #include "ibisapi.h"
 #include "DomeRenderer.h"
 #include "view.h"
-#include "vtkRenderer.h"
-#include "vtkCamera.h"
-#include "volumerenderingobject.h"
 #include "transferfunctionkey.h"
 #include "CameraAnimation.h"
 #include "doublevalueanimation.h"
-#include "vtkVolumeProperty.h"
-#include "vtkColorTransferFunction.h"
-#include "vtkPiecewiseFunction.h"
-#include <QTimer>
-#include <QTime>
 
 void DomeRenderState::GetRenderSize( vtkRenderer * ren, int size[2] )
 {

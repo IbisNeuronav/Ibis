@@ -15,7 +15,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include "Animation.h"
 #include "serializer.h"
-#include "vtkSmartPointer.h"
+#include <vtkSmartPointer.h>
 
 class vtkColorTransferFunction;
 class vtkPiecewiseFunction;

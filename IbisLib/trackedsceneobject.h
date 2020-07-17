@@ -1,6 +1,7 @@
 #ifndef __TrackedSceneObject_h_
 #define __TrackedSceneObject_h_
 
+#include <QObject>
 #include <map>
 #include "sceneobject.h"
 #include "ibistypes.h"

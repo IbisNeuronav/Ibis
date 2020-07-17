@@ -13,7 +13,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef VTKINTERACTORSTYLEIMAGE2_H
 #define VTKINTERACTORSTYLEIMAGE2_H
 
-#include "vtkInteractorStyleImage.h"
+#include <vtkInteractorStyleImage.h>
 
 class vtkInteractorStyleImage2 : public vtkInteractorStyleImage
 {

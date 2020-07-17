@@ -22,7 +22,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef __vtkSimpleProp3D_h
 #define __vtkSimpleProp3D_h
 
-#include "vtkProp3D.h"
+#include <vtkProp3D.h>
 
 class vtkWindow;
 class vtkSimpleMapper3D;

@@ -11,9 +11,9 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "cameraobjectsettingswidget.h"
 #include "ui_cameraobjectsettingswidget.h"
 #include "cameraobject.h"
-#include "vtkQtMatrixDialog.h"
+#include <vtkQtMatrixDialog.h>
+#include <vtkMatrix4x4.h>
 #include "vtkMatrix4x4Operators.h"
-#include "vtkMatrix4x4.h"
 
 static double minLensDisplacement = -5.0;
 static double maxLensDisplacement = 5.0;

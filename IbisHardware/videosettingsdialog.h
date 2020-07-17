@@ -11,6 +11,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef TAG_VIDEOSETTINGSDIALOG_H
 #define TAG_VIDEOSETTINGSDIALOG_H
 
+#include <QObject>
 #include "ui_videosettingsdialog.h"
 
 class TrackedVideoSource;

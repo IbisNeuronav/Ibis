@@ -12,6 +12,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #define POINTCLOUDOBJECTSETTINGSDIALOG_H
 
 #include <vector>
+#include <QObject>
 #include "ui_pointcloudobjectsettingsdialog.h"
 
 class PointCloudObject;

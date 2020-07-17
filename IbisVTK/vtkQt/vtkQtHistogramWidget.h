@@ -13,6 +13,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef __vtkQtHistogramWidget_h_
 #define __vtkQtHistogramWidget_h_
 
+#include "QObject"
 #include <QWidget>
 
 class vtkImageAccumulate;

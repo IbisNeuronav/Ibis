@@ -12,7 +12,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #define __IbisHardwareIGSIO_h_
 
 #include "hardwaremodule.h"
-#include "igtlioDevice.h"
+#include <igtlioDevice.h>
 #include "configio.h"
 
 class igtlioLogic;

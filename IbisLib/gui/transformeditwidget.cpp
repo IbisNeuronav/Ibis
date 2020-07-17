@@ -10,9 +10,9 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 #include "transformeditwidget.h"
 #include "ui_transformeditwidget.h"
-#include "vtkTransform.h"
-#include "vtkEventQtSlotConnect.h"
-#include "vtkQtMatrixDialog.h"
+#include <vtkTransform.h>
+#include <vtkEventQtSlotConnect.h>
+#include <vtkQtMatrixDialog.h>
 #include "vtkMatrix4x4Operators.h"
 #include "sceneobject.h"
 #include "application.h"

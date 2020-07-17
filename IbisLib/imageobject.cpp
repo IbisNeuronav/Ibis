@@ -10,28 +10,28 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 #include <sstream>
 #include <math.h>
-#include "vtkOutlineFilter.h"
-#include "vtkPolyDataMapper.h"
-#include "vtkRenderer.h"
-#include "vtkActor.h"
+#include <vtkOutlineFilter.h>
+#include <vtkPolyDataMapper.h>
+#include <vtkRenderer.h>
+#include <vtkActor.h>
+#include <vtkTransform.h>
+
+#include <vtkGPUVolumeRayCastMapper.h>
+#include <vtkVolume.h>
+#include <vtkPiecewiseFunction.h>
+#include <vtkPiecewiseFunctionLookupTable.h>
+#include <vtkColorTransferFunction.h>
+#include <vtkImageImport.h>
+#include <vtkEventQtSlotConnect.h>
+#include <vtkImageShiftScale.h>
+#include <vtkBoxWidget2.h>
+#include <vtkScalarsToColors.h>
+#include <vtkImageAccumulate.h>
+#include <vtkVolumeProperty.h>
+#include <vtkImageData.h>
+#include <vtkBoxRepresentation.h>
+
 #include "view.h"
-#include "vtkTransform.h"
-
-#include "vtkGPUVolumeRayCastMapper.h"
-#include "vtkVolume.h"
-#include "vtkPiecewiseFunction.h"
-#include "vtkPiecewiseFunctionLookupTable.h"
-#include "vtkColorTransferFunction.h"
-#include "vtkImageImport.h"
-#include "vtkEventQtSlotConnect.h"
-#include "vtkImageShiftScale.h"
-#include "vtkBoxWidget2.h"
-#include "vtkScalarsToColors.h"
-#include "vtkImageAccumulate.h"
-#include "vtkVolumeProperty.h"
-#include "vtkImageData.h"
-#include "vtkBoxRepresentation.h"
-
 #include "application.h"
 #include "imageobjectsettingsdialog.h"
 #include "imageobjectvolumesettingswidget.h"

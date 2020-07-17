@@ -19,8 +19,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "ui_gpu_rigidregistrationwidget.h"
 #include "sceneobject.h"
 #include "imageobject.h"
-#include "vtkTransform.h"
-#include "vtkMatrix4x4.h"
+#include <vtkTransform.h>
+#include <vtkMatrix4x4.h>
 
 #include "gpu_rigidregistration.h"
 

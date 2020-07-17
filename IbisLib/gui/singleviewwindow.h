@@ -1,8 +1,8 @@
 #ifndef __SingleViewWindow_h_
 #define __SingleViewWindow_h_
 
-#include <qvariant.h>
-#include <qwidget.h>
+#include <QVariant>
+#include <QWidget>
 //Added by qt3to4:
 #include <QCloseEvent>
 #include <Q3HBoxLayout>

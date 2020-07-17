@@ -11,9 +11,9 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "serializerhelper.h"
 #include "serializer.h"
 #include "vtkGenericParam.h"
-#include "vtkColorTransferFunction.h"
-#include "vtkPiecewiseFunction.h"
-#include "vtkMatrix4x4.h"
+#include <vtkColorTransferFunction.h>
+#include <vtkPiecewiseFunction.h>
+#include <vtkMatrix4x4.h>
 #include "SVL.h"
 
 bool Serialize( Serializer * serial, const char * attrName, vtkGenericParamValues & value )

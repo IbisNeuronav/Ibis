@@ -14,19 +14,13 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "sceneobject.h"
 #include "serializer.h"
 #include <map>
+#include <QObject>
 #include <QVector>
 
-#include "vtkSmartPointer.h"
-#include "vtkPolyDataMapper.h"
-#include "vtkVertexGlyphFilter.h"
-#include "vtkProperty.h"
-
-//class vtkPoints;
-//class vtkPolyData;
-//class vtkTransform;
-//class vtkActor;
-//class vtkProperty;
-//class vtkVertexGlyphFilter;
+#include <vtkSmartPointer.h>
+#include <vtkPolyDataMapper.h>
+#include <vtkVertexGlyphFilter.h>
+#include <vtkProperty.h>
 
 
 class PointCloudObject : public SceneObject

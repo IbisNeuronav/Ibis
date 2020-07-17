@@ -18,27 +18,27 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "hardwaremodule.h"
 #include "guiutilities.h"
 
-#include "QVTKWidget.h"
-#include "vtkRenderWindowInteractor.h"
-#include "vtkInteractorStyleImage2.h"
-#include "vtkRenderWindow.h"
-#include "vtkRenderer.h"
-#include "vtkTransform.h"
-#include "vtkImageActor.h"
-#include "vtkImageMapper3D.h"
-#include "vtkImageResliceToColors.h"
-#include "vtkImageBlend.h"
-#include "vtkImageMask.h"
-#include "vtkImageData.h"
-#include "vtkImageStack.h"
-#include "vtkImageProperty.h"
+#include <QVTKWidget.h>
+#include <vtkRenderWindowInteractor.h>
+#include <vtkRenderWindow.h>
+#include <vtkRenderer.h>
+#include <vtkTransform.h>
+#include <vtkImageActor.h>
+#include <vtkImageMapper3D.h>
+#include <vtkImageResliceToColors.h>
+#include <vtkImageBlend.h>
+#include <vtkImageMask.h>
+#include <vtkImageData.h>
+#include <vtkImageStack.h>
+#include <vtkImageProperty.h>
+#include <vtkLineSource.h>
+#include <vtkPolyDataMapper.h>
+#include <vtkProperty.h>
+#include <vtkAlgorithm.h>
+#include <vtkAlgorithmOutput.h>
+#include <vtkCamera.h>
 
-#include "vtkLineSource.h"
-#include "vtkPolyDataMapper.h"
-#include "vtkProperty.h"
-#include "vtkAlgorithm.h"
-#include "vtkAlgorithmOutput.h"
-#include "vtkCamera.h"
+#include "vtkInteractorStyleImage2.h"
 
 DoubleViewWidget::DoubleViewWidget( QWidget * parent, Qt::WindowFlags f ) :
     QWidget(parent,f),

@@ -13,7 +13,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef __PRISMVolumeRenderPluginInterface_h_
 #define __PRISMVolumeRenderPluginInterface_h_
 
-#include "vtkSmartPointer.h"
+#include <vtkSmartPointer.h>
 #include "globalobjectplugininterface.h"
 
 class VolumeRenderingObject;

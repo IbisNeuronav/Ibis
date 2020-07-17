@@ -11,15 +11,15 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef TAG_SCENEMANAGER_H
 #define TAG_SCENEMANAGER_H
 
-#include "vtkObject.h"
-#include "vtkSmartPointer.h"
+#include <vtkObject.h>
+#include <vtkSmartPointer.h>
 #include "ibistypes.h"
-#include <QObject>
 #include <QString>
 #include <QStringList>
 #include <QList>
 #include <QMap>
 #include <QProgressDialog>
+#include <QObject>
 
 #include <vector>
 #include <algorithm>

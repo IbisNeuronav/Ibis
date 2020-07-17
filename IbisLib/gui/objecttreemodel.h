@@ -16,6 +16,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QVariant>
 #include <QMimeData>
 #include <QStringList>
+#include <QObject>
 
 class QContextMenuEvent;
 class SceneManager;

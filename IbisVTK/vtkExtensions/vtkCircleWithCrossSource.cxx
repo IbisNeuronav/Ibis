@@ -12,15 +12,15 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include "vtkCircleWithCrossSource.h"
 
-#include "vtkCellArray.h"
-#include "vtkFloatArray.h"
-#include "vtkObjectFactory.h"
-#include "vtkPointData.h"
-#include "vtkPoints.h"
-#include "vtkPolyData.h"
-#include "vtkMath.h"
-#include "vtkInformation.h"
-#include "vtkInformationVector.h"
+#include <vtkCellArray.h>
+#include <vtkFloatArray.h>
+#include <vtkObjectFactory.h>
+#include <vtkPointData.h>
+#include <vtkPoints.h>
+#include <vtkPolyData.h>
+#include <vtkMath.h>
+#include <vtkInformation.h>
+#include <vtkInformationVector.h>
 
 #include <math.h>
 

@@ -9,21 +9,21 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
 #include "pointerobject.h"
-#include "vtkPolyDataMapper.h"
-#include "vtkRenderer.h"
-#include "vtkActor.h"
-#include "view.h"
-#include "vtkTransform.h"
-#include "vtkAxes.h"
-#include "vtkMath.h"
+#include <vtkPolyDataMapper.h>
+#include <vtkRenderer.h>
+#include <vtkActor.h>
+#include <vtkTransform.h>
+#include <vtkAxes.h>
+#include <vtkMath.h>
 #include <vtkProperty.h>
-#include "vtkDoubleArray.h"
-#include "vtkAmoebaMinimizer.h"
-#include "vtkObjectFactory.h"
+#include <vtkDoubleArray.h>
+#include <vtkAmoebaMinimizer.h>
+#include <vtkObjectFactory.h>
+
 #include "scenemanager.h"
 #include "pointerobjectsettingsdialog.h"
 #include "pointsobject.h"
-
+#include "view.h"
 #include "application.h"
 #include "hardwaremodule.h"
 

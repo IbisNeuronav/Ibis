@@ -15,17 +15,17 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 
 #include "imageobject.h"
-#include "vtkTransform.h"
-#include "vtkMatrix4x4.h"
+#include <vtkTransform.h>
+#include <vtkMatrix4x4.h>
 
 #include "itkGPU3DRigidSimilarityMetric.h"
-#include "itkEuler3DTransform.h"
+#include <itkEuler3DTransform.h>
 
-#include "itkAmoebaOptimizer.h"
-#include "itkSPSAOptimizer.h"
-#include "itkCMAEvolutionStrategyOptimizer.h"
+#include <itkAmoebaOptimizer.h>
+#include <itkSPSAOptimizer.h>
+#include <itkCMAEvolutionStrategyOptimizer.h>
 
-#include "itkImageMaskSpatialObject.h"
+#include <itkImageMaskSpatialObject.h>
 #include <sstream>
 
 class GPU_RigidRegistration

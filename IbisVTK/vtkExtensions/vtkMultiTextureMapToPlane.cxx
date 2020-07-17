@@ -12,14 +12,14 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include "vtkMultiTextureMapToPlane.h"
 
-#include "vtkCellData.h"
-#include "vtkDataSet.h"
-#include "vtkFloatArray.h"
-#include "vtkInformation.h"
-#include "vtkInformationVector.h"
-#include "vtkMath.h"
-#include "vtkObjectFactory.h"
-#include "vtkPointData.h"
+#include <vtkCellData.h>
+#include <vtkDataSet.h>
+#include <vtkFloatArray.h>
+#include <vtkInformation.h>
+#include <vtkInformationVector.h>
+#include <vtkMath.h>
+#include <vtkObjectFactory.h>
+#include <vtkPointData.h>
 
 vtkStandardNewMacro(vtkMultiTextureMapToPlane);
 

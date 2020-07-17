@@ -9,7 +9,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
 #include "vtkTagReader.h"
-#include "vtkPoints.h"
+#include <vtkPoints.h>
 #include <sstream>
 #include "stringtools.h"
 

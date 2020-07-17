@@ -19,15 +19,16 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "polydataobject.h"
 #include "cameraobject.h"
 #include "pointsobject.h"
-#include "vtkImageData.h"
-#include "vtkTransform.h"
+#include <vtkImageData.h>
+#include <vtkTransform.h>
+#include <vtkRenderer.h>
 #include <QtPlugin>
 #include <QSettings>
 #include <QTime>
+#include <QProgressDialog>
 #include <vector>
 #include "opencv2/opencv.hpp"
 #include "simplepropcreator.h"
-#include "vtkRenderer.h"
 
 
 CameraCalibrationPluginInterface::CameraCalibrationPluginInterface()

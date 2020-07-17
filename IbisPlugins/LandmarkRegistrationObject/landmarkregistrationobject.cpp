@@ -17,11 +17,11 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "imageobject.h"
 #include "application.h"
 #include "view.h"
-#include "vtkPoints.h"
-#include "vtkLandmarkTransform.h"
-#include "vtkTransform.h"
 #include "vtkTagWriter.h"
 #include "vtkXFMWriter.h"
+#include <vtkPoints.h>
+#include <vtkLandmarkTransform.h>
+#include <vtkTransform.h>
 #include <QMessageBox>
 #include <QString>
 #include <QStringList>

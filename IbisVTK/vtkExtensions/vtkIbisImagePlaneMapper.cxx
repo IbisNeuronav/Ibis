@@ -11,17 +11,17 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 // Thanks to Simon Drouin for writing this class
 
 #include "vtkIbisImagePlaneMapper.h"
-#include "vtkInformation.h"
-#include "vtkImageData.h"
-#include "vtkExecutive.h"
-#include "vtkgl.h"
-#include "vtkObjectFactory.h"
-#include "vtkMath.h"
+#include <vtkInformation.h>
+#include <vtkImageData.h>
+#include <vtkExecutive.h>
+#include <vtkgl.h>
+#include <vtkObjectFactory.h>
+#include <vtkMath.h>
+#include <vtkOpenGLExtensionManager.h>
+#include <vtkRenderer.h>
+#include <vtkSimpleProp3D.h>
+#include <vtkMatrix4x4.h>
 #include "GlslShader.h"
-#include "vtkOpenGLExtensionManager.h"
-#include "vtkRenderer.h"
-#include "vtkSimpleProp3D.h"
-#include "vtkMatrix4x4.h"
 
 vtkStandardNewMacro(vtkIbisImagePlaneMapper);
 

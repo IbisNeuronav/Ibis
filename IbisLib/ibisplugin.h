@@ -15,8 +15,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "vtkObject.h"
 #include "viewinteractor.h"
 #include "serializer.h"
-#include <QObject>
 #include <QString>
+#include <QObject>
 
 class IbisAPI;
 class Application;

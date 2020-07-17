@@ -22,7 +22,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef __vtkPiecewiseFunctionLookupTable_h
 #define __vtkPiecewiseFunctionLookupTable_h
 
-#include "vtkLookupTable.h"
+#include <vtkLookupTable.h>
 
 class vtkColorTransferFunction;
 class vtkPiecewiseFunction;

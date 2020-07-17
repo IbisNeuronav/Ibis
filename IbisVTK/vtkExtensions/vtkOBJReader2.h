@@ -20,7 +20,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef __vtkOBJReader2_h
 #define __vtkOBJReader2_h
 
-#include "vtkPolyDataAlgorithm.h"
+#include <vtkPolyDataAlgorithm.h>
 
 class vtkOBJReader2 : public vtkPolyDataAlgorithm
 {

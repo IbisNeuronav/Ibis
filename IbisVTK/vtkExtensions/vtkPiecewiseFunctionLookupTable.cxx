@@ -11,9 +11,9 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 // Thanks to Simon Drouin for writing this class
 
 #include "vtkPiecewiseFunctionLookupTable.h"
-#include "vtkObjectFactory.h"
-#include "vtkColorTransferFunction.h"
-#include "vtkPiecewiseFunction.h"
+#include <vtkObjectFactory.h>
+#include <vtkColorTransferFunction.h>
+#include <vtkPiecewiseFunction.h>
 
 vtkStandardNewMacro(vtkPiecewiseFunctionLookupTable);
 

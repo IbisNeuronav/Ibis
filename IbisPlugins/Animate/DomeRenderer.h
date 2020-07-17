@@ -13,8 +13,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef __DomeRenderer_h_
 #define __DomeRenderer_h_
 
-#include "vtkRendererDelegate.h"
-#include "vtkSmartPointer.h"
+#include <vtkRendererDelegate.h>
+#include <vtkSmartPointer.h>
 
 class vtkCamera;
 class GlslShader;

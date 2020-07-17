@@ -11,15 +11,15 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "usprobeobjectsettingswidget.h"
 #include "ui_usprobeobjectsettingswidget.h"
 #include "usprobeobject.h"
-#include "vtkQtMatrixDialog.h"
-#include "vtkTransform.h"
+#include <vtkQtMatrixDialog.h>
+#include <vtkTransform.h>
 
 #include <QPushButton>
 #include <QLabel>
 #include <QComboBox>
 #include <QLineEdit>
 #include <QLayout>
-#include <qvariant.h>
+#include <QVariant>
 
 UsProbeObjectSettingsWidget::UsProbeObjectSettingsWidget(QWidget *parent) :
     QWidget(parent),

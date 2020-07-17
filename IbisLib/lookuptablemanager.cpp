@@ -9,8 +9,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
 #include "lookuptablemanager.h"
-#include "vtkLookupTable.h"
-#include "vtkPiecewiseFunctionLookupTable.h"
+#include <vtkLookupTable.h>
+#include <vtkPiecewiseFunctionLookupTable.h>
 
 LookupTableManager::LookupTableManager()
 {

@@ -11,18 +11,18 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QFileDialog>
 #include <QMessageBox>
 #include "pointcloudobject.h"
-#include "vtkRenderer.h"
-#include "view.h"
-#include "vtkTransform.h"
-#include "vtkAssembly.h"
-#include "vtkProperty.h"
-#include "vtkPolyDataWriter.h"
+#include <vtkRenderer.h>
+#include <vtkTransform.h>
+#include <vtkAssembly.h>
+#include <vtkProperty.h>
+#include <vtkPolyDataWriter.h>
 
+#include "view.h"
 #include "pointcloudobjectsettingsdialog.h"
 #include "application.h"
 #include "scenemanager.h"
 #include "imageobject.h"
-#include "vtkProbeFilter.h"
+#include <vtkProbeFilter.h>
 
 vtkCxxSetObjectMacro(PointCloudObject, Property, vtkProperty);
 ObjectSerializationMacro( PointCloudObject );

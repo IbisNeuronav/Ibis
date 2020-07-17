@@ -11,7 +11,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 // Thanks to Simon Drouin for writing this class
 
 #include "DrawableTexture.h"
-#include "vtkgl.h"
+#include <vtkgl.h>
 
 static const GLenum pixelFormat = GL_RGBA;
 static const GLenum pixelType = GL_FLOAT;

@@ -1,7 +1,7 @@
 #include "vtkQtProgressDialog.h"
 #include "vtkProcessObject.h"
-#include <qprogressdialog.h>
-#include <qapplication.h>
+#include <QProgressDialog>
+#include <QApplication>
 
 void vtkQtProgressDialog::Execute( vtkObject * caller, unsigned long eventId, void * callData )
 {

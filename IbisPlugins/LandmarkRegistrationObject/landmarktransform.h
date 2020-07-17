@@ -12,10 +12,10 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #define LANDMARKTRANSFORM_H
 
 #include <QString>
-#include "vtkObject.h"
 #include <vector>
 #include <sstream>
-#include "vtkSmartPointer.h"
+#include <vtkObject.h>
+#include <vtkSmartPointer.h>
 
 class vtkPoints;
 class vtkIntArray;
