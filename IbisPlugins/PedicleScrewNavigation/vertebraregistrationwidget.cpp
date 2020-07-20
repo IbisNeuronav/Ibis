@@ -663,6 +663,11 @@ void VertebraRegistrationWidget::on_startRegistrationButton_clicked()
     }
 }
 
+void VertebraRegistrationWidget::on_initialAlignmentCheckBox_stateChanged(int value)
+{
+    ui->sweepDirectionComboBox->setEnabled( (bool)value );
+}
+
 void VertebraRegistrationWidget::on_sweepDirectionComboBox_currentIndexChanged(int value)
 {
     switch (value)

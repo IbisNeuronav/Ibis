@@ -157,6 +157,7 @@ private slots:
     void OnObjectAddedSlot( int );
     void OnObjectRemovedSlot( int );
 
+    void on_initialAlignmentCheckBox_stateChanged(int);
     void on_sweepDirectionComboBox_currentIndexChanged(int);
     void on_startRegistrationButton_clicked();
     
