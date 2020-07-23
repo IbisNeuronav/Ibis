@@ -1336,7 +1336,7 @@ void ScrewNavigationWidget::on_importPlanButton_clicked()
         dir = api->GetWorkingDirectory();
     }
 
-    QString filename = QFileDialog::getOpenFileName( this->parentWidget(), tr("Import screw plan"), dir, tr("Screw Files (*.xml)") );
+    QString filename = QFileDialog::getOpenFileName( this->parentWidget(), tr("Import screw plan"), dir, tr("Screw Files (*.xml)"), nullptr, QFileDialog::DontUseNativeDialog );
     if( !filename.isEmpty() )
     {
         // Make sure the file exists
