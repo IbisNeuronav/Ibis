@@ -34,16 +34,16 @@ public:\
 
     PedicleScrewNavigationPluginInterface();
     ~PedicleScrewNavigationPluginInterface();
-    virtual QString GetPluginName() { return QString("PedicleScrewNavigation"); }
-    bool CanRun();
-    QString GetMenuEntryString() { return QString("Pedicle Screw Navigation"); }
+    virtual QString GetPluginName() override { return QString("PedicleScrewNavigation"); }
+    bool CanRun() override;
+    QString GetMenuEntryString() override { return QString("Pedicle Screw Navigation"); }
 
     vtkRenderer * GetScrewNavigationAxialRenderer();
     vtkRenderer * GetScrewNavigationSagittalRenderer();
 
     VertebraRegistrationWidget * GetWidget() { return m_interfaceWidget; }
 
-    QWidget * CreateTab();
+    QWidget * CreateTab() override;
 
 private:
 
