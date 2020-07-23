@@ -37,6 +37,21 @@ public:\
     virtual QString GetPluginName() override { return QString("PedicleScrewNavigation"); }
     bool CanRun() override;
     QString GetMenuEntryString() override { return QString("Pedicle Screw Navigation"); }
+    QString GetPluginDescription() override
+    {
+        QString description;
+        description = "Pedicle Screw Navigation v. 1.0\n"
+                      "Author: Houssem Gueziri, PhD.\n"
+                      "\n"
+                      "This plugin provides functionalities for navigated spinal instrumentation using intraoperative ultrasound imaging. It includes:\n"
+                      "   - Fast rigid registration of preoperative CT images to intraoperative US scans\n"
+                      "   - Standard pedicle screw navigation using reformatted Axial / Sagittal views\n"
+                      "   - Screw planning (create screws, load and save screw positions)\n"
+                      "\n"
+                      "Reference:\n"
+                      "TBA";
+        return description;
+    }
 
     vtkRenderer * GetScrewNavigationAxialRenderer();
     vtkRenderer * GetScrewNavigationSagittalRenderer();
