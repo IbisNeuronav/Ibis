@@ -31,13 +31,13 @@ public:
     ~PRISMVolumeRenderPluginInterface();
 
     // Implement IbisPlugin
-    virtual QString GetPluginName() { return QString("PRISMVolumeRender"); }
+    virtual QString GetPluginName() override { return QString("PRISMVolumeRender"); }
 
     // Implement GlobalObjectPluginInterface
-    SceneObject * GetGlobalObjectInstance();
+    SceneObject * GetGlobalObjectInstance() override;
     QString GetGlobalObjectClassName() { return "VolumeRederingObject"; }
-    virtual void LoadSettings( QSettings & s );
-    virtual void SaveSettings( QSettings & s );
+    virtual void LoadSettings( QSettings & s ) override;
+    virtual void SaveSettings( QSettings & s ) override;
 
     VolumeRenderingObject * GetVolumeRenderingObjectInstance();
 protected:

@@ -30,12 +30,12 @@ public:
 
     FrameRateTesterPluginInterface();
     virtual ~FrameRateTesterPluginInterface();
-    virtual QString GetPluginName() { return QString("FrameRateTester"); }
-    virtual bool CanRun();
-    virtual QString GetMenuEntryString() { return QString("Test Frame Rate"); }
+    virtual QString GetPluginName() override { return QString("FrameRateTester"); }
+    virtual bool CanRun() override;
+    virtual QString GetMenuEntryString() override { return QString("Test Frame Rate"); }
 
-    virtual QWidget * CreateTab();
-    virtual bool WidgetAboutToClose();
+    virtual QWidget * CreateTab() override;
+    virtual bool WidgetAboutToClose() override;
 
     void SetRunning( bool run );
     bool IsRunning();

@@ -47,14 +47,14 @@ public:
 
     AnimatePluginInterface();
     virtual ~AnimatePluginInterface();
-    virtual QString GetPluginName() { return QString("Animate"); }
-    virtual bool CanRun();
-    virtual QString GetMenuEntryString() { return QString("Animate"); }
+    virtual QString GetPluginName() override { return QString("Animate"); }
+    virtual bool CanRun() override;
+    virtual QString GetMenuEntryString() override{ return QString("Animate"); }
 
-    virtual void Serialize( Serializer * serializer );
+    virtual void Serialize( Serializer * serializer ) override;
 
-    virtual QWidget * CreateTab();
-    virtual bool WidgetAboutToClose();
+    virtual QWidget * CreateTab() override;
+    virtual bool WidgetAboutToClose() override;
 
     VolumeRenderingObject * GetVolumeRenderer();
 

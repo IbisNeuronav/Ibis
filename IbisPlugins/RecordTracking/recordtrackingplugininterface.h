@@ -28,12 +28,12 @@ public:
 
     RecordTrackingPluginInterface();
     ~RecordTrackingPluginInterface();
-    virtual QString GetPluginName() { return QString("RecordTracking"); }
-    virtual bool WidgetAboutToClose();
-    bool CanRun();
-    QString GetMenuEntryString() { return QString("Record Tracking Information"); }
+    virtual QString GetPluginName() override { return QString("RecordTracking"); }
+    virtual bool WidgetAboutToClose() override;
+    bool CanRun() override;
+    QString GetMenuEntryString() override { return QString("Record Tracking Information"); }
 
-    QWidget * CreateTab();
+    QWidget * CreateTab() override;
 
 protected slots:
 

@@ -35,12 +35,12 @@ public:
 
     StereotacticFramePluginInterface();
     virtual ~StereotacticFramePluginInterface();
-    virtual QString GetPluginName() { return QString("StereotacticFrame"); }
-    virtual bool CanRun();
-    virtual QString GetMenuEntryString() { return QString("Stereotactic Frame"); }
+    virtual QString GetPluginName() override { return QString("StereotacticFrame"); }
+    virtual bool CanRun() override;
+    virtual QString GetMenuEntryString() override { return QString("Stereotactic Frame"); }
 
-    virtual QWidget * CreateTab();
-    virtual bool WidgetAboutToClose();
+    virtual QWidget * CreateTab() override;
+    virtual bool WidgetAboutToClose() override;
 
     bool IsShowingManipulators() { return m_manipulatorsOn; }
     void SetShowManipulators( bool on );
