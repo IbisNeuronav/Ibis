@@ -29,11 +29,11 @@ public:
 
     GPU_RigidRegistrationPluginInterface();
     ~GPU_RigidRegistrationPluginInterface();
-    virtual QString GetPluginName() { return QString("GPU_RigidRegistration"); }
-    bool CanRun();
-    QString GetMenuEntryString() { return QString("Rigid Registration With GPU"); }
+    virtual QString GetPluginName() override { return QString("GPU_RigidRegistration"); }
+    bool CanRun() override;
+    QString GetMenuEntryString() override { return QString("Rigid Registration With GPU"); }
 
-    QWidget * CreateFloatingWidget();
+    QWidget * CreateFloatingWidget() override;
 
 };
 

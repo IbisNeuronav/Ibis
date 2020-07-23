@@ -29,10 +29,10 @@ public:
 
     GPUVolumeReconstructionAPITestPluginInterface();
     ~GPUVolumeReconstructionAPITestPluginInterface();
-    virtual QString GetPluginName() { return QString("GPUVolumeReconstructionAPITest"); }
-    bool CanRun();
-    QString GetMenuEntryString() { return QString("No GUI US Volume Reconstruction"); }
-    QWidget * CreateFloatingWidget();
+    virtual QString GetPluginName() override { return QString("GPUVolumeReconstructionAPITest"); }
+    bool CanRun() override;
+    QString GetMenuEntryString() override { return QString("No GUI US Volume Reconstruction"); }
+    QWidget * CreateFloatingWidget() override;
 };
 
 #endif

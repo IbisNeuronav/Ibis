@@ -33,13 +33,13 @@ public:
     ~LandmarkRegistrationObjectPluginInterface();
 
     // IbisPlugin interface
-    virtual QString GetPluginName() { return QString("LandmarkRegistrationObject"); }
+    virtual QString GetPluginName() override { return QString("LandmarkRegistrationObject"); }
 
     // ObjectPluginInterface interface
-    QString GetMenuEntryString() { return QString("Landmark Registration Object"); }
+    QString GetMenuEntryString() override { return QString("Landmark Registration Object"); }
     QString GetObjectClassName() { return "LandmarkRegistrationObject"; }
 
-    virtual SceneObject * CreateObject();
+    virtual SceneObject * CreateObject() override;
 
     virtual void SceneAboutToLoad() override;
 
