@@ -260,7 +260,7 @@ void vtkQtMatrixDialog::LoadButtonClicked()
 {
     // Get filename from user
 
-    QString filename = QFileDialog::getOpenFileName( this, tr("Open XFM file"), m_directory, tr("*.xfm") );
+    QString filename = QFileDialog::getOpenFileName( this, tr("Open XFM file"), m_directory, tr("*.xfm"), nullptr, QFileDialog::DontUseNativeDialog );
     if( !filename.isEmpty() )
     {
         QFile OpenFile( filename );
