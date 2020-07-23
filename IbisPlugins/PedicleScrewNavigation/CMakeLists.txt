@@ -31,4 +31,4 @@ add_subdirectory( itkWeightRegistration )
 DefinePlugin( "${PluginSrc}" "${PluginHdr}" "${PluginHdrMoc}" "${PluginUi}")
 
 #add library specific to this plugin
-target_link_libraries( ${PluginName} GPU_RigidRegistration GPU_VolumeReconstruction itkWeightRegistration )
+target_link_libraries( ${PluginName} GPU_VolumeReconstruction GPU_RigidRegistration itkWeightRegistration )

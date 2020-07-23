@@ -44,10 +44,11 @@ ELSE( BUILD_SHARED_LIBS )
    ADD_LIBRARY( itkWeightRegistration ${GPUWeightRegistration_SRC} ${GPUWeightRegistration_HDR} ${LibCLSrc} )
 ENDIF( BUILD_SHARED_LIBS )
 
-target_link_libraries( itkWeightRegistration ${ITK_LIBRARIES}  ${OPENCL_LIBRARIES} GPU_RigidRegistration)
+target_link_libraries( itkWeightRegistration ${ITK_LIBRARIES} ${OPENCL_LIBRARIES} itkRegistrationOpenCL )
 
 #================================
 # Define include dir for
 # dependent projects
 #================================
 target_include_directories( itkWeightRegistration PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR} ${OPENCL_INCLUDE_DIRS} )
+set_property(TARGET itkWeightRegistration PROPERTY POSITION_INDEPENDENT_CODE ON)
