@@ -163,7 +163,7 @@ void FiberObjectSettingsWidget::on_loadMaximaButton_clicked()
     IbisAPI *ibisAPI = m_pluginInterface->GetIbisAPI();
     Q_ASSERT(ibisAPI);
     QString lastVisitedDir = ibisAPI->GetWorkingDirectory();
-    QString filePath = QFileDialog::getOpenFileName(0, tr("Open File"), lastVisitedDir, tr("Files (*.nii)"));
+    QString filePath = QFileDialog::getOpenFileName( 0, tr("Open File"), lastVisitedDir, tr("Files (*.nii)"), nullptr, QFileDialog::DontUseNativeDialog );
 
     if(!filePath.length())
         return;
@@ -182,7 +182,7 @@ void FiberObjectSettingsWidget::on_loadFAButton_clicked()
     IbisAPI *ibisAPI = m_pluginInterface->GetIbisAPI();
     Q_ASSERT(ibisAPI);
     QString lastVisitedDir = ibisAPI->GetWorkingDirectory();
-    QString filePath = QFileDialog::getOpenFileName(0, tr("Open File"), lastVisitedDir, tr("Files (*.nii)"));
+    QString filePath = QFileDialog::getOpenFileName( 0, tr("Open File"), lastVisitedDir, tr("Files (*.nii)"), nullptr, QFileDialog::DontUseNativeDialog );
 
     if(!filePath.length())
         return;

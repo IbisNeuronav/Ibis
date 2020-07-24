@@ -30,11 +30,11 @@ public:
 
     GPU_VolumeReconstructionPluginInterface();
     ~GPU_VolumeReconstructionPluginInterface();
-    virtual QString GetPluginName() { return QString("GPU_VolumeReconstruction"); }
-    bool CanRun();
-    QString GetMenuEntryString() { return QString("US Volume Reconstruction With GPU"); }
+    virtual QString GetPluginName() override { return QString("GPU_VolumeReconstruction"); }
+    bool CanRun() override;
+    QString GetMenuEntryString() override { return QString("US Volume Reconstruction With GPU"); }
 
-    QWidget * CreateFloatingWidget();
+    QWidget * CreateFloatingWidget() override;
 
 protected:
 

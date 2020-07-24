@@ -63,11 +63,11 @@ public:
     ~FiberNavigatorPluginInterface();
     QString OpenMaximaFile(QString fileName);
     QString OpenFAFile(QString fileName);
-    virtual QString GetPluginName() { return QString("FiberNavigator"); }
-    virtual QString GetMenuEntryString() { return QString("Fiber Navigator"); }
-    virtual bool CanRun() { return true; }
-    virtual QWidget* CreateTab();
-    virtual bool WidgetAboutToClose();
+    virtual QString GetPluginName() override { return QString("FiberNavigator"); }
+    virtual QString GetMenuEntryString() override { return QString("Fiber Navigator"); }
+    virtual bool CanRun() override { return true; }
+    virtual QWidget* CreateTab() override;
+    virtual bool WidgetAboutToClose() override;
 
     //Parameters that can be changed from the interface
     void SetSeedPerAxis( int nb );

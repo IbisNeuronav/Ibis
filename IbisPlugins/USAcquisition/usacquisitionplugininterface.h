@@ -33,11 +33,11 @@ public:
 
     USAcquisitionPluginInterface();
     ~USAcquisitionPluginInterface();
-    QString GetMenuEntryString() { return QString("US Acquisition Double View"); }
-    virtual QString GetPluginName() { return QString("USAcquisitionDoubleView"); }
-    bool CanRun();
-    QWidget * CreateFloatingWidget();
-    virtual bool WidgetAboutToClose();
+    QString GetMenuEntryString() override { return QString("US Acquisition Double View"); }
+    virtual QString GetPluginName() override { return QString("USAcquisitionDoubleView"); }
+    bool CanRun() override;
+    QWidget * CreateFloatingWidget() override;
+    virtual bool WidgetAboutToClose() override;
 
     UsProbeObject * GetCurrentUsProbe();
     USAcquisitionObject * GetCurrentAcquisition();

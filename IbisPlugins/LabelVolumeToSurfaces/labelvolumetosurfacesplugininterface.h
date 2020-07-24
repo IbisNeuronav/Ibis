@@ -29,12 +29,12 @@ public:
     ~LabelVolumeToSurfacesPluginInterface();
 
     // IbisPlugin interface
-    QString GetPluginName() { return "LabelVolumeToSurfaces"; }
+    QString GetPluginName() override { return "LabelVolumeToSurfaces"; }
 
     // ObjectPluginInterface
-    QString GetMenuEntryString() { return QString("Extract surfaces from label volume"); }
-    bool CanRun();
-    void Run();
+    QString GetMenuEntryString() override { return QString("Extract surfaces from label volume"); }
+    bool CanRun() override;
+    void Run() override;
 
 };
 

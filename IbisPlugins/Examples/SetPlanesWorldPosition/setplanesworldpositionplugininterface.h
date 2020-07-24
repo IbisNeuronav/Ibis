@@ -19,10 +19,10 @@ public:
 
     SetPlanesWorldPositionPluginInterface();
     ~SetPlanesWorldPositionPluginInterface();
-    virtual QString GetPluginName() { return QString("SetPlanesWorldPosition"); }
-    bool CanRun() { return true; }
-    QString GetMenuEntryString() { return QString("Set Planes World Position"); }
-    QWidget * CreateFloatingWidget();
+    virtual QString GetPluginName() override { return QString("SetPlanesWorldPosition"); }
+    bool CanRun() override { return true; }
+    QString GetMenuEntryString() override { return QString("Set Planes World Position"); }
+    QWidget * CreateFloatingWidget() override;
 
 
 protected:

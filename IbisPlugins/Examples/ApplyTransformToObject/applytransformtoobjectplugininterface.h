@@ -19,10 +19,10 @@ public:
 
     ApplyTransformToObjectPluginInterface();
     ~ApplyTransformToObjectPluginInterface();
-    virtual QString GetPluginName() { return QString("ApplyTransformToObject"); }
-    bool CanRun() { return true; }
-    QString GetMenuEntryString() { return QString("Apply Transform to Object"); }
-    QWidget * CreateFloatingWidget();
+    virtual QString GetPluginName() override { return QString("ApplyTransformToObject"); }
+    bool CanRun() override { return true; }
+    QString GetMenuEntryString() override { return QString("Apply Transform to Object"); }
+    QWidget * CreateFloatingWidget() override;
 
 
 protected:

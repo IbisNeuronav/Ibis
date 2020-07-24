@@ -30,14 +30,14 @@ public:
 
     USManualCalibrationPluginInterface();
     ~USManualCalibrationPluginInterface();
-    virtual QString GetPluginName() { return QString("USManualCalibration"); }
-    bool CanRun();
-    QString GetMenuEntryString() { return QString("US Manual Calibration"); }
+    virtual QString GetPluginName() override { return QString("USManualCalibration"); }
+    bool CanRun() override;
+    QString GetMenuEntryString() override { return QString("US Manual Calibration"); }
 
-    virtual QWidget * CreateFloatingWidget();
-    virtual bool WidgetAboutToClose();
-    virtual void LoadSettings( QSettings & s );
-    virtual void SaveSettings( QSettings & s );
+    virtual QWidget * CreateFloatingWidget() override;
+    virtual bool WidgetAboutToClose() override;
+    virtual void LoadSettings( QSettings & s ) override;
+    virtual void SaveSettings( QSettings & s ) override;
 
     UsProbeObject * GetCurrentUsProbe();
     void StartPhantomRegistration();

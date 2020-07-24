@@ -28,11 +28,11 @@ public:
 
     ImageFilterExamplePluginInterface();
     ~ImageFilterExamplePluginInterface();
-    virtual QString GetPluginName() { return QString("ImageFilterExample"); }
-    bool CanRun();
-    QString GetMenuEntryString() { return QString("Image Filter Example"); }
+    virtual QString GetPluginName() override { return QString("ImageFilterExample"); }
+    bool CanRun() override;
+    QString GetMenuEntryString() override { return QString("Image Filter Example"); }
 
-    QWidget * CreateFloatingWidget();
+    QWidget * CreateFloatingWidget() override;
 
 };
 

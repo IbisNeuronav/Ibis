@@ -29,11 +29,11 @@ public:
     ~ContourSurfacePluginInterface();
 
     // IbisPlugin interface
-    virtual QString GetPluginName() { return QString("GeneratedSurface"); }
+    virtual QString GetPluginName() override { return QString("GeneratedSurface"); }
 
     // ObjectPluginInterface
-    QString GetMenuEntryString() { return QString("Contour Surface"); }
-    SceneObject * CreateObject();
+    QString GetMenuEntryString() override { return QString("Contour Surface"); }
+    SceneObject * CreateObject() override;
     virtual bool CanBeActivated() override;
 
 protected:

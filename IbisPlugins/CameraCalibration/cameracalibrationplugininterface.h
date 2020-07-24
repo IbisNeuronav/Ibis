@@ -39,18 +39,18 @@ public:
 
     CameraCalibrationPluginInterface();
     ~CameraCalibrationPluginInterface();
-    virtual QString GetPluginName() { return QString("CameraCalibration"); }
-    virtual QString GetPluginDescription();
-    bool CanRun();
-    QString GetMenuEntryString() { return QString("Camera Calibration"); }
+    virtual QString GetPluginName() override { return QString("CameraCalibration"); }
+    virtual QString GetPluginDescription() override;
+    bool CanRun() override;
+    QString GetMenuEntryString() override { return QString("Camera Calibration"); }
 
     // Tab widget
-    virtual QWidget * CreateTab();
-    virtual bool WidgetAboutToClose();
+    virtual QWidget * CreateTab() override;
+    virtual bool WidgetAboutToClose() override;
 
     // Plugin Settings
-    virtual void LoadSettings( QSettings & s );
-    virtual void SaveSettings( QSettings & s );
+    virtual void LoadSettings( QSettings & s ) override;
+    virtual void SaveSettings( QSettings & s ) override;
 
     // Calibration widget
     void StartCalibrationWidget( bool on );
