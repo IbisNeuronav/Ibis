@@ -99,6 +99,20 @@ TARGET_LINK_LIBRARIES( ${exec_name} ${PluginLibs} ${PluginExternalLibs} ${Hardwa
 qt5_use_modules( ${exec_name} ${IbisQtModules} )
 
 #================================
+# Define git hash variable
+#================================
+execute_process(COMMAND
+        "${GIT_EXECUTABLE}" rev-parse --short HEAD
+        WORKING_DIRECTORY "${GIT_WORKING_DIR}"
+        RESULT_VARIABLE HASH_FOUND
+        OUTPUT_VARIABLE IBIS_GIT_HASH_SHORT
+        #ERROR_QUIET
+        OUTPUT_STRIP_TRAILING_WHITESPACE)
+if( NOT HASH_FOUND EQUAL 0 )
+   set(IBIS_GIT_HASH_SHORT "")
+endif()
+
+#================================
 # Install
 #================================
 if( APPLE )
@@ -109,7 +123,7 @@ if( APPLE )
    set( BuiltExecFullPath ${CMAKE_CURRENT_BINARY_DIR}/${ExecName}.app )
    set( BuiltExecFullPathExec ${BuiltExecFullPath}/Contents/MacOS/Lines )
    file( TIMESTAMP ${BuiltExecFullPathExec} ExecDate %Y-%m-%d )
-   set( DmgFileName ${ExecName}-v${LINES_MAJOR_VERSION}.${LINES_MINOR_VERSION}.${LINES_PATCH_VERSION}-${LINES_VERSION_QUALIFIER}-${ExecDate}-macOS-${CMAKE_OSX_DEPLOYMENT_TARGET}-${GIT_COMMIT_HASH_SHORT}.dmg )
+   set( DmgFileName ${ExecName}-v${LINES_MAJOR_VERSION}.${LINES_MINOR_VERSION}.${LINES_PATCH_VERSION}-${LINES_VERSION_QUALIFIER}-${ExecDate}-macOS-${CMAKE_OSX_DEPLOYMENT_TARGET}-${IBIS_GIT_HASH_SHORT}.dmg )
    install( CODE "file( COPY ${BuiltExecFullPath} DESTINATION ${CMAKE_INSTALL_PREFIX} )
        execute_process( COMMAND ${MacDeployQtExec} ${CMAKE_INSTALL_PREFIX}/${ExecName}.app -dmg )
        execute_process( COMMAND mv ${CMAKE_INSTALL_PREFIX}/${ExecName}.dmg ${CMAKE_INSTALL_PREFIX}/${DmgFileName} )" )
