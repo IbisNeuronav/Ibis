@@ -433,7 +433,7 @@ void UsProbeObject::TakeSnapshot()
     ImageObject * newObj = ImageObject::New();
     newObj->SetName(name);
     newObj->SetImage(image, transform);
-    newObj->Modified();
+    newObj->ObjectModified();
 
     m_screenShotIndex++;
 

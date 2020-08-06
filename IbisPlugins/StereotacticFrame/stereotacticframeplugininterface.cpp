@@ -325,7 +325,7 @@ void StereotacticFramePluginInterface::Enable3DFrame()
     m_frameRepresentation->SetLocalTransform( m_frameTransform );
 
     GetIbisAPI()->AddObject( m_frameRepresentation, ref );
-    m_frameRepresentation->Modified();
+    m_frameRepresentation->ObjectModified();
 }
 
 void StereotacticFramePluginInterface::Disable3DFrame()

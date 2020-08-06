@@ -536,7 +536,7 @@ bool VertebraRegistrationWidget::Register()
     if ( ui->initialAlignmentCheckBox->isChecked() )
     {
         this->PerformInitialAlignment(sourceVtkTransform, itkSourceImage, m_inputImageList, m_usScanCenterPointList);
-        ctImageObject->Modified();
+        ctImageObject->ObjectModified();
     }
 
     progress->setLabelText(tr("Registering..."));
@@ -855,7 +855,7 @@ void VertebraRegistrationWidget::on_presetVolumeButton_clicked()
         volumeProperty->SetDiffuse(0.9);
         volumeProperty->SetSpecularPower(10);
         imObj->SetVtkVolumeRenderingEnabled(true);
-        imObj->Modified();
+        imObj->ObjectModified();
 
         ui->opacityShiftSlider->setEnabled(true);
 
@@ -899,7 +899,7 @@ void VertebraRegistrationWidget::on_opacityShiftSlider_valueChanged(int value)
             volumeProperty->SetColor(colorTransferFunction);
             volumeProperty->SetScalarOpacity(opacityTransferFunction);
             std::cout << ui->opacityShiftSlider->value() << std::endl;
-            imObj->Modified();
+            imObj->ObjectModified();
 
         }
 
