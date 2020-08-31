@@ -43,6 +43,16 @@ public:
 
     virtual void SceneAboutToLoad() override;
 
+    QString GetPluginDescription() override
+    {
+        QString description;
+        description = "Landmark Registration\n"
+                      "This plugin is used to register two images by a least square fit of two sets of user defined points,\n"
+                      "functionality provided by vtkLandmarkTransform.\n"
+                      "\n";
+        return description;
+    }
+
 protected:
     void Clear();
 
