@@ -818,7 +818,7 @@ void VolumeRenderingObject::DuplicateRayInitShaderType()
     if( nameFound && ok )
     {
         newIndex = m_initShaders.size();
-        m_volumeShaders.push_back( newContrib );
+        m_initShaders.push_back(newContrib);
         m_initShaderContributionType = newIndex;
     }
 
