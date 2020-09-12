@@ -294,7 +294,7 @@ void VolumeRenderingObjectSettingsWidget::on_addStopConditionShaderButton_clicke
 void VolumeRenderingObjectSettingsWidget::on_removeStopConditionShaderButton_clicked()
 {
     Q_ASSERT( m_vr );
-    m_vr->DeleteRayInitShaderType();
+    m_vr->DeleteStopConditionShaderType();
     UpdateUI();
 }
 

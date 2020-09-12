@@ -950,8 +950,8 @@ void VolumeRenderingObject::DuplicateStopConditionShaderType()
     int newIndex = -1;
     if( nameFound && ok )
     {
-        newIndex = m_volumeShaders.size();
-        m_volumeShaders.push_back( newContrib );
+        newIndex = m_stopConditionShaders.size();
+        m_stopConditionShaders.push_back( newContrib ); //todo
         m_stopConditionShaderType = newIndex;
     }
 
