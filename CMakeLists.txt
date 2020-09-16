@@ -191,3 +191,7 @@ if( IBIS_BUILD_DOCUMENTATION )
         message("Doxygen needs to be installed to generate documentation")
     endif (DOXYGEN_FOUND)
 endif()
+
+#cleaning
+set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${CMAKE_CURRENT_BINARY_DIR}/version.h)
+set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${GIT_STATE_FILE})
