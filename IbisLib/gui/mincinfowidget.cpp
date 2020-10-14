@@ -143,13 +143,8 @@ void MincInfoWidget::UpdateUI()
             if(str)
             {
                 varValue = str->GetMetaDataObjectValue().c_str();
+                list.append( QPair<QString, QString>( varName, varValue ) );
             }
-            else
-            {
-                varName.append( " type: " );
-                varValue = typeid(*bs).name();
-            }
-            list.append( QPair<QString, QString>( varName, varValue ) );
         }
     }
 
