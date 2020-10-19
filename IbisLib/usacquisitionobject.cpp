@@ -1036,6 +1036,7 @@ void USAcquisitionObject::ExportTrackedVideoBuffer(QString destDir , bool masked
                 IbisItkUnsignedChar3ImageType::Pointer itkSliceImage = IbisItkUnsignedChar3ImageType::New();
                 this->GetItkImage(itkSliceImage, i,  masked,  useCalibratedTransform, relativeToID );
                 //Output acquisition properties: time stamp, calibration matrix, frame ID, flag telling idf the calibration matrix was applied
+                // TODO: Somehow obtain time stamp of the frame and output it also
                 itk::MetaDataDictionary & metaDict = itkSliceImage->GetMetaDataDictionary();
                 itk::EncapsulateMetaData< std::string >( metaDict, "acquisition:calibratioMatrix", calMatString.toUtf8().data() );
                 itk::EncapsulateMetaData< std::string >( metaDict, "acquisition:calibratioMatrixApplied", useCalibratedTransform?"true":"false" );
@@ -1082,6 +1083,7 @@ void USAcquisitionObject::ExportTrackedVideoBuffer(QString destDir , bool masked
                 IbisRGBImageType::Pointer itkSliceImage = IbisRGBImageType::New();
                 this->GetItkRGBImage(itkSliceImage, i,  masked,  useCalibratedTransform, relativeToID );
                 //Output acquisition properties: time stamp, calibration matrix, frame ID, flag telling idf the calibration matrix was applied
+                // TODO: Somehow obtain time stamp of the frame and output it also
                 itk::MetaDataDictionary & metaDict = itkSliceImage->GetMetaDataDictionary();
                 itk::EncapsulateMetaData< std::string >( metaDict, "acquisition:calibratioMatrix", calMatString.toUtf8().data() );
                 itk::EncapsulateMetaData< std::string >( metaDict, "acquisition:calibratioMatrixApplied", useCalibratedTransform?"true":"false" );
