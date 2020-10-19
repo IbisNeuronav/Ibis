@@ -50,6 +50,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "vtkXFMReader.h"
 #include "vtkXFMWriter.h"
 #include "vtkPiecewiseFunctionLookupTable.h"
+#include "itkMetaDataObject.h"
 
 ObjectSerializationMacro( USAcquisitionObject );
 
@@ -979,6 +980,33 @@ void USAcquisitionObject::ExportTrackedVideoBuffer(QString destDir , bool masked
     bool processOK = false;
     QProgressDialog * progress = new QProgressDialog("Exporting frames", "Cancel", 0, numberOfFrames);
     progress->setAttribute(Qt::WA_DeleteOnClose, true);
+    //Prepare for writing out calibration matrix
+    vtkMatrix4x4 *calMatrix = this->GetCalibrationTransform()->GetMatrix();
+    QString calMatString;
+    calMatString.append( QString::number(calMatrix->GetElement( 0, 0 ), 'g', 6 ) );
+    calMatString.append( ", ");
+    calMatString.append( QString::number(calMatrix->GetElement( 0, 1 ), 'g', 6 ) );
+    calMatString.append( ", ");
+    calMatString.append( QString::number(calMatrix->GetElement( 0, 2 ), 'g', 6 ) );
+    calMatString.append( ", ");
+    calMatString.append( QString::number(calMatrix->GetElement( 0, 3 ), 'g', 6 ) );
+    calMatString.append( ", ");
+    calMatString.append( QString::number(calMatrix->GetElement( 1, 0 ), 'g', 6 ) );
+    calMatString.append( ", ");
+    calMatString.append( QString::number(calMatrix->GetElement( 1, 1 ), 'g', 6 ) );
+    calMatString.append( ", ");
+    calMatString.append( QString::number(calMatrix->GetElement( 1, 2 ), 'g', 6 ) );
+    calMatString.append( ", ");
+    calMatString.append( QString::number(calMatrix->GetElement( 1, 2 ), 'g', 6 ) );
+    calMatString.append( ", ");
+    calMatString.append( QString::number(calMatrix->GetElement( 2, 0 ), 'g', 6 ) );
+    calMatString.append( ", ");
+    calMatString.append( QString::number(calMatrix->GetElement( 2, 1 ), 'g', 6 ) );
+    calMatString.append( ", ");
+    calMatString.append( QString::number(calMatrix->GetElement( 2, 2 ), 'g', 6 ) );
+    calMatString.append( ", ");
+    calMatString.append( QString::number(calMatrix->GetElement( 2, 3 ), 'g', 6 ) );
+
     if( numberOfFrames > 0)
     {
         int backupCurrentFrame = this->GetCurrentSlice();
@@ -1007,6 +1035,11 @@ void USAcquisitionObject::ExportTrackedVideoBuffer(QString destDir , bool masked
 
                 IbisItkUnsignedChar3ImageType::Pointer itkSliceImage = IbisItkUnsignedChar3ImageType::New();
                 this->GetItkImage(itkSliceImage, i,  masked,  useCalibratedTransform, relativeToID );
+                //Output acquisition properties: time stamp, calibration matrix, frame ID, flag telling idf the calibration matrix was applied
+                itk::MetaDataDictionary & metaDict = itkSliceImage->GetMetaDataDictionary();
+                itk::EncapsulateMetaData< std::string >( metaDict, "acquisition:calibratioMatrix", calMatString.toUtf8().data() );
+                itk::EncapsulateMetaData< std::string >( metaDict, "acquisition:calibratioMatrixApplied", useCalibratedTransform?"true":"false" );
+                itk::EncapsulateMetaData< std::string >( metaDict, "acquisition:frameID", Number.toUtf8().data() );
                 mincWriter->SetInput( itkSliceImage );
                 try
                 {
@@ -1048,6 +1081,11 @@ void USAcquisitionObject::ExportTrackedVideoBuffer(QString destDir , bool masked
 
                 IbisRGBImageType::Pointer itkSliceImage = IbisRGBImageType::New();
                 this->GetItkRGBImage(itkSliceImage, i,  masked,  useCalibratedTransform, relativeToID );
+                //Output acquisition properties: time stamp, calibration matrix, frame ID, flag telling idf the calibration matrix was applied
+                itk::MetaDataDictionary & metaDict = itkSliceImage->GetMetaDataDictionary();
+                itk::EncapsulateMetaData< std::string >( metaDict, "acquisition:calibratioMatrix", calMatString.toUtf8().data() );
+                itk::EncapsulateMetaData< std::string >( metaDict, "acquisition:calibratioMatrixApplied", useCalibratedTransform?"true":"false" );
+                itk::EncapsulateMetaData< std::string >( metaDict, "acquisition:frameID", Number.toUtf8().data() );
                 mincWriter->SetInput( itkSliceImage );
 
                 try
@@ -1071,6 +1109,7 @@ void USAcquisitionObject::ExportTrackedVideoBuffer(QString destDir , bool masked
             }
         }
         progress->close();
+        this->SetCurrentFrame( backupCurrentFrame );
     }
     if( !useCalibratedTransform ) // export calibration transform
     {
