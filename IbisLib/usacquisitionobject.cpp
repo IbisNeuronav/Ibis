@@ -313,7 +313,7 @@ void USAcquisitionObject::Record()
     {
         int * dims = probe->GetVideoOutput()->GetDimensions();
         this->SetFrameAndMaskSize( dims[0], dims[1] );
-        m_videoBuffer->AddFrame( probe->GetVideoOutput(), probe->GetUncalibratedWorldTransform()->GetMatrix() );
+        m_videoBuffer->AddFrame( probe->GetVideoOutput(), probe->GetUncalibratedWorldTransform()->GetMatrix(), probe->GetLastTimestamp() );
     }
 
     // Start watching the clock for updates
@@ -333,7 +333,7 @@ void USAcquisitionObject::Updated()
         Q_ASSERT( probe );
         if( probe->IsOk() )
         {
-            m_videoBuffer->AddFrame( probe->GetVideoOutput(), probe->GetUncalibratedWorldTransform()->GetMatrix() );
+            m_videoBuffer->AddFrame( probe->GetVideoOutput(), probe->GetUncalibratedWorldTransform()->GetMatrix(), probe->GetLastTimestamp() );
             emit ObjectModified();
         }
     }
@@ -983,29 +983,15 @@ void USAcquisitionObject::ExportTrackedVideoBuffer(QString destDir , bool masked
     //Prepare for writing out calibration matrix
     vtkMatrix4x4 *calMatrix = this->GetCalibrationTransform()->GetMatrix();
     QString calMatString;
-    calMatString.append( QString::number(calMatrix->GetElement( 0, 0 ), 'g', 6 ) );
-    calMatString.append( ", ");
-    calMatString.append( QString::number(calMatrix->GetElement( 0, 1 ), 'g', 6 ) );
-    calMatString.append( ", ");
-    calMatString.append( QString::number(calMatrix->GetElement( 0, 2 ), 'g', 6 ) );
-    calMatString.append( ", ");
-    calMatString.append( QString::number(calMatrix->GetElement( 0, 3 ), 'g', 6 ) );
-    calMatString.append( ", ");
-    calMatString.append( QString::number(calMatrix->GetElement( 1, 0 ), 'g', 6 ) );
-    calMatString.append( ", ");
-    calMatString.append( QString::number(calMatrix->GetElement( 1, 1 ), 'g', 6 ) );
-    calMatString.append( ", ");
-    calMatString.append( QString::number(calMatrix->GetElement( 1, 2 ), 'g', 6 ) );
-    calMatString.append( ", ");
-    calMatString.append( QString::number(calMatrix->GetElement( 1, 2 ), 'g', 6 ) );
-    calMatString.append( ", ");
-    calMatString.append( QString::number(calMatrix->GetElement( 2, 0 ), 'g', 6 ) );
-    calMatString.append( ", ");
-    calMatString.append( QString::number(calMatrix->GetElement( 2, 1 ), 'g', 6 ) );
-    calMatString.append( ", ");
-    calMatString.append( QString::number(calMatrix->GetElement( 2, 2 ), 'g', 6 ) );
-    calMatString.append( ", ");
-    calMatString.append( QString::number(calMatrix->GetElement( 2, 3 ), 'g', 6 ) );
+    for( int i = 0; i < 3; i++ )
+    {
+        for( int j = 0; j < 4; j++ )
+        {
+            calMatString.append( QString::number(calMatrix->GetElement( i, j ), 'g', 6 ) );
+            if( j < 3 )
+                calMatString.append( ", ");
+        }
+    }
 
     if( numberOfFrames > 0)
     {
@@ -1036,11 +1022,12 @@ void USAcquisitionObject::ExportTrackedVideoBuffer(QString destDir , bool masked
                 IbisItkUnsignedChar3ImageType::Pointer itkSliceImage = IbisItkUnsignedChar3ImageType::New();
                 this->GetItkImage(itkSliceImage, i,  masked,  useCalibratedTransform, relativeToID );
                 //Output acquisition properties: time stamp, calibration matrix, frame ID, flag telling idf the calibration matrix was applied
-                // TODO: Somehow obtain time stamp of the frame and output it also
+                double timestamp = m_videoBuffer->GetTimestamp( i );
                 itk::MetaDataDictionary & metaDict = itkSliceImage->GetMetaDataDictionary();
                 itk::EncapsulateMetaData< std::string >( metaDict, "acquisition:calibratioMatrix", calMatString.toUtf8().data() );
                 itk::EncapsulateMetaData< std::string >( metaDict, "acquisition:calibratioMatrixApplied", useCalibratedTransform?"true":"false" );
-                itk::EncapsulateMetaData< std::string >( metaDict, "acquisition:frameID", Number.toUtf8().data() );
+                itk::EncapsulateMetaData< std::string >( metaDict, "acquisition:timestamp", QString::number( timestamp, 'g', 6 ).toUtf8().data() );
+                itk::EncapsulateMetaData< std::string >( metaDict, "acquisition:frameID", QString::number(i).toUtf8().data() );
                 mincWriter->SetInput( itkSliceImage );
                 try
                 {
@@ -1083,10 +1070,11 @@ void USAcquisitionObject::ExportTrackedVideoBuffer(QString destDir , bool masked
                 IbisRGBImageType::Pointer itkSliceImage = IbisRGBImageType::New();
                 this->GetItkRGBImage(itkSliceImage, i,  masked,  useCalibratedTransform, relativeToID );
                 //Output acquisition properties: time stamp, calibration matrix, frame ID, flag telling idf the calibration matrix was applied
-                // TODO: Somehow obtain time stamp of the frame and output it also
+                double timestamp = m_videoBuffer->GetTimestamp( i );
                 itk::MetaDataDictionary & metaDict = itkSliceImage->GetMetaDataDictionary();
                 itk::EncapsulateMetaData< std::string >( metaDict, "acquisition:calibratioMatrix", calMatString.toUtf8().data() );
                 itk::EncapsulateMetaData< std::string >( metaDict, "acquisition:calibratioMatrixApplied", useCalibratedTransform?"true":"false" );
+                itk::EncapsulateMetaData< std::string >( metaDict, "acquisition:timestamp", QString::number( timestamp, 'g', 6 ).toUtf8().data() );
                 itk::EncapsulateMetaData< std::string >( metaDict, "acquisition:frameID", Number.toUtf8().data() );
                 mincWriter->SetInput( itkSliceImage );
 

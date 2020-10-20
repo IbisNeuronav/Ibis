@@ -37,7 +37,7 @@ public:
     int GetFrameHeight();
     int GetFrameNumberOfComponents();
 
-    void AddFrame( vtkImageData * frame, vtkMatrix4x4 * mat );
+    void AddFrame( vtkImageData * frame, vtkMatrix4x4 * mat, double timestamp = 0.0 );
     int GetNumberOfFrames() { return m_frames.size(); }
 
     void SetCurrentFrame( int index );
@@ -45,9 +45,11 @@ public:
 
     vtkMatrix4x4 * GetCurrentMatrix();
     vtkImageData * GetCurrentImage();
+    double GetCurrentTimestamp();
 
     vtkMatrix4x4 * GetMatrix( int index );
     vtkImageData * GetImage( int index );
+    double GetTimestamp( int index);
 
     vtkImageData * GetVideoOutput();
     vtkAlgorithmOutput * GetVideoOutputPort();
@@ -70,9 +72,11 @@ protected:
     vtkSmartPointer<vtkImageData> m_videoOutput;
     vtkSmartPointer<vtkPassThrough> m_output;
     vtkSmartPointer<vtkTransform> m_outputTransform;
+    double m_outputTimestamp;
     int m_currentFrame;
     QList< vtkImageData * > m_frames;
     QList< vtkMatrix4x4 * > m_matrices;
+    QList< double > m_timestamps;
 
     int m_defaultImageSize[2];
 };
