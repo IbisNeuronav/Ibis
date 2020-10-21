@@ -987,11 +987,11 @@ void USAcquisitionObject::ExportTrackedVideoBuffer(QString destDir , bool masked
     {
         for( int j = 0; j < 4; j++ )
         {
-            calMatString.append( QString::number(calMatrix->GetElement( i, j ), 'g', 6 ) );
-            if( j < 3 )
-                calMatString.append( ", ");
+            calMatString.append( QString::number(calMatrix->GetElement( i, j ), 'f', 6 ) );
+            calMatString.append( " ");
         }
     }
+    calMatString.replace(calMatString.count()-1, 1, ";");
 
     if( numberOfFrames > 0)
     {
@@ -1026,8 +1026,8 @@ void USAcquisitionObject::ExportTrackedVideoBuffer(QString destDir , bool masked
                 itk::MetaDataDictionary & metaDict = itkSliceImage->GetMetaDataDictionary();
                 itk::EncapsulateMetaData< std::string >( metaDict, "acquisition:calibratioMatrix", calMatString.toUtf8().data() );
                 itk::EncapsulateMetaData< std::string >( metaDict, "acquisition:calibratioMatrixApplied", useCalibratedTransform?"true":"false" );
-                itk::EncapsulateMetaData< std::string >( metaDict, "acquisition:timestamp", QString::number( timestamp, 'g', 6 ).toUtf8().data() );
-                itk::EncapsulateMetaData< std::string >( metaDict, "acquisition:frameID", QString::number(i).toUtf8().data() );
+                itk::EncapsulateMetaData< std::string >( metaDict, "acquisition:timestamp", QString::number( timestamp, 'f', 6 ).toUtf8().data() );
+                itk::EncapsulateMetaData< std::string >( metaDict, "acquisition:frameID", QString::number(sequenceNumber-1).toUtf8().data() );
                 mincWriter->SetInput( itkSliceImage );
                 try
                 {
@@ -1075,7 +1075,7 @@ void USAcquisitionObject::ExportTrackedVideoBuffer(QString destDir , bool masked
                 itk::EncapsulateMetaData< std::string >( metaDict, "acquisition:calibratioMatrix", calMatString.toUtf8().data() );
                 itk::EncapsulateMetaData< std::string >( metaDict, "acquisition:calibratioMatrixApplied", useCalibratedTransform?"true":"false" );
                 itk::EncapsulateMetaData< std::string >( metaDict, "acquisition:timestamp", QString::number( timestamp, 'g', 6 ).toUtf8().data() );
-                itk::EncapsulateMetaData< std::string >( metaDict, "acquisition:frameID", Number.toUtf8().data() );
+                itk::EncapsulateMetaData< std::string >( metaDict, "acquisition:frameID", QString::number(sequenceNumber-1).toUtf8().data() );
                 mincWriter->SetInput( itkSliceImage );
 
                 try
