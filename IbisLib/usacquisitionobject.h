@@ -17,6 +17,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QWidget>
 #include <QObject>
 #include <QString>
+#include <QList>
 #include <QObject>
 #include "sceneobject.h"
 #include "scenemanager.h"
@@ -164,6 +165,11 @@ protected:
     // Images and matrices
     int m_defaultImageSize[2];
     TrackedVideoBuffer * m_videoBuffer;
+
+    // Importing
+    int m_componentsNumber;
+    QList<IbisItkUnsignedChar3ImageType::Pointer> m_grayFrames;
+    QList<IbisRGBImageType::Pointer> m_RGBframes;
 
     // 3D viewing data
     struct PerViewElements

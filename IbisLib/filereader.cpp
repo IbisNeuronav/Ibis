@@ -450,7 +450,6 @@ bool FileReader::OpenFile( QList<SceneObject*> & readObjects, QString filename, 
 #include "vtkIntArray.h"
 #include "vtkDoubleArray.h"
 #include "stringtools.h"
-#include "ibisitkvtkconverter.h"
 #include <string>
 #include <typeinfo>
 #include <QString>
@@ -748,6 +747,172 @@ bool FileReader::OpenTagFile( QList<SceneObject*> & readObjects, QString filenam
     return true;
 }
 
+bool FileReader::GetPointsDataFromTagFile( QString filename, PointsObject *pts1, PointsObject *pts2 )
+{
+    Q_ASSERT(pts1);
+    Q_ASSERT(pts2);
+
+    vtkTagReader * reader = vtkTagReader::New();
+    reader->SetFileName( filename.toUtf8().data() );
+
+    reader->Update();
+
+    vtkPoints *pts = reader->GetVolume( 0 );
+    if (!pts)
+    {
+        reader->Delete();
+        return false;
+    }
+    int i, n = pts->GetNumberOfPoints();
+    QFileInfo info( filename );
+    QString displayName;
+    if (reader->GetVolumeNames().size() > 0)
+        displayName = QString(reader->GetVolumeNames()[0].c_str());
+    if (displayName.isEmpty())
+        displayName = info.baseName();
+    pts1->SetName(displayName);
+    pts1->SetDataFileName( info.fileName() );
+    pts1->SetFullFileName( info.absoluteFilePath() );
+    for (i = 0; i < n; i++)
+    {
+        pts1->AddPoint( QString(reader->GetPointNames()[i].c_str()), pts->GetPoint(i) );
+        pts1->SetPointTimeStamp( i, reader->GetTimeStamps()[i].c_str() );
+    }
+    // is there a second set of points?
+    // it will be added to the same parent
+    if (reader->GetNumberOfVolumes() > 1)
+    {
+        displayName = QString(reader->GetVolumeNames()[1].c_str());
+        if (displayName.isEmpty())
+            displayName = info.baseName()+"*";
+        pts2->SetName(displayName);
+        vtkPoints *pts1 = reader->GetVolume( 1 );
+        for (i = 0; i < n; i++)
+        {
+            pts2->AddPoint(QString(reader->GetPointNames()[i].c_str()), pts1->GetPoint(i));
+            pts2->SetPointTimeStamp( i, reader->GetTimeStamps()[i].c_str() );
+        }
+    }
+    reader->Delete();
+    return true;
+}
+
+void FileReader::SetObjectName( SceneObject * obj, QString objName, QString filename )
+{
+    QFileInfo info( filename );
+    obj->SetDataFileName( info.fileName() );
+    obj->SetFullFileName( info.absoluteFilePath() );
+    if (!objName.isEmpty())
+        obj->SetName( objName );
+    else
+        obj->SetName( info.fileName() );
+}
+
+void FileReader::ReportWarning( QString warning )
+{
+    m_warnings.push_back( warning );
+}
+
+//Getting US acquisition files
+//
+int FileReader::GetNumberOfComponents( QString filename )
+{
+    QString fileToRead( filename );
+    QString fileMINC2;
+    if( this->IsMINC1( filename ) )
+    {
+        if( this->m_mincconvert.isEmpty())
+        {
+            QString tmp("File ");
+            tmp.append( filename + " is an acquired frame of MINC1 type and needs to be coverted to MINC2.\n" +
+                        "Open Settings/Preferences and set path to the directory containing MINC tools.\n" );
+            QMessageBox::critical( 0, "Error", tmp, 1, 0 );
+            return 0;
+        }
+        if( this->ConvertMINC1toMINC2( filename, fileMINC2, true ) )
+            fileToRead = fileMINC2;
+        else
+            return 0;
+    }
+    IOBasePointer io = itk::ImageIOFactory::CreateImageIO(fileToRead.toUtf8().data(), itk::ImageIOFactory::ReadMode );
+
+    if(!io)
+      throw itk::ExceptionObject("Unsupported image file type");
+
+    io->SetFileName((fileToRead.toUtf8().data()));
+    io->ReadImageInformation();
+
+    size_t nc = io->GetNumberOfComponents();
+    return static_cast<int>(nc);
+}
+
+#include "itkImage.h"
+#include "itkImageRegionIterator.h"
+
+bool FileReader::GetGrayFrame( QString filename, IbisItkUnsignedChar3ImageType::Pointer itkImage )
+{
+    typedef itk::ImageFileReader< IbisItkUnsignedChar3ImageType > ReaderType;
+    ReaderType::Pointer reader = ReaderType::New();
+    reader->SetFileName( filename.toUtf8().data() );
+
+    try
+    {
+        reader->Update();
+    }
+    catch( itk::ExceptionObject & err )
+    {
+        return false;
+    }
+
+    itkImage->SetRegions(reader->GetOutput()->GetLargestPossibleRegion());
+    itkImage->Allocate();
+
+    itk::ImageRegionConstIterator<IbisItkUnsignedChar3ImageType> inputIterator(itkImage, itkImage->GetLargestPossibleRegion());
+    itk::ImageRegionIterator<IbisItkUnsignedChar3ImageType>      outputIterator(reader->GetOutput(), reader->GetOutput()->GetLargestPossibleRegion());
+
+    while (!inputIterator.IsAtEnd())
+    {
+      outputIterator.Set(inputIterator.Get());
+      ++inputIterator;
+      ++outputIterator;
+    }
+    itkImage->SetMetaDataDictionary( reader->GetOutput()->GetMetaDataDictionary() );
+
+    return true;
+}
+
+bool FileReader::GetRGBFrame( QString filename, IbisRGBImageType::Pointer itkImage )
+{
+    typedef itk::ImageFileReader< IbisRGBImageType > ReaderType;
+    ReaderType::Pointer reader = ReaderType::New();
+    reader->SetFileName( filename.toUtf8().data() );
+
+    try
+    {
+        reader->Update();
+    }
+    catch( itk::ExceptionObject & err )
+    {
+        return false;
+    }
+
+    itkImage->SetRegions(reader->GetOutput()->GetLargestPossibleRegion());
+    itkImage->Allocate();
+
+    itk::ImageRegionConstIterator<IbisRGBImageType> inputIterator(itkImage, itkImage->GetLargestPossibleRegion());
+    itk::ImageRegionIterator<IbisRGBImageType>      outputIterator(reader->GetOutput(), reader->GetOutput()->GetLargestPossibleRegion());
+
+    while (!inputIterator.IsAtEnd())
+    {
+      outputIterator.Set(inputIterator.Get());
+      ++inputIterator;
+      ++outputIterator;
+    }
+    itkImage->SetMetaDataDictionary( reader->GetOutput()->GetMetaDataDictionary() );
+
+    return true;
+}
+
 
 bool FileReader::GetFrameDataFromMINCFile(QString filename, vtkImageData *img , vtkMatrix4x4 *mat )
 {
@@ -826,70 +991,4 @@ bool FileReader::GetFrameDataFromMINCFile(QString filename, vtkImageData *img , 
     mat->DeepCopy( tr->GetMatrix( ) );
     ItktovtkConverter->Delete();
     return true;
-}
-
-bool FileReader::GetPointsDataFromTagFile( QString filename, PointsObject *pts1, PointsObject *pts2 )
-{
-    Q_ASSERT(pts1);
-    Q_ASSERT(pts2);
-
-    vtkTagReader * reader = vtkTagReader::New();
-    reader->SetFileName( filename.toUtf8().data() );
-
-    reader->Update();
-
-    vtkPoints *pts = reader->GetVolume( 0 );
-    if (!pts)
-    {
-        reader->Delete();
-        return false;
-    }
-    int i, n = pts->GetNumberOfPoints();
-    QFileInfo info( filename );
-    QString displayName;
-    if (reader->GetVolumeNames().size() > 0)
-        displayName = QString(reader->GetVolumeNames()[0].c_str());
-    if (displayName.isEmpty())
-        displayName = info.baseName();
-    pts1->SetName(displayName);
-    pts1->SetDataFileName( info.fileName() );
-    pts1->SetFullFileName( info.absoluteFilePath() );
-    for (i = 0; i < n; i++)
-    {
-        pts1->AddPoint( QString(reader->GetPointNames()[i].c_str()), pts->GetPoint(i) );
-        pts1->SetPointTimeStamp( i, reader->GetTimeStamps()[i].c_str() );
-    }
-    // is there a second set of points?
-    // it will be added to the same parent
-    if (reader->GetNumberOfVolumes() > 1)
-    {
-        displayName = QString(reader->GetVolumeNames()[1].c_str());
-        if (displayName.isEmpty())
-            displayName = info.baseName()+"*";
-        pts2->SetName(displayName);
-        vtkPoints *pts1 = reader->GetVolume( 1 );
-        for (i = 0; i < n; i++)
-        {
-            pts2->AddPoint(QString(reader->GetPointNames()[i].c_str()), pts1->GetPoint(i));
-            pts2->SetPointTimeStamp( i, reader->GetTimeStamps()[i].c_str() );
-        }
-    }
-    reader->Delete();
-    return true;
-}
-
-void FileReader::SetObjectName( SceneObject * obj, QString objName, QString filename )
-{
-    QFileInfo info( filename );
-    obj->SetDataFileName( info.fileName() );
-    obj->SetFullFileName( info.absoluteFilePath() );
-    if (!objName.isEmpty())
-        obj->SetName( objName );
-    else
-        obj->SetName( info.fileName() );
-}
-
-void FileReader::ReportWarning( QString warning )
-{
-    m_warnings.push_back( warning );
 }

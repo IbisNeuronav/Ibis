@@ -50,7 +50,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "vtkXFMReader.h"
 #include "vtkXFMWriter.h"
 #include "vtkPiecewiseFunctionLookupTable.h"
-#include "itkMetaDataObject.h"
+#include <itkMetaDataObject.h>
+#include <itkMetaDataDictionary.h>
 
 ObjectSerializationMacro( USAcquisitionObject );
 
@@ -121,6 +122,7 @@ USAcquisitionObject::USAcquisitionObject()
     m_staticSlicesDataNeedUpdate = true;
     m_defaultImageSize[0] = 640;
     m_defaultImageSize[1] = 480;
+    m_componentsNumber = 0;
 }
 
 USAcquisitionObject::~USAcquisitionObject()
@@ -583,7 +585,55 @@ bool USAcquisitionObject::LoadFramesFromMINCFile( QStringList & allMINCFiles )
     QProgressDialog * progress = new QProgressDialog("Importing frames", "Cancel", 0, allMINCFiles.count() );
     progress->setAttribute(Qt::WA_DeleteOnClose, true);
     progress->show();
-    for( int i = 0; i < allMINCFiles.count() && processOK; ++i )
+    // First get all frames as ITK files, then convert to vtkImageData
+    // Get the first frame to chck if it is RGB or Gray scale, from the first frame get also
+    // calibration matrix, flag  telling if that matrix was applied, we don't bother with frame ID as it is a consecutive number
+    QFileInfo fi( allMINCFiles.at(0) );
+    if( !(fi.isReadable()) )
+    {
+        QString message( tr("No read permission on file: ") );
+        message.append( allMINCFiles.at(0) );
+        QMessageBox::critical( 0, "Error", message, 1, 0 );
+        processOK = false;
+        return false;
+    }
+    m_componentsNumber = Application::GetInstance().GetNumberOfComponents( allMINCFiles.at(0) );
+    if( m_componentsNumber <= 0 )
+        return false;
+    itk::MetaDataDictionary dictionary;
+    if( m_componentsNumber == 1 )
+    {
+        IbisItkUnsignedChar3ImageType::Pointer itkImage = IbisItkUnsignedChar3ImageType::New();
+        if( Application::GetInstance().GetGrayFrame( allMINCFiles.at(0),  itkImage ) )
+        {
+            dictionary = itkImage->GetMetaDataDictionary();
+            m_grayFrames.push_back( itkImage );
+         }
+        else
+            return false;
+    }
+    else
+    {
+        IbisRGBImageType::Pointer itkImage = IbisRGBImageType::New();
+        if( Application::GetInstance().GetRGBFrame( allMINCFiles.at(0),  itkImage ) )
+        {
+            dictionary = itkImage->GetMetaDataDictionary();
+            m_RGBframes.push_back( itkImage );
+         }
+        else
+            return false;
+    }
+
+    std::vector< std::string >  keys = dictionary.GetKeys();
+//    for( itk::MetaDataDictionary::ConstIterator it = dictionary.Begin(); it != dictionary.End(); ++it )
+//    {
+//        itk::MetaDataObjectBase *bs=(*it).second;
+//        itk::MetaDataObject<std::string> * str=dynamic_cast<itk::MetaDataObject<std::string> *>(bs);
+//        std::string s = (*it).first.c_str();
+//        int i = s.size();
+//    }
+
+    for( int i = 1; i < allMINCFiles.count() && processOK; ++i )
     {
         QFileInfo fi( allMINCFiles.at(i) );
         if( !(fi.isReadable()) )

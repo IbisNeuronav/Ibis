@@ -14,7 +14,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QTableWidget>
 #include <QGridLayout>
 #include <vtkImageData.h>
-#include "itkMetaDataObject.h"
+#include <itkMetaDataObject.h>
 #include <itkMetaDataDictionary.h>
 #include <typeinfo>
 

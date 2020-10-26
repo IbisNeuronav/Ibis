@@ -16,6 +16,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QObject>
 #include <itkMetaDataObject.h>
 #include <itkMetaDataDictionary.h>
+#include "ibisitkvtkconverter.h"
 
 class SceneManager;
 class SceneObject;
@@ -52,8 +53,13 @@ public:
     bool HasMincConverter();
     bool IsMINC1( QString fileName );
     bool ConvertMINC1toMINC2(QString &inputileName, QString &outputileName , bool isVideoFrame = false );
-    bool GetFrameDataFromMINCFile(QString filename, vtkImageData *img , vtkMatrix4x4 *mat );
     bool GetPointsDataFromTagFile( QString filename, PointsObject *pts1, PointsObject *pts2 );
+
+    //Getting US acquisition files
+    bool GetFrameDataFromMINCFile( QString filename, vtkImageData *img , vtkMatrix4x4 *mat );
+    int GetNumberOfComponents( QString filename );
+    bool GetGrayFrame( QString filename, IbisItkUnsignedChar3ImageType::Pointer itkImage );
+    bool GetRGBFrame( QString filename, IbisRGBImageType::Pointer itkImage );
 
     void SetIbisAPI(IbisAPI *api );
 
