@@ -70,18 +70,6 @@ find_package(VTK ${IBIS_VTK_LONG_VERSION} EXACT
     IOXML IOLegacy IOPLY
     PATHS ${AutoVtkPath} )
 
-# Find vtkEncodeString utility executable. Look in built or installed dir structure
-set( vtkEncodeStringExeFile vtkEncodeString-${VTK_MAJOR_VERSION}.${VTK_MINOR_VERSION} )
-find_program( VTK_ENCODESTRING_EXE ${vtkEncodeStringExeFile} PATHS
-              ${VTK_DIR}/bin/
-              ${VTK_DIR}/bin/Debug/
-              ${VTK_DIR}/bin/Release/
-              ${VTK_INSTALL_PREFIX}/bin
-              NO_DEFAULT_PATH )
-if( NOT VTK_ENCODESTRING_EXE )
-    message( FATAL_ERROR "the vtkEncodeString executable could not be found in the VTK directory.")
-endif()
-
 #==================================================================
 # Look for ITK (required)
 #==================================================================
