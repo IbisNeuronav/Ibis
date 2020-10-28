@@ -585,6 +585,7 @@ bool USAcquisitionObject::LoadFramesFromMINCFile( QStringList & allMINCFiles )
     QProgressDialog * progress = new QProgressDialog("Importing frames", "Cancel", 0, allMINCFiles.count() );
     progress->setAttribute(Qt::WA_DeleteOnClose, true);
     progress->show();
+
     // First get all frames as ITK files, then convert to vtkImageData
     // Get the first frame to chck if it is RGB or Gray scale, from the first frame get also
     // calibration matrix, flag  telling if that matrix was applied, we don't bother with frame ID as it is a consecutive number
@@ -625,6 +626,14 @@ bool USAcquisitionObject::LoadFramesFromMINCFile( QStringList & allMINCFiles )
     }
 
     std::vector< std::string >  keys = dictionary.GetKeys();
+
+    std::string value="";
+    for( size_t i = 0; i < keys.size(); i++ )
+    {
+        const std::string & key = keys[i];
+        itk::MetaDataObjectBase *bs = dictionary[key];
+        itk::MetaDataObject<std::string> * str=dynamic_cast<itk::MetaDataObject<std::string> *>(bs);
+    }
 //    for( itk::MetaDataDictionary::ConstIterator it = dictionary.Begin(); it != dictionary.End(); ++it )
 //    {
 //        itk::MetaDataObjectBase *bs=(*it).second;
@@ -1075,7 +1084,7 @@ void USAcquisitionObject::ExportTrackedVideoBuffer(QString destDir , bool masked
                 double timestamp = m_videoBuffer->GetTimestamp( i );
                 itk::MetaDataDictionary & metaDict = itkSliceImage->GetMetaDataDictionary();
                 itk::EncapsulateMetaData< std::string >( metaDict, "acquisition:calibratioMatrix", calMatString.toUtf8().data() );
-                itk::EncapsulateMetaData< std::string >( metaDict, "acquisition:calibratioMatrixApplied", useCalibratedTransform?"true":"false" );
+                itk::EncapsulateMetaData< std::string >( metaDict, "acquisition:calibratioMatrixApplied", useCalibratedTransform?"1":"0" );
                 itk::EncapsulateMetaData< std::string >( metaDict, "acquisition:timestamp", QString::number( timestamp, 'f', 6 ).toUtf8().data() );
                 itk::EncapsulateMetaData< std::string >( metaDict, "acquisition:frameID", QString::number(sequenceNumber-1).toUtf8().data() );
                 mincWriter->SetInput( itkSliceImage );
@@ -1123,7 +1132,7 @@ void USAcquisitionObject::ExportTrackedVideoBuffer(QString destDir , bool masked
                 double timestamp = m_videoBuffer->GetTimestamp( i );
                 itk::MetaDataDictionary & metaDict = itkSliceImage->GetMetaDataDictionary();
                 itk::EncapsulateMetaData< std::string >( metaDict, "acquisition:calibratioMatrix", calMatString.toUtf8().data() );
-                itk::EncapsulateMetaData< std::string >( metaDict, "acquisition:calibratioMatrixApplied", useCalibratedTransform?"true":"false" );
+                itk::EncapsulateMetaData< std::string >( metaDict, "acquisition:calibratioMatrixApplied", useCalibratedTransform?"1":"0" );
                 itk::EncapsulateMetaData< std::string >( metaDict, "acquisition:timestamp", QString::number( timestamp, 'g', 6 ).toUtf8().data() );
                 itk::EncapsulateMetaData< std::string >( metaDict, "acquisition:frameID", QString::number(sequenceNumber-1).toUtf8().data() );
                 mincWriter->SetInput( itkSliceImage );
