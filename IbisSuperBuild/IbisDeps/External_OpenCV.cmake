@@ -22,4 +22,4 @@ ExternalProject_Add( ${opencv_name}
                -DWITH_CUDA:BOOL=FALSE
                -DWITH_VTK:BOOL=FALSE
                -DBUILD_opencv_python2:BOOL=FALSE
-               -DBUILD_opencv_python2:BOOL=FALSE )
+               -DBUILD_opencv_python3:BOOL=FALSE )
