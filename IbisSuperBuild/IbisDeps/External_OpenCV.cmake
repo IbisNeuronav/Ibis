@@ -20,4 +20,6 @@ ExternalProject_Add( ${opencv_name}
                -DBUILD_DOCS:BOOL=FALSE
                -DBUILD_FAT_JAVA_LIB:BOOL=FALSE
                -DWITH_CUDA:BOOL=FALSE
-               -DWITH_VTK:BOOL=FALSE )
+               -DWITH_VTK:BOOL=FALSE
+               -DBUILD_opencv_python2:BOOL=FALSE
+               -DBUILD_opencv_python3:BOOL=FALSE )
