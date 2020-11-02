@@ -692,24 +692,15 @@ bool USAcquisitionObject::LoadFramesFromMINCFile( QStringList & allMINCFiles )
 bool USAcquisitionObject::LoadGrayFrames( QStringList & allMINCFiles )
 {
     bool processOK = true;
-    QProgressDialog * progress = new QProgressDialog("Importing frames", "Cancel", 0, allMINCFiles.count() );
-    progress->setAttribute(Qt::WA_DeleteOnClose, true);
-    progress->show();
 
-    // First get all frames as ITK files, then convert to vtkImageData
-    // Get the first frame to chck if it is RGB or Gray scale, from the first frame get also
+    // Get the first frame and from it
     // calibration matrix, flag  telling if that matrix was applied, we don't bother with frame ID as it is a consecutive number
-    for( int i = 0; i < allMINCFiles.count(); ++i )
-    {
-        IbisItkUnsignedChar3ImageType::Pointer itkImage = IbisItkUnsignedChar3ImageType::New();
-        if( Application::GetInstance().GetGrayFrame( allMINCFiles.at(i),  itkImage ) )
-        {
-            m_grayFrames.push_back( itkImage );
-        }
-    }
+    IbisItkUnsignedChar3ImageType::Pointer itkImage = IbisItkUnsignedChar3ImageType::New();
+    if( !Application::GetInstance().GetGrayFrame( allMINCFiles.at(0),  itkImage ) )
+        return false;
     itk::MetaDataDictionary dictionary;
     //From the first frame find global data - acquisition:calibratioMatrix and acquisition:calibratioMatrixApplied
-    dictionary = m_grayFrames.at(0)->GetMetaDataDictionary();
+    dictionary = itkImage->GetMetaDataDictionary();
     std::string calMat, calMatUsed;;
     itk::ExposeMetaData< std::string >(dictionary,"acquisition:calibratioMatrix",calMat);
     // in reality, we do not need the calibration matrix from the frame, as it is loaded from USAcquisitionObject as m_calibrationTransform
@@ -720,38 +711,47 @@ bool USAcquisitionObject::LoadGrayFrames( QStringList & allMINCFiles )
             m_useCalibratedTransform = true;
     }
     // Now get all frames as vtkImageData and timestamps of frames.
+    QProgressDialog * progress = new QProgressDialog("Importing frames", "Cancel", 0, allMINCFiles.count() );
+    progress->setAttribute(Qt::WA_DeleteOnClose, true);
+    progress->show();
     IbisItkVtkConverter *ItktovtkConverter = IbisItkVtkConverter::New();
     for( int i = 0; i < allMINCFiles.count() && processOK; ++i )
     {
-        dictionary = m_grayFrames.at(i)->GetMetaDataDictionary();
-        std::string value;
-        double ts = 0.0;
-        if ( itk::ExposeMetaData< std::string >(dictionary,"acquisition:timestamp",value) )
-            ts = std::stod( value );
-        vtkTransform *tr =vtkTransform::New();
-        vtkSmartPointer<vtkImageData> frame = vtkSmartPointer<vtkImageData>::New();
-        frame = ItktovtkConverter->ConvertItkImageToVtkImage( m_grayFrames.at(i), tr );
-        // create full transform and reset image step and origin in order to avoid
-        // double translation and scaling and display slices correctly in double view
-        double start[3], step[3];
-        frame->GetOrigin( start );
-        frame->GetSpacing( step );
-        vtkSmartPointer<vtkTransform> localTransform = vtkSmartPointer<vtkTransform>::New();
-        localTransform->SetMatrix( tr->GetMatrix() );
-        localTransform->Translate( start );
-        localTransform->Scale( step );
-        frame->SetOrigin(0,0,0);
-        frame->SetSpacing(1,1,1);
-
-        m_videoBuffer->AddFrame( frame, localTransform->GetMatrix(), ts );
-
-        progress->setValue(i);
-        qApp->processEvents();
-        if ( progress->wasCanceled() )
+        IbisItkUnsignedChar3ImageType::Pointer itkImage = IbisItkUnsignedChar3ImageType::New();
+        if( Application::GetInstance().GetGrayFrame( allMINCFiles.at(i),  itkImage ) )
         {
-            QMessageBox::information(0, "Importing frames", "Process cancelled", 1, 0);
-            processOK = false;
+            dictionary = itkImage->GetMetaDataDictionary();
+            std::string value;
+            double ts = 0.0;
+            if ( itk::ExposeMetaData< std::string >(dictionary,"acquisition:timestamp",value) )
+                ts = std::stod( value );
+            vtkTransform *tr =vtkTransform::New();
+            vtkSmartPointer<vtkImageData> frame = vtkSmartPointer<vtkImageData>::New();
+            frame = ItktovtkConverter->ConvertItkImageToVtkImage( itkImage, tr );
+            // create full transform and reset image step and origin in order to avoid
+            // double translation and scaling and display slices correctly in double view
+            double start[3], step[3];
+            frame->GetOrigin( start );
+            frame->GetSpacing( step );
+            vtkSmartPointer<vtkTransform> localTransform = vtkSmartPointer<vtkTransform>::New();
+            localTransform->SetMatrix( tr->GetMatrix() );
+            localTransform->Translate( start );
+            localTransform->Scale( step );
+            frame->SetOrigin(0,0,0);
+            frame->SetSpacing(1,1,1);
+
+            m_videoBuffer->AddFrame( frame, localTransform->GetMatrix(), ts );
+
+            progress->setValue(i);
+            qApp->processEvents();
+            if ( progress->wasCanceled() )
+            {
+                QMessageBox::information(0, "Importing frames", "Process cancelled", 1, 0);
+                processOK = false;
+            }
         }
+        else
+            processOK = false;
     }
 
     ItktovtkConverter->Delete();
@@ -762,67 +762,69 @@ bool USAcquisitionObject::LoadGrayFrames( QStringList & allMINCFiles )
 bool USAcquisitionObject::LoadRGBFrames( QStringList & allMINCFiles )
 {
     bool processOK = true;
-    QProgressDialog * progress = new QProgressDialog("Importing frames", "Cancel", 0, allMINCFiles.count() );
-    progress->setAttribute(Qt::WA_DeleteOnClose, true);
-    progress->show();
 
-    // First get all frames as ITK files, then convert to vtkImageData
-    // Get the first frame to chck if it is RGB or Gray scale, from the first frame get also
+    // Get the first frame to find
     // calibration matrix, flag  telling if that matrix was applied, we don't bother with frame ID as it is a consecutive number
-    for( int i = 0; i < allMINCFiles.count(); ++i )
-    {
-        IbisRGBImageType::Pointer itkImage = IbisRGBImageType::New();
-        if( Application::GetInstance().GetRGBFrame( allMINCFiles.at(i),  itkImage ) )
-        {
-            m_RGBframes.push_back( itkImage );
-        }
-    }
+    IbisRGBImageType::Pointer itkImage = IbisRGBImageType::New();
+    if( !Application::GetInstance().GetRGBFrame( allMINCFiles.at(0),  itkImage ) )
+        return false;
     itk::MetaDataDictionary dictionary;
     //From the first frame find global data - acquisition:calibratioMatrix and acquisition:calibratioMatrixApplied
-    dictionary = m_RGBframes.at(0)->GetMetaDataDictionary();
+    dictionary = itkImage->GetMetaDataDictionary();
     std::string calMat, calMatUsed;;
     itk::ExposeMetaData< std::string >(dictionary,"acquisition:calibratioMatrix",calMat);
     // in reality, we do not need the calibration matrix from the frame, as it is loaded from USAcquisitionObject as m_calibrationTransform
     m_useCalibratedTransform = false;
+
     if( itk::ExposeMetaData< std::string >(dictionary,"acquisition:calibratioMatrixApplied",calMatUsed) )
     {
         if( calMat == "1" )
             m_useCalibratedTransform = true;
     }
     // Now get all frames as vtkImageData and timestamps of frames.
+    QProgressDialog * progress = new QProgressDialog("Importing frames", "Cancel", 0, allMINCFiles.count() );
+    progress->setAttribute(Qt::WA_DeleteOnClose, true);
+    progress->show();
+
     IbisItkVtkConverter *ItktovtkConverter = IbisItkVtkConverter::New();
     for( int i = 0; i < allMINCFiles.count() && processOK; ++i )
     {
-        dictionary = m_RGBframes.at(i)->GetMetaDataDictionary();
-        std::string value;
-        double ts = 0.0;
-        if ( itk::ExposeMetaData< std::string >(dictionary,"acquisition:timestamp",value) )
-            ts = std::stod( value );
-        vtkSmartPointer<vtkTransform> tr =vtkTransform::New();
-        vtkSmartPointer<vtkImageData> frame = vtkSmartPointer<vtkImageData>::New();
-        frame = ItktovtkConverter->ConvertItkImageToVtkImage( m_RGBframes.at(i), tr );
-        // create full transform and reset image step and origin in order to avoid
-        // double translation and scaling and display slices correctly in double view
-        double start[3], step[3];
-        frame->GetOrigin( start );
-        frame->GetSpacing( step );
-        vtkSmartPointer<vtkTransform> localTransform = vtkSmartPointer<vtkTransform>::New();
-        localTransform->SetMatrix( tr->GetMatrix() );
-        localTransform->Translate( start );
-        localTransform->Scale( step );
-        frame->SetOrigin(0,0,0);
-        frame->SetSpacing(1,1,1);
-
-        m_videoBuffer->AddFrame( frame, localTransform->GetMatrix(), ts );
-
-        progress->setValue(i);
-        qApp->processEvents();
-        if ( progress->wasCanceled() )
+        IbisRGBImageType::Pointer itkImage = IbisRGBImageType::New();
+        if( Application::GetInstance().GetRGBFrame( allMINCFiles.at(i),  itkImage ) )
         {
-            QMessageBox::information(0, "Importing frames", "Process cancelled", 1, 0);
-            processOK = false;
+            dictionary = itkImage->GetMetaDataDictionary();
+            std::string value;
+            double ts = 0.0;
+            if ( itk::ExposeMetaData< std::string >(dictionary,"acquisition:timestamp",value) )
+                ts = std::stod( value );
+            vtkSmartPointer<vtkTransform> tr =vtkTransform::New();
+            vtkSmartPointer<vtkImageData> frame = vtkSmartPointer<vtkImageData>::New();
+            frame = ItktovtkConverter->ConvertItkImageToVtkImage( itkImage, tr );
+            // create full transform and reset image step and origin in order to avoid
+            // double translation and scaling and display slices correctly in double view
+            double start[3], step[3];
+            frame->GetOrigin( start );
+            frame->GetSpacing( step );
+            vtkSmartPointer<vtkTransform> localTransform = vtkSmartPointer<vtkTransform>::New();
+            localTransform->SetMatrix( tr->GetMatrix() );
+            localTransform->Translate( start );
+            localTransform->Scale( step );
+            frame->SetOrigin(0,0,0);
+            frame->SetSpacing(1,1,1);
+
+            m_videoBuffer->AddFrame( frame, localTransform->GetMatrix(), ts );
+
+            progress->setValue(i);
+            qApp->processEvents();
+            if ( progress->wasCanceled() )
+            {
+                QMessageBox::information(0, "Importing frames", "Process cancelled", 1, 0);
+                processOK = false;
+            }
         }
-    }
+        else
+            processOK = false;
+     }
 
     ItktovtkConverter->Delete();
     progress->close();
