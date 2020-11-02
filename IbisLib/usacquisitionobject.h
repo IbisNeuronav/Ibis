@@ -171,6 +171,7 @@ protected:
     bool m_useCalibratedTransform;
     bool LoadGrayFrames( QStringList & allMINCFiles );
     bool LoadRGBFrames( QStringList & allMINCFiles );
+    void AdjustFrame(vtkImageData *frame, vtkMatrix4x4 *inputMatrix, vtkMatrix4x4 *outputMatrix );
 
     // 3D viewing data
     struct PerViewElements

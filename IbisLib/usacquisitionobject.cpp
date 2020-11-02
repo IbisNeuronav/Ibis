@@ -640,19 +640,12 @@ bool USAcquisitionObject::LoadGrayFrames( QStringList & allMINCFiles )
             vtkTransform *tr =vtkTransform::New();
             vtkSmartPointer<vtkImageData> frame = vtkSmartPointer<vtkImageData>::New();
             frame = ItktovtkConverter->ConvertItkImageToVtkImage( itkImage, tr );
+
             // create full transform and reset image step and origin in order to avoid
             // double translation and scaling and display slices correctly in double view
-            double start[3], step[3];
-            frame->GetOrigin( start );
-            frame->GetSpacing( step );
-            vtkSmartPointer<vtkTransform> localTransform = vtkSmartPointer<vtkTransform>::New();
-            localTransform->SetMatrix( tr->GetMatrix() );
-            localTransform->Translate( start );
-            localTransform->Scale( step );
-            frame->SetOrigin(0,0,0);
-            frame->SetSpacing(1,1,1);
-
-            m_videoBuffer->AddFrame( frame, localTransform->GetMatrix(), ts );
+            vtkSmartPointer<vtkMatrix4x4> outputMatrix = vtkSmartPointer<vtkMatrix4x4>::New();
+            this->AdjustFrame( frame,tr->GetMatrix(), outputMatrix );
+            m_videoBuffer->AddFrame( frame, outputMatrix, ts );
 
             progress->setValue(i);
             qApp->processEvents();
@@ -712,19 +705,12 @@ bool USAcquisitionObject::LoadRGBFrames( QStringList & allMINCFiles )
             vtkSmartPointer<vtkTransform> tr =vtkTransform::New();
             vtkSmartPointer<vtkImageData> frame = vtkSmartPointer<vtkImageData>::New();
             frame = ItktovtkConverter->ConvertItkImageToVtkImage( itkImage, tr );
+
             // create full transform and reset image step and origin in order to avoid
             // double translation and scaling and display slices correctly in double view
-            double start[3], step[3];
-            frame->GetOrigin( start );
-            frame->GetSpacing( step );
-            vtkSmartPointer<vtkTransform> localTransform = vtkSmartPointer<vtkTransform>::New();
-            localTransform->SetMatrix( tr->GetMatrix() );
-            localTransform->Translate( start );
-            localTransform->Scale( step );
-            frame->SetOrigin(0,0,0);
-            frame->SetSpacing(1,1,1);
-
-            m_videoBuffer->AddFrame( frame, localTransform->GetMatrix(), ts );
+            vtkSmartPointer<vtkMatrix4x4> outputMatrix = vtkSmartPointer<vtkMatrix4x4>::New();
+            this->AdjustFrame( frame,tr->GetMatrix(), outputMatrix );
+            m_videoBuffer->AddFrame( frame, outputMatrix, ts );
 
             progress->setValue(i);
             qApp->processEvents();
@@ -741,6 +727,20 @@ bool USAcquisitionObject::LoadRGBFrames( QStringList & allMINCFiles )
     ItktovtkConverter->Delete();
     progress->close();
     return processOK;
+}
+
+void USAcquisitionObject::AdjustFrame(vtkImageData *frame, vtkMatrix4x4 *inputMatrix , vtkMatrix4x4 *outputMatrix )
+{
+    double start[3], step[3];
+    frame->GetOrigin( start );
+    frame->GetSpacing( step );
+    vtkSmartPointer<vtkTransform> localTransform = vtkSmartPointer<vtkTransform>::New();
+    localTransform->SetMatrix( inputMatrix );
+    localTransform->Translate( start );
+    localTransform->Scale( step );
+    frame->SetOrigin(0,0,0);
+    frame->SetSpacing(1,1,1);
+    outputMatrix->DeepCopy( localTransform->GetMatrix() );
 }
 
 bool USAcquisitionObject::LoadFramesFromMINCFile( Serializer * ser )
