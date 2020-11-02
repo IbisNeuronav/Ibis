@@ -56,7 +56,6 @@ public:
     bool GetPointsDataFromTagFile( QString filename, PointsObject *pts1, PointsObject *pts2 );
 
     //Getting US acquisition files
-    bool GetFrameDataFromMINCFile( QString filename, vtkImageData *img , vtkMatrix4x4 *mat );
     int GetNumberOfComponents( QString filename );
     bool GetGrayFrame( QString filename, IbisItkUnsignedChar3ImageType::Pointer itkImage );
     bool GetRGBFrame( QString filename, IbisRGBImageType::Pointer itkImage );

@@ -1107,21 +1107,3 @@ bool Application::GetRGBFrame( QString filename, IbisRGBImageType::Pointer itkIm
     return ok;
 }
 
-bool Application::GetImageDataFromVideoFrame(QString fileName, vtkImageData *img, vtkMatrix4x4 *mat )
-{
-    Q_ASSERT(img);
-    Q_ASSERT(mat);
-    m_fileReader = new FileReader;
-    m_fileReader->SetIbisAPI( m_ibisAPI );
-    QFileInfo fi( fileName );
-    if( !(fi.isReadable()) )
-    {
-        QString message( "No read permission on file: " );
-        message.append( fileName );
-        QMessageBox::critical( nullptr, "Error", message, 1, 0 );
-        return false;
-    }
-    bool ok = m_fileReader->GetFrameDataFromMINCFile( fileName, img, mat );
-    delete m_fileReader;
-    return ok;
-}

@@ -167,7 +167,6 @@ public:
     int GetNumberOfComponents( QString filename );
     bool GetGrayFrame( QString filename, IbisItkUnsignedChar3ImageType::Pointer itkImage );
     bool GetRGBFrame( QString filename, IbisRGBImageType::Pointer itkImage );
-    bool GetImageDataFromVideoFrame(QString fileName, vtkImageData *img , vtkMatrix4x4 *mat );
 
     // Useful modal dialog
     QString GetFileNameOpen( const QString & caption = QString(), const QString & dir = QString(), const QString & filter = QString() );

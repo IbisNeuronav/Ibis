@@ -601,94 +601,6 @@ bool USAcquisitionObject::LoadFramesFromMINCFile( QStringList & allMINCFiles )
     return ok;
 }
 
-#if 0
-bool USAcquisitionObject::LoadFramesFromMINCFile( QStringList & allMINCFiles )
-{
-    bool processOK = true;
-    QProgressDialog * progress = new QProgressDialog("Importing frames", "Cancel", 0, allMINCFiles.count() );
-    progress->setAttribute(Qt::WA_DeleteOnClose, true);
-    progress->show();
-
-    itk::MetaDataDictionary dictionary;
-    for( int i = 0; i < allMINCFiles.count(); ++i )
-    {
-        if( m_componentsNumber == 1 )
-        {
-            IbisItkUnsignedChar3ImageType::Pointer itkImage = IbisItkUnsignedChar3ImageType::New();
-            if( Application::GetInstance().GetGrayFrame( allMINCFiles.at(0),  itkImage ) )
-            {
-                dictionary = itkImage->GetMetaDataDictionary();
-                m_grayFrames.push_back( itkImage );
-             }
-            else
-            {
-                return false;
-            }
-        }
-        else
-        {
-            IbisRGBImageType::Pointer itkImage = IbisRGBImageType::New();
-            if( Application::GetInstance().GetRGBFrame( allMINCFiles.at(0),  itkImage ) )
-            {
-                dictionary = itkImage->GetMetaDataDictionary();
-                m_RGBframes.push_back( itkImage );
-             }
-            else
-            {
-                return false;
-            }
-        }
-    }
-
-//    std::vector< std::string >  keys = dictionary.GetKeys();
-
-    std::string value;
-    itk::ExposeMetaData< std::string >(dictionary,"acquisition:timestamp",value);
-    for( int i = 0; i < allMINCFiles.count() && processOK; ++i )
-    {
-        QFileInfo fi( allMINCFiles.at(i) );
-        if( !(fi.isReadable()) )
-        {
-            QString message( tr("No read permission on file: ") );
-            message.append( allMINCFiles.at(i) );
-            QMessageBox::critical( 0, "Error", message, 1, 0 );
-            processOK = false;
-            break;
-        }
-        vtkSmartPointer<vtkImageData> frame = vtkSmartPointer<vtkImageData>::New();
-        vtkSmartPointer<vtkMatrix4x4> mat = vtkSmartPointer<vtkMatrix4x4>::New();
-        if ( Application::GetInstance().GetImageDataFromVideoFrame( allMINCFiles.at(i), frame, mat ) )
-        {
-            // create full transform and reset image step and origin in order to avoid
-            // double translation and scaling and display slices correctly in double view
-            double start[3], step[3];
-            frame->GetOrigin( start );
-            frame->GetSpacing( step );
-            vtkSmartPointer<vtkTransform> localTransform = vtkSmartPointer<vtkTransform>::New();
-            localTransform->SetMatrix( mat );
-            localTransform->Translate( start );
-            localTransform->Scale( step );
-            frame->SetOrigin(0,0,0);
-            frame->SetSpacing(1,1,1);
-
-            m_videoBuffer->AddFrame( frame, localTransform->GetMatrix() );
-
-            progress->setValue(i);
-            qApp->processEvents();
-            if ( progress->wasCanceled() )
-            {
-                QMessageBox::information(0, "Importing frames", "Process cancelled", 1, 0);
-                processOK = false;
-            }
-        }
-        else // if first file was not read in, the others won't neither
-            processOK = false;
-    }
-    progress->close();
-    return processOK;
-}
-#endif
-
 bool USAcquisitionObject::LoadGrayFrames( QStringList & allMINCFiles )
 {
     bool processOK = true;
@@ -797,14 +709,9 @@ bool USAcquisitionObject::LoadRGBFrames( QStringList & allMINCFiles )
             double ts = 0.0;
             if ( itk::ExposeMetaData< std::string >(dictionary,"acquisition:timestamp",value) )
                 ts = std::stod( value );
-            int frameID = 0;
-            if ( itk::ExposeMetaData< std::string >(dictionary,"acquisition:frameID",value) )
-                frameID = std::stoi( value );
             vtkSmartPointer<vtkTransform> tr =vtkTransform::New();
             vtkSmartPointer<vtkImageData> frame = vtkSmartPointer<vtkImageData>::New();
             frame = ItktovtkConverter->ConvertItkImageToVtkImage( itkImage, tr );
-            vtkIndent indent;
-            tr->GetMatrix()->PrintSelf( std::cout, indent );
             // create full transform and reset image step and origin in order to avoid
             // double translation and scaling and display slices correctly in double view
             double start[3], step[3];
