@@ -877,6 +877,9 @@ bool FileReader::GetGrayFrame( QString filename, IbisItkUnsignedChar3ImageType::
         ++outputIterator;
     }
     itkImage->SetMetaDataDictionary( reader->GetOutput()->GetMetaDataDictionary() );
+    itkImage->SetDirection( reader->GetOutput()->GetDirection() );
+    itkImage->SetOrigin( reader->GetOutput()->GetOrigin() );
+    itkImage->SetSpacing( reader->GetOutput()->GetSpacing() );
 
     return true;
 }
@@ -909,6 +912,9 @@ bool FileReader::GetRGBFrame( QString filename, IbisRGBImageType::Pointer itkIma
         ++outputIterator;
     }
     itkImage->SetMetaDataDictionary( reader->GetOutput()->GetMetaDataDictionary() );
+    itkImage->SetDirection( reader->GetOutput()->GetDirection() );
+    itkImage->SetOrigin( reader->GetOutput()->GetOrigin() );
+    itkImage->SetSpacing( reader->GetOutput()->GetSpacing() );
 
     return true;
 }

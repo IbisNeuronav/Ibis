@@ -797,9 +797,14 @@ bool USAcquisitionObject::LoadRGBFrames( QStringList & allMINCFiles )
             double ts = 0.0;
             if ( itk::ExposeMetaData< std::string >(dictionary,"acquisition:timestamp",value) )
                 ts = std::stod( value );
+            int frameID = 0;
+            if ( itk::ExposeMetaData< std::string >(dictionary,"acquisition:frameID",value) )
+                frameID = std::stoi( value );
             vtkSmartPointer<vtkTransform> tr =vtkTransform::New();
             vtkSmartPointer<vtkImageData> frame = vtkSmartPointer<vtkImageData>::New();
             frame = ItktovtkConverter->ConvertItkImageToVtkImage( itkImage, tr );
+            vtkIndent indent;
+            tr->GetMatrix()->PrintSelf( std::cout, indent );
             // create full transform and reset image step and origin in order to avoid
             // double translation and scaling and display slices correctly in double view
             double start[3], step[3];
