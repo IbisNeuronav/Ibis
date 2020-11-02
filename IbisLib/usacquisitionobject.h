@@ -168,8 +168,11 @@ protected:
 
     // Importing
     int m_componentsNumber;
+    bool m_useCalibratedTransform;
     QList<IbisItkUnsignedChar3ImageType::Pointer> m_grayFrames;
     QList<IbisRGBImageType::Pointer> m_RGBframes;
+    bool LoadGrayFrames( QStringList & allMINCFiles );
+    bool LoadRGBFrames( QStringList & allMINCFiles );
 
     // 3D viewing data
     struct PerViewElements

@@ -867,14 +867,14 @@ bool FileReader::GetGrayFrame( QString filename, IbisItkUnsignedChar3ImageType::
     itkImage->SetRegions(reader->GetOutput()->GetLargestPossibleRegion());
     itkImage->Allocate();
 
-    itk::ImageRegionConstIterator<IbisItkUnsignedChar3ImageType> inputIterator(itkImage, itkImage->GetLargestPossibleRegion());
-    itk::ImageRegionIterator<IbisItkUnsignedChar3ImageType>      outputIterator(reader->GetOutput(), reader->GetOutput()->GetLargestPossibleRegion());
+    itk::ImageRegionConstIterator<IbisItkUnsignedChar3ImageType> outputIterator(reader->GetOutput(), reader->GetOutput()->GetLargestPossibleRegion());
+    itk::ImageRegionIterator<IbisItkUnsignedChar3ImageType>      inputIterator(itkImage, itkImage->GetLargestPossibleRegion());
 
     while (!inputIterator.IsAtEnd())
     {
-      outputIterator.Set(inputIterator.Get());
-      ++inputIterator;
-      ++outputIterator;
+        inputIterator.Set(outputIterator.Get());
+        ++inputIterator;
+        ++outputIterator;
     }
     itkImage->SetMetaDataDictionary( reader->GetOutput()->GetMetaDataDictionary() );
 
@@ -899,14 +899,14 @@ bool FileReader::GetRGBFrame( QString filename, IbisRGBImageType::Pointer itkIma
     itkImage->SetRegions(reader->GetOutput()->GetLargestPossibleRegion());
     itkImage->Allocate();
 
-    itk::ImageRegionConstIterator<IbisRGBImageType> inputIterator(itkImage, itkImage->GetLargestPossibleRegion());
-    itk::ImageRegionIterator<IbisRGBImageType>      outputIterator(reader->GetOutput(), reader->GetOutput()->GetLargestPossibleRegion());
+    itk::ImageRegionConstIterator<IbisRGBImageType> outputIterator(reader->GetOutput(), reader->GetOutput()->GetLargestPossibleRegion());
+    itk::ImageRegionIterator<IbisRGBImageType>      inputIterator(itkImage, itkImage->GetLargestPossibleRegion());
 
     while (!inputIterator.IsAtEnd())
     {
-      outputIterator.Set(inputIterator.Get());
-      ++inputIterator;
-      ++outputIterator;
+        inputIterator.Set(outputIterator.Get());
+        ++inputIterator;
+        ++outputIterator;
     }
     itkImage->SetMetaDataDictionary( reader->GetOutput()->GetMetaDataDictionary() );
 
