@@ -75,7 +75,6 @@ public:
     void    SetBaseDirectory(QString dir) {m_baseDirectory = dir;}
     QString GetBaseDirectory() {return m_baseDirectory;}
     void    ExportTrackedVideoBuffer(QString destDir = "", bool masked = false , bool useCalibratedTransform = false, int relativeToID = SceneManager::InvalidId );
-    bool    LoadFramesFromMINCFile( QStringList & allMINCFiles );
     bool    LoadFramesFromMINCFile( Serializer * ser );
 
     virtual void CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets) override;
@@ -169,6 +168,7 @@ protected:
     // Importing
     int m_componentsNumber;
     bool m_useCalibratedTransform;
+    bool LoadFramesFromMINCFile( QStringList & allMINCFiles );
     bool LoadGrayFrames( QStringList & allMINCFiles );
     bool LoadRGBFrames( QStringList & allMINCFiles );
     void AdjustFrame(vtkImageData *frame, vtkMatrix4x4 *inputMatrix, vtkMatrix4x4 *outputMatrix );
