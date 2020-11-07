@@ -18,6 +18,8 @@ foreach (shader_file IN LISTS LibGlsl)
   list(APPEND LibGlslSrc ${shader_file} ${shader_h} ${shader_cxx})
 endforeach ()
 
+find_package(VTK REQUIRED NO_MODULE COMPONENTS FiltersCore )
+
 # define sources
 set( PluginSrc  PRISMVolumeRenderPluginInterface.cpp
                 volumerenderingobject.cpp
@@ -48,3 +50,5 @@ set( PluginUi   volumerenderingobjectsettingswidget.ui
 
 # Create plugin
 DefinePlugin( "${PluginSrc}" "${PluginHdr}" "${PluginHdrMoc}" "${PluginUi}" )
+
+target_link_libraries( ${PluginName} ${VTK_LIBRARIES} )

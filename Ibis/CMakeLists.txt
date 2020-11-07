@@ -98,6 +98,9 @@ TARGET_LINK_LIBRARIES( ${exec_name} ${PluginLibs} ${PluginExternalLibs} ${Hardwa
                                     ${itkLibsToUse} ${OpenCV_LIBS} ${flycaptureLib} svl ${gpuLibs} )
 qt5_use_modules( ${exec_name} ${IbisQtModules} )
 
+vtk_module_autoinit( TARGETS ${exec_name} MODULES ${VTK_LIBRARIES})
+
+
 #================================
 # Define git hash variable
 #================================

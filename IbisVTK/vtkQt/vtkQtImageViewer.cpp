@@ -19,7 +19,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <vtkInteractorStyleImage.h>
 #include <vtkImageData.h>
 
-vtkQtImageViewer::vtkQtImageViewer( QWidget * parent ) : QVTKWidget( parent )
+vtkQtImageViewer::vtkQtImageViewer( QWidget * parent ) : QVTKRenderWidget( parent )
 {
     m_actor = vtkImageActor::New();
     m_actor->InterpolateOff();

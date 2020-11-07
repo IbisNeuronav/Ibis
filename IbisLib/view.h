@@ -17,6 +17,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QObject>
 #include "serializer.h"
 #include <vtkSmartPointer.h>
+#include <QVTKRenderWidget.h>
 
 class ViewInteractor;
 class vtkInteractorStyle;
@@ -29,7 +30,6 @@ class vtkEventQtSlotConnect;
 class SceneManager;
 class SceneObject;
 template< class T > class vtkObjectCallback;
-class vtkQtRenderWindow;
 
 #define CtrlModifier (unsigned(1))
 #define ShiftModifier (unsigned(2))
@@ -74,8 +74,8 @@ public:
     vtkGetMacro(Type,int);
     void SetType( int type );
 
-    vtkQtRenderWindow * GetQtRenderWindow();
-    void SetQtRenderWindow( vtkQtRenderWindow * w );
+    QVTKRenderWidget * GetQtRenderWidget();
+    void SetQtRenderWidget( QVTKRenderWidget * w );
 
     // Control rendering of the view
     void Render();
@@ -145,7 +145,7 @@ protected:
     void Reset2DView();
 
     QString Name;
-    vtkQtRenderWindow * RenderWindow;
+    QVTKRenderWidget * RenderWidget;
     bool m_renderingEnabled;
     vtkSmartPointer<vtkRenderWindowInteractor> Interactor;
     vtkSmartPointer<vtkRenderer> Renderer;

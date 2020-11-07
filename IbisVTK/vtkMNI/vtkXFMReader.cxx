@@ -15,6 +15,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <sstream>
 #include "stringtools.h"
 
+using namespace std;
+
 vtkXFMReader * vtkXFMReader::New()
 {
     return new vtkXFMReader();

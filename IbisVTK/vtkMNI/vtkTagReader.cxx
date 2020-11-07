@@ -11,7 +11,10 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "vtkTagReader.h"
 #include <vtkPoints.h>
 #include <sstream>
+#include <fstream>
 #include "stringtools.h"
+
+using namespace std;
 
 vtkTagReader * vtkTagReader::New()
 {

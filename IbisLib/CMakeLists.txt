@@ -1,5 +1,20 @@
 PROJECT( IBISLIB )
 
+find_package(VTK REQUIRED NO_MODULE COMPONENTS
+    IOLegacy
+    IOXML
+    IOGeometry
+    IOPLY
+    IOImage
+    FiltersModeling
+    FiltersTexture
+    RenderingVolume
+    RenderingFreeType
+    RenderingAnnotation
+    ImagingStencil
+    ImagingColor
+    ImagingGeneral )
+
 #================================
 # Define source files
 #================================
@@ -181,7 +196,10 @@ qt5_add_resources( IBISLIB_RCC_SRC ${IBISLIB_RCC})
 set( IBISLIB_all_src ${IBISLIB_SRC} ${IBISLIB_MOC} ${IBISLIB_HDR} ${IBISLIB_HDR_MOC} ${IBISLIB_HDR_UI} ${IBISLIB_RCC_SRC} )
 ADD_LIBRARY( IbisLib ${IBISLIB_all_src})
 
-target_link_libraries( IbisLib svl vtkQt vtkMNI vtkExtensions)
+target_link_libraries( IbisLib svl vtkQt vtkMNI vtkExtensions ${VTK_LIBRARIES} )
+
+vtk_module_autoinit( TARGETS IbisLib MODULES ${VTK_LIBRARIES})
+
 add_dependencies( IbisLib check_git_repository )
 target_include_directories( IbisLib PUBLIC  ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/gui
     PRIVATE ${ibis_BINARY_DIR} )

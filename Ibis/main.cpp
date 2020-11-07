@@ -17,13 +17,17 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "mainwindow.h"
 #include "commandlinearguments.h"
 #include <vtkObject.h>
+#include <QVTKRenderWidget.h>
 
 int main( int argc, char** argv )
 {
     // Disable VTK warnings unless not wanted
 #ifdef VTK_NO_WARNINGS
-    //vtkObject::SetGlobalWarningDisplay( 0 );
+    vtkObject::SetGlobalWarningDisplay( 1 );
 #endif
+
+    // Set default format for render windows - Warning: has to be done before QApplication instanciation
+    QSurfaceFormat::setDefaultFormat(QVTKRenderWidget::defaultFormat());
 
     // Create Qt app
     QApplication a( argc, argv );
