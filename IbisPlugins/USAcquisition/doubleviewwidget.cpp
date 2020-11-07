@@ -18,7 +18,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "hardwaremodule.h"
 #include "guiutilities.h"
 
-#include <QVTKWidget.h>
 #include <vtkRenderWindowInteractor.h>
 #include <vtkRenderWindow.h>
 #include <vtkRenderer.h>

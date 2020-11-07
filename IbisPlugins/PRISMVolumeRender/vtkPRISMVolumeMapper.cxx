@@ -771,7 +771,7 @@ bool vtkPRISMVolumeMapper::SetCameraMatrices( vtkRenderer * ren, GlslShader * s 
     vtkOpenGLCamera * cam = vtkOpenGLCamera::SafeDownCast( ren->GetActiveCamera() );
     if( !ren )
     {
-        vtkErrorMacro(<<"vtkPRISMVolumeMapper: this mapper only works with OpenGL.")
+        vtkErrorMacro(<<"vtkPRISMVolumeMapper: this mapper only works with OpenGL.");
         return false;
     }
 

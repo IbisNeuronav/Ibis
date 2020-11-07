@@ -22,7 +22,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <vtkEventQtSlotConnect.h>
 #include <vtkRendererCollection.h>
 #include <vtkObjectCallback.h>
-#include "vtkqtrenderwindow.h"
 #include "vtkMatrix4x4Operators.h"
 #include "scenemanager.h"
 #include "sceneobject.h"
@@ -39,7 +38,7 @@ View::View()
 {
     this->Name = "";
     this->SetName( DefaultViewNames[THREED_VIEW_TYPE] );
-    this->RenderWindow = 0;
+    this->RenderWidget = 0;
     this->m_renderingEnabled = true;
     this->InteractorStyle = vtkSmartPointer<vtkInteractorStyleTerrain>::New();
     this->Picker = vtkCellPicker::New();
@@ -170,17 +169,17 @@ void View::SetType( int type )
     }
 }
 
-vtkQtRenderWindow * View::GetQtRenderWindow()
+QVTKRenderWidget * View::GetQtRenderWidget()
 {
-    return this->RenderWindow;
+    return this->RenderWidget;
 }
 
 
-void View::SetQtRenderWindow( vtkQtRenderWindow * w )
+void View::SetQtRenderWidget( QVTKRenderWidget * w )
 {
-    if( w == this->RenderWindow )
+    if( w == this->RenderWidget )
         return;
-    this->RenderWindow = w;
+    this->RenderWidget = w;
 }
 
 void View::Render()
@@ -193,8 +192,9 @@ void View::SetRenderingEnabled( bool b )
     if( m_renderingEnabled == b )
         return;
     m_renderingEnabled = b;
-    if( this->RenderWindow )
-        this->RenderWindow->SetRenderingEnabled( m_renderingEnabled );
+    // TODO: this mechanism to disable rendering is broken by the transition to VTK > 9, where we use QVTKRenderWidget instead of QVTKWidget. Find a new way to achieve the same result
+    //if( this->RenderWindow )
+    //    this->RenderWindow->SetRenderingEnabled( m_renderingEnabled );
     if( m_renderingEnabled )
         NotifyNeedRender();
 }
@@ -231,7 +231,7 @@ void View::SetInteractor( vtkRenderWindowInteractor * interactor )
 
     // Make sure widget and other interactor observers don't call render directly, but instead, request a
     // render to the view. This will allow Qt to concatenate render requests.
-    this->Interactor->EnableRenderOff();
+    //this->Interactor->EnableRenderOff();
     this->EventObserver->Connect( this->Interactor, vtkCommand::RenderEvent, this, SLOT(NotifyNeedRender()) );
 
     this->Interactor->AddObserver( vtkCommand::KeyPressEvent, this->InteractionCallback, this->Priority );
@@ -340,12 +340,12 @@ void View::ReleaseControl( ViewController * c )
 
 void View::Fullscreen()
 {
-    Q_ASSERT( this->RenderWindow );
-    Q_ASSERT( !this->RenderWindow->isFullScreen() );
+    Q_ASSERT( this->RenderWidget );
+    Q_ASSERT( !this->RenderWidget->isFullScreen() );
 
-    m_backupWindowParent = this->RenderWindow->parent();
-    this->RenderWindow->setParent( 0 );
-    this->RenderWindow->showFullScreen();
+    m_backupWindowParent = this->RenderWidget->parent();
+    this->RenderWidget->setParent( 0 );
+    this->RenderWidget->showFullScreen();
 }
 
 void View::AddInteractionObject( ViewInteractor * obj, double priority )
@@ -367,15 +367,15 @@ void View::RemoveInteractionObject( ViewInteractor * obj )
     }
 }
 
-void View::ProcessInteractionEvents( vtkObject * caller, unsigned long event, void * calldata )
+void View::ProcessInteractionEvents( vtkObject * /*caller*/, unsigned long event, void * /*calldata*/ )
 {
     // if in fullscreen mode, get back if ESC key is pressed
     if( event == vtkCommand::KeyPressEvent && this->Interactor->GetKeyCode() == 27 )
     {
-        if( this->RenderWindow->isFullScreen() )
+        if( this->RenderWidget->isFullScreen() )
         {
-            this->RenderWindow->setParent( qobject_cast<QWidget*>(m_backupWindowParent) );
-            this->RenderWindow->showNormal();
+            this->RenderWidget->setParent( qobject_cast<QWidget*>(m_backupWindowParent) );
+            this->RenderWidget->showNormal();
         }
     }
 
@@ -480,7 +480,7 @@ void View::SetBackgroundColor( double * color )
 
 int * View::GetWindowSize( )
 {
-    return this->RenderWindow->GetRenderWindow()->GetSize();
+    return this->RenderWidget->GetRenderWindow()->GetSize();
 }
 
 void View::ResetCamera()

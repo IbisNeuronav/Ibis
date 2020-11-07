@@ -22,6 +22,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <vtkPNGReader.h>
 #include <vtkDoubleArray.h>
 #include <vtkPoints.h>
+#include <vtkTexture.h>
 
 #include <vtkTextureMapToPlane.h>
 #include <vtkTextureMapToSphere.h>

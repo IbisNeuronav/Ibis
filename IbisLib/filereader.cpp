@@ -14,7 +14,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <vtkPolyDataReader.h>
 #include <vtkProperty.h>
 #include <vtkXMLPolyDataReader.h>
-#include <vtkOBJReader2.h>
+#include <vtkOBJReader.h>
 #include <vtkPLYReader.h>
 #include <vtkDataObjectReader.h>
 #include <vtkStructuredPointsReader.h>
@@ -571,7 +571,7 @@ bool FileReader::OpenObjFile( QList<SceneObject*> & readObjects, QString filenam
 
 bool FileReader::OpenWavObjFile( QList<SceneObject*> & readObjects, QString filename, const QString & dataObjectName )
 {
-    vtkOBJReader2 * reader = vtkOBJReader2::New();
+    vtkOBJReader * reader = vtkOBJReader::New();
     reader->SetFileName( filename.toUtf8().data() );
 
     // Read file and monito progress

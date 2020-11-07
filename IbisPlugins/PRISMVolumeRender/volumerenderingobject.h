@@ -54,7 +54,7 @@ public:
     virtual void CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets) override {}
 
     // Use picking to set interaction point
-    bool Pick( View * v, int x, int y, double pickedPos[3] );
+    bool Pick( View * v, int x, int y, double pickedPos[3] ) override;
     virtual bool OnLeftButtonPressed( View * v, int x, int y, unsigned modifiers ) override;
     bool GetPickPos() { return m_pickPos; }
     void SetPickPos( bool set );

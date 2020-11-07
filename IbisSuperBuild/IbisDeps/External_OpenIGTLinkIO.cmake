@@ -5,8 +5,8 @@ ExternalProject_Add( ${openigtlinkio_name}
   BINARY_DIR ${openigtlinkio_prefix}/build
   STAMP_DIR ${openigtlinkio_prefix}/stamp
   INSTALL_COMMAND ""
-  GIT_REPOSITORY "git://github.com/IGSIO/OpenIGTLinkIO.git"
-  GIT_TAG master
+  GIT_REPOSITORY "git://github.com/IbisNeuronav/OpenIGTLinkIO.git"
+  GIT_TAG build-with-vtk-9-0-1-macos
   CMAKE_ARGS -DCMAKE_OSX_SYSROOT:PATH=${CMAKE_OSX_SYSROOT}
              -DCMAKE_OSX_DEPLOYMENT_TARGET:STRING=${CMAKE_OSX_DEPLOYMENT_TARGET}
              -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}

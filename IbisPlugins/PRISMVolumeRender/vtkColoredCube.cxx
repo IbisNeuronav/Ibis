@@ -20,6 +20,12 @@
 #include "vtkPlane.h"
 #include "vtkPlaneCollection.h"
 #include "vtkColorPolyData.h"
+#include "vtkTriangleFilter.h"
+#include "vtkUnsignedIntArray.h"
+#include "vtkPointData.h"
+#include "vtkCamera.h"
+#include "vtkRenderer.h"
+#include "vtkMatrix4x4.h"
 
 vtkStandardNewMacro(vtkColoredCube);
 
@@ -325,7 +331,7 @@ void vtkColoredCube::UpdateGeometry( vtkRenderer * ren, vtkMatrix4x4  *mat )
     vtkCellArray * cells = cubePoly->GetPolys();
     BoxIndices->SetNumberOfTuples( 0 );
     vtkIdType npts;
-    vtkIdType *pts;
+    const vtkIdType *pts;
     cells->InitTraversal();
     while(cells->GetNextCell(npts, pts))
     {
