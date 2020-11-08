@@ -9,6 +9,7 @@ find_package(VTK REQUIRED NO_MODULE COMPONENTS
     FiltersModeling
     FiltersTexture
     RenderingVolume
+    RenderingVolumeOpenGL2
     RenderingFreeType
     RenderingAnnotation
     ImagingStencil
