@@ -229,11 +229,6 @@ void View::SetInteractor( vtkRenderWindowInteractor * interactor )
     // Add observer to know when the window starts rendering ( to reset clipping range )
     this->EventObserver->Connect( this->Interactor->GetRenderWindow(), vtkCommand::StartEvent, this, SLOT(WindowStartsRendering()) );
 
-    // Make sure widget and other interactor observers don't call render directly, but instead, request a
-    // render to the view. This will allow Qt to concatenate render requests.
-    //this->Interactor->EnableRenderOff();
-    this->EventObserver->Connect( this->Interactor, vtkCommand::RenderEvent, this, SLOT(NotifyNeedRender()) );
-
     this->Interactor->AddObserver( vtkCommand::KeyPressEvent, this->InteractionCallback, this->Priority );
     this->Interactor->AddObserver( vtkCommand::LeftButtonPressEvent, this->InteractionCallback, this->Priority );
     this->Interactor->AddObserver( vtkCommand::LeftButtonReleaseEvent, this->InteractionCallback, this->Priority );
@@ -517,8 +512,13 @@ void View::SetViewAngle( double angle )
 
 void View::NotifyNeedRender()
 {
-    if( m_renderingEnabled )
-        emit ViewModified();
+    if( m_renderingEnabled && this->Interactor )
+    {
+        // Temp solution: call Interactor::Render directly. There should be a mechanism
+        // to cache render requests and never do it more than once everytime a Qt event is processed
+        this->Interactor->Render();
+    }
+
 }
 
 void View::ReferenceTransformChanged()

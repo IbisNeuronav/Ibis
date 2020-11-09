@@ -2047,6 +2047,7 @@ void vtkMultiImagePlaneWidget::UpdateCursor()
     cursorPts->SetPoint(1,b);
     cursorPts->SetPoint(2,c);
     cursorPts->SetPoint(3,d);
+    cursorPts->Modified();
 
     this->CursorPolyData->Modified();
 }
