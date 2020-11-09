@@ -55,13 +55,6 @@ public slots:
     void Detach3DView( QWidget * parent );
     void Attach3DView();
     
-    void Win0NeedsRender();
-    void Win1NeedsRender();
-    void Win2NeedsRender();
-    void Win3NeedsRender();
-    
-    void RenderAll();
-    
     void ZoomInButtonClicked();
     void ZoomOutButtonClicked();
     void ResetCameraButtonClicked();
@@ -82,9 +75,7 @@ public slots:
 protected:
 
     QAbstractButton * CreateToolButton( QWidget * parent, QString name, QString iconPath, QString toolTip, const char * callbackSlot );
-    void MakeOneView( int index, const char * name );
-
-    void WinNeedsRender( int winIndex );
+    void MakeOneWidget( int index, const char * name );
 
     // reimplemented from QObject. Filters event sent to children. Used to track focus
     bool eventFilter(QObject *obj, QEvent *event);

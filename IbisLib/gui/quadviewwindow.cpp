@@ -24,6 +24,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QSettings>
 
 #include <QVTKRenderWidget.h>
+#include <QVTKInteractor.h>
 #include <vtkGenericOpenGLRenderWindow.h>
 #include <vtkRenderer.h>
 #include <vtkRenderWindowInteractor.h>
@@ -93,10 +94,10 @@ QuadViewWindow::QuadViewWindow( QWidget* parent, Qt::WindowFlags fl ) : QWidget(
     m_viewWindowsLayout->setContentsMargins( 1, 1, 1, 1 );
     m_viewWindowsLayout->setSpacing( 1 );
 
-    MakeOneView( 0, "UpperLeftView" );
-    MakeOneView( 1, "UpperRightView" );
-    MakeOneView( 2, "LowerLeftView" );
-    MakeOneView( 3, "LowerRightView" );
+    MakeOneWidget( 0, "UpperLeftView" );
+    MakeOneWidget( 1, "UpperRightView" );
+    MakeOneWidget( 2, "LowerLeftView" );
+    MakeOneWidget( 3, "LowerRightView" );
 
     // An empty frame for plugins to add custom widgets at the bottom
     m_bottomWidgetFrame = new QFrame( this );
@@ -125,7 +126,7 @@ QAbstractButton * QuadViewWindow::CreateToolButton( QWidget * parent, QString na
     return button;
 }
 
-void QuadViewWindow::MakeOneView( int index, const char * name )
+void QuadViewWindow::MakeOneWidget( int index, const char * name )
 {
     m_vtkWindowFrames[index] = new QFrame( this );
     m_vtkWindowFrames[index]->setFrameShape( QFrame::NoFrame );
@@ -169,7 +170,6 @@ QuadViewWindow::~QuadViewWindow()
 {
 }
 
-#include <QVTKInteractor.h>
 void QuadViewWindow::SetSceneManager( SceneManager * man )
 {
     Q_ASSERT( man );
@@ -177,25 +177,21 @@ void QuadViewWindow::SetSceneManager( SceneManager * man )
     view = man->CreateView( TRANSVERSE_VIEW_TYPE, ViewNames[0], TRANSVERSE_VIEW_ID );
     view->SetQtRenderWidget( m_vtkWidgets[0] );
     view->SetInteractor( m_vtkWidgets[0]->GetInteractor() );
-    connect( view, SIGNAL( ViewModified() ), this, SLOT( Win0NeedsRender() ) );
     man->SetMainTransverseViewID( TRANSVERSE_VIEW_ID );
 
     view = man->CreateView( THREED_VIEW_TYPE, ViewNames[1], THREED_VIEW_ID );
     view->SetQtRenderWidget( m_vtkWidgets[1] );
     view->SetInteractor( m_vtkWidgets[1]->GetInteractor() );
-    connect( view, SIGNAL( ViewModified() ), this, SLOT( Win1NeedsRender() ) );
     man->SetMain3DViewID( THREED_VIEW_ID );
 
     view = man->CreateView( CORONAL_VIEW_TYPE, ViewNames[2], CORONAL_VIEW_ID );
     view->SetQtRenderWidget( m_vtkWidgets[2] );
     view->SetInteractor( m_vtkWidgets[2]->GetInteractor() );
-    connect( view, SIGNAL( ViewModified() ), this, SLOT( Win2NeedsRender() ) );
     man->SetMainCoronalViewID( CORONAL_VIEW_ID );
 
     view = man->CreateView( SAGITTAL_VIEW_TYPE, ViewNames[3], SAGITTAL_VIEW_ID );
     view->SetQtRenderWidget( m_vtkWidgets[3] );
     view->SetInteractor( m_vtkWidgets[3]->GetInteractor() );
-    connect( view, SIGNAL( ViewModified() ), this, SLOT( Win3NeedsRender() ) );
     man->SetMainSagittalViewID( SAGITTAL_VIEW_ID );
 
     m_sceneManager = man;
@@ -223,7 +219,7 @@ void QuadViewWindow::RemoveBottomWidget( QWidget * w )
 
 #include <QDesktopWidget>
 
-void QuadViewWindow::Detach3DView( QWidget * parent )
+void QuadViewWindow::Detach3DView( QWidget * /*parent*/ )
 {
     Q_ASSERT( !m_detachedWidget );
 
@@ -250,40 +246,19 @@ void QuadViewWindow::Attach3DView()
     m_detachedWidget = 0;
 }
 
-void QuadViewWindow::Win0NeedsRender() { this->WinNeedsRender( 0 ); }
-void QuadViewWindow::Win1NeedsRender() { this->WinNeedsRender( 1 ); }
-void QuadViewWindow::Win2NeedsRender() { this->WinNeedsRender( 2 ); }
-void QuadViewWindow::Win3NeedsRender() { this->WinNeedsRender( 3 ); }
-
-void QuadViewWindow::WinNeedsRender( int winIndex )
-{
-    m_vtkWidgets[ winIndex ]->update();
-}
-
 void QuadViewWindow::ZoomInButtonClicked()
 {
     m_sceneManager->ZoomAllCameras( 1.5 );
-    this->RenderAll();
 }
 
 void QuadViewWindow::ZoomOutButtonClicked()
 {
     m_sceneManager->ZoomAllCameras( .75 );
-    this->RenderAll();
 }
 
 void QuadViewWindow::ResetCameraButtonClicked()
 {
     m_sceneManager->ResetAllCameras();
-    this->RenderAll();
-}
-
-void QuadViewWindow::RenderAll()
-{
-    for( int i = 0; i < 4; i++ )
-    {
-        m_vtkWidgets[i]->update();
-    }
 }
 
 void QuadViewWindow::ExpandViewButtonClicked()

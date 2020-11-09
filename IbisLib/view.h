@@ -112,10 +112,6 @@ public:
 
     void WorldToWindow( double world[3], double & xWin, double & yWin );
 
-signals:
-
-    void ViewModified();
-
 public slots:
 
     // Description:
