@@ -23,7 +23,7 @@ int main( int argc, char** argv )
 {
     // Disable VTK warnings unless not wanted
 #ifdef VTK_NO_WARNINGS
-    vtkObject::SetGlobalWarningDisplay( 1 );
+    vtkObject::SetGlobalWarningDisplay( 0 );
 #endif
 
     // Set default format for render windows - Warning: has to be done before QApplication instanciation
