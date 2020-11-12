@@ -145,8 +145,7 @@ void vtkOffscreenCamera::Render(vtkRenderer *ren)
   // insert camera view transformation
   glMultMatrixd(matrix->Element[0]);
 
-  if ((ren->GetRenderWindow())->GetErase() && ren->GetErase()
-          && !ren->GetIsPicking())
+  if ((ren->GetRenderWindow())->GetErase() && ren->GetErase())
   {
       ren->Clear();
   }
