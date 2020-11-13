@@ -18,6 +18,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QUrl>
 #include <QDateTime>
 #include <vtkOpenGLRenderWindow.h>
+#include <vtk_glew.h>
 #include <vtkImageImport.h>
 #include <vtkPNGWriter.h>
 #include <vtkRenderer.h>

@@ -28,7 +28,6 @@ vtkStandardNewMacro(vtkOffscreenCamera);
 // Implement base class method.
 void vtkOffscreenCamera::Render(vtkRenderer *ren)
 {
-  double aspect[2];
   int  lowerLeft[2] = { 0, 0 };
   int usize, vsize;
   vtkMatrix4x4 *matrix = vtkMatrix4x4::New();
