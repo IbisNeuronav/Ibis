@@ -30,6 +30,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <vtkImageData.h>
 #include <vtkImageStack.h>
 #include <vtkImageProperty.h>
+#include <vtkImageSliceMapper.h>
+#include <vtkImageSlice.h>
 #include <vtkLineSource.h>
 #include <vtkPolyDataMapper.h>
 #include <vtkProperty.h>
@@ -55,7 +57,7 @@ DoubleViewWidget::DoubleViewWidget( QWidget * parent, Qt::WindowFlags f ) :
     usInteractor->SetInteractorStyle( style );
 
     m_usRenderer = vtkSmartPointer<vtkRenderer>::New();
-    ui->usImageWindow->GetRenderWindow()->AddRenderer( m_usRenderer );
+    ui->usImageWindow->renderWindow()->AddRenderer( m_usRenderer );
 
     m_usActor = vtkSmartPointer<vtkImageActor>::New();
     m_usActor->InterpolateOff();
@@ -67,6 +69,7 @@ DoubleViewWidget::DoubleViewWidget( QWidget * parent, Qt::WindowFlags f ) :
     m_reslice->SetOutputExtent(0, ui->usImageWindow->width()-1, 0, ui->usImageWindow->height()-1, 0, 1);
     m_reslice->SetOutputSpacing( 1.0, 1.0, 1.0 );
     m_reslice->SetOutputOrigin( 0.0, 0.0, 0.0 );
+    m_reslice->SetOutputFormatToRGB();
 
     // put one more for the second MRI
     m_reslice2 = vtkSmartPointer<vtkImageResliceToColors>::New();  // set up the reslice2
@@ -74,6 +77,7 @@ DoubleViewWidget::DoubleViewWidget( QWidget * parent, Qt::WindowFlags f ) :
     m_reslice2->SetOutputExtent(0, ui->usImageWindow->width()-1, 0, ui->usImageWindow->height()-1, 0, 1);
     m_reslice2->SetOutputSpacing( 1.0, 1.0, 1.0 );
     m_reslice2->SetOutputOrigin( 0.0, 0.0, 0.0 );
+    m_reslice2->SetOutputFormatToLuminance();
 
     m_imageMask = vtkSmartPointer<vtkImageMask>::New();
     m_imageMask->SetInputConnection( m_reslice->GetOutputPort() );
@@ -85,7 +89,9 @@ DoubleViewWidget::DoubleViewWidget( QWidget * parent, Qt::WindowFlags f ) :
     m_vol2Slice->GetMapper()->SetInputConnection( m_reslice2->GetOutputPort() );
     m_vol2Slice->GetProperty()->SetLayerNumber( 1 );
     m_vol2Slice->VisibilityOff();
-    m_usSlice = vtkSmartPointer<vtkImageActor>::New();
+    m_usSlice = vtkSmartPointer<vtkImageSlice>::New();
+    vtkSmartPointer<vtkImageSliceMapper> imageSliceMapper = vtkSmartPointer<vtkImageSliceMapper>::New();
+    m_usSlice->SetMapper(imageSliceMapper);
     m_usSlice->GetProperty()->SetLayerNumber( 2 );
     m_usSlice->VisibilityOff();
     m_mriActor = vtkSmartPointer<vtkImageStack>::New();
@@ -94,7 +100,7 @@ DoubleViewWidget::DoubleViewWidget( QWidget * parent, Qt::WindowFlags f ) :
     m_mriActor->AddImage( m_usSlice );
 
     m_mriRenderer = vtkSmartPointer<vtkRenderer>::New();
-    ui->mriImageWindow->GetRenderWindow()->AddRenderer( m_mriRenderer );
+    ui->mriImageWindow->renderWindow()->AddRenderer( m_mriRenderer );
     m_mriRenderer->AddActor( m_mriActor );
 
     vtkRenderWindowInteractor * mriInteractor = ui->mriImageWindow->GetInteractor();
@@ -269,8 +275,8 @@ void DoubleViewWidget::UpdateCurrentFrameUi()
 
 void DoubleViewWidget::UpdateViews()
 {
-    ui->usImageWindow->update();
-    ui->mriImageWindow->update();
+    ui->usImageWindow->renderWindow()->Render();
+    ui->mriImageWindow->renderWindow()->Render();
     this->UpdateCurrentFrameUi();
     UpdateStatus();
 }
