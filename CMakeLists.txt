@@ -102,7 +102,7 @@ endif()
 # Create options to build or not the different dependent projects.
 #==================================================================
 if(UNIX AND NOT APPLE)
-    OPTION( IBIS_BUILD_DEFAULT_HARDWARE_MODULE "Build default hardware module on Linux." ON )
+    OPTION( IBIS_BUILD_DEFAULT_HARDWARE_MODULE "Build default hardware module on Linux." OFF )
 endif()
 OPTION( IBIS_BUILD_IGSIO_HARDWARE_MODULE "Build hardware module that allows connection to OpenIGTLinkServers" OFF )
 
