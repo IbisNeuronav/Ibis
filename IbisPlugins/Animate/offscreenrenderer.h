@@ -37,7 +37,6 @@ protected:
     void Setup();
     void RenderOneFrame( QString filename );
     void Cleanup();
-    bool LoadGlExtensions( vtkOpenGLRenderWindow * win );
 
     bool m_glInit;
     AnimatePluginInterface * m_animate;

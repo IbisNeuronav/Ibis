@@ -27,7 +27,7 @@ public:
     vtkTypeMacro( DomeRenderer, vtkRendererDelegate );
     static DomeRenderer * New() { return new DomeRenderer; }
     DomeRenderer();
-    virtual void Render( vtkRenderer * r );
+    virtual void Render( vtkRenderer * r ) override;
     int GetCubeTextureSize() { return m_cubeTextureSize; }
     void SetCubeTextureSize( int size ) { m_cubeTextureSize = size; }
     double GetDomeViewAngle() { return m_domeViewAngle; }
