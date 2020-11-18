@@ -180,6 +180,7 @@ public:
     void SaveScene( QString fileName );
 
     IbisPreferences *GetIbisPreferences() { return m_preferences; }
+    void Preferences();
 
 public slots:
     void UpdateProgress( QProgressDialog*, int current );
@@ -188,7 +189,6 @@ public slots:
 private slots:
 
     void OpenFilesProgress();
-    void Preferences();
 
 signals:
 

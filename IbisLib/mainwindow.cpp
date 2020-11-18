@@ -100,14 +100,16 @@ MainWindow::MainWindow( QWidget * parent )
     connect( newObjectFileMenu, SIGNAL( aboutToShow() ), this, SLOT( ModifyNewObjectFileMenu() ) );
     connect( fileGenerateMenu, SIGNAL(aboutToShow()), this, SLOT(FileGenerateMenuAboutToShow()) );
 
-    if( !viewerOnly )
-    {
-        // -----------------------------------------
-        // Creates settings menu
-        // -----------------------------------------
+    // -----------------------------------------
+    // Creates settings menu
+    // -----------------------------------------
         QMenu * settingsMenu = menuBar()->addMenu( tr("&Settings") );
-        Application::GetInstance().AddHardwareSettingsMenuEntries( settingsMenu );
-    }
+        if( !viewerOnly )
+        {
+            Application::GetInstance().AddHardwareSettingsMenuEntries( settingsMenu );
+        }
+        QAction *preferences = settingsMenu->addAction( tr("&Preferences"), this, SLOT( Preferences() ), QKeySequence::Preferences );
+        preferences->setMenuRole( QAction::PreferencesRole );
 
     // -----------------------------------------
     // Creates a View menu
@@ -945,4 +947,9 @@ void MainWindow::SaveSettings( QSettings & s )
     s.setValue( "MainWindowRightPanelSize", m_rightPanelSize );
     m_4Views->SaveSettings( s );
     s.endGroup();
+}
+
+void MainWindow::Preferences()
+{
+   Application::GetInstance().Preferences();
 }

@@ -43,11 +43,11 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 DoubleViewWidget::DoubleViewWidget( QWidget * parent, Qt::WindowFlags f ) :
     QWidget(parent,f),
+    ui(new Ui::DoubleViewWidget),
     m_usLine1Actor(nullptr),
     m_usLine2Actor(nullptr),
     m_mriLine1Actor(nullptr),
-    m_mriLine2Actor(nullptr),
-    ui(new Ui::DoubleViewWidget)
+    m_mriLine2Actor(nullptr)
 {
     ui->setupUi(this);
 

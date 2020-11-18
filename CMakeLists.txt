@@ -101,10 +101,7 @@ endif()
 #==================================================================
 # Create options to build or not the different dependent projects.
 #==================================================================
-if(UNIX AND NOT APPLE)
-    OPTION( IBIS_BUILD_DEFAULT_HARDWARE_MODULE "Build default hardware module on Linux." ON )
-endif()
-OPTION( IBIS_BUILD_IGSIO_HARDWARE_MODULE "Build hardware module that allows connection to OpenIGTLinkServers" OFF )
+OPTION( IBIS_BUILD_DEFAULT_HARDWARE_MODULE "Build hardware module based on OpenIGTLink and dependencies (OpenIGTLink and OpenIGTLinkIO)" ON )
 
 find_package ( OpenCL QUIET )
 include(${CMAKE_COMMON_DIR}/OpenCLMacros.cmake)
@@ -139,9 +136,6 @@ configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/version.h.in ${CMAKE_CURRENT_BINARY_
 add_subdirectory( IbisLib )
 set( HardwareModulesLibs "" )
 if( IBIS_BUILD_DEFAULT_HARDWARE_MODULE )
-    add_subdirectory( IbisHardware )
-endif()
-if( IBIS_BUILD_IGSIO_HARDWARE_MODULE )
     add_subdirectory( IbisHardwareIGSIO )
 endif()
 add_subdirectory( IbisPlugins )
