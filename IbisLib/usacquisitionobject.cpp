@@ -1371,3 +1371,12 @@ void USAcquisitionObject::SetStaticSlicesLutIndex( int index )
     emit ObjectModified();
 }
 
+double USAcquisitionObject::GetFrameTimestamp( int index )
+{
+    return m_videoBuffer->GetTimestamp( index );
+}
+
+double USAcquisitionObject::GetCurrentFrameTimestamp()
+{
+    return m_videoBuffer->GetCurrentTimestamp();
+}

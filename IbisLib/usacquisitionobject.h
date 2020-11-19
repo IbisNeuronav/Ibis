@@ -89,6 +89,7 @@ public:
 
     void SetCalibrationMatrix( vtkMatrix4x4 * mat );
     vtkTransform * GetCalibrationTransform();
+    bool IsCalibratioMatrixApplied() { return m_useCalibratedTransform; }
 
     vtkImageData * GetVideoOutput();
     vtkTransform * GetTransform();
@@ -97,6 +98,8 @@ public:
 
     // Return frame data
     void GetFrameData(int index, vtkImageData *img, vtkMatrix4x4 *mat );
+    double GetFrameTimestamp( int index );
+    double GetCurrentFrameTimestamp();
 
     // Return itk image of a given frame
     void GetItkImage(IbisItkUnsignedChar3ImageType::Pointer itkOutputImage, int frameNo, bool masked, bool useCalibratedTransform = false, int relativeToObjectID = SceneManager::InvalidId );
