@@ -44,6 +44,7 @@ void TrackedVideoBuffer::Clear()
     }
     m_frames.clear();
     m_matrices.clear();
+    m_timestamps.clear();
     m_currentFrame = -1;
     m_videoOutput->Initialize();
 }
