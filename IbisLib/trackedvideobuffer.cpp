@@ -44,6 +44,7 @@ void TrackedVideoBuffer::Clear()
     }
     m_frames.clear();
     m_matrices.clear();
+    m_timestamps.clear();
     m_currentFrame = -1;
     m_videoOutput->Initialize();
 }
@@ -69,7 +70,7 @@ int TrackedVideoBuffer::GetFrameNumberOfComponents()
     return DefaultNumberOfScalarComponents;
 }
 
-void TrackedVideoBuffer::AddFrame( vtkImageData * frame, vtkMatrix4x4 * mat )
+void TrackedVideoBuffer::AddFrame(vtkImageData * frame, vtkMatrix4x4 * mat , double timestamp )
 {
     vtkImageData * im = vtkImageData::New();
     im->DeepCopy( frame );
@@ -78,6 +79,8 @@ void TrackedVideoBuffer::AddFrame( vtkImageData * frame, vtkMatrix4x4 * mat )
     vtkMatrix4x4 * m = vtkMatrix4x4::New();
     m->DeepCopy( mat );
     m_matrices.push_back( m );
+
+    m_timestamps.push_back( timestamp );
 
     SetCurrentFrame( m_frames.size() - 1 );
 }
@@ -88,6 +91,7 @@ void TrackedVideoBuffer::SetCurrentFrame( int index )
     m_currentFrame = index;
     m_videoOutput->ShallowCopy( GetCurrentImage() );
     m_outputTransform->SetMatrix( GetCurrentMatrix() );
+    m_outputTimestamp = GetCurrentTimestamp();
 }
 
 vtkMatrix4x4 * TrackedVideoBuffer::GetCurrentMatrix()
@@ -102,6 +106,13 @@ vtkImageData * TrackedVideoBuffer::GetCurrentImage()
     return m_frames[ m_currentFrame ];
 }
 
+double TrackedVideoBuffer::GetCurrentTimestamp()
+{
+    Q_ASSERT( m_currentFrame != -1 && m_frames.size() > 0 );
+    return m_timestamps[m_currentFrame ];
+}
+
+
 vtkMatrix4x4 * TrackedVideoBuffer::GetMatrix( int index )
 {
     Q_ASSERT( index >= 0 && index < m_frames.size() );
@@ -112,6 +123,12 @@ vtkImageData * TrackedVideoBuffer::GetImage( int index )
 {
     Q_ASSERT( index >= 0 && index < m_frames.size() );
     return m_frames[index];
+}
+
+double TrackedVideoBuffer::GetTimestamp( int index )
+{
+    Q_ASSERT( index >= 0 && index < m_frames.size() );
+    return m_timestamps[index];
 }
 
 vtkAlgorithmOutput * TrackedVideoBuffer::GetVideoOutputPort()

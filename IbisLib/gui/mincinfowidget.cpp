@@ -14,7 +14,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QTableWidget>
 #include <QGridLayout>
 #include <vtkImageData.h>
-#include "itkMetaDataObject.h"
+#include <itkMetaDataObject.h>
 #include <itkMetaDataDictionary.h>
 #include <typeinfo>
 
@@ -143,13 +143,8 @@ void MincInfoWidget::UpdateUI()
             if(str)
             {
                 varValue = str->GetMetaDataObjectValue().c_str();
+                list.append( QPair<QString, QString>( varName, varValue ) );
             }
-            else
-            {
-                varName.append( " type: " );
-                varValue = typeid(*bs).name();
-            }
-            list.append( QPair<QString, QString>( varName, varValue ) );
         }
     }
 

@@ -17,6 +17,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QWidget>
 #include <QObject>
 #include <QString>
+#include <QList>
 #include <QObject>
 #include "sceneobject.h"
 #include "scenemanager.h"
@@ -74,7 +75,6 @@ public:
     void    SetBaseDirectory(QString dir) {m_baseDirectory = dir;}
     QString GetBaseDirectory() {return m_baseDirectory;}
     void    ExportTrackedVideoBuffer(QString destDir = "", bool masked = false , bool useCalibratedTransform = false, int relativeToID = SceneManager::InvalidId );
-    bool    LoadFramesFromMINCFile( QStringList & allMINCFiles );
     bool    LoadFramesFromMINCFile( Serializer * ser );
 
     virtual void CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets) override;
@@ -89,6 +89,7 @@ public:
 
     void SetCalibrationMatrix( vtkMatrix4x4 * mat );
     vtkTransform * GetCalibrationTransform();
+    bool IsCalibratioMatrixApplied() { return m_useCalibratedTransform; }
 
     vtkImageData * GetVideoOutput();
     vtkTransform * GetTransform();
@@ -97,6 +98,8 @@ public:
 
     // Return frame data
     void GetFrameData(int index, vtkImageData *img, vtkMatrix4x4 *mat );
+    double GetFrameTimestamp( int index );
+    double GetCurrentFrameTimestamp();
 
     // Return itk image of a given frame
     void GetItkImage(IbisItkUnsignedChar3ImageType::Pointer itkOutputImage, int frameNo, bool masked, bool useCalibratedTransform = false, int relativeToObjectID = SceneManager::InvalidId );
@@ -164,6 +167,14 @@ protected:
     // Images and matrices
     int m_defaultImageSize[2];
     TrackedVideoBuffer * m_videoBuffer;
+
+    // Importing
+    int m_componentsNumber;
+    bool m_useCalibratedTransform;
+    bool LoadFramesFromMINCFile( QStringList & allMINCFiles );
+    bool LoadGrayFrames( QStringList & allMINCFiles );
+    bool LoadRGBFrames( QStringList & allMINCFiles );
+    void AdjustFrame(vtkImageData *frame, vtkMatrix4x4 *inputMatrix, vtkMatrix4x4 *outputMatrix );
 
     // 3D viewing data
     struct PerViewElements

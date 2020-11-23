@@ -50,6 +50,10 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "vtkXFMReader.h"
 #include "vtkXFMWriter.h"
 #include "vtkPiecewiseFunctionLookupTable.h"
+#include <itkMetaDataObject.h>
+#include <itkMetaDataDictionary.h>
+#include <iostream>
+#include <string>
 
 ObjectSerializationMacro( USAcquisitionObject );
 
@@ -120,6 +124,8 @@ USAcquisitionObject::USAcquisitionObject()
     m_staticSlicesDataNeedUpdate = true;
     m_defaultImageSize[0] = 640;
     m_defaultImageSize[1] = 480;
+    m_componentsNumber = 0;
+    m_useCalibratedTransform = false;
 }
 
 USAcquisitionObject::~USAcquisitionObject()
@@ -312,7 +318,7 @@ void USAcquisitionObject::Record()
     {
         int * dims = probe->GetVideoOutput()->GetDimensions();
         this->SetFrameAndMaskSize( dims[0], dims[1] );
-        m_videoBuffer->AddFrame( probe->GetVideoOutput(), probe->GetUncalibratedWorldTransform()->GetMatrix() );
+        m_videoBuffer->AddFrame( probe->GetVideoOutput(), probe->GetUncalibratedWorldTransform()->GetMatrix(), probe->GetLastTimestamp() );
     }
 
     // Start watching the clock for updates
@@ -332,7 +338,7 @@ void USAcquisitionObject::Updated()
         Q_ASSERT( probe );
         if( probe->IsOk() )
         {
-            m_videoBuffer->AddFrame( probe->GetVideoOutput(), probe->GetUncalibratedWorldTransform()->GetMatrix() );
+            m_videoBuffer->AddFrame( probe->GetVideoOutput(), probe->GetUncalibratedWorldTransform()->GetMatrix(), probe->GetLastTimestamp() );
             emit ObjectModified();
         }
     }
@@ -578,38 +584,68 @@ void USAcquisitionObject::Save()
 
 bool USAcquisitionObject::LoadFramesFromMINCFile( QStringList & allMINCFiles )
 {
+    QFileInfo fi( allMINCFiles.at(0) );
+    bool ok = false;
+    if( !(fi.isReadable()) )
+    {
+        QString message( tr("No read permission on file: ") );
+        message.append( allMINCFiles.at(0) );
+        QMessageBox::critical( 0, "Error", message, 1, 0 );
+        return false;
+    }
+    m_componentsNumber = Application::GetInstance().GetNumberOfComponents( allMINCFiles.at(0) );
+    if( m_componentsNumber == 1 )
+        ok = this->LoadGrayFrames( allMINCFiles );
+    else if( m_componentsNumber > 1 )
+        ok = LoadRGBFrames( allMINCFiles );
+    return ok;
+}
+
+bool USAcquisitionObject::LoadGrayFrames( QStringList & allMINCFiles )
+{
     bool processOK = true;
+
+    // Get the first frame and from it
+    // calibration matrix, flag  telling if that matrix was applied, we don't bother with frame ID as it is a consecutive number
+    IbisItkUnsignedChar3ImageType::Pointer itkImage = IbisItkUnsignedChar3ImageType::New();
+    if( !Application::GetInstance().GetGrayFrame( allMINCFiles.at(0),  itkImage ) )
+        return false;
+    itk::MetaDataDictionary dictionary;
+    //From the first frame find global data - acquisition:calibratioMatrix and acquisition:calibratioMatrixApplied
+    dictionary = itkImage->GetMetaDataDictionary();
+    std::string calMat, calMatUsed;;
+    itk::ExposeMetaData< std::string >(dictionary,"acquisition:calibratioMatrix",calMat);
+    // in reality, we do not need the calibration matrix from the frame, as it is loaded from USAcquisitionObject as m_calibrationTransform
+    m_useCalibratedTransform = false;
+    if( itk::ExposeMetaData< std::string >(dictionary,"acquisition:calibratioMatrixApplied",calMatUsed) )
+    {
+        if( calMat == "1" )
+            m_useCalibratedTransform = true;
+    }
+    // Now get all frames as vtkImageData and timestamps of frames.
     QProgressDialog * progress = new QProgressDialog("Importing frames", "Cancel", 0, allMINCFiles.count() );
     progress->setAttribute(Qt::WA_DeleteOnClose, true);
     progress->show();
+    IbisItkVtkConverter *ItktovtkConverter = IbisItkVtkConverter::New();
     for( int i = 0; i < allMINCFiles.count() && processOK; ++i )
     {
-        QFileInfo fi( allMINCFiles.at(i) );
-        if( !(fi.isReadable()) )
+        IbisItkUnsignedChar3ImageType::Pointer itkImage = IbisItkUnsignedChar3ImageType::New();
+        if( Application::GetInstance().GetGrayFrame( allMINCFiles.at(i),  itkImage ) )
         {
-            QString message( tr("No read permission on file: ") );
-            message.append( allMINCFiles.at(i) );
-            QMessageBox::critical( 0, "Error", message, 1, 0 );
-            processOK = false;
-            break;
-        }
-        vtkSmartPointer<vtkImageData> frame = vtkSmartPointer<vtkImageData>::New();
-        vtkSmartPointer<vtkMatrix4x4> mat = vtkSmartPointer<vtkMatrix4x4>::New();
-        if ( Application::GetInstance().GetImageDataFromVideoFrame( allMINCFiles.at(i), frame, mat ) )
-        {
+            dictionary = itkImage->GetMetaDataDictionary();
+            std::string value;
+            double ts = 0.0;
+            if ( itk::ExposeMetaData< std::string >(dictionary,"acquisition:timestamp",value) )
+                ts = std::stod( value );
+            vtkTransform *tr =vtkTransform::New();
+            vtkSmartPointer<vtkImageData> frame = vtkSmartPointer<vtkImageData>::New();
+            frame = ItktovtkConverter->ConvertItkImageToVtkImage( itkImage, tr );
+
             // create full transform and reset image step and origin in order to avoid
             // double translation and scaling and display slices correctly in double view
-            double start[3], step[3];
-            frame->GetOrigin( start );
-            frame->GetSpacing( step );
-            vtkSmartPointer<vtkTransform> localTransform = vtkSmartPointer<vtkTransform>::New();
-            localTransform->SetMatrix( mat );
-            localTransform->Translate( start );
-            localTransform->Scale( step );
-            frame->SetOrigin(0,0,0);
-            frame->SetSpacing(1,1,1);
-
-            m_videoBuffer->AddFrame( frame, localTransform->GetMatrix() );
+            vtkSmartPointer<vtkMatrix4x4> outputMatrix = vtkSmartPointer<vtkMatrix4x4>::New();
+            this->AdjustFrame( frame,tr->GetMatrix(), outputMatrix );
+            m_videoBuffer->AddFrame( frame, outputMatrix, ts );
 
             progress->setValue(i);
             qApp->processEvents();
@@ -619,11 +655,92 @@ bool USAcquisitionObject::LoadFramesFromMINCFile( QStringList & allMINCFiles )
                 processOK = false;
             }
         }
-        else // if first file was not read in, the others won't neither
+        else
             processOK = false;
     }
+
+    ItktovtkConverter->Delete();
     progress->close();
     return processOK;
+}
+
+bool USAcquisitionObject::LoadRGBFrames( QStringList & allMINCFiles )
+{
+    bool processOK = true;
+
+    // Get the first frame to find
+    // calibration matrix, flag  telling if that matrix was applied, we don't bother with frame ID as it is a consecutive number
+    IbisRGBImageType::Pointer itkImage = IbisRGBImageType::New();
+    if( !Application::GetInstance().GetRGBFrame( allMINCFiles.at(0),  itkImage ) )
+        return false;
+    itk::MetaDataDictionary dictionary;
+    //From the first frame find global data - acquisition:calibratioMatrix and acquisition:calibratioMatrixApplied
+    dictionary = itkImage->GetMetaDataDictionary();
+    std::string calMat, calMatUsed;;
+    itk::ExposeMetaData< std::string >(dictionary,"acquisition:calibratioMatrix",calMat);
+    // in reality, we do not need the calibration matrix from the frame, as it is loaded from USAcquisitionObject as m_calibrationTransform
+    m_useCalibratedTransform = false;
+
+    if( itk::ExposeMetaData< std::string >(dictionary,"acquisition:calibratioMatrixApplied",calMatUsed) )
+    {
+        if( calMat == "1" )
+            m_useCalibratedTransform = true;
+    }
+    // Now get all frames as vtkImageData and timestamps of frames.
+    QProgressDialog * progress = new QProgressDialog("Importing frames", "Cancel", 0, allMINCFiles.count() );
+    progress->setAttribute(Qt::WA_DeleteOnClose, true);
+    progress->show();
+
+    IbisItkVtkConverter *ItktovtkConverter = IbisItkVtkConverter::New();
+    for( int i = 0; i < allMINCFiles.count() && processOK; ++i )
+    {
+        IbisRGBImageType::Pointer itkImage = IbisRGBImageType::New();
+        if( Application::GetInstance().GetRGBFrame( allMINCFiles.at(i),  itkImage ) )
+        {
+            dictionary = itkImage->GetMetaDataDictionary();
+            std::string value;
+            double ts = 0.0;
+            if ( itk::ExposeMetaData< std::string >(dictionary,"acquisition:timestamp",value) )
+                ts = std::stod( value );
+            vtkSmartPointer<vtkTransform> tr =vtkTransform::New();
+            vtkSmartPointer<vtkImageData> frame = vtkSmartPointer<vtkImageData>::New();
+            frame = ItktovtkConverter->ConvertItkImageToVtkImage( itkImage, tr );
+
+            // create full transform and reset image step and origin in order to avoid
+            // double translation and scaling and display slices correctly in double view
+            vtkSmartPointer<vtkMatrix4x4> outputMatrix = vtkSmartPointer<vtkMatrix4x4>::New();
+            this->AdjustFrame( frame,tr->GetMatrix(), outputMatrix );
+            m_videoBuffer->AddFrame( frame, outputMatrix, ts );
+
+            progress->setValue(i);
+            qApp->processEvents();
+            if ( progress->wasCanceled() )
+            {
+                QMessageBox::information(0, "Importing frames", "Process cancelled", 1, 0);
+                processOK = false;
+            }
+        }
+        else
+            processOK = false;
+     }
+
+    ItktovtkConverter->Delete();
+    progress->close();
+    return processOK;
+}
+
+void USAcquisitionObject::AdjustFrame(vtkImageData *frame, vtkMatrix4x4 *inputMatrix , vtkMatrix4x4 *outputMatrix )
+{
+    double start[3], step[3];
+    frame->GetOrigin( start );
+    frame->GetSpacing( step );
+    vtkSmartPointer<vtkTransform> localTransform = vtkSmartPointer<vtkTransform>::New();
+    localTransform->SetMatrix( inputMatrix );
+    localTransform->Translate( start );
+    localTransform->Scale( step );
+    frame->SetOrigin(0,0,0);
+    frame->SetSpacing(1,1,1);
+    outputMatrix->DeepCopy( localTransform->GetMatrix() );
 }
 
 bool USAcquisitionObject::LoadFramesFromMINCFile( Serializer * ser )
@@ -979,6 +1096,19 @@ void USAcquisitionObject::ExportTrackedVideoBuffer(QString destDir , bool masked
     bool processOK = false;
     QProgressDialog * progress = new QProgressDialog("Exporting frames", "Cancel", 0, numberOfFrames);
     progress->setAttribute(Qt::WA_DeleteOnClose, true);
+    //Prepare for writing out calibration matrix
+    vtkMatrix4x4 *calMatrix = this->GetCalibrationTransform()->GetMatrix();
+    QString calMatString;
+    for( int i = 0; i < 3; i++ )
+    {
+        for( int j = 0; j < 4; j++ )
+        {
+            calMatString.append( QString::number(calMatrix->GetElement( i, j ), 'f', 6 ) );
+            calMatString.append( " ");
+        }
+    }
+    calMatString.replace(calMatString.count()-1, 1, ";");
+
     if( numberOfFrames > 0)
     {
         int backupCurrentFrame = this->GetCurrentSlice();
@@ -1007,6 +1137,13 @@ void USAcquisitionObject::ExportTrackedVideoBuffer(QString destDir , bool masked
 
                 IbisItkUnsignedChar3ImageType::Pointer itkSliceImage = IbisItkUnsignedChar3ImageType::New();
                 this->GetItkImage(itkSliceImage, i,  masked,  useCalibratedTransform, relativeToID );
+                //Output acquisition properties: time stamp, calibration matrix, frame ID, flag telling idf the calibration matrix was applied
+                double timestamp = m_videoBuffer->GetTimestamp( i );
+                itk::MetaDataDictionary & metaDict = itkSliceImage->GetMetaDataDictionary();
+                itk::EncapsulateMetaData< std::string >( metaDict, "acquisition:calibratioMatrix", calMatString.toUtf8().data() );
+                itk::EncapsulateMetaData< std::string >( metaDict, "acquisition:calibratioMatrixApplied", useCalibratedTransform?"1":"0" );
+                itk::EncapsulateMetaData< std::string >( metaDict, "acquisition:timestamp", QString::number( timestamp, 'f', 6 ).toUtf8().data() );
+                itk::EncapsulateMetaData< std::string >( metaDict, "acquisition:frameID", QString::number(sequenceNumber-1).toUtf8().data() );
                 mincWriter->SetInput( itkSliceImage );
                 try
                 {
@@ -1048,6 +1185,13 @@ void USAcquisitionObject::ExportTrackedVideoBuffer(QString destDir , bool masked
 
                 IbisRGBImageType::Pointer itkSliceImage = IbisRGBImageType::New();
                 this->GetItkRGBImage(itkSliceImage, i,  masked,  useCalibratedTransform, relativeToID );
+                //Output acquisition properties: time stamp, calibration matrix, frame ID, flag telling idf the calibration matrix was applied
+                double timestamp = m_videoBuffer->GetTimestamp( i );
+                itk::MetaDataDictionary & metaDict = itkSliceImage->GetMetaDataDictionary();
+                itk::EncapsulateMetaData< std::string >( metaDict, "acquisition:calibratioMatrix", calMatString.toUtf8().data() );
+                itk::EncapsulateMetaData< std::string >( metaDict, "acquisition:calibratioMatrixApplied", useCalibratedTransform?"1":"0" );
+                itk::EncapsulateMetaData< std::string >( metaDict, "acquisition:timestamp", QString::number( timestamp, 'g', 6 ).toUtf8().data() );
+                itk::EncapsulateMetaData< std::string >( metaDict, "acquisition:frameID", QString::number(sequenceNumber-1).toUtf8().data() );
                 mincWriter->SetInput( itkSliceImage );
 
                 try
@@ -1071,6 +1215,7 @@ void USAcquisitionObject::ExportTrackedVideoBuffer(QString destDir , bool masked
             }
         }
         progress->close();
+        this->SetCurrentFrame( backupCurrentFrame );
     }
     if( !useCalibratedTransform ) // export calibration transform
     {
@@ -1226,3 +1371,12 @@ void USAcquisitionObject::SetStaticSlicesLutIndex( int index )
     emit ObjectModified();
 }
 
+double USAcquisitionObject::GetFrameTimestamp( int index )
+{
+    return m_videoBuffer->GetTimestamp( index );
+}
+
+double USAcquisitionObject::GetCurrentFrameTimestamp()
+{
+    return m_videoBuffer->GetCurrentTimestamp();
+}

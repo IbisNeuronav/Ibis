@@ -567,25 +567,6 @@ void Application::OpenFiles( OpenFileParams * params, bool addToScene )
     m_progressDialogUpdateTimer = nullptr;
 }
 
-bool Application::GetImageDataFromVideoFrame(QString fileName, vtkImageData *img, vtkMatrix4x4 *mat )
-{
-    Q_ASSERT(img);
-    Q_ASSERT(mat);
-    m_fileReader = new FileReader;
-    m_fileReader->SetIbisAPI( m_ibisAPI );
-    QFileInfo fi( fileName );
-    if( !(fi.isReadable()) )
-    {
-        QString message( "No read permission on file: " );
-        message.append( fileName );
-        QMessageBox::critical( nullptr, "Error", message, 1, 0 );
-        return false;
-    }
-    bool ok = m_fileReader->GetFrameDataFromMINCFile( fileName, img, mat );
-    delete m_fileReader;
-    return ok;
-}
-
 bool Application::GetPointsFromTagFile( QString fileName, PointsObject *pts1, PointsObject *pts2 )
 {
     Q_ASSERT(pts1);
@@ -1073,3 +1054,56 @@ void Application::Preferences()
 {
     m_preferences->ShowPreferenceDialog();
 }
+
+int Application::GetNumberOfComponents( QString filename )
+{
+    m_fileReader = new FileReader;
+    m_fileReader->SetIbisAPI( m_ibisAPI );
+    QFileInfo fi( filename );
+    if( !(fi.isReadable()) )
+    {
+        QString message( "No read permission on file: " );
+        message.append( filename );
+        QMessageBox::critical( nullptr, "Error", message, 1, 0 );
+        return false;
+    }
+    int n = m_fileReader->GetNumberOfComponents( filename );
+    delete m_fileReader;
+    return n;
+}
+bool Application::GetGrayFrame( QString filename, IbisItkUnsignedChar3ImageType::Pointer itkImage )
+{
+    Q_ASSERT(itkImage);
+    m_fileReader = new FileReader;
+    m_fileReader->SetIbisAPI( m_ibisAPI );
+    QFileInfo fi( filename );
+    if( !(fi.isReadable()) )
+    {
+        QString message( "No read permission on file: " );
+        message.append( filename );
+        QMessageBox::critical( nullptr, "Error", message, 1, 0 );
+        return false;
+    }
+    bool ok = m_fileReader->GetGrayFrame( filename, itkImage );
+    delete m_fileReader;
+    return ok;
+}
+
+bool Application::GetRGBFrame( QString filename, IbisRGBImageType::Pointer itkImage )
+{
+    Q_ASSERT(itkImage);
+    m_fileReader = new FileReader;
+    m_fileReader->SetIbisAPI( m_ibisAPI );
+    QFileInfo fi( filename );
+    if( !(fi.isReadable()) )
+    {
+        QString message( "No read permission on file: " );
+        message.append( filename );
+        QMessageBox::critical( nullptr, "Error", message, 1, 0 );
+        return false;
+    }
+    bool ok = m_fileReader->GetRGBFrame( filename, itkImage );
+    delete m_fileReader;
+    return ok;
+}
+

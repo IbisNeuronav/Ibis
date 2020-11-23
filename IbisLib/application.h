@@ -22,6 +22,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "ibistypes.h"
 #include "globaleventhandler.h"
 #include "serializer.h"
+#include "ibisitkvtkconverter.h"
 
 // forward declarations
 class QSettings;
@@ -160,8 +161,12 @@ public:
     void ImportCamera();
 
     // Getting data from files
-    bool GetImageDataFromVideoFrame(QString fileName, vtkImageData *img , vtkMatrix4x4 *mat );
     bool GetPointsFromTagFile(QString fileName, PointsObject *pts1, PointsObject *pts2 );
+
+    // Dwtting US Acquisitions
+    int GetNumberOfComponents( QString filename );
+    bool GetGrayFrame( QString filename, IbisItkUnsignedChar3ImageType::Pointer itkImage );
+    bool GetRGBFrame( QString filename, IbisRGBImageType::Pointer itkImage );
 
     // Useful modal dialog
     QString GetFileNameOpen( const QString & caption = QString(), const QString & dir = QString(), const QString & filter = QString() );

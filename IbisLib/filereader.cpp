@@ -450,7 +450,6 @@ bool FileReader::OpenFile( QList<SceneObject*> & readObjects, QString filename, 
 #include "vtkIntArray.h"
 #include "vtkDoubleArray.h"
 #include "stringtools.h"
-#include "ibisitkvtkconverter.h"
 #include <string>
 #include <typeinfo>
 #include <QString>
@@ -748,86 +747,6 @@ bool FileReader::OpenTagFile( QList<SceneObject*> & readObjects, QString filenam
     return true;
 }
 
-
-bool FileReader::GetFrameDataFromMINCFile(QString filename, vtkImageData *img , vtkMatrix4x4 *mat )
-{
-    Q_ASSERT(img);
-    Q_ASSERT(mat);
-    QString fileToRead( filename );
-    QString fileMINC2;
-    if( this->IsMINC1( filename ) )
-    {
-        if( this->m_mincconvert.isEmpty())
-        {
-            QString tmp("File ");
-            tmp.append( filename + " is an acquired frame of MINC1 type and needs to be coverted to MINC2.\n" +
-                        "Open Settings/Preferences and set path to the directory containing MINC tools.\n" );
-            QMessageBox::critical( 0, "Error", tmp, 1, 0 );
-            return false;
-        }
-        if( this->ConvertMINC1toMINC2( filename, fileMINC2, true ) )
-            fileToRead = fileMINC2;
-        else
-            return false;
-    }
-
-    IOBasePointer io = itk::ImageIOFactory::CreateImageIO(fileToRead.toUtf8().data(), itk::ImageIOFactory::ReadMode );
-
-    if(!io)
-      throw itk::ExceptionObject("Unsupported image file type");
-
-    io->SetFileName((fileToRead.toUtf8().data()));
-    io->ReadImageInformation();
-
-    size_t nc = io->GetNumberOfComponents();
-
-    IbisItkVtkConverter *ItktovtkConverter = IbisItkVtkConverter::New();
-    vtkSmartPointer<vtkTransform> tr = vtkSmartPointer<vtkTransform>::New();
-    if( nc == 1 )
-    {
-        typedef itk::ImageFileReader< IbisItkUnsignedChar3ImageType > ReaderType;
-        ReaderType::Pointer reader = ReaderType::New();
-        reader->SetFileName( fileToRead.toUtf8().data() );
-
-        try
-        {
-            reader->Update();
-        }
-        catch( itk::ExceptionObject & err )
-        {
-            return false;
-        }
-
-        IbisItkUnsignedChar3ImageType::Pointer itkImage = reader->GetOutput();
-        vtkImageData * tmpImg = ItktovtkConverter->ConvertItkImageToVtkImage( itkImage, tr );
-        img->DeepCopy( tmpImg);
-        mat->DeepCopy( tr->GetMatrix( ) );
-        ItktovtkConverter->Delete();
-        return true;
-    }
-
-    // try to read
-    typedef itk::ImageFileReader< IbisRGBImageType > ReaderType;
-    ReaderType::Pointer reader = ReaderType::New();
-    reader->SetFileName( fileToRead.toUtf8().data() );
-
-    try
-    {
-        reader->Update();
-    }
-    catch( itk::ExceptionObject & err )
-    {
-        return false;
-    }
-
-    IbisRGBImageType::Pointer itkImage = reader->GetOutput();
-    vtkImageData * tmpImg = ItktovtkConverter->ConvertItkImageToVtkImage( itkImage, tr );
-    img->DeepCopy( tmpImg);
-    mat->DeepCopy( tr->GetMatrix( ) );
-    ItktovtkConverter->Delete();
-    return true;
-}
-
 bool FileReader::GetPointsDataFromTagFile( QString filename, PointsObject *pts1, PointsObject *pts2 )
 {
     Q_ASSERT(pts1);
@@ -892,4 +811,110 @@ void FileReader::SetObjectName( SceneObject * obj, QString objName, QString file
 void FileReader::ReportWarning( QString warning )
 {
     m_warnings.push_back( warning );
+}
+
+//Getting US acquisition files
+//
+int FileReader::GetNumberOfComponents( QString filename )
+{
+    QString fileToRead( filename );
+    QString fileMINC2;
+    if( this->IsMINC1( filename ) )
+    {
+        if( this->m_mincconvert.isEmpty())
+        {
+            QString tmp("File ");
+            tmp.append( filename + " is an acquired frame of MINC1 type and needs to be coverted to MINC2.\n" +
+                        "Open Settings/Preferences and set path to the directory containing MINC tools.\n" );
+            QMessageBox::critical( 0, "Error", tmp, 1, 0 );
+            return 0;
+        }
+        if( this->ConvertMINC1toMINC2( filename, fileMINC2, true ) )
+            fileToRead = fileMINC2;
+        else
+            return 0;
+    }
+    IOBasePointer io = itk::ImageIOFactory::CreateImageIO(fileToRead.toUtf8().data(), itk::ImageIOFactory::ReadMode );
+
+    if(!io)
+      throw itk::ExceptionObject("Unsupported image file type");
+
+    io->SetFileName((fileToRead.toUtf8().data()));
+    io->ReadImageInformation();
+
+    size_t nc = io->GetNumberOfComponents();
+    return static_cast<int>(nc);
+}
+
+#include "itkImage.h"
+#include "itkImageRegionIterator.h"
+
+bool FileReader::GetGrayFrame( QString filename, IbisItkUnsignedChar3ImageType::Pointer itkImage )
+{
+    typedef itk::ImageFileReader< IbisItkUnsignedChar3ImageType > ReaderType;
+    ReaderType::Pointer reader = ReaderType::New();
+    reader->SetFileName( filename.toUtf8().data() );
+
+    try
+    {
+        reader->Update();
+    }
+    catch( itk::ExceptionObject & err )
+    {
+        return false;
+    }
+
+    itkImage->SetRegions(reader->GetOutput()->GetLargestPossibleRegion());
+    itkImage->Allocate();
+
+    itk::ImageRegionConstIterator<IbisItkUnsignedChar3ImageType> outputIterator(reader->GetOutput(), reader->GetOutput()->GetLargestPossibleRegion());
+    itk::ImageRegionIterator<IbisItkUnsignedChar3ImageType>      inputIterator(itkImage, itkImage->GetLargestPossibleRegion());
+
+    while (!inputIterator.IsAtEnd())
+    {
+        inputIterator.Set(outputIterator.Get());
+        ++inputIterator;
+        ++outputIterator;
+    }
+    itkImage->SetMetaDataDictionary( reader->GetOutput()->GetMetaDataDictionary() );
+    itkImage->SetDirection( reader->GetOutput()->GetDirection() );
+    itkImage->SetOrigin( reader->GetOutput()->GetOrigin() );
+    itkImage->SetSpacing( reader->GetOutput()->GetSpacing() );
+
+    return true;
+}
+
+bool FileReader::GetRGBFrame( QString filename, IbisRGBImageType::Pointer itkImage )
+{
+    typedef itk::ImageFileReader< IbisRGBImageType > ReaderType;
+    ReaderType::Pointer reader = ReaderType::New();
+    reader->SetFileName( filename.toUtf8().data() );
+
+    try
+    {
+        reader->Update();
+    }
+    catch( itk::ExceptionObject & err )
+    {
+        return false;
+    }
+
+    itkImage->SetRegions(reader->GetOutput()->GetLargestPossibleRegion());
+    itkImage->Allocate();
+
+    itk::ImageRegionConstIterator<IbisRGBImageType> outputIterator(reader->GetOutput(), reader->GetOutput()->GetLargestPossibleRegion());
+    itk::ImageRegionIterator<IbisRGBImageType>      inputIterator(itkImage, itkImage->GetLargestPossibleRegion());
+
+    while (!inputIterator.IsAtEnd())
+    {
+        inputIterator.Set(outputIterator.Get());
+        ++inputIterator;
+        ++outputIterator;
+    }
+    itkImage->SetMetaDataDictionary( reader->GetOutput()->GetMetaDataDictionary() );
+    itkImage->SetDirection( reader->GetOutput()->GetDirection() );
+    itkImage->SetOrigin( reader->GetOutput()->GetOrigin() );
+    itkImage->SetSpacing( reader->GetOutput()->GetSpacing() );
+
+    return true;
 }
