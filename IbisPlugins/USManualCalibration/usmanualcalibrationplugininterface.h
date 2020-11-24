@@ -28,6 +28,8 @@ class USManualCalibrationPluginInterface : public ToolPluginInterface
 
 public:
 
+    enum PhantomSize { MEDIUMDEPTH = 0, SHALLOWDEPTH = 1 };
+
     USManualCalibrationPluginInterface();
     ~USManualCalibrationPluginInterface();
     virtual QString GetPluginName() override { return QString("USManualCalibration"); }
@@ -45,16 +47,21 @@ public:
     const double * GetPhantomPoint( int nIndex, int pointIndex );
     SceneObject * GetCalibrationPhantomObject();
 
+    void SetPhatonSize(int);
+
 protected:
 
     void ValidateUsProbe();
     void BuildCalibrationPhantomRepresentation();
+    void UpdateCalibrationPhantomRepresentation();
 
     int m_calibrationPhantomObjectId;
     int m_phantomRegSourcePointsId;
     int m_phantomRegTargetPointsId;
     int m_landmarkRegistrationObjectId;
     int m_usProbeObjectId;
+
+    PhantomSize m_currentPhantomSize;
 };
 
 #endif

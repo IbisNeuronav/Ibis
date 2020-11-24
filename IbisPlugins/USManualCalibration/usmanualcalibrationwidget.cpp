@@ -136,6 +136,7 @@ void USManualCalibrationWidget::UpdateUi()
     //calibResults += QString("Reprojection error: %1\n").arg( calib->GetReprojectionError() );
     //ui->calibrationResultTextEdit->setPlainText( calibResults );
     ui->resetButton->setEnabled( m_imageFrozen );
+    ui->depthComboBox->setEnabled( !m_imageFrozen );
 }
 
 void USManualCalibrationWidget::EnableManipulators( bool on )
@@ -425,4 +426,12 @@ void USManualCalibrationWidget::on_resetButton_clicked()
     m_manipulators[ 3 ]->SetMiddlePoint( 0.5 );
 
     OnManipulatorsModified();
+}
+
+void USManualCalibrationWidget::on_depthComboBox_currentIndexChanged(int index)
+{
+    if( m_pluginInterface )
+    {
+        m_pluginInterface->SetPhatonSize(index);
+    }
 }
