@@ -36,7 +36,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QVTKWidget" name="videoWidget" native="true">
+      <widget class="QVTKRenderWidget" name="videoWidget" native="true">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
          <horstretch>0</horstretch>
@@ -114,9 +114,10 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>QVTKWidget</class>
+   <class>QVTKRenderWidget</class>
    <extends>QWidget</extends>
-   <header>QVTKWidget.h</header>
+   <header>qvtkrenderwidget.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources/>
