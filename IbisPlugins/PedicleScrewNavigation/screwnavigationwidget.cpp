@@ -565,7 +565,7 @@ void ScrewNavigationWidget::MoveAxialPlane(vtkSmartPointer<vtkImageResliceToColo
     // Set the point through which to slice
     reslice->SetResliceAxes(resliceAxes);
 
-    ui->axialImageWindow->update();
+    ui->axialImageWindow->renderWindow()->Render();
 }
 
 
@@ -594,7 +594,7 @@ void ScrewNavigationWidget::MoveSagittalPlane(double pos[3], double orientation[
     // Set the point through which to slice
     m_sagittalReslice->SetResliceAxes(resliceAxes);
 
-    ui->sagittalImageWindow->update();
+    ui->sagittalImageWindow->renderWindow()->Render();
 }
 
 
