@@ -380,8 +380,6 @@ void Application::AddHardwareSettingsMenuEntries( QMenu * menu )
         ++index;
     }
     menu->addSeparator();
-    QAction *preferences = menu->addAction( tr("&Preferences"), this, SLOT( Preferences() ), QKeySequence::Preferences );
-    preferences->setMenuRole( QAction::PreferencesRole );
 }
 
 void Application::AddToolObjectsToScene()

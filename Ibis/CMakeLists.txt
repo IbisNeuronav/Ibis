@@ -25,9 +25,6 @@ endforeach( plugin )
 
 # Add plugin def for the hardware module
 if( IBIS_BUILD_DEFAULT_HARDWARE_MODULE )
-    file( APPEND ${ImportPluginsSourceFile} "Q_IMPORT_PLUGIN(IbisHardwareModule);\n" )
-endif()
-if( IBIS_BUILD_IGSIO_HARDWARE_MODULE )
     file( APPEND ${ImportPluginsSourceFile} "Q_IMPORT_PLUGIN(IbisHardwareIGSIO);\n" )
 endif()
 
