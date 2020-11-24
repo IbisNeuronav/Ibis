@@ -74,11 +74,9 @@ public:
     vtkGetMacro(Type,int);
     void SetType( int type );
 
-    QVTKRenderWidget * GetQtRenderWidget();
     void SetQtRenderWidget( QVTKRenderWidget * w );
 
     // Control rendering of the view
-    void Render();
     void SetRenderingEnabled( bool b );
 
     vtkRenderWindowInteractor * GetInteractor();
@@ -134,6 +132,7 @@ private slots:
 
 protected:
 
+    void DoVTKRender();
     void SetupAllObjects();
     void ReleaseAllObjects();
     void GetPositionAndModifier( int & x, int & y, unsigned & modifier );
