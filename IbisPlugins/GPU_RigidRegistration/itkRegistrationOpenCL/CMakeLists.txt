@@ -10,10 +10,6 @@ SET( IBIS_ITK_REGISTRATION_OPENCL_HDR
     itkGPUOrientationMatchingMatrixTransformationSparseMask.h
 )
 
-set( LibCL GPUDiscreteGaussianGradientImageFilter 
-    GPUOrientationMatchingMatrixTransformationSparseMaskKernel
-)
-
 #================================
 # Create custom commands to
 # encode each cl file into a
@@ -21,9 +17,7 @@ set( LibCL GPUDiscreteGaussianGradientImageFilter
 # file.
 #================================
 set( LibCL GPUDiscreteGaussianGradientImageFilter.cl
-          GPUOrientationMatchingMatrixTransformationSparseMaskKernel.cl
-          GPU2D3DOrientationMatchingMatrixTransformationSparseMaskKernel.cl
-          GPUOrientationMatchingUSCalibrationKernel.cl )
+           GPUOrientationMatchingMatrixTransformationSparseMaskKernel.cl )
 set( LibCLSrc )
 set( LibCLHdr )
 foreach (shader_file IN LISTS LibCL)
