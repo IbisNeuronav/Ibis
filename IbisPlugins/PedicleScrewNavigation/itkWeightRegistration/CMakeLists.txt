@@ -18,14 +18,12 @@ SET( GPUWeightRegistration_HDR
 # C string literal in a header
 # file.
 #================================
-set( LibCL
-    GPUWeightMatchingMatrixTransformationSparseMaskKernel.cl
-)
+set( LibCL GPUWeightMatchingMatrixTransformationSparseMaskKernel.cl )
 set( LibCLSrc )
 set( LibCLHdr )
 foreach (shader_file IN LISTS LibCL)
   vtk_encode_string(
-    INPUT         "${shader_file}"
+    INPUT "${shader_file}"
     HEADER_OUTPUT clKernel_h
     SOURCE_OUTPUT clKernel_cxx)
   list(APPEND LibCLSrc ${clKernel_cxx})
@@ -41,7 +39,7 @@ ELSE( BUILD_SHARED_LIBS )
    ADD_LIBRARY( itkWeightRegistration ${GPUWeightRegistration_SRC} ${GPUWeightRegistration_HDR} ${LibCLSrc} )
 ENDIF( BUILD_SHARED_LIBS )
 
-target_link_libraries( itkWeightRegistration ${ITK_LIBRARIES} ${OPENCL_LIBRARIES} itkRegistrationOpenCL )
+target_link_libraries( itkWeightRegistration ${ITK_LIBRARIES} ${VTK_LIBRARIES} ${OPENCL_LIBRARIES} itkRegistrationOpenCL )
 
 #================================
 # Define include dir for

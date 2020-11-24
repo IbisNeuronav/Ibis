@@ -13,18 +13,18 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef __itkGPUWeightMatchingMatrixTransformationSparseMask_h__
 #define __itkGPUWeightMatchingMatrixTransformationSparseMask_h__
 
-#include "itkObject.h"
-#include "itkOpenCLUtil.h"
-#include "itkCovariantVector.h"
-#include "itkMatrixOffsetTransformBase.h"
-#include "itkImage.h"
-#include "itkSampleToHistogramFilter.h"
-#include "itkListSample.h"
-#include "itkHistogram.h"
+#include <itkObject.h>
+#include <itkOpenCLUtil.h>
+#include <itkCovariantVector.h>
+#include <itkMatrixOffsetTransformBase.h>
+#include <itkImage.h>
+#include <itkSampleToHistogramFilter.h>
+#include <itkListSample.h>
+#include <itkHistogram.h>
 
-#include "itkImageRegionIteratorWithIndex.h"
-#include "itkNormalizeImageFilter.h"
-#include "itkRescaleIntensityImageFilter.h"
+#include <itkImageRegionIteratorWithIndex.h>
+#include <itkNormalizeImageFilter.h>
+#include <itkRescaleIntensityImageFilter.h>
 
 namespace itk
 {
