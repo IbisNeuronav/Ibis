@@ -110,9 +110,9 @@ ScrewNavigationWidget::~ScrewNavigationWidget()
     delete ui;
 }
 
-void ScrewNavigationWidget::SetPluginInterface( PedicleScrewNavigationPluginInterface * interface )
+void ScrewNavigationWidget::SetPluginInterface( PedicleScrewNavigationPluginInterface * inter )
 {
-    m_pluginInterface = interface;
+    m_pluginInterface = inter;
     if (m_pluginInterface)
     {
         IbisAPI *ibisApi = m_pluginInterface->GetIbisAPI();
