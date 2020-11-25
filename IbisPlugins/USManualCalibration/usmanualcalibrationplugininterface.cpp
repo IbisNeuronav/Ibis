@@ -19,22 +19,44 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QSettings>
 #include <QMessageBox>
 
-const double phantomPoints[16][3] = { { 0, 5, 50 },
-{ 50, 5, 50 },
-{ 0, 45, 50 },
-{ 50, 45, 50 },
-{ 0, 50, 45 },
-{ 50, 50, 45 },
-{ 0, 50, 5 },
-{ 50, 50, 5 },
-{ 0, 45, 0 },
-{ 50, 45, 0 },
-{  0, 5, 0 },
-{  50, 5, 0 },
-{  0, 0, 45 },
-{  50, 0, 45 },
-{  0, 0, 5 },
-{  50, 0, 5 } };
+const double phantomPoints[2][16][3] = {
+    // medium depth 
+  { { 0, 5, 50 },
+    { 50, 5, 50 },
+    { 0, 45, 50 },
+    { 50, 45, 50 },
+    { 0, 50, 45 },
+    { 50, 50, 45 },
+    { 0, 50, 5 },
+    { 50, 50, 5 },
+    { 0, 45, 0 },
+    { 50, 45, 0 },
+    {  0, 5, 0 },
+    {  50, 5, 0 },
+    {  0, 0, 45 },
+    {  50, 0, 45 },
+    {  0, 0, 5 },
+    {  50, 0, 5 } 
+  },
+// shallow depth
+  { { 0, 15, 40 },
+    { 50, 15, 40 },
+    {  0, 35, 40 },
+    { 50, 35, 40 },
+    {  0, 40, 35 },
+    { 50, 40, 35 },
+    {  0, 40, 15 },
+    { 50, 40, 15 },
+    {  0, 35, 10 },
+    { 50, 35, 10 },
+    {  0, 15, 10 },
+    { 50, 15, 10 },
+    {  0, 10, 35 },
+    { 50, 10, 35 },
+    {  0, 10, 15 },
+    { 50, 10, 15 }
+  }
+};
 
 USManualCalibrationPluginInterface::USManualCalibrationPluginInterface()
 {
@@ -43,6 +65,7 @@ USManualCalibrationPluginInterface::USManualCalibrationPluginInterface()
     m_phantomRegTargetPointsId = IbisAPI::InvalidId;
     m_landmarkRegistrationObjectId = IbisAPI::InvalidId;
     m_usProbeObjectId = IbisAPI::InvalidId;
+    m_currentPhantomSize = PhantomSize::MEDIUMDEPTH;
 }
 
 USManualCalibrationPluginInterface::~USManualCalibrationPluginInterface()
@@ -141,7 +164,7 @@ void USManualCalibrationPluginInterface::BuildCalibrationPhantomRepresentation()
 
     phantomLinesPoints->SetNumberOfPoints( 16 );
     for( int i = 0; i < 16; ++i )
-        phantomLinesPoints->SetPoint( i, phantomPoints[i] );
+        phantomLinesPoints->SetPoint( i, phantomPoints[m_currentPhantomSize][i] );
 
     vtkIdType pts[4][4] = {{0,1,2,3},{4,5,6,7},{8,9,10,11},{12,13,14,15}};
     vtkCellArray * lines = vtkCellArray::New();
@@ -165,6 +188,38 @@ void USManualCalibrationPluginInterface::BuildCalibrationPhantomRepresentation()
     phantomLinesPoints->Delete();
     phantomLinesPoly->Delete();
 
+}
+
+void USManualCalibrationPluginInterface::UpdateCalibrationPhantomRepresentation()
+{
+    bool needNewRepresentation = m_calibrationPhantomObjectId == IbisAPI::InvalidId;
+    PolyDataObject * phantomObject = PolyDataObject::SafeDownCast(GetIbisAPI()->GetObjectByID(m_calibrationPhantomObjectId));
+    if( needNewRepresentation | (phantomObject == 0) )
+    {
+        this->BuildCalibrationPhantomRepresentation();
+        return;
+    }
+
+    vtkPolyData * phantomLinesPoly = phantomObject->GetPolyData();
+    Q_ASSERT(phantomLinesPoly->GetNumberOfPoints() == 16);
+
+    vtkPoints * phantomLinesPoints = vtkPoints::New();
+    vtkCellArray * lines = vtkCellArray::New();
+
+    phantomLinesPoints->SetNumberOfPoints(16);
+    for( int i = 0; i < 16; ++i )
+        phantomLinesPoints->SetPoint(i, phantomPoints[m_currentPhantomSize][i]);
+
+    vtkIdType pts[4][4] = {{0,1,2,3},{4,5,6,7},{8,9,10,11},{12,13,14,15}};    
+    for( int i = 0; i < 4; i++ ) lines->InsertNextCell(4, pts[i]);
+    
+    phantomLinesPoly->DeleteCells();
+    phantomLinesPoly->SetPoints(phantomLinesPoints);
+    phantomLinesPoly->SetLines(lines);
+    phantomObject->Modified();
+
+    // Cleanup
+    lines->Delete();
 }
 
 #include "pointsobject.h"
@@ -229,11 +284,27 @@ void USManualCalibrationPluginInterface::StartPhantomRegistration()
 
  const double * USManualCalibrationPluginInterface::GetPhantomPoint( int nIndex, int pointIndex )
  {
-     return phantomPoints[ nIndex * 4 + pointIndex ];
+     return phantomPoints[m_currentPhantomSize][ nIndex * 4 + pointIndex ];
  }
 
  SceneObject * USManualCalibrationPluginInterface::GetCalibrationPhantomObject()
  {
      SceneObject * obj = GetIbisAPI()->GetObjectByID( m_calibrationPhantomObjectId );
      return obj;
+ }
+
+ void USManualCalibrationPluginInterface::SetPhatonSize(int index)
+ {
+     switch( index )
+     {
+        case 0:
+            m_currentPhantomSize = PhantomSize::MEDIUMDEPTH;
+            break;
+        case 1:
+            m_currentPhantomSize = PhantomSize::SHALLOWDEPTH;
+            break;
+        default:
+            m_currentPhantomSize = PhantomSize::MEDIUMDEPTH;
+     }
+     UpdateCalibrationPhantomRepresentation();
  }
