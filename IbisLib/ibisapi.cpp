@@ -205,6 +205,11 @@ QMap<View*, int> IbisAPI::GetAllViews( )
     return m_sceneManager->GetAllViews();
 }
 
+void IbisAPI::SetRenderingEnabled( bool enable )
+{
+    m_sceneManager->SetRenderingEnabled( enable );
+}
+
 double * IbisAPI::GetViewBackgroundColor()
 {
     return m_sceneManager->GetViewBackgroundColor();
