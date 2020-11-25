@@ -106,6 +106,37 @@
       </layout>
      </item>
      <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_4">
+       <item>
+        <widget class="QLabel" name="label">
+         <property name="maximumSize">
+          <size>
+           <width>80</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>Phantom size</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QComboBox" name="depthComboBox">
+         <item>
+          <property name="text">
+           <string>Medium - probe depth (7 cm - 14 cm)</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Shallow - probe depth (3 cm - 7 cm)</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
       <widget class="QTextEdit" name="calibrationResultTextEdit"/>
      </item>
     </layout>
