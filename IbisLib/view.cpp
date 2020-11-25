@@ -169,12 +169,6 @@ void View::SetType( int type )
     }
 }
 
-QVTKRenderWidget * View::GetQtRenderWidget()
-{
-    return this->RenderWidget;
-}
-
-
 void View::SetQtRenderWidget( QVTKRenderWidget * w )
 {
     if( w == this->RenderWidget )
@@ -182,19 +176,11 @@ void View::SetQtRenderWidget( QVTKRenderWidget * w )
     this->RenderWidget = w;
 }
 
-void View::Render()
-{
-    this->Interactor->Render();
-}
-
 void View::SetRenderingEnabled( bool b )
 {
     if( m_renderingEnabled == b )
         return;
     m_renderingEnabled = b;
-    // TODO: this mechanism to disable rendering is broken by the transition to VTK > 9, where we use QVTKRenderWidget instead of QVTKWidget. Find a new way to achieve the same result
-    //if( this->RenderWindow )
-    //    this->RenderWindow->SetRenderingEnabled( m_renderingEnabled );
     if( m_renderingEnabled )
         NotifyNeedRender();
 }
@@ -512,13 +498,10 @@ void View::SetViewAngle( double angle )
 
 void View::NotifyNeedRender()
 {
-    if( m_renderingEnabled && this->Interactor )
+    if( m_renderingEnabled )
     {
-        // Temp solution: call Interactor::Render directly. There should be a mechanism
-        // to cache render requests and never do it more than once everytime a Qt event is processed
-        this->Interactor->Render();
+        this->DoVTKRender();
     }
-
 }
 
 void View::ReferenceTransformChanged()
@@ -557,6 +540,15 @@ void View::ReferenceTransformChanged()
 void View::WindowStartsRendering()
 {
     this->Renderer->ResetCameraClippingRange();
+}
+
+// Really call the vtk rendering code
+void View::DoVTKRender()
+{
+    if( this->Interactor )
+    {
+        this->Interactor->Render();
+    }
 }
 
 void View::SetupAllObjects()
