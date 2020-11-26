@@ -381,15 +381,6 @@ bool IbisHardwareIGSIO::LaunchLocalServer( QString plusConfigFile )
     return didLaunch;
 }
 
-void IbisHardwareIGSIO::Connect( std::string ip, int port )
-{
-    igtlioConnectorPointer c = m_logic->CreateConnector();
-    c->SetTypeClient( ip, port );
-    c->Start();
-    m_logicCallbacks->Connect( c , igtlioConnector::ConnectedEvent, this, SLOT(OnConnectionEstablished(vtkObject*, unsigned long, void*, void*)) );
-}
-
-//overloaded when more parameters are available from config:
 void IbisHardwareIGSIO::Connect( std::string ip, int port, std::string type, std::string protocol, std::string serverName, std::string deviceType )
 {
     igtlioConnectorPointer c = m_logic->CreateConnector();
