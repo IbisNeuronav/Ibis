@@ -88,7 +88,7 @@ void IbisHardwareIGSIO::Init()
     m_logicController->setLogic( m_logic );
     m_logicCallbacks->Connect( m_logic, igtlioLogic::NewDeviceEvent, this, SLOT(OnDeviceNew(vtkObject*, unsigned long, void*, void*)) );
     m_logicCallbacks->Connect( m_logic, igtlioLogic::RemovedDeviceEvent, this, SLOT(OnDeviceRemoved(vtkObject*, unsigned long, void*, void*)) );
-
+    m_logicCallbacks->Connect( m_logic, igtlioCommand::CommandReceivedEvent, this, SLOT(OnCommandReceived(vtkObject*, unsigned long, void*, void*)) );
 
     // Initialize with last config file
     if( m_autoStartLastConfig )
@@ -111,6 +111,11 @@ void IbisHardwareIGSIO::StartConfig( QString configFile )
         Tool * newTool = new Tool;
         newTool->sceneObject = InstanciateSceneObjectFromType( in.GetToolName(i), in.GetToolType( i ) );
         newTool->toolModel = InstanciateToolModel(in.GetToolModelFile(i));
+        newTool->flipYAxis = in.GetFlipYAxis(i);
+        if(newTool->flipYAxis){
+            newTool->flipYFilter = vtkSmartPointer<vtkImageFlip>::New();
+            newTool->flipYFilter->SetFilteredAxis(1);
+        }
         ReadToolConfig( in.GetToolParamFile(i), newTool->sceneObject );
         m_tools.append( newTool );
         GetIbisAPI()->AddObject( newTool->sceneObject );
@@ -131,7 +136,7 @@ void IbisHardwareIGSIO::StartConfig( QString configFile )
         }
 
         // Now try to connect to server
-        Connect( in.GetServerIPAddress(i), in.GetServerPort(i) );
+        Connect( in.GetServerIPAddress(i), in.GetServerPort(i), in.GetServerType(i), in.GetProtocol(i), in.GetDeviceName(i), in.GetDeviceType(i) );
     }
 
     m_lastIbisPlusConfigFile = configFile;
@@ -285,16 +290,20 @@ void IbisHardwareIGSIO::OnDeviceNew( vtkObject*, unsigned long, void*, void * ca
     QString deviceName( device->GetDeviceName().c_str() );
     std::cout << "New device: " << deviceName.toUtf8().data() << std::endl;
     m_deviceToolAssociations.ToolAndPartFromDevice( deviceName, toolName, toolPart );
-    if( toolName.isEmpty() )
+    if( toolName.isEmpty() ){
+        std::cerr << "[IbisHardwareIGSIO::OnDeviceNew] Missing tool name." << std::endl;
         return;
+    }
     int toolIndex = FindToolByName( toolName );
-    if( toolIndex == -1 )
+    if( toolIndex == -1 ){
+        std::cerr << "[IbisHardwareIGSIO::OnDeviceNew] Tool index out of bounds." << std::endl;
         return;
+    }
 
     std::cout << "----> Connected to tool ( " << toolName.toUtf8().data() << " ), part ( " << toolPart.toUtf8().data() << " )" << std::endl;
 
     // Assign image data of new device to the video input of the scene object
-    if( toolPart == "ImageAndTransform" || toolPart == "Image" )
+    if( toolPart == "ImageAndTransform" || toolPart == "Image" || toolPart == "Video" )
     {
         AssignDeviceImageToTool( device, m_tools[toolIndex] );
         m_tools[toolIndex]->imageDevice = device;
@@ -380,6 +389,30 @@ void IbisHardwareIGSIO::Connect( std::string ip, int port )
     m_logicCallbacks->Connect( c , igtlioConnector::ConnectedEvent, this, SLOT(OnConnectionEstablished(vtkObject*, unsigned long, void*, void*)) );
 }
 
+//overloaded when more parameters are available from config:
+void IbisHardwareIGSIO::Connect( std::string ip, int port, std::string type, std::string protocol, std::string serverName, std::string deviceType )
+{
+    igtlioConnectorPointer c = m_logic->CreateConnector();
+    if( type == "Server" ){
+        c->SetTypeServer( port );
+    }else if( type == "Client" ){
+        c->SetTypeClient( ip, port );
+    }else{
+        std::cerr << "[IbisHardwareIGSIO::Connect] IGTLConnector type unrecognized." << std::endl;
+    }
+    if( protocol == "TCP" ){
+        c->SetProtocolTCP();
+    }else if( protocol == "UDP" ){
+        c->SetProtocolUDP();
+        c->SetDeviceName( serverName );
+        c->SetDeviceType( deviceType );
+    }else{
+        std::cerr << "[IbisHardwareIGSIO::Connect] IGTLConnector protocol unrecognized." << std::endl;
+    }
+    c->Start();
+    m_logicCallbacks->Connect( c , igtlioConnector::ConnectedEvent, this, SLOT(OnConnectionEstablished(vtkObject*, unsigned long, void*, void*)) );
+}
+
 void IbisHardwareIGSIO::OnConnectionEstablished(vtkObject* caller, unsigned long, void*, void *)
 {
     // send a dummy message with metadata to force v2 message exchange
@@ -399,6 +432,11 @@ void IbisHardwareIGSIO::OnConnectionEstablished(vtkObject* caller, unsigned long
     connector->RemoveDevice(statusDevice);
 }
 
+void IbisHardwareIGSIO::OnCommandReceived( vtkObject *, unsigned long, void*, void *callData )
+{
+    igtlioCommand * command = reinterpret_cast<igtlioCommand*>( callData );
+    emit NewCommandReceived( command );
+}
 
 void IbisHardwareIGSIO::DisconnectAllServers()
 {
@@ -484,28 +522,38 @@ int IbisHardwareIGSIO::FindToolByName( QString name )
 
 void IbisHardwareIGSIO::AssignDeviceImageToTool( igtlioDevicePointer device, Tool * tool )
 {
-  vtkImageData * imageContent = nullptr;
-  if( IsDeviceImage( device ) )
-  {
-      igtlioImageDevicePointer imageDev = igtlioImageDevice::SafeDownCast( device );
-      imageContent = imageDev->GetContent().image;
-  }
-  else if( IsDeviceVideo( device ) )
-  {
-      igtlioVideoDevicePointer videoDev = igtlioVideoDevice::SafeDownCast( device );
-      imageContent = videoDev->GetContent().image;
-  }
+    vtkImageData * imageContent = nullptr;
 
-  if( tool->sceneObject->IsA( "CameraObject" ) )
-  {
-      vtkSmartPointer<CameraObject> cam = CameraObject::SafeDownCast( tool->sceneObject );
-      cam->SetVideoInputData( imageContent );
-  }
-  else if( tool->sceneObject->IsA( "UsProbeObject" ) )
-  {
-      vtkSmartPointer<UsProbeObject> probe = UsProbeObject::SafeDownCast( tool->sceneObject );
-      probe->SetVideoInputData( imageContent );
-  }
+    if( IsDeviceImage( device ) )
+    {
+        igtlioImageDevicePointer imageDev = igtlioImageDevice::SafeDownCast( device );
+        imageContent = imageDev->GetContent().image;
+    }
+    else if( IsDeviceVideo( device ) )
+    {
+        igtlioVideoDevicePointer videoDev = igtlioVideoDevice::SafeDownCast( device );
+        imageContent = videoDev->GetContent().image;
+        if(tool->flipYAxis){
+            //TODO: This shouldn't need to be done every frame. Check pipeline logic.
+            tool->flipYFilter->SetInputData( imageContent );
+            tool->flipYFilter->Update();
+        }
+    }
+
+    if( tool->sceneObject->IsA( "CameraObject" ) )
+    {
+        vtkSmartPointer<CameraObject> cam = CameraObject::SafeDownCast( tool->sceneObject );
+        if(tool->flipYAxis){
+            cam->SetVideoInputData( tool->flipYFilter->GetOutput() );
+        }else{
+            cam->SetVideoInputData( imageContent );
+        }
+    }
+    else if( tool->sceneObject->IsA( "UsProbeObject" ) )
+    {
+        vtkSmartPointer<UsProbeObject> probe = UsProbeObject::SafeDownCast( tool->sceneObject );
+        probe->SetVideoInputData( imageContent );
+    }
 }
 
 TrackedSceneObject * IbisHardwareIGSIO::InstanciateSceneObjectFromType( QString objectName, QString objectType )
@@ -611,7 +659,6 @@ void IbisHardwareIGSIO::WriteToolConfig()
 		InternalWriteToolConfig(generalConfigFileName, m_tools[ i ]);
 	}
 }
-
 
 void IbisHardwareIGSIO::InternalWriteToolConfig(QString filename, Tool* tool)
 {

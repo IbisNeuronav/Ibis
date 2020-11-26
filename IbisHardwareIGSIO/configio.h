@@ -15,6 +15,10 @@ public:
 
     std::string m_serverName;
     std::string m_ipAddress;
+    std::string m_type;
+    std::string m_protocol;
+    std::string m_deviceName;
+    std::string m_deviceType;
     int m_port;
     bool m_startAuto;
     bool m_connectAuto;
@@ -31,6 +35,7 @@ public:
     QString ToolType;
     QString ToolModelFile;
     QString ToolParamFile;
+    bool FlipYAxis;
 };
 
 ObjectSerializationHeaderMacro( ToolConfig );
@@ -63,6 +68,10 @@ public:
     int GetNumberOfServers() { return m_servers.size(); }
     std::string GetServerName( int index );
     std::string GetServerIPAddress( int index );
+    std::string GetServerType( int index );
+    std::string GetProtocol( int index );
+    std::string GetDeviceName( int index );
+    std::string GetDeviceType( int index );
     int GetServerPort( int index );
     bool GetStartAuto( int index );
     bool GetConnectAuto( int index );
@@ -72,8 +81,9 @@ public:
     int GetNumberOfTools() { return m_tools.size(); }
     QString GetToolName( int index );
     QString GetToolType( int index );
-    QString GetToolModelFile(int index);
-    QString GetToolParamFile(int index);
+    QString GetToolModelFile( int index );
+    QString GetToolParamFile( int index );
+    bool GetFlipYAxis( int index );
 
     // Associations
     DeviceToolMap GetAssociations();

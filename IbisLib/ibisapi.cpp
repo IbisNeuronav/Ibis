@@ -458,6 +458,11 @@ IbisPreferences * IbisAPI::GetIbisPreferences()
     return m_application->GetIbisPreferences();
 }
 
+HardwareModule * IbisAPI::GetHardwareModule()
+{
+    return m_application->GetHardwareModule();
+}
+
 //Custom paths
 void IbisAPI::RegisterCustomPath( const QString & pathName, const QString & directoryPath )
 {

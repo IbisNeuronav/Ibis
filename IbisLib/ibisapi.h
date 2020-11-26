@@ -35,6 +35,7 @@ class GlobalEventHandler;
 class IbisPreferences;
 
 class vtkMatrix4x4;
+class HardwareModule;
 
 class QProgressDialog;
 class QString;
@@ -356,6 +357,9 @@ public:
      * Manage ibis preferences, e.g. path to MINC tools
      */
     IbisPreferences *GetIbisPreferences();
+    HardwareModule * GetHardwareModule();
+
+    //Custom paths
     void RegisterCustomPath( const QString & pathName, const QString & directoryPath );
     void UnRegisterCustomPath( const QString & pathName );
     const QString GetCustomPath( const QString & pathName );

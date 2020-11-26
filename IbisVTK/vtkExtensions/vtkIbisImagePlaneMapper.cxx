@@ -283,10 +283,19 @@ void vtkIbisImagePlaneMapper::UpdateTexture()
         format = GL_LUMINANCE;
         internalFormat = GL_LUMINANCE;
     }
+    else if( input->GetNumberOfScalarComponents() == 3 )
+    {
+        format = GL_RGB;
+        internalFormat = GL_RGB;
+    }
     else if( input->GetNumberOfScalarComponents() == 4 )
     {
         format = GL_RGBA;
         internalFormat = GL_RGBA;
+    }
+    else
+    {
+        std::cout << "[vtkIbisImagePlaneMapper] Format not supported." << std::endl;
     }
 
     // Setup the texture

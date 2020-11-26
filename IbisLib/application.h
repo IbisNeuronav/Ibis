@@ -185,6 +185,7 @@ public:
     void SaveScene( QString fileName );
 
     IbisPreferences *GetIbisPreferences() { return m_preferences; }
+    HardwareModule * GetHardwareModule(){ return m_hardwareModules.at(0); }
 
 public slots:
     void UpdateProgress( QProgressDialog*, int current );
