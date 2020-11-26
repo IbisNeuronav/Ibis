@@ -256,7 +256,7 @@ bool FileReader::ConvertMINC1toMINC2( QString &inputileName, QString &outputileN
             else
             {
                 QString tmp("File ");
-                tmp.append( inputileName + " is an acquired frame of MINC1 type and needs to be coverted to MINC2.\n" +
+                tmp.append( inputileName + " is an acquired frame of MINC1 type and needs to be converted to MINC2.\n" +
                             "Tool minccalc was not found in standard paths on your file system.\n" );
                 QMessageBox::critical( 0, "Error", tmp, 1, 0 );
                 return false;
@@ -363,7 +363,7 @@ bool FileReader::OpenFile( QList<SceneObject*> & readObjects, QString filename, 
             if( this->m_mincconvert.isEmpty())
             {
                 QString tmp("File ");
-                tmp.append( filename + " is  of MINC1 type and needs to be coverted to MINC2.\n" +
+                tmp.append( filename + " is  of MINC1 type and needs to be converted to MINC2.\n" +
                             "Open Settings/Preferences and set path to the directory containing MINC tools.\n" );
                 QMessageBox::critical( 0, "Error", tmp, 1, 0 );
                 return false;
@@ -760,7 +760,7 @@ bool FileReader::GetFrameDataFromMINCFile(QString filename, vtkImageData *img , 
         if( this->m_mincconvert.isEmpty())
         {
             QString tmp("File ");
-            tmp.append( filename + " is an acquired frame of MINC1 type and needs to be coverted to MINC2.\n" +
+            tmp.append( filename + " is an acquired frame of MINC1 type and needs to be converted to MINC2.\n" +
                         "Open Settings/Preferences and set path to the directory containing MINC tools.\n" );
             QMessageBox::critical( 0, "Error", tmp, 1, 0 );
             return false;
