@@ -188,7 +188,7 @@ bool FileReader::ConvertMINC1toMINC2( QString &inputileName, QString &outputileN
     if( m_mincconvert.isEmpty() )
     {
         QString tmp("File ");
-        tmp.append( inputileName + " is of MINC1 type and needs to be coverted to MINC2.\n" +
+        tmp.append( inputileName + " is of MINC1 type and needs to be converted to MINC2.\n" +
                     "Tool mincconvert was not found in standard paths on your file system.\n" +
                     "Please convert using command: \nmincconvert -2 <input> <output>");
         QMessageBox::critical( 0, "Error", tmp, 1, 0 );
@@ -256,7 +256,7 @@ bool FileReader::ConvertMINC1toMINC2( QString &inputileName, QString &outputileN
             else
             {
                 QString tmp("File ");
-                tmp.append( inputileName + " is an acquired frame of MINC1 type and needs to be coverted to MINC2.\n" +
+                tmp.append( inputileName + " is an acquired frame of MINC1 type and needs to be converted to MINC2.\n" +
                             "Tool minccalc was not found in standard paths on your file system.\n" );
                 QMessageBox::critical( 0, "Error", tmp, 1, 0 );
                 return false;
@@ -363,7 +363,7 @@ bool FileReader::OpenFile( QList<SceneObject*> & readObjects, QString filename, 
             if( this->m_mincconvert.isEmpty())
             {
                 QString tmp("File ");
-                tmp.append( filename + " is  of MINC1 type and needs to be coverted to MINC2.\n" +
+                tmp.append( filename + " is  of MINC1 type and needs to be converted to MINC2.\n" +
                             "Open Settings/Preferences and set path to the directory containing MINC tools.\n" );
                 QMessageBox::critical( 0, "Error", tmp, 1, 0 );
                 return false;
@@ -747,6 +747,89 @@ bool FileReader::OpenTagFile( QList<SceneObject*> & readObjects, QString filenam
     return true;
 }
 
+<<<<<<< HEAD
+=======
+
+bool FileReader::GetFrameDataFromMINCFile(QString filename, vtkImageData *img , vtkMatrix4x4 *mat )
+{
+    Q_ASSERT(img);
+    Q_ASSERT(mat);
+    QString fileToRead( filename );
+    QString fileMINC2;
+    if( this->IsMINC1( filename ) )
+    {
+        if( this->m_mincconvert.isEmpty())
+        {
+            QString tmp("File ");
+            tmp.append( filename + " is an acquired frame of MINC1 type and needs to be converted to MINC2.\n" +
+                        "Open Settings/Preferences and set path to the directory containing MINC tools.\n" );
+            QMessageBox::critical( 0, "Error", tmp, 1, 0 );
+            return false;
+        }
+        if( this->ConvertMINC1toMINC2( filename, fileMINC2, true ) )
+            fileToRead = fileMINC2;
+        else
+            return false;
+    }
+
+    IOBasePointer io = itk::ImageIOFactory::CreateImageIO(fileToRead.toUtf8().data(), itk::ImageIOFactory::ReadMode );
+
+    if(!io)
+      throw itk::ExceptionObject("Unsupported image file type");
+
+    io->SetFileName((fileToRead.toUtf8().data()));
+    io->ReadImageInformation();
+
+    size_t nc = io->GetNumberOfComponents();
+
+    IbisItkVtkConverter *ItktovtkConverter = IbisItkVtkConverter::New();
+    vtkSmartPointer<vtkTransform> tr = vtkSmartPointer<vtkTransform>::New();
+    if( nc == 1 )
+    {
+        typedef itk::ImageFileReader< IbisItkUnsignedChar3ImageType > ReaderType;
+        ReaderType::Pointer reader = ReaderType::New();
+        reader->SetFileName( fileToRead.toUtf8().data() );
+
+        try
+        {
+            reader->Update();
+        }
+        catch( itk::ExceptionObject & err )
+        {
+            return false;
+        }
+
+        IbisItkUnsignedChar3ImageType::Pointer itkImage = reader->GetOutput();
+        vtkImageData * tmpImg = ItktovtkConverter->ConvertItkImageToVtkImage( itkImage, tr );
+        img->DeepCopy( tmpImg);
+        mat->DeepCopy( tr->GetMatrix( ) );
+        ItktovtkConverter->Delete();
+        return true;
+    }
+
+    // try to read
+    typedef itk::ImageFileReader< IbisRGBImageType > ReaderType;
+    ReaderType::Pointer reader = ReaderType::New();
+    reader->SetFileName( fileToRead.toUtf8().data() );
+
+    try
+    {
+        reader->Update();
+    }
+    catch( itk::ExceptionObject & err )
+    {
+        return false;
+    }
+
+    IbisRGBImageType::Pointer itkImage = reader->GetOutput();
+    vtkImageData * tmpImg = ItktovtkConverter->ConvertItkImageToVtkImage( itkImage, tr );
+    img->DeepCopy( tmpImg);
+    mat->DeepCopy( tr->GetMatrix( ) );
+    ItktovtkConverter->Delete();
+    return true;
+}
+
+>>>>>>> Vtk opengl2 backend (#382)
 bool FileReader::GetPointsDataFromTagFile( QString filename, PointsObject *pts1, PointsObject *pts2 )
 {
     Q_ASSERT(pts1);
@@ -824,7 +907,7 @@ int FileReader::GetNumberOfComponents( QString filename )
         if( this->m_mincconvert.isEmpty())
         {
             QString tmp("File ");
-            tmp.append( filename + " is an acquired frame of MINC1 type and needs to be coverted to MINC2.\n" +
+            tmp.append( filename + " is an acquired frame of MINC1 type and needs to be converted to MINC2.\n" +
                         "Open Settings/Preferences and set path to the directory containing MINC tools.\n" );
             QMessageBox::critical( 0, "Error", tmp, 1, 0 );
             return 0;
