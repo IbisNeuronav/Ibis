@@ -70,7 +70,6 @@ public:
     std::string GetServerIPAddress( int index );
     std::string GetServerType( int index );
     std::string GetProtocol( int index );
-    std::string GetDeviceName( int index );
     std::string GetDeviceType( int index );
     int GetServerPort( int index );
     bool GetStartAuto( int index );

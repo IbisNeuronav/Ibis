@@ -136,7 +136,7 @@ void IbisHardwareIGSIO::StartConfig( QString configFile )
         }
 
         // Now try to connect to server
-        Connect( in.GetServerIPAddress(i), in.GetServerPort(i), in.GetServerType(i), in.GetProtocol(i), in.GetDeviceName(i), in.GetDeviceType(i) );
+        Connect( in.GetServerIPAddress(i), in.GetServerPort(i), in.GetServerType(i), in.GetProtocol(i), in.GetServerName(i), in.GetDeviceType(i) );
     }
 
     m_lastIbisPlusConfigFile = configFile;

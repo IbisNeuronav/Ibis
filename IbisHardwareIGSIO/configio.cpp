@@ -21,7 +21,6 @@ void ServerConfig::Serialize( Serializer * ser )
     ::Serialize( ser, "IPAddress", m_ipAddress );
     ::Serialize( ser, "Type", m_type );
     ::Serialize( ser, "Protocol", m_protocol );
-    ::Serialize( ser, "DeviceName", m_deviceName );
     ::Serialize( ser, "DeviceType", m_deviceType );
     ::Serialize( ser, "Port", m_port );
     ::Serialize( ser, "StartAuto", m_startAuto );
@@ -80,12 +79,6 @@ std::string ConfigIO::GetProtocol( int index )
 {
     Q_ASSERT( index >=0 && index < m_servers.size() );
     return m_servers[index].m_protocol;
-}
-
-std::string ConfigIO::GetDeviceName( int index )
-{
-    Q_ASSERT( index >=0 && index < m_servers.size() );
-    return m_servers[index].m_deviceName;
 }
 
 std::string ConfigIO::GetDeviceType( int index )
