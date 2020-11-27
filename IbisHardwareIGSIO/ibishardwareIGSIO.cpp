@@ -543,7 +543,11 @@ void IbisHardwareIGSIO::AssignDeviceImageToTool( igtlioDevicePointer device, Too
     else if( tool->sceneObject->IsA( "UsProbeObject" ) )
     {
         vtkSmartPointer<UsProbeObject> probe = UsProbeObject::SafeDownCast( tool->sceneObject );
-        probe->SetVideoInputData( imageContent );
+        if(tool->flipYAxis){
+            probe->SetVideoInputData( tool->flipYFilter->GetOutput() );
+        }else{
+            probe->SetVideoInputData( imageContent );
+        }
     }
 }
 
