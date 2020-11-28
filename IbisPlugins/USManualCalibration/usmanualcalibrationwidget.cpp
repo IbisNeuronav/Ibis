@@ -229,7 +229,7 @@ void USManualCalibrationWidget::UpdateManipulators()
     probeMat->Invert();
 
     vtkMatrix4x4 * phantomMat = vtkMatrix4x4::New();
-    SceneObject * phantom = m_pluginInterface->GetCalibrationPhantomObject();
+    SceneObject * phantom = m_pluginInterface->GetPhantomWiresObject();
     phantom->GetWorldTransform()->GetMatrix( phantomMat );
 
     // for each manipulator
@@ -321,7 +321,7 @@ void USManualCalibrationWidget::OnManipulatorsModified()
     {
         // Compute each manipulator's center point position in phantom coordinate
         vtkMatrix4x4 * phantomToWorldMat = vtkMatrix4x4::New();
-        m_pluginInterface->GetCalibrationPhantomObject()->GetWorldTransform()->GetMatrix( phantomToWorldMat );
+        m_pluginInterface->GetPhantomWiresObject()->GetWorldTransform()->GetMatrix( phantomToWorldMat );
         double manipWorldCoords[4][4];
         for( int i = 0; i < 4; ++i )
         {
