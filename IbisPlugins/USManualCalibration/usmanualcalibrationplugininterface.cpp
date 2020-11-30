@@ -60,6 +60,7 @@ const double phantomPoints[2][16][3] = {
 
 USManualCalibrationPluginInterface::USManualCalibrationPluginInterface()
 {
+    m_phantomWiresObjectId = IbisAPI::InvalidId;
     m_calibrationPhantomObjectId = IbisAPI::InvalidId;
     m_phantomRegSourcePointsId = IbisAPI::InvalidId;
     m_phantomRegTargetPointsId = IbisAPI::InvalidId;
@@ -89,7 +90,7 @@ QWidget * USManualCalibrationPluginInterface::CreateFloatingWidget()
         return 0;
     }
 
-    BuildCalibrationPhantomRepresentation();
+    BuildWiresRepresentation();
 
     USManualCalibrationWidget * calibrationWidget = new USManualCalibrationWidget;
     calibrationWidget->SetPluginInterface( this );
@@ -104,10 +105,14 @@ bool USManualCalibrationPluginInterface::WidgetAboutToClose()
 {
     if( m_landmarkRegistrationObjectId != IbisAPI::InvalidId )
     {
-        SceneObject *phantom = this->GetIbisAPI()->GetObjectByID( m_calibrationPhantomObjectId );
+        SceneObject *phantom = this->GetIbisAPI()->GetObjectByID(m_phantomWiresObjectId);
         if( phantom )
             this->GetIbisAPI()->RemoveObject( phantom );
+        SceneObject * model = this->GetIbisAPI()->GetObjectByID(m_calibrationPhantomObjectId);
+        if( model )
+            this->GetIbisAPI()->RemoveObject(model);
         this->GetIbisAPI()->RemoveObject( this->GetIbisAPI()->GetObjectByID( m_landmarkRegistrationObjectId ) );
+        m_phantomWiresObjectId = IbisAPI::InvalidId;
         m_calibrationPhantomObjectId = IbisAPI::InvalidId;
         m_phantomRegSourcePointsId = IbisAPI::InvalidId;
         m_phantomRegTargetPointsId = IbisAPI::InvalidId;
@@ -152,51 +157,76 @@ void USManualCalibrationPluginInterface::ValidateUsProbe()
 #include "vtkPoints.h"
 #include "vtkCellArray.h"
 
-void USManualCalibrationPluginInterface::BuildCalibrationPhantomRepresentation()
+void USManualCalibrationPluginInterface::BuildWiresRepresentation()
 {
-    bool needNewRepresentation = m_calibrationPhantomObjectId == IbisAPI::InvalidId;
-    needNewRepresentation |= GetIbisAPI()->GetObjectByID( m_calibrationPhantomObjectId ) == 0;
+    // Build wire representation
+    bool needNewRepresentation = m_phantomWiresObjectId == IbisAPI::InvalidId;
+    needNewRepresentation |= GetIbisAPI()->GetObjectByID(m_phantomWiresObjectId) == 0;
     if( !needNewRepresentation )
         return;
 
     vtkPolyData * phantomLinesPoly = vtkPolyData::New();
     vtkPoints * phantomLinesPoints = vtkPoints::New();
 
-    phantomLinesPoints->SetNumberOfPoints( 16 );
+    phantomLinesPoints->SetNumberOfPoints(16);
     for( int i = 0; i < 16; ++i )
-        phantomLinesPoints->SetPoint( i, phantomPoints[m_currentPhantomSize][i] );
+        phantomLinesPoints->SetPoint(i, phantomPoints[m_currentPhantomSize][i]);
 
     vtkIdType pts[4][4] = {{0,1,2,3},{4,5,6,7},{8,9,10,11},{12,13,14,15}};
     vtkCellArray * lines = vtkCellArray::New();
-    for( int i = 0; i < 4; i++ ) lines->InsertNextCell( 4, pts[i] );
-    phantomLinesPoly->SetPoints( phantomLinesPoints );
-    phantomLinesPoly->SetLines( lines );
+    for( int i = 0; i < 4; i++ ) lines->InsertNextCell(4, pts[i]);
+    phantomLinesPoly->SetPoints(phantomLinesPoints);
+    phantomLinesPoly->SetLines(lines);
 
     PolyDataObject * phantomObject = PolyDataObject::New();
-    phantomObject->SetName( "US Calib Phantom" );
-    phantomObject->SetCanChangeParent( false );
-    phantomObject->SetCanEditTransformManually( false );
-    phantomObject->SetNameChangeable( false );
+    phantomObject->SetName("Phantom Wires");
+    phantomObject->SetCanChangeParent(false);
+    phantomObject->SetCanEditTransformManually(false);
+    phantomObject->SetNameChangeable(false);
     //phantomObject->SetObjectDeletable( false );
-    phantomObject->SetPolyData( phantomLinesPoly );
-    GetIbisAPI()->AddObject( phantomObject );
-    m_calibrationPhantomObjectId = phantomObject->GetObjectID();
+    phantomObject->SetPolyData(phantomLinesPoly);
+    GetIbisAPI()->AddObject(phantomObject);
+    m_phantomWiresObjectId = phantomObject->GetObjectID();
 
     // Cleanup
     phantomObject->Delete();
     lines->Delete();
     phantomLinesPoints->Delete();
     phantomLinesPoly->Delete();
-
 }
 
-void USManualCalibrationPluginInterface::UpdateCalibrationPhantomRepresentation()
+void USManualCalibrationPluginInterface::BuildCalibrationPhantomRepresentation()
 {
+    // Build model representation
     bool needNewRepresentation = m_calibrationPhantomObjectId == IbisAPI::InvalidId;
-    PolyDataObject * phantomObject = PolyDataObject::SafeDownCast(GetIbisAPI()->GetObjectByID(m_calibrationPhantomObjectId));
+    needNewRepresentation |= GetIbisAPI()->GetObjectByID(m_calibrationPhantomObjectId) == 0;
+    if( !needNewRepresentation )
+        return;
+
+    // TODO: get file name from CMake
+    QString filePath( tr("../IbisPlugins/") + this->GetPluginName() + tr("/calibrationPhantomModel.ply") );
+    if( QFile(filePath).exists() )
+    {
+        OpenFileParams * params = new OpenFileParams;
+        params->AddInputFile(filePath, tr("Phantom Model"));
+        this->GetIbisAPI()->OpenFiles(params);
+        if( params->filesParams[0].loadedObject )
+        {
+            params->filesParams[0].loadedObject->SetCanChangeParent(false);
+            params->filesParams[0].loadedObject->SetCanEditTransformManually(false);
+            params->filesParams[0].loadedObject->SetNameChangeable(false);
+            m_calibrationPhantomObjectId = params->filesParams[0].loadedObject->GetObjectID();
+        }
+    }
+}
+
+void USManualCalibrationPluginInterface::UpdateWiresRepresentation()
+{
+    bool needNewRepresentation = m_phantomWiresObjectId == IbisAPI::InvalidId;
+    PolyDataObject * phantomObject = PolyDataObject::SafeDownCast(GetIbisAPI()->GetObjectByID(m_phantomWiresObjectId));
     if( needNewRepresentation | (phantomObject == 0) )
     {
-        this->BuildCalibrationPhantomRepresentation();
+        this->BuildWiresRepresentation();
         return;
     }
 
@@ -231,9 +261,13 @@ void USManualCalibrationPluginInterface::StartPhantomRegistration()
     const char * pointNames[4] = { "One", "Two", "Three", "Four" };
     double pointCoords[4][3] = { { 0, -17.5, 53 }, { 50, -17.5, 53 }, { 42, 112.5, 53 }, {  10, 80, 53 } };
 
+    if( m_phantomWiresObjectId == IbisAPI::InvalidId )
+        BuildWiresRepresentation();
+    SceneObject * wiresObject = GetIbisAPI()->GetObjectByID(m_phantomWiresObjectId);
+
     if( m_calibrationPhantomObjectId == IbisAPI::InvalidId )
         BuildCalibrationPhantomRepresentation();
-    SceneObject * phantomObject = GetIbisAPI()->GetObjectByID( m_calibrationPhantomObjectId );
+    SceneObject * phantomObject = GetIbisAPI()->GetObjectByID(m_calibrationPhantomObjectId);
 
     // Add source and target points to scene
     PointsObject * sourcePoints = PointsObject::SafeDownCast( GetIbisAPI()->GetObjectByID( m_phantomRegSourcePointsId ) );
@@ -272,6 +306,7 @@ void USManualCalibrationPluginInterface::StartPhantomRegistration()
     m_phantomRegSourcePointsId = sourcePoints->GetObjectID();
     m_phantomRegTargetPointsId = targetPoints->GetObjectID();
 
+    GetIbisAPI()->ChangeParent( wiresObject, regObj, 0 );
     GetIbisAPI()->ChangeParent( phantomObject, regObj, 0 );
     regObj->SelectPoint( 0 );
     GetIbisAPI()->SetCurrentObject( regObj );
@@ -287,9 +322,9 @@ void USManualCalibrationPluginInterface::StartPhantomRegistration()
      return phantomPoints[m_currentPhantomSize][ nIndex * 4 + pointIndex ];
  }
 
- SceneObject * USManualCalibrationPluginInterface::GetCalibrationPhantomObject()
+ SceneObject * USManualCalibrationPluginInterface::GetPhantomWiresObject()
  {
-     SceneObject * obj = GetIbisAPI()->GetObjectByID( m_calibrationPhantomObjectId );
+     SceneObject * obj = GetIbisAPI()->GetObjectByID(m_phantomWiresObjectId);
      return obj;
  }
 
@@ -306,5 +341,5 @@ void USManualCalibrationPluginInterface::StartPhantomRegistration()
         default:
             m_currentPhantomSize = PhantomSize::MEDIUMDEPTH;
      }
-     UpdateCalibrationPhantomRepresentation();
+     UpdateWiresRepresentation();
  }
