@@ -131,7 +131,7 @@ void IbisHardwareIGSIO::StartConfig( QString configFile )
         }
 
         // Now try to connect to server
-        Connect( in.GetServerIPAddress(i), in.GetServerPort(i) );
+        Connect( in.GetServerIPAddress(i), in.GetServerPort(i), in.GetConnectAuto(i) );
     }
 
     m_lastIbisPlusConfigFile = configFile;
@@ -372,11 +372,13 @@ bool IbisHardwareIGSIO::LaunchLocalServer( QString plusConfigFile )
     return didLaunch;
 }
 
-void IbisHardwareIGSIO::Connect( std::string ip, int port )
+void IbisHardwareIGSIO::Connect( std::string ip, int port, bool start )
 {
     igtlioConnectorPointer c = m_logic->CreateConnector();
     c->SetTypeClient( ip, port );
-    c->Start();
+    if(start){
+        c->Start();
+    }
     m_logicCallbacks->Connect( c , igtlioConnector::ConnectedEvent, this, SLOT(OnConnectionEstablished(vtkObject*, unsigned long, void*, void*)) );
 }
 
