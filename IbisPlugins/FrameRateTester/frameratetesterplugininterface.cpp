@@ -17,6 +17,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QTimer>
 #include <QTime>
 #include <QMap>
+#include <vtkRenderer.h>
 
 FrameRateTesterPluginInterface::FrameRateTesterPluginInterface()
 {
@@ -112,8 +113,8 @@ void FrameRateTesterPluginInterface::OnTimerTriggered()
         m_time->restart();
 
     // Render
-//    GetIbisAPI()->GetViewByID( m_currentViewID )->Render();
-    GetIbisAPI()->GetViewByID( m_currentViewID )->NotifyNeedRender();
+    View *v = GetIbisAPI()->GetViewByID( m_currentViewID );
+    v->GetRenderer()->Render();
 
     // Increment stats
     m_lastPeriod = ((double)m_time->elapsed()) * 0.001;
