@@ -98,7 +98,7 @@ protected:
 
     // Launch a Plus server and connect
     bool LaunchLocalServer( QString plusConfigFile );
-    void Connect( std::string ip, int port );
+    void Connect( std::string ip, int port, bool start );
     void DisconnectAllServers();
     void ShutDownLocalServers();
 
