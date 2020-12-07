@@ -113,8 +113,7 @@ void FrameRateTesterPluginInterface::OnTimerTriggered()
         m_time->restart();
 
     // Render
-    View *v = GetIbisAPI()->GetViewByID( m_currentViewID );
-    v->GetRenderer()->Render();
+    GetIbisAPI()->GetViewByID( m_currentViewID )->NotifyNeedRender();
 
     // Increment stats
     m_lastPeriod = ((double)m_time->elapsed()) * 0.001;
