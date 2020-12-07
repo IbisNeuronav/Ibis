@@ -52,6 +52,8 @@ public:
     void LoadSettings( QSettings & s );
     void SaveSettings( QSettings & s );
 
+    void CreatePluginsUi();
+
 public slots:
 
     void OnStartMainLoop();
@@ -99,7 +101,6 @@ private slots:
 protected:
 
     void OpenFiles( OpenFileParams * params );
-    void CreatePluginsUi();
     void CreateNewObjectPluginsUi(QMenu *);
     QAction * AddToggleAction( QMenu * menu, const QString & title, const char * member, const QKeySequence & shortcut, bool checked );
     void closeEvent( QCloseEvent * event );

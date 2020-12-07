@@ -143,6 +143,8 @@ Application::Application( )
 void Application::SetMainWindow( MainWindow * mw )
 {
     m_mainWindow = mw;
+    // Create UI elements from the plugins
+    m_mainWindow->CreatePluginsUi();
 }
 
 void Application::LoadWindowSettings()

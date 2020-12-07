@@ -209,11 +209,6 @@ MainWindow::MainWindow( QWidget * parent )
 
     UpdateMainSplitter();
 
-    // -----------------------------------------
-    // Create UI elements from the plugins
-    // -----------------------------------------
-    CreatePluginsUi();
-
     // Tell the qApp unique instance to send event to MainWindow::eventFilter before anyone else
     // so that we can grab global keyboard shortcuts.
     qApp->installEventFilter(this);
