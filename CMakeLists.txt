@@ -142,7 +142,12 @@ if( CMAKE_BUILD_TYPE MATCHES "Debug" )
 endif( CMAKE_BUILD_TYPE MATCHES "Debug" )
 
 # Track state of local git repository
+set(GITWATCHER_PRE_CONFIGURE_FILE "${CMAKE_SOURCE_DIR}/githash.h.in")
+set(GITWATCHER_POST_CONFIGURE_FILE "${CMAKE_BINARY_DIR}/githash.h")
+set(GITWATCHER_GIT_STATE_FILE "${CMAKE_BINARY_DIR}/git-state")
 include(${CMAKE_COMMON_DIR}/gitwatcher.cmake)
+#cleaning
+set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${GITWATCHER_GIT_STATE_FILE})
 
 # configure version file
 configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/version.h.in ${CMAKE_CURRENT_BINARY_DIR}/version.h )
@@ -192,6 +197,3 @@ if( IBIS_BUILD_DOCUMENTATION )
     endif (DOXYGEN_FOUND)
 endif()
 
-#cleaning
-set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${CMAKE_CURRENT_BINARY_DIR}/version.h)
-set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES ${GIT_STATE_FILE})
