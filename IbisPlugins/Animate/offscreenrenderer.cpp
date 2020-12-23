@@ -103,7 +103,8 @@ void OffscreenRenderer::Setup()
     //-------------------------------
     // Make GL context current
     //-------------------------------
-    vtkOpenGLRenderWindow * win = vtkOpenGLRenderWindow::SafeDownCast( m_animate->GetIbisAPI()->GetMain3DView()->GetQtRenderWidget()->GetRenderWindow() );
+    vtkRenderer *ren = m_animate->GetIbisAPI()->GetMain3DView()->GetRenderer();
+    vtkOpenGLRenderWindow * win = vtkOpenGLRenderWindow::SafeDownCast( ren->GetRenderWindow() );
     Q_ASSERT( win );
     win->SetForceMakeCurrent();
     win->MakeCurrent();
@@ -151,7 +152,6 @@ void OffscreenRenderer::Setup()
     //-------------------------------
     m_cam = vtkOffscreenCamera::New();
     m_cam->SetRenderSize( m_renderSize );
-    vtkRenderer * ren = m_animate->GetIbisAPI()->GetMain3DView()->GetRenderer();
     m_backupCam = ren->GetActiveCamera();
     m_cam->DeepCopy( m_backupCam );
     ren->SetActiveCamera( m_cam );
