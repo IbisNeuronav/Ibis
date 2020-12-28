@@ -6,7 +6,7 @@ ExternalProject_Add( ${opencv_name}
     STAMP_DIR ${opencv_prefix}/stamp
     INSTALL_COMMAND ""
     GIT_REPOSITORY "https://github.com/opencv/opencv.git"
-    GIT_TAG 70bbf17b133496bd7d54d034b0f94bd869e0e810
+    GIT_TAG ${IBIS_OPENCV_LONG_VERSION}
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=${external_project_dir}/${opencv_name}/install
                -DCMAKE_OSX_SYSROOT:PATH=${CMAKE_OSX_SYSROOT}
                -DCMAKE_OSX_DEPLOYMENT_TARGET:STRING=${CMAKE_OSX_DEPLOYMENT_TARGET}
@@ -21,5 +21,14 @@ ExternalProject_Add( ${opencv_name}
                -DBUILD_FAT_JAVA_LIB:BOOL=FALSE
                -DWITH_CUDA:BOOL=FALSE
                -DWITH_VTK:BOOL=FALSE
+               -DWITH_EIGEN:BOOL=OFF
+               -DWITH_1394:BOOL=OFF
+               -DWITH_GSTREAMER:BOOL=OFF
+               -DWITH_GTK:BOOL=OFF
+               -DWITH_ITT:BOOL=OFF
                -DBUILD_opencv_python2:BOOL=FALSE
-               -DBUILD_opencv_python3:BOOL=FALSE )
+               -DBUILD_opencv_python3:BOOL=FALSE
+               -DBUILD_opencv_apps:BOOL=FALSE
+               -DBUILD_JAVA:BOOL=FALSE
+               -DBUILD_PACKAGE:BOOL=FALSE
+                )
