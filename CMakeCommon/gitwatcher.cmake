@@ -140,6 +140,8 @@ endfunction()
 
 # Function: CheckGit
 # Description: check if the git repo has changed. If so, update the state file.
+# If the state did not changed, but GITWATCHER_POST_CONFIGURE_FILE does not exist
+# set _state_changed to true, to configure the output file
 # Args:
 #   _working_dir    (in)  string; the directory from which git commands will be ran.
 #   _state_changed (out)    bool; whether or no the state of the repo has changed.
@@ -159,7 +161,9 @@ function(CheckGit _working_dir _state_changed _state)
         if(OLD_HEAD_CONTENTS STREQUAL "${state}")
             # State didn't change.
             set(${_state_changed} "false" PARENT_SCOPE)
-            return()
+            if(EXISTS "${GITWATCHER_POST_CONFIGURE_FILE}")
+                return()
+            endif()
         endif()
     endif()
 

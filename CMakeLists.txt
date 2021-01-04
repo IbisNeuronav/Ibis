@@ -191,3 +191,4 @@ if( IBIS_BUILD_DOCUMENTATION )
         message("Doxygen needs to be installed to generate documentation")
     endif (DOXYGEN_FOUND)
 endif()
+
