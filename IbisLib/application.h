@@ -100,7 +100,7 @@ public:
     void AddBottomWidget( QWidget * w );
     void RemoveBottomWidget( QWidget * w );
 
-    void ShowFloatingDock( QWidget * w, QFlags<QDockWidget::DockWidgetFeature> features=QDockWidget::AllDockWidgetFeatures );
+    void ShowFloatingDock( QWidget * w, QFlags<QDockWidget::DockWidgetFeature> features=QDockWidget::AllDockWidgetFeatures, int xOffset=0, int yOffset = 0 );
 
     void OnStartMainLoop();
     void AddGlobalEventHandler( GlobalEventHandler * h );

@@ -2,6 +2,7 @@
 #include "ui_pathform.h"
 #include <QFile>
 #include <QMessageBox>
+#include <QDockWidget>
 #include "filesystemtree.h"
 #include "application.h"
 
@@ -40,7 +41,7 @@ void PathForm::on_browsePushButton_clicked()
     FileSystemTree *tree = new FileSystemTree;
     tree->setAttribute(Qt::WA_DeleteOnClose);
     tree->SetPathForm( this );
-    Application::GetInstance().ShowFloatingDock( tree );
+    Application::GetInstance().ShowFloatingDock( tree, QDockWidget::AllDockWidgetFeatures, this->width()/2+tree->width() );
 }
 
 void PathForm::PathLineEditChanged()
