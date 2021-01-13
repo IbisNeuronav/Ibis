@@ -2,8 +2,7 @@
 #include "ui_pathform.h"
 #include <QFile>
 #include <QMessageBox>
-#include <QDockWidget>
-#include "filesystemtree.h"
+\#include "filesystemtree.h"
 #include "application.h"
 
 const QString PathForm::LabelWidgetName = "CustomPathName";
