@@ -41,7 +41,7 @@ void PathForm::on_browsePushButton_clicked()
     FileSystemTree *tree = new FileSystemTree;
     tree->setAttribute(Qt::WA_DeleteOnClose);
     tree->SetPathForm( this );
-    Application::GetInstance().ShowFloatingDock( tree, QDockWidget::AllDockWidgetFeatures, this->width()/2+tree->width() );
+    Application::GetInstance().ShowFloatingDock( tree );
 }
 
 void PathForm::PathLineEditChanged()

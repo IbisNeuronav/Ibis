@@ -872,7 +872,7 @@ void MainWindow::RemoveBottomWidget( QWidget * w )
     m_4Views->RemoveBottomWidget( w );
 }
 
-void MainWindow::ShowFloatingDock(QWidget * w, QFlags<QDockWidget::DockWidgetFeature> features , int xOffset, int yOffset )
+void MainWindow::ShowFloatingDock(QWidget * w, QFlags<QDockWidget::DockWidgetFeature> features )
 {
     QDockWidget * dock = new QDockWidget( this );
     dock->setWindowTitle( w->windowTitle() );
@@ -881,11 +881,13 @@ void MainWindow::ShowFloatingDock(QWidget * w, QFlags<QDockWidget::DockWidgetFea
     dock->setFeatures( features );
     dock->setAllowedAreas( Qt::NoDockWidgetArea );
     dock->setFloating( true );
-    dock->move(this->pos().x() + this->size().width()/2 - dock->size().width()/2 + xOffset,
-               this->pos().y() + this->size().height()/2 - dock->size().height()/2 + yOffset );
+    dock->move(this->pos().x() + this->size().width()/2 - dock->size().width()/2,
+               this->pos().y() + this->size().height()/2 - dock->size().height()/2 );
     dock->setWidget( w );
     connect( w, SIGNAL(destroyed()), dock, SLOT(close()) );
     dock->show();
+    dock->raise();
+    dock->activateWindow();
 }
 
 void MainWindow::SetShowToolbar( bool show )

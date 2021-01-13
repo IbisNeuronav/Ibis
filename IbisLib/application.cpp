@@ -322,9 +322,9 @@ void Application::RemoveBottomWidget( QWidget * w )
     m_mainWindow->RemoveBottomWidget( w );
 }
 
-void Application::ShowFloatingDock(QWidget * w, QFlags<QDockWidget::DockWidgetFeature> features , int xOffset, int yOffset)
+void Application::ShowFloatingDock(QWidget * w, QFlags<QDockWidget::DockWidgetFeature> features )
 {
-    m_mainWindow->ShowFloatingDock( w, features, xOffset,  yOffset );
+    m_mainWindow->ShowFloatingDock( w, features );
 }
 
 void Application::OnStartMainLoop()
