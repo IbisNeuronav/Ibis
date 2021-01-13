@@ -886,7 +886,6 @@ void MainWindow::ShowFloatingDock( QWidget * w, QFlags<QDockWidget::DockWidgetFe
     dock->setWidget( w );
     connect( w, SIGNAL(destroyed()), dock, SLOT(close()) );
     dock->show();
-    dock->raise();
     dock->activateWindow();
 }
 
