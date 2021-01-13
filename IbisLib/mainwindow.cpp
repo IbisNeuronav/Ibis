@@ -882,9 +882,11 @@ void MainWindow::ShowFloatingDock( QWidget * w, QFlags<QDockWidget::DockWidgetFe
     dock->setAllowedAreas( Qt::NoDockWidgetArea );
     dock->setFloating( true );
     dock->move(this->pos().x() + this->size().width()/2 - dock->size().width()/2,
-               this->pos().y() + this->size().height()/2 - dock->size().height()/2);
+               this->pos().y() + this->size().height()/2 - dock->size().height()/2 );
     dock->setWidget( w );
+    connect( w, SIGNAL(destroyed()), dock, SLOT(close()) );
     dock->show();
+    dock->activateWindow();
 }
 
 void MainWindow::SetShowToolbar( bool show )
