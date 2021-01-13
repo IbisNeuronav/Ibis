@@ -872,7 +872,7 @@ void MainWindow::RemoveBottomWidget( QWidget * w )
     m_4Views->RemoveBottomWidget( w );
 }
 
-void MainWindow::ShowFloatingDock(QWidget * w, QFlags<QDockWidget::DockWidgetFeature> features )
+void MainWindow::ShowFloatingDock( QWidget * w, QFlags<QDockWidget::DockWidgetFeature> features )
 {
     QDockWidget * dock = new QDockWidget( this );
     dock->setWindowTitle( w->windowTitle() );
