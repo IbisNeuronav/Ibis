@@ -58,6 +58,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "gpu_weightrigidregistration.h"
 #include "screwnavigationwidget.h"
 #include "screwproperties.h"
+#include "secondaryusacquisition.h"
 
 class QDockWidget;
 class PedicleScrewNavigationPluginInterface;
@@ -151,6 +152,7 @@ private:
     double                                      m_optInitialSigma;
 
     int m_it;
+    SecondaryUSAcquisition *                    m_secondaryAcquisitions;
 
 private slots:
 
@@ -177,6 +179,8 @@ private slots:
     void on_optPopulationSizeComboBox_currentIndexChanged( int );
     void on_initialSigmaComboBox_currentIndexChanged( int );
     void on_advancedSettingsButton_clicked();
+    void on_addUSAcquisitionButton_clicked();
+    void on_removeUSAcquisitionButton_clicked();
 };
 
 

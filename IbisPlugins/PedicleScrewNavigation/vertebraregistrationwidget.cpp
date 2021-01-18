@@ -38,6 +38,8 @@ VertebraRegistrationWidget::VertebraRegistrationWidget(QWidget *parent) :
     std::srand(std::time(nullptr));
 
     setWindowTitle( "Vertebra Registration" );
+    m_secondaryAcquisitions = new SecondaryUSAcquisition();
+    m_secondaryAcquisitions->setGlobalLayout(ui->usAcquisitionVerticalLayout);
 }
 
 VertebraRegistrationWidget::~VertebraRegistrationWidget()
@@ -68,6 +70,7 @@ void VertebraRegistrationWidget::SetPluginInterface( PedicleScrewNavigationPlugi
             connect( ibisApi, SIGNAL(ObjectRemoved(int)), this, SLOT(OnObjectRemovedSlot(int)) );
         }
         this->UpdateUi();
+        m_secondaryAcquisitions->setPluginInterface(m_pluginInterface);
     }
 }
 
@@ -754,6 +757,8 @@ void VertebraRegistrationWidget::OnObjectAddedSlot( int imageObjectId )
             }
             else if( sceneObject->IsA("USAcquisitionObject") )
             {
+                m_secondaryAcquisitions->addUSAcquisition(imageObjectId);
+
                 if(ui->usImageComboBox->count() == 0)
                 {
                     ui->usImageComboBox->addItem(sceneObject->GetName(), QVariant(imageObjectId) );
@@ -973,4 +978,14 @@ void VertebraRegistrationWidget::on_advancedSettingsButton_clicked()
         ui->advancedSettingsButton->setText( tr( "Show advanced settings >>>" ) );
         ui->advancedSettingsGroupBox->hide();
     }
+}
+
+void VertebraRegistrationWidget::on_addUSAcquisitionButton_clicked()
+{
+    m_secondaryAcquisitions->addNewEntry();
+}
+
+void VertebraRegistrationWidget::on_removeUSAcquisitionButton_clicked()
+{
+    m_secondaryAcquisitions->removeLastEntry();
 }

@@ -5,6 +5,7 @@ set(  PluginSrc
       screwnavigationwidget.cpp
       screwtablewidget.cpp
       screwproperties.cpp
+      secondaryusacquisition.cpp
       )
 
 set( PluginHdrMoc 
@@ -13,6 +14,7 @@ set( PluginHdrMoc
      screwnavigationwidget.h
      screwtablewidget.h
      screwproperties.h
+     secondaryusacquisition.h
     )
 
 set( PluginUi vertebraregistrationwidget.ui screwnavigationwidget.ui screwtablewidget.ui )
