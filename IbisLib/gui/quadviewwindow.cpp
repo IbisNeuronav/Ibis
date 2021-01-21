@@ -355,7 +355,8 @@ void QuadViewWindow::OnCursorMoved()
 {
     double cursorPos[3];
     m_sceneManager->GetCursorPosition( cursorPos );
-    QString text = QString( "Cursor: ( %1, %2, %3 )" ).arg( cursorPos[0] ).arg( cursorPos[1] ).arg( cursorPos[2] );
+    QString text;
+    text.sprintf("Cursor: ( %.2f, %.2f, %.2f )\t", cursorPos[0], cursorPos[1], cursorPos[2]);
     m_cursorPosLabel->setText( text );
 }
 
