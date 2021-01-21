@@ -149,3 +149,34 @@ void SecondaryUSAcquisition::addUSAcquisition(int objectId)
         }
     }
 }
+
+void SecondaryUSAcquisition::getValidUSAcquisitions(QList< USAcquisitionObject * > & list)
+{
+    list.clear();
+
+    if( !m_pluginInterface )
+        return;
+
+    IbisAPI * ibisApi = m_pluginInterface->GetIbisAPI();
+    if( !ibisApi )
+        return;
+
+    for( QComboBox * cb : m_comboboxes )
+    {
+        int index = cb->itemData(cb->currentIndex()).toInt();
+        USAcquisitionObject * sceneObject = USAcquisitionObject::SafeDownCast( ibisApi->GetObjectByID(index) );
+        if( sceneObject )
+        {
+            bool exists = false;
+            for( USAcquisitionObject * so : list )
+            {
+                if( so->GetObjectID() == sceneObject->GetObjectID() )
+                    exists = true;
+            }
+            if( !exists )
+            {
+                list.append(sceneObject);
+            }
+        }
+    }
+}

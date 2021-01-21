@@ -34,6 +34,7 @@ public:
     void removeLastEntry();
     void removeEntryAt(int);
     void addUSAcquisition(int);
+    void getValidUSAcquisitions(QList< USAcquisitionObject * > &);
 
 private:
 

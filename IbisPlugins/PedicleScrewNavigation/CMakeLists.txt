@@ -6,6 +6,7 @@ set(  PluginSrc
       screwtablewidget.cpp
       screwproperties.cpp
       secondaryusacquisition.cpp
+      itkCompoundImageFilter.hxx
       )
 
 set( PluginHdrMoc 
@@ -15,6 +16,7 @@ set( PluginHdrMoc
      screwtablewidget.h
      screwproperties.h
      secondaryusacquisition.h
+     itkCompoundImageFilter.h
     )
 
 set( PluginUi vertebraregistrationwidget.ui screwnavigationwidget.ui screwtablewidget.ui )
