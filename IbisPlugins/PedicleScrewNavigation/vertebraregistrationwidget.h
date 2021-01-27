@@ -99,6 +99,7 @@ private:
 
     // Reconstruction functionality
     bool CreateVolumeFromSlices(USAcquisitionObject *, float spacingFactor=0);
+    bool CreateVolumeFromSlices(USAcquisitionObject *, float spacingFactor, QList<USAcquisitionObject *> secondaryAcquisitions);
     
     // Registration functionality
     IbisItkFloat3ImageType::PointType GetCenterOfGravity( IbisItkFloat3ImagePointer );
