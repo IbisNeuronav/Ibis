@@ -537,6 +537,12 @@ void View::ReferenceTransformChanged()
 
             cam->ApplyTransform( t );
 
+            double center[3];
+            double newFocal[3];
+            obj->GetCenter( center );
+            refTransform->TransformPoint( center, newFocal );
+            cam->SetFocalPoint( newFocal );
+
             // backup inverted current transform
             this->PrevViewingTransform->DeepCopy( refTransform->GetMatrix() );
             this->PrevViewingTransform->Invert();
