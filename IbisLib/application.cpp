@@ -484,9 +484,6 @@ void Application::OpenFiles( OpenFileParams * params, bool addToScene )
         }
     }
 
-    // See if it is the first batch of objects loaded/created
-    int initialNumberOfUserObjects = GetSceneManager()->GetNumberOfUserObjects();
-
     m_fileReader->start();
 
     // Create a progress dialog and a timer to update it
@@ -546,6 +543,8 @@ void Application::OpenFiles( OpenFileParams * params, bool addToScene )
                     Application::GetSceneManager()->SetCurrentObject( cur.loadedObject );
                 }
             }
+            // See if it is the first batch of objects loaded/created
+            int initialNumberOfUserObjects = GetSceneManager()->GetNumberOfUserObjects();
 
             if( initialNumberOfUserObjects == 0 )
             {
