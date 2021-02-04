@@ -537,8 +537,6 @@ void View::ReferenceTransformChanged()
 
             cam->ApplyTransform( t );
 
-            if ( this->Manager->Is3DViewFollowingReferenceVolume() )
-                this->SetRotationCenter3D();
             // backup inverted current transform
             this->PrevViewingTransform->DeepCopy( refTransform->GetMatrix() );
             this->PrevViewingTransform->Invert();
@@ -598,10 +596,7 @@ void View::AdjustCameraDistance( double viewAngle )
     double wantedAngle = vtkMath::RadiansFromDegrees( viewAngle * 0.5 );
     double du = dr * tan( vtkHardcodedAngle ) / tan( wantedAngle );
     Vec3 newPos = pos + ( dr - du ) * ndir;
-    if ( this->Manager->Is3DViewFollowingReferenceVolume() )
-        this->SetRotationCenter3D();
-    else
-        cam->SetPosition( newPos.Ref() );
+    cam->SetPosition( newPos.Ref() );
     cam->SetViewAngle( viewAngle );
 }
 
@@ -649,34 +644,5 @@ void View::Reset2DView()
         vtkMatrix4x4Operators::MultiplyVector( transform->GetMatrix(), up.Ref(), newVup.Ref() );
         cam->SetPosition( newPos.Ref() );
         cam->SetViewUp( newVup.Ref() );
-    }
-}
-
-void View::SetRotationCenter3D()
-{
-    ImageObject * obj = this->Manager->GetReferenceDataObject();
-
-    if ( obj )
-    {
-        vtkCamera * cam = this->Renderer->GetActiveCamera();
-        vtkTransform * refTransform = obj->GetWorldTransform();
-
-        double center[3];
-        double focal[3];
-        double newFocal[3];
-        double pos[3];
-        double newPos[3];
-        cam->GetPosition( pos );
-        cam->GetFocalPoint( focal );
-        obj->GetCenter( center );
-        refTransform->TransformPoint( center, newFocal );
-        for( int i = 0; i < 3; i++ )
-        {
-            newPos[i] = pos[i] + newFocal[i] - focal[i];
-        }
-
-        cam->SetFocalPoint( newFocal );
-        cam->SetPosition( newPos );
-        cam->OrthogonalizeViewUp();
     }
 }

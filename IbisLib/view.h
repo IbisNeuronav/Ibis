@@ -143,7 +143,6 @@ protected:
     void GetPositionAndModifier( int & x, int & y, unsigned & modifier );
     void AdjustCameraDistance( double viewAngle );
     void Reset2DView();
-    void SetRotationCenter3D();
 
     QString Name;
     vtkQtRenderWindow * RenderWindow;
