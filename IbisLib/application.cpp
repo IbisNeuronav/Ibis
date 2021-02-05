@@ -544,9 +544,10 @@ void Application::OpenFiles( OpenFileParams * params, bool addToScene )
                 }
             }
             // See if it is the first batch of objects loaded/created
+            // adding first user object has to call ResetAllCameras
             int initialNumberOfUserObjects = GetSceneManager()->GetNumberOfUserObjects();
 
-            if( initialNumberOfUserObjects == 0 )
+            if( initialNumberOfUserObjects == 1 )
             {
                 Application::GetSceneManager()->ResetAllCameras();
             }

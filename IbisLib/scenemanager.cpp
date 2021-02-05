@@ -706,11 +706,6 @@ void SceneManager::AddObjectUsingID( SceneObject * object, SceneObject * attachT
     this->SetupInAllViews( object );
     object->PreDisplaySetup();
 
-    // adding first image object has to call ResetAllCameras,
-    // at this point the object is already added to the list
-    if( this->GetNumberOfUserObjects() == 1 && object->IsUserObject() )
-        this->ResetAllCameras();
-
     if( !GetReferenceDataObject() && CanBeReference( object ) )
         SetReferenceDataObject( object );
 

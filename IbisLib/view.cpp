@@ -537,8 +537,9 @@ void View::ReferenceTransformChanged()
 
             cam->ApplyTransform( t );
 
-            if ( this->Manager->Is3DViewFollowingReferenceVolume() )
+            if ( this->GetType() == THREED_VIEW_TYPE )
                 this->SetRotationCenter3D();
+
             // backup inverted current transform
             this->PrevViewingTransform->DeepCopy( refTransform->GetMatrix() );
             this->PrevViewingTransform->Invert();
@@ -598,7 +599,7 @@ void View::AdjustCameraDistance( double viewAngle )
     double wantedAngle = vtkMath::RadiansFromDegrees( viewAngle * 0.5 );
     double du = dr * tan( vtkHardcodedAngle ) / tan( wantedAngle );
     Vec3 newPos = pos + ( dr - du ) * ndir;
-    if ( this->Manager->Is3DViewFollowingReferenceVolume() )
+    if ( this->GetType() == THREED_VIEW_TYPE )
         this->SetRotationCenter3D();
     else
         cam->SetPosition( newPos.Ref() );
