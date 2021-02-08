@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>387</width>
-    <height>496</height>
+    <height>549</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -250,7 +250,7 @@ border-radius: 7;</string>
    <item>
     <widget class="QCheckBox" name="viewFollowsReferenceCheckBox">
      <property name="text">
-      <string>3D view follows reference</string>
+      <string>3D View Follows Reference</string>
      </property>
     </widget>
    </item>
@@ -341,7 +341,7 @@ border-radius: 7;</string>
    <item>
     <widget class="QLabel" name="updateMaxFrequencyLabel">
      <property name="text">
-      <string>Update max frequency:</string>
+      <string>Update Max Frequency:</string>
      </property>
     </widget>
    </item>
