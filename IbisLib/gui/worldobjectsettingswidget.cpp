@@ -49,7 +49,7 @@ void WorldObjectSettingsWidget::SetWorldObject( WorldObject * obj )
 void WorldObjectSettingsWidget::on_changeColorButton_clicked()
 {
     QColor initial( m_worldObject->GetBackgroundColor() );
-    QColor newColor = QColorDialog::getColor( initial );
+    QColor newColor = QColorDialog::getColor( initial, nullptr, tr("Choose Color"),  QColorDialog::DontUseNativeDialog );
     if( newColor.isValid() )
     {
         m_worldObject->SetBackgroundColor( newColor );
@@ -60,7 +60,7 @@ void WorldObjectSettingsWidget::on_changeColorButton_clicked()
 void WorldObjectSettingsWidget::on_change3DColorButton_clicked()
 {
     QColor initial( m_worldObject->Get3DBackgroundColor() );
-    QColor newColor = QColorDialog::getColor( initial );
+    QColor newColor = QColorDialog::getColor( initial, nullptr, tr("Choose Color"),  QColorDialog::DontUseNativeDialog );
     if( newColor.isValid() )
     {
         m_worldObject->Set3DBackgroundColor( newColor );
@@ -71,7 +71,7 @@ void WorldObjectSettingsWidget::on_change3DColorButton_clicked()
 void WorldObjectSettingsWidget::on_changeCursorColorButton_clicked()
 {
     QColor initial( m_worldObject->GetCursorColor() );
-    QColor newColor = QColorDialog::getColor( initial );
+    QColor newColor = QColorDialog::getColor( initial, nullptr, tr("Choose Color"),  QColorDialog::DontUseNativeDialog );
     if( newColor.isValid() )
     {
         m_worldObject->SetCursorColor( newColor );

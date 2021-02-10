@@ -123,7 +123,7 @@ void vtkQtColorTransferFunctionWidget::mouseDoubleClickEvent(QMouseEvent *event)
         if( abs( pixPos - event->x() ) <= m_hotspotRadius )
         {
             QColor currentColor = GetColorNodeColor( index );
-            QColor newColor = QColorDialog::getColor( currentColor );
+            QColor newColor = QColorDialog::getColor( currentColor, nullptr, tr("Choose Color"),  QColorDialog::DontUseNativeDialog );
             if( newColor.isValid() )
             {
                 SetColorNodeColor( index, newColor );

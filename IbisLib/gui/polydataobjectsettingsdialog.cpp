@@ -213,7 +213,7 @@ void PolyDataObjectSettingsDialog::ColorSwatchClicked()
 {
     double * oldColor = m_object->GetColor();
     QColor initial( (int)(oldColor[0] * 255), (int)(oldColor[1] * 255), (int)(oldColor[2] * 255) );
-    QColor newColor = QColorDialog::getColor( initial );
+    QColor newColor = QColorDialog::getColor( initial, nullptr, tr("Choose Color"),  QColorDialog::DontUseNativeDialog );
     if( newColor.isValid() )
     {
         double newColorfloat[3] = { 1, 1, 1 };
