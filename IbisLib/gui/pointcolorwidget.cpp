@@ -117,7 +117,7 @@ void PointColorWidget::DisabledColorSetButtonClicked()
 {
     double * oldColor = m_points->GetDisabledColor();
     QColor initial( (int)(oldColor[0] * 255), (int)(oldColor[1] * 255), (int)(oldColor[2] * 255) );
-    QColor newColor = QColorDialog::getColor( initial );
+    QColor newColor = QColorDialog::getColor( initial, nullptr, tr("Choose Color"),  QColorDialog::DontUseNativeDialog );
     QString styleColor = QString("background-color: rgb(%1,%2,%3);").arg( newColor.red()).arg( newColor.green()).arg( newColor.blue() );
     QString style = QString("border-width: 2px; border-style: solid; border-radius: 7;" );
     styleColor += style;
@@ -133,7 +133,7 @@ void PointColorWidget::EnabledColorSetButtonClicked()
 {
     double * oldColor = m_points->GetEnabledColor();
     QColor initial( (int)(oldColor[0] * 255), (int)(oldColor[1] * 255), (int)(oldColor[2] * 255) );
-    QColor newColor = QColorDialog::getColor( initial );
+    QColor newColor = QColorDialog::getColor( initial, nullptr, tr("Choose Color"),  QColorDialog::DontUseNativeDialog );
     QString styleColor = QString("background-color: rgb(%1,%2,%3);").arg( newColor.red()).arg( newColor.green()).arg( newColor.blue() );
     QString style = QString("border-width: 2px; border-style: solid; border-radius: 7;" );
     styleColor += style;
@@ -149,7 +149,7 @@ void PointColorWidget::SelectedColorSetButtonClicked()
 {
     double * oldColor = m_points->GetSelectedColor();
     QColor initial( (int)(oldColor[0] * 255), (int)(oldColor[1] * 255), (int)(oldColor[2] * 255) );
-    QColor newColor = QColorDialog::getColor( initial );
+    QColor newColor = QColorDialog::getColor( initial, nullptr, tr("Choose Color"),  QColorDialog::DontUseNativeDialog );
     QString styleColor = QString("background-color: rgb(%1,%2,%3);").arg( newColor.red()).arg( newColor.green()).arg( newColor.blue() );
     QString style = QString("border-width: 2px; border-style: solid; border-radius: 7;" );
     styleColor += style;
@@ -165,7 +165,7 @@ void PointColorWidget::LineColorSetButtonClicked()
 {
     double * oldColor = m_points->GetLineToPointerColor();
     QColor initial( (int)(oldColor[0] * 255), (int)(oldColor[1] * 255), (int)(oldColor[2] * 255) );
-    QColor newColor = QColorDialog::getColor( initial );
+    QColor newColor = QColorDialog::getColor( initial, nullptr, tr("Choose Color"),  QColorDialog::DontUseNativeDialog );
     QString styleColor = QString("background-color: rgb(%1,%2,%3);").arg( newColor.red()).arg( newColor.green()).arg( newColor.blue() );
     QString style = QString("border-width: 2px; border-style: solid; border-radius: 7;" );
     styleColor += style;
