@@ -32,6 +32,7 @@ SET( IBISLIB_SRC
                      imageobject.cpp
                      triplecutplaneobject.cpp
                      worldobject.cpp
+                     polydataabstract.cpp
                      polydataobject.cpp
                      pointcloudobject.cpp
                      pointsobject.cpp
@@ -111,6 +112,7 @@ SET( IBISLIB_HDR_MOC
                          imageobject.h
                          triplecutplaneobject.h
                          worldobject.h
+                         polydataabstract.h
                          polydataobject.h
                          pointcloudobject.h
                          pointsobject.h
