@@ -19,7 +19,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <vtkProperty.h>
 #include <vtkSmartPointer.h>
 
-#include "polydataabstract.h"
+#include "abstractpolydataobject.h"
 
 class vtkPolyData;
 class vtkTransform;
@@ -34,10 +34,10 @@ class vtkPassThrough;
 class vtkCutter;
 class vtkPlane;
 class vtkPlanes;
-class PolyDataAbstract;
+class AbstractPolyDataObject;
 
 
-class PolyDataObject : public PolyDataAbstract
+class PolyDataObject : public AbstractPolyDataObject
 {
     
 Q_OBJECT
@@ -45,13 +45,13 @@ Q_OBJECT
 public:
         
     static PolyDataObject * New() { return new PolyDataObject; }
-    vtkTypeMacro(PolyDataObject,PolyDataAbstract);
+    vtkTypeMacro(PolyDataObject,AbstractPolyDataObject);
     
     PolyDataObject();
     virtual ~PolyDataObject();
     virtual void Serialize( Serializer * ser ) override;
     
-    void UpdatePipeline();
+    virtual void UpdatePipeline() override;
     virtual void CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets) override;
 
 

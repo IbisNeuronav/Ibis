@@ -37,14 +37,13 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "lookuptablemanager.h"
 
 
-#include "polydataabstract.h"
+#include "abstractpolydataobject.h"
 #include "polydataobjectsettingsdialog.h"
 
-ObjectSerializationMacro( PolyDataAbstract );
+ObjectSerializationMacro( AbstractPolyDataObject );
 
 
-
-PolyDataAbstract::PolyDataAbstract()
+AbstractPolyDataObject::AbstractPolyDataObject()
 {
     m_clippingSwitch = vtkSmartPointer<vtkPassThrough>::New();
     m_colorSwitch = vtkSmartPointer<vtkPassThrough>::New();
@@ -93,7 +92,7 @@ PolyDataAbstract::PolyDataAbstract()
     this->ProbeFilter->SetInputConnection( m_clippingSwitch->GetOutputPort() );
 }
 
-PolyDataAbstract::~PolyDataAbstract()
+AbstractPolyDataObject::~AbstractPolyDataObject()
 {
     if( this->PolyData )
         this->PolyData->UnRegister( this );
@@ -101,12 +100,12 @@ PolyDataAbstract::~PolyDataAbstract()
         this->ScalarSource->UnRegister( this );
 }
 
-vtkPolyData * PolyDataAbstract::GetPolyData()
+vtkPolyData * AbstractPolyDataObject::GetPolyData()
 {
     return this->PolyData;
 }
 
-void PolyDataAbstract::SetPolyData(vtkPolyData *poly )
+void AbstractPolyDataObject::SetPolyData(vtkPolyData *poly )
 {
     if( poly == this->PolyData )
         return;
@@ -119,12 +118,12 @@ void PolyDataAbstract::SetPolyData(vtkPolyData *poly )
         this->PolyData->Register( this );
     }
 
-    UpdatePipeline();
+    this->UpdatePipeline();
 
     emit ObjectModified();
 }
 
-void PolyDataAbstract::Serialize( Serializer * ser )
+void AbstractPolyDataObject::Serialize( Serializer * ser )
 {
     double opacity = this->GetOpacity();
     double *objectColor = this->GetColor();
@@ -161,7 +160,7 @@ void PolyDataAbstract::Serialize( Serializer * ser )
     }
 }
 
-void PolyDataAbstract::Export()
+void AbstractPolyDataObject::Export()
 {
     Q_ASSERT( this->GetManager() );
     QString surfaceName(this->Name);
@@ -184,7 +183,7 @@ void PolyDataAbstract::Export()
     this->SavePolyData( saveName );
 }
 
-void PolyDataAbstract::SavePolyData( QString &fileName )
+void AbstractPolyDataObject::SavePolyData( QString &fileName )
 {
     vtkSmartPointer<vtkPolyDataWriter> writer = vtkSmartPointer<vtkPolyDataWriter>::New();
     writer->SetFileName( fileName.toUtf8().data() );
@@ -193,7 +192,7 @@ void PolyDataAbstract::SavePolyData( QString &fileName )
     writer->Write();
 }
 
-void PolyDataAbstract::Setup( View * view )
+void AbstractPolyDataObject::Setup( View * view )
 {
     SceneObject::Setup( view );
 
@@ -223,7 +222,7 @@ void PolyDataAbstract::Setup( View * view )
     }
 }
 
-void PolyDataAbstract::Release( View * view )
+void AbstractPolyDataObject::Release( View * view )
 {
     SceneObject::Release( view );
 
@@ -239,26 +238,26 @@ void PolyDataAbstract::Release( View * view )
     }
 }
 
-void PolyDataAbstract::SetColor( double r, double g, double b )
+void AbstractPolyDataObject::SetColor( double r, double g, double b )
 {
     this->Property->SetColor( r, g, b );
     m_2dProperty->SetColor( r, g, b );
     emit ObjectModified();
 }
 
-double * PolyDataAbstract::GetColor()
+double * AbstractPolyDataObject::GetColor()
 {
     return this->Property->GetColor();
 }
 
-void PolyDataAbstract::SetLineWidth( double w )
+void AbstractPolyDataObject::SetLineWidth( double w )
 {
     this->Property->SetLineWidth( w );
     m_2dProperty->SetLineWidth( w );
     emit ObjectModified();
 }
 
-void PolyDataAbstract::SetRenderingMode( int renderingMode )
+void AbstractPolyDataObject::SetRenderingMode( int renderingMode )
 {
     this->renderingMode = renderingMode;
     this->Property->SetRepresentation( this->renderingMode );
@@ -266,44 +265,44 @@ void PolyDataAbstract::SetRenderingMode( int renderingMode )
     emit ObjectModified();
 }
 
-void PolyDataAbstract::SetScalarsVisible( int use )
+void AbstractPolyDataObject::SetScalarsVisible( int use )
 {
     this->ScalarsVisible = use;
     this->UpdatePipeline();
     emit ObjectModified();
 }
 
-void PolyDataAbstract::SetLutIndex( int index )
+void AbstractPolyDataObject::SetLutIndex( int index )
 {
     this->LutIndex = index;
     if( this->CurrentLut )
     {
         this->CurrentLut = 0;
     }
-    UpdatePipeline();
+    this->UpdatePipeline();
     emit ObjectModified();
 }
 
-void PolyDataAbstract::SetVertexColorMode( int mode )
+void AbstractPolyDataObject::SetVertexColorMode( int mode )
 {
     this->VertexColorMode = mode;
-    UpdatePipeline();
+    this->UpdatePipeline();
     emit ObjectModified();
 }
 
-void PolyDataAbstract::SetOpacity( double opacity )
+void AbstractPolyDataObject::SetOpacity( double opacity )
 {
     Q_ASSERT( opacity >= 0.0 && opacity <= 1.0 );
     this->Property->SetOpacity( opacity );
     emit ObjectModified();
 }
 
-void PolyDataAbstract::UpdateSettingsWidget()
+void AbstractPolyDataObject::UpdateSettingsWidget()
 {
     emit ObjectViewChanged();
 }
 
-void PolyDataAbstract::SetCrossSectionVisible( bool showCrossSection )
+void AbstractPolyDataObject::SetCrossSectionVisible( bool showCrossSection )
 {
     this->CrossSectionVisible = showCrossSection;
     if( IsHidden() )
@@ -320,14 +319,14 @@ void PolyDataAbstract::SetCrossSectionVisible( bool showCrossSection )
     emit ObjectModified();
 }
 
-void PolyDataAbstract::SetClippingEnabled( bool e )
+void AbstractPolyDataObject::SetClippingEnabled( bool e )
 {
     m_clippingOn = e;
     this->UpdatePipeline();
     emit ObjectModified();
 }
 
-void PolyDataAbstract::SetClippingPlanesOrientation( int plane, bool positive )
+void AbstractPolyDataObject::SetClippingPlanesOrientation( int plane, bool positive )
 {
     Q_ASSERT( plane >= 0 && plane < 3 );
     vtkDoubleArray * normals = vtkDoubleArray::SafeDownCast( m_clippingPlanes->GetNormals() );
@@ -338,7 +337,7 @@ void PolyDataAbstract::SetClippingPlanesOrientation( int plane, bool positive )
     emit ObjectModified();
 }
 
-bool PolyDataAbstract::GetClippingPlanesOrientation( int plane )
+bool AbstractPolyDataObject::GetClippingPlanesOrientation( int plane )
 {
     Q_ASSERT( plane >= 0 && plane < 3 );
     vtkDoubleArray * normals = vtkDoubleArray::SafeDownCast( m_clippingPlanes->GetNormals() );
@@ -346,7 +345,7 @@ bool PolyDataAbstract::GetClippingPlanesOrientation( int plane )
     return tuple[plane] > 0.0 ? false : true;
 }
 
-void PolyDataAbstract::SetScalarSource( ImageObject * im )
+void AbstractPolyDataObject::SetScalarSource( ImageObject * im )
 {
     if( this->ScalarSource == im )
         return;
@@ -369,50 +368,50 @@ void PolyDataAbstract::SetScalarSource( ImageObject * im )
     {
         this->ProbeFilter->SetSourceData( 0 );
     }
-    UpdatePipeline();
+    this->UpdatePipeline();
     emit ObjectModified();
 }
 
-void PolyDataAbstract::OnStartCursorInteraction()
+void AbstractPolyDataObject::OnStartCursorInteraction()
 {
     m_interacting = true;
 }
 
-void PolyDataAbstract::OnEndCursorInteraction()
+void AbstractPolyDataObject::OnEndCursorInteraction()
 {
     m_interacting = false;
     this->UpdateClippingPlanes();
 }
 
-void PolyDataAbstract::OnCursorPositionChanged()
+void AbstractPolyDataObject::OnCursorPositionChanged()
 {
     this->UpdateCuttingPlane();
     if( !m_interacting )
         this->UpdateClippingPlanes();
 }
 
-void PolyDataAbstract::OnReferenceChanged()
+void AbstractPolyDataObject::OnReferenceChanged()
 {
     this->UpdateClippingPlanes();
 }
 
-void PolyDataAbstract::OnScalarSourceDeleted()
+void AbstractPolyDataObject::OnScalarSourceDeleted()
 {
     this->SetScalarSource( 0 );
 }
 
-void PolyDataAbstract::OnScalarSourceModified()
+void AbstractPolyDataObject::OnScalarSourceModified()
 {
     vtkScalarsToColors * newLut = this->ScalarSource->GetLut();
     if( this->LutBackup != newLut )
     {
         this->LutBackup->DeepCopy( newLut );
-        UpdatePipeline();
+        this->UpdatePipeline();
     }
     emit ObjectModified();
 }
 
-void PolyDataAbstract::Hide()
+void AbstractPolyDataObject::Hide()
 {
     PolyDataObjectViewAssociation::iterator it = this->polydataObjectInstances.begin();
     for( ; it != this->polydataObjectInstances.end(); ++it )
@@ -423,7 +422,7 @@ void PolyDataAbstract::Hide()
     emit ObjectModified();
 }
 
-void PolyDataAbstract::Show()
+void AbstractPolyDataObject::Show()
 {
     PolyDataObjectViewAssociation::iterator it = this->polydataObjectInstances.begin();
     for( ; it != this->polydataObjectInstances.end(); ++it )
@@ -436,7 +435,7 @@ void PolyDataAbstract::Show()
     emit ObjectModified();
 }
 
-void PolyDataAbstract::ObjectAddedToScene()
+void AbstractPolyDataObject::ObjectAddedToScene()
 {
     connect( GetManager(), SIGNAL(ReferenceObjectChanged()), this, SLOT(OnReferenceChanged()) );
     connect( GetManager(), SIGNAL(ReferenceTransformChanged()), this, SLOT(OnReferenceChanged()) );
@@ -450,7 +449,7 @@ void PolyDataAbstract::ObjectAddedToScene()
     UpdateClippingPlanes();
 }
 
-void PolyDataAbstract::ObjectAboutToBeRemovedFromScene()
+void AbstractPolyDataObject::ObjectAboutToBeRemovedFromScene()
 {
     m_referenceToPolyTransform->Identity();
     disconnect( GetManager(), SIGNAL(ReferenceObjectChanged()), this, SLOT(OnReferenceChanged()) );
@@ -460,7 +459,7 @@ void PolyDataAbstract::ObjectAboutToBeRemovedFromScene()
     disconnect( GetManager(), SIGNAL(EndCursorInteraction()), this, SLOT(OnEndCursorInteraction()) );
 }
 
-void PolyDataAbstract::InternalPostSceneRead()
+void AbstractPolyDataObject::InternalPostSceneRead()
 {
     Q_ASSERT( this->GetManager() );
 
@@ -474,7 +473,7 @@ void PolyDataAbstract::InternalPostSceneRead()
     emit ObjectViewChanged();
 }
 
-void PolyDataAbstract::UpdateClippingPlanes()
+void AbstractPolyDataObject::UpdateClippingPlanes()
 {
     double pos[3] = { 0.0, 0.0, 0.0 };
     GetManager()->GetCursorPosition( pos );
@@ -486,7 +485,7 @@ void PolyDataAbstract::UpdateClippingPlanes()
     emit ObjectModified();
 }
 
-void PolyDataAbstract::UpdateCuttingPlane()
+void AbstractPolyDataObject::UpdateCuttingPlane()
 {
     double cursorPos[3] = { 0.0, 0.0, 0.0 };
     GetManager()->GetCursorPosition( cursorPos );
@@ -496,42 +495,8 @@ void PolyDataAbstract::UpdateCuttingPlane()
     emit ObjectModified();
 }
 
-void PolyDataAbstract::UpdatePipeline()
-{
-    if( !this->PolyData )
-        return;
 
-    m_clipper->SetInputData( this->PolyData );
-    if( IsClippingEnabled() )
-        m_clippingSwitch->SetInputConnection( m_clipper->GetOutputPort() );
-    else
-        m_clippingSwitch->SetInputData( this->PolyData );
-
-    this->ProbeFilter->SetInputConnection( m_clippingSwitch->GetOutputPort() );
-
-    m_colorSwitch->SetInputConnection( m_clippingSwitch->GetOutputPort() );
-    if( this->ScalarsVisible )
-    {
-        if( this->VertexColorMode == 1 && this->ScalarSource )
-            m_colorSwitch->SetInputConnection( this->ProbeFilter->GetOutputPort() );
-    }
-
-    // Update mappers
-    PolyDataObjectViewAssociation::iterator it = this->polydataObjectInstances.begin();
-    while( it != this->polydataObjectInstances.end() )
-    {
-        vtkSmartPointer<vtkActor> actor = (*it).second;
-        vtkMapper * mapper = actor->GetMapper();
-        mapper->SetScalarVisibility( this->ScalarsVisible );
-        if( this->VertexColorMode == 1 && this->ScalarSource )
-            mapper->SetLookupTable( this->ScalarSource->GetLut() );
-        else if ( this->CurrentLut )
-            mapper->SetLookupTable( this->CurrentLut );
-        ++it;
-    }
-}
-
-vtkScalarsToColors * PolyDataAbstract::GetCurrentLut()
+vtkScalarsToColors * AbstractPolyDataObject::GetCurrentLut()
 {
     // No LUT
     if( this->LutIndex == -1 )  // Don't try to control the lookup table, use default
@@ -554,7 +519,7 @@ vtkScalarsToColors * PolyDataAbstract::GetCurrentLut()
     return this->CurrentLut;
 }
 
-void PolyDataAbstract::InitializeClippingPlanes()
+void AbstractPolyDataObject::InitializeClippingPlanes()
 {
     vtkSmartPointer<vtkDoubleArray> clipPlaneNormals = vtkSmartPointer<vtkDoubleArray>::New();
     clipPlaneNormals->SetNumberOfComponents( 3 );
