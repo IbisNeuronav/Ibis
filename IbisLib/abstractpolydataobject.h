@@ -8,8 +8,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
-#ifndef __PolyDataAbstract_h_
-#define __PolyDataAbstract_h_
+#ifndef __AbstractPolyDataObject_h_
+#define __AbstractPolyDataObject_h_
 
 #include "sceneobject.h"
 #include "serializer.h"
@@ -36,18 +36,18 @@ class vtkPlanes;
 enum RenderingMode{ Solid = 0, Wireframe = 1, Both = 2 };
 
 
-class PolyDataAbstract : public SceneObject
+class AbstractPolyDataObject : public SceneObject
 {
     
 Q_OBJECT
 
 public:
         
-    static PolyDataAbstract * New() { return new PolyDataAbstract; }
-    vtkTypeMacro(PolyDataAbstract,SceneObject);
+    //static AbstractPolyDataObject * New() { return new AbstractPolyDataObject; }
+    vtkTypeMacro(AbstractPolyDataObject,SceneObject);
     
-    PolyDataAbstract();
-    virtual ~PolyDataAbstract();
+    AbstractPolyDataObject();
+    virtual ~AbstractPolyDataObject();
     virtual void Serialize( Serializer * ser ) override;
     virtual void Export() override;
     virtual bool IsExportable()  override { return true; }
@@ -105,6 +105,8 @@ signals:
     
 protected:
 
+    virtual void UpdatePipeline() = 0;
+
     // SceneObject overrides
     virtual void Hide() override;
     virtual void Show() override;
@@ -114,7 +116,6 @@ protected:
 
     void UpdateClippingPlanes();
     void UpdateCuttingPlane();
-    void UpdatePipeline();
     vtkScalarsToColors * GetCurrentLut();
     void InitializeClippingPlanes();
         
@@ -152,6 +153,6 @@ protected:
 };
 
 
-ObjectSerializationHeaderMacro( PolyDataAbstract );
+ObjectSerializationHeaderMacro( AbstractPolyDataObject );
 
 #endif

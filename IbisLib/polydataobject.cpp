@@ -63,7 +63,7 @@ PolyDataObject::~PolyDataObject()
 
 void PolyDataObject::Serialize( Serializer * ser )
 {
-    PolyDataAbstract::Serialize( ser );
+    AbstractPolyDataObject::Serialize( ser );
     if( ser->IsReader() )
     {
         this->SetRenderingMode( this->renderingMode );
