@@ -71,6 +71,29 @@ void PolyDataObject::Serialize( Serializer * ser )
     }
 }
 
+void PolyDataObject::Export()
+{
+    Q_ASSERT( this->GetManager() );
+    QString surfaceName(this->Name);
+    surfaceName.append(".vtk");
+    this->SetDataFileName(surfaceName);
+    QString fullName(this->GetManager()->GetSceneDirectory());
+    fullName.append("/");
+    fullName.append(surfaceName);
+    QString saveName = Application::GetInstance().GetFileNameSave( tr("Save Object"), fullName, tr("*.vtk") );
+    if(saveName.isEmpty())
+        return;
+    if (QFile::exists(saveName))
+    {
+        int ret = QMessageBox::warning(0, tr("Save PolyDataObject"), saveName,
+                                       QMessageBox::Yes | QMessageBox::Default,
+                                       QMessageBox::No | QMessageBox::Escape);
+        if (ret == QMessageBox::No)
+            return;
+    }
+    this->SavePolyData( saveName );
+}
+
 void PolyDataObject::CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets)
 {
     PolyDataObjectSettingsDialog * res = new PolyDataObjectSettingsDialog( parent );

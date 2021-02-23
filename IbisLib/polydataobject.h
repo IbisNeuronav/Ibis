@@ -50,6 +50,8 @@ public:
     PolyDataObject();
     virtual ~PolyDataObject();
     virtual void Serialize( Serializer * ser ) override;
+    virtual void Export() override;
+    virtual bool IsExportable()  override { return true; }
     
     virtual void UpdatePipeline() override;
     virtual void CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets) override;

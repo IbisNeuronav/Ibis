@@ -160,29 +160,6 @@ void AbstractPolyDataObject::Serialize( Serializer * ser )
     }
 }
 
-void AbstractPolyDataObject::Export()
-{
-    Q_ASSERT( this->GetManager() );
-    QString surfaceName(this->Name);
-    surfaceName.append(".vtk");
-    this->SetDataFileName(surfaceName);
-    QString fullName(this->GetManager()->GetSceneDirectory());
-    fullName.append("/");
-    fullName.append(surfaceName);
-    QString saveName = Application::GetInstance().GetFileNameSave( tr("Save Object"), fullName, tr("*.vtk") );
-    if(saveName.isEmpty())
-        return;
-    if (QFile::exists(saveName))
-    {
-        int ret = QMessageBox::warning(0, tr("Save PolyDataObject"), saveName,
-                                       QMessageBox::Yes | QMessageBox::Default,
-                                       QMessageBox::No | QMessageBox::Escape);
-        if (ret == QMessageBox::No)
-            return;
-    }
-    this->SavePolyData( saveName );
-}
-
 void AbstractPolyDataObject::SavePolyData( QString &fileName )
 {
     vtkSmartPointer<vtkPolyDataWriter> writer = vtkSmartPointer<vtkPolyDataWriter>::New();

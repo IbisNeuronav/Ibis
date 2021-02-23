@@ -49,8 +49,6 @@ public:
     AbstractPolyDataObject();
     virtual ~AbstractPolyDataObject();
     virtual void Serialize( Serializer * ser ) override;
-    virtual void Export() override;
-    virtual bool IsExportable()  override { return true; }
 
     //virtual void CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets) = 0;
 
