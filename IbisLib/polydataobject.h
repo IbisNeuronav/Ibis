@@ -11,30 +11,19 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef __PolyDataObject_h_
 #define __PolyDataObject_h_
 
-#include "sceneobject.h"
-#include "serializer.h"
 #include <map>
 #include <QVector>
-#include <QObject>
-#include <vtkProperty.h>
 #include <vtkSmartPointer.h>
 
+#include "sceneobject.h"
+#include "serializer.h"
 #include "abstractpolydataobject.h"
 
-class vtkPolyData;
-class vtkTransform;
-class vtkActor;
 class vtkDataSetAlgorithm;
 class vtkImageData;
 class vtkProbeFilter;
 class vtkScalarsToColors;
 class ImageObject;
-class vtkClipPolyData;
-class vtkPassThrough;
-class vtkCutter;
-class vtkPlane;
-class vtkPlanes;
-class AbstractPolyDataObject;
 
 
 class PolyDataObject : public AbstractPolyDataObject
@@ -57,10 +46,16 @@ public:
     virtual void CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets) override;
 
 
-    vtkImageData* Texture;
-    vtkSmartPointer<vtkDataSetAlgorithm> TextureMap;
-    bool      showTexture;
-    QString   textureFileName;
+    bool IsUsingScalarSource();
+    void UseScalarSource( bool use );
+    ImageObject * GetScalarSource() { return this->ScalarSource; }
+    void SetScalarSource( ImageObject * im );
+    int GetLutIndex() { return LutIndex; }
+    void SetLutIndex( int index );
+    int GetVertexColorMode() { return VertexColorMode; }
+    void SetVertexColorMode( int mode );
+    vtkScalarsToColors * GetCurrentLut();
+    virtual void InternalPostSceneRead() override;
 
     void SetTexture( vtkImageData * texImage );
     bool GetShowTexture() { return showTexture; }
@@ -68,6 +63,26 @@ public:
     void SetTextureFileName( QString );
     QString GetTextureFileName() { return textureFileName; }
 
+public slots:
+
+    void OnScalarSourceDeleted();
+    void OnScalarSourceModified();
+
+protected:
+
+    vtkSmartPointer<vtkScalarsToColors> CurrentLut;
+    ImageObject * ScalarSource;
+    vtkSmartPointer<vtkScalarsToColors> LutBackup;
+    vtkSmartPointer<vtkProbeFilter> ProbeFilter;
+
+    int VertexColorMode;   // 0 : use scalars in data, 1 : get scalars from object ScalarSourceObjectId
+    int ScalarSourceObjectId;
+    int LutIndex;
+
+    vtkImageData* Texture;
+    vtkSmartPointer<vtkDataSetAlgorithm> TextureMap;
+    bool      showTexture;
+    QString   textureFileName;
     static vtkSmartPointer<vtkImageData> checkerBoardTexture;
 };
 

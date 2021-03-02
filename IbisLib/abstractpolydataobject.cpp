@@ -8,37 +8,24 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
-#include <QFileDialog>
-#include <QMessageBox>
-#include "polydataobject.h"
 #include <vtkPolyData.h>
 #include <vtkPolyDataMapper.h>
 #include <vtkRenderer.h>
 #include <vtkActor.h>
 #include <vtkTransform.h>
-#include <vtkAssembly.h>
 #include <vtkPolyDataWriter.h>
-#include <vtkImageData.h>
-#include <vtkPNGReader.h>
 #include <vtkDoubleArray.h>
 #include <vtkPoints.h>
+#include <vtkClipPolyData.h>
+#include <vtkPassThrough.h>
+#include <vtkCutter.h>
+#include <vtkPlane.h>
+#include <vtkPlanes.h>
 
 #include "view.h"
-#include "vtkPiecewiseFunctionLookupTable.h"
 #include "application.h"
 #include "scenemanager.h"
-#include "imageobject.h"
-#include "vtkProbeFilter.h"
-#include "vtkClipPolyData.h"
-#include "vtkPassThrough.h"
-#include "vtkCutter.h"
-#include "vtkPlane.h"
-#include "vtkPlanes.h"
-#include "lookuptablemanager.h"
-
-
 #include "abstractpolydataobject.h"
-#include "polydataobjectsettingsdialog.h"
 
 ObjectSerializationMacro( AbstractPolyDataObject );
 
@@ -73,31 +60,20 @@ AbstractPolyDataObject::AbstractPolyDataObject()
     m_cuttingPlane[2]->SetNormal( 0.0, 0.0, 1.0 );
 
     this->PolyData = 0;
-    this->LutIndex = 0;
     this->renderingMode = VTK_SURFACE;
     this->ScalarsVisible = 0;
-    this->VertexColorMode = 0;
-    this->ScalarSourceObjectId = SceneManager::InvalidId;
     this->Property = vtkSmartPointer<vtkProperty>::New();
     this->CrossSectionVisible = false;
 
     m_2dProperty = vtkSmartPointer<vtkProperty>::New();
     m_2dProperty->SetAmbient( 1.0 );
     m_2dProperty->LightingOff();
-
-    // Probe filter ( used to sample scalars from other dataset )
-    this->ScalarSource = 0;
-    this->LutBackup = vtkSmartPointer<vtkScalarsToColors>::New();
-    this->ProbeFilter = vtkSmartPointer<vtkProbeFilter>::New();
-    this->ProbeFilter->SetInputConnection( m_clippingSwitch->GetOutputPort() );
 }
 
 AbstractPolyDataObject::~AbstractPolyDataObject()
 {
     if( this->PolyData )
         this->PolyData->UnRegister( this );
-    if( this->ScalarSource )
-        this->ScalarSource->UnRegister( this );
 }
 
 vtkPolyData * AbstractPolyDataObject::GetPolyData()
@@ -130,20 +106,13 @@ void AbstractPolyDataObject::Serialize( Serializer * ser )
     int clippingPlaneOrientation[3] = { 1, 1, 1 };
     if(!ser->IsReader())
     {
-        if( this->ScalarSource )
-            this->ScalarSourceObjectId = this->ScalarSource->GetObjectID();
-        else
-            this->ScalarSourceObjectId = SceneManager::InvalidId;
         clippingPlaneOrientation[0] = GetClippingPlanesOrientation( 0 ) ? 1 : 0;
         clippingPlaneOrientation[1] = GetClippingPlanesOrientation( 1 ) ? 1 : 0;
         clippingPlaneOrientation[2] = GetClippingPlanesOrientation( 2 ) ? 1 : 0;
     }
     SceneObject::Serialize(ser);
     ::Serialize( ser, "RenderingMode", this->renderingMode );
-    ::Serialize( ser, "LutIndex", this->LutIndex );
     ::Serialize( ser, "ScalarsVisible", this->ScalarsVisible );
-    ::Serialize( ser, "VertexColorMode", this->VertexColorMode );
-    ::Serialize( ser, "ScalarSourceObjectId", this->ScalarSourceObjectId );
     ::Serialize( ser, "Opacity", opacity );
     ::Serialize( ser, "ObjectColor", objectColor, 3 );
     ::Serialize( ser, "CrossSectionVisible", this->CrossSectionVisible );
@@ -249,24 +218,6 @@ void AbstractPolyDataObject::SetScalarsVisible( int use )
     emit ObjectModified();
 }
 
-void AbstractPolyDataObject::SetLutIndex( int index )
-{
-    this->LutIndex = index;
-    if( this->CurrentLut )
-    {
-        this->CurrentLut = 0;
-    }
-    this->UpdatePipeline();
-    emit ObjectModified();
-}
-
-void AbstractPolyDataObject::SetVertexColorMode( int mode )
-{
-    this->VertexColorMode = mode;
-    this->UpdatePipeline();
-    emit ObjectModified();
-}
-
 void AbstractPolyDataObject::SetOpacity( double opacity )
 {
     Q_ASSERT( opacity >= 0.0 && opacity <= 1.0 );
@@ -322,33 +273,6 @@ bool AbstractPolyDataObject::GetClippingPlanesOrientation( int plane )
     return tuple[plane] > 0.0 ? false : true;
 }
 
-void AbstractPolyDataObject::SetScalarSource( ImageObject * im )
-{
-    if( this->ScalarSource == im )
-        return;
-    if( this->ScalarSource )
-    {
-        this->ScalarSource->UnRegister( this );
-        disconnect( this->ScalarSource, SIGNAL(RemovingFromScene()), this, SLOT(OnScalarSourceDeleted()) );
-        disconnect( this->ScalarSource, SIGNAL(ObjectModified()), this, SLOT(OnScalarSourceModified()) );
-    }
-    this->ScalarSource = im;
-    if( this->ScalarSource )
-    {
-        this->ScalarSource->Register( this );
-        this->ProbeFilter->SetSourceData( this->ScalarSource->GetImage() );
-        this->LutBackup->DeepCopy( this->ScalarSource->GetLut() );
-        connect( this->ScalarSource, SIGNAL(RemovingFromScene()), this, SLOT(OnScalarSourceDeleted()) );
-        connect( this->ScalarSource, SIGNAL(ObjectModified()), this, SLOT(OnScalarSourceModified()) );
-    }
-    else
-    {
-        this->ProbeFilter->SetSourceData( 0 );
-    }
-    this->UpdatePipeline();
-    emit ObjectModified();
-}
-
 void AbstractPolyDataObject::OnStartCursorInteraction()
 {
     m_interacting = true;
@@ -372,21 +296,6 @@ void AbstractPolyDataObject::OnReferenceChanged()
     this->UpdateClippingPlanes();
 }
 
-void AbstractPolyDataObject::OnScalarSourceDeleted()
-{
-    this->SetScalarSource( 0 );
-}
-
-void AbstractPolyDataObject::OnScalarSourceModified()
-{
-    vtkScalarsToColors * newLut = this->ScalarSource->GetLut();
-    if( this->LutBackup != newLut )
-    {
-        this->LutBackup->DeepCopy( newLut );
-        this->UpdatePipeline();
-    }
-    emit ObjectModified();
-}
 
 void AbstractPolyDataObject::Hide()
 {
@@ -439,14 +348,6 @@ void AbstractPolyDataObject::ObjectAboutToBeRemovedFromScene()
 void AbstractPolyDataObject::InternalPostSceneRead()
 {
     Q_ASSERT( this->GetManager() );
-
-    // reconnect to the image object from which scalars are computed
-    if( this->ScalarSourceObjectId != SceneManager::InvalidId )
-    {
-        SceneObject * scalarObj = this->GetManager()->GetObjectByID( this->ScalarSourceObjectId );
-        ImageObject * scalarImageObj = ImageObject::SafeDownCast( scalarObj );
-        this->SetScalarSource( scalarImageObj );
-    }
     emit ObjectViewChanged();
 }
 
@@ -473,28 +374,6 @@ void AbstractPolyDataObject::UpdateCuttingPlane()
 }
 
 
-vtkScalarsToColors * AbstractPolyDataObject::GetCurrentLut()
-{
-    // No LUT
-    if( this->LutIndex == -1 )  // Don't try to control the lookup table, use default
-        return 0;
-
-    // LUT already exists
-    if( this->CurrentLut )
-        return this->CurrentLut;
-
-    // Create a new LUT if needed
-    Q_ASSERT( this->GetManager() );
-    Q_ASSERT( this->LutIndex < Application::GetLookupTableManager()->GetNumberOfTemplateLookupTables() );
-    Q_ASSERT( this->PolyData );
-    QString tableName = Application::GetLookupTableManager()->GetTemplateLookupTableName( this->LutIndex );
-    vtkSmartPointer<vtkPiecewiseFunctionLookupTable> lut = vtkSmartPointer<vtkPiecewiseFunctionLookupTable>::New();
-    double range[2];
-    this->PolyData->GetScalarRange( range );
-    Application::GetLookupTableManager()->CreateLookupTable( tableName, range, lut );
-    this->CurrentLut = lut;
-    return this->CurrentLut;
-}
 
 void AbstractPolyDataObject::InitializeClippingPlanes()
 {

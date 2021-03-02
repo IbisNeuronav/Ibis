@@ -8,17 +8,17 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
-#include <QFileDialog>
 #include <QMessageBox>
 #include <vtkPolyData.h>
 #include <vtkPolyDataMapper.h>
-#include <vtkRenderer.h>
 #include <vtkActor.h>
-#include <vtkTexture.h>
+#include <vtkClipPolyData.h>
 #include <vtkImageData.h>
+#include <vtkPassThrough.h>
+#include <vtkPiecewiseFunctionLookupTable.h>
 #include <vtkPNGReader.h>
-#include "vtkPiecewiseFunctionLookupTable.h"
-
+#include <vtkProbeFilter.h>
+#include <vtkTexture.h>
 #include <vtkTextureMapToPlane.h>
 #include <vtkTextureMapToSphere.h>
 #include <vtkTextureMapToCylinder.h>
@@ -27,14 +27,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "application.h"
 #include "scenemanager.h"
 #include "imageobject.h"
-#include "vtkProbeFilter.h"
-#include "vtkClipPolyData.h"
-#include "vtkPassThrough.h"
-#include "vtkCutter.h"
-#include "vtkPlane.h"
-#include "vtkPlanes.h"
 #include "lookuptablemanager.h"
-
 #include "polydataobjectsettingsdialog.h"
 #include "polydataobject.h"
 
@@ -46,6 +39,15 @@ PolyDataObject::PolyDataObject()
 {
     this->showTexture = false;
     this->Texture = 0;
+    this->VertexColorMode = 0;
+
+    // Probe filter ( used to sample scalars from other dataset )
+    this->ScalarSource = 0;
+    this->LutIndex = 0;
+    this->ScalarSourceObjectId = SceneManager::InvalidId;
+    this->LutBackup = vtkSmartPointer<vtkScalarsToColors>::New();
+    this->ProbeFilter = vtkSmartPointer<vtkProbeFilter>::New();
+    this->ProbeFilter->SetInputConnection( m_clippingSwitch->GetOutputPort() );
 
     // Texture map filter
     vtkSmartPointer<vtkTextureMapToSphere> map = vtkSmartPointer<vtkTextureMapToSphere>::New();
@@ -57,13 +59,28 @@ PolyDataObject::PolyDataObject()
 
 PolyDataObject::~PolyDataObject()
 {
+    if( this->ScalarSource )
+        this->ScalarSource->UnRegister( this );
     if( this->Texture )
         this->Texture->UnRegister( this );
 }
 
 void PolyDataObject::Serialize( Serializer * ser )
 {
-    AbstractPolyDataObject::Serialize( ser );
+    PolyDataObject::Serialize( ser );
+    if(!ser->IsReader())
+    {
+        if( this->ScalarSource )
+            this->ScalarSourceObjectId = this->ScalarSource->GetObjectID();
+        else
+            this->ScalarSourceObjectId = SceneManager::InvalidId;
+    }
+    ::Serialize( ser, "LutIndex", this->LutIndex );
+    ::Serialize( ser, "VertexColorMode", this->VertexColorMode );
+    ::Serialize( ser, "ScalarSourceObjectId", this->ScalarSourceObjectId );
+    ::Serialize( ser, "ShowTexture", this->showTexture );
+    ::Serialize( ser, "TextureFileName", this->textureFileName );
+    ::Serialize( ser, "VertexColorMode", this->VertexColorMode );
     if( ser->IsReader() )
     {
         this->SetRenderingMode( this->renderingMode );
@@ -104,7 +121,6 @@ void PolyDataObject::CreateSettingsWidgets( QWidget * parent, QVector <QWidget*>
     widgets->append(res);
 }
 
-
 void PolyDataObject::UpdatePipeline()
 {
     if( !this->PolyData )
@@ -141,6 +157,105 @@ void PolyDataObject::UpdatePipeline()
             mapper->SetLookupTable( this->CurrentLut );
         ++it;
     }
+}
+
+void PolyDataObject::SetVertexColorMode( int mode )
+{
+    this->VertexColorMode = mode;
+    this->UpdatePipeline();
+    emit ObjectModified();
+}
+
+void PolyDataObject::SetScalarSource( ImageObject * im )
+{
+    if( this->ScalarSource == im )
+        return;
+    if( this->ScalarSource )
+    {
+        this->ScalarSource->UnRegister( this );
+        disconnect( this->ScalarSource, SIGNAL(RemovingFromScene()), this, SLOT(OnScalarSourceDeleted()) );
+        disconnect( this->ScalarSource, SIGNAL(ObjectModified()), this, SLOT(OnScalarSourceModified()) );
+    }
+    this->ScalarSource = im;
+    if( this->ScalarSource )
+    {
+        this->ScalarSource->Register( this );
+        this->ProbeFilter->SetSourceData( this->ScalarSource->GetImage() );
+        this->LutBackup->DeepCopy( this->ScalarSource->GetLut() );
+        connect( this->ScalarSource, SIGNAL(RemovingFromScene()), this, SLOT(OnScalarSourceDeleted()) );
+        connect( this->ScalarSource, SIGNAL(ObjectModified()), this, SLOT(OnScalarSourceModified()) );
+    }
+    else
+    {
+        this->ProbeFilter->SetSourceData( 0 );
+    }
+    this->UpdatePipeline();
+    emit ObjectModified();
+}
+
+
+void PolyDataObject::OnScalarSourceDeleted()
+{
+    this->SetScalarSource( 0 );
+}
+
+void PolyDataObject::OnScalarSourceModified()
+{
+    vtkScalarsToColors * newLut = this->ScalarSource->GetLut();
+    if( this->LutBackup != newLut )
+    {
+        this->LutBackup->DeepCopy( newLut );
+        this->UpdatePipeline();
+    }
+    emit ObjectModified();
+}
+
+void PolyDataObject::SetLutIndex( int index )
+{
+    this->LutIndex = index;
+    if( this->CurrentLut )
+    {
+        this->CurrentLut = 0;
+    }
+    this->UpdatePipeline();
+    emit ObjectModified();
+}
+
+vtkScalarsToColors * PolyDataObject::GetCurrentLut()
+{
+    // No LUT
+    if( this->LutIndex == -1 )  // Don't try to control the lookup table, use default
+        return 0;
+
+    // LUT already exists
+    if( this->CurrentLut )
+        return this->CurrentLut;
+
+    // Create a new LUT if needed
+    Q_ASSERT( this->GetManager() );
+    Q_ASSERT( this->LutIndex < Application::GetLookupTableManager()->GetNumberOfTemplateLookupTables() );
+    Q_ASSERT( this->PolyData );
+    QString tableName = Application::GetLookupTableManager()->GetTemplateLookupTableName( this->LutIndex );
+    vtkSmartPointer<vtkPiecewiseFunctionLookupTable> lut = vtkSmartPointer<vtkPiecewiseFunctionLookupTable>::New();
+    double range[2];
+    this->PolyData->GetScalarRange( range );
+    Application::GetLookupTableManager()->CreateLookupTable( tableName, range, lut );
+    this->CurrentLut = lut;
+    return this->CurrentLut;
+}
+
+void PolyDataObject::InternalPostSceneRead()
+{
+    Q_ASSERT( this->GetManager() );
+
+    // reconnect to the image object from which scalars are computed
+    if( this->ScalarSourceObjectId != SceneManager::InvalidId )
+    {
+        SceneObject * scalarObj = this->GetManager()->GetObjectByID( this->ScalarSourceObjectId );
+        ImageObject * scalarImageObj = ImageObject::SafeDownCast( scalarObj );
+        this->SetScalarSource( scalarImageObj );
+    }
+    emit ObjectViewChanged();
 }
 
 void PolyDataObject::SetTexture( vtkImageData * texImage )
