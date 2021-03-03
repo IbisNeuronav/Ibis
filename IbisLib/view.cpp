@@ -471,6 +471,7 @@ void View::ResetCamera()
     double prevViewAngle = this->Renderer->GetActiveCamera()->GetViewAngle();
     this->Renderer->ResetCamera();
     AdjustCameraDistance( prevViewAngle );
+    this->NotifyNeedRender();
 }
 
 void View::ResetCamera( double bounds[6] )
@@ -478,11 +479,13 @@ void View::ResetCamera( double bounds[6] )
     double prevViewAngle = this->Renderer->GetActiveCamera()->GetViewAngle();
     this->Renderer->ResetCamera( bounds );
     AdjustCameraDistance( prevViewAngle );
+    this->NotifyNeedRender();
 }
 
 void View::ZoomCamera(double factor)
 {
     this->Renderer->GetActiveCamera()->Zoom(factor);
+    this->NotifyNeedRender();
 }
 
 double View::GetViewAngle()
