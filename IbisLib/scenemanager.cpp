@@ -702,17 +702,12 @@ void SceneManager::AddObjectUsingID( SceneObject * object, SceneObject * attachT
     // Attach object to the hierarchy
     attachTo->AddChild( object );
 
-    if( !GetReferenceDataObject() && CanBeReference( object ) )
-        SetReferenceDataObject( object );
-
     // Setup in views
     this->SetupInAllViews( object );
     object->PreDisplaySetup();
 
-    // adding first image object has to call ResetAllCameras,
-    // at this point the object is already added to the list
-    if( this->GetNumberOfUserObjects() == 1 && object->IsUserObject() )
-        this->ResetAllCameras();
+    if( !GetReferenceDataObject() && CanBeReference( object ) )
+        SetReferenceDataObject( object );
 
     // Notify clients the object has been added
     if( object->IsListable() )

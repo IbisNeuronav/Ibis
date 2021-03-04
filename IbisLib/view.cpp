@@ -490,6 +490,7 @@ void View::ResetCamera()
     double prevViewAngle = this->Renderer->GetActiveCamera()->GetViewAngle();
     this->Renderer->ResetCamera();
     AdjustCameraDistance( prevViewAngle );
+    this->NotifyNeedRender();
 }
 
 void View::ResetCamera( double bounds[6] )
@@ -497,11 +498,13 @@ void View::ResetCamera( double bounds[6] )
     double prevViewAngle = this->Renderer->GetActiveCamera()->GetViewAngle();
     this->Renderer->ResetCamera( bounds );
     AdjustCameraDistance( prevViewAngle );
+    this->NotifyNeedRender();
 }
 
 void View::ZoomCamera(double factor)
 {
     this->Renderer->GetActiveCamera()->Zoom(factor);
+    this->NotifyNeedRender();
 }
 
 double View::GetViewAngle()
@@ -536,6 +539,9 @@ void View::ReferenceTransformChanged()
             t->Concatenate( this->PrevViewingTransform );
 
             cam->ApplyTransform( t );
+
+            if ( this->GetType() == THREED_VIEW_TYPE )
+                this->SetRotationCenter3D();
 
             // backup inverted current transform
             this->PrevViewingTransform->DeepCopy( refTransform->GetMatrix() );
@@ -596,7 +602,10 @@ void View::AdjustCameraDistance( double viewAngle )
     double wantedAngle = vtkMath::RadiansFromDegrees( viewAngle * 0.5 );
     double du = dr * tan( vtkHardcodedAngle ) / tan( wantedAngle );
     Vec3 newPos = pos + ( dr - du ) * ndir;
-    cam->SetPosition( newPos.Ref() );
+    if ( this->GetType() == THREED_VIEW_TYPE )
+        this->SetRotationCenter3D();
+    else
+        cam->SetPosition( newPos.Ref() );
     cam->SetViewAngle( viewAngle );
 }
 
@@ -644,5 +653,34 @@ void View::Reset2DView()
         vtkMatrix4x4Operators::MultiplyVector( transform->GetMatrix(), up.Ref(), newVup.Ref() );
         cam->SetPosition( newPos.Ref() );
         cam->SetViewUp( newVup.Ref() );
+    }
+}
+
+void View::SetRotationCenter3D()
+{
+    ImageObject * obj = this->Manager->GetReferenceDataObject();
+
+    if ( obj )
+    {
+        vtkCamera * cam = this->Renderer->GetActiveCamera();
+        vtkTransform * refTransform = obj->GetWorldTransform();
+
+        double center[3];
+        double focal[3];
+        double newFocal[3];
+        double pos[3];
+        double newPos[3];
+        cam->GetPosition( pos );
+        cam->GetFocalPoint( focal );
+        obj->GetCenter( center );
+        refTransform->TransformPoint( center, newFocal );
+        for( int i = 0; i < 3; i++ )
+        {
+            newPos[i] = pos[i] + newFocal[i] - focal[i];
+        }
+
+        cam->SetFocalPoint( newFocal );
+        cam->SetPosition( newPos );
+        cam->OrthogonalizeViewUp();
     }
 }
