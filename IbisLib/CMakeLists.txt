@@ -34,6 +34,7 @@ SET( IBISLIB_SRC
                      worldobject.cpp
                      abstractpolydataobject.cpp
                      polydataobject.cpp
+                     tractogramobject.cpp
                      pointcloudobject.cpp
                      pointsobject.cpp
                      pointrepresentation.cpp
@@ -62,6 +63,7 @@ SET( IBISLIB_SRC
                      gui/imageobjectsettingsdialog.cpp
                      gui/imageobjectvolumesettingswidget.cpp
                      gui/polydataobjectsettingsdialog.cpp
+                     gui/tractogramobjectsettingsdialog.cpp
                      gui/pointcloudobjectsettingsdialog.cpp
                      gui/worldobjectsettingswidget.cpp
                      gui/pointpropertieswidget.cpp
@@ -114,6 +116,7 @@ SET( IBISLIB_HDR_MOC
                          worldobject.h
                          abstractpolydataobject.h
                          polydataobject.h
+                         tractogramobject.h
                          pointcloudobject.h
                          pointsobject.h
                          pointrepresentation.h
@@ -133,6 +136,7 @@ SET( IBISLIB_HDR_MOC
                          gui/imageobjectsettingsdialog.h
                          gui/imageobjectvolumesettingswidget.h
                          gui/polydataobjectsettingsdialog.h
+                         gui/tractogramobjectsettingsdialog.h
                          gui/pointcloudobjectsettingsdialog.h
                          gui/worldobjectsettingswidget.h
                          gui/pointpropertieswidget.h
@@ -167,6 +171,7 @@ set( IBISLIB_UI
             gui/pointpropertieswidget.ui
             gui/pointcolorwidget.ui
             gui/polydataobjectsettingsdialog.ui
+            gui/tractogramobjectsettingsdialog.ui
             gui/pointcloudobjectsettingsdialog.ui
             gui/worldobjectsettingswidget.ui
             gui/transformeditwidget.ui
