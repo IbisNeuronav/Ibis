@@ -63,6 +63,7 @@ ApplicationSettings::~ApplicationSettings()
 void ApplicationSettings::LoadSettings( QSettings & settings )
 {
     QString workDir(QDir::homePath());
+    workDir.append("/");
     workDir.append(IBIS_CONFIGURATION_SUBDIRECTORY);
     WorkingDirectory = settings.value( "WorkingDirectory", workDir).toString();
 
@@ -152,11 +153,17 @@ void Application::LoadWindowSettings()
     Q_ASSERT( m_mainWindow );
     QSettings settings( m_appOrganisation, m_appName );
     m_mainWindow->LoadSettings( settings );
+    //Apply settings to scene
+    this->ApplyApplicationSettings();
 }
 
 void Application::Init( bool viewerOnly )
 {
     m_viewerOnly = viewerOnly;
+
+
+    // Create the object that will manage the 3D scene in the visualizer
+    m_sceneManager = SceneManager::New();
 
     // Load application settings
     QSettings settings( m_appOrganisation, m_appName );
@@ -165,12 +172,6 @@ void Application::Init( bool viewerOnly )
     // Load custom paths and other preferences
     m_preferences = new IbisPreferences;
     m_preferences->LoadSettings( settings );
-
-    // Create the object that will manage the 3D scene in the visualizer
-    m_sceneManager = SceneManager::New();
-
-    //Apply settings to scene
-    this->ApplyApplicationSettings();
 
     m_updateManager = UpdateManager::New();
 
