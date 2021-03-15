@@ -25,6 +25,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <vtkEventQtSlotConnect.h>
 #include "imageobject.h"
 #include "polydataobject.h"
+#include "tractogramobject.h"
 #include "pointsobject.h"
 #include "ibisapi.h"
 #include <QDir>
@@ -425,6 +426,10 @@ bool FileReader::OpenFile( QList<SceneObject*> & readObjects, QString filename, 
                 return true;
         }
 
+        // try tractogram fib / vtk format
+        if( OpenFIBFile( readObjects, filename, dataObjectName ) )
+            return true;
+
         // try vtp
         if( OpenVTPFile( readObjects, filename, dataObjectName ) )
             return true;
@@ -657,6 +662,39 @@ bool FileReader::OpenVTKFile( QList<SceneObject*> & readObjects, QString filenam
         else
         {
             ReportWarning( tr("Unsupported file format") );
+        }
+    }
+    reader->Delete();
+    return res;
+}
+
+bool FileReader::OpenFIBFile( QList<SceneObject*> & readObjects, QString filename, const QString & dataObjectName )
+{
+    vtkDataObjectReader * reader = vtkDataObjectReader::New();
+    reader->SetFileName( filename.toUtf8().data() );
+    reader->Update();
+    m_fileProgressEvent->Disconnect( reader );
+
+    bool res = false;
+
+    if( reader->GetErrorCode() == vtkErrorCode::NoError )
+    {
+        if ( filename.endsWith( QString(".fib") ) && reader->IsFilePolyData() )
+        {
+            vtkPolyDataReader * polyReader = vtkPolyDataReader::New();
+            polyReader->SetFileName( filename.toUtf8().data() );
+
+            m_fileProgressEvent->Connect( polyReader, vtkCommand::ProgressEvent, this, SLOT(OnReaderProgress( vtkObject*, unsigned long) ), 0, 0.0, Qt::DirectConnection );
+            polyReader->Update();
+            m_fileProgressEvent->Disconnect( polyReader );
+
+            TractogramObject * object = TractogramObject::New();
+            object->SetPolyData( polyReader->GetOutput() );
+            SetObjectName( object, dataObjectName, filename );
+            readObjects.push_back( object );
+            res = true;
+
+            polyReader->Delete();
         }
     }
     reader->Delete();
