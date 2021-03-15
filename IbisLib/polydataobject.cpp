@@ -67,7 +67,6 @@ PolyDataObject::~PolyDataObject()
 
 void PolyDataObject::Serialize( Serializer * ser )
 {
-    PolyDataObject::Serialize( ser );
     if(!ser->IsReader())
     {
         if( this->ScalarSource )
