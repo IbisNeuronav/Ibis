@@ -36,6 +36,17 @@ public:
     SceneObject * CreateObject() override;
     virtual bool CanBeActivated() override;
 
+    QString GetPluginDescription() override
+    {
+        QString description;
+        description = "Contour Surface\n"
+                      "This plugin is used to construct a surface\nof an ImageObject using image intensities.\n"
+                      "The intensity value may be selected on the ImageObject histogram.\n"
+                      "Select an Image on the object list then got to File/NewObject and select Contour Surface.\n"
+                      "\n";
+        return description;
+    }
+
 protected:
     vtkSmartPointer<GeneratedSurface> m_generatedSurface;
 };

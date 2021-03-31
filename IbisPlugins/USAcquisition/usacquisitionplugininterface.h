@@ -39,6 +39,18 @@ public:
     QWidget * CreateFloatingWidget() override;
     virtual bool WidgetAboutToClose() override;
 
+    QString GetPluginDescription() override
+    {
+        QString description;
+        description = "US Acquisition Double View\n"
+                      "This plugin is used to collect and review an ultrasound sweep.\n"
+                      "The double window allows user to show\n"
+                      "image and acquisition data side by side.\n"
+                      "Both images may be blended to show better the differences."
+                      "\n";
+        return description;
+    }
+
     UsProbeObject * GetCurrentUsProbe();
     USAcquisitionObject * GetCurrentAcquisition();
     void NewAcquisition();
