@@ -14,6 +14,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <vtkEventQtSlotConnect.h>
 #include <vtkQtMatrixDialog.h>
 #include "vtkMatrix4x4Operators.h"
+#include <vtkSmartPointer.h>
 #include "sceneobject.h"
 #include "application.h"
 
@@ -71,7 +72,14 @@ void TransformEditWidget::UpdateTransform()
         m_selfUpdating = true;
         //m_sceneObject->StartModifyingTransform();
 
-        vtkMatrix4x4 * mat = m_sceneObject->GetLocalTransform()->GetMatrix();
+        // We have to replace the matrix with a new one
+        // vtkTransform saves matrix mtime when the matrix was set
+        // and compares with the current matrix mtime  (see vtkTransform::InternalUpdate() )
+        // if the current matrix time is grater than the saved one
+        // that means, that the matrix was changed manually
+        // which breaks the pipeline - concatenated transforms are discarded.
+        m_sceneObject->GetLocalTransform()->Identity();
+        vtkSmartPointer<vtkMatrix4x4> mat = vtkSmartPointer<vtkMatrix4x4>::New();
         double rot[3];
         rot[0] = ui->rotateXSpinBox->value();
         rot[1] = ui->rotateYSpinBox->value();
@@ -81,6 +89,7 @@ void TransformEditWidget::UpdateTransform()
         trans[1] = ui->translateYSpinBox->value();
         trans[2] = ui->translateZSpinBox->value();
         vtkMatrix4x4Operators::TransRotToMatrix( trans, rot, mat );
+        m_sceneObject->GetLocalTransform()->SetMatrix( mat );
         m_sceneObject->GetLocalTransform()->Modified();
 
         //m_sceneObject->FinishModifyingTransform();
