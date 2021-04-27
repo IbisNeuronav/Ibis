@@ -136,13 +136,13 @@ GPU_RigidRegistration::GPU_RigidRegistration( ) :
     m_numberOfPixels(16000),
     m_orientationSelectivity(2),
     m_populationSize(0),
-    m_parentVtkTransform(0),
-    m_sourceVtkTransform(0),
-    m_targetVtkTransform(0),
-    m_resultTransform(0),
-    m_targetSpatialObjectMask(0),
-    m_itkSourceImage(0),
-    m_itkTargetImage(0)
+    m_parentVtkTransform(nullptr),
+    m_sourceVtkTransform(nullptr),
+    m_targetVtkTransform(nullptr),
+    m_resultTransform(nullptr),
+    m_targetSpatialObjectMask(nullptr),
+    m_itkSourceImage(nullptr),
+    m_itkTargetImage(nullptr)
 {
     m_samplingStrategy = SamplingStrategy::RANDOM;
 }

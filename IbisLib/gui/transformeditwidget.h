@@ -47,6 +47,7 @@ private:
     bool m_selfUpdating;
     vtkQtMatrixDialog * m_matrixDialog;
     vtkQtMatrixDialog * m_worldMatrixDialog;
+    bool m_mustUpdateTransform;
 
 public slots:
     void UpdateUi();         // take data in transform and put it in ui

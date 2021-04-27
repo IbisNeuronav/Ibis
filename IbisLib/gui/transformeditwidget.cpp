@@ -24,7 +24,8 @@ TransformEditWidget::TransformEditWidget(QWidget *parent) :
     m_sceneObject(nullptr),
     m_selfUpdating(false),
     m_matrixDialog(nullptr),
-    m_worldMatrixDialog(nullptr)
+    m_worldMatrixDialog(nullptr),
+    m_mustUpdateTransform(false)
 {
     ui->setupUi(this);
     m_transformModifiedConnection = vtkEventQtSlotConnect::New();
@@ -131,6 +132,11 @@ void TransformEditWidget::UpdateUi()
             ui->rotateXSpinBox->setValue( r[0] );
             ui->rotateYSpinBox->setValue( r[1] );
             ui->rotateZSpinBox->setValue( r[2] );
+            if( m_mustUpdateTransform )
+            {
+                this->UpdateTransform();
+                m_mustUpdateTransform = false;
+            }
         }
         BlockSpinboxSignals(false);
     }
@@ -165,9 +171,10 @@ void TransformEditWidget::EditMatrixButtonToggled( bool isOn )
             m_matrixDialog->setAttribute( Qt::WA_DeleteOnClose );
             m_matrixDialog->SetMatrix( t->GetMatrix() );
             Application::GetInstance().ShowFloatingDock( m_matrixDialog );
-            connect( m_matrixDialog, SIGNAL(MatrixModified()), m_sceneObject, SLOT(NotifyTransformChanged()) );
+//            connect( m_matrixDialog, SIGNAL(MatrixModified()), m_sceneObject, SLOT(NotifyTransformChanged()) );
             connect( m_matrixDialog, SIGNAL(MatrixModified()), this, SLOT(UpdateUi()) );
             connect( m_matrixDialog, SIGNAL(destroyed()), this, SLOT(EditMatrixDialogClosed()) );
+            m_mustUpdateTransform = true;
         }
     }
 }

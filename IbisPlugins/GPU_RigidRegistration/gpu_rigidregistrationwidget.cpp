@@ -21,7 +21,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 GPU_RigidRegistrationWidget::GPU_RigidRegistrationWidget(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::GPU_RigidRegistrationWidget),
-    m_pluginInterface(0),
+    m_pluginInterface(nullptr),
     m_OptimizationRunning(false)
 {
     ui->setupUi(this);
@@ -39,6 +39,7 @@ GPU_RigidRegistrationWidget::GPU_RigidRegistrationWidget(QWidget *parent) :
 GPU_RigidRegistrationWidget::~GPU_RigidRegistrationWidget()
 {
     delete ui;
+    delete m_rigidRegistrator;
 }
 
 void GPU_RigidRegistrationWidget::SetPluginInterface( GPU_RigidRegistrationPluginInterface * ifc )
