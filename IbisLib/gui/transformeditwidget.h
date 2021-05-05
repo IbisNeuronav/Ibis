@@ -16,6 +16,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 class vtkEventQtSlotConnect;
 class vtkQtMatrixDialog;
+class vtkMatrix4x4;
 class SceneObject;
 
 namespace Ui {
@@ -47,14 +48,14 @@ private:
     bool m_selfUpdating;
     vtkQtMatrixDialog * m_matrixDialog;
     vtkQtMatrixDialog * m_worldMatrixDialog;
-    bool m_mustUpdateTransform;
 
 public slots:
     void UpdateUi();         // take data in transform and put it in ui
 
 private slots:
 
-    void UpdateTransform();  // take data in ui and put it in transform
+    void UpdateTransform( );  // take data in ui and put it in transform
+    void UpdateTransformFromMatrixDialog( vtkMatrix4x4 *mat );  // take data in ui and put it in transform
     void EditMatrixButtonToggled( bool isOn );
     void EditMatrixDialogClosed();
     void WorldMatrixButtonToggled( bool isOn );

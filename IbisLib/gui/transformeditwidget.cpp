@@ -14,6 +14,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <vtkEventQtSlotConnect.h>
 #include <vtkQtMatrixDialog.h>
 #include "vtkMatrix4x4Operators.h"
+#include <vtkMatrix4x4.h>
 #include <vtkSmartPointer.h>
 #include "sceneobject.h"
 #include "application.h"
@@ -24,8 +25,7 @@ TransformEditWidget::TransformEditWidget(QWidget *parent) :
     m_sceneObject(nullptr),
     m_selfUpdating(false),
     m_matrixDialog(nullptr),
-    m_worldMatrixDialog(nullptr),
-    m_mustUpdateTransform(false)
+    m_worldMatrixDialog(nullptr)
 {
     ui->setupUi(this);
     m_transformModifiedConnection = vtkEventQtSlotConnect::New();
@@ -65,6 +65,13 @@ void TransformEditWidget::SetSceneObject( SceneObject * obj )
     UpdateUi();
 }
 
+// When we update LocalTransform we have to replace the matrix with a new one
+// vtkTransform saves matrix mtime when the matrix was set
+// and compares with the current matrix mtime  (see vtkTransform::InternalUpdate() )
+// if the current matrix mtime is grater than the saved one
+// that means, that the matrix was changed manually
+// which breaks the pipeline - concatenated transforms are discarded.
+
 // take data in ui and put it in transform
 void TransformEditWidget::UpdateTransform()
 {
@@ -73,12 +80,6 @@ void TransformEditWidget::UpdateTransform()
         m_selfUpdating = true;
         //m_sceneObject->StartModifyingTransform();
 
-        // We have to replace the matrix with a new one
-        // vtkTransform saves matrix mtime when the matrix was set
-        // and compares with the current matrix mtime  (see vtkTransform::InternalUpdate() )
-        // if the current matrix time is grater than the saved one
-        // that means, that the matrix was changed manually
-        // which breaks the pipeline - concatenated transforms are discarded.
         m_sceneObject->GetLocalTransform()->Identity();
         vtkSmartPointer<vtkMatrix4x4> mat = vtkSmartPointer<vtkMatrix4x4>::New();
         double rot[3];
@@ -95,6 +96,18 @@ void TransformEditWidget::UpdateTransform()
 
         //m_sceneObject->FinishModifyingTransform();
         m_selfUpdating = false;
+    }
+}
+
+// take matrix produced in vtkQtMatrixDialog and put it in the local transform
+void TransformEditWidget::UpdateTransformFromMatrixDialog( vtkMatrix4x4 * mat )
+{
+    if( m_sceneObject )
+    {
+        m_sceneObject->GetLocalTransform()->Identity();
+        m_sceneObject->GetLocalTransform()->SetMatrix( mat );
+        m_sceneObject->GetLocalTransform()->Modified();
+        this->UpdateUi();
     }
 }
 
@@ -132,11 +145,6 @@ void TransformEditWidget::UpdateUi()
             ui->rotateXSpinBox->setValue( r[0] );
             ui->rotateYSpinBox->setValue( r[1] );
             ui->rotateZSpinBox->setValue( r[2] );
-            if( m_mustUpdateTransform )
-            {
-                this->UpdateTransform();
-                m_mustUpdateTransform = false;
-            }
         }
         BlockSpinboxSignals(false);
     }
@@ -163,18 +171,21 @@ void TransformEditWidget::EditMatrixButtonToggled( bool isOn )
         vtkTransform * t = m_sceneObject->GetLocalTransform();
         if( t )
         {
+            vtkSmartPointer<vtkMatrix4x4> mat = vtkSmartPointer<vtkMatrix4x4>::New();
+            mat->DeepCopy( t->GetMatrix() );
             bool readOnly = !m_sceneObject->CanEditTransformManually();
             QString dialogTitle = m_sceneObject->GetName();
             dialogTitle += ": Local Matrix";
             m_matrixDialog = new vtkQtMatrixDialog( readOnly, 0 );
             m_matrixDialog->setWindowTitle( dialogTitle );
             m_matrixDialog->setAttribute( Qt::WA_DeleteOnClose );
-            m_matrixDialog->SetMatrix( t->GetMatrix() );
+            m_matrixDialog->SetMatrix( mat );
             Application::GetInstance().ShowFloatingDock( m_matrixDialog );
-//            connect( m_matrixDialog, SIGNAL(MatrixModified()), m_sceneObject, SLOT(NotifyTransformChanged()) );
-            connect( m_matrixDialog, SIGNAL(MatrixModified()), this, SLOT(UpdateUi()) );
+            if( m_sceneObject->CanEditTransformManually() )
+            {
+                connect( m_matrixDialog, SIGNAL(MatrixModified( vtkMatrix4x4 *) ), this, SLOT(UpdateTransformFromMatrixDialog( vtkMatrix4x4 * )) );
+            }
             connect( m_matrixDialog, SIGNAL(destroyed()), this, SLOT(EditMatrixDialogClosed()) );
-            m_mustUpdateTransform = true;
         }
     }
 }
