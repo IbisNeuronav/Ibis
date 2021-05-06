@@ -1372,7 +1372,7 @@ void ScrewNavigationWidget::on_exportPlanButton_clicked()
         dir = api->GetWorkingDirectory();
     }
 
-    QString filename = QFileDialog::getSaveFileName( this, tr("Export screw plan"), dir, tr("*.xml") );
+    QString filename = QFileDialog::getSaveFileName( this, tr("Export screw plan"), dir, tr("*.xml"), nullptr, QFileDialog::DontUseNativeDialog);
     if( !filename.isEmpty() )
     {
         if(!filename.toLower().endsWith(".xml"))

@@ -38,6 +38,8 @@ VertebraRegistrationWidget::VertebraRegistrationWidget(QWidget *parent) :
     std::srand(std::time(nullptr));
 
     setWindowTitle( "Vertebra Registration" );
+    m_secondaryAcquisitions = new SecondaryUSAcquisition();
+    m_secondaryAcquisitions->setGlobalLayout(ui->usAcquisitionVerticalLayout);
 }
 
 VertebraRegistrationWidget::~VertebraRegistrationWidget()
@@ -68,6 +70,7 @@ void VertebraRegistrationWidget::SetPluginInterface( PedicleScrewNavigationPlugi
             connect( ibisApi, SIGNAL(ObjectRemoved(int)), this, SLOT(OnObjectRemovedSlot(int)) );
         }
         this->UpdateUi();
+        m_secondaryAcquisitions->setPluginInterface(m_pluginInterface);
     }
 }
 
@@ -264,8 +267,15 @@ void VertebraRegistrationWidget::GetUSScanOrthogonalDirection(itk::Vector<double
     directionVector.Normalize();
 }
 
+bool VertebraRegistrationWidget::CreateVolumeFromSlices(USAcquisitionObject * usAcquisitionObject, float spacingFactor)
+{
+    QList<USAcquisitionObject *> secAcq;
+    return this->CreateVolumeFromSlices(usAcquisitionObject, spacingFactor, secAcq);
+}
 
-bool VertebraRegistrationWidget::CreateVolumeFromSlices(USAcquisitionObject *usAcquisitionObject, float spacingFactor)
+bool VertebraRegistrationWidget::CreateVolumeFromSlices(USAcquisitionObject *usAcquisitionObject,
+                                                        float spacingFactor,
+                                                        QList<USAcquisitionObject *> secondaryAcquisitions)
 {
     m_usScanCenterPointList.clear();
     m_inputImageList.clear();
@@ -310,26 +320,51 @@ bool VertebraRegistrationWidget::CreateVolumeFromSlices(USAcquisitionObject *usA
         }
     }
 
+    for( USAcquisitionObject * acq : secondaryAcquisitions )
+    {
+        if( (acq->GetObjectID() != usAcquisitionObject->GetObjectID()) || (acq->GetObjectID() != IbisAPI::InvalidId) )
+        {
+            N += acq->GetNumberOfSlices();
+        }
+    }
+    secondaryAcquisitions.append(usAcquisitionObject);
+
     // US reconstruction
     GPU_VolumeReconstruction * volumeReconstructor = GPU_VolumeReconstruction::New();;
-    volumeReconstructor->SetNumberOfSlices( usAcquisitionObject->GetNumberOfSlices() );
+    volumeReconstructor->SetNumberOfSlices( N );
     if (ui->useMaskCheckBox->isChecked())
-        {
-         volumeReconstructor->SetFixedSliceMask(usAcquisitionObject->GetMask());
-        }
+    {
+        volumeReconstructor->SetFixedSliceMask(usAcquisitionObject->GetMask());
+    }
     volumeReconstructor->SetUSSearchRadius( m_reconstructionSearchRadius );
     volumeReconstructor->SetVolumeSpacing( m_reconstructionResolution );
     volumeReconstructor->SetKernelStdDev( m_reconstructionResolution / 2.0 );
 
-    vtkSmartPointer<vtkMatrix4x4> sliceTransformMatrix = vtkSmartPointer<vtkMatrix4x4>::New() ;
+    unsigned int frameCount = 0;
+    vtkSmartPointer<vtkMatrix4x4> sliceTransformMatrix = vtkSmartPointer<vtkMatrix4x4>::New();
     vtkSmartPointer<vtkImageData> slice = vtkSmartPointer<vtkImageData>::New();
-    for(unsigned int i=0; i<usAcquisitionObject->GetNumberOfSlices(); i++)
+    for( unsigned int i = 0; i < usAcquisitionObject->GetNumberOfSlices(); i++ )
     {
-        usAcquisitionObject->GetFrameData( i, slice, sliceTransformMatrix );
-        volumeReconstructor->SetFixedSlice(i, slice, sliceTransformMatrix );
+        usAcquisitionObject->GetFrameData(i, slice, sliceTransformMatrix);
+        volumeReconstructor->SetFixedSlice(frameCount, slice, sliceTransformMatrix);
+        frameCount++;
     }
 
-     //Construct ITK Matrix corresponding to VTK Local Matrix
+    for( USAcquisitionObject * acq : secondaryAcquisitions )
+    {
+        if( (acq->GetObjectID() != usAcquisitionObject->GetObjectID()) & (acq->GetObjectID() != IbisAPI::InvalidId) )
+        {
+            for( unsigned int i = 0; i < acq->GetNumberOfSlices(); i++ )
+            {
+                acq->GetFrameData(i, slice, sliceTransformMatrix);
+                volumeReconstructor->SetFixedSlice(frameCount, slice, sliceTransformMatrix);
+                frameCount++;
+            }
+        }
+    }
+
+    //Construct ITK Matrix corresponding to VTK Local Matrix
+    //TODO: we assume that all US acquisitions use the main usAcquisitionObject local transform
     volumeReconstructor->SetTransform( usAcquisitionObject->GetLocalTransform()->GetMatrix() );
     volumeReconstructor->start();
     volumeReconstructor->wait();
@@ -504,7 +539,9 @@ bool VertebraRegistrationWidget::Register()
         return false;
     }
 
-    if ( !this->CreateVolumeFromSlices(usAcquisitionObject, m_reconstructionResolution) )
+    QList<USAcquisitionObject *> secAcqList;
+    m_secondaryAcquisitions->getValidUSAcquisitions(secAcqList);
+    if ( !this->CreateVolumeFromSlices(usAcquisitionObject, m_reconstructionResolution, secAcqList) )
         return false;
     
     if( ui->addUltrasoundReconstructionCheckBox->isChecked() )
@@ -754,6 +791,8 @@ void VertebraRegistrationWidget::OnObjectAddedSlot( int imageObjectId )
             }
             else if( sceneObject->IsA("USAcquisitionObject") )
             {
+                m_secondaryAcquisitions->addUSAcquisition(imageObjectId);
+
                 if(ui->usImageComboBox->count() == 0)
                 {
                     ui->usImageComboBox->addItem(sceneObject->GetName(), QVariant(imageObjectId) );
@@ -973,4 +1012,14 @@ void VertebraRegistrationWidget::on_advancedSettingsButton_clicked()
         ui->advancedSettingsButton->setText( tr( "Show advanced settings >>>" ) );
         ui->advancedSettingsGroupBox->hide();
     }
+}
+
+void VertebraRegistrationWidget::on_addUSAcquisitionButton_clicked()
+{
+    m_secondaryAcquisitions->addNewEntry();
+}
+
+void VertebraRegistrationWidget::on_removeUSAcquisitionButton_clicked()
+{
+    m_secondaryAcquisitions->removeLastEntry();
 }
