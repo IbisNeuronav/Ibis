@@ -294,7 +294,7 @@ void vtkQtMatrixDialog::SaveButtonClicked()
 {
     Q_ASSERT( m_matrix );
 
-    QString filename = QFileDialog::getSaveFileName( this, tr("Save XFM file"), m_directory, tr("*.xfm") );
+    QString filename = QFileDialog::getSaveFileName( this, tr("Save XFM file"), m_directory, tr("*.xfm"), nullptr, QFileDialog::DontUseNativeDialog );
     if( !filename.isEmpty() )
     {
         vtkXFMWriter * writer = vtkXFMWriter::New();
