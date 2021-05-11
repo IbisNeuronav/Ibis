@@ -330,6 +330,31 @@ void USAcquisitionObject::Record()
     emit ObjectModified();
 }
 
+bool USAcquisitionObject::AddFrame(vtkImageData * image, vtkMatrix4x4 * mat, double timestamp)
+{
+    if( m_isRecording )
+        return false;
+
+    // check if frame dimensions match
+    int * dims = image->GetDimensions();
+    if( m_videoBuffer->GetNumberOfFrames() )
+    {
+        if( (dims[0] != m_defaultImageSize[0]) || (dims[1] != m_defaultImageSize[1]) )
+            return false;
+        
+    }
+    else
+    {
+        this->SetFrameAndMaskSize(dims[0], dims[1]);
+    }
+    
+    // Add the frame
+    m_videoBuffer->AddFrame(image, mat, timestamp);
+    
+    emit ObjectModified();
+    return true;
+}
+
 void USAcquisitionObject::Updated()
 {
     if( m_isRecording )
