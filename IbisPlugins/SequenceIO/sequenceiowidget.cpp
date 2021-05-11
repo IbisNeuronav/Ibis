@@ -72,6 +72,7 @@ void SequenceIOWidget::WriteAcquisition(USAcquisitionObject * usAcquisitionObjec
         m_recordfile << "BinaryData = True" << std::endl;
         m_recordfile << "BinaryDataByteOrderMSB = False" << std::endl;
         m_recordfile << "CenterOfRotation = 0 0 0" << std::endl;
+        // TODO: add write compressed files
         m_recordfile << "CompressedData = False" << std::endl;
         m_recordfile << "DimSize = " << usAcquisitionObject->GetSliceWidth() << " "
             << usAcquisitionObject->GetSliceHeight() << " "
@@ -268,6 +269,11 @@ USAcquisitionObject * SequenceIOWidget::ReadAcquisitionData(QString filename, Ac
         bool * transformStatus = new bool[props->numberOfFrames];
         bool * imageStatus = new bool[props->numberOfFrames];
         double * timestamps = new double[props->numberOfFrames];
+
+        unsigned int transformCount = 0;
+        unsigned int transformStatusCount = 0;
+        unsigned int imageStatusCount = 0;
+        unsigned int timestampsCount = 0;
         
         unsigned int frameId = 0;
 
@@ -296,6 +302,7 @@ USAcquisitionObject * SequenceIOWidget::ReadAcquisitionData(QString filename, Ac
                 {
                     // set transform status: only consider OK status
                     transformStatus[frameId] = tokens[1].trimmed() == "OK";
+                    transformStatusCount++;
                 }
                 else if( frameinfo[2] == props->probeTransformName )
                 {
@@ -308,16 +315,19 @@ USAcquisitionObject * SequenceIOWidget::ReadAcquisitionData(QString filename, Ac
                         jj = i % 4;
                         transforms[frameId]->SetElement(ii, jj, strtransform[i].toDouble());
                     }
+                    transformCount++;
                 }
                 else if( frameinfo[2] == "Timestamp" )
                 {
                     // set timestamp
                     timestamps[frameId] = tokens[1].trimmed().toDouble();
+                    timestampsCount++;
                 }
                 else if( frameinfo[2] == "ImageStatus" )
                 {
                     // set transform status: only consider OK status
                     imageStatus[frameId] = tokens[1].trimmed() == "OK";
+                    imageStatusCount++;
                 }
             }
             else if( tokens[0].trimmed().contains("ElementDataFile") )
@@ -327,36 +337,15 @@ USAcquisitionObject * SequenceIOWidget::ReadAcquisitionData(QString filename, Ac
             }
         }
 
-        //if( props->compressed )
-        //{
-        //    double lastTimestamp = 0;
-        //    
-        //    vtkSmartPointer<vtkIGSIOTrackedFrameList> timestampFrameList = vtkSmartPointer<vtkIGSIOTrackedFrameList>::New();
-        //    if( vtkIGSIOSequenceIO::Read(filename, timestampFrameList) )
-        //    {
-        //        LOG_ERROR("Couldn't read sequence file: " << inputFileNames[0]);
-        //        return PLUS_FAIL;
-        //    }
-
-        //    if( incrementTimestamps )
-        //    {
-        //        vtkIGSIOTrackedFrameList * tfList = timestampFrameList;
-        //        for( unsigned int f = 0; f < tfList->GetNumberOfTrackedFrames(); ++f )
-        //        {
-        //            igsioTrackedFrame * tf = tfList->GetTrackedFrame(f);
-        //            tf->SetTimestamp(lastTimestamp + tf->GetTimestamp());
-        //        }
-
-        //        lastTimestamp = tfList->GetTrackedFrame(tfList->GetNumberOfTrackedFrames() - 1)->GetTimestamp();
-        //    }
-
-        //    if( trackedFrameList->AddTrackedFrameList(timestampFrameList) != PLUS_SUCCESS )
-        //    {
-        //        LOG_ERROR("Failed to append tracked frame list!");
-        //        return PLUS_FAIL;
-        //    }
-        //    
-        //}
+        // check if number of frames is the same as frameId
+        if( (props->numberOfFrames != frameId) ||
+            (props->numberOfFrames != transformCount) ||
+            (props->numberOfFrames != transformStatusCount) ||
+            (props->numberOfFrames != imageStatusCount) ||
+            (props->numberOfFrames != timestampsCount) )
+        {
+            return nullptr;
+        }
 
         std::vector<unsigned char> allFramesPixelBuffer;
         unsigned int frameSizeInBytes = props->imageDimensions[0] * props->imageDimensions[1] * sizeof(vtkTypeUInt8); // * number of scalar components
@@ -387,6 +376,7 @@ USAcquisitionObject * SequenceIOWidget::ReadAcquisitionData(QString filename, Ac
         {
             filereader.read((char *)&allFramesPixelBuffer[0], allFramesPixelBufferSize);
         }
+
 
         for( int i = 0; i < props->numberOfFrames; i++ )
         {
@@ -609,6 +599,7 @@ void SequenceIOWidget::on_openSequenceButton_clicked()
             ui->inportPropertiesLayout->addWidget(acqInfo);
 
             // generate transforms radio buttons
+            bool recommendedTransformFound = false;
             for( QString transformName : m_acquisitionProperties->trackedTransformNames )
             {
                 QRadioButton * radbtn = new QRadioButton(transformName);
@@ -620,6 +611,11 @@ void SequenceIOWidget::on_openSequenceButton_clicked()
                 }
                 ui->inportPropertiesLayout->addWidget(radbtn);
                 m_transformNamesList.push_back(radbtn);
+            }
+            // set default transform 
+            if( (!recommendedTransformFound) & (m_transformNamesList.size() > 0) )
+            {
+                m_transformNamesList[0]->setChecked(true);
             }
             
             ui->importButton->setEnabled(true);
