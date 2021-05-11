@@ -133,6 +133,7 @@ public:
     void Record();
     void Stop();
     void SetCurrentFrame( int frameIndex );
+    bool AddFrame(vtkImageData *, vtkMatrix4x4 *, double);
 
     void Clear();
 
