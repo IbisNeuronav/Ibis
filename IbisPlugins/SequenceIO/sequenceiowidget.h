@@ -13,6 +13,7 @@
 #include <vector>
 #include <iostream>
 #include <sstream>
+#include <vtkXFMReader.h>
 #include "vtk_zlib.h"
 
 class SequenceIOPluginInterface;
@@ -82,6 +83,11 @@ private:
     void MultiplyMatrix(double(&out)[4][4], double in1[4][4], double in2[4][4]);
     void GetImage(USAcquisitionObject *, itk::SmartPointer<IbisItkUnsignedChar3ImageType> & image, int);
     void GetImage(USAcquisitionObject *, itk::SmartPointer<IbisRGBImageType> & image, int);
+
+    void StartProgress(int, QString title = "");
+    void StopProgress();
+
+    void UpdateAcquisitionInfoUI();
     
 protected:
 
@@ -106,9 +112,10 @@ private slots:
 
     void on_importButton_clicked();
     void on_openSequenceButton_clicked();
+    void on_loadCalibrationTransformButton_clicked();
 
     void UpdateProgress(int);
-
+    
 signals:
 
     void exportProgressUpdated(int);

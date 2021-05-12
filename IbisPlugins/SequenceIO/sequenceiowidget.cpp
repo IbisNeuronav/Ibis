@@ -83,6 +83,7 @@ void SequenceIOWidget::WriteAcquisition(USAcquisitionObject * usAcquisitionObjec
         m_recordfile << "Offset = 0 0 0" << std::endl;
         m_recordfile << "TransformMatrix = 1 0 0 0 1 0 0 0 1" << std::endl;
         m_recordfile << "UltrasoundImageOrientation = MF" << std::endl;
+        // TODO: write RGB images 
         m_recordfile << "UltrasoundImageType = BRIGHTNESS" << std::endl;
 
         vtkSmartPointer<vtkTransform> calibrationTransform = usAcquisitionObject->GetCalibrationTransform();
@@ -153,13 +154,9 @@ void SequenceIOWidget::WriteAcquisition(USAcquisitionObject * usAcquisitionObjec
 
 bool SequenceIOWidget::ReadAcquisitionMetaData(QString filename, AcqProperties * &props)
 {
-    Q_ASSERT(m_pluginInterface);
-    
     std::ifstream filereader(filename.toUtf8().constData(), std::ios::in | std::ios::binary);
     if( filereader.is_open() )
-    {
-        IbisAPI * ibisApi = m_pluginInterface->GetIbisAPI();
-        
+    {   
         std::string line;
         while( std::getline(filereader, line) )
         {
@@ -188,7 +185,7 @@ bool SequenceIOWidget::ReadAcquisitionMetaData(QString filename, AcqProperties *
                 props->imageDimensions[0] = strdim[0].toInt();
                 props->imageDimensions[1] = strdim[1].toInt();
                 props->numberOfFrames = strdim[2].toInt();
-                m_progressBar = ibisApi->StartProgress(props->numberOfFrames, tr("Reading Image MetaData"));
+                this->StartProgress(props->numberOfFrames, tr("Reading Image MetaData"));
             }
             else if( tokens[0].trimmed().contains("CalibrationTransform") )
             {
@@ -232,24 +229,17 @@ bool SequenceIOWidget::ReadAcquisitionMetaData(QString filename, AcqProperties *
             }
         }
         filereader.close();
-        if( m_progressBar )
-        {
-            ibisApi->StopProgress(m_progressBar);
-            m_progressBar = nullptr;
-        }
+        this->StopProgress();
     }
     return props->isValid();
 }
 
 USAcquisitionObject * SequenceIOWidget::ReadAcquisitionData(QString filename, AcqProperties * props)
 {
-    Q_ASSERT(m_pluginInterface);
-
     std::ifstream filereader(filename.toUtf8().constData(), std::ios::in | std::ios::binary);
     if( filereader.is_open() )
     {
-        IbisAPI * ibisApi = m_pluginInterface->GetIbisAPI();
-        m_progressBar = ibisApi->StartProgress(props->numberOfFrames, tr("Reading Image Data..."));
+        this->StartProgress(props->numberOfFrames, tr("Reading Image Data..."));
 
         USAcquisitionObject * usAcquisitionObject = USAcquisitionObject::New();
         QFileInfo fi(filename);
@@ -292,12 +282,6 @@ USAcquisitionObject * SequenceIOWidget::ReadAcquisitionData(QString filename, Ac
                 std::string readableB = props->probeTransformName.toUtf8().constData();
 
                 frameId = frameinfo[1].split("Frame").at(1).toInt();
-                /*
-                if( frameinfo[2] == "FrameNumber" )
-                {
-                    frameId = tokens[1].toInt();
-                }
-                else*/ 
                 if( frameinfo[2] == props->probeTransformName + tr("Status") )
                 {
                     // set transform status: only consider OK status
@@ -338,12 +322,14 @@ USAcquisitionObject * SequenceIOWidget::ReadAcquisitionData(QString filename, Ac
         }
 
         // check if number of frames is the same as frameId
-        if( (props->numberOfFrames != frameId) ||
+        if( (props->numberOfFrames != frameId + 1) ||
             (props->numberOfFrames != transformCount) ||
             (props->numberOfFrames != transformStatusCount) ||
             (props->numberOfFrames != imageStatusCount) ||
             (props->numberOfFrames != timestampsCount) )
         {
+            this->StopProgress();
+            filereader.close();
             return nullptr;
         }
 
@@ -364,11 +350,13 @@ USAcquisitionObject * SequenceIOWidget::ReadAcquisitionData(QString filename, Ac
             if( uncompress((Bytef *)&(allFramesPixelBuffer[0]), &unCompSize, (const Bytef *)&(allFramesCompressedPixelBuffer[0]), allFramesCompressedPixelBufferSize) != Z_OK )
             {
                 filereader.close();
+                this->StopProgress();
                 return nullptr;
             }
             if( unCompSize != allFramesPixelBufferSize )
             {
                 filereader.close();
+                this->StopProgress();
                 return nullptr;
             }
         }
@@ -396,12 +384,26 @@ USAcquisitionObject * SequenceIOWidget::ReadAcquisitionData(QString filename, Ac
         }
         
         filereader.close();
-        if( m_progressBar )
-        {
-            ibisApi->StopProgress(m_progressBar);
-            m_progressBar = nullptr;
-        }
+        this->StopProgress();
         return usAcquisitionObject;
+    }
+}
+
+void SequenceIOWidget::StartProgress(int max, QString title)
+{
+    Q_ASSERT(m_pluginInterface);
+    IbisAPI * ibisApi = m_pluginInterface->GetIbisAPI();
+    m_progressBar = ibisApi->StartProgress(max, title);
+}
+
+void SequenceIOWidget::StopProgress()
+{
+    Q_ASSERT(m_pluginInterface);
+    if( m_progressBar )
+    {
+        IbisAPI * ibisApi = m_pluginInterface->GetIbisAPI();
+        ibisApi->StopProgress(m_progressBar);
+        m_progressBar = nullptr;
     }
 }
 
@@ -513,6 +515,68 @@ void SequenceIOWidget::UpdateUi()
     m_useMask = ui->useMaskCheckBox->isChecked();
 }
 
+void SequenceIOWidget::UpdateAcquisitionInfoUI()
+{
+    // clear acquisition info text
+    ui->acquisitionInfoLabel->setText("");
+
+    // clear radio buttons
+    for( QRadioButton * radbtn : m_transformNamesList )
+    {
+        ui->inportPropertiesLayout->removeWidget(radbtn);
+        delete radbtn;
+    }
+    m_transformNamesList.clear();
+
+    // set acquisition info text
+    if( m_acquisitionProperties->isValid() )
+    {
+        QString text;
+        ui->acquisitionInfoLabel->clear();
+        text = tr("Number of frames: %1\nImage dimensions: %2 x %3\nCalibration matrix %4\n")
+            .arg(m_acquisitionProperties->numberOfFrames)
+            .arg(m_acquisitionProperties->imageDimensions[0])
+            .arg(m_acquisitionProperties->imageDimensions[1])
+            .arg(m_acquisitionProperties->isCalibrationFound ? tr("found:") : tr("not found:"));
+        for( int i = 0; i < 4; i++ )
+        {
+            for( int j = 0; j < 4; j++ )
+            {
+                double elem = m_acquisitionProperties->calibrationMatrix->GetElement(i, j);
+                text += (elem > 0 ? " " : "") + QString::number(elem, 'f', 4) + "\t";
+            }
+            text += "\n";
+        }
+        ui->acquisitionInfoLabel->setText(text);
+
+        // generate radio buttons
+        bool recommendedTransformFound = false;
+        for( QString transformName : m_acquisitionProperties->trackedTransformNames )
+        {
+            QRadioButton * radbtn = new QRadioButton(transformName);
+            radbtn->setProperty("TransformName", QVariant(transformName));
+            if( transformName == tr("ProbeToReferenceTransform") )
+            {
+                radbtn->setText(transformName + tr(" (Recommended)"));
+                radbtn->setChecked(true);
+                recommendedTransformFound = true;
+            }
+            ui->inportPropertiesLayout->addWidget(radbtn);
+            m_transformNamesList.push_back(radbtn);
+        }
+
+        // set default transform 
+        if( (!recommendedTransformFound) & (m_transformNamesList.size() > 0) )
+        {
+            m_transformNamesList[0]->setChecked(true);
+        }
+    }
+    else
+    {
+        ui->acquisitionInfoLabel->setText("Invalid US acquisition sequence.");
+    }
+}
+
 void SequenceIOWidget::on_exportButton_clicked()
 {
     Q_ASSERT(m_pluginInterface);
@@ -540,7 +604,7 @@ void SequenceIOWidget::on_exportButton_clicked()
     m_outputFilename = QFileDialog::getSaveFileName(this, tr("Export Ultrasound Sequence"), "", tr("Sequence (*.igs.mha);;All files (*)"));
     if( !m_outputFilename.isEmpty() )
     {
-        m_progressBar = ibisApi->StartProgress(usAcquisitionObject->GetNumberOfSlices() * 2, tr("Ultrasound sequence IO"));
+        this->StartProgress(usAcquisitionObject->GetNumberOfSlices() * 2, tr("Ultrasound sequence IO"));
         m_progressBar->setLabelText(tr("Exporting..."));
         connect(this, SIGNAL(exportProgressUpdated(int)), this, SLOT(UpdateProgress(int)));
 
@@ -555,8 +619,7 @@ void SequenceIOWidget::on_exportButton_clicked()
             this->WriteAcquisition<IbisItkUnsignedChar3ImageType>(usAcquisitionObject, image);
         }
         disconnect(this, SIGNAL(exportProgressUpdated(int)), this, SLOT(UpdateProgress(int)));
-        ibisApi->StopProgress(m_progressBar);
-        m_progressBar = nullptr;
+        this->StopProgress();
     }
 }
 
@@ -572,62 +635,30 @@ void SequenceIOWidget::on_openSequenceButton_clicked()
 
     QString filename = QFileDialog::getOpenFileName(this, tr("Open Sequence File"), ibisApi->GetSceneDirectory(),
                                                     "Sequence file (*.igs.mha);; All files(*)");
+    
     QFileInfo fi(filename);
     if( fi.isFile() )
     {
+        // clear acquisition properties
+        delete m_acquisitionProperties;
+        m_acquisitionProperties = new AcqProperties;
+
         QString filepath = fi.absoluteFilePath();
         ui->openSequenceEdit->setText(filepath);
 
-        // clean properties layout
-        QLayoutItem * child;
-        while( (child = ui->inportPropertiesLayout->takeAt(0)) != 0 )
-        {
-            delete child;
-        }
-        m_transformNamesList.clear();
-
         if( this->ReadAcquisitionMetaData(filepath, m_acquisitionProperties) )
         {   
-            // set property widgets
-            QString text;
-            QLabel * acqInfo = new QLabel();
-            text = tr("Number of frames: %1\nImage dimensions: %2 x %3\nCalibration matrix %4\n").arg(m_acquisitionProperties->numberOfFrames)
-                .arg(m_acquisitionProperties->imageDimensions[0])
-                .arg(m_acquisitionProperties->imageDimensions[1])
-                .arg(m_acquisitionProperties->isCalibrationFound ? tr("found") : tr("not found"));
-            acqInfo->setText(text);
-            ui->inportPropertiesLayout->addWidget(acqInfo);
-
-            // generate transforms radio buttons
-            bool recommendedTransformFound = false;
-            for( QString transformName : m_acquisitionProperties->trackedTransformNames )
-            {
-                QRadioButton * radbtn = new QRadioButton(transformName);
-                radbtn->setProperty("TransformName", QVariant(transformName));
-                if( transformName == tr("ProbeToReferenceTransform") )
-                {
-                    radbtn->setText(transformName + tr(" (Recommended)"));
-                    radbtn->setChecked(true);
-                }
-                ui->inportPropertiesLayout->addWidget(radbtn);
-                m_transformNamesList.push_back(radbtn);
-            }
-            // set default transform 
-            if( (!recommendedTransformFound) & (m_transformNamesList.size() > 0) )
-            {
-                m_transformNamesList[0]->setChecked(true);
-            }
-            
+            ui->loadCalibrationTransformButton->setEnabled(true);
             ui->importButton->setEnabled(true);
         }
         else 
         {
-            QLabel * label = new QLabel("Invalid sequence file");
-            ui->inportPropertiesLayout->addWidget(label);
             ui->importButton->setEnabled(false);
+            ui->loadCalibrationTransformButton->setEnabled(false);
         }
+
+        this->UpdateAcquisitionInfoUI();
     }
-    
 }
 
 void SequenceIOWidget::on_importButton_clicked()
@@ -650,7 +681,37 @@ void SequenceIOWidget::on_importButton_clicked()
         Q_ASSERT(m_pluginInterface);
         IbisAPI * ibisApi = m_pluginInterface->GetIbisAPI();
         ibisApi->AddObject(acq);
-        
+    }
+}
+
+void SequenceIOWidget::on_loadCalibrationTransformButton_clicked()
+{
+    Q_ASSERT(m_pluginInterface);
+    IbisAPI * ibisApi = m_pluginInterface->GetIbisAPI();
+
+    QString filename = QFileDialog::getOpenFileName(this, tr("Open XFM file"), ibisApi->GetSceneDirectory(), tr("*.xfm"), nullptr, QFileDialog::DontUseNativeDialog);
+    if( !filename.isEmpty() )
+    {
+        QFile OpenFile(filename);
+        vtkMatrix4x4 * mat = vtkMatrix4x4::New();
+        vtkXFMReader * reader = vtkXFMReader::New();
+        if( reader->CanReadFile(filename.toUtf8()) )
+        {
+            reader->SetFileName(filename.toUtf8());
+            reader->SetMatrix(mat);
+            reader->Update();
+            reader->Delete();
+            m_acquisitionProperties->calibrationMatrix->DeepCopy(mat);
+            mat->Delete();
+
+            this->UpdateAcquisitionInfoUI();
+        }
+        else
+        {
+            reader->Delete();
+            mat->Delete();
+            return;
+        }
     }
 }
 
