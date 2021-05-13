@@ -98,7 +98,7 @@ void SequenceIOWidget::WriteAcquisition(USAcquisitionObject * usAcquisitionObjec
         timestampBaseline = usAcquisitionObject->GetFrameTimestamp(0);
         m_recordfile << "TimestampBaseline = " << QString::number(timestampBaseline,'f').toUtf8().constData() << std::endl;
 
-        image = typename ImageType::New();
+        image = ImageType::New();
         
         for( int i = 0; i < frameCount; i++ )
         {
