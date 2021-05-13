@@ -98,7 +98,7 @@ void SequenceIOWidget::WriteAcquisition(USAcquisitionObject * usAcquisitionObjec
         timestampBaseline = usAcquisitionObject->GetFrameTimestamp(0);
         m_recordfile << "TimestampBaseline = " << QString::number(timestampBaseline,'f').toUtf8().constData() << std::endl;
 
-        image = ImageType::New();
+        image = typename ImageType::New();
         
         for( int i = 0; i < frameCount; i++ )
         {
@@ -140,9 +140,9 @@ void SequenceIOWidget::WriteAcquisition(USAcquisitionObject * usAcquisitionObjec
         for( int i = 0; i < frameCount; i++ )
         {
             this->GetImage(usAcquisitionObject, image, i);
-            ImageType::PixelType * pPixel = image->GetBufferPointer();
-            ImageType::SizeType size = image->GetLargestPossibleRegion().GetSize();
-            m_recordfile.write((char *)&pPixel[0], sizeof(ImageType::PixelType) * size[0] * size[1] * size[2]);
+            typename ImageType::PixelType * pPixel = image->GetBufferPointer();
+            typename ImageType::SizeType size = image->GetLargestPossibleRegion().GetSize();
+            m_recordfile.write((char *)&pPixel[0], sizeof(typename ImageType::PixelType) * size[0] * size[1] * size[2]);
             
             emit exportProgressUpdated(i + frameCount);
         }
