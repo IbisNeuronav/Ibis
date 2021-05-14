@@ -237,156 +237,156 @@ bool SequenceIOWidget::ReadAcquisitionMetaData(QString filename, AcqProperties *
 USAcquisitionObject * SequenceIOWidget::ReadAcquisitionData(QString filename, AcqProperties * props)
 {
     std::ifstream filereader(filename.toUtf8().constData(), std::ios::in | std::ios::binary);
-    if( filereader.is_open() )
-    {
-        this->StartProgress(props->numberOfFrames, tr("Reading Image Data..."));
+    if( !filereader.is_open() )
+        return nullptr;
+    
+    this->StartProgress(props->numberOfFrames, tr("Reading Image Data..."));
 
-        USAcquisitionObject * usAcquisitionObject = USAcquisitionObject::New();
-        QFileInfo fi(filename);
-        usAcquisitionObject->SetCanAppendChildren(true);
-        usAcquisitionObject->SetNameChangeable(true);
-        usAcquisitionObject->SetObjectDeletable(true);
-        usAcquisitionObject->SetCanChangeParent(false);
-        usAcquisitionObject->SetCanEditTransformManually(true);
-        usAcquisitionObject->SetObjectManagedBySystem(false);
-        usAcquisitionObject->SetBaseDirectory(fi.dir().absolutePath());
-        usAcquisitionObject->SetName(tr("Acquisition_") + fi.baseName());
-        usAcquisitionObject->SetCalibrationMatrix(props->calibrationMatrix);
-        usAcquisitionObject->SetFrameAndMaskSize(props->imageDimensions[0], props->imageDimensions[1]);
+    USAcquisitionObject * usAcquisitionObject = USAcquisitionObject::New();
+    QFileInfo fi(filename);
+    usAcquisitionObject->SetCanAppendChildren(true);
+    usAcquisitionObject->SetNameChangeable(true);
+    usAcquisitionObject->SetObjectDeletable(true);
+    usAcquisitionObject->SetCanChangeParent(false);
+    usAcquisitionObject->SetCanEditTransformManually(true);
+    usAcquisitionObject->SetObjectManagedBySystem(false);
+    usAcquisitionObject->SetBaseDirectory(fi.dir().absolutePath());
+    usAcquisitionObject->SetName(tr("Acquisition_") + fi.baseName());
+    usAcquisitionObject->SetCalibrationMatrix(props->calibrationMatrix);
+    usAcquisitionObject->SetFrameAndMaskSize(props->imageDimensions[0], props->imageDimensions[1]);
 
-        // list of (transform, status) paris
-        vtkSmartPointer<vtkMatrix4x4> * transforms = new vtkSmartPointer<vtkMatrix4x4>[props->numberOfFrames];
-        bool * transformStatus = new bool[props->numberOfFrames];
-        bool * imageStatus = new bool[props->numberOfFrames];
-        double * timestamps = new double[props->numberOfFrames];
+    // list of (transform, status) paris
+    vtkSmartPointer<vtkMatrix4x4> * transforms = new vtkSmartPointer<vtkMatrix4x4>[props->numberOfFrames];
+    bool * transformStatus = new bool[props->numberOfFrames];
+    bool * imageStatus = new bool[props->numberOfFrames];
+    double * timestamps = new double[props->numberOfFrames];
 
-        unsigned int transformCount = 0;
-        unsigned int transformStatusCount = 0;
-        unsigned int imageStatusCount = 0;
-        unsigned int timestampsCount = 0;
+    unsigned int transformCount = 0;
+    unsigned int transformStatusCount = 0;
+    unsigned int imageStatusCount = 0;
+    unsigned int timestampsCount = 0;
         
-        unsigned int frameId = 0;
+    unsigned int frameId = 0;
 
-        std::string line;
-        while( std::getline(filereader, line) )
-        {
-            QString qline(line.c_str());
-            qline = qline.trimmed();
-            QStringList tokens = qline.split("=");
+    std::string line;
+    while( std::getline(filereader, line) )
+    {
+        QString qline(line.c_str());
+        qline = qline.trimmed();
+        QStringList tokens = qline.split("=");
             
-            if( tokens[0].trimmed().startsWith("Seq_") )
-            {
-                // metadata starting with Seq_ are tracking information (i.e., frame id, frame transform, frame status, timestamp, etc.)
-                QStringList frameinfo = tokens[0].trimmed().split("_");
-                std::string readableA = frameinfo[2].toUtf8().constData();
-                std::string readableB = props->probeTransformName.toUtf8().constData();
+        if( tokens[0].trimmed().startsWith("Seq_") )
+        {
+            // metadata starting with Seq_ are tracking information (i.e., frame id, frame transform, frame status, timestamp, etc.)
+            QStringList frameinfo = tokens[0].trimmed().split("_");
+            std::string readableA = frameinfo[2].toUtf8().constData();
+            std::string readableB = props->probeTransformName.toUtf8().constData();
 
-                frameId = frameinfo[1].split("Frame").at(1).toInt();
-                if( frameinfo[2] == props->probeTransformName + tr("Status") )
-                {
-                    // set transform status: only consider OK status
-                    transformStatus[frameId] = tokens[1].trimmed() == "OK";
-                    transformStatusCount++;
-                }
-                else if( frameinfo[2] == props->probeTransformName )
-                {
-                    QStringList strtransform = tokens[1].trimmed().split(" ");
-                    transforms[frameId] = vtkMatrix4x4::New();
-                    int ii = 0, jj = 0;
-                    for( int i = 0; i < 16; i++ )
-                    {
-                        ii = i / 4;
-                        jj = i % 4;
-                        transforms[frameId]->SetElement(ii, jj, strtransform[i].toDouble());
-                    }
-                    transformCount++;
-                }
-                else if( frameinfo[2] == "Timestamp" )
-                {
-                    // set timestamp
-                    timestamps[frameId] = tokens[1].trimmed().toDouble();
-                    timestampsCount++;
-                }
-                else if( frameinfo[2] == "ImageStatus" )
-                {
-                    // set transform status: only consider OK status
-                    imageStatus[frameId] = tokens[1].trimmed() == "OK";
-                    imageStatusCount++;
-                }
-            }
-            else if( tokens[0].trimmed().contains("ElementDataFile") )
+            frameId = frameinfo[1].split("Frame").at(1).toInt();
+            if( frameinfo[2] == props->probeTransformName + tr("Status") )
             {
-                //end of metadata
-                break;
+                // set transform status: only consider OK status
+                transformStatus[frameId] = tokens[1].trimmed() == "OK";
+                transformStatusCount++;
+            }
+            else if( frameinfo[2] == props->probeTransformName )
+            {
+                QStringList strtransform = tokens[1].trimmed().split(" ");
+                transforms[frameId] = vtkMatrix4x4::New();
+                int ii = 0, jj = 0;
+                for( int i = 0; i < 16; i++ )
+                {
+                    ii = i / 4;
+                    jj = i % 4;
+                    transforms[frameId]->SetElement(ii, jj, strtransform[i].toDouble());
+                }
+                transformCount++;
+            }
+            else if( frameinfo[2] == "Timestamp" )
+            {
+                // set timestamp
+                timestamps[frameId] = tokens[1].trimmed().toDouble();
+                timestampsCount++;
+            }
+            else if( frameinfo[2] == "ImageStatus" )
+            {
+                // set transform status: only consider OK status
+                imageStatus[frameId] = tokens[1].trimmed() == "OK";
+                imageStatusCount++;
             }
         }
-
-        // check if number of frames is the same as frameId
-        if( (props->numberOfFrames != frameId + 1) ||
-            (props->numberOfFrames != transformCount) ||
-            (props->numberOfFrames != transformStatusCount) ||
-            (props->numberOfFrames != imageStatusCount) ||
-            (props->numberOfFrames != timestampsCount) )
+        else if( tokens[0].trimmed().contains("ElementDataFile") )
         {
-            this->StopProgress();
+            //end of metadata
+            break;
+        }
+    }
+
+    // check if number of frames is the same as frameId
+    if( (props->numberOfFrames != frameId + 1) ||
+        (props->numberOfFrames != transformCount) ||
+        (props->numberOfFrames != transformStatusCount) ||
+        (props->numberOfFrames != imageStatusCount) ||
+        (props->numberOfFrames != timestampsCount) )
+    {
+        this->StopProgress();
+        filereader.close();
+        return nullptr;
+    }
+
+    std::vector<unsigned char> allFramesPixelBuffer;
+    unsigned int frameSizeInBytes = props->imageDimensions[0] * props->imageDimensions[1] * sizeof(vtkTypeUInt8); // * number of scalar components
+    unsigned int allFramesPixelBufferSize = props->numberOfFrames * frameSizeInBytes;
+    allFramesPixelBuffer.resize(allFramesPixelBufferSize);
+
+    if( props->compressed )
+    {
+        unsigned int allFramesCompressedPixelBufferSize = props->compressedDataSize;
+        std::vector<unsigned char> allFramesCompressedPixelBuffer;
+        allFramesCompressedPixelBuffer.resize(allFramesCompressedPixelBufferSize);
+
+        filereader.read((char *)&allFramesCompressedPixelBuffer[0], allFramesCompressedPixelBufferSize);
+
+        uLongf unCompSize = allFramesPixelBufferSize;
+        if( uncompress((Bytef *)&(allFramesPixelBuffer[0]), &unCompSize, (const Bytef *)&(allFramesCompressedPixelBuffer[0]), allFramesCompressedPixelBufferSize) != Z_OK )
+        {
             filereader.close();
+            this->StopProgress();
             return nullptr;
         }
-
-        std::vector<unsigned char> allFramesPixelBuffer;
-        unsigned int frameSizeInBytes = props->imageDimensions[0] * props->imageDimensions[1] * sizeof(vtkTypeUInt8); // * number of scalar components
-        unsigned int allFramesPixelBufferSize = props->numberOfFrames * frameSizeInBytes;
-        allFramesPixelBuffer.resize(allFramesPixelBufferSize);
-
-        if( props->compressed )
+        if( unCompSize != allFramesPixelBufferSize )
         {
-            unsigned int allFramesCompressedPixelBufferSize = props->compressedDataSize;
-            std::vector<unsigned char> allFramesCompressedPixelBuffer;
-            allFramesCompressedPixelBuffer.resize(allFramesCompressedPixelBufferSize);
-
-            filereader.read((char *)&allFramesCompressedPixelBuffer[0], allFramesCompressedPixelBufferSize);
-
-            uLongf unCompSize = allFramesPixelBufferSize;
-            if( uncompress((Bytef *)&(allFramesPixelBuffer[0]), &unCompSize, (const Bytef *)&(allFramesCompressedPixelBuffer[0]), allFramesCompressedPixelBufferSize) != Z_OK )
-            {
-                filereader.close();
-                this->StopProgress();
-                return nullptr;
-            }
-            if( unCompSize != allFramesPixelBufferSize )
-            {
-                filereader.close();
-                this->StopProgress();
-                return nullptr;
-            }
+            filereader.close();
+            this->StopProgress();
+            return nullptr;
         }
-        else
-        {
-            filereader.read((char *)&allFramesPixelBuffer[0], allFramesPixelBufferSize);
-        }
-
-
-        for( int i = 0; i < props->numberOfFrames; i++ )
-        {
-            vtkImageData * image = vtkImageData::New();
-            image->SetDimensions(props->imageDimensions[0], props->imageDimensions[1], 1);
-            image->SetExtent(0, props->imageDimensions[0] - 1, 0, props->imageDimensions[1], 0, 0);
-            image->AllocateScalars(VTK_UNSIGNED_CHAR, 1);
-            unsigned char * pointer = static_cast<unsigned char *>(image->GetScalarPointer());
-            
-            memcpy(pointer, &allFramesPixelBuffer[0] + i * frameSizeInBytes, frameSizeInBytes);
-
-            if( imageStatus[i] )
-            {
-                usAcquisitionObject->AddFrame(image, transforms[i], props->timestampBaseline + timestamps[i]);
-            }
-            this->UpdateProgress(i);
-        }
-        
-        filereader.close();
-        this->StopProgress();
-        return usAcquisitionObject;
     }
+    else
+    {
+        filereader.read((char *)&allFramesPixelBuffer[0], allFramesPixelBufferSize);
+    }
+
+
+    for( int i = 0; i < props->numberOfFrames; i++ )
+    {
+        vtkImageData * image = vtkImageData::New();
+        image->SetDimensions(props->imageDimensions[0], props->imageDimensions[1], 1);
+        image->SetExtent(0, props->imageDimensions[0] - 1, 0, props->imageDimensions[1], 0, 0);
+        image->AllocateScalars(VTK_UNSIGNED_CHAR, 1);
+        unsigned char * pointer = static_cast<unsigned char *>(image->GetScalarPointer());
+            
+        memcpy(pointer, &allFramesPixelBuffer[0] + i * frameSizeInBytes, frameSizeInBytes);
+
+        if( imageStatus[i] )
+        {
+            usAcquisitionObject->AddFrame(image, transforms[i], props->timestampBaseline + timestamps[i]);
+        }
+        this->UpdateProgress(i);
+    }
+        
+    filereader.close();
+    this->StopProgress();
+    return usAcquisitionObject;
 }
 
 void SequenceIOWidget::StartProgress(int max, QString title)
