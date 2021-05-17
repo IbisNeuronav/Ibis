@@ -71,7 +71,9 @@ void TransformEditWidget::UpdateTransform()
         m_selfUpdating = true;
         //m_sceneObject->StartModifyingTransform();
 
-        vtkMatrix4x4 * mat = m_sceneObject->GetLocalTransform()->GetMatrix();
+        vtkTransform * localTransform = m_sceneObject->GetLocalTransform();
+        vtkMatrix4x4 *mat = vtkMatrix4x4::New();
+        mat->DeepCopy( localTransform->GetMatrix() );
         double rot[3];
         rot[0] = ui->rotateXSpinBox->value();
         rot[1] = ui->rotateYSpinBox->value();
@@ -81,7 +83,9 @@ void TransformEditWidget::UpdateTransform()
         trans[1] = ui->translateYSpinBox->value();
         trans[2] = ui->translateZSpinBox->value();
         vtkMatrix4x4Operators::TransRotToMatrix( trans, rot, mat );
-        m_sceneObject->GetLocalTransform()->Modified();
+        localTransform->SetMatrix( mat );
+        localTransform->Modified();
+        mat->Delete();
 
         //m_sceneObject->FinishModifyingTransform();
         m_selfUpdating = false;
@@ -148,19 +152,31 @@ void TransformEditWidget::EditMatrixButtonToggled( bool isOn )
         vtkTransform * t = m_sceneObject->GetLocalTransform();
         if( t )
         {
+            vtkMatrix4x4 *mat = vtkMatrix4x4::New();
+            mat->DeepCopy( t->GetMatrix() );
             bool readOnly = !m_sceneObject->CanEditTransformManually();
             QString dialogTitle = m_sceneObject->GetName();
             dialogTitle += ": Local Matrix";
             m_matrixDialog = new vtkQtMatrixDialog( readOnly, 0 );
             m_matrixDialog->setWindowTitle( dialogTitle );
             m_matrixDialog->setAttribute( Qt::WA_DeleteOnClose );
-            m_matrixDialog->SetMatrix( t->GetMatrix() );
+            m_matrixDialog->SetMatrix( mat );
             Application::GetInstance().ShowFloatingDock( m_matrixDialog );
-            connect( m_matrixDialog, SIGNAL(MatrixModified()), m_sceneObject, SLOT(NotifyTransformChanged()) );
-            connect( m_matrixDialog, SIGNAL(MatrixModified()), this, SLOT(UpdateUi()) );
+            connect( m_matrixDialog, SIGNAL(MatrixModified( vtkMatrix4x4* )), this, SLOT(TransformModified( vtkMatrix4x4* )) );
             connect( m_matrixDialog, SIGNAL(destroyed()), this, SLOT(EditMatrixDialogClosed()) );
+            mat->Delete();
         }
     }
+}
+
+void TransformEditWidget::TransformModified( vtkMatrix4x4 *mat )
+{
+    Q_ASSERT_X( m_sceneObject, "TransformEditWidget::TransformModified", "Can't call this function without setting SceneObject." );
+
+    vtkTransform * localTransform = m_sceneObject->GetLocalTransform();
+    localTransform->SetMatrix( mat );
+    localTransform->Modified();
+    this->UpdateUi();
 }
 
 void TransformEditWidget::EditMatrixDialogClosed()

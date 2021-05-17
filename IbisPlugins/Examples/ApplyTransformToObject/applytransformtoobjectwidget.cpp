@@ -38,7 +38,7 @@ void ApplyTransformToObjectWidget::on_transformPushButton_clicked()
     m_matrixDialog->setAttribute( Qt::WA_DeleteOnClose );
     m_matrixDialog->SetMatrix( localTransform->GetMatrix() );
     m_matrixDialog->show();
-    connect( m_matrixDialog, SIGNAL(MatrixModified()), m_selectedObject, SLOT(NotifyTransformChanged()) );
+    connect( m_matrixDialog, SIGNAL(MatrixModified( vtkMatrix4x4* )), m_selectedObject, SLOT(NotifyTransformChanged()) );
     connect( m_matrixDialog, SIGNAL(destroyed()), this, SLOT(EditMatrixDialogClosed()) );
 }
 
