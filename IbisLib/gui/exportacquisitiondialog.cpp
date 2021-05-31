@@ -42,7 +42,7 @@ void ExportAcquisitionDialog::SetUSAcquisitionObject( USAcquisitionObject * acq 
 void ExportAcquisitionDialog::on_browsePushButton_clicked( )
 {
     Q_ASSERT( m_acquisitionObject );
-    QString outputDir = QFileDialog::getExistingDirectory( this, "Output Folder", m_acquisitionObject->GetManager()->GetSceneDirectory() );
+    QString outputDir = QFileDialog::getExistingDirectory( this, "Output Folder", m_acquisitionObject->GetManager()->GetSceneDirectory(),  QFileDialog::DontUseNativeDialog );
     ui->outputDirLineEdit->setText( outputDir );
 }
 

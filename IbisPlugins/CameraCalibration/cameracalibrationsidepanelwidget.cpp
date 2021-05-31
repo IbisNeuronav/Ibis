@@ -155,7 +155,7 @@ void CameraCalibrationSidePanelWidget::on_exportCalibrationDataButton_clicked()
 {
     Q_ASSERT( m_pluginInterface );
 
-    QString dir = QFileDialog::getExistingDirectory( this, "Choose directory to export calibration data", QDir::homePath() );
+    QString dir = QFileDialog::getExistingDirectory( this, "Choose directory to export calibration data", QDir::homePath(), QFileDialog::DontUseNativeDialog );
     if( !dir.isEmpty() )
     {
         QProgressDialog * dlg = m_pluginInterface->GetIbisAPI()->StartProgress( 100, "Exporting calibration data..." );
@@ -168,7 +168,7 @@ void CameraCalibrationSidePanelWidget::on_importDataButton_clicked()
 {
     Q_ASSERT( m_pluginInterface );
 
-    QString dir = QFileDialog::getExistingDirectory( this, "Choose directory where calibration data is located", QDir::homePath() );
+    QString dir = QFileDialog::getExistingDirectory( this, "Choose directory where calibration data is located", QDir::homePath(), QFileDialog::DontUseNativeDialog );
     if( !dir.isEmpty() )
     {
         m_pluginInterface->ImportCalibrationData( dir );
