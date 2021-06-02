@@ -601,7 +601,7 @@ void SequenceIOWidget::on_exportButton_clicked()
         return;
     }
 
-    m_outputFilename = QFileDialog::getSaveFileName(this, tr("Export Ultrasound Sequence"), "", tr("Sequence (*.igs.mha);;All files (*)"));
+    m_outputFilename = QFileDialog::getSaveFileName(this, tr("Export Ultrasound Sequence"), "", tr("Sequence (*.igs.mha);;All files (*)"), nullptr, QFileDialog::DontUseNativeDialog);
     if( !m_outputFilename.isEmpty() )
     {
         this->StartProgress(usAcquisitionObject->GetNumberOfSlices() * 2, tr("Ultrasound sequence IO"));
@@ -634,7 +634,7 @@ void SequenceIOWidget::on_openSequenceButton_clicked()
     IbisAPI * ibisApi = m_pluginInterface->GetIbisAPI();
 
     QString filename = QFileDialog::getOpenFileName(this, tr("Open Sequence File"), ibisApi->GetSceneDirectory(),
-                                                    "Sequence file (*.igs.mha);; All files(*)");
+                                                    "Sequence file (*.igs.mha);; All files(*)", nullptr, QFileDialog::DontUseNativeDialog);
     
     QFileInfo fi(filename);
     if( fi.isFile() )

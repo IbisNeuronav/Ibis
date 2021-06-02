@@ -680,7 +680,7 @@ QString Application::GetFileNameOpen( const QString & caption, const QString & d
     if (m_mainWindow)
         parent = m_mainWindow;
     bool running = PreModalDialog();
-    QString filename = QFileDialog::getOpenFileName( parent, caption, dir, filter );
+    QString filename = QFileDialog::getOpenFileName( parent, caption, dir, filter, nullptr, QFileDialog::DontUseNativeDialog );
     if( running )
         PostModalDialog();
     return filename;
@@ -690,7 +690,7 @@ QString Application::GetFileNameSave( const QString & caption, const QString & d
 {
     Q_ASSERT_X( m_mainWindow, "Application::GetFileNameSave()", "MainWindow was not set" );
     bool running = PreModalDialog();
-    QString filename = QFileDialog::getSaveFileName( m_mainWindow, caption, dir, filter );
+    QString filename = QFileDialog::getSaveFileName( m_mainWindow, caption, dir, filter, nullptr, QFileDialog::DontUseNativeDialog );
     if( running )
         PostModalDialog();
     return filename;
@@ -701,7 +701,7 @@ QString Application::GetExistingDirectory( const QString & caption, const QStrin
     Q_ASSERT_X( m_mainWindow, "Application::GetExistingDirectory()", "MainWindow was not set" );
     bool running = PreModalDialog();
     QString dirname = QFileDialog::getExistingDirectory( m_mainWindow, caption, dir, QFileDialog::ShowDirsOnly
-                                                         | QFileDialog::DontResolveSymlinks );
+                                                         | QFileDialog::DontResolveSymlinks | QFileDialog::DontUseNativeDialog );
     if( running )
         PostModalDialog();
     return dirname;
