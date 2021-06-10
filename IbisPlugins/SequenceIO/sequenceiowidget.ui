@@ -54,6 +54,52 @@
        </widget>
       </item>
       <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_5">
+        <item>
+         <widget class="QLabel" name="label_2">
+          <property name="maximumSize">
+           <size>
+            <width>150</width>
+            <height>200</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>Ultrasound Image Orientation:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QComboBox" name="ultrasoundImageOrientationComboBox">
+          <property name="minimumSize">
+           <size>
+            <width>100</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>300</width>
+            <height>16777215</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="horizontalSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </item>
+      <item>
        <layout class="QHBoxLayout" name="horizontalLayout">
         <item>
          <widget class="QPushButton" name="exportButton">
@@ -141,6 +187,19 @@
        </layout>
       </item>
       <item>
+       <widget class="QCheckBox" name="checkImageStatusCheckBox">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="text">
+         <string>Check image status</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QGroupBox" name="importTransformsGroupBox">
         <property name="title">
          <string>Sequence properties:</string>
@@ -163,7 +222,7 @@
               <x>0</x>
               <y>0</y>
               <width>423</width>
-              <height>369</height>
+              <height>346</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_4">

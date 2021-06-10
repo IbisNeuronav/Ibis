@@ -47,6 +47,7 @@ public:
         unsigned int compressedDataSize;
         unsigned int imageDimensions[2];
         unsigned int numberOfFrames;
+        bool flippedAxes[2];
         vtkMatrix4x4 * calibrationMatrix;
         bool isCalibrationFound;
         double timestampBaseline;
@@ -59,6 +60,8 @@ public:
             imageDimensions[0] = 0;
             imageDimensions[1] = 0;
             numberOfFrames = 0;
+            flippedAxes[0] = false;
+            flippedAxes[1] = false;
             calibrationMatrix = vtkMatrix4x4::New();
             isCalibrationFound = false;
             timestampBaseline = 0;

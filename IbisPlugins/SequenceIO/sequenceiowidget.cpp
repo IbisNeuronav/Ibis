@@ -28,6 +28,7 @@
 #include <vtkSmartPointer.h>
 #include <vtkDataArray.h>
 #include <vtkPassThrough.h>
+#include <vtkImageReslice.h>
 #include <itkSmartPointer.h>
 #include <itkMetaDataObject.h>
 #include <itkMetaDataDictionary.h>
@@ -43,6 +44,13 @@ SequenceIOWidget::SequenceIOWidget(QWidget *parent) :
     m_outputFilename = "";
     ui->setupUi(this);
     setWindowTitle( "Export Ultrasound Sequence" );
+
+    ui->ultrasoundImageOrientationComboBox->clear();
+    ui->ultrasoundImageOrientationComboBox->addItem("MN (Default)", QVariant(tr("MN")));
+    ui->ultrasoundImageOrientationComboBox->addItem("MF", QVariant(tr("MF")));
+    ui->ultrasoundImageOrientationComboBox->addItem("UN", QVariant(tr("UN")));
+    ui->ultrasoundImageOrientationComboBox->addItem("UF", QVariant(tr("UF")));
+    ui->ultrasoundImageOrientationComboBox->setCurrentIndex(0);
 }
 
 SequenceIOWidget::~SequenceIOWidget()
@@ -82,7 +90,9 @@ void SequenceIOWidget::WriteAcquisition(USAcquisitionObject * usAcquisitionObjec
         m_recordfile << "ElementType = MET_UCHAR" << std::endl;
         m_recordfile << "Offset = 0 0 0" << std::endl;
         m_recordfile << "TransformMatrix = 1 0 0 0 1 0 0 0 1" << std::endl;
-        m_recordfile << "UltrasoundImageOrientation = MF" << std::endl;
+        QString imageOrientation;
+        imageOrientation = ui->ultrasoundImageOrientationComboBox->itemData(ui->ultrasoundImageOrientationComboBox->currentIndex()).toString();
+        m_recordfile << "UltrasoundImageOrientation = " << imageOrientation.toUtf8().constData() << std::endl;
         // TODO: write RGB images 
         m_recordfile << "UltrasoundImageType = BRIGHTNESS" << std::endl;
 
@@ -186,6 +196,13 @@ bool SequenceIOWidget::ReadAcquisitionMetaData(QString filename, AcqProperties *
                 props->imageDimensions[1] = strdim[1].toInt();
                 props->numberOfFrames = strdim[2].toInt();
                 this->StartProgress(props->numberOfFrames, tr("Reading Image MetaData"));
+            }
+            else if( tokens[0].trimmed() == tr("UltrasoundImageOrientation") )
+            {
+                if( tokens[1].trimmed().contains("U") )
+                    props->flippedAxes[0] = true;
+                if( tokens[1].trimmed().contains("F") )
+                    props->flippedAxes[1] = true;
             }
             else if( tokens[0].trimmed().contains("CalibrationTransform") )
             {
@@ -326,7 +343,7 @@ USAcquisitionObject * SequenceIOWidget::ReadAcquisitionData(QString filename, Ac
     if( (props->numberOfFrames != frameId + 1) ||
         (props->numberOfFrames != transformCount) ||
         (props->numberOfFrames != transformStatusCount) ||
-        (props->numberOfFrames != imageStatusCount) ||
+        ((props->numberOfFrames != imageStatusCount) && (ui->checkImageStatusCheckBox->isChecked()) ) ||
         (props->numberOfFrames != timestampsCount) )
     {
         this->StopProgress();
@@ -366,7 +383,6 @@ USAcquisitionObject * SequenceIOWidget::ReadAcquisitionData(QString filename, Ac
         filereader.read((char *)&allFramesPixelBuffer[0], allFramesPixelBufferSize);
     }
 
-
     for( int i = 0; i < props->numberOfFrames; i++ )
     {
         vtkImageData * image = vtkImageData::New();
@@ -376,8 +392,31 @@ USAcquisitionObject * SequenceIOWidget::ReadAcquisitionData(QString filename, Ac
         unsigned char * pointer = static_cast<unsigned char *>(image->GetScalarPointer());
             
         memcpy(pointer, &allFramesPixelBuffer[0] + i * frameSizeInBytes, frameSizeInBytes);
+        
+        double center[3];
+        center[0] = 0.5 * (props->imageDimensions[0] - 1);
+        center[1] = 0.5 * (props->imageDimensions[1] - 1);
+        center[2] = 0.5;
 
-        if( imageStatus[i] )
+        vtkSmartPointer<vtkMatrix4x4> resliceAxes = vtkSmartPointer<vtkMatrix4x4>::New();
+        resliceAxes->Identity();
+        // Set flipped axes
+        resliceAxes->SetElement(0, 0, props->flippedAxes[0] ? -1 : 1);
+        resliceAxes->SetElement(1, 1, props->flippedAxes[1] ? -1 : 1);
+        // Set the point through which to slice
+        resliceAxes->SetElement(0, 3, center[0]);
+        resliceAxes->SetElement(1, 3, center[1]);
+        resliceAxes->SetElement(2, 3, center[2]);
+
+        // Extract a slice in the desired orientation
+        vtkSmartPointer<vtkImageReslice> reslice = vtkSmartPointer<vtkImageReslice>::New();
+        reslice->SetInputData(image);
+        reslice->SetResliceAxes(resliceAxes);
+        reslice->SetInterpolationModeToNearestNeighbor();
+        reslice->Update();
+        image = reslice->GetOutput();
+
+        if( (imageStatus[i]) || (!ui->checkImageStatusCheckBox->isChecked()))
         {
             usAcquisitionObject->AddFrame(image, transforms[i], props->timestampBaseline + timestamps[i]);
         }
