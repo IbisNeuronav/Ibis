@@ -53,20 +53,20 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
   m_ComputeMask = false;
   m_MaskThreshold = 0.0;
 
-  m_FixedImage = NULL;
-  m_MovingImage = NULL;
+  m_FixedImage = nullptr;
+  m_MovingImage = nullptr;
 
-  m_MovingImageGradientGPUImage = NULL;
+  m_MovingImageGradientGPUImage = nullptr;
 
-  m_Transform = NULL;
+  m_Transform = nullptr;
   m_MetricValue = 0;
 
   m_UseImageMask = false;
   m_FixedImageMaskSpatialObject = 0;
   SetSamplingStrategyToGrid();
 
-  m_MovingGPUImage = NULL;
-  m_FixedGPUImage = NULL;
+  m_MovingGPUImage = nullptr;
+  m_FixedGPUImage = nullptr;
 }
 
 
@@ -95,18 +95,18 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
   cl_int errid;
 
   // Get the platforms
-  errid = clGetPlatformIDs(0, NULL, &m_NumberOfPlatforms);
+  errid = clGetPlatformIDs(0, nullptr, &m_NumberOfPlatforms);
   OpenCLCheckError( errid, __FILE__, __LINE__, ITK_LOCATION );
 
   // Get NVIDIA platform by default
   m_Platform = OpenCLSelectPlatform("NVIDIA");
-  assert(m_Platform != NULL);
+  assert(m_Platform != nullptr);
 
   cl_device_type devType = CL_DEVICE_TYPE_GPU;
   m_Devices = OpenCLGetAvailableDevices(m_Platform, devType, &m_NumberOfDevices);
 
   // create context
-  m_Context = clCreateContext(0, m_NumberOfDevices, m_Devices, NULL, NULL, &errid);
+  m_Context = clCreateContext(0, m_NumberOfDevices, m_Devices, nullptr, nullptr, &errid);
   OpenCLCheckError( errid, __FILE__, __LINE__, ITK_LOCATION );
 
   // create command queues
@@ -159,7 +159,7 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
 ::CreateKernelFromFile(const char * filename, const char * cPreamble, const char * kernelname, const char * cOptions)
 {
 
-  FILE*  pFileStream = NULL;
+  FILE*  pFileStream = nullptr;
   pFileStream = fopen(filename, "rb");
   if(pFileStream == 0)
     {
@@ -200,14 +200,14 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
   OpenCLCheckError(errid, __FILE__, __LINE__, ITK_LOCATION);
   free(cSourceString);
 
-  errid = clBuildProgram(m_Program, 0, NULL, cOptions, NULL, NULL);
+  errid = clBuildProgram(m_Program, 0, nullptr, cOptions, nullptr, nullptr);
   if(errid != CL_SUCCESS)
     {
     size_t paramValueSize = 0;
-    clGetProgramBuildInfo(m_Program, 0, CL_PROGRAM_BUILD_LOG, 0, NULL, &paramValueSize);
+    clGetProgramBuildInfo(m_Program, 0, CL_PROGRAM_BUILD_LOG, 0, nullptr, &paramValueSize);
     char *paramValue;
     paramValue = new char[paramValueSize+1];
-    clGetProgramBuildInfo(m_Program, 0, CL_PROGRAM_BUILD_LOG, paramValueSize, paramValue, NULL);
+    clGetProgramBuildInfo(m_Program, 0, CL_PROGRAM_BUILD_LOG, paramValueSize, paramValue, nullptr);
     paramValue[paramValueSize] = '\0';
     if(m_Debug)
         std::cerr << paramValue << std::endl;
@@ -360,13 +360,13 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
     clSetKernelArg(m_GradientKernel, argidx++, sizeof(int),  &(spacing[i]) );
     } 
 
-  clEnqueueNDRangeKernel(m_CommandQueue[0], m_GradientKernel, FixedImageDimension, NULL, globalSize, localSize, 0, NULL, NULL);
+  clEnqueueNDRangeKernel(m_CommandQueue[0], m_GradientKernel, FixedImageDimension, nullptr, globalSize, localSize, 0, nullptr, nullptr);
 
   errid = clFinish(m_CommandQueue[0]);
   OpenCLCheckError(errid, __FILE__, __LINE__, ITK_LOCATION);
 
   errid = clEnqueueReadBuffer(m_CommandQueue[0], m_FixedImageGradientGPUBuffer, CL_TRUE, 0, 
-    nbrOfPixelsInFixedImage * 4 * sizeof(InternalRealType), cpuFixedGradientBuffer, 0, NULL, NULL);
+    nbrOfPixelsInFixedImage * 4 * sizeof(InternalRealType), cpuFixedGradientBuffer, 0, nullptr, nullptr);
   OpenCLCheckError(errid, __FILE__, __LINE__, ITK_LOCATION);
 
   errid = clFinish(m_CommandQueue[0]);
@@ -693,7 +693,7 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
 
   m_MovingImageGradientGPUBuffer = clCreateBuffer(m_Context, CL_MEM_WRITE_ONLY , 
                           4 *  sizeof(MovingImagePixelType) * nbrOfPixelsInMovingImage,
-                          NULL, &errid);
+                          nullptr, &errid);
   OpenCLCheckError(errid, __FILE__, __LINE__, ITK_LOCATION);      
 
 
@@ -785,7 +785,7 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
     } 
 
   // create N-D range object with work-item dimensions and execute kernel
-  clEnqueueNDRangeKernel(m_CommandQueue[0], m_GradientKernel, MovingImageDimension, NULL, globalSize, localSize, 0, NULL, NULL);
+  clEnqueueNDRangeKernel(m_CommandQueue[0], m_GradientKernel, MovingImageDimension, nullptr, globalSize, localSize, 0, nullptr, nullptr);
   errid = clFinish(m_CommandQueue[0]);
   OpenCLCheckError(errid, __FILE__, __LINE__, ITK_LOCATION);
 
@@ -803,8 +803,9 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
   desc.image_slice_pitch = 0;
   desc.num_mip_levels = 0;
   desc.num_samples = 0;
-  desc.buffer = NULL;
+  desc.buffer = nullptr;
 
+  m_cpuMovingGradientImageBuffer = nullptr;
   m_MovingImageGradientGPUImage = clCreateImage(m_Context,
                                   CL_MEM_READ_ONLY, &(gpu_gradient_image_format), &desc,
                                   m_cpuMovingGradientImageBuffer, &errid);
@@ -813,7 +814,7 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
   size_t origin[3] = {0, 0, 0};
   size_t region[3] = { (size_t)(imgSize[0]), (size_t)(imgSize[1]), (size_t)(imgSize[2])};
   errid = clEnqueueCopyBufferToImage(m_CommandQueue[0], m_MovingImageGradientGPUBuffer, m_MovingImageGradientGPUImage,
-                                     0, origin, region, 0, NULL, NULL );
+                                     0, origin, region, 0, nullptr, nullptr );
   errid = clFinish(m_CommandQueue[0]);
   OpenCLCheckError(errid, __FILE__, __LINE__, ITK_LOCATION);
 
@@ -880,7 +881,7 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
 
   m_gpuMetricAccum = clCreateBuffer(m_Context, CL_MEM_WRITE_ONLY | CL_MEM_ALLOC_HOST_PTR, 
                           m_Blocks * sizeof(InternalRealType),
-                          NULL, &errid);
+                          nullptr, &errid);
   OpenCLCheckError(errid, __FILE__, __LINE__, ITK_LOCATION);    
 
 
@@ -923,7 +924,7 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
 
     cl_int errid;
     errid = clEnqueueWriteBuffer(m_CommandQueue[0], m_gpuDummy, CL_TRUE, 0,
-    24 * sizeof(InternalRealType), m_cpuDummy, 0, NULL, NULL);
+    24 * sizeof(InternalRealType), m_cpuDummy, 0, nullptr, nullptr);
     OpenCLCheckError(errid, __FILE__, __LINE__, ITK_LOCATION);
 }
 
@@ -979,9 +980,9 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
     clSetKernelArg(m_OrientationMatchingKernel, argidx++, sizeof(cl_mem), (void *)&m_gpuFixedLocationSamples);
     clSetKernelArg(m_OrientationMatchingKernel, argidx++, sizeof(cl_mem), (void *)&m_MovingImageGradientGPUImage);
     clSetKernelArg(m_OrientationMatchingKernel, argidx++, sizeof(cl_mem), (void *)&m_gpuMetricAccum);
-    clSetKernelArg(m_OrientationMatchingKernel, argidx++, sizeof(InternalRealType) * m_Threads, NULL);
+    clSetKernelArg(m_OrientationMatchingKernel, argidx++, sizeof(InternalRealType) * m_Threads, nullptr);
 
-    clEnqueueNDRangeKernel(m_CommandQueue[0], m_OrientationMatchingKernel, 1, NULL, globalSize, localSize, 0, NULL, NULL);
+    clEnqueueNDRangeKernel(m_CommandQueue[0], m_OrientationMatchingKernel, 1, nullptr, globalSize, localSize, 0, nullptr, nullptr);
 
     cl_int errid;
     errid = clFinish(m_CommandQueue[0]);
@@ -989,7 +990,7 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
 
     m_cpuMetricAccum = (InternalRealType *)clEnqueueMapBuffer( m_CommandQueue[0], m_gpuMetricAccum, CL_TRUE,
                                   CL_MAP_READ, 0, m_Blocks * sizeof(InternalRealType),
-                                  0, NULL, NULL, &errid);
+                                  0, nullptr, nullptr, &errid);
     OpenCLCheckError(errid, __FILE__, __LINE__, ITK_LOCATION);
 
 
