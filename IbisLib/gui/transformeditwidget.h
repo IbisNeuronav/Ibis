@@ -16,6 +16,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 class vtkEventQtSlotConnect;
 class vtkQtMatrixDialog;
+class vtkMatrix4x4;
 class SceneObject;
 
 namespace Ui {
@@ -50,6 +51,7 @@ private:
 
 public slots:
     void UpdateUi();         // take data in transform and put it in ui
+    void TransformModified( vtkMatrix4x4 *mat );
 
 private slots:
 
