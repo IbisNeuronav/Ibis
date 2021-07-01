@@ -46,10 +46,10 @@ SequenceIOWidget::SequenceIOWidget(QWidget *parent) :
     setWindowTitle( "Export Ultrasound Sequence" );
 
     ui->ultrasoundImageOrientationComboBox->clear();
-    ui->ultrasoundImageOrientationComboBox->addItem("MN (Default)", QVariant(tr("MN")));
-    ui->ultrasoundImageOrientationComboBox->addItem("MF", QVariant(tr("MF")));
-    ui->ultrasoundImageOrientationComboBox->addItem("UN", QVariant(tr("UN")));
+    ui->ultrasoundImageOrientationComboBox->addItem("MF (Default)", QVariant(tr("MF")));
+    ui->ultrasoundImageOrientationComboBox->addItem("MN", QVariant(tr("MN")));
     ui->ultrasoundImageOrientationComboBox->addItem("UF", QVariant(tr("UF")));
+    ui->ultrasoundImageOrientationComboBox->addItem("UN", QVariant(tr("UN")));
     ui->ultrasoundImageOrientationComboBox->setCurrentIndex(0);
 }
 
@@ -201,7 +201,7 @@ bool SequenceIOWidget::ReadAcquisitionMetaData(QString filename, AcqProperties *
             {
                 if( tokens[1].trimmed().contains("U") )
                     props->flippedAxes[0] = true;
-                if( tokens[1].trimmed().contains("F") )
+                if( tokens[1].trimmed().contains("N") )
                     props->flippedAxes[1] = true;
             }
             else if( tokens[0].trimmed().contains("CalibrationTransform") )
@@ -393,28 +393,31 @@ USAcquisitionObject * SequenceIOWidget::ReadAcquisitionData(QString filename, Ac
             
         memcpy(pointer, &allFramesPixelBuffer[0] + i * frameSizeInBytes, frameSizeInBytes);
         
-        double center[3];
-        center[0] = 0.5 * (props->imageDimensions[0] - 1);
-        center[1] = 0.5 * (props->imageDimensions[1] - 1);
-        center[2] = 0.5;
+        if( (props->flippedAxes[0]) || (props->flippedAxes[1]) )
+        {
+            double center[3];
+            center[0] = 0.5 * (props->imageDimensions[0] - 1);
+            center[1] = 0.5 * (props->imageDimensions[1] - 1);
+            center[2] = 0.5;
 
-        vtkSmartPointer<vtkMatrix4x4> resliceAxes = vtkSmartPointer<vtkMatrix4x4>::New();
-        resliceAxes->Identity();
-        // Set flipped axes
-        resliceAxes->SetElement(0, 0, props->flippedAxes[0] ? -1 : 1);
-        resliceAxes->SetElement(1, 1, props->flippedAxes[1] ? -1 : 1);
-        // Set the point through which to slice
-        resliceAxes->SetElement(0, 3, center[0]);
-        resliceAxes->SetElement(1, 3, center[1]);
-        resliceAxes->SetElement(2, 3, center[2]);
+            vtkSmartPointer<vtkMatrix4x4> resliceAxes = vtkSmartPointer<vtkMatrix4x4>::New();
+            resliceAxes->Identity();
+            // Set flipped axes
+            resliceAxes->SetElement(0, 0, props->flippedAxes[0] ? -1 : 1);
+            resliceAxes->SetElement(1, 1, props->flippedAxes[1] ? -1 : 1);
+            // Set the point through which to slice
+            resliceAxes->SetElement(0, 3, center[0]);
+            resliceAxes->SetElement(1, 3, center[1]);
+            resliceAxes->SetElement(2, 3, center[2]);
 
-        // Extract a slice in the desired orientation
-        vtkSmartPointer<vtkImageReslice> reslice = vtkSmartPointer<vtkImageReslice>::New();
-        reslice->SetInputData(image);
-        reslice->SetResliceAxes(resliceAxes);
-        reslice->SetInterpolationModeToNearestNeighbor();
-        reslice->Update();
-        image = reslice->GetOutput();
+            // Extract a slice in the desired orientation
+            vtkSmartPointer<vtkImageReslice> reslice = vtkSmartPointer<vtkImageReslice>::New();
+            reslice->SetInputData(image);
+            reslice->SetResliceAxes(resliceAxes);
+            reslice->SetInterpolationModeToNearestNeighbor();
+            reslice->Update();
+            image->DeepCopy(reslice->GetOutput());
+        }
 
         if( (imageStatus[i]) || (!ui->checkImageStatusCheckBox->isChecked()))
         {
