@@ -785,9 +785,6 @@ bool FileReader::OpenTagFile( QList<SceneObject*> & readObjects, QString filenam
     return true;
 }
 
-<<<<<<< HEAD
-=======
-
 bool FileReader::GetFrameDataFromMINCFile(QString filename, vtkImageData *img , vtkMatrix4x4 *mat )
 {
     Q_ASSERT(img);
@@ -867,7 +864,6 @@ bool FileReader::GetFrameDataFromMINCFile(QString filename, vtkImageData *img , 
     return true;
 }
 
->>>>>>> Vtk opengl2 backend (#382)
 bool FileReader::GetPointsDataFromTagFile( QString filename, PointsObject *pts1, PointsObject *pts2 )
 {
     Q_ASSERT(pts1);
