@@ -169,8 +169,14 @@ public:
   using FixedImageMaskType = typename FixedImageMaskSpatialObjectType::ImageType;
   using FixedImageMaskPointer = typename FixedImageMaskType::Pointer;
 
+  using MovingImageMaskSpatialObjectType = itk::ImageMaskSpatialObject< MovingImageDimension >;
+  using MovingImageMaskSpatialObjectPointer = typename MovingImageMaskSpatialObjectType::Pointer;
+  using MovingImageMaskType = typename MovingImageMaskSpatialObjectType::ImageType;
+  using MovingImageMaskPointer = typename MovingImageMaskType::Pointer;
+
   itkSetMacro(FixedImageMaskSpatialObject, FixedImageMaskSpatialObjectPointer);
-  itkSetMacro(UseImageMask, bool)
+  itkSetMacro(MovingImageMaskSpatialObject, MovingImageMaskSpatialObjectPointer);
+  itkSetMacro(UseFixedImageMask, bool)
 
   using FixedImageMaskIteratorType = itk::ImageRegionConstIteratorWithIndex< FixedImageMaskType >;
   using FixedImageIteratorType = itk::ImageRegionConstIteratorWithIndex< FixedImageType >;
@@ -201,6 +207,7 @@ protected:
   unsigned int      m_N;
   double            m_GradientScale;
 
+  // m_ComputeMask: when true only select strong gradient magnitudes
   bool              m_ComputeMask;
   double            m_MaskThreshold;
 
@@ -267,7 +274,10 @@ protected:
   cl_uint m_NumberOfDevices, m_NumberOfPlatforms;
 
   FixedImageMaskSpatialObjectPointer     m_FixedImageMaskSpatialObject;
-  bool                                   m_UseImageMask;
+  MovingImageMaskSpatialObjectPointer    m_MovingImageMaskSpatialObject;
+
+  // m_UseImageMask: when true samples gradients from masked region in FixedImage
+  bool                                   m_UseFixedImageMask;
 
   InternalRealType *          m_cpuMovingImageBuffer;
   cl_mem                      m_MovingGPUImage;

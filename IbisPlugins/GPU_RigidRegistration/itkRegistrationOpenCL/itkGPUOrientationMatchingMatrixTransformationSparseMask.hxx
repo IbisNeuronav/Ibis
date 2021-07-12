@@ -50,7 +50,7 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
 
   m_GradientScale = 1.0;
 
-  m_ComputeMask = false;
+  m_ComputeMask = true;
   m_MaskThreshold = 0.0;
 
   m_FixedImage = nullptr;
@@ -61,8 +61,9 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
   m_Transform = nullptr;
   m_MetricValue = 0;
 
-  m_UseImageMask = false;
-  m_FixedImageMaskSpatialObject = 0;
+  m_UseFixedImageMask = false;
+  m_FixedImageMaskSpatialObject = nullptr;
+  m_MovingImageMaskSpatialObject = nullptr;
   SetSamplingStrategyToGrid();
 
   m_MovingGPUImage = nullptr;
@@ -320,7 +321,7 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
   }
 
   std::string kernelname = "SeparableNeighborOperatorFilter";
-  if((m_ComputeMask) & (!m_UseImageMask))
+  if((m_ComputeMask) & (!m_UseFixedImageMask))
   {
       kernelname = "SeparableNeighborOperatorFilterThresholder";
   }
@@ -372,7 +373,7 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
   errid = clFinish(m_CommandQueue[0]);
   OpenCLCheckError(errid, __FILE__, __LINE__, ITK_LOCATION);
 
-  if(m_UseImageMask)
+  if( m_UseFixedImageMask )
      {
      typename FixedImageMaskType::ConstPointer constFixedImage = m_FixedImageMaskSpatialObject->GetImage();
      FixedImageMaskIteratorType imageIterator( constFixedImage, constFixedImage->GetRequestedRegion() );
@@ -942,14 +943,14 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
     itkExceptionMacro(<< "Transform is not set." );
     }
 
-    if(m_UseImageMask)
+    if(m_UseFixedImageMask)
     {
     if(!m_FixedImageMaskSpatialObject)
        {
        itkWarningMacro(<< "m_FixedImageMaskSpatialObject was not found, UseImageMask is set to OFF" );
-       m_UseImageMask = false;
+       m_UseFixedImageMask = false;
        }
-    m_ComputeMask = true;
+    //m_ComputeMask = true;
     }
 
     if(!m_MovingImageGradientGPUImage)
