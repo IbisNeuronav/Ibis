@@ -682,11 +682,14 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
 
   cl_int errid;
 
-  typedef typename MovingImageMaskType::PixelType    MovingImageMaskPixelType;
-  m_MovingImageMaskGPUBuffer = clCreateBuffer(m_Context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
-      sizeof(MovingImageMaskPixelType) * nbrOfPixelsInMovingImage,
-      (MovingImageMaskPixelType *) m_MovingImageMaskSpatialObject->GetImage()->GetBufferPointer(), &errid);
-  OpenCLCheckError(errid, __FILE__, __LINE__, ITK_LOCATION);
+  if( m_UseMovingImageMask )
+  {
+      typedef typename MovingImageMaskType::PixelType    MovingImageMaskPixelType;
+      m_MovingImageMaskGPUBuffer = clCreateBuffer(m_Context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
+          sizeof(MovingImageMaskPixelType) * nbrOfPixelsInMovingImage,
+          (MovingImageMaskPixelType *)m_MovingImageMaskSpatialObject->GetImage()->GetBufferPointer(), &errid);
+      OpenCLCheckError(errid, __FILE__, __LINE__, ITK_LOCATION);
+  }
 
   m_MovingImageGPUBuffer = clCreateBuffer(m_Context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
                           sizeof(MovingImagePixelType)*nbrOfPixelsInMovingImage,
@@ -989,6 +992,9 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
           std::cout << "Preparing to Compute Gradients.." << std::endl;
        this->ComputeFixedImageGradient();
        this->ComputeMovingImageGradient();
+       {
+           // TODOMamarz: add test code here
+       }
     }
 
     if(m_TransformMatrix == m_Transform->GetMatrix() && m_TransformOffset == m_TransformOffset)
