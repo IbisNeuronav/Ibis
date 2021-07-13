@@ -176,10 +176,14 @@ public:
 
   itkSetMacro(FixedImageMaskSpatialObject, FixedImageMaskSpatialObjectPointer);
   itkSetMacro(MovingImageMaskSpatialObject, MovingImageMaskSpatialObjectPointer);
-  itkSetMacro(UseFixedImageMask, bool)
+  itkSetMacro(UseFixedImageMask, bool);
+  itkSetMacro(UseMovingImageMask, bool);
 
   using FixedImageMaskIteratorType = itk::ImageRegionConstIteratorWithIndex< FixedImageMaskType >;
   using FixedImageIteratorType = itk::ImageRegionConstIteratorWithIndex< FixedImageType >;
+  
+  using MovingImageMaskIteratorType = itk::ImageRegionConstIteratorWithIndex< MovingImageMaskType >;
+  using MovingImageIteratorType = itk::ImageRegionConstIteratorWithIndex< MovingImageType >;
 
   void Update(void);
 
@@ -230,7 +234,7 @@ protected:
   cl_mem                      m_MovingImageGradientGPUBuffer;
   cl_mem                      m_MovingImageGradientGPUImage;
 
-  cl_mem                      m_MaskImageGPUBuffer;
+  cl_mem                      m_MovingImageMaskGPUBuffer;
 
   InternalRealType              m_MetricValue;
 
@@ -276,8 +280,10 @@ protected:
   FixedImageMaskSpatialObjectPointer     m_FixedImageMaskSpatialObject;
   MovingImageMaskSpatialObjectPointer    m_MovingImageMaskSpatialObject;
 
-  // m_UseImageMask: when true samples gradients from masked region in FixedImage
+  // m_UseFixedImageMask: when true samples gradients from masked region in FixedImage
   bool                                   m_UseFixedImageMask;
+  // m_UseMovingImageMask: when true samples gradients from masked region in MovingImage
+  bool                                   m_UseMovingImageMask;
 
   InternalRealType *          m_cpuMovingImageBuffer;
   cl_mem                      m_MovingGPUImage;

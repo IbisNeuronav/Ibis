@@ -252,7 +252,7 @@ public:
           if (m_FixedSpatialObjectImageMask)
              {
              m_GPUOrientationMetric->SetFixedImageMaskSpatialObject(m_FixedSpatialObjectImageMask);
-             m_GPUOrientationMetric->SetUseImageMask(true);
+             m_GPUOrientationMetric->SetUseFixedImageMask(true);
              }
           m_GPUOrientationMetric->SetSamplingStrategy(m_OrientationSamplingStrategy);
           m_GPUOrientationMetric->SetNumberOfPixels( m_OrientationNumberOfPixels );

@@ -221,7 +221,7 @@ void GPU_RigidRegistration::runRegistration()
     {
         *this->m_debugStream << "Using mask" << std::endl;
         metric->SetFixedImageMaskSpatialObject(m_targetSpatialObjectMask);
-        metric->SetUseImageMask(true);
+        metric->SetUseFixedImageMask(true);
     }
 
     // Initialize Transform

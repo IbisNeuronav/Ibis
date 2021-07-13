@@ -682,6 +682,12 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
 
   cl_int errid;
 
+  typedef typename MovingImageMaskType::PixelType    MovingImageMaskPixelType;
+  m_MovingImageMaskGPUBuffer = clCreateBuffer(m_Context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
+      sizeof(MovingImageMaskPixelType) * nbrOfPixelsInMovingImage,
+      (MovingImageMaskPixelType *) m_MovingImageMaskSpatialObject->GetImage()->GetBufferPointer(), &errid);
+  OpenCLCheckError(errid, __FILE__, __LINE__, ITK_LOCATION);
+
   m_MovingImageGPUBuffer = clCreateBuffer(m_Context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
                           sizeof(MovingImagePixelType)*nbrOfPixelsInMovingImage,
                           m_MovingImage->GetBufferPointer(), &errid);
@@ -738,12 +744,21 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
 
   if(m_ComputeMask)
     {
-      clReleaseKernel(m_GradientKernel);
-      m_GradientKernel = CreateKernelFromString(GPUDiscreteGaussianGradientImageFilter,
-                                                          "#define DIM_3\n", "SeparableNeighborOperatorFilter","");
-
+      if( m_UseMovingImageMask )
+        {
+          clReleaseKernel(m_GradientKernel);
+          m_GradientKernel = CreateKernelFromString(GPUDiscreteGaussianGradientImageFilter, 
+              "#define DIM_3\n", "SeparableNeighborOperatorFilterWithMask", "");
+        }
+      else
+        {
+        clReleaseKernel(m_GradientKernel);
+        m_GradientKernel = CreateKernelFromString(GPUDiscreteGaussianGradientImageFilter, 
+            "#define DIM_3\n", "SeparableNeighborOperatorFilter", "");
+        }
     }
 
+  
 
   int radius[3];  
   radius[0] = radius[1] = radius[2] = 0;
@@ -761,6 +776,12 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
 
   int argidx = 0;
   clSetKernelArg(m_GradientKernel, argidx++, sizeof(cl_mem), (void *)&m_MovingImageGPUBuffer);
+
+  if( m_UseMovingImageMask )
+    {
+    clSetKernelArg(m_GradientKernel, argidx++, sizeof(cl_mem), (void *)&m_MovingImageMaskGPUBuffer);
+    }
+
   clSetKernelArg(m_GradientKernel, argidx++, sizeof(cl_mem), (void *)&m_MovingImageGradientGPUBuffer);
 
   for(int i=0; i<MovingImageDimension; i++)
@@ -835,6 +856,7 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
   defines2 << "#define SEL " << m_N << std::endl;
   defines2 << "#define N " << m_Blocks * m_Threads << std::endl;
   defines2 << "#define LOCALSIZE " << m_Threads << std::endl;
+  defines2 << "#define USEMASK " << m_UseMovingImageMask << std::endl;
 
   m_OrientationMatchingKernel = CreateKernelFromString( GPUOrientationMatchingMatrixTransformationSparseMaskKernel,  
     defines2.str().c_str(), "OrientationMatchingMetricSparseMask","");  
@@ -945,12 +967,20 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
 
     if(m_UseFixedImageMask)
     {
-    if(!m_FixedImageMaskSpatialObject)
+       if(!m_FixedImageMaskSpatialObject)
        {
-       itkWarningMacro(<< "m_FixedImageMaskSpatialObject was not found, UseImageMask is set to OFF" );
-       m_UseFixedImageMask = false;
+           itkWarningMacro(<< "m_FixedImageMaskSpatialObject was not found, UseFixedImageMask is set to OFF" );
+           m_UseFixedImageMask = false;
        }
-    //m_ComputeMask = true;
+    }
+
+    if( m_UseMovingImageMask )
+    {
+        if( !m_MovingImageMaskSpatialObject )
+        {
+            itkWarningMacro(<< "m_MovingImageMaskSpatialObject was not found, UseMovingImageMask is set to OFF");
+            m_UseMovingImageMask = false;
+        }
     }
 
     if(!m_MovingImageGradientGPUImage)
