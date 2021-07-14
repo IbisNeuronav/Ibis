@@ -38,7 +38,7 @@ View::View()
 {
     this->Name = "";
     this->SetName( DefaultViewNames[THREED_VIEW_TYPE] );
-    this->RenderWidget = 0;
+    this->RenderWidget = nullptr;
     this->m_renderingEnabled = true;
     this->InteractorStyle = vtkSmartPointer<vtkInteractorStyleTerrain>::New();
     this->Picker = vtkCellPicker::New();
@@ -56,7 +56,7 @@ View::View()
     this->OverlayRenderer2 = vtkSmartPointer<vtkRenderer>::New();
     this->OverlayRenderer2->SetLayer( 2 );
     this->OverlayRenderer2->SetActiveCamera( this->Renderer->GetActiveCamera() ); // use same camera as main renderer
-    this->Manager = 0;
+    this->Manager = nullptr;
     this->PrevViewingTransform = vtkSmartPointer<vtkMatrix4x4>::New();
     this->PrevViewingTransform->Identity();
     this->EventObserver = vtkSmartPointer<vtkEventQtSlotConnect>::New();
@@ -68,8 +68,8 @@ View::View()
     m_leftButtonDown = false;
     m_middleButtonDown = false;
     m_rightButtonDown = false;
-    m_backupWindowParent = 0;
-    CurrentController = 0;
+    m_backupWindowParent = nullptr;
+    CurrentController = nullptr;
 }
 
 
