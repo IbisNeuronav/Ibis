@@ -163,7 +163,7 @@ public:
     // Getting data from files
     bool GetPointsFromTagFile(QString fileName, PointsObject *pts1, PointsObject *pts2 );
 
-    // Dwtting US Acquisitions
+    // Getting US Acquisitions
     int GetNumberOfComponents( QString filename );
     bool GetGrayFrame( QString filename, IbisItkUnsignedChar3ImageType::Pointer itkImage );
     bool GetRGBFrame( QString filename, IbisRGBImageType::Pointer itkImage );
