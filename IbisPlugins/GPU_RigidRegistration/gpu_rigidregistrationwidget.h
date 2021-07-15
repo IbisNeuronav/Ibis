@@ -53,7 +53,6 @@ private:
 
     Ui::GPU_RigidRegistrationWidget * ui;
     GPU_RigidRegistrationPluginInterface * m_pluginInterface;
-    GPU_RigidRegistration * m_rigidRegistrator;
     QElapsedTimer m_registrationTimer;
     bool          m_OptimizationRunning;
 

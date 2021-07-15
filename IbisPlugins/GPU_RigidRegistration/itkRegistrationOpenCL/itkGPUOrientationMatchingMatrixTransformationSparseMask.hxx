@@ -62,6 +62,7 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
   m_MetricValue = 0;
 
   m_UseFixedImageMask = false;
+  m_UseMovingImageMask = false;
   m_FixedImageMaskSpatialObject = nullptr;
   m_MovingImageMaskSpatialObject = nullptr;
   SetSamplingStrategyToGrid();
