@@ -119,7 +119,7 @@ endif()
 
 
 # define version and build info
-set( IBIS_MAJOR_VERSION 3 )
+set( IBIS_MAJOR_VERSION 4 )
 set( IBIS_MINOR_VERSION 0 )
 set( IBIS_PATCH_VERSION 0 )
 set( IBIS_VERSION_QUALIFIER "Dev" )                    # Dev, Alpha, Beta or nothing for official releases
