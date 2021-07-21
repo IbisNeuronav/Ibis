@@ -13,10 +13,10 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef __itkGPU3DRigidSimilarityWeightMetric_h__
 #define __itkGPU3DRigidSimilarityWeightMetric_h__
 
-#include "itkEuler3DTransform.h"
+#include <itkEuler3DTransform.h>
 #include "itkGPUWeightMatchingMatrixTransformationSparseMask.h"
 #include "itkGPUOrientationMatchingMatrixTransformationSparseMask.h"
-#include "itkSingleValuedCostFunction.h"
+#include <itkSingleValuedCostFunction.h>
 
 namespace itk
 {

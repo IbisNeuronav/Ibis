@@ -70,7 +70,6 @@ protected:
     ~vtkIbisImagePlaneMapper();
 
     virtual int FillInputPortInformation(int, vtkInformation*) override;
-    void LoadOpenGLExtensions( vtkRenderWindow * window );
     void UpdateTexture();
     bool UpdateShader();
     vtkImageData * GetInput();
@@ -79,7 +78,6 @@ protected:
     vtkTimeStamp   LastInputTimeStamp;
     unsigned       TextureId;
     GlslShader   * Shader;
-    bool           OpenGLExtensionsLoaded;
     double GlobalOpacity;
     double ImageCenter[2];
     double LensDistortion;

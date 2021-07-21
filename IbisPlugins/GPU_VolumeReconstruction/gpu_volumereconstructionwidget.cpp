@@ -154,6 +154,9 @@ void GPU_VolumeReconstructionWidget::on_startButton_clicked()
     std::cerr << "Constructing m_Reconstructor...DONE" << std::endl;
 #endif
 
+    // Disable rendering while reconstructing
+    ibisAPI->SetRenderingEnabled(false);
+
     vtkSmartPointer<vtkMatrix4x4> sliceTransformMatrix = vtkSmartPointer<vtkMatrix4x4>::New() ;
     vtkSmartPointer<vtkImageData> slice = vtkSmartPointer<vtkImageData>::New();
     for(unsigned int i=0; i<nbrOfSlices; i++)
@@ -169,6 +172,9 @@ void GPU_VolumeReconstructionWidget::on_startButton_clicked()
 #endif   
 
     m_VolumeReconstructor->start();
+
+    // re-enable rendering after reconstruction
+    ibisAPI->SetRenderingEnabled(true);
 }
 
 void GPU_VolumeReconstructionWidget::UpdateUi()

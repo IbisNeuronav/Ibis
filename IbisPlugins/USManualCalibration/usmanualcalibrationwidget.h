@@ -53,6 +53,7 @@ private slots:
     void OnManipulatorsModified();
     void on_freezeVideoButton_toggled(bool checked);
     void on_resetButton_clicked();
+    void on_depthComboBox_currentIndexChanged(int);
 
 private:
 

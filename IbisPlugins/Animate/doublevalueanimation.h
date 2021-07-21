@@ -48,6 +48,7 @@ class DoubleValueAnimation : public Animation<DoubleValueKey>
 public:
 
     DoubleValueAnimation();
+    virtual ~DoubleValueAnimation() {}
 
     void Serialize( Serializer * ser );
 };

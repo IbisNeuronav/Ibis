@@ -17,12 +17,10 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QDir>
 #include <QUrl>
 #include <QDateTime>
-#include <vtkqtrenderwindow.h>
 #include <vtkOpenGLRenderWindow.h>
-#include <vtkgl.h>
+#include <vtk_glew.h>
 #include <vtkImageImport.h>
 #include <vtkPNGWriter.h>
-#include <vtkOpenGLExtensionManager.h>
 #include <vtkRenderer.h>
 #include "vtkOffscreenCamera.h"
 #include "ibisapi.h"
@@ -103,15 +101,11 @@ void OffscreenRenderer::RenderAnimation()
 void OffscreenRenderer::Setup()
 {
     //-------------------------------
-    // Initialize GL and Make GL context current
+    // Make GL context current
     //-------------------------------
-    vtkOpenGLRenderWindow * win = vtkOpenGLRenderWindow::SafeDownCast( m_animate->GetIbisAPI()->GetMain3DView()->GetQtRenderWindow()->GetRenderWindow() );
+    vtkRenderer *ren = m_animate->GetIbisAPI()->GetMain3DView()->GetRenderer();
+    vtkOpenGLRenderWindow * win = vtkOpenGLRenderWindow::SafeDownCast( ren->GetRenderWindow() );
     Q_ASSERT( win );
-    if( !m_glInit )
-    {
-        LoadGlExtensions( win );
-        m_glInit = true;
-    }
     win->SetForceMakeCurrent();
     win->MakeCurrent();
 
@@ -120,8 +114,8 @@ void OffscreenRenderer::Setup()
     //-------------------------------
 
     // Create and bind frame buffer object
-    vtkgl::GenFramebuffersEXT( 1, &m_fbId );
-    vtkgl::BindFramebufferEXT( vtkgl::FRAMEBUFFER_EXT, m_fbId );
+    glGenFramebuffersEXT( 1, &m_fbId );
+    glBindFramebufferEXT( GL_FRAMEBUFFER_EXT, m_fbId );
 
     // Create and initialize texture
     glGenTextures( 1, &m_textureId );
@@ -135,20 +129,20 @@ void OffscreenRenderer::Setup()
     glBindTexture( GL_TEXTURE_2D, 0 );
 
     // Attach one of the faces of the Cubemap texture to this FBO
-    vtkgl::FramebufferTexture2DEXT( vtkgl::FRAMEBUFFER_EXT, vtkgl::COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, m_textureId, 0 );
+    glFramebufferTexture2DEXT( GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, m_textureId, 0 );
 
     // Create and bind depth buffer used for all faces of the cube and attach it to FBO
-    vtkgl::GenRenderbuffersEXT( 1, &m_depthId );
-    vtkgl::BindRenderbufferEXT( vtkgl::RENDERBUFFER_EXT, m_depthId );
-    vtkgl::RenderbufferStorageEXT( vtkgl::RENDERBUFFER_EXT, vtkgl::DEPTH_COMPONENT24, m_renderSize[0], m_renderSize[1] );
-    vtkgl::BindRenderbufferEXT( vtkgl::RENDERBUFFER_EXT, 0 );
+    glGenRenderbuffersEXT( 1, &m_depthId );
+    glBindRenderbufferEXT( GL_RENDERBUFFER_EXT, m_depthId );
+    glRenderbufferStorageEXT( GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT24, m_renderSize[0], m_renderSize[1] );
+    glBindRenderbufferEXT( GL_RENDERBUFFER_EXT, 0 );
 
     // Attach depth render buffer to the FBO
-    vtkgl::FramebufferRenderbufferEXT( vtkgl::FRAMEBUFFER_EXT, vtkgl::DEPTH_ATTACHMENT_EXT, vtkgl::RENDERBUFFER_EXT, m_depthId );
+    glFramebufferRenderbufferEXT( GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, m_depthId );
 
     // Check if FBO is complete and config supported by system
-    GLenum ret = vtkgl::CheckFramebufferStatusEXT( vtkgl::FRAMEBUFFER_EXT );
-    if( ret != vtkgl::FRAMEBUFFER_COMPLETE_EXT )
+    GLenum ret = glCheckFramebufferStatusEXT( GL_FRAMEBUFFER_EXT );
+    if( ret != GL_FRAMEBUFFER_COMPLETE_EXT )
     {
         std::cerr << "Render Snapshot: couldn't initialize framebuffer" << std::endl;
     }
@@ -158,7 +152,6 @@ void OffscreenRenderer::Setup()
     //-------------------------------
     m_cam = vtkOffscreenCamera::New();
     m_cam->SetRenderSize( m_renderSize );
-    vtkRenderer * ren = m_animate->GetIbisAPI()->GetMain3DView()->GetRenderer();
     m_backupCam = ren->GetActiveCamera();
     m_cam->DeepCopy( m_backupCam );
     ren->SetActiveCamera( m_cam );
@@ -211,16 +204,16 @@ void OffscreenRenderer::Cleanup()
     m_backupCam = 0;
     m_cam->Delete();
     m_cam = 0;
-    vtkgl::BindFramebufferEXT( vtkgl::FRAMEBUFFER_EXT, 0 );
+    glBindFramebufferEXT( GL_FRAMEBUFFER_EXT, 0 );
 
     delete[] m_openglRawImage;
     m_openglRawImage = 0;
 
     glDeleteTextures( 1, &m_textureId );
     m_textureId = 0;
-    vtkgl::DeleteFramebuffersEXT( 1, &m_fbId );
+    glDeleteFramebuffersEXT( 1, &m_fbId );
     m_fbId = 0;
-    vtkgl::DeleteRenderbuffersEXT( 1, &m_depthId );
+    glDeleteRenderbuffersEXT( 1, &m_depthId );
     m_depthId = 0;
     m_importer->Delete();
     m_importer = 0;
@@ -228,31 +221,3 @@ void OffscreenRenderer::Cleanup()
     m_writer = 0;
 }
 
-bool OffscreenRenderer::LoadGlExtensions( vtkOpenGLRenderWindow * win )
-{
-    vtkOpenGLExtensionManager * man = win->GetExtensionManager();
-
-    bool canLoad = true;
-    if( !man->ExtensionSupported("GL_VERSION_2_0") )
-    {
-        canLoad = false;
-        std::cerr << "DomeRenderer: OpenGL 2.0 required but not supported" << std::endl;
-    }
-
-    if( !man->ExtensionSupported("GL_EXT_framebuffer_object" ) )
-    {
-        canLoad = false;
-        std::cerr << "DomeRenderer: GL_EXT_framebuffer_object is required but not supported" << std::endl;
-    }
-
-    // Really load now that we know everything is supported
-    if( canLoad )
-    {
-        man->LoadExtension( "GL_VERSION_1_2" );
-        man->LoadExtension( "GL_VERSION_1_3" );
-        man->LoadExtension( "GL_VERSION_2_0" );
-        man->LoadExtension( "GL_EXT_framebuffer_object" );
-    }
-
-    return canLoad;
-}

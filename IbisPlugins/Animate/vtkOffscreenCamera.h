@@ -28,13 +28,13 @@ public:
 
     static vtkOffscreenCamera *New();
     vtkTypeMacro(vtkOffscreenCamera,vtkCamera);
-    virtual void PrintSelf(ostream& os, vtkIndent indent);
+    virtual void PrintSelf(ostream& os, vtkIndent indent) override;
 
     // Description:
     // Implement base class method.
-    void Render(vtkRenderer *ren);
+    void Render(vtkRenderer *ren) override;
 
-    void UpdateViewport(vtkRenderer *ren);
+    void UpdateViewport(vtkRenderer *ren) override;
 
     vtkSetVector2Macro( RenderSize, int );
     vtkGetVector2Macro( RenderSize, int );

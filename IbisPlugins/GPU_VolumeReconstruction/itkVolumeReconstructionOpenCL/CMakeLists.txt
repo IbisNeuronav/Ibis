@@ -6,10 +6,8 @@ SET( IBIS_ITK_VOLUME_RECONSTRUCTION_OPENCL_SRC
 )
 
 SET( IBIS_ITK_VOLUME_RECONSTRUCTION_OPENCL_HDR
-  	itkGPUVolumeReconstruction.h 
+  	itkGPUVolumeReconstruction.h
 )
-
-set( LibCL GPUVolumeReconstructionKernel )
 
 #================================
 # Create custom commands to
@@ -17,18 +15,17 @@ set( LibCL GPUVolumeReconstructionKernel )
 # C string literal in a header
 # file.
 #================================
-foreach( file ${LibCL} )
-  set( clKernel_src ${CMAKE_CURRENT_SOURCE_DIR}/${file}.cl )
-  set( clKernel_cxx ${CMAKE_CURRENT_BINARY_DIR}/${file}.cxx )
-  set( clKernel_h ${CMAKE_CURRENT_BINARY_DIR}/${file}.h )
-  add_custom_command(
-    OUTPUT ${clKernel_cxx} ${clKernel_h}
-    DEPENDS ${clKernel_src}
-    COMMAND ${VTK_ENCODESTRING_EXE}
-    ARGS ${clKernel_cxx} ${clKernel_src} ${file} --build-header " " vtkSystemIncludes.h )
-  set( LibCLSrc ${LibCLSrc} ${clKernel_src} ${clKernel_h} ${clKernel_cxx} )
-  set( LibCLHdr ${LibCLHdr} ${clKernel_h} )
-endforeach(file)
+set( LibCL GPUVolumeReconstructionKernel.cl )
+set( LibCLSrc )
+set( LibCLHdr )
+foreach (shader_file IN LISTS LibCL)
+  vtk_encode_string(
+    INPUT         "${shader_file}"
+    HEADER_OUTPUT clKernel_h
+    SOURCE_OUTPUT clKernel_cxx)
+  list(APPEND LibCLSrc ${clKernel_cxx})
+  list(APPEND LibCLHdr ${clKernel_h})
+endforeach ()
 
 #================================
 # Define output
@@ -45,5 +42,4 @@ target_link_libraries( itkVolumeReconstructionOpenCL ${ITK_LIBRARIES}  ${OPENCL_
 # dependent projects
 #================================
 target_include_directories( itkVolumeReconstructionOpenCL PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR} ${OPENCL_INCLUDE_DIRS} )
-
 

@@ -20,7 +20,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QFileDialog>
 
 // VTK includes
-#include <QVTKWidget.h>
+#include <QVTKRenderWidget.h>
 #include <vtkImageData.h>
 #include <vtkImageSlice.h>
 #include <vtkImageSliceMapper.h>
@@ -98,7 +98,7 @@ public:
     explicit ScrewNavigationWidget(std::vector<Screw *> plannedScrews=std::vector<Screw *>(), QWidget *parent=0);
     ~ScrewNavigationWidget();
 
-    void SetPluginInterface( PedicleScrewNavigationPluginInterface * interface);
+    void SetPluginInterface( PedicleScrewNavigationPluginInterface * );
     void Navigate();
     void StopNavigation();
 

@@ -17,6 +17,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "mainwindow.h"
 #include "commandlinearguments.h"
 #include <vtkObject.h>
+#include <QVTKRenderWidget.h>
 
 int main( int argc, char** argv )
 {
@@ -25,13 +26,16 @@ int main( int argc, char** argv )
     vtkObject::SetGlobalWarningDisplay( 0 );
 #endif
 
+    // Set default format for render windows - Warning: has to be done before QApplication instanciation
+    QSurfaceFormat::setDefaultFormat(QVTKRenderWidget::defaultFormat());
+
     // Create Qt app
     QApplication a( argc, argv );
     Q_INIT_RESOURCE(IbisLib);
 
     // Warning : IBIS IS NOT APPROVED FOR CLINICAL USE.
     if( !QFile::exists( QDir::homePath() + QString("/.ibis/no-clinical-warning.txt")  ) )
-        QMessageBox::warning( 0, "WARNING!", QString("The Ibis platform is not approved for clinical use.") );
+        QMessageBox::warning( nullptr, "WARNING!", QString("The Ibis platform is not approved for clinical use.") );
 	
 	// On Mac, we always do Viewer-mode only without command-line params for now
     // Parse command-line arguments

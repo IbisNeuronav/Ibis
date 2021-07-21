@@ -13,18 +13,18 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef __itkGPUWeightMatchingMatrixTransformationSparseMask_hxx
 #define __itkGPUWeightMatchingMatrixTransformationSparseMask_hxx
 
-#include "itkMacro.h"
+#include <itkMacro.h>
 #include "itkGPUWeightMatchingMatrixTransformationSparseMask.h"
-#include "itkTimeProbe.h"
-#include "itkMatrix.h"
-#include "vnl/vnl_matrix.h"
-#include "vnl/vnl_vector.h"
-#include "itkGaussianDerivativeOperator.h"
-#include "itkOpenCLUtil.h"
+#include <itkTimeProbe.h>
+#include <itkMatrix.h>
+#include <vnl/vnl_matrix.h>
+#include <vnl/vnl_vector.h>
+#include <itkGaussianDerivativeOperator.h>
+#include <itkOpenCLUtil.h>
 
 #include "GPUWeightMatchingMatrixTransformationSparseMaskKernel.h"
 
-#include "itkLinearInterpolateImageFunction.h"
+#include <itkLinearInterpolateImageFunction.h>
 
 
 namespace itk

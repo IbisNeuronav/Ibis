@@ -15,7 +15,8 @@ ExternalProject_Add( ${vtk_name}
                -DBUILD_SHARED_LIBS:BOOL=FALSE
                -DCMAKE_CXX_FLAGS:STRING=-fPIC
                -DVTK_QT_VERSION:STRING=5
-               -DModule_vtkGUISupportQt:BOOL=ON
+               -DVTK_MODULE_ENABLE_VTK_GUISupportQt:STRING=YES
+               -DVTK_MODULE_ENABLE_VTK_hdf5:STRING=NO  # hdf5 doesn't build with XCode 12 compiler, could be re-enabled later, but not needed
                -DQt5_DIR:PATH=${Qt5_DIR}
                -DVTK_LEGACY_SILENT:BOOL=ON
                -DVTK_RENDERING_BACKEND:STRING=OpenGL )

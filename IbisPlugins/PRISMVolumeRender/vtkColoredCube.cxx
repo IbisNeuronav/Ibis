@@ -14,30 +14,29 @@
 =========================================================================*/
 #include "vtkColoredCube.h"
 
-#include <vtkTessellatedBoxSource.h>
-#include <vtkClipConvexPolyData.h>
-#include <vtkPlane.h>
-#include <vtkPlaneCollection.h>
-#include <vtkTriangleFilter.h>
-#include <vtkPolyDataMapper.h>
-#include <vtkRenderer.h>
-#include <vtkCamera.h>
-#include <vtkMatrix4x4.h>
-#include <vtkMath.h>
-#include <vtkObjectFactory.h>  // for vtkStandardNewMacro
-#include <vtkNew.h>
-#include <vtkUnsignedIntArray.h>
-#include <vtkPointData.h>
-#include <vtkCellArray.h>
-#include <vtkOpenGL.h>
-#include <vtkSmartPointer.h>
+#include "vtk_glew.h"
+#include "vtkTessellatedBoxSource.h"
+#include "vtkClipConvexPolyData.h"
+#include "vtkPlane.h"
+#include "vtkPlaneCollection.h"
 #include "vtkColorPolyData.h"
+#include "vtkTriangleFilter.h"
+#include "vtkUnsignedIntArray.h"
+#include "vtkPointData.h"
+#include "vtkCamera.h"
+#include "vtkRenderer.h"
+#include "vtkMatrix4x4.h"
 
 vtkStandardNewMacro(vtkColoredCube);
 
 //----------------------------------------------------------------------------
 vtkColoredCube::vtkColoredCube()
 {
+    this->Vao = 0;
+    this->VertexBuffer = 0;
+    this->ColorBuffer = 0;
+    this->IndicesBuffer = 0;
+
     this->Cropping = 0;
 
     for ( int i = 0; i < 3; i++ )
@@ -165,28 +164,89 @@ GLenum vtkDataTypeToGlEnum( int vtkDataType )
     return res;
 }
 
+#include "vtkOpenGLError.h"
+
 //----------------------------------------------------------------------------
 void vtkColoredCube::Render()
 {
   vtkPolyData * cubePoly = vtkPolyData::SafeDownCast( BoxTriangles->GetOutput() );
 
-  // Vertices
-  vtkPoints * points = cubePoly->GetPoints();
-  glEnableClientState( GL_VERTEX_ARRAY );
-  GLenum vertexType = vtkDataTypeToGlEnum( points->GetDataType() );
-  glVertexPointer( 3, vertexType, 0, points->GetData()->GetVoidPointer(0) );
+  // Create vertex attribute and triangle buffers if they don't already exist
+  if( VertexBuffer == 0 )
+  {
+      glGenBuffers(1, &VertexBuffer);
+      glGenBuffers(1, &ColorBuffer);
+      glGenBuffers(1, &IndicesBuffer);
+  }
 
-  // Colors
+  // Put the data into the buffers (if different data every frame)
+  glBindBuffer( GL_ARRAY_BUFFER, VertexBuffer);
+  vtkDataArray * points = cubePoly->GetPoints()->GetData();
+  GLsizeiptr pointSize = points->GetDataSize() * points->GetDataTypeSize();
+  glBufferData( GL_ARRAY_BUFFER, pointSize, points->GetVoidPointer(0), GL_STREAM_DRAW );
+
+  glBindBuffer( GL_ARRAY_BUFFER, ColorBuffer);
   vtkDataArray * colors = cubePoly->GetPointData()->GetScalars();
-  glEnableClientState( GL_COLOR_ARRAY );
-  glColorPointer( 3, GL_UNSIGNED_BYTE, 0, colors->GetVoidPointer(0) );
+  GLsizeiptr colorSize = points->GetDataSize() * points->GetDataTypeSize();
+  glBufferData( GL_ARRAY_BUFFER, colorSize, colors->GetVoidPointer(0), GL_STREAM_DRAW );
+
+  glBindBuffer( GL_ELEMENT_ARRAY_BUFFER, IndicesBuffer);
+  GLsizeiptr indicesSize = BoxIndices->GetDataSize() * BoxIndices->GetDataTypeSize();
+  glBufferData( GL_ELEMENT_ARRAY_BUFFER, indicesSize, BoxIndices->GetVoidPointer(0), GL_STREAM_DRAW );
+
+  // Create vertex array object if it doesn't exist already
+  if( this->Vao == 0 )
+  {
+      glGenVertexArrays( 1, &(this->Vao) );
+      glBindVertexArray( this->Vao );
+
+      // Vertices
+      glEnableVertexAttribArray( 0 );  // by convention, shaders in Ibis bind index 0 attribute array in_vertex
+      GLenum vertexType = vtkDataTypeToGlEnum( points->GetDataType() );
+      glVertexAttribPointer( 0, 3, vertexType, GL_FALSE, 0, static_cast<void*>(nullptr) );
+
+      // Colors
+      glEnableVertexAttribArray( 1 );  // by convention, shaders in Ibis bind index 1 attribute array in_color
+      glVertexAttribPointer( 1, 3, GL_UNSIGNED_BYTE, GL_FALSE, 0, static_cast<void*>(nullptr) );
+
+  }
+  else
+  {
+      glBindVertexArray( this->Vao );
+  }
+
+  // can this be done in the vao?
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, IndicesBuffer);
 
   // Draw Triangles
-  glDrawElements( GL_TRIANGLES, BoxIndices->GetDataSize(), GL_UNSIGNED_INT, BoxIndices->GetVoidPointer(0) );
+  glDrawElements( GL_TRIANGLES, BoxIndices->GetDataSize(), GL_UNSIGNED_INT, static_cast<void*>(nullptr) );
 
-  // Restore previous state
-  glDisableClientState( GL_VERTEX_ARRAY );
-  glDisableClientState( GL_COLOR_ARRAY );
+  // unbind vertex array
+  glBindVertexArray( 0 );
+}
+
+void vtkColoredCube::ReleaseGraphicsResources(vtkWindow *)
+{
+    if( this->Vao )
+    {
+        glDeleteVertexArrays( 1, &(this->Vao) );
+        this->Vao = 0;
+    }
+    if( this->VertexBuffer )
+    {
+        glDeleteBuffers( 1, &this->VertexBuffer );
+        this->VertexBuffer = 0;
+    }
+    if( this->ColorBuffer )
+    {
+        glDeleteBuffers( 1, &this->ColorBuffer );
+        this->ColorBuffer = 0;
+    }
+    if( this->IndicesBuffer )
+    {
+        glDeleteBuffers( 1, &this->IndicesBuffer );
+        this->IndicesBuffer = 0;
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -271,7 +331,7 @@ void vtkColoredCube::UpdateGeometry( vtkRenderer * ren, vtkMatrix4x4  *mat )
     vtkCellArray * cells = cubePoly->GetPolys();
     BoxIndices->SetNumberOfTuples( 0 );
     vtkIdType npts;
-    vtkIdType *pts;
+    const vtkIdType *pts;
     cells->InitTraversal();
     while(cells->GetNextCell(npts, pts))
     {

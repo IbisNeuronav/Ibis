@@ -14,7 +14,9 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "ui_frameratetesterwidget.h"
 #include "frameratetesterplugininterface.h"
 #include "ibisapi.h"
-#include "vtkqtrenderwindow.h"
+#include <vtkRenderer.h>
+#include <vtkRenderWindow.h>
+#include <QVTKRenderWidget.h>
 #include <QSize>
 #include <QMap>
 #include <QComboBox>
@@ -57,7 +59,12 @@ void FrameRateTesterWidget::UpdateUi()
 
     // View size
     View * v = m_pluginInterface->GetIbisAPI()->GetViewByID( m_pluginInterface->GetCurrentViewID() );
-    QSize s = v->GetQtRenderWindow()->size();
+    vtkRenderer *ren = v->GetRenderer();
+    vtkRenderWindow * win = vtkRenderWindow::SafeDownCast( ren->GetRenderWindow() );
+    QSize s;
+    s.setWidth( win->GetSize()[0] );
+
+    s.setHeight( win->GetSize()[1] );
     ui->windowSizeLabel->setText( QString("Size : %1 x %2").arg( s.width() ).arg( s.height() ) );
 
     // Run button

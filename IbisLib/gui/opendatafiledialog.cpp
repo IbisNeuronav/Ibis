@@ -33,7 +33,7 @@ OpenDataFileDialog::~OpenDataFileDialog()
 
 void OpenDataFileDialog::BrowsePushButtonClicked()
 {
-    QString filter = tr("All valid files(*.mnc *.mnc2 *.mnc.gz *.MNC *.MNC2 *.MNC.GZ *.nii *.obj *.ply *.tag *.vtk *.vtp);;Minc file (*.mnc *.mnc2 *.mnc.gz *.MNC *.MNC2 *.MNC.GZ);;Nifti file (*.nii);;Object file (*.obj);;PLY file (*.ply);;Tag file (*.tag);;VTK file (*.vtk);;VTP file (*.vtp)");
+    QString filter = tr("All valid files(*.mnc *.mnc2 *.mnc.gz *.MNC *.MNC2 *.MNC.GZ *.nii *.obj *.ply *.tag *.vtk *.vtp *.fib);;Minc file (*.mnc *.mnc2 *.mnc.gz *.MNC *.MNC2 *.MNC.GZ);;Nifti file (*.nii);;Object file (*.obj);;PLY file (*.ply);;Tag file (*.tag);;VTK file (*.vtk);;VTP file (*.vtp);;FIB file (*.fib)");
     QStringList inputFiles = QFileDialog::getOpenFileNames( this, tr("Open Files"), m_fileParams->lastVisitedDir, filter, nullptr, QFileDialog::DontUseNativeDialog );
     for( int i = 0; i < inputFiles.size(); ++i )
     {

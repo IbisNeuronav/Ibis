@@ -10,10 +10,9 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 
 #include "gpu_weightrigidregistration.h"
-#include "vnl/algo/vnl_symmetric_eigensystem.h"
-#include "vnl/algo/vnl_real_eigensystem.h"
-#include "vtkSmartPointer.h"
-#include "itkTimeProbesCollectorBase.h"
+#include <vnl/algo/vnl_symmetric_eigensystem.h>
+#include <vnl/algo/vnl_real_eigensystem.h>
+#include <itkTimeProbesCollectorBase.h>
 
 class CommandIterationUpdateWeightOpenCL : public itk::Command
 {

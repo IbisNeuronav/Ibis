@@ -12,6 +12,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <vtkPoints.h>
 #include <fstream>
 
+using namespace std;
+
 vtkTagWriter::vtkTagWriter()
 {
     FileName = 0;

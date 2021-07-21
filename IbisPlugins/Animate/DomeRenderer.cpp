@@ -12,9 +12,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include "DomeRenderer.h"
 #include <vtkRenderer.h>
-#include <vtkgl.h>
+#include <vtk_glew.h>
 #include <vtkOpenGLRenderWindow.h>
-#include <vtkOpenGLExtensionManager.h>
 #include <vtkMath.h>
 #include "vtkOffscreenCamera.h"
 #include "GlslShader.h"
@@ -47,54 +46,30 @@ bool DomeRenderer::LoadGLExtensions( vtkRenderer * r )
         return false;
     }
 
-    vtkOpenGLExtensionManager * man = win->GetExtensionManager();
-
-    bool canLoad = true;
-    if( !man->ExtensionSupported("GL_VERSION_2_0") )
-    {
-        canLoad = false;
-        vtkErrorMacro( << "DomeRenderer: OpenGL 2.0 required but not supported" );
-    }
-
-    if( !man->ExtensionSupported("GL_EXT_framebuffer_object" ) )
-    {
-        canLoad = false;
-        vtkErrorMacro( << "DomeRenderer: GL_EXT_framebuffer_object is required but not supported" );
-    }
-
-    if( !man->ExtensionSupported("GL_ARB_texture_cube_map") )
+    if( !glewIsSupported("GL_ARB_texture_cube_map") )
     {
         vtkErrorMacro( << "DomeRenderer: GL_ARB_texture_cube_map is required but not supported" );
+        return false;
     }
 
-    if( !man->ExtensionSupported("GL_ARB_seamless_cube_map") )
+    if( !glewIsSupported("GL_ARB_seamless_cube_map") )
     {
         vtkErrorMacro( << "DomeRenderer: GL_ARB_seamless_cube_map is required but not supported" );
+        return false;
     }
 
-    // Really load now that we know everything is supported
-    if( canLoad )
-    {
-        man->LoadExtension( "GL_VERSION_1_2" );
-        man->LoadExtension( "GL_VERSION_1_3" );
-        man->LoadExtension( "GL_VERSION_2_0" );
-        man->LoadExtension( "GL_EXT_framebuffer_object" );
-        man->LoadExtension( "GL_ARB_texture_cube_map" );
-        man->LoadExtension( "GL_ARB_seamless_cube_map" );
-    }
-
-    return canLoad;
+    return true;
 }
 
 bool DomeRenderer::SetupFrameBuffer()
 {
     // backup prev FB binding
     GLint prevFrameBuffer;
-    glGetIntegerv( vtkgl::FRAMEBUFFER_BINDING_EXT, &prevFrameBuffer );
+    glGetIntegerv( GL_FRAMEBUFFER_BINDING_EXT, &prevFrameBuffer );
 
     // Create and bind frame buffer object
-    vtkgl::GenFramebuffersEXT( 1, &m_fbId );
-    vtkgl::BindFramebufferEXT( vtkgl::FRAMEBUFFER_EXT, m_fbId );
+    glGenFramebuffersEXT( 1, &m_fbId );
+    glBindFramebufferEXT( GL_FRAMEBUFFER_EXT, m_fbId );
 
     // Create and initialize cube texture
     glGenTextures( 1, &m_cubeTextureId );
@@ -113,32 +88,32 @@ bool DomeRenderer::SetupFrameBuffer()
     glBindTexture( GL_TEXTURE_CUBE_MAP, 0 );
 
     // Attach one of the faces of the Cubemap texture to this FBO
-    vtkgl::FramebufferTexture2DEXT( vtkgl::FRAMEBUFFER_EXT, vtkgl::COLOR_ATTACHMENT0_EXT, GL_TEXTURE_CUBE_MAP_POSITIVE_X, m_cubeTextureId, 0 );
+    glFramebufferTexture2DEXT( GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_CUBE_MAP_POSITIVE_X, m_cubeTextureId, 0 );
 
     // Create and bind depth buffer used for all faces of the cube and attach it to FBO
-    vtkgl::GenRenderbuffersEXT( 1, &m_depthRenderBufferId );
-    vtkgl::BindRenderbufferEXT( vtkgl::RENDERBUFFER_EXT, m_depthRenderBufferId );
-    vtkgl::RenderbufferStorageEXT( vtkgl::RENDERBUFFER_EXT, vtkgl::DEPTH_COMPONENT24, m_cubeTextureSize, m_cubeTextureSize );
-    vtkgl::BindRenderbufferEXT( vtkgl::RENDERBUFFER_EXT, 0 );
+    glGenRenderbuffersEXT( 1, &m_depthRenderBufferId );
+    glBindRenderbufferEXT( GL_RENDERBUFFER_EXT, m_depthRenderBufferId );
+    glRenderbufferStorageEXT( GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT24, m_cubeTextureSize, m_cubeTextureSize );
+    glBindRenderbufferEXT( GL_RENDERBUFFER_EXT, 0 );
 
     // Attach depth render buffer to the FBO
-    vtkgl::FramebufferRenderbufferEXT( vtkgl::FRAMEBUFFER_EXT, vtkgl::DEPTH_ATTACHMENT_EXT, vtkgl::RENDERBUFFER_EXT, m_depthRenderBufferId );
+    glFramebufferRenderbufferEXT( GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, m_depthRenderBufferId );
 
     // Check if FBO is complete and config supported by system
-    GLenum ret = vtkgl::CheckFramebufferStatusEXT( vtkgl::FRAMEBUFFER_EXT );
-    if( ret != vtkgl::FRAMEBUFFER_COMPLETE_EXT )
+    GLenum ret = glCheckFramebufferStatusEXT( GL_FRAMEBUFFER_EXT );
+    if( ret != GL_FRAMEBUFFER_COMPLETE_EXT )
     {
-        vtkgl::BindFramebufferEXT( vtkgl::FRAMEBUFFER_EXT, prevFrameBuffer );
+        glBindFramebufferEXT( GL_FRAMEBUFFER_EXT, prevFrameBuffer );
         glDeleteTextures( 1, &m_cubeTextureId );
         m_cubeTextureId = 0;
-        vtkgl::DeleteFramebuffersEXT( 1, &m_fbId );
+        glDeleteFramebuffersEXT( 1, &m_fbId );
         m_fbId = 0;
-        vtkgl::DeleteRenderbuffersEXT( 1, &m_depthRenderBufferId );
+        glDeleteRenderbuffersEXT( 1, &m_depthRenderBufferId );
         m_depthRenderBufferId = 0;
         return false;
     }
 
-    vtkgl::BindFramebufferEXT( vtkgl::FRAMEBUFFER_EXT, prevFrameBuffer );
+    glBindFramebufferEXT( GL_FRAMEBUFFER_EXT, prevFrameBuffer );
 
     return true;
 }
@@ -157,9 +132,9 @@ bool DomeRenderer::ResizeCubeTexture( )
         glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+5, 0, GL_RGBA8, m_cubeTextureSize, m_cubeTextureSize, 0, GL_BGRA, GL_UNSIGNED_BYTE, NULL);
         glBindTexture( GL_TEXTURE_CUBE_MAP, 0 );
 
-        vtkgl::BindRenderbufferEXT( vtkgl::RENDERBUFFER_EXT, m_depthRenderBufferId );
-        vtkgl::RenderbufferStorageEXT( vtkgl::RENDERBUFFER_EXT, vtkgl::DEPTH_COMPONENT24, m_cubeTextureSize, m_cubeTextureSize );
-        vtkgl::BindRenderbufferEXT( vtkgl::RENDERBUFFER_EXT, 0 );
+        glBindRenderbufferEXT( GL_RENDERBUFFER_EXT, m_depthRenderBufferId );
+        glRenderbufferStorageEXT( GL_RENDERBUFFER_EXT, GL_DEPTH_COMPONENT24, m_cubeTextureSize, m_cubeTextureSize );
+        glBindRenderbufferEXT( GL_RENDERBUFFER_EXT, 0 );
     }
     return true;
 }
@@ -280,13 +255,13 @@ void DomeRenderer::Render( vtkRenderer * r )
 
     // Start drawing to the FBO
     GLint prevFrameBuffer;
-    glGetIntegerv( vtkgl::FRAMEBUFFER_BINDING_EXT, &prevFrameBuffer );
-    vtkgl::BindFramebufferEXT( vtkgl::FRAMEBUFFER_EXT, m_fbId );
+    glGetIntegerv( GL_FRAMEBUFFER_BINDING_EXT, &prevFrameBuffer );
+    glBindFramebufferEXT( GL_FRAMEBUFFER_EXT, m_fbId );
 
     //-------------------------------------
     // Front (Z+)
     //-------------------------------------
-    vtkgl::FramebufferTexture2DEXT( vtkgl::FRAMEBUFFER_EXT, vtkgl::COLOR_ATTACHMENT0_EXT, GL_TEXTURE_CUBE_MAP_POSITIVE_Z, m_cubeTextureId, 0 );
+    glFramebufferTexture2DEXT( GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_CUBE_MAP_POSITIVE_Z, m_cubeTextureId, 0 );
     m_renderCam->SetPosition( pos );
     m_renderCam->SetFocalPoint( focalPt );
     m_renderCam->SetViewUp( up );
@@ -297,7 +272,7 @@ void DomeRenderer::Render( vtkRenderer * r )
     //-------------------------------------
     // Up  (Y-)
     //-------------------------------------
-    vtkgl::FramebufferTexture2DEXT( vtkgl::FRAMEBUFFER_EXT, vtkgl::COLOR_ATTACHMENT0_EXT, GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, m_cubeTextureId, 0 );
+    glFramebufferTexture2DEXT( GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, m_cubeTextureId, 0 );
     m_renderCam->SetFocalPoint( fpUp );
     m_renderCam->SetViewUp( -dir[0], -dir[1], -dir[2] );
     r->LightFollowCameraOff();
@@ -306,7 +281,7 @@ void DomeRenderer::Render( vtkRenderer * r )
     //-------------------------------------
     // Down (Y+)
     //-------------------------------------
-    vtkgl::FramebufferTexture2DEXT( vtkgl::FRAMEBUFFER_EXT, vtkgl::COLOR_ATTACHMENT0_EXT, GL_TEXTURE_CUBE_MAP_POSITIVE_Y, m_cubeTextureId, 0 );
+    glFramebufferTexture2DEXT( GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_CUBE_MAP_POSITIVE_Y, m_cubeTextureId, 0 );
     m_renderCam->SetFocalPoint( fpDown );
     m_renderCam->SetViewUp( dir[0], dir[1], dir[2] );
     r->Render();
@@ -314,7 +289,7 @@ void DomeRenderer::Render( vtkRenderer * r )
     //-------------------------------------
     // Right (X+)
     //-------------------------------------
-    vtkgl::FramebufferTexture2DEXT( vtkgl::FRAMEBUFFER_EXT, vtkgl::COLOR_ATTACHMENT0_EXT, GL_TEXTURE_CUBE_MAP_POSITIVE_X, m_cubeTextureId, 0 );
+    glFramebufferTexture2DEXT( GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_CUBE_MAP_POSITIVE_X, m_cubeTextureId, 0 );
     m_renderCam->SetFocalPoint( fpRight );
     m_renderCam->SetViewUp( up );
     r->Render();
@@ -322,7 +297,7 @@ void DomeRenderer::Render( vtkRenderer * r )
     //-------------------------------------
     // Left (X-)
     //-------------------------------------
-    vtkgl::FramebufferTexture2DEXT( vtkgl::FRAMEBUFFER_EXT, vtkgl::COLOR_ATTACHMENT0_EXT, GL_TEXTURE_CUBE_MAP_NEGATIVE_X, m_cubeTextureId, 0 );
+    glFramebufferTexture2DEXT( GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_CUBE_MAP_NEGATIVE_X, m_cubeTextureId, 0 );
     m_renderCam->SetFocalPoint( fpLeft );
     m_renderCam->SetViewUp( up );
     r->Render();
@@ -330,7 +305,7 @@ void DomeRenderer::Render( vtkRenderer * r )
     //=========================================
     // Dome render
     //=========================================
-    vtkgl::BindFramebufferEXT( vtkgl::FRAMEBUFFER_EXT, prevFrameBuffer );
+    glBindFramebufferEXT( GL_FRAMEBUFFER_EXT, prevFrameBuffer );
 
     r->SetActiveCamera( cam );
     r->SetLightFollowCamera( lightFollows );
@@ -403,8 +378,8 @@ void DomeRenderer::DrawFishEye( int w, int h )
     glLoadIdentity();
 
     glColor4d( 1.0, 1.0, 1.0, 1.0 );
-    glEnable( vtkgl::TEXTURE_CUBE_MAP_ARB );
-    glBindTexture( vtkgl::TEXTURE_CUBE_MAP_ARB, m_cubeTextureId );
+    glEnable( GL_TEXTURE_CUBE_MAP_ARB );
+    glBindTexture( GL_TEXTURE_CUBE_MAP_ARB, m_cubeTextureId );
 
     // Setup shader
     if( !m_domeShader )
@@ -441,8 +416,8 @@ void DomeRenderer::DrawFishEye( int w, int h )
 
     m_domeShader->UseProgram( false );
 
-    glBindTexture( vtkgl::TEXTURE_CUBE_MAP_ARB, 0 );
-    glDisable( vtkgl::TEXTURE_CUBE_MAP_ARB );
+    glBindTexture( GL_TEXTURE_CUBE_MAP_ARB, 0 );
+    glDisable( GL_TEXTURE_CUBE_MAP_ARB );
 
     // Pop modelview
     glPopMatrix();
@@ -479,8 +454,8 @@ void DomeRenderer::DrawCubeMap( int w, int h )
     glLoadIdentity();
 
     glColor4d( 1.0, 1.0, 1.0, 1.0 );
-    glEnable( vtkgl::TEXTURE_CUBE_MAP_ARB );
-    glBindTexture( vtkgl::TEXTURE_CUBE_MAP_ARB, m_cubeTextureId );
+    glEnable( GL_TEXTURE_CUBE_MAP_ARB );
+    glBindTexture( GL_TEXTURE_CUBE_MAP_ARB, m_cubeTextureId );
 
     // Front (Z+)
     int sideSize = 300.0;
@@ -543,8 +518,8 @@ void DomeRenderer::DrawCubeMap( int w, int h )
     }
     glEnd();
 
-    glBindTexture( vtkgl::TEXTURE_CUBE_MAP_ARB, 0 );
-    glDisable( vtkgl::TEXTURE_CUBE_MAP_ARB );
+    glBindTexture( GL_TEXTURE_CUBE_MAP_ARB, 0 );
+    glDisable( GL_TEXTURE_CUBE_MAP_ARB );
 
     // Pop modelview
     glPopMatrix();

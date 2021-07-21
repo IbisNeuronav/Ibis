@@ -30,6 +30,7 @@ class vtkImageActor;
 class vtkAlgorithmOutput;
 class vtkTransform;
 class vtkImageStack;
+class vtkImageSlice;
 
 class DoubleViewWidget : public QWidget
 {
@@ -85,7 +86,7 @@ private:
     vtkSmartPointer<vtkImageStack> m_mriActor;
     vtkSmartPointer<vtkImageActor> m_vol1Slice;
     vtkSmartPointer<vtkImageActor> m_vol2Slice;
-    vtkSmartPointer<vtkImageActor> m_usSlice;
+    vtkSmartPointer<vtkImageSlice> m_usSlice;
     vtkSmartPointer<vtkRenderer> m_mriRenderer;
     vtkSmartPointer<vtkRenderer> m_usRenderer;
     vtkSmartPointer<vtkImageActor> m_usActor;

@@ -233,6 +233,10 @@ public:
      */
     QMap<View*, int> GetAllViews( );
     /**
+     * Enable/Disable in all views of the main window
+     */
+    void SetRenderingEnabled( bool enable );
+    /**
      * Get the background color of main 2D Views, they all have the same color.
      */
     double * GetViewBackgroundColor();

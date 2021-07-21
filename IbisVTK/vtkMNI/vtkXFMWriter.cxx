@@ -12,6 +12,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <vtkMatrix4x4.h>
 #include <fstream>
 
+using namespace std;
+
 vtkXFMWriter * vtkXFMWriter::New()
 {
     return new vtkXFMWriter();

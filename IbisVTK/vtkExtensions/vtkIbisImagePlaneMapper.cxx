@@ -11,17 +11,16 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 // Thanks to Simon Drouin for writing this class
 
 #include "vtkIbisImagePlaneMapper.h"
-#include <vtkInformation.h>
-#include <vtkImageData.h>
-#include <vtkExecutive.h>
-#include <vtkgl.h>
-#include <vtkObjectFactory.h>
-#include <vtkMath.h>
-#include <vtkOpenGLExtensionManager.h>
-#include <vtkRenderer.h>
-#include <vtkSimpleProp3D.h>
-#include <vtkMatrix4x4.h>
+#include "vtkInformation.h"
+#include "vtkImageData.h"
+#include "vtkExecutive.h"
+#include "vtk_glew.h"
+#include "vtkObjectFactory.h"
+#include "vtkMath.h"
 #include "GlslShader.h"
+#include "vtkRenderer.h"
+#include "vtkSimpleProp3D.h"
+#include "vtkMatrix4x4.h"
 
 vtkStandardNewMacro(vtkIbisImagePlaneMapper);
 
@@ -30,7 +29,6 @@ vtkIbisImagePlaneMapper::vtkIbisImagePlaneMapper()
     this->LastInput = 0;
     this->TextureId = 0;
     this->Shader = 0;
-    this->OpenGLExtensionsLoaded = false;
     this->GlobalOpacity = 1.0;
     this->ImageCenter[ 0 ] = 319.5;
     this->ImageCenter[ 1 ] = 239.5;
@@ -53,12 +51,6 @@ vtkIbisImagePlaneMapper::~vtkIbisImagePlaneMapper()
 
 int vtkIbisImagePlaneMapper::RenderTranslucentPolygonalGeometry( vtkRenderer *ren, vtkSimpleProp3D * prop )
 {
-    // Test if OpenGL has all extensions needed and if they are loaded
-    if(!this->OpenGLExtensionsLoaded)
-        this->LoadOpenGLExtensions( ren->GetRenderWindow() );
-    if(!this->OpenGLExtensionsLoaded)
-        return 0;
-
     // Put input image in OpenGL texture
     this->UpdateTexture();
 
@@ -119,8 +111,8 @@ int vtkIbisImagePlaneMapper::RenderTranslucentPolygonalGeometry( vtkRenderer *re
     glColor4d( 1.0, 1.0, 1.0, 1.0 );
     glEnable( GL_BLEND );
     glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-    glEnable( vtkgl::TEXTURE_RECTANGLE );
-    glBindTexture( vtkgl::TEXTURE_RECTANGLE, this->TextureId );
+    glEnable( GL_TEXTURE_RECTANGLE );
+    glBindTexture( GL_TEXTURE_RECTANGLE, this->TextureId );
     glBegin( GL_QUADS );
     {
         glTexCoord2d( 0.5, 0.5 );                   glVertex2d( minX, minY );
@@ -129,8 +121,8 @@ int vtkIbisImagePlaneMapper::RenderTranslucentPolygonalGeometry( vtkRenderer *re
         glTexCoord2d( 0.5, dim[1] - 0.5 );          glVertex2d( minX, maxY );
     }
     glEnd();
-    glBindTexture( vtkgl::TEXTURE_RECTANGLE, 0 );
-    glDisable( vtkgl::TEXTURE_RECTANGLE );
+    glBindTexture( GL_TEXTURE_RECTANGLE, 0 );
+    glDisable( GL_TEXTURE_RECTANGLE );
 
     this->Shader->UseProgram( false );
 
@@ -292,15 +284,15 @@ void vtkIbisImagePlaneMapper::UpdateTexture()
     // Setup the texture
     int dim[3];
     input->GetDimensions(dim);
-    glEnable( vtkgl::TEXTURE_RECTANGLE_ARB );
+    glEnable( GL_TEXTURE_RECTANGLE );
     if( this->TextureId == 0 )
         glGenTextures( 1, &(this->TextureId) );
-    glBindTexture( vtkgl::TEXTURE_RECTANGLE_ARB, this->TextureId );
-    glTexParameteri( vtkgl::TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
-    glTexParameteri( vtkgl::TEXTURE_RECTANGLE_ARB, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
-    glTexImage2D( vtkgl::TEXTURE_RECTANGLE_ARB, 0, internalFormat, dim[0], dim[1], 0, format, GL_UNSIGNED_BYTE, input->GetScalarPointer() );
-    glBindTexture( vtkgl::TEXTURE_RECTANGLE_ARB, 0 );
-    glDisable( vtkgl::TEXTURE_RECTANGLE_ARB );
+    glBindTexture( GL_TEXTURE_RECTANGLE, this->TextureId );
+    glTexParameteri( GL_TEXTURE_RECTANGLE, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+    glTexParameteri( GL_TEXTURE_RECTANGLE, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+    glTexImage2D( GL_TEXTURE_RECTANGLE, 0, internalFormat, dim[0], dim[1], 0, format, GL_UNSIGNED_BYTE, input->GetScalarPointer() );
+    glBindTexture( GL_TEXTURE_RECTANGLE, 0 );
+    glDisable( GL_TEXTURE_RECTANGLE );
 
     if( glGetError() != GL_NO_ERROR )
     {
@@ -309,26 +301,6 @@ void vtkIbisImagePlaneMapper::UpdateTexture()
     }
 }
 
-void vtkIbisImagePlaneMapper::LoadOpenGLExtensions( vtkRenderWindow * window )
-{
-    vtkOpenGLExtensionManager * extensions = vtkOpenGLExtensionManager::New();
-    extensions->SetRenderWindow( window );
-
-    if( !extensions->ExtensionSupported("GL_VERSION_2_0") )
-    {
-        this->OpenGLExtensionsLoaded = false;
-        vtkErrorMacro(<<"No support for OpenGL 2.0");
-    }
-    else
-    {
-        extensions->LoadExtension( "GL_VERSION_1_2" );
-        extensions->LoadExtension( "GL_VERSION_1_3" );
-        extensions->LoadExtension( "GL_VERSION_2_0" );
-        this->OpenGLExtensionsLoaded = true;
-    }
-
-    extensions->Delete();
-}
 
 #include "vtkIbisImagePlaneMapper_FS.h"
 

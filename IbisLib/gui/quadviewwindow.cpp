@@ -20,10 +20,12 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QGridLayout>
 #include <QLabel>
 #include <QFont>
-#include <QVTKWidget.h>
 #include <QApplication>
 #include <QSettings>
-#include <vtkqtrenderwindow.h>
+
+#include <QVTKRenderWidget.h>
+#include <QVTKInteractor.h>
+#include <vtkGenericOpenGLRenderWindow.h>
 #include <vtkRenderer.h>
 #include <vtkRenderWindowInteractor.h>
 #include <vtkInteractorObserver.h>
@@ -48,7 +50,7 @@ QuadViewWindow::QuadViewWindow( QWidget* parent, Qt::WindowFlags fl ) : QWidget(
     m_generalLayout->setSpacing( 0 );
 
     // Add a button box at the top of the window. These buttons control view layout and manipulation tools
-    m_toolboxFrame = new QFrame;
+    m_toolboxFrame = new QFrame(this);
     m_generalLayout->addWidget( m_toolboxFrame );
 
     m_buttonBox = new QHBoxLayout( m_toolboxFrame );
@@ -86,16 +88,16 @@ QuadViewWindow::QuadViewWindow( QWidget* parent, Qt::WindowFlags fl ) : QWidget(
     m_buttonBox->addWidget( m_genericLabel );
     m_genericLabel->hide();
 
-    m_viewWindowsLayout = new QGridLayout( );
+    m_viewWindowsLayout = new QGridLayout();
     m_viewWindowsLayout->setObjectName( "4Views" );
     m_generalLayout->addLayout( m_viewWindowsLayout );
     m_viewWindowsLayout->setContentsMargins( 1, 1, 1, 1 );
     m_viewWindowsLayout->setSpacing( 1 );
 
-    MakeOneView( 0, "UpperLeftView" );
-    MakeOneView( 1, "UpperRightView" );
-    MakeOneView( 2, "LowerLeftView" );
-    MakeOneView( 3, "LowerRightView" );
+    MakeOneWidget( 0, "UpperLeftView" );
+    MakeOneWidget( 1, "UpperRightView" );
+    MakeOneWidget( 2, "LowerLeftView" );
+    MakeOneWidget( 3, "LowerRightView" );
 
     // An empty frame for plugins to add custom widgets at the bottom
     m_bottomWidgetFrame = new QFrame( this );
@@ -124,25 +126,19 @@ QAbstractButton * QuadViewWindow::CreateToolButton( QWidget * parent, QString na
     return button;
 }
 
-void QuadViewWindow::MakeOneView( int index, const char * name )
+void QuadViewWindow::MakeOneWidget( int index, const char * name )
 {
-    m_vtkWindowFrames[index] = new QFrame( );
+    m_vtkWindowFrames[index] = new QFrame( this );
     m_vtkWindowFrames[index]->setFrameShape( QFrame::NoFrame );
 
-#ifdef USE_QVTKWIDGET_2
-    QGLFormat fmt;
-    //fmt.setDepth( true );
-    //fmt.setDepthBufferSize( 32 );
-    fmt.setSampleBuffers( false );
-    //fmt.setSamples( 16 );
-    m_vtkWindows[index] = new QVTKWidget2( fmt, m_vtkWindowFrames[index] );
-#else
-    m_vtkWindows[index] = new vtkQtRenderWindow( m_vtkWindowFrames[index] );
-#endif
-    m_vtkWindows[index]->setObjectName( name );
-    m_vtkWindows[index]->installEventFilter( this );
+    vtkNew<vtkGenericOpenGLRenderWindow> w;
+    m_vtkWidgets[index] = new QVTKRenderWidget( m_vtkWindowFrames[index] );
+    m_vtkWidgets[index]->setRenderWindow(w);
+    m_vtkWidgets[index]->setObjectName( name );
+    m_vtkWidgets[index]->setSizePolicy( QSizePolicy::Expanding, QSizePolicy::Expanding );
+    m_vtkWidgets[index]->installEventFilter( this );
     m_frameLayouts[index] = new QVBoxLayout( m_vtkWindowFrames[index] );
-    m_frameLayouts[index]->addWidget( m_vtkWindows[index] );
+    m_frameLayouts[index]->addWidget( m_vtkWidgets[index] );
     m_frameLayouts[index]->setContentsMargins( 1, 1, 1, 1 );
 
     int row, col;
@@ -174,33 +170,28 @@ QuadViewWindow::~QuadViewWindow()
 {
 }
 
-#include <QVTKInteractor.h>
 void QuadViewWindow::SetSceneManager( SceneManager * man )
 {
     Q_ASSERT( man );
     View * view;
     view = man->CreateView( TRANSVERSE_VIEW_TYPE, ViewNames[0], TRANSVERSE_VIEW_ID );
-    view->SetQtRenderWindow( m_vtkWindows[0] );
-    view->SetInteractor( m_vtkWindows[0]->GetInteractor() );
-    connect( view, SIGNAL( ViewModified() ), this, SLOT( Win0NeedsRender() ) );
+    view->SetQtRenderWidget( m_vtkWidgets[0] );
+    view->SetInteractor( m_vtkWidgets[0]->GetInteractor() );
     man->SetMainTransverseViewID( TRANSVERSE_VIEW_ID );
 
     view = man->CreateView( THREED_VIEW_TYPE, ViewNames[1], THREED_VIEW_ID );
-    view->SetQtRenderWindow( m_vtkWindows[1] );
-    view->SetInteractor( m_vtkWindows[1]->GetInteractor() );
-    connect( view, SIGNAL( ViewModified() ), this, SLOT( Win1NeedsRender() ) );
+    view->SetQtRenderWidget( m_vtkWidgets[1] );
+    view->SetInteractor( m_vtkWidgets[1]->GetInteractor() );
     man->SetMain3DViewID( THREED_VIEW_ID );
 
     view = man->CreateView( CORONAL_VIEW_TYPE, ViewNames[2], CORONAL_VIEW_ID );
-    view->SetQtRenderWindow( m_vtkWindows[2] );
-    view->SetInteractor( m_vtkWindows[2]->GetInteractor() );
-    connect( view, SIGNAL( ViewModified() ), this, SLOT( Win2NeedsRender() ) );
+    view->SetQtRenderWidget( m_vtkWidgets[2] );
+    view->SetInteractor( m_vtkWidgets[2]->GetInteractor() );
     man->SetMainCoronalViewID( CORONAL_VIEW_ID );
 
     view = man->CreateView( SAGITTAL_VIEW_TYPE, ViewNames[3], SAGITTAL_VIEW_ID );
-    view->SetQtRenderWindow( m_vtkWindows[3] );
-    view->SetInteractor( m_vtkWindows[3]->GetInteractor() );
-    connect( view, SIGNAL( ViewModified() ), this, SLOT( Win3NeedsRender() ) );
+    view->SetQtRenderWidget( m_vtkWidgets[3] );
+    view->SetInteractor( m_vtkWidgets[3]->GetInteractor() );
     man->SetMainSagittalViewID( SAGITTAL_VIEW_ID );
 
     m_sceneManager = man;
@@ -228,14 +219,14 @@ void QuadViewWindow::RemoveBottomWidget( QWidget * w )
 
 #include <QDesktopWidget>
 
-void QuadViewWindow::Detach3DView( QWidget * parent )
+void QuadViewWindow::Detach3DView( QWidget * /*parent*/ )
 {
     Q_ASSERT( !m_detachedWidget );
 
     m_detachedWidget = new QWidget();
     QVBoxLayout * layout = new QVBoxLayout( m_detachedWidget );
     layout->setMargin( 0 );
-    layout->addWidget( m_vtkWindows[1] );
+    layout->addWidget( m_vtkWidgets[1] );
 
     int nbScreens = QApplication::desktop()->screenCount();
     if( nbScreens > 1 )
@@ -250,45 +241,24 @@ void QuadViewWindow::Detach3DView( QWidget * parent )
 
 void QuadViewWindow::Attach3DView()
 {
-    m_frameLayouts[1]->addWidget( m_vtkWindows[1] );
+    m_frameLayouts[1]->addWidget( m_vtkWidgets[1] );
     delete m_detachedWidget;
     m_detachedWidget = 0;
-}
-
-void QuadViewWindow::Win0NeedsRender() { this->WinNeedsRender( 0 ); }
-void QuadViewWindow::Win1NeedsRender() { this->WinNeedsRender( 1 ); }
-void QuadViewWindow::Win2NeedsRender() { this->WinNeedsRender( 2 ); }
-void QuadViewWindow::Win3NeedsRender() { this->WinNeedsRender( 3 ); }
-
-void QuadViewWindow::WinNeedsRender( int winIndex )
-{
-    m_vtkWindows[ winIndex ]->update();
 }
 
 void QuadViewWindow::ZoomInButtonClicked()
 {
     m_sceneManager->ZoomAllCameras( 1.5 );
-    this->RenderAll();
 }
 
 void QuadViewWindow::ZoomOutButtonClicked()
 {
     m_sceneManager->ZoomAllCameras( .75 );
-    this->RenderAll();
 }
 
 void QuadViewWindow::ResetCameraButtonClicked()
 {
     m_sceneManager->ResetAllCameras();
-    this->RenderAll();
-}
-
-void QuadViewWindow::RenderAll()
-{
-    for( int i = 0; i < 4; i++ )
-    {
-        m_vtkWindows[i]->update();
-    }
 }
 
 void QuadViewWindow::ExpandViewButtonClicked()
@@ -298,7 +268,7 @@ void QuadViewWindow::ExpandViewButtonClicked()
         for( int i = 0; i < 4; i++ )
         {
             m_vtkWindowFrames[i]->show();
-            m_vtkWindows[i]->update();
+            m_vtkWidgets[i]->update();
         }
         m_viewExpanded = false;
     }
@@ -383,7 +353,7 @@ bool QuadViewWindow::eventFilter(QObject *obj, QEvent *event)
         int which = -1;
         for( int i = 0; i < 4; ++i )
         {
-            if( m_vtkWindows[i] == obj )
+            if( m_vtkWidgets[i] == obj )
             {
                 which = i;
                 break;

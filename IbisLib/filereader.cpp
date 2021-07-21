@@ -14,7 +14,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <vtkPolyDataReader.h>
 #include <vtkProperty.h>
 #include <vtkXMLPolyDataReader.h>
-#include <vtkOBJReader2.h>
+#include <vtkOBJReader.h>
 #include <vtkPLYReader.h>
 #include <vtkDataObjectReader.h>
 #include <vtkStructuredPointsReader.h>
@@ -25,6 +25,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <vtkEventQtSlotConnect.h>
 #include "imageobject.h"
 #include "polydataobject.h"
+#include "tractogramobject.h"
 #include "pointsobject.h"
 #include "ibisapi.h"
 #include <QDir>
@@ -188,7 +189,7 @@ bool FileReader::ConvertMINC1toMINC2( QString &inputileName, QString &outputileN
     if( m_mincconvert.isEmpty() )
     {
         QString tmp("File ");
-        tmp.append( inputileName + " is of MINC1 type and needs to be coverted to MINC2.\n" +
+        tmp.append( inputileName + " is of MINC1 type and needs to be converted to MINC2.\n" +
                     "Tool mincconvert was not found in standard paths on your file system.\n" +
                     "Please convert using command: \nmincconvert -2 <input> <output>");
         QMessageBox::critical( 0, "Error", tmp, 1, 0 );
@@ -256,7 +257,7 @@ bool FileReader::ConvertMINC1toMINC2( QString &inputileName, QString &outputileN
             else
             {
                 QString tmp("File ");
-                tmp.append( inputileName + " is an acquired frame of MINC1 type and needs to be coverted to MINC2.\n" +
+                tmp.append( inputileName + " is an acquired frame of MINC1 type and needs to be converted to MINC2.\n" +
                             "Tool minccalc was not found in standard paths on your file system.\n" );
                 QMessageBox::critical( 0, "Error", tmp, 1, 0 );
                 return false;
@@ -363,7 +364,7 @@ bool FileReader::OpenFile( QList<SceneObject*> & readObjects, QString filename, 
             if( this->m_mincconvert.isEmpty())
             {
                 QString tmp("File ");
-                tmp.append( filename + " is  of MINC1 type and needs to be coverted to MINC2.\n" +
+                tmp.append( filename + " is  of MINC1 type and needs to be converted to MINC2.\n" +
                             "Open Settings/Preferences and set path to the directory containing MINC tools.\n" );
                 QMessageBox::critical( 0, "Error", tmp, 1, 0 );
                 return false;
@@ -424,6 +425,10 @@ bool FileReader::OpenFile( QList<SceneObject*> & readObjects, QString filename, 
             if( OpenPlyFile( readObjects, filename, dataObjectName ) )
                 return true;
         }
+
+        // try tractogram fib / vtk format
+        if( OpenFIBFile( readObjects, filename, dataObjectName ) )
+            return true;
 
         // try vtp
         if( OpenVTPFile( readObjects, filename, dataObjectName ) )
@@ -571,7 +576,7 @@ bool FileReader::OpenObjFile( QList<SceneObject*> & readObjects, QString filenam
 
 bool FileReader::OpenWavObjFile( QList<SceneObject*> & readObjects, QString filename, const QString & dataObjectName )
 {
-    vtkOBJReader2 * reader = vtkOBJReader2::New();
+    vtkOBJReader * reader = vtkOBJReader::New();
     reader->SetFileName( filename.toUtf8().data() );
 
     // Read file and monito progress
@@ -656,6 +661,39 @@ bool FileReader::OpenVTKFile( QList<SceneObject*> & readObjects, QString filenam
         else
         {
             ReportWarning( tr("Unsupported file format") );
+        }
+    }
+    reader->Delete();
+    return res;
+}
+
+bool FileReader::OpenFIBFile( QList<SceneObject*> & readObjects, QString filename, const QString & dataObjectName )
+{
+    vtkDataObjectReader * reader = vtkDataObjectReader::New();
+    reader->SetFileName( filename.toUtf8().data() );
+    reader->Update();
+    m_fileProgressEvent->Disconnect( reader );
+
+    bool res = false;
+
+    if( reader->GetErrorCode() == vtkErrorCode::NoError )
+    {
+        if ( filename.endsWith( QString(".fib") ) && reader->IsFilePolyData() )
+        {
+            vtkPolyDataReader * polyReader = vtkPolyDataReader::New();
+            polyReader->SetFileName( filename.toUtf8().data() );
+
+            m_fileProgressEvent->Connect( polyReader, vtkCommand::ProgressEvent, this, SLOT(OnReaderProgress( vtkObject*, unsigned long) ), 0, 0.0, Qt::DirectConnection );
+            polyReader->Update();
+            m_fileProgressEvent->Disconnect( polyReader );
+
+            TractogramObject * object = TractogramObject::New();
+            object->SetPolyData( polyReader->GetOutput() );
+            SetObjectName( object, dataObjectName, filename );
+            readObjects.push_back( object );
+            res = true;
+
+            polyReader->Delete();
         }
     }
     reader->Delete();
@@ -747,6 +785,7 @@ bool FileReader::OpenTagFile( QList<SceneObject*> & readObjects, QString filenam
     return true;
 }
 
+
 bool FileReader::GetPointsDataFromTagFile( QString filename, PointsObject *pts1, PointsObject *pts2 )
 {
     Q_ASSERT(pts1);
@@ -824,7 +863,7 @@ int FileReader::GetNumberOfComponents( QString filename )
         if( this->m_mincconvert.isEmpty())
         {
             QString tmp("File ");
-            tmp.append( filename + " is an acquired frame of MINC1 type and needs to be coverted to MINC2.\n" +
+            tmp.append( filename + " is an acquired frame of MINC1 type and needs to be converted to MINC2.\n" +
                         "Open Settings/Preferences and set path to the directory containing MINC tools.\n" );
             QMessageBox::critical( 0, "Error", tmp, 1, 0 );
             return 0;

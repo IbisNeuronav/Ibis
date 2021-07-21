@@ -27,7 +27,7 @@ class CameraAnimation : public Animation< CameraKey >
 public:
 	
 	CameraAnimation();
-	~CameraAnimation();
+    virtual ~CameraAnimation();
 	
 	void AddKeyframe( int frame, vtkCamera * cam );
     virtual void MoveKey( int oldFrame, int newFrame );

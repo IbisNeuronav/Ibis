@@ -33,7 +33,7 @@ public:
     static GeneratedSurface *New() { return new GeneratedSurface; }
     vtkTypeMacro(GeneratedSurface,PolyDataObject);
 
-    virtual void Serialize( Serializer * ser );
+    virtual void Serialize( Serializer * ser ) override;
 
     virtual bool GenerateSurface();
 

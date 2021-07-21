@@ -22,7 +22,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <vtkEventQtSlotConnect.h>
 #include <vtkRendererCollection.h>
 #include <vtkObjectCallback.h>
-#include "vtkqtrenderwindow.h"
 #include "vtkMatrix4x4Operators.h"
 #include "scenemanager.h"
 #include "sceneobject.h"
@@ -39,7 +38,7 @@ View::View()
 {
     this->Name = "";
     this->SetName( DefaultViewNames[THREED_VIEW_TYPE] );
-    this->RenderWindow = 0;
+    this->RenderWidget = nullptr;
     this->m_renderingEnabled = true;
     this->InteractorStyle = vtkSmartPointer<vtkInteractorStyleTerrain>::New();
     this->Picker = vtkCellPicker::New();
@@ -57,7 +56,7 @@ View::View()
     this->OverlayRenderer2 = vtkSmartPointer<vtkRenderer>::New();
     this->OverlayRenderer2->SetLayer( 2 );
     this->OverlayRenderer2->SetActiveCamera( this->Renderer->GetActiveCamera() ); // use same camera as main renderer
-    this->Manager = 0;
+    this->Manager = nullptr;
     this->PrevViewingTransform = vtkSmartPointer<vtkMatrix4x4>::New();
     this->PrevViewingTransform->Identity();
     this->EventObserver = vtkSmartPointer<vtkEventQtSlotConnect>::New();
@@ -69,8 +68,8 @@ View::View()
     m_leftButtonDown = false;
     m_middleButtonDown = false;
     m_rightButtonDown = false;
-    m_backupWindowParent = 0;
-    CurrentController = 0;
+    m_backupWindowParent = nullptr;
+    CurrentController = nullptr;
 }
 
 
@@ -170,22 +169,11 @@ void View::SetType( int type )
     }
 }
 
-vtkQtRenderWindow * View::GetQtRenderWindow()
+void View::SetQtRenderWidget( QVTKRenderWidget * w )
 {
-    return this->RenderWindow;
-}
-
-
-void View::SetQtRenderWindow( vtkQtRenderWindow * w )
-{
-    if( w == this->RenderWindow )
+    if( w == this->RenderWidget )
         return;
-    this->RenderWindow = w;
-}
-
-void View::Render()
-{
-    this->Interactor->Render();
+    this->RenderWidget = w;
 }
 
 void View::SetRenderingEnabled( bool b )
@@ -193,8 +181,6 @@ void View::SetRenderingEnabled( bool b )
     if( m_renderingEnabled == b )
         return;
     m_renderingEnabled = b;
-    if( this->RenderWindow )
-        this->RenderWindow->SetRenderingEnabled( m_renderingEnabled );
     if( m_renderingEnabled )
         NotifyNeedRender();
 }
@@ -228,11 +214,6 @@ void View::SetInteractor( vtkRenderWindowInteractor * interactor )
 
     // Add observer to know when the window starts rendering ( to reset clipping range )
     this->EventObserver->Connect( this->Interactor->GetRenderWindow(), vtkCommand::StartEvent, this, SLOT(WindowStartsRendering()) );
-
-    // Make sure widget and other interactor observers don't call render directly, but instead, request a
-    // render to the view. This will allow Qt to concatenate render requests.
-    this->Interactor->EnableRenderOff();
-    this->EventObserver->Connect( this->Interactor, vtkCommand::RenderEvent, this, SLOT(NotifyNeedRender()) );
 
     this->Interactor->AddObserver( vtkCommand::KeyPressEvent, this->InteractionCallback, this->Priority );
     this->Interactor->AddObserver( vtkCommand::LeftButtonPressEvent, this->InteractionCallback, this->Priority );
@@ -340,12 +321,12 @@ void View::ReleaseControl( ViewController * c )
 
 void View::Fullscreen()
 {
-    Q_ASSERT( this->RenderWindow );
-    Q_ASSERT( !this->RenderWindow->isFullScreen() );
+    Q_ASSERT( this->RenderWidget );
+    Q_ASSERT( !this->RenderWidget->isFullScreen() );
 
-    m_backupWindowParent = this->RenderWindow->parent();
-    this->RenderWindow->setParent( 0 );
-    this->RenderWindow->showFullScreen();
+    m_backupWindowParent = this->RenderWidget->parent();
+    this->RenderWidget->setParent( 0 );
+    this->RenderWidget->showFullScreen();
 }
 
 void View::AddInteractionObject( ViewInteractor * obj, double priority )
@@ -367,15 +348,15 @@ void View::RemoveInteractionObject( ViewInteractor * obj )
     }
 }
 
-void View::ProcessInteractionEvents( vtkObject * caller, unsigned long event, void * calldata )
+void View::ProcessInteractionEvents( vtkObject * /*caller*/, unsigned long event, void * /*calldata*/ )
 {
     // if in fullscreen mode, get back if ESC key is pressed
     if( event == vtkCommand::KeyPressEvent && this->Interactor->GetKeyCode() == 27 )
     {
-        if( this->RenderWindow->isFullScreen() )
+        if( this->RenderWidget->isFullScreen() )
         {
-            this->RenderWindow->setParent( qobject_cast<QWidget*>(m_backupWindowParent) );
-            this->RenderWindow->showNormal();
+            this->RenderWidget->setParent( qobject_cast<QWidget*>(m_backupWindowParent) );
+            this->RenderWidget->showNormal();
         }
     }
 
@@ -480,7 +461,7 @@ void View::SetBackgroundColor( double * color )
 
 int * View::GetWindowSize( )
 {
-    return this->RenderWindow->GetRenderWindow()->GetSize();
+    return this->RenderWidget->GetRenderWindow()->GetSize();
 }
 
 void View::ResetCamera()
@@ -521,7 +502,9 @@ void View::SetViewAngle( double angle )
 void View::NotifyNeedRender()
 {
     if( m_renderingEnabled )
-        emit ViewModified();
+    {
+        this->DoVTKRender();
+    }
 }
 
 void View::ReferenceTransformChanged()
@@ -563,6 +546,15 @@ void View::ReferenceTransformChanged()
 void View::WindowStartsRendering()
 {
     this->Renderer->ResetCameraClippingRange();
+}
+
+// Really call the vtk rendering code
+void View::DoVTKRender()
+{
+    if( this->Interactor )
+    {
+        this->Interactor->Render();
+    }
 }
 
 void View::SetupAllObjects()

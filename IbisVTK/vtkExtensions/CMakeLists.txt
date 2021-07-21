@@ -1,3 +1,7 @@
+project( vtkExtensions )
+
+find_package(VTK REQUIRED NO_MODULE COMPONENTS RenderingCore RenderingOpenGL2 InteractionWidgets ImagingCore InteractionStyle )
+
 #================================
 # Define sources
 #================================
@@ -11,7 +15,6 @@ SET( VTK_EXTENSIONS_SRC
     vtkMultiTextureMapToPlane.cxx
     vtkPiecewiseFunctionLookupTable.cxx
     vtkInteractorStyleImage2.cxx
-    vtkOBJReader2.cxx
     vtkSimpleMapper3D.cxx
     vtkSimpleProp3D.cxx
     stringtools.cpp
@@ -29,7 +32,6 @@ SET( VTK_EXTENSIONS_HDR
     vtkMultiTextureMapToPlane.h
     vtkPiecewiseFunctionLookupTable.h
     vtkInteractorStyleImage2.h
-    vtkOBJReader2.h 
     vtkSimpleMapper3D.h
     vtkSimpleProp3D.h
     vtkGenericParam.h
@@ -41,26 +43,22 @@ SET( VTK_EXTENSIONS_HDR
 #================================
 # Process GLSL shader files
 #================================
-set( LibGlsl vtkIbisImagePlaneMapper_FS )
-foreach( file ${LibGlsl} )
-  set( shader_src ${CMAKE_CURRENT_SOURCE_DIR}/${file}.glsl )
-  set( shader_cxx ${CMAKE_CURRENT_BINARY_DIR}/${file}.cxx )
-  set( shader_h ${CMAKE_CURRENT_BINARY_DIR}/${file}.h )
-  add_custom_command(
-    OUTPUT ${shader_cxx} ${shader_h}
-    DEPENDS ${shader_src}
-    COMMAND ${VTK_ENCODESTRING_EXE}
-    ARGS ${shader_cxx} ${shader_src} ${file} --build-header " " vtkSystemIncludes.h )
-  set( LibGlslSrc ${LibGlslSrc} ${shader_src} ${shader_h} ${shader_cxx} )
-endforeach(file)
+set( LibGlsl vtkIbisImagePlaneMapper_FS.glsl )
+set( LibGlslSrc )
+foreach (shader_file IN LISTS LibGlsl)
+  vtk_encode_string(
+    INPUT         "${shader_file}"
+    HEADER_OUTPUT shader_h
+    SOURCE_OUTPUT shader_cxx)
+  list(APPEND LibGlslSrc ${shader_file} ${shader_h} ${shader_cxx})
+endforeach ()
 
 #================================
 # Define output
 #================================
-IF (BUILD_SHARED_LIBS)
-ADD_LIBRARY( vtkExtensions SHARED ${VTK_EXTENSIONS_SRC} ${VTK_EXTENSIONS_HDR} )
-ELSE( BUILD_SHARED_LIBS )
 ADD_LIBRARY( vtkExtensions ${VTK_EXTENSIONS_SRC} ${VTK_EXTENSIONS_HDR} ${LibGlslSrc} )
-ENDIF( BUILD_SHARED_LIBS )
 
+target_link_libraries( vtkExtensions ${VTK_LIBRARIES} )
 target_include_directories( vtkExtensions  PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} PRIVATE ${CMAKE_CURRENT_BINARY_DIR} )
+
+vtk_module_autoinit( TARGETS vtkExtensions MODULES ${VTK_LIBRARIES})

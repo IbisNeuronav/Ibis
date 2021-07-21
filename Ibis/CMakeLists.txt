@@ -25,9 +25,6 @@ endforeach( plugin )
 
 # Add plugin def for the hardware module
 if( IBIS_BUILD_DEFAULT_HARDWARE_MODULE )
-    file( APPEND ${ImportPluginsSourceFile} "Q_IMPORT_PLUGIN(IbisHardwareModule);\n" )
-endif()
-if( IBIS_BUILD_IGSIO_HARDWARE_MODULE )
     file( APPEND ${ImportPluginsSourceFile} "Q_IMPORT_PLUGIN(IbisHardwareIGSIO);\n" )
 endif()
 
@@ -97,6 +94,9 @@ TARGET_LINK_LIBRARIES( ${exec_name} ${PluginLibs} ${PluginExternalLibs} ${Hardwa
                                     ${VTK_LIBRARIES} ${MINC4ITK_LIBRARIES} ${ELASTIX_LIBRARIES}
                                     ${itkLibsToUse} ${OpenCV_LIBS} ${flycaptureLib} svl ${gpuLibs} )
 qt5_use_modules( ${exec_name} ${IbisQtModules} )
+
+vtk_module_autoinit( TARGETS ${exec_name} MODULES ${VTK_LIBRARIES})
+
 
 #================================
 # Define git hash variable
