@@ -54,6 +54,7 @@ class TFAnimation : public Animation<TransferFunctionKey>
 
 public:
 
+    virtual ~TFAnimation() {}
     void Serialize( Serializer * ser );
 };
 

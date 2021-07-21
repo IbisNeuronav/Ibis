@@ -35,12 +35,12 @@ CameraCalibrationSidePanelWidget::~CameraCalibrationSidePanelWidget()
     delete ui;
 }
 
-void CameraCalibrationSidePanelWidget::SetPluginInterface( CameraCalibrationPluginInterface * interface )
+void CameraCalibrationSidePanelWidget::SetPluginInterface( CameraCalibrationPluginInterface * pluginInterface )
 {
     Q_ASSERT( m_pluginInterface == 0 );
-    Q_ASSERT( interface != 0 );
+    Q_ASSERT( pluginInterface != 0 );
 
-    m_pluginInterface = interface;
+    m_pluginInterface = pluginInterface;
 
     connect( m_pluginInterface, SIGNAL(PluginModified()), this, SLOT(InterfaceModified()) );
     connect( m_pluginInterface, SIGNAL(CameraCalibrationWidgetClosedSignal()), this, SLOT(UpdateUi()) );

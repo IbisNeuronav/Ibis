@@ -60,7 +60,7 @@ public:
     void CreatePointerPickedPointsObject();
     void ManagerAddPointerPickedPointsObject();
     vtkSmartPointer<PointsObject> GetCurrentPointerPickedPointsObject() {return this->CurrentPointerPickedPointsObject;}
-    void SetCurrentPointerPickedPointsObject(vtkSmartPointer<PointsObject> obj) {this->CurrentPointerPickedPointsObject = obj;}
+    void SetCurrentPointerPickedPointsObject(vtkSmartPointer<PointsObject> obj);
     const QList<vtkSmartPointer<PointsObject> > & GetPointerPickedPointsObjects() { return PointerPickedPointsObjectList; }
 
 public slots:

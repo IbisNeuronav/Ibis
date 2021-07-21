@@ -62,24 +62,13 @@ include_directories( ${Qt5Multimedia_INCLUDE_DIRS} )
 # Look for VTK (required)
 #==================================================================
 set( AutoVtkPath ${IBIS_EXTERNAL_DEPENDENCIES_DIR}/vtk-${IBIS_VTK_LONG_VERSION}/build )
-find_package(VTK ${IBIS_VTK_LONG_VERSION} EXACT COMPONENTS vtkGUISupportQt vtkRenderingOpenGL vtkRenderingVolumeOpenGL vtkRenderingImage
-    vtkRenderingAnnotation vtkImagingStencil vtkImagingStatistics vtkFiltersTexture
-    vtkInteractionStyle vtkInteractionWidgets
-    vtkIOXML vtkIOLegacy vtkIOPLY NO_MODULE
+find_package(VTK ${IBIS_VTK_LONG_VERSION} EXACT
+    COMPONENTS GUISupportQt RenderingOpenGL2
+    RenderingImage RenderingVolumeOpenGL2
+    RenderingAnnotation ImagingStencil ImagingStatistics FiltersTexture
+    InteractionStyle InteractionWidgets
+    IOXML IOLegacy IOPLY
     PATHS ${AutoVtkPath} )
-include(${VTK_USE_FILE})
-
-# Find vtkEncodeString utility executable. Look in built or installed dir structure
-set( vtkEncodeStringExeFile vtkEncodeString-${VTK_MAJOR_VERSION}.${VTK_MINOR_VERSION} )
-find_program( VTK_ENCODESTRING_EXE ${vtkEncodeStringExeFile} PATHS
-              ${VTK_DIR}/bin/
-              ${VTK_DIR}/bin/Debug/
-              ${VTK_DIR}/bin/Release/
-              ${VTK_INSTALL_PREFIX}/bin
-              NO_DEFAULT_PATH )
-if( NOT VTK_ENCODESTRING_EXE )
-    message( FATAL_ERROR "the vtkEncodeString executable could not be found in the VTK directory.")
-endif()
 
 #==================================================================
 # Look for ITK (required)
@@ -112,10 +101,7 @@ endif()
 #==================================================================
 # Create options to build or not the different dependent projects.
 #==================================================================
-if(UNIX AND NOT APPLE)
-    OPTION( IBIS_BUILD_DEFAULT_HARDWARE_MODULE "Build default hardware module on Linux." ON )
-endif()
-OPTION( IBIS_BUILD_IGSIO_HARDWARE_MODULE "Build hardware module that allows connection to OpenIGTLinkServers" OFF )
+OPTION( IBIS_BUILD_DEFAULT_HARDWARE_MODULE "Build hardware module based on OpenIGTLink and dependencies (OpenIGTLink and OpenIGTLinkIO)" ON )
 
 find_package ( OpenCL QUIET )
 include(${CMAKE_COMMON_DIR}/OpenCLMacros.cmake)
@@ -133,8 +119,8 @@ endif()
 
 
 # define version and build info
-set( IBIS_MAJOR_VERSION 3 )
-set( IBIS_MINOR_VERSION 2 )
+set( IBIS_MAJOR_VERSION 4 )
+set( IBIS_MINOR_VERSION 0 )
 set( IBIS_PATCH_VERSION 0 )
 set( IBIS_VERSION_QUALIFIER "" )                    # Dev, Alpha, Beta or nothing for official releases
 if( CMAKE_BUILD_TYPE MATCHES "Debug" )
@@ -150,9 +136,6 @@ configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/version.h.in ${CMAKE_CURRENT_BINARY_
 add_subdirectory( IbisLib )
 set( HardwareModulesLibs "" )
 if( IBIS_BUILD_DEFAULT_HARDWARE_MODULE )
-    add_subdirectory( IbisHardware )
-endif()
-if( IBIS_BUILD_IGSIO_HARDWARE_MODULE )
     add_subdirectory( IbisHardwareIGSIO )
 endif()
 add_subdirectory( IbisPlugins )
