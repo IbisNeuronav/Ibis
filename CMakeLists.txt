@@ -122,7 +122,7 @@ endif()
 set( IBIS_MAJOR_VERSION 4 )
 set( IBIS_MINOR_VERSION 0 )
 set( IBIS_PATCH_VERSION 0 )
-set( IBIS_VERSION_QUALIFIER "" )                    # Dev, Alpha, Beta or nothing for official releases
+set( IBIS_VERSION_QUALIFIER "Dev" )                    # Dev, Alpha, Beta or nothing for official releases
 if( CMAKE_BUILD_TYPE MATCHES "Debug" )
     set( IBIS_BUILD_QUALIFIER "Debug" )
 endif( CMAKE_BUILD_TYPE MATCHES "Debug" )
