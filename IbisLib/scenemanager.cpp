@@ -806,6 +806,8 @@ void SceneManager::RemoveObject( SceneObject * object )
 
     // remove all children
     this->RemoveAllChildrenObjects(object);
+    // removing children may change index on the ALLObjects list
+    indexAll = this->AllObjects.indexOf( object );
 
     // simtodo : assert position != -1
     int position = object->GetObjectListableIndex();
