@@ -179,3 +179,15 @@ void TrackedSceneObject::InternalUpdateWorldTransform()
         m_uncalibratedWorldTransform->Concatenate( Parent->GetWorldTransform() );
     m_uncalibratedWorldTransform->Concatenate( m_transform );
 }
+
+void TrackedSceneObject::ObjectAboutToBeRemovedFromScene()
+{
+    // We mark the object as not driven by hardware, removing it from the list of tracked objects.
+    // We also mark it as not managed by tracker and not managed by system.
+    // We have to remember that the object is known to the SceneManager until it is removed from the list of all objects.
+    // Before the final removal from the list there are many callbacks that may access the object and we do not want it
+    // to be treated as a special object.
+    this->SetHardwareModule( nullptr );
+    this->SetObjectManagedBySystem( false );
+    this->SetObjectManagedByTracker( false );
+}
