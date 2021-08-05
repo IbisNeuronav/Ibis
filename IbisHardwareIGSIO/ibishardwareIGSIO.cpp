@@ -18,6 +18,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "usprobeobject.h"
 #include "cameraobject.h"
 #include "polydataobject.h"
+#include "trackedsceneobject.h"
 
 #include <QDir>
 #include <QMenu>
@@ -148,6 +149,7 @@ void IbisHardwareIGSIO::ClearConfig()
         delete tool;
     }
     m_tools.clear();
+    m_deviceToolAssociations.clear();
     ShutDownLocalServers();
 }
 
@@ -211,6 +213,16 @@ void IbisHardwareIGSIO::RemoveToolObjectsFromScene()
 {
     foreach( Tool * tool, m_tools )
     {
+        TrackedSceneObject * toolObject = TrackedSceneObject::SafeDownCast( tool->sceneObject );
+// This next 3 calls will mark the object as not driven by hardware, removing it from the list of tracked objects.
+// We also mark it as not managed by tracker and not managed by system.
+// We have to remember that the object is known to the SceneManager until it is removed from the list of all objects.
+// Before the final removal from the list there are many callbacks that may access the object and we do not want it
+// to be treated as a special object.
+        toolObject->SetHardwareModule( nullptr );
+        toolObject->SetObjectManagedBySystem( false );
+        toolObject->SetObjectManagedByTracker( false );
+// Finally we remove the object
         GetIbisAPI()->RemoveObject( tool->sceneObject );
     }
 }
