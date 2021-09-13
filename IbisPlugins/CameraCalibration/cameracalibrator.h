@@ -14,6 +14,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #define __CameraCalibrator_h_
 
 #include "opencv2/opencv.hpp"
+#include <opencv2/highgui/highgui_c.h>
+#include "opencv2/calib3d/calib3d_c.h"
 #include "cameraobject.h"
 
 class vtkImageData;
