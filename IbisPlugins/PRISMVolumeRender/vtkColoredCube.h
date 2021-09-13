@@ -21,15 +21,10 @@ public:
 
   static vtkColoredCube *New();
   vtkTypeMacro(vtkColoredCube,vtkObject);
-  void PrintSelf(ostream& os, vtkIndent indent);
+  void PrintSelf(ostream& os, vtkIndent indent) override;
 
   void UpdateGeometry( vtkRenderer * ren, vtkMatrix4x4 * mat );
   void Render();
-
-  // Description:
-  // Release any graphics resources that are being consumed by this actor.
-  // The parameter window could be used to determine which graphic
-  // resources to release.
   void ReleaseGraphicsResources(vtkWindow *);
 
   // Description:
@@ -49,6 +44,11 @@ protected:
   ~vtkColoredCube();
 
   // Drawing the bounding box
+  unsigned Vao;
+  unsigned VertexBuffer;
+  unsigned ColorBuffer;
+  unsigned IndicesBuffer;
+
   int Cropping;
   double Bounds[6];
   double CroppingRegionPlanes[6];

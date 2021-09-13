@@ -281,6 +281,11 @@ void PointerObject::ManagerAddPointerPickedPointsObject()
     this->GetManager()->AddObject( this->CurrentPointerPickedPointsObject );
 }
 
+void PointerObject::SetCurrentPointerPickedPointsObject(vtkSmartPointer<PointsObject> obj)
+{
+    this->CurrentPointerPickedPointsObject = obj;
+}
+
 void PointerObject::CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets )
 {
     PointerObjectSettingsDialog *dlg = new PointerObjectSettingsDialog;

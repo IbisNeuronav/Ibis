@@ -32,6 +32,7 @@ class QTime;
 class DomeRenderState : public vtkIbisRenderState
 {
 public:
+    virtual ~DomeRenderState() {}
     virtual void GetRenderSize( vtkRenderer * ren, int size[2] );
 };
 

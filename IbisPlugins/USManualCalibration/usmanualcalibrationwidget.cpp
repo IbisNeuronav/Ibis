@@ -136,6 +136,7 @@ void USManualCalibrationWidget::UpdateUi()
     //calibResults += QString("Reprojection error: %1\n").arg( calib->GetReprojectionError() );
     //ui->calibrationResultTextEdit->setPlainText( calibResults );
     ui->resetButton->setEnabled( m_imageFrozen );
+    ui->depthComboBox->setEnabled( !m_imageFrozen );
 }
 
 void USManualCalibrationWidget::EnableManipulators( bool on )
@@ -228,7 +229,7 @@ void USManualCalibrationWidget::UpdateManipulators()
     probeMat->Invert();
 
     vtkMatrix4x4 * phantomMat = vtkMatrix4x4::New();
-    SceneObject * phantom = m_pluginInterface->GetCalibrationPhantomObject();
+    SceneObject * phantom = m_pluginInterface->GetPhantomWiresObject();
     phantom->GetWorldTransform()->GetMatrix( phantomMat );
 
     // for each manipulator
@@ -320,7 +321,7 @@ void USManualCalibrationWidget::OnManipulatorsModified()
     {
         // Compute each manipulator's center point position in phantom coordinate
         vtkMatrix4x4 * phantomToWorldMat = vtkMatrix4x4::New();
-        m_pluginInterface->GetCalibrationPhantomObject()->GetWorldTransform()->GetMatrix( phantomToWorldMat );
+        m_pluginInterface->GetPhantomWiresObject()->GetWorldTransform()->GetMatrix( phantomToWorldMat );
         double manipWorldCoords[4][4];
         for( int i = 0; i < 4; ++i )
         {
@@ -425,4 +426,12 @@ void USManualCalibrationWidget::on_resetButton_clicked()
     m_manipulators[ 3 ]->SetMiddlePoint( 0.5 );
 
     OnManipulatorsModified();
+}
+
+void USManualCalibrationWidget::on_depthComboBox_currentIndexChanged(int index)
+{
+    if( m_pluginInterface )
+    {
+        m_pluginInterface->SetPhatonSize(index);
+    }
 }

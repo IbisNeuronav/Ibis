@@ -97,6 +97,7 @@ private slots:
     void GeneratePluginsMenuActionTriggered();
     void MainSplitterMoved( int pos, int index );
     void SaveScene(bool);
+    void Preferences();
 
 protected:
 

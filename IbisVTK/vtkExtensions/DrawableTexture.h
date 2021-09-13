@@ -13,16 +13,21 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef __DrawableTexture_h_
 #define __DrawableTexture_h_
 
-class DrawableTexture
+#include "vtkObject.h"
+
+class GlslShader;
+class vtkOpenGLState;
+
+class DrawableTexture : public vtkObject
 {
 
 public:
 
-    DrawableTexture();
-    ~DrawableTexture();
+    static DrawableTexture *New();
+    vtkTypeMacro(DrawableTexture,vtkObject);
 	
     void UseByteTexture();
-    bool Init( int width, int height );
+    bool Init( int width, int height, vtkOpenGLState * s );
 	void Resize( int width, int height );
 	void Release();
 	
@@ -37,6 +42,10 @@ public:
 
 protected:
 
+    DrawableTexture();
+    ~DrawableTexture();
+
+    void RenderPlane( int x, int y, int width, int height );
     void BindFramebuffer();
     void UnBindFramebuffer();
 	
@@ -46,6 +55,14 @@ protected:
 	int m_width;
 	int m_height;
     unsigned m_backupFramebuffer;
+
+    GlslShader * m_pasteShader;
+    GlslShader * m_clearShader;
+
+private:
+
+    DrawableTexture(const DrawableTexture&); // Not implemented.
+    void operator=(const DrawableTexture&);  // Not implemented.
 };
 
 #endif
