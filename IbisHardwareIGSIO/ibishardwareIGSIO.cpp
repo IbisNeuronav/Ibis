@@ -148,6 +148,7 @@ void IbisHardwareIGSIO::ClearConfig()
         delete tool;
     }
     m_tools.clear();
+    m_deviceToolAssociations.clear();
     ShutDownLocalServers();
 }
 
