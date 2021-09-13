@@ -59,6 +59,7 @@ public:
 protected:
 
     virtual void InternalUpdateWorldTransform();
+    virtual void ObjectAboutToBeRemovedFromScene() override;
 
     HardwareModule * m_hardwareModule;
 

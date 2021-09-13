@@ -73,7 +73,7 @@ protected:
 
     // SceneObject protected overloads
     virtual void ObjectAddedToScene();
-    virtual void ObjectAboutToBeRemovedFromScene();
+    virtual void ObjectAboutToBeRemovedFromScene() override;
 
     virtual void InternalPostSceneRead();
     virtual void Hide();

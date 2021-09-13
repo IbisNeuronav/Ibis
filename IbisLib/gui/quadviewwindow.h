@@ -12,9 +12,9 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #define __QuadViewWindow_h_
 
 #include <QVariant>
-#include <QWidget>
 #include "serializer.h"
 #include <QObject>
+#include <QVTKRenderWidget.h>
 
 class QVBoxLayout;
 class QHBoxLayout;
@@ -24,14 +24,10 @@ class QSpacerItem;
 class QSplitter;
 class QLabel;
 class QSettings;
-class QVTKWidget;
-class vtkQtRenderWindow;
-class QVTKWidget2;
 class QFrame;
+
 class SceneManager;
 class vtkRenderWindowInteractor;
-
-//#define USE_QVTKWIDGET_2
 
 class QuadViewWindow : public QWidget
 {
@@ -59,13 +55,6 @@ public slots:
     void Detach3DView( QWidget * parent );
     void Attach3DView();
     
-    void Win0NeedsRender();
-    void Win1NeedsRender();
-    void Win2NeedsRender();
-    void Win3NeedsRender();
-    
-    void RenderAll();
-    
     void ZoomInButtonClicked();
     void ZoomOutButtonClicked();
     void ResetCameraButtonClicked();
@@ -86,9 +75,7 @@ public slots:
 protected:
 
     QAbstractButton * CreateToolButton( QWidget * parent, QString name, QString iconPath, QString toolTip, const char * callbackSlot );
-    void MakeOneView( int index, const char * name );
-
-    void WinNeedsRender( int winIndex );
+    void MakeOneWidget( int index, const char * name );
 
     // reimplemented from QObject. Filters event sent to children. Used to track focus
     bool eventFilter(QObject *obj, QEvent *event);
@@ -108,11 +95,8 @@ protected:
     QGridLayout *m_viewWindowsLayout;
 
     static const QString ViewNames[4];
-#ifdef USE_QVTKWIDGET_2
-    QVTKWidget2 * m_vtkWindows[4];
-#else
-    vtkQtRenderWindow * m_vtkWindows[4];
-#endif
+
+    QVTKRenderWidget * m_vtkWidgets[4];
     QFrame * m_vtkWindowFrames[4];
     QVBoxLayout * m_frameLayouts[4];
 

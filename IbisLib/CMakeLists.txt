@@ -1,5 +1,21 @@
 PROJECT( IBISLIB )
 
+find_package(VTK REQUIRED NO_MODULE COMPONENTS
+    IOLegacy
+    IOXML
+    IOGeometry
+    IOPLY
+    IOImage
+    FiltersModeling
+    FiltersTexture
+    RenderingVolume
+    RenderingVolumeOpenGL2
+    RenderingFreeType
+    RenderingAnnotation
+    ImagingStencil
+    ImagingColor
+    ImagingGeneral )
+
 #================================
 # Define source files
 #================================
@@ -16,7 +32,9 @@ SET( IBISLIB_SRC
                      imageobject.cpp
                      triplecutplaneobject.cpp
                      worldobject.cpp
+                     abstractpolydataobject.cpp
                      polydataobject.cpp
+                     tractogramobject.cpp
                      pointcloudobject.cpp
                      pointsobject.cpp
                      pointrepresentation.cpp
@@ -45,6 +63,7 @@ SET( IBISLIB_SRC
                      gui/imageobjectsettingsdialog.cpp
                      gui/imageobjectvolumesettingswidget.cpp
                      gui/polydataobjectsettingsdialog.cpp
+                     gui/tractogramobjectsettingsdialog.cpp
                      gui/pointcloudobjectsettingsdialog.cpp
                      gui/worldobjectsettingswidget.cpp
                      gui/pointpropertieswidget.cpp
@@ -95,7 +114,9 @@ SET( IBISLIB_HDR_MOC
                          imageobject.h
                          triplecutplaneobject.h
                          worldobject.h
+                         abstractpolydataobject.h
                          polydataobject.h
+                         tractogramobject.h
                          pointcloudobject.h
                          pointsobject.h
                          pointrepresentation.h
@@ -115,6 +136,7 @@ SET( IBISLIB_HDR_MOC
                          gui/imageobjectsettingsdialog.h
                          gui/imageobjectvolumesettingswidget.h
                          gui/polydataobjectsettingsdialog.h
+                         gui/tractogramobjectsettingsdialog.h
                          gui/pointcloudobjectsettingsdialog.h
                          gui/worldobjectsettingswidget.h
                          gui/pointpropertieswidget.h
@@ -149,6 +171,7 @@ set( IBISLIB_UI
             gui/pointpropertieswidget.ui
             gui/pointcolorwidget.ui
             gui/polydataobjectsettingsdialog.ui
+            gui/tractogramobjectsettingsdialog.ui
             gui/pointcloudobjectsettingsdialog.ui
             gui/worldobjectsettingswidget.ui
             gui/transformeditwidget.ui
@@ -181,7 +204,10 @@ qt5_add_resources( IBISLIB_RCC_SRC ${IBISLIB_RCC})
 set( IBISLIB_all_src ${IBISLIB_SRC} ${IBISLIB_MOC} ${IBISLIB_HDR} ${IBISLIB_HDR_MOC} ${IBISLIB_HDR_UI} ${IBISLIB_RCC_SRC} )
 ADD_LIBRARY( IbisLib ${IBISLIB_all_src})
 
-target_link_libraries( IbisLib svl vtkQt vtkMNI vtkExtensions)
+target_link_libraries( IbisLib svl vtkQt vtkMNI vtkExtensions ${VTK_LIBRARIES} )
+
+vtk_module_autoinit( TARGETS IbisLib MODULES ${VTK_LIBRARIES})
+
 add_dependencies( IbisLib check_git_repository )
 target_include_directories( IbisLib PUBLIC  ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/gui
     PRIVATE ${ibis_BINARY_DIR} )

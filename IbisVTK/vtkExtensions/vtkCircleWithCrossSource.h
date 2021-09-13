@@ -55,7 +55,7 @@ protected:
     vtkCircleWithCrossSource();
     ~vtkCircleWithCrossSource() {}
 
-    virtual int RequestData(vtkInformation* request, vtkInformationVector** inInfo, vtkInformationVector* outInfo);
+    virtual int RequestData(vtkInformation* request, vtkInformationVector** inInfo, vtkInformationVector* outInfo) override;
 
     double Center[3];
     double Radius;

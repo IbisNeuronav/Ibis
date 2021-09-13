@@ -1,17 +1,16 @@
+project(vtkQt)
+
+find_package(VTK REQUIRED NO_MODULE COMPONENTS GUISupportQt ImagingStatistics )
+
 SET( IBIS_VTK_QT_SRC
            vtkQtImageViewer.cpp
            vtkQtMatrixDialog.cpp
            vtkQtHistogramWidget.cpp
            vtkQtPiecewiseFunctionWidget.cpp
-           vtkQtColorTransferFunctionWidget.cpp
-           vtkqtrenderwindow.cpp )
+           vtkQtColorTransferFunctionWidget.cpp )
 
-SET( IBIS_VTK_QT_HDR_MOC vtkQtImageViewer.h vtkQtMatrixDialog.h vtkqtrenderwindow.h )
+SET( IBIS_VTK_QT_HDR_MOC vtkQtImageViewer.h vtkQtMatrixDialog.h )
 set( IBIS_VTK_QT_PLUGIN_HDR_MOC vtkQtHistogramWidget.h vtkQtPiecewiseFunctionWidget.h vtkQtColorTransferFunctionWidget.h )
-
-if(APPLE)
-    set( IBIS_VTK_QT_SRC ${IBIS_VTK_QT_SRC} retinadisplayhack.mm retinadisplayhack.h )
-endif()
 
 # moc Qt source file without a ui file
 qt5_wrap_cpp( IBIS_VTK_QT_MOC ${IBIS_VTK_QT_HDR_MOC} )
@@ -24,8 +23,10 @@ qt5_wrap_cpp( IBIS_VTK_QT_PLUGIN_MOC ${IBIS_VTK_QT_PLUGIN_HDR_MOC} )
 set( vtkQt_all_src ${IBIS_VTK_QT_SRC} ${IBIS_VTK_QT_HDR} ${IBIS_VTK_QT_HDR_MOC} ${IBIS_VTK_QT_MOC} ${IBIS_VTK_QT_PLUGING_HDR_MOC} ${IBIS_VTK_QT_PLUGIN_MOC} )
 ADD_LIBRARY( vtkQt  ${vtkQt_all_src} )
 
-target_link_libraries( vtkQt vtkMNI vtkExtensions )
+target_link_libraries( vtkQt vtkMNI vtkExtensions ${VTK_LIBRARIES} )
 target_include_directories( vtkQt PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} )
+
+vtk_module_autoinit( TARGETS vtkQt MODULES ${VTK_LIBRARIES})
 
 IF( CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64" )
   SET_TARGET_PROPERTIES( vtkQt PROPERTIES COMPILE_FLAGS "-fPIC")

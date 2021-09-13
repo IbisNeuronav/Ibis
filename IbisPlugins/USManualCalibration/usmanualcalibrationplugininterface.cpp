@@ -19,30 +19,54 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QSettings>
 #include <QMessageBox>
 
-const double phantomPoints[16][3] = { { 0, 5, 50 },
-{ 50, 5, 50 },
-{ 0, 45, 50 },
-{ 50, 45, 50 },
-{ 0, 50, 45 },
-{ 50, 50, 45 },
-{ 0, 50, 5 },
-{ 50, 50, 5 },
-{ 0, 45, 0 },
-{ 50, 45, 0 },
-{  0, 5, 0 },
-{  50, 5, 0 },
-{  0, 0, 45 },
-{  50, 0, 45 },
-{  0, 0, 5 },
-{  50, 0, 5 } };
+const double phantomPoints[2][16][3] = {
+    // medium depth 
+  { { 0, 5, 50 },
+    { 50, 5, 50 },
+    { 0, 45, 50 },
+    { 50, 45, 50 },
+    { 0, 50, 45 },
+    { 50, 50, 45 },
+    { 0, 50, 5 },
+    { 50, 50, 5 },
+    { 0, 45, 0 },
+    { 50, 45, 0 },
+    {  0, 5, 0 },
+    {  50, 5, 0 },
+    {  0, 0, 45 },
+    {  50, 0, 45 },
+    {  0, 0, 5 },
+    {  50, 0, 5 } 
+  },
+// shallow depth
+  { { 0, 15, 40 },
+    { 50, 15, 40 },
+    {  0, 35, 40 },
+    { 50, 35, 40 },
+    {  0, 40, 35 },
+    { 50, 40, 35 },
+    {  0, 40, 15 },
+    { 50, 40, 15 },
+    {  0, 35, 10 },
+    { 50, 35, 10 },
+    {  0, 15, 10 },
+    { 50, 15, 10 },
+    {  0, 10, 35 },
+    { 50, 10, 35 },
+    {  0, 10, 15 },
+    { 50, 10, 15 }
+  }
+};
 
 USManualCalibrationPluginInterface::USManualCalibrationPluginInterface()
 {
+    m_phantomWiresObjectId = IbisAPI::InvalidId;
     m_calibrationPhantomObjectId = IbisAPI::InvalidId;
     m_phantomRegSourcePointsId = IbisAPI::InvalidId;
     m_phantomRegTargetPointsId = IbisAPI::InvalidId;
     m_landmarkRegistrationObjectId = IbisAPI::InvalidId;
     m_usProbeObjectId = IbisAPI::InvalidId;
+    m_currentPhantomSize = PhantomSize::MEDIUMDEPTH;
 }
 
 USManualCalibrationPluginInterface::~USManualCalibrationPluginInterface()
@@ -66,7 +90,7 @@ QWidget * USManualCalibrationPluginInterface::CreateFloatingWidget()
         return 0;
     }
 
-    BuildCalibrationPhantomRepresentation();
+    BuildWiresRepresentation();
 
     USManualCalibrationWidget * calibrationWidget = new USManualCalibrationWidget;
     calibrationWidget->SetPluginInterface( this );
@@ -81,10 +105,14 @@ bool USManualCalibrationPluginInterface::WidgetAboutToClose()
 {
     if( m_landmarkRegistrationObjectId != IbisAPI::InvalidId )
     {
-        SceneObject *phantom = this->GetIbisAPI()->GetObjectByID( m_calibrationPhantomObjectId );
+        SceneObject *phantom = this->GetIbisAPI()->GetObjectByID(m_phantomWiresObjectId);
         if( phantom )
             this->GetIbisAPI()->RemoveObject( phantom );
+        SceneObject * model = this->GetIbisAPI()->GetObjectByID(m_calibrationPhantomObjectId);
+        if( model )
+            this->GetIbisAPI()->RemoveObject(model);
         this->GetIbisAPI()->RemoveObject( this->GetIbisAPI()->GetObjectByID( m_landmarkRegistrationObjectId ) );
+        m_phantomWiresObjectId = IbisAPI::InvalidId;
         m_calibrationPhantomObjectId = IbisAPI::InvalidId;
         m_phantomRegSourcePointsId = IbisAPI::InvalidId;
         m_phantomRegTargetPointsId = IbisAPI::InvalidId;
@@ -129,42 +157,99 @@ void USManualCalibrationPluginInterface::ValidateUsProbe()
 #include "vtkPoints.h"
 #include "vtkCellArray.h"
 
-void USManualCalibrationPluginInterface::BuildCalibrationPhantomRepresentation()
+void USManualCalibrationPluginInterface::BuildWiresRepresentation()
 {
-    bool needNewRepresentation = m_calibrationPhantomObjectId == IbisAPI::InvalidId;
-    needNewRepresentation |= GetIbisAPI()->GetObjectByID( m_calibrationPhantomObjectId ) == 0;
+    // Build wire representation
+    bool needNewRepresentation = m_phantomWiresObjectId == IbisAPI::InvalidId;
+    needNewRepresentation |= GetIbisAPI()->GetObjectByID(m_phantomWiresObjectId) == 0;
     if( !needNewRepresentation )
         return;
 
     vtkPolyData * phantomLinesPoly = vtkPolyData::New();
     vtkPoints * phantomLinesPoints = vtkPoints::New();
 
-    phantomLinesPoints->SetNumberOfPoints( 16 );
+    phantomLinesPoints->SetNumberOfPoints(16);
     for( int i = 0; i < 16; ++i )
-        phantomLinesPoints->SetPoint( i, phantomPoints[i] );
+        phantomLinesPoints->SetPoint(i, phantomPoints[m_currentPhantomSize][i]);
 
     vtkIdType pts[4][4] = {{0,1,2,3},{4,5,6,7},{8,9,10,11},{12,13,14,15}};
     vtkCellArray * lines = vtkCellArray::New();
-    for( int i = 0; i < 4; i++ ) lines->InsertNextCell( 4, pts[i] );
-    phantomLinesPoly->SetPoints( phantomLinesPoints );
-    phantomLinesPoly->SetLines( lines );
+    for( int i = 0; i < 4; i++ ) lines->InsertNextCell(4, pts[i]);
+    phantomLinesPoly->SetPoints(phantomLinesPoints);
+    phantomLinesPoly->SetLines(lines);
 
     PolyDataObject * phantomObject = PolyDataObject::New();
-    phantomObject->SetName( "US Calib Phantom" );
-    phantomObject->SetCanChangeParent( false );
-    phantomObject->SetCanEditTransformManually( false );
-    phantomObject->SetNameChangeable( false );
+    phantomObject->SetName("Phantom Wires");
+    phantomObject->SetCanChangeParent(false);
+    phantomObject->SetCanEditTransformManually(false);
+    phantomObject->SetNameChangeable(false);
     //phantomObject->SetObjectDeletable( false );
-    phantomObject->SetPolyData( phantomLinesPoly );
-    GetIbisAPI()->AddObject( phantomObject );
-    m_calibrationPhantomObjectId = phantomObject->GetObjectID();
+    phantomObject->SetPolyData(phantomLinesPoly);
+    GetIbisAPI()->AddObject(phantomObject);
+    m_phantomWiresObjectId = phantomObject->GetObjectID();
 
     // Cleanup
     phantomObject->Delete();
     lines->Delete();
     phantomLinesPoints->Delete();
     phantomLinesPoly->Delete();
+}
 
+void USManualCalibrationPluginInterface::BuildCalibrationPhantomRepresentation()
+{
+    // Build model representation
+    bool needNewRepresentation = m_calibrationPhantomObjectId == IbisAPI::InvalidId;
+    needNewRepresentation |= GetIbisAPI()->GetObjectByID(m_calibrationPhantomObjectId) == 0;
+    if( !needNewRepresentation )
+        return;
+
+    // TODO: get file name from CMake
+    QString filePath( tr("../IbisPlugins/") + this->GetPluginName() + tr("/calibrationPhantomModel.ply") );
+    if( QFile(filePath).exists() )
+    {
+        OpenFileParams * params = new OpenFileParams;
+        params->AddInputFile(filePath, tr("Phantom Model"));
+        this->GetIbisAPI()->OpenFiles(params);
+        if( params->filesParams[0].loadedObject )
+        {
+            params->filesParams[0].loadedObject->SetCanChangeParent(false);
+            params->filesParams[0].loadedObject->SetCanEditTransformManually(false);
+            params->filesParams[0].loadedObject->SetNameChangeable(false);
+            m_calibrationPhantomObjectId = params->filesParams[0].loadedObject->GetObjectID();
+        }
+    }
+}
+
+void USManualCalibrationPluginInterface::UpdateWiresRepresentation()
+{
+    bool needNewRepresentation = m_phantomWiresObjectId == IbisAPI::InvalidId;
+    PolyDataObject * phantomObject = PolyDataObject::SafeDownCast(GetIbisAPI()->GetObjectByID(m_phantomWiresObjectId));
+    if( needNewRepresentation | (phantomObject == 0) )
+    {
+        this->BuildWiresRepresentation();
+        return;
+    }
+
+    vtkPolyData * phantomLinesPoly = phantomObject->GetPolyData();
+    Q_ASSERT(phantomLinesPoly->GetNumberOfPoints() == 16);
+
+    vtkPoints * phantomLinesPoints = vtkPoints::New();
+    vtkCellArray * lines = vtkCellArray::New();
+
+    phantomLinesPoints->SetNumberOfPoints(16);
+    for( int i = 0; i < 16; ++i )
+        phantomLinesPoints->SetPoint(i, phantomPoints[m_currentPhantomSize][i]);
+
+    vtkIdType pts[4][4] = {{0,1,2,3},{4,5,6,7},{8,9,10,11},{12,13,14,15}};    
+    for( int i = 0; i < 4; i++ ) lines->InsertNextCell(4, pts[i]);
+    
+    phantomLinesPoly->DeleteCells();
+    phantomLinesPoly->SetPoints(phantomLinesPoints);
+    phantomLinesPoly->SetLines(lines);
+    phantomObject->Modified();
+
+    // Cleanup
+    lines->Delete();
 }
 
 #include "pointsobject.h"
@@ -176,9 +261,13 @@ void USManualCalibrationPluginInterface::StartPhantomRegistration()
     const char * pointNames[4] = { "One", "Two", "Three", "Four" };
     double pointCoords[4][3] = { { 0, -17.5, 53 }, { 50, -17.5, 53 }, { 42, 112.5, 53 }, {  10, 80, 53 } };
 
+    if( m_phantomWiresObjectId == IbisAPI::InvalidId )
+        BuildWiresRepresentation();
+    SceneObject * wiresObject = GetIbisAPI()->GetObjectByID(m_phantomWiresObjectId);
+
     if( m_calibrationPhantomObjectId == IbisAPI::InvalidId )
         BuildCalibrationPhantomRepresentation();
-    SceneObject * phantomObject = GetIbisAPI()->GetObjectByID( m_calibrationPhantomObjectId );
+    SceneObject * phantomObject = GetIbisAPI()->GetObjectByID(m_calibrationPhantomObjectId);
 
     // Add source and target points to scene
     PointsObject * sourcePoints = PointsObject::SafeDownCast( GetIbisAPI()->GetObjectByID( m_phantomRegSourcePointsId ) );
@@ -217,6 +306,7 @@ void USManualCalibrationPluginInterface::StartPhantomRegistration()
     m_phantomRegSourcePointsId = sourcePoints->GetObjectID();
     m_phantomRegTargetPointsId = targetPoints->GetObjectID();
 
+    GetIbisAPI()->ChangeParent( wiresObject, regObj, 0 );
     GetIbisAPI()->ChangeParent( phantomObject, regObj, 0 );
     regObj->SelectPoint( 0 );
     GetIbisAPI()->SetCurrentObject( regObj );
@@ -229,11 +319,27 @@ void USManualCalibrationPluginInterface::StartPhantomRegistration()
 
  const double * USManualCalibrationPluginInterface::GetPhantomPoint( int nIndex, int pointIndex )
  {
-     return phantomPoints[ nIndex * 4 + pointIndex ];
+     return phantomPoints[m_currentPhantomSize][ nIndex * 4 + pointIndex ];
  }
 
- SceneObject * USManualCalibrationPluginInterface::GetCalibrationPhantomObject()
+ SceneObject * USManualCalibrationPluginInterface::GetPhantomWiresObject()
  {
-     SceneObject * obj = GetIbisAPI()->GetObjectByID( m_calibrationPhantomObjectId );
+     SceneObject * obj = GetIbisAPI()->GetObjectByID(m_phantomWiresObjectId);
      return obj;
+ }
+
+ void USManualCalibrationPluginInterface::SetPhatonSize(int index)
+ {
+     switch( index )
+     {
+        case 0:
+            m_currentPhantomSize = PhantomSize::MEDIUMDEPTH;
+            break;
+        case 1:
+            m_currentPhantomSize = PhantomSize::SHALLOWDEPTH;
+            break;
+        default:
+            m_currentPhantomSize = PhantomSize::MEDIUMDEPTH;
+     }
+     UpdateWiresRepresentation();
  }

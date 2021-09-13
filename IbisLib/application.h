@@ -163,7 +163,7 @@ public:
     // Getting data from files
     bool GetPointsFromTagFile(QString fileName, PointsObject *pts1, PointsObject *pts2 );
 
-    // Dwtting US Acquisitions
+    // Getting US Acquisitions
     int GetNumberOfComponents( QString filename );
     bool GetGrayFrame( QString filename, IbisItkUnsignedChar3ImageType::Pointer itkImage );
     bool GetRGBFrame( QString filename, IbisRGBImageType::Pointer itkImage );
@@ -185,6 +185,7 @@ public:
     void SaveScene( QString fileName );
 
     IbisPreferences *GetIbisPreferences() { return m_preferences; }
+    void Preferences();
 
 public slots:
     void UpdateProgress( QProgressDialog*, int current );
@@ -193,7 +194,6 @@ public slots:
 private slots:
 
     void OpenFilesProgress();
-    void Preferences();
 
 signals:
 
