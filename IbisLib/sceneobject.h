@@ -30,6 +30,13 @@ class QWidget;
 class SceneManager;
 class vtkEventQtSlotConnect;
 
+/**
+ * @class   SceneObject
+ * @brief   It is the basic object used to build a scene, all other objects are derived from SceneObject
+ *
+ *  SceneObject defines common properties of all objects and their basic functionality.
+ */
+
 class SceneObject : public QObject, public vtkObject, public ViewInteractor
 {
     
@@ -44,74 +51,175 @@ public:
     SceneObject();
     virtual ~SceneObject();
   
+    /**
+     * Read/write properties of the object in xml format
+     * Every object has to override this function.
+     */
     virtual void Serialize( Serializer * ser );
+    /**
+     * Adjust object after loading a scene
+     * Other objects override this function if needed.
+     */
     virtual void PostSceneRead();
+    /**
+     * Export object with its properties in the format proper to the object type
+     * Other objects override this function if they can be exported.
+     */
     virtual void Export();
+    /**
+     * Is it possible to export the given object?
+     * Every object has to override this function.
+     */
     virtual bool IsExportable() { return false; }
 
+    ///@{
+    /** Set/Get the ObjectID */
     vtkSetMacro( ObjectID, int );
     vtkGetMacro( ObjectID, int );
+    ///@}
+
+    /** @name Object Name and File Info
+     * @brief  Getting and setting object and object file names
+     */
+    ///@{
+    /** Get object name */
     QString GetName() { return this->Name; }
+    /** Set object name */
     virtual void SetName( QString name );
+    /** Check if it is possible to change object name */
     bool CanChangeName() { return NameChangeable; }
+    /** Allow/disallow changing object name */
     virtual void SetNameChangeable( bool c ) { NameChangeable = c; }
+    /** Return the name of the file containing the object */
     QString GetDataFileName() { return this->DataFileName; }
+    /** Set the name of the file containing the object */
     void SetDataFileName( QString DataFileName );
+    /** Return file name including the path */
     QString GetFullFileName() { return this->FullFileName; }
+    /** Set file name including the path */
     void SetFullFileName( QString FullFileName ) {this->FullFileName = FullFileName;}
+    //@}
 
+    /** @name Object Transforms
+     * @brief  Getting and setting object transforms
+     */
+    ///@{
+    /** Set local transform */
     void SetLocalTransform(vtkTransform *localTransform );
+    /** Get local transform */
     vtkTransform *GetLocalTransform( );
+    /** Get world transform */
     vtkTransform *GetWorldTransform( );
+    /** Find out if local transform can be set manually */
     bool CanEditTransformManually() { return AllowManualTransformEdit; }
+    /** Allow/disallow manual transform change */
     void SetCanEditTransformManually( bool c ) { AllowManualTransformEdit = c; }
-
-    // Next 2 functions used in the case where many modifs have to be done on the
-    // transforms and we don't want to issue a WorldTransformChanged signal every time.
+    /** Set a flag telling the system  that many modifs have to be done on the\
+    transforms and we don't want to issue a WorldTransformChanged signal every time. */
     void StartModifyingTransform();
+    /** Inform the system that transform modifications are finished. */
     void FinishModifyingTransform();
-    
+    ///@}
+
+
+    /** @name Object and Views
+     * @brief  Setting and releasing object in views
+     */
+    ///@{
+    /** Setup object in a specific view */
     virtual void Setup( View * view );
+    /** Prepare object before rendering, it may be specific to the given object type */
     virtual void PreDisplaySetup();
+    /** Release object from a specific view */
     virtual void Release( View * view );
+    /** Release object from all views */
     virtual void ReleaseAllViews();
+    ///@}
+
+
+    /** @name Create Settings Dialogs
+     * @brief Setting dialog allows changing objects patameters (color, opacity, etc.).
+     */
+    ///@{
+    /** Create basic settings dialog */
     virtual QWidget * CreateSettingsDialog( QWidget * parent );
-    virtual void CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets) {};
+    /** Create widgets specific to the object, they are added as tabs to the basic settings dialog. */
+    virtual void CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets) {}
+    /** Create tab widget that will show object transforms */
     QWidget * CreateTransformEditWidget( QWidget * parent );
+    ///@}
 
+    /** @name Show and Hide
+     * @brief Showing and hiding objects in views
+     */
+    ///@{
+    /** Hide the object and all its children */
     virtual void SetHiddenWithChildren( bool hide );
+    /** Hide all object's children, leave the object in view */
     virtual void SetHiddenChildren(SceneObject * parent, bool hide);
+    /** Check if the object is hidden */
     bool IsHidden() { return this->ObjectHidden; }
+    /** Hide the object, children remain in view */
     void SetHidden( bool h );
+    /** Check if hiding the object is allowed */
     bool IsHidable() { return AllowHiding; }
+    /** Allow/disallow hiding of the object */
     virtual void SetHidable( bool h ) { AllowHiding = h; }
-        
-    void AddChild( SceneObject * child );
-    void InsertChild( SceneObject * child, int index );
-    void RemoveChild( SceneObject * child );
-    int GetNumberOfChildren();
-    SceneObject * GetChild( int index );
-    SceneObject * GetChild( const QString & objectName );
-    int GetChildIndex( SceneObject * child );
-    int GetChildListableIndex( SceneObject * child );
-    int GetObjectIndex();
-    int GetObjectListableIndex();
-    SceneObject * GetParent() { return this->Parent; }
-    bool CanAppendChildren() { return AllowChildren; }
-    void SetCanAppendChildren( bool c ) { AllowChildren = c; }
-    bool CanChangeParent() { return AllowChangeParent; }
-    void SetCanChangeParent( bool c ) { AllowChangeParent = c; }
-    bool DescendsFrom( SceneObject * obj );
+    ///@}
 
+    /** @name Children
+     * @brief Object position, adding, removing and accessing children snd parent objects.
+     */
+    ///@{
+    /** Add a child to the object */
+    void AddChild( SceneObject * child );
+    /** Add a child to the object at a specific position */
+    void InsertChild( SceneObject * child, int index );
+    /** Remove one child */
+    void RemoveChild( SceneObject * child );
+    /** Get the number of all object's children */
+    int GetNumberOfChildren();
+    /** Get child at a specific position */
+    SceneObject * GetChild( int index );
+    /** Get child by name */
+    SceneObject * GetChild( const QString & objectName );
+    /** Get child's position */
+    int GetChildIndex( SceneObject * child );
+    /** Get listable child's position */
+    int GetChildListableIndex( SceneObject * child );
+    /** Get object's position */
+    int GetObjectIndex();
+    /** Get listable object's position */
+    int GetObjectListableIndex();
+    /** Get object's parent */
+    SceneObject * GetParent() { return this->Parent; }
+    /** Check if object can have children */
+    bool CanAppendChildren() { return AllowChildren; }
+    /** Allow/disallow children */
+    void SetCanAppendChildren( bool c ) { AllowChildren = c; }
+    /** Check if object can change parent */
+    bool CanChangeParent() { return AllowChangeParent; }
+    /** Allow/disallow changing parent */
+    void SetCanChangeParent( bool c ) { AllowChangeParent = c; }
+    /** Check object's descent */
+    bool DescendsFrom( SceneObject * obj );
+    /** Get number of the objects that are listed in the objects tree */
+    int GetNumberOfListableChildren();
+    /** Get a listable child at a specific position */
+    SceneObject * GetListableChild( int index );
+    /** Check if the object is listed in the objects tree */
+    bool IsListable() { return ObjectListable; }
+    /** Allow/disallow listing object in the objects tree */
+    void SetListable( bool l );
+    ///@}
+
+    /** Convert world coordinates to local coordinates */
     void WorldToLocal(double worldPoint[3], double localPoint[3] );
+    /** Convert local coordinates to world coordinates */
     void LocalToWorld(double localPoint[3], double worldPoint[3] );
 
     bool IsUserObject();
 
-    int GetNumberOfListableChildren();
-    SceneObject * GetListableChild( int index );
-    bool IsListable() { return ObjectListable; }
-    void SetListable( bool l );
 
     bool IsManagedBySystem() { return ObjectManagedBySystem; }
     vtkSetMacro( ObjectManagedBySystem, bool );
