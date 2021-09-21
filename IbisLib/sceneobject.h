@@ -52,17 +52,17 @@ public:
     virtual ~SceneObject();
   
     /**
-     * Read/write properties of the object in xml format
+     * Read/write properties of the object in xml format.
      * Every object has to override this function.
      */
     virtual void Serialize( Serializer * ser );
     /**
-     * Adjust object after loading a scene
+     * Adjust object after loading a scene.
      * Other objects override this function if needed.
      */
     virtual void PostSceneRead();
     /**
-     * Export object with its properties in the format proper to the object type
+     * Export object with its properties in the format proper to the object type.
      * Other objects override this function if they can be exported.
      */
     virtual void Export();
@@ -218,36 +218,53 @@ public:
     /** Convert local coordinates to world coordinates */
     void LocalToWorld(double localPoint[3], double worldPoint[3] );
 
+    /** Check if the object  was user created */
     bool IsUserObject();
 
 
+    /** Check if it is a system object */
     bool IsManagedBySystem() { return ObjectManagedBySystem; }
+    /** Allow/disallow setting object as a system object */
     vtkSetMacro( ObjectManagedBySystem, bool );
 
+    /** Check if the object is controlled by tracker */
     bool IsManagedByTracker() { return ObjectManagedByTracker; }
+    /** Allow/disallow managing by tracker */
     vtkSetMacro( ObjectManagedByTracker, bool );
 
+    /** Allow/disallow deleting of the object */
     virtual void SetObjectDeletable( bool d ) { ObjectDeletable = d; }
+    /** Check if the object can be deleted */
     bool IsObjectDeletable() { return ObjectDeletable; }
 
+    /** Check if the object is added to the scene */
     bool IsObjectInScene() { return this->Manager != 0; }
 
+    /** Get  pointer to SceneManager */
     vtkGetObjectMacro( Manager, SceneManager );
 
-    // Try to pick a 3D position only on that particular SceneObject
+    /** Try to pick a 3D position only on that particular SceneObject */
     virtual bool Pick( View * v, int x, int y, double pickedPos[3] ) { return false; }
 
+    ///@{
+    /** Set/Get the RenderLayer */
     vtkGetMacro( RenderLayer, int );
     vtkSetMacro( RenderLayer, int );
-      
+    ///@}
+
 signals:
 
+    /** @name Signals
+     * @brief Signals are emitted when there are changes affecting the scene and other objects.
+     */
+    ///@{
     void NameChanged();
     void AttributesChanged( SceneObject * );
     void ObjectModified();
     void RemovingFromScene();
     void WorldTransformChangedSignal();
     void FinishedReading();
+    ///@}
 
 public slots:
 
@@ -256,7 +273,6 @@ public slots:
     
 protected:
 
-    // Give subclasses a chance to react
     virtual void ObjectAddedToScene() {}
     virtual void ObjectAboutToBeRemovedFromScene() {}
     virtual void ObjectRemovedFromScene() {}
@@ -266,17 +282,24 @@ protected:
     QString GetSceneDataDirectoryForThisObject( QString baseDir );
     virtual void InternalPostSceneRead() {}
     virtual void WorldTransformChanged();
-    virtual void InternalWorldTransformChanged() {} // let subclass react to the change in transform
+    /** let subclass react to the change in transform */
+    virtual void InternalWorldTransformChanged() {}
     
+    /** Name of the object to display on the list. */
+    QString Name;
+    /** Just the name of the file. */
+    QString DataFileName;
+    /** Name of the data file including full path. */
+    QString FullFileName;
 
-    QString Name; // name to display on the list
-    QString DataFileName; // just the name of the file
-    QString FullFileName; // name of the data file including full path
 
-    // Transforms:
+    /** @name Transforms
+     */
+    ///@{
     virtual void UpdateWorldTransform();
     bool IsModifyingTransform;
     bool TransformModified;
+    ///@}
 
     vtkSmartPointer<vtkEventQtSlotConnect> m_vtkConnections;
     
