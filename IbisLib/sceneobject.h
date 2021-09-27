@@ -114,7 +114,7 @@ public:
     bool CanEditTransformManually() { return AllowManualTransformEdit; }
     /** Allow/disallow manual transform change */
     void SetCanEditTransformManually( bool c ) { AllowManualTransformEdit = c; }
-    /** Set a flag telling the system  that many modifs have to be done on the\
+    /** Set a flag telling the system  that many modifs have to be done on the
     transforms and we don't want to issue a WorldTransformChanged signal every time. */
     void StartModifyingTransform();
     /** Inform the system that transform modifications are finished. */
@@ -153,13 +153,13 @@ public:
      * @brief Showing and hiding objects in views
      */
     ///@{
-    /** Hide the object and all its children */
+    /** Hide/show the object and all its children */
     virtual void SetHiddenWithChildren( bool hide );
-    /** Hide all object's children, leave the object in view */
+    /** Hide/show all object's children, leave the object in view */
     virtual void SetHiddenChildren(SceneObject * parent, bool hide);
     /** Check if the object is hidden */
     bool IsHidden() { return this->ObjectHidden; }
-    /** Hide the object, children remain in view */
+    /** Hide/show the object, children remain in view */
     void SetHidden( bool h );
     /** Check if hiding the object is allowed */
     bool IsHidable() { return AllowHiding; }
@@ -285,6 +285,8 @@ protected:
     /** let subclass react to the change in transform */
     virtual void InternalWorldTransformChanged() {}
     
+    /** @name Object and Object Files
+     */
     /** Name of the object to display on the list. */
     QString Name;
     /** Just the name of the file. */
@@ -296,34 +298,60 @@ protected:
     /** @name Transforms
      */
     ///@{
+    /** Update WorldTransform after modifying LocalTransform. */
     virtual void UpdateWorldTransform();
+    /** When IsModifyingTransform flag is set true, changes to Local Transform accumulate, but WorldTransform remais unchainged. */
     bool IsModifyingTransform;
+    /** TransformModified flag is set true when LocalTransform has changed. */
     bool TransformModified;
     ///@}
 
+    /** Connect to VTK Events. */
     vtkSmartPointer<vtkEventQtSlotConnect> m_vtkConnections;
     
-    // The following vector is used to remember which actors were instanciated
-    // for every view so we can remove them or add new objects as children
+    /** The views vector is used to remember which actors were instanciated
+    for every view so we can remove them or add new objects as children */
+    ///@{
     typedef std::vector< View* > ViewContainer;
     ViewContainer Views;
-    
-    // Scene hierarchy management
-    SceneObject * Parent;
+    ///@}
+
+    /** @name Scene Hierarchy Management
+     */
+    ///@{
     typedef QList< SceneObject* > SceneObjectVec;
+    /** Vector of children of the object. */
     SceneObjectVec Children;
+    /** Parent of the object. */
+    SceneObject * Parent;
+    /** Allow/disallow children of the object. */
     bool AllowChildren;
+    /** Allow/disallow changing parent. */
     bool AllowChangeParent;
-    
+    ///@}
+
+    /** @name Other Object Properties
+     */
+    ///@{
+    /** This flag is set when the application controls the object. */
     bool ObjectManagedBySystem;
+    /** Is the object visible in the scene?. */
     bool ObjectHidden;
+    /** Allow/disallow hiding. */
     bool AllowHiding;
+    /** Allow/disallow deleting. */
     bool ObjectDeletable;
+    /** Allow/disallow name change. */
     bool NameChangeable;
+    /** Is the object listed in the object tree? */
     bool ObjectListable;
+    /** Allow/disallow changing transform */
     bool AllowManualTransformEdit;
+    /** Is it a tracked object?*/
     bool ObjectManagedByTracker;
-    int RenderLayer;  // This is an hint to determine which layer of renderer we draw on
+    ///@}
+    /** This is a hint to determine which layer of renderer we draw on. */
+    int RenderLayer;
 
 private:
 
