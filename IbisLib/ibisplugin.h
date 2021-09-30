@@ -22,6 +22,15 @@ class IbisAPI;
 class Application;
 class QSettings;
 
+/**
+ * @class   IbisPlugin
+ * @brief   base class defining plugins
+ *
+ * All IBIS plugins derive from this class.
+ * There are 3 types of plugins defined in IBIS - tool plugin, object plugin and generator plugin.
+ * Object plugin is used to create a scene object of a given type. Tool plugin will provide some functionality.
+ * Generator plugin will procedurally generate one or more scene objects.
+ */
 
 class IbisPlugin : public QObject, public vtkObject, public ViewInteractor
 {
@@ -41,11 +50,13 @@ public:
 
     virtual void Serialize( Serializer * ser ) {}
 
-    // Give plugin a chance to react before/after scene loading/saving
+    ///@{
+    /** Give plugin a chance to react before/after scene loading/saving */
     virtual void SceneAboutToLoad() {}
     virtual void SceneFinishedLoading() {}
     virtual void SceneAboutToSave() {}
     virtual void SceneFinishedSaving() {}
+    ///@}
 
 signals:
 
@@ -56,18 +67,22 @@ protected:
     IbisPlugin();
     virtual ~IbisPlugin() {}
 
-    // Give a chance to plugin to initialize things right after construction
-    // but with a valid pointer to m_ibiAPI and after settings have been loaded.
-    // This function can be overriden by every plugin to initialize its internal data.
+    /** Give a chance to plugin to initialize things right after construction
+    * but with a valid pointer to m_ibiAPI and after settings have been loaded.
+    * This function can be overriden by every plugin to initialize its internal data. */
     virtual void InitPlugin() {}
 
-    // These functions should be overriden only by the base class for each plugin type base classes.
+    ///@{
+    /** This function should be overriden only by the base class for each plugin type base classes */
     virtual void PluginTypeLoadSettings( QSettings & s ) {}
     virtual void PluginTypeSaveSettings( QSettings & s ) {}
+    ///@}
 
-    // Override this function to save settings for your plugin
+    ///@{
+    /** Override this function to save settings for your plugin. */
     virtual void LoadSettings( QSettings & s ) {}
     virtual void SaveSettings( QSettings & s ) {}
+    ///@}
 
 private:
 
@@ -79,10 +94,12 @@ private:
 
     friend class IbisAPI;
 
-    // Should only be called by Application at init and shutdown
+    ///@{
+    /** Should only be called by Application at init and shutdown. */
     void SetIbisAPI( IbisAPI * api ) { m_ibisAPI = api; }
     void BaseLoadSettings( QSettings & s );
     void BaseSaveSettings( QSettings & s );
+    ///@}
 
 };
 
