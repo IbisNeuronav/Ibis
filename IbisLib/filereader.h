@@ -29,6 +29,27 @@ class PointsObject;
 class IbisAPI;
 class OpenFileParams;
 
+/**
+ * @class   FileReader
+ * @brief   Loading data from files of different types
+ *
+ * FileReader provides access to data stored in files.
+ * Following file types are supported:
+ * Minc file: *.mnc *.mnc2 *.mnc.gz *.MNC *.MNC2 *.MNC.GZ
+ * Nifti file *.nii
+ * Object file *.obj
+ * PLY file *.ply
+ * Tag file *.tag
+ * VTK file: *.vtk *.vtp
+ * FIB file *.fib
+ * The data is used to create a corresponding SceneObject.
+ * Minc and Nifti are represented as ImageObject.
+ * Object, PLY, VTK and VTP are represented as PolyDataObject.
+ * FIB is represented as a TractogramObject.
+ *
+ * @sa
+ * IbisAPI OpenFileParams SceneManager PointsObject SceneObject ImageObject TractogramObject
+ */
 class FileReader : public QThread
 {
     Q_OBJECT
