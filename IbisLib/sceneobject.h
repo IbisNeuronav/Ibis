@@ -98,7 +98,7 @@ public:
     QString GetFullFileName() { return this->FullFileName; }
     /** Set file name including the path */
     void SetFullFileName( QString FullFileName ) {this->FullFileName = FullFileName;}
-    //@}
+    ///@}
 
     /** @name Object Transforms
      * @brief  Getting and setting object transforms
