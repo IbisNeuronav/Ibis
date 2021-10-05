@@ -59,21 +59,34 @@ public:
     FileReader( QObject * parent = 0 );
     ~FileReader();
 
+    /** Path to the directory containing MINC tools, Linux only */
     static const QString MINCToolsPathVarName;
 
+    /** Set all the attributes of the file to open */
     void SetParams( OpenFileParams * params );
-    void SetFileNames( QStringList & filenames );  // helper that eventually call SetParams
-    void GetReadObjects( QList<SceneObject*> & objects );  // helper
+    /** Helper function that eventually call SetParams. */
+    void SetFileNames( QStringList & filenames );
+    /** Return a list of objects read in from open files. */
+    void GetReadObjects( QList<SceneObject*> & objects );
 
+    /** Warnings are accumulated during reading and then returned in a list of strings. */
     const QStringList & GetWarnings() { return m_warnings; }
+    /** Return reading progress as a fraction between 0 and 1. */
     double GetProgress() { return m_progress; }
+    /** Return the name of currently processed file. */
     QString GetCurrentlyReadFile();
 
     void PrintMetadata(itk::MetaDataDictionary &dict);
+
+    /** @name MINC1 and MINC2
+     * @brief MINC1 dtecting and converting to MINC2
+     */
+    ///@{
     bool FindMincConverter();
     bool HasMincConverter();
     bool IsMINC1( QString fileName );
     bool ConvertMINC1toMINC2(QString &inputileName, QString &outputileName , bool isVideoFrame = false );
+    ///@}
     bool GetPointsDataFromTagFile( QString filename, PointsObject *pts1, PointsObject *pts2 );
 
     //Getting US acquisition files
