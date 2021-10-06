@@ -34,7 +34,9 @@ class OpenFileParams;
  * @brief   Loading data from files of different types
  *
  * FileReader provides access to data stored in files.
+ *
  * Following file types are supported:
+ *
  * Minc file: *.mnc *.mnc2 *.mnc.gz *.MNC *.MNC2 *.MNC.GZ
  * Nifti file *.nii
  * Object file *.obj
@@ -42,6 +44,7 @@ class OpenFileParams;
  * Tag file *.tag
  * VTK file: *.vtk *.vtp
  * FIB file *.fib
+ *
  * The data is used to create a corresponding SceneObject.
  * Minc and Nifti are represented as ImageObject.
  * Object, PLY, VTK and VTP are represented as PolyDataObject.
@@ -59,12 +62,12 @@ public:
     FileReader( QObject * parent = 0 );
     ~FileReader();
 
-    /** Path to the directory containing MINC tools, Linux only */
+    /** Path to the directory containing MINC tools */
     static const QString MINCToolsPathVarName;
 
     /** Set all the attributes of the file to open */
     void SetParams( OpenFileParams * params );
-    /** Helper function that eventually call SetParams. */
+    /** Helper function that eventually calls SetParams. */
     void SetFileNames( QStringList & filenames );
     /** Return a list of objects read in from open files. */
     void GetReadObjects( QList<SceneObject*> & objects );
@@ -76,24 +79,41 @@ public:
     /** Return the name of currently processed file. */
     QString GetCurrentlyReadFile();
 
+    /** Used for debugging */
     void PrintMetadata(itk::MetaDataDictionary &dict);
 
     /** @name MINC1 and MINC2
      * @brief MINC1 dtecting and converting to MINC2
      */
     ///@{
+    /** Find 2 executables - mincconvert and minccalc. */
     bool FindMincConverter();
+    /** Were both mincconvert and minccalc found? */
     bool HasMincConverter();
+    /** Is the file of MINC1 type? */
     bool IsMINC1( QString fileName );
+    /** Convert MINC1 file to MINC2 file using mincconvert, if it is a frame from US acquisition, additionaly use mincalc. */
     bool ConvertMINC1toMINC2(QString &inputileName, QString &outputileName , bool isVideoFrame = false );
     ///@}
+
+    /** Return one or two PointsObjects loaded from a tag file. */
     bool GetPointsDataFromTagFile( QString filename, PointsObject *pts1, PointsObject *pts2 );
 
-    //Getting US acquisition files
+    /** @name US acquisitions
+     * @brief Getting US acquisition files
+     */
+    ///@{
+    /** Find out if the acquisition is grayscale (1 component) or RGB */
     int GetNumberOfComponents( QString filename );
+    /** Load gray scale frame */
     bool GetGrayFrame( QString filename, IbisItkUnsignedChar3ImageType::Pointer itkImage );
+    /** Load RGB frame.*/
     bool GetRGBFrame( QString filename, IbisRGBImageType::Pointer itkImage );
+    ///@}
 
+    /** IbisAPI is used to communicate between plugins and the core of ibis application
+    *   In FileReader it is used to get from preferences the path to the directory containing MINC tools
+    */
     void SetIbisAPI(IbisAPI *api );
 
 private slots:
@@ -117,30 +137,38 @@ protected:
     bool OpenVTPFile     ( QList<SceneObject*> & readObjects, QString filename, const QString & dataObjectName = "" );
     bool OpenTagFile     ( QList<SceneObject*> & readObjects, QString filename, const QString & dataObjectName = "" );
 
+    /** Set the name to show on the objects tree together with the file name and full [ath to the file. */
     void SetObjectName( SceneObject * obj, QString objName, QString filename );
+    /** Push the warning string on the list of warnings. */
     void ReportWarning( QString warning );
 
+    /** Check if the "candidate" exists and is executable .*/
     bool FindMINCTool( QString candidate );
 
-    // Progress report
+    ///@{
+    /** Progress report */
     int m_currentFileIndex;
     double m_progress;
+    ///@}
 
-    // define stuff to read
+    ///@{
+    /** define stuff to read */
     bool m_selfAllocParams;
     OpenFileParams * m_params;
+    ///@}
 
-    // callbacks
+    /** callbacks */
     vtkEventQtSlotConnect * m_fileProgressEvent;
 
-    // Error collecting
+    /** Error collecting */
     QStringList m_warnings;
 
-    // Path to mincconvert
+    /** Path to mincconvert */
     QString m_mincconvert;
+    /** Path to minccalc */
     QString m_minccalc;
 
-    // IbisAPI to get preferences
+    /** IbisAPI is used to get the path to the directory containing MINC tools */
     IbisAPI *m_ibisAPI;
 };
 
