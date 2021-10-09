@@ -290,7 +290,7 @@ void GPU_RigidRegistration::runRegistration()
     metric->SetPercentile( percentile );
     metric->SetN( orientationSelectivity );
     metric->SetComputeMask( m_useMask );
-    metric->SetMaskThreshold( 0.5 );
+    metric->SetMaskThreshold(0.05);
     metric->SetGradientScale( gradientScale );
     GPUCostFunctionPointer costFunction = GPUCostFunctionType::New();
     costFunction->SetGPUMetric( metric );

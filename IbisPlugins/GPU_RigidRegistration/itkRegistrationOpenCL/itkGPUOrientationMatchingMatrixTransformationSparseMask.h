@@ -32,6 +32,9 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include <itkImageMaskSpatialObject.h>
 #include <itkImageRegionIteratorWithIndex.h>
+#include <itkChangeInformationImageFilter.h>
+
+#include <itkImageFileWriter.h>
 
 namespace itk
 {
@@ -168,11 +171,13 @@ public:
   using FixedImageMaskSpatialObjectPointer = typename FixedImageMaskSpatialObjectType::Pointer;
   using FixedImageMaskType = typename FixedImageMaskSpatialObjectType::ImageType;
   using FixedImageMaskPointer = typename FixedImageMaskType::Pointer;
+  using FixedImageMaskPixelType = typename FixedImageMaskType::PixelType;
 
   using MovingImageMaskSpatialObjectType = itk::ImageMaskSpatialObject< MovingImageDimension >;
   using MovingImageMaskSpatialObjectPointer = typename MovingImageMaskSpatialObjectType::Pointer;
   using MovingImageMaskType = typename MovingImageMaskSpatialObjectType::ImageType;
   using MovingImageMaskPointer = typename MovingImageMaskType::Pointer;
+  using MovingImageMaskPixelType = typename MovingImageMaskType::PixelType;
 
   itkSetMacro(FixedImageMaskSpatialObject, FixedImageMaskSpatialObjectPointer);
   itkSetMacro(MovingImageMaskSpatialObject, MovingImageMaskSpatialObjectPointer);
@@ -235,6 +240,7 @@ protected:
   cl_mem                      m_MovingImageGradientGPUImage;
 
   cl_mem                      m_MovingImageMaskGPUBuffer;
+  cl_mem                      m_FixedImageMaskGPUBuffer;
 
   InternalRealType              m_MetricValue;
 
