@@ -111,7 +111,7 @@ void GPU_RigidRegistrationWidget::on_startButton_clicked()
     if( transformObject->GetParent() )
     {
         vtkTransform * parentVtktransform = vtkTransform::SafeDownCast( transformObject->GetParent()->GetWorldTransform() );
-        Q_ASSERT_X( parentVtktransform, "VertebraRegistrationWidget::AddImageToQueue()", "Invalid transform" );
+        Q_ASSERT_X( parentVtktransform, "GPU_RigidRegistrationWidget::AddImageToQueue()", "Invalid transform" );
         rigidRegistrator->SetParentVtkTransform(parentVtktransform);
     }
 
