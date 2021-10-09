@@ -136,13 +136,14 @@ GPU_RigidRegistration::GPU_RigidRegistration( ) :
     m_numberOfPixels(16000),
     m_orientationSelectivity(2),
     m_populationSize(0),
-    m_parentVtkTransform(0),
-    m_sourceVtkTransform(0),
-    m_targetVtkTransform(0),
-    m_resultTransform(0),
-    m_targetSpatialObjectMask(0),
-    m_itkSourceImage(0),
-    m_itkTargetImage(0)
+    m_parentVtkTransform(nullptr),
+    m_sourceVtkTransform(nullptr),
+    m_targetVtkTransform(nullptr),
+    m_resultTransform(nullptr),
+    m_targetSpatialObjectMask(nullptr),
+    m_sourceSpatialObjectMask(nullptr),
+    m_itkSourceImage(nullptr),
+    m_itkTargetImage(nullptr)
 {
     m_samplingStrategy = SamplingStrategy::RANDOM;
 }
@@ -219,9 +220,16 @@ void GPU_RigidRegistration::runRegistration()
 
     if ( m_targetSpatialObjectMask )
     {
-        *this->m_debugStream << "Using mask" << std::endl;
+        *this->m_debugStream << "Using fixed mask" << std::endl;
         metric->SetFixedImageMaskSpatialObject(m_targetSpatialObjectMask);
         metric->SetUseFixedImageMask(true);
+    }
+
+    if( m_sourceSpatialObjectMask )
+    {
+        *this->m_debugStream << "Using moving mask" << std::endl;
+        metric->SetMovingImageMaskSpatialObject(m_sourceSpatialObjectMask);
+        metric->SetUseMovingImageMask(true);
     }
 
     // Initialize Transform
