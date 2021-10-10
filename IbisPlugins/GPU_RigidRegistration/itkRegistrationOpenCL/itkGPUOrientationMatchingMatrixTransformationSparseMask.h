@@ -32,9 +32,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include <itkImageMaskSpatialObject.h>
 #include <itkImageRegionIteratorWithIndex.h>
-#include <itkChangeInformationImageFilter.h>
-
-#include <itkImageFileWriter.h>
 
 namespace itk
 {

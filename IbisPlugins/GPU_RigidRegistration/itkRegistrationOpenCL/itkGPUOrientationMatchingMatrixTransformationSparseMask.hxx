@@ -26,6 +26,10 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "GPUDiscreteGaussianGradientImageFilter.h"
 #include "GPUOrientationMatchingMatrixTransformationSparseMaskKernel.h"
 
+#ifdef __OUTPUT_GRADIENTS__
+#include <itkImageFileWriter.h>
+#endif
+
 namespace itk
 {
 /**

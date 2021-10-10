@@ -16,6 +16,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <itkTimeProbesCollectorBase.h>
 #include <sstream>
 
+#include <itkImageFileReader.h>
+
 class CommandIterationUpdateOpenCL : public itk::Command
 {
 public:
