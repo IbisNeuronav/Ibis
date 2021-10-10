@@ -13,7 +13,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef __itkGPUOrientationMatchingMatrixTransformationSparseMask_hxx
 #define __itkGPUOrientationMatchingMatrixTransformationSparseMask_hxx
 
-#define __OUTPUT_GRADIENTS__
+// uncomment this line to enable output gradient images for debug
+//#define __OUTPUT_GRADIENTS__
 
 #include <itkMacro.h>
 #include <itkTimeProbe.h>
