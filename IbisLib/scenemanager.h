@@ -97,11 +97,12 @@ public:
     /** @name Getting views
      * @brief  Create and access different views
      *
+     * There are 4 main views: Saggital, Coronal, 3D and Transverese.
+     * View types and IDs are defined in ibistypes.h.
+     *
      * The next functions are used to get a pointer to one of the views of the scene.
-     * GetView(const char*) will return a view by the name passed in parameter
+     * GetViewByID(int) will return a view with the id passed in parameter
      * or 0 if no such view exists.
-     * GetView(ViewType) will return the first view it finds that is of 'type'
-     * and 0 if there is no view of this type.
      */
     ///@{
     QMap<View*, int> GetAllViews( ) {return this->Views;}
@@ -122,16 +123,27 @@ public:
      * @brief  Get and se view attributes
      */
     ///@{
+    /** Decide if main 3D view is following the reference object. */
     void Set3DViewFollowingReferenceVolume( bool follow ) { m_viewFollowsReferenceObject = follow; }
+    /** Find out if main 3D view is following the reference object. */
     bool Is3DViewFollowingReferenceVolume() { return m_viewFollowsReferenceObject; }
+    /** SetViewBackgroundColor will set the backgroud color of all views, 3D included. */
     void SetViewBackgroundColor( double * color );
+    /** SetView3DBackgroundColor will only set the backgroud color of main 3D view. */
     void SetView3DBackgroundColor( double * color );
+    /** UpdateBackgroundColor is called after updating application settings. */
     void UpdateBackgroundColor();
+    /** Get the color of all views, 3D may have different color. */
     vtkGetVector3Macro( ViewBackgroundColor, double );
+    /** Get the color of 3D view. */
     vtkGetVector3Macro( View3DBackgroundColor, double );
+    /** Get renderer of the view by view ID. */
     vtkRenderer *GetViewRenderer(int viewID);
+    /** Eneble/disable rendering in all views. */
     void SetRenderingEnabled( bool r );
+    /** Get camera view angle in main 3D view. */
     double Get3DCameraViewAngle();
+    /** Set camera view angle in main 3D view. */
     void Set3DCameraViewAngle( double angle );
     ///@}
 
