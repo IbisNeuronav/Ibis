@@ -147,22 +147,23 @@ public:
     void Set3DCameraViewAngle( double angle );
     ///@}
 
-    // Description:
-    // Utility functions to transform between reference object space and
-    // world space coordinate systems.
+    /** @name World and reference object space
+     * @brief  transform between reference object space and world space coordinate systems
+     * */
+    ///@{
     void WorldToReference( double worldPoint[3], double referencePoint[3] );
     void ReferenceToWorld( double referencePoint[3], double worldPoint[3] );
     void GetReferenceOrientation( vtkMatrix4x4 * mat );
+    ///@}
 
-    // Description:
-    // Manipulate the global cursor. The cursor is a general concept that
-    // can be used by any module as a 3D reference point. Amongst other things,
-    // its position is used to place the Triple Cut planes.
+    /** Manipulate the global cursor. The cursor is a general concept that
+     * can be used by any module as a 3D reference point. Amongst other things,
+     * its position is used to place the Triple Cut planes. */
     void GetCursorPosition( double pos[3] );
 
-    // Description:
-    // Determine whether the pos is in one of the 3 planes identified by planeType. Point is
-    // in the plane if it is closer than .5 * voxel size of the reference volume.
+
+    /** Determine whether the pos is in one of the 3 planes identified by planeType. Point is
+     * in the plane if it is closer than .5 * voxel size of the reference volume. */
     bool IsInPlane( VIEWTYPES planeType, double pos[3] );
 
     void EmitShowGenericLabel( bool );
