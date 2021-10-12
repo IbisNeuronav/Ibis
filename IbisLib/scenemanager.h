@@ -44,14 +44,18 @@ class UsProbeObject;
 class PointerObject;
 class vtkInteractor;
 
-// Scene file format version
+/** Scene file format version */
 #define IBIS_SCENE_SAVE_VERSION "6.0"
 
-// Description:
-// This class is the main interface for all 3D display. It manages the hierarchy
-// of 3D objects that compose the scene that can be displayed. It also manages
-// the list of different views of the 3D scene that can be displayed in a window
-// Furthermore, it is responsible for creating different Qt windows and/or window layouts.
+/**
+ * @class   SceneManager
+ * @brief   Management of display
+ *
+ * This class is the main interface for all 3D/2D display. It manages the hierarchy
+ * of 3D objects that compose the scene that can be displayed. It also manages
+ * the list of different views of the 3D scene that can be displayed in a window
+ * Furthermore, it is responsible for creating different Qt windows and/or window layouts.
+ * */
 
 enum STANDARDVIEW {SV_NONE, SV_FRONT, SV_BACK, SV_LEFT, SV_RIGHT, SV_TOP, SV_BOTTOM };
 
@@ -70,30 +74,36 @@ public:
     vtkTypeMacro(SceneManager,vtkObject);
 
     SceneManager();
-    ~SceneManager();
+    virtual ~SceneManager();
 
-    void Destroy(); // call instead of Delete(),  SceneManager has a lot of cleanup to do before it can be deleted
+    /** call instead of Delete(),  SceneManager has a lot of cleanup to do before it can be deleted */
+    void Destroy();
 
     void OnStartMainLoop();
 
     virtual void Serialize( Serializer * ser );
     void PostSceneRead( int n );
 
-    // Description:
-    // Create different view windows and/or window layouts
+
+    /** @name Basic layout
+     * @brief  Create different view windows and/or window layouts
+     */
+    ///@{
     QWidget * CreateQuadViewWindow( QWidget * parent );
     QWidget * CreateObjectTreeWidget( QWidget * parent );
     QWidget * CreateTrackedToolsStatusWidget( QWidget * parent );
+    ///@}
 
-    // Description:
-    // The three next functions are used to get a pointer to
-    // one of the views of the scene. GetView(const char*) will
-    // return a view by the name passed in parameter or 0 if
-    // no such view exists. GetView(ViewType) will return the
-    // first view it finds that is of 'type' and 0 if there
-    // is no view of this type. GetOrCreateView() will return
-    // a view of type 'type' if there is one, otherwise, it
-    // will create one.
+    /** @name Getting views
+     * @brief  Create and access different views
+     *
+     * The next functions are used to get a pointer to one of the views of the scene.
+     * GetView(const char*) will return a view by the name passed in parameter
+     * or 0 if no such view exists.
+     * GetView(ViewType) will return the first view it finds that is of 'type'
+     * and 0 if there is no view of this type.
+     */
+    ///@{
     QMap<View*, int> GetAllViews( ) {return this->Views;}
     int GetNumberOfViews() { return this->Views.size(); }
     vtkGetMacro(Main3DViewID,int);
@@ -107,6 +117,11 @@ public:
     View * GetMainSagittalView();
     View * GetMainTransverseView();
     View * GetViewFromInteractor( vtkRenderWindowInteractor * interactor );
+    ///@}
+    /** @name View attributes
+     * @brief  Get and se view attributes
+     */
+    ///@{
     void Set3DViewFollowingReferenceVolume( bool follow ) { m_viewFollowsReferenceObject = follow; }
     bool Is3DViewFollowingReferenceVolume() { return m_viewFollowsReferenceObject; }
     void SetViewBackgroundColor( double * color );
@@ -118,6 +133,7 @@ public:
     void SetRenderingEnabled( bool r );
     double Get3DCameraViewAngle();
     void Set3DCameraViewAngle( double angle );
+    ///@}
 
     // Description:
     // Utility functions to transform between reference object space and
