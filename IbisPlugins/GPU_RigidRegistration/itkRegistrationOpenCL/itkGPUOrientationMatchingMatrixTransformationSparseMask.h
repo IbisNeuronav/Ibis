@@ -289,9 +289,7 @@ protected:
   bool                                   m_UseMovingImageMask;
 
   InternalRealType *          m_cpuMovingImageBuffer;
-  cl_mem                      m_MovingGPUImage;
   InternalRealType *          m_cpuFixedImageBuffer;
-  cl_mem                      m_FixedGPUImage;
 
 private:
   GPUOrientationMatchingMatrixTransformationSparseMask(const Self &);   //purposely not implemented

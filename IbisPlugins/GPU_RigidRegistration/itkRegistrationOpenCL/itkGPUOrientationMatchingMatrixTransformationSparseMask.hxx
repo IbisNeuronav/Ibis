@@ -72,10 +72,7 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
   m_UseMovingImageMask = false;
   m_FixedImageMaskSpatialObject = nullptr;
   m_MovingImageMaskSpatialObject = nullptr;
-  SetSamplingStrategyToGrid();
-
-  m_MovingGPUImage = nullptr;
-  m_FixedGPUImage = nullptr;
+  SetSamplingStrategyToRandom();
 }
 
 
@@ -91,6 +88,7 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
     clReleaseMemObject(m_gpuFixedLocationSamples);
     clReleaseMemObject(m_MovingImageGradientGPUImage);
     clReleaseMemObject(m_gpuMetricAccum);
+    clReleaseMemObject(m_gpuDummy);
   }
     
 
@@ -351,7 +349,6 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
   kernelDefines << "#define THRESHOLD " << m_MaskThreshold << std::endl;
   kernelDefines << "#define DIM_3 " << std::endl;
 
-  //clReleaseKernel(m_GradientKernel);
   m_GradientKernel = CreateKernelFromString(GPUDiscreteGaussianGradientImageFilter,
       kernelDefines.str().c_str(), "SeparableNeighborOperatorFilterWithMask", "");
 
@@ -717,9 +714,10 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
   if(m_Debug)
     std::cerr << "Post-Processing Fixed Image Gradient took:\t" << clock.GetMean() << std::endl;
 
+  clReleaseKernel(m_GradientKernel);
   clReleaseMemObject(m_FixedImageGradientGPUBuffer);
   clReleaseMemObject(m_FixedImageGPUBuffer);
-
+  clReleaseMemObject(m_FixedImageMaskGPUBuffer);
   for (int d = 0; d < FixedImageDimension; ++d)
   {
     clReleaseMemObject(m_GPUDerivOperatorBuffers[d]);
@@ -834,16 +832,13 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
   }
 
   
-    std::ostringstream kernelDefines;
-    kernelDefines << "#define THRESHOLD " << m_MaskThreshold << std::endl;
-    kernelDefines << "#define DIM_3 " << std::endl;
+  std::ostringstream kernelDefines;
+  kernelDefines << "#define THRESHOLD " << m_MaskThreshold << std::endl;
+  kernelDefines << "#define DIM_3 " << std::endl;
 
-    clReleaseKernel(m_GradientKernel);
-    m_GradientKernel = CreateKernelFromString(GPUDiscreteGaussianGradientImageFilter, 
+  m_GradientKernel = CreateKernelFromString(GPUDiscreteGaussianGradientImageFilter, 
         kernelDefines.str().c_str(), "SeparableNeighborOperatorFilterWithMask", "");
   
-  
-
   int radius[3];  
   radius[0] = radius[1] = radius[2] = 0;
   for(int i=0; i<MovingImageDimension; i++)
@@ -984,22 +979,12 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
   clReleaseKernel(m_GradientKernel);
   clReleaseMemObject(m_MovingImageGradientGPUBuffer);
   clReleaseMemObject(m_MovingImageGPUBuffer);
+  clReleaseMemObject(m_MovingImageMaskGPUBuffer);
   for (int d = 0; d < MovingImageDimension; ++d)
   {
     clReleaseMemObject(m_GPUDerivOperatorBuffers[d]);
   }
 
-  this->CreateGPUVariablesForCostFunction();
-
-  /* Build Orientation Matching Kernel */
-  std::ostringstream defines2;
-  defines2 << "#define SEL " << m_N << std::endl;
-  defines2 << "#define N " << m_Blocks * m_Threads << std::endl;
-  defines2 << "#define LOCALSIZE " << m_Threads << std::endl;
-  defines2 << "#define USEMASK " << m_ComputeMask << std::endl; 
-
-  m_OrientationMatchingKernel = CreateKernelFromString( GPUOrientationMatchingMatrixTransformationSparseMaskKernel,  
-    defines2.str().c_str(), "OrientationMatchingMetricSparseMask","");  
 }
 
 /**
@@ -1123,17 +1108,26 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
         }
     }
 
-    if(!m_MovingImageGradientGPUImage)
+    if( !m_MovingImageGradientGPUImage )
     {
-       if(m_Debug)
-          std::cout << "Preparing to Compute Gradients.." << std::endl;
-       this->ComputeFixedImageGradient();
-       this->ComputeMovingImageGradient();
-       {
-           // TODOMamarz: add test code here
-       }
-    }
+        if( m_Debug )
+            std::cout << "Preparing to compute image gradients.." << std::endl;
+        this->ComputeFixedImageGradient();
+        this->ComputeMovingImageGradient();
 
+        this->CreateGPUVariablesForCostFunction();
+
+        /* Build Orientation Matching Kernel */
+        std::ostringstream defines2;
+        defines2 << "#define SEL " << m_N << std::endl;
+        defines2 << "#define N " << m_Blocks * m_Threads << std::endl;
+        defines2 << "#define LOCALSIZE " << m_Threads << std::endl;
+        defines2 << "#define USEMASK " << m_ComputeMask << std::endl;
+
+        m_OrientationMatchingKernel = CreateKernelFromString(GPUOrientationMatchingMatrixTransformationSparseMaskKernel,
+            defines2.str().c_str(), "OrientationMatchingMetricSparseMask", "");
+    }
+    
     if(m_TransformMatrix == m_Transform->GetMatrix() && m_TransformOffset == m_TransformOffset)
        {
        return;
