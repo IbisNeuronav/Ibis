@@ -203,6 +203,12 @@ public:
     void SetCanChangeParent( bool c ) { AllowChangeParent = c; }
     /** Check object's descent */
     bool DescendsFrom( SceneObject * obj );
+    ///@}
+
+    /** @name Listability
+     * @brief Show object name in the object tree.
+     */
+    ///@{
     /** Get number of the objects that are listed in the objects tree */
     int GetNumberOfListableChildren();
     /** Get a listable child at a specific position */
