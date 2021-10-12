@@ -49,8 +49,8 @@ __kernel void OrientationMatchingMetricSparseMask(
   /* Interpolated Moving Gradient */
   REAL4 movingGrad = read_imagef(mgImage, mySampler, cId);  
   REAL metricValue;
-
-  if( (!USEMASK) || (USEMASK && (movingGrad.w > 0.0f)) )
+  
+  if( (!USEMASK && (movingGrad.w > -1.0f)) || (USEMASK && (movingGrad.w > 0.0f)) )
   {
       REAL4 rctX = rigidContext[3];
       REAL4 rctY = rigidContext[4];

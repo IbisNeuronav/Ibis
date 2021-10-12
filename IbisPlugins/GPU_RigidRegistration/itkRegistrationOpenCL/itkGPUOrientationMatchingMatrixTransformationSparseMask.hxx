@@ -952,6 +952,7 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
       pixelValue.Fill(0);
       outputGradient->FillBuffer(pixelValue);
       outputGradient->Update();
+
       using GradientImageIterator = itk::ImageRegionIteratorWithIndex< VectorImageType >;
       GradientImageIterator imageIterator(outputGradient, outputGradient->GetRequestedRegion());
       for( imageIterator.GoToBegin(); !imageIterator.IsAtEnd(); ++imageIterator )
@@ -995,7 +996,7 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
   defines2 << "#define SEL " << m_N << std::endl;
   defines2 << "#define N " << m_Blocks * m_Threads << std::endl;
   defines2 << "#define LOCALSIZE " << m_Threads << std::endl;
-  defines2 << "#define USEMASK " << m_UseMovingImageMask << std::endl; //TODO: check if this is necessary?
+  defines2 << "#define USEMASK " << m_ComputeMask << std::endl; 
 
   m_OrientationMatchingKernel = CreateKernelFromString( GPUOrientationMatchingMatrixTransformationSparseMaskKernel,  
     defines2.str().c_str(), "OrientationMatchingMetricSparseMask","");  
