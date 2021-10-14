@@ -73,6 +73,18 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
   m_FixedImageMaskSpatialObject = nullptr;
   m_MovingImageMaskSpatialObject = nullptr;
   SetSamplingStrategyToRandom();
+
+  m_FixedImageGradientGPUBuffer = NULL;
+  m_FixedImageGPUBuffer = NULL;
+  m_FixedImageMaskGPUBuffer = NULL;
+  m_MovingImageGradientGPUBuffer = NULL;
+  m_MovingImageGPUBuffer = NULL;
+  m_MovingImageMaskGPUBuffer = NULL;
+  m_gpuFixedGradientSamples = NULL;
+  m_gpuFixedLocationSamples = NULL;
+  m_MovingImageGradientGPUImage = NULL;
+  m_gpuMetricAccum = NULL;
+  m_gpuDummy = NULL;
 }
 
 
@@ -84,14 +96,20 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
   if(m_OrientationMatchingKernel)
   {
     clReleaseKernel(m_OrientationMatchingKernel);
-    clReleaseMemObject(m_gpuFixedGradientSamples);
-    clReleaseMemObject(m_gpuFixedLocationSamples);
-    clReleaseMemObject(m_MovingImageGradientGPUImage);
-    clReleaseMemObject(m_gpuMetricAccum);
-    clReleaseMemObject(m_gpuDummy);
   }
-    
 
+  if( m_gpuFixedGradientSamples ) clReleaseMemObject(m_gpuFixedGradientSamples);
+  if( m_gpuFixedLocationSamples ) clReleaseMemObject(m_gpuFixedLocationSamples);
+  if( m_MovingImageGradientGPUImage ) clReleaseMemObject(m_MovingImageGradientGPUImage);
+  if( m_gpuMetricAccum ) clReleaseMemObject(m_gpuMetricAccum);
+  if( m_gpuDummy ) clReleaseMemObject(m_gpuDummy);
+  if( m_FixedImageGradientGPUBuffer ) clReleaseMemObject(m_FixedImageGradientGPUBuffer);
+  if( m_FixedImageGPUBuffer ) clReleaseMemObject(m_FixedImageGPUBuffer);
+  if( m_FixedImageMaskGPUBuffer ) clReleaseMemObject(m_FixedImageMaskGPUBuffer);
+  if( m_MovingImageGradientGPUBuffer ) clReleaseMemObject(m_MovingImageGradientGPUBuffer);
+  if( m_MovingImageGPUBuffer ) clReleaseMemObject(m_MovingImageGPUBuffer);
+  if( m_MovingImageMaskGPUBuffer ) clReleaseMemObject(m_MovingImageMaskGPUBuffer);
+    
 }
 
 template< class TFixedImage, class TMovingImage >
@@ -718,6 +736,9 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
   clReleaseMemObject(m_FixedImageGradientGPUBuffer);
   clReleaseMemObject(m_FixedImageGPUBuffer);
   clReleaseMemObject(m_FixedImageMaskGPUBuffer);
+  m_FixedImageGradientGPUBuffer = NULL;
+  m_FixedImageGPUBuffer = NULL;
+  m_FixedImageMaskGPUBuffer = NULL;
   for (int d = 0; d < FixedImageDimension; ++d)
   {
     clReleaseMemObject(m_GPUDerivOperatorBuffers[d]);
@@ -980,6 +1001,9 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
   clReleaseMemObject(m_MovingImageGradientGPUBuffer);
   clReleaseMemObject(m_MovingImageGPUBuffer);
   clReleaseMemObject(m_MovingImageMaskGPUBuffer);
+  m_MovingImageGradientGPUBuffer = NULL;
+  m_MovingImageGPUBuffer = NULL;
+  m_MovingImageMaskGPUBuffer = NULL;
   for (int d = 0; d < MovingImageDimension; ++d)
   {
     clReleaseMemObject(m_GPUDerivOperatorBuffers[d]);
