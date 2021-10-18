@@ -66,9 +66,18 @@ struct ApplicationSettings
     bool ShowCursor;
     bool ShowAxes;
     bool ViewFollowsReference;
+    /** @name Cutting planes
+     *  @brief these variables are used to set respective planes visibility
+     * */
+    ///@{
+    /** XPlane formed by axes Y and Z is later known as Saggital plane In ImagePlane settings and in View mwnu */
     int ShowXPlane;
+    /** YPlane formed by axes X and Z is later known as Coronal plane In ImagePlane settings and in View mwnu */
     int ShowYPlane;
+    /** ZPlane formed by axes X and Y is later known as Transverse plane In ImagePlane settings and in View mwnu */
     int ShowZPlane;
+    ///@}
+
     int TripleCutPlaneResliceInterpolationType;
     int TripleCutPlaneDisplayInterpolationType;
     bool VolumeRendererEnabled;

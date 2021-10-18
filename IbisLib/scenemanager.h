@@ -86,7 +86,7 @@ public:
 
 
     /** @name Basic layout
-     * @brief  Create different view windows and/or window layouts
+     *  @brief  Create different view windows and/or window layouts
      */
     ///@{
     QWidget * CreateQuadViewWindow( QWidget * parent );
@@ -95,7 +95,7 @@ public:
     ///@}
 
     /** @name Getting views
-     * @brief  Create and access different views
+     *  @brief  Create and access different views
      *
      * There are 4 main views: Saggital, Coronal, 3D and Transverese.
      * View types and IDs are defined in ibistypes.h.
@@ -120,7 +120,7 @@ public:
     View * GetViewFromInteractor( vtkRenderWindowInteractor * interactor );
     ///@}
     /** @name View attributes
-     * @brief  Get and se view attributes
+     *  @brief  Get and se view attributes
      */
     ///@{
     /** Decide if main 3D view is following the reference object. */
@@ -148,7 +148,7 @@ public:
     ///@}
 
     /** @name World and reference object space
-     * @brief  transform between reference object space and world space coordinate systems
+     *  @brief  transform between reference object space and world space coordinate systems
      * */
     ///@{
     void WorldToReference( double worldPoint[3], double referencePoint[3] );
@@ -196,7 +196,10 @@ signals:
 
 public:
 
-    // Manage Objects
+    /** @name Manage objects
+     *  @brief  add, remove, get SceneObject
+     * */
+    ///@{
     void AddObject( SceneObject * object, SceneObject * attachTo = 0 );
     void RemoveObjectById( int objectId );
     void RemoveObject(SceneObject * object );
@@ -211,16 +214,27 @@ public:
     void GetAllPointerObjects( QList<PointerObject*> & all );
     void GetAllTrackedObjects( QList<TrackedSceneObject*> & all );
     void GetAllObjectsOfType( const char * typeName, QList<SceneObject*> & all );
+    ///@}
 
-    // Manage cursor visibility and color - wrapper for TrippleCutPlane
+    /** @name Manage cursor
+     *  @brief set visibility and color - wrapper for TrippleCutPlane
+     * */
+    ///@{
     bool GetCursorVisible();
     void SetCursorVisibility( bool v );
     void SetCursorColor( const QColor & c );
     QColor GetCursorColor();
-    // Manage planes visibility - wrapper for TrippleCutPlane
+    ///@}
+
+    /** @name Manage planes
+     *  @brief set visibility - wrapper for TrippleCutPlane
+     * */
+    ///@{
     void ViewPlane( int index, bool show );
     bool IsPlaneVisible( int index );
     void ViewAllPlanes( bool show );
+    ///@}
+
     // Manage data interpolation for reslice and display - wrapper for TrippleCutPlane
     void SetResliceInterpolationType( int type );
     int GetResliceInterpolationType();
