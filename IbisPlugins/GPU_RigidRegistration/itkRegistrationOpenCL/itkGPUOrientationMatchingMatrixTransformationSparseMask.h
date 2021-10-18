@@ -168,12 +168,24 @@ public:
   using FixedImageMaskSpatialObjectPointer = typename FixedImageMaskSpatialObjectType::Pointer;
   using FixedImageMaskType = typename FixedImageMaskSpatialObjectType::ImageType;
   using FixedImageMaskPointer = typename FixedImageMaskType::Pointer;
+  using FixedImageMaskPixelType = typename FixedImageMaskType::PixelType;
+
+  using MovingImageMaskSpatialObjectType = itk::ImageMaskSpatialObject< MovingImageDimension >;
+  using MovingImageMaskSpatialObjectPointer = typename MovingImageMaskSpatialObjectType::Pointer;
+  using MovingImageMaskType = typename MovingImageMaskSpatialObjectType::ImageType;
+  using MovingImageMaskPointer = typename MovingImageMaskType::Pointer;
+  using MovingImageMaskPixelType = typename MovingImageMaskType::PixelType;
 
   itkSetMacro(FixedImageMaskSpatialObject, FixedImageMaskSpatialObjectPointer);
-  itkSetMacro(UseImageMask, bool)
+  itkSetMacro(MovingImageMaskSpatialObject, MovingImageMaskSpatialObjectPointer);
+  itkSetMacro(UseFixedImageMask, bool);
+  itkSetMacro(UseMovingImageMask, bool);
 
   using FixedImageMaskIteratorType = itk::ImageRegionConstIteratorWithIndex< FixedImageMaskType >;
   using FixedImageIteratorType = itk::ImageRegionConstIteratorWithIndex< FixedImageType >;
+  
+  using MovingImageMaskIteratorType = itk::ImageRegionConstIteratorWithIndex< MovingImageMaskType >;
+  using MovingImageIteratorType = itk::ImageRegionConstIteratorWithIndex< MovingImageType >;
 
   void Update(void);
 
@@ -201,6 +213,7 @@ protected:
   unsigned int      m_N;
   double            m_GradientScale;
 
+  // m_ComputeMask: when true only select strong gradient magnitudes
   bool              m_ComputeMask;
   double            m_MaskThreshold;
 
@@ -223,7 +236,8 @@ protected:
   cl_mem                      m_MovingImageGradientGPUBuffer;
   cl_mem                      m_MovingImageGradientGPUImage;
 
-  cl_mem                      m_MaskImageGPUBuffer;
+  cl_mem                      m_MovingImageMaskGPUBuffer;
+  cl_mem                      m_FixedImageMaskGPUBuffer;
 
   InternalRealType              m_MetricValue;
 
@@ -267,12 +281,15 @@ protected:
   cl_uint m_NumberOfDevices, m_NumberOfPlatforms;
 
   FixedImageMaskSpatialObjectPointer     m_FixedImageMaskSpatialObject;
-  bool                                   m_UseImageMask;
+  MovingImageMaskSpatialObjectPointer    m_MovingImageMaskSpatialObject;
+
+  // m_UseFixedImageMask: when true samples gradients from masked region in FixedImage
+  bool                                   m_UseFixedImageMask;
+  // m_UseMovingImageMask: when true samples gradients from masked region in MovingImage
+  bool                                   m_UseMovingImageMask;
 
   InternalRealType *          m_cpuMovingImageBuffer;
-  cl_mem                      m_MovingGPUImage;
   InternalRealType *          m_cpuFixedImageBuffer;
-  cl_mem                      m_FixedGPUImage;
 
 private:
   GPUOrientationMatchingMatrixTransformationSparseMask(const Self &);   //purposely not implemented

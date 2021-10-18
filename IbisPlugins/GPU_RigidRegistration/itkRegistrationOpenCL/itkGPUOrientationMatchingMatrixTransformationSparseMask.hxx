@@ -13,6 +13,9 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef __itkGPUOrientationMatchingMatrixTransformationSparseMask_hxx
 #define __itkGPUOrientationMatchingMatrixTransformationSparseMask_hxx
 
+// uncomment this line to enable output gradient images for debug
+//#define __OUTPUT_GRADIENTS__
+
 #include <itkMacro.h>
 #include <itkTimeProbe.h>
 #include <itkMatrix.h>
@@ -23,6 +26,10 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include "GPUDiscreteGaussianGradientImageFilter.h"
 #include "GPUOrientationMatchingMatrixTransformationSparseMaskKernel.h"
+
+#ifdef __OUTPUT_GRADIENTS__
+#include <itkImageFileWriter.h>
+#endif
 
 namespace itk
 {
@@ -50,7 +57,7 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
 
   m_GradientScale = 1.0;
 
-  m_ComputeMask = false;
+  m_ComputeMask = true;
   m_MaskThreshold = 0.0;
 
   m_FixedImage = nullptr;
@@ -61,12 +68,23 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
   m_Transform = nullptr;
   m_MetricValue = 0;
 
-  m_UseImageMask = false;
-  m_FixedImageMaskSpatialObject = 0;
-  SetSamplingStrategyToGrid();
+  m_UseFixedImageMask = false;
+  m_UseMovingImageMask = false;
+  m_FixedImageMaskSpatialObject = nullptr;
+  m_MovingImageMaskSpatialObject = nullptr;
+  SetSamplingStrategyToRandom();
 
-  m_MovingGPUImage = nullptr;
-  m_FixedGPUImage = nullptr;
+  m_FixedImageGradientGPUBuffer = NULL;
+  m_FixedImageGPUBuffer = NULL;
+  m_FixedImageMaskGPUBuffer = NULL;
+  m_MovingImageGradientGPUBuffer = NULL;
+  m_MovingImageGPUBuffer = NULL;
+  m_MovingImageMaskGPUBuffer = NULL;
+  m_gpuFixedGradientSamples = NULL;
+  m_gpuFixedLocationSamples = NULL;
+  m_MovingImageGradientGPUImage = NULL;
+  m_gpuMetricAccum = NULL;
+  m_gpuDummy = NULL;
 }
 
 
@@ -78,13 +96,20 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
   if(m_OrientationMatchingKernel)
   {
     clReleaseKernel(m_OrientationMatchingKernel);
-    clReleaseMemObject(m_gpuFixedGradientSamples);
-    clReleaseMemObject(m_gpuFixedLocationSamples);
-    clReleaseMemObject(m_MovingImageGradientGPUImage);
-    clReleaseMemObject(m_gpuMetricAccum);
   }
-    
 
+  if( m_gpuFixedGradientSamples ) clReleaseMemObject(m_gpuFixedGradientSamples);
+  if( m_gpuFixedLocationSamples ) clReleaseMemObject(m_gpuFixedLocationSamples);
+  if( m_MovingImageGradientGPUImage ) clReleaseMemObject(m_MovingImageGradientGPUImage);
+  if( m_gpuMetricAccum ) clReleaseMemObject(m_gpuMetricAccum);
+  if( m_gpuDummy ) clReleaseMemObject(m_gpuDummy);
+  if( m_FixedImageGradientGPUBuffer ) clReleaseMemObject(m_FixedImageGradientGPUBuffer);
+  if( m_FixedImageGPUBuffer ) clReleaseMemObject(m_FixedImageGPUBuffer);
+  if( m_FixedImageMaskGPUBuffer ) clReleaseMemObject(m_FixedImageMaskGPUBuffer);
+  if( m_MovingImageGradientGPUBuffer ) clReleaseMemObject(m_MovingImageGradientGPUBuffer);
+  if( m_MovingImageGPUBuffer ) clReleaseMemObject(m_MovingImageGPUBuffer);
+  if( m_MovingImageMaskGPUBuffer ) clReleaseMemObject(m_MovingImageMaskGPUBuffer);
+    
 }
 
 template< class TFixedImage, class TMovingImage >
@@ -263,6 +288,25 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
                           cpuFixedGradientBuffer, &errid);
   OpenCLCheckError(errid, __FILE__, __LINE__, ITK_LOCATION);    
 
+  FixedImageMaskPixelType * fixedMaskBuffer;
+  if( (m_UseFixedImageMask) && (m_FixedImageMaskSpatialObject) )
+  {
+      fixedMaskBuffer = (FixedImageMaskPixelType *)m_FixedImageMaskSpatialObject->GetImage()->GetBufferPointer();
+  }
+  else
+  {
+      if( m_UseFixedImageMask )
+      {
+          itkWarningMacro(<< "FixedImageMaskSpatialObject was not found, UseFixedImageMask is set to OFF");
+          m_UseFixedImageMask = false;
+      }
+      fixedMaskBuffer = (FixedImageMaskPixelType *)malloc(nbrOfPixelsInFixedImage * sizeof(FixedImageMaskPixelType));
+      memset(fixedMaskBuffer, (FixedImageMaskPixelType)1, nbrOfPixelsInFixedImage * sizeof(FixedImageMaskPixelType));
+  }
+  m_FixedImageMaskGPUBuffer = clCreateBuffer(m_Context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
+      sizeof(FixedImageMaskPixelType) * nbrOfPixelsInFixedImage,
+      (unsigned char *)fixedMaskBuffer, &errid);
+  OpenCLCheckError(errid, __FILE__, __LINE__, ITK_LOCATION);
 
   /* Create Gauss Derivative Operator and Populate GPU Buffer */
   std::vector<FixedDerivativeOperatorType> opers;
@@ -319,14 +363,12 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
     itkExceptionMacro(<<"localSize == 0");
   }
 
-  std::string kernelname = "SeparableNeighborOperatorFilter";
-  if((m_ComputeMask) & (!m_UseImageMask))
-  {
-      kernelname = "SeparableNeighborOperatorFilterThresholder";
-  }
+  std::ostringstream kernelDefines;
+  kernelDefines << "#define THRESHOLD " << m_MaskThreshold << std::endl;
+  kernelDefines << "#define DIM_3 " << std::endl;
 
   m_GradientKernel = CreateKernelFromString(GPUDiscreteGaussianGradientImageFilter,
-                                                      "#define DIM_3\n", kernelname.c_str(), "");
+      kernelDefines.str().c_str(), "SeparableNeighborOperatorFilterWithMask", "");
 
 
   for(unsigned int i=0; i<FixedImageDimension; i++)
@@ -337,6 +379,8 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
   int argidx = 0;
   clSetKernelArg(m_GradientKernel, argidx++, sizeof(cl_mem), (void *)&m_FixedImageGPUBuffer);
   clSetKernelArg(m_GradientKernel, argidx++, sizeof(cl_mem), (void *)&m_FixedImageGradientGPUBuffer);
+
+  clSetKernelArg(m_GradientKernel, argidx++, sizeof(cl_mem), (void *)&m_FixedImageMaskGPUBuffer);
 
   for(unsigned int i=0; i<FixedImageDimension; i++)
     {
@@ -372,24 +416,57 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
   errid = clFinish(m_CommandQueue[0]);
   OpenCLCheckError(errid, __FILE__, __LINE__, ITK_LOCATION);
 
-  if(m_UseImageMask)
-     {
-     typename FixedImageMaskType::ConstPointer constFixedImage = m_FixedImageMaskSpatialObject->GetImage();
-     FixedImageMaskIteratorType imageIterator( constFixedImage, constFixedImage->GetRequestedRegion() );
-     for (imageIterator.GoToBegin(); !imageIterator.IsAtEnd(); ++imageIterator)
-        {
-        unsigned int idx = static_cast<unsigned int>(constFixedImage->ComputeOffset(imageIterator.GetIndex()));
+#ifdef __OUTPUT_GRADIENTS__
+  { 
+      using GradientPixelType = itk::Vector<float, 3>;
+      using VectorImageType = itk::Image<GradientPixelType, 3>;
+      VectorImageType::Pointer outputGradient = VectorImageType::New();
+      outputGradient->SetOrigin(m_FixedImage->GetOrigin());
+      outputGradient->SetDirection(m_FixedImage->GetDirection());
+      outputGradient->SetSpacing(m_FixedImage->GetSpacing());
+      typename FixedImageType::SizeType fsize = m_FixedImage->GetLargestPossibleRegion().GetSize();
+      VectorImageType::SizeType gsize;
+      gsize[0] = fsize[0];
+      gsize[1] = fsize[1];
+      gsize[2] = fsize[2];
+      VectorImageType::RegionType region;
+      VectorImageType::IndexType start;
+      start.Fill(0);
+      region.SetSize(gsize);
+      region.SetIndex(start);
+      outputGradient->SetRegions(region);
+      outputGradient->Allocate();
+      VectorImageType::PixelType pixelValue;
+      pixelValue.Fill(0);
+      outputGradient->FillBuffer(pixelValue);
+      outputGradient->Update();
+      using GradientImageIterator = itk::ImageRegionIteratorWithIndex< VectorImageType >;
+      GradientImageIterator imageIterator(outputGradient, outputGradient->GetRequestedRegion());
+      for( imageIterator.GoToBegin(); !imageIterator.IsAtEnd(); ++imageIterator )
+      {
+          unsigned int idx = static_cast<unsigned int>(outputGradient->ComputeOffset(imageIterator.GetIndex()));
+          pixelValue[0] = cpuFixedGradientBuffer[idx * 4 + 0];
+          pixelValue[1] = cpuFixedGradientBuffer[idx * 4 + 1];
+          pixelValue[2] = cpuFixedGradientBuffer[idx * 4 + 2];
+          imageIterator.Set(pixelValue);
+      }
 
-        if(imageIterator.Get() > 0)
-           {
-           cpuFixedGradientBuffer[idx*4 + 3] = (InternalRealType)1.0;
-           }
-        else
-           {
-           cpuFixedGradientBuffer[idx*4 + 3] = (InternalRealType)0.0;
-           }
-        }
-     }
+      using WriterType = itk::ImageFileWriter<VectorImageType>;
+      WriterType::Pointer writer = WriterType::New();
+      writer->SetFileName("FixedGradientImage.nrrd");
+      writer->SetInput(outputGradient);
+
+      try
+      {
+          writer->Update();
+      }
+      catch( itk::ExceptionObject & err )
+      {
+          std::cerr << "ExceptionObject caught !" << std::endl;
+          std::cerr << err << std::endl;
+      }
+  }
+#endif
 
   clockGPUKernel.Stop();
   if(m_Debug)
@@ -415,7 +492,8 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
         {
         unsigned int idx = static_cast<unsigned int>(m_FixedImage->ComputeOffset(imageIterator.GetIndex()));
 
-        if(!m_ComputeMask || (m_ComputeMask && (cpuFixedGradientBuffer[idx*4 + 3] > (InternalRealType)0.0)))
+        if( (!m_ComputeMask && (cpuFixedGradientBuffer[idx * 4 + 3] > (InternalRealType)-1.0)) ||
+            (m_ComputeMask && (cpuFixedGradientBuffer[idx*4 + 3] > (InternalRealType)0.0)))
             {
             InternalRealType magnitudeValue = 0;
             MeasurementVectorType tempSample;
@@ -487,7 +565,8 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
             }
          magnitudeValue = sqrt(magnitudeValue);
          tempSample[0] = magnitudeValue;
-         if(!m_ComputeMask || (m_ComputeMask && (cpuFixedGradientBuffer[idx*4 + 3] > (InternalRealType)0.0)))
+         if( (!m_ComputeMask && (cpuFixedGradientBuffer[idx * 4 + 3] > (InternalRealType)-1.0)) ||
+             (m_ComputeMask && (cpuFixedGradientBuffer[idx*4 + 3] > (InternalRealType)0.0)))
             {
             sample->PushBack(tempSample);
             maskIdxSample->PushBack(idx);
@@ -550,7 +629,8 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
          {
          unsigned int idx = static_cast<unsigned int>(m_FixedImage->ComputeOffset(imageIterator.GetIndex()));
 
-         if(!m_ComputeMask || (m_ComputeMask && (cpuFixedGradientBuffer[idx*4 + 3] > (InternalRealType)0.0)))
+         if( (!m_ComputeMask && (cpuFixedGradientBuffer[idx * 4 + 3] > (InternalRealType)-1.0)) ||
+             (m_ComputeMask && (cpuFixedGradientBuffer[idx*4 + 3] > (InternalRealType)0.0)))
             {
 
             InternalRealType magnitudeValue = 0;
@@ -621,7 +701,8 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
             if (bufferedRegion.IsInside(imageIndex))
                {
                unsigned int idx = static_cast<unsigned int>(m_FixedImage->ComputeOffset(imageIndex));
-               if(!m_ComputeMask || (m_ComputeMask && (cpuFixedGradientBuffer[idx*4 + 3] > (InternalRealType)0.0)))
+               if( (!m_ComputeMask && (cpuFixedGradientBuffer[idx * 4 + 3] > (InternalRealType)-1.0)) ||
+                   (m_ComputeMask && (cpuFixedGradientBuffer[idx*4 + 3] > (InternalRealType)0.0)))
                   {
                   InternalRealType magnitudeValue = 0.0;
                   for (unsigned int d = 0; d < FixedImageDimension; ++d)
@@ -651,9 +732,13 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
   if(m_Debug)
     std::cerr << "Post-Processing Fixed Image Gradient took:\t" << clock.GetMean() << std::endl;
 
+  clReleaseKernel(m_GradientKernel);
   clReleaseMemObject(m_FixedImageGradientGPUBuffer);
   clReleaseMemObject(m_FixedImageGPUBuffer);
-
+  clReleaseMemObject(m_FixedImageMaskGPUBuffer);
+  m_FixedImageGradientGPUBuffer = NULL;
+  m_FixedImageGPUBuffer = NULL;
+  m_FixedImageMaskGPUBuffer = NULL;
   for (int d = 0; d < FixedImageDimension; ++d)
   {
     clReleaseMemObject(m_GPUDerivOperatorBuffers[d]);
@@ -691,11 +776,43 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
   imgSize[1] = m_MovingImage->GetLargestPossibleRegion().GetSize()[1];
   imgSize[2] = m_MovingImage->GetLargestPossibleRegion().GetSize()[2];
 
-  m_MovingImageGradientGPUBuffer = clCreateBuffer(m_Context, CL_MEM_WRITE_ONLY , 
+#ifdef __OUTPUT_GRADIENTS__
+  InternalRealType * cpuMovingGradientBuffer = (InternalRealType *)malloc(4 *
+      nbrOfPixelsInMovingImage * sizeof(InternalRealType));
+  memset(cpuMovingGradientBuffer, (InternalRealType)0, 4 * nbrOfPixelsInMovingImage * sizeof(InternalRealType));
+
+  m_MovingImageGradientGPUBuffer = clCreateBuffer(m_Context, CL_MEM_READ_WRITE | CL_MEM_COPY_HOST_PTR,
                           4 *  sizeof(MovingImagePixelType) * nbrOfPixelsInMovingImage,
-                          nullptr, &errid);
+                          cpuMovingGradientBuffer, & errid);
+#else
+  m_MovingImageGradientGPUBuffer = clCreateBuffer(m_Context, CL_MEM_WRITE_ONLY, 
+      4 * sizeof(MovingImagePixelType) * nbrOfPixelsInMovingImage,
+      nullptr, &errid);
+#endif
+
   OpenCLCheckError(errid, __FILE__, __LINE__, ITK_LOCATION);      
 
+  MovingImageMaskPixelType * movingMaskBuffer;
+  if( (m_UseMovingImageMask) && (m_MovingImageMaskSpatialObject) )
+  {
+      movingMaskBuffer = (MovingImageMaskPixelType *)m_MovingImageMaskSpatialObject->GetImage()->GetBufferPointer();
+  }
+  else
+  {
+      if( m_UseMovingImageMask )
+      {
+          itkWarningMacro(<< "MovingImageMaskSpatialObject was not found, UseMovingImageMask is set to OFF");
+          m_UseMovingImageMask = false;
+      }
+
+      movingMaskBuffer = (MovingImageMaskPixelType *)malloc(nbrOfPixelsInMovingImage * sizeof(MovingImageMaskPixelType));
+      memset(movingMaskBuffer, (MovingImageMaskPixelType)1, nbrOfPixelsInMovingImage * sizeof(MovingImageMaskPixelType));
+  }
+
+  m_MovingImageMaskGPUBuffer = clCreateBuffer(m_Context, CL_MEM_READ_ONLY | CL_MEM_COPY_HOST_PTR,
+      sizeof(MovingImageMaskPixelType) * nbrOfPixelsInMovingImage,
+      (unsigned char *)movingMaskBuffer, &errid);
+  OpenCLCheckError(errid, __FILE__, __LINE__, ITK_LOCATION);
 
   /* Create Gauss Derivative Operator and Populate GPU Buffer */
   std::vector<MovingDerivativeOperatorType> opers;
@@ -735,15 +852,14 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
     OpenCLCheckError(errid, __FILE__, __LINE__, ITK_LOCATION);  
   }
 
-  if(m_ComputeMask)
-    {
-      clReleaseKernel(m_GradientKernel);
-      m_GradientKernel = CreateKernelFromString(GPUDiscreteGaussianGradientImageFilter,
-                                                          "#define DIM_3\n", "SeparableNeighborOperatorFilter","");
+  
+  std::ostringstream kernelDefines;
+  kernelDefines << "#define THRESHOLD " << m_MaskThreshold << std::endl;
+  kernelDefines << "#define DIM_3 " << std::endl;
 
-    }
-
-
+  m_GradientKernel = CreateKernelFromString(GPUDiscreteGaussianGradientImageFilter, 
+        kernelDefines.str().c_str(), "SeparableNeighborOperatorFilterWithMask", "");
+  
   int radius[3];  
   radius[0] = radius[1] = radius[2] = 0;
   for(int i=0; i<MovingImageDimension; i++)
@@ -760,7 +876,10 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
 
   int argidx = 0;
   clSetKernelArg(m_GradientKernel, argidx++, sizeof(cl_mem), (void *)&m_MovingImageGPUBuffer);
+
   clSetKernelArg(m_GradientKernel, argidx++, sizeof(cl_mem), (void *)&m_MovingImageGradientGPUBuffer);
+
+  clSetKernelArg(m_GradientKernel, argidx++, sizeof(cl_mem), (void *)&m_MovingImageMaskGPUBuffer);
 
   for(int i=0; i<MovingImageDimension; i++)
     {
@@ -818,25 +937,78 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
   errid = clFinish(m_CommandQueue[0]);
   OpenCLCheckError(errid, __FILE__, __LINE__, ITK_LOCATION);
 
+#ifdef __OUTPUT_GRADIENTS__
+   {  
+      errid = clEnqueueReadBuffer(m_CommandQueue[0], m_MovingImageGradientGPUBuffer, CL_TRUE, 0,
+          nbrOfPixelsInMovingImage * 4 * sizeof(InternalRealType), cpuMovingGradientBuffer, 0, nullptr, nullptr);
+      OpenCLCheckError(errid, __FILE__, __LINE__, ITK_LOCATION);
+
+      errid = clFinish(m_CommandQueue[0]);
+      OpenCLCheckError(errid, __FILE__, __LINE__, ITK_LOCATION);
+
+      using GradientPixelType = itk::Vector<float, 3>;
+      using VectorImageType = itk::Image<GradientPixelType, 3>;
+      VectorImageType::Pointer outputGradient = VectorImageType::New();
+      outputGradient->SetOrigin(m_MovingImage->GetOrigin());
+      outputGradient->SetDirection(m_MovingImage->GetDirection());
+      outputGradient->SetSpacing(m_MovingImage->GetSpacing());
+      typename MovingImageType::SizeType fsize = m_MovingImage->GetLargestPossibleRegion().GetSize();
+      VectorImageType::SizeType gsize;
+      gsize[0] = fsize[0];
+      gsize[1] = fsize[1];
+      gsize[2] = fsize[2];
+      VectorImageType::RegionType region;
+      VectorImageType::IndexType start;
+      start.Fill(0);
+      region.SetSize(gsize);
+      region.SetIndex(start);
+      outputGradient->SetRegions(region);
+      outputGradient->Allocate();
+      VectorImageType::PixelType pixelValue;
+      pixelValue.Fill(0);
+      outputGradient->FillBuffer(pixelValue);
+      outputGradient->Update();
+
+      using GradientImageIterator = itk::ImageRegionIteratorWithIndex< VectorImageType >;
+      GradientImageIterator imageIterator(outputGradient, outputGradient->GetRequestedRegion());
+      for( imageIterator.GoToBegin(); !imageIterator.IsAtEnd(); ++imageIterator )
+      {
+          unsigned int idx = static_cast<unsigned int>(outputGradient->ComputeOffset(imageIterator.GetIndex()));
+          pixelValue[0] = cpuMovingGradientBuffer[idx * 4 + 0];
+          pixelValue[1] = cpuMovingGradientBuffer[idx * 4 + 1];
+          pixelValue[2] = cpuMovingGradientBuffer[idx * 4 + 2];
+          imageIterator.Set(pixelValue);
+      }
+
+      using WriterType = itk::ImageFileWriter<VectorImageType>;
+      WriterType::Pointer writer = WriterType::New();
+      writer->SetFileName("MovingGradientImage.nrrd");
+      writer->SetInput(outputGradient);
+
+      try
+      {
+          writer->Update();
+      }
+      catch( itk::ExceptionObject & err )
+      {
+          std::cerr << "ExceptionObject caught !" << std::endl;
+          std::cerr << err << std::endl;
+      }
+   }
+#endif
 
   clReleaseKernel(m_GradientKernel);
   clReleaseMemObject(m_MovingImageGradientGPUBuffer);
   clReleaseMemObject(m_MovingImageGPUBuffer);
+  clReleaseMemObject(m_MovingImageMaskGPUBuffer);
+  m_MovingImageGradientGPUBuffer = NULL;
+  m_MovingImageGPUBuffer = NULL;
+  m_MovingImageMaskGPUBuffer = NULL;
   for (int d = 0; d < MovingImageDimension; ++d)
   {
     clReleaseMemObject(m_GPUDerivOperatorBuffers[d]);
   }
 
-  this->CreateGPUVariablesForCostFunction();
-
-  /* Build Orientation Matching Kernel */
-  std::ostringstream defines2;
-  defines2 << "#define SEL " << m_N << std::endl;
-  defines2 << "#define N " << m_Blocks * m_Threads << std::endl;
-  defines2 << "#define LOCALSIZE " << m_Threads << std::endl;
-
-  m_OrientationMatchingKernel = CreateKernelFromString( GPUOrientationMatchingMatrixTransformationSparseMaskKernel,  
-    defines2.str().c_str(), "OrientationMatchingMetricSparseMask","");  
 }
 
 /**
@@ -942,24 +1114,44 @@ GPUOrientationMatchingMatrixTransformationSparseMask< TFixedImage, TMovingImage 
     itkExceptionMacro(<< "Transform is not set." );
     }
 
-    if(m_UseImageMask)
+    if(m_UseFixedImageMask)
     {
-    if(!m_FixedImageMaskSpatialObject)
+       if(!m_FixedImageMaskSpatialObject)
        {
-       itkWarningMacro(<< "m_FixedImageMaskSpatialObject was not found, UseImageMask is set to OFF" );
-       m_UseImageMask = false;
+           itkWarningMacro(<< "FixedImageMaskSpatialObject was not found, UseFixedImageMask is set to OFF" );
+           m_UseFixedImageMask = false;
        }
-    m_ComputeMask = true;
     }
 
-    if(!m_MovingImageGradientGPUImage)
+    if( m_UseMovingImageMask )
     {
-       if(m_Debug)
-          std::cout << "Preparing to Compute Gradients.." << std::endl;
-       this->ComputeFixedImageGradient();
-       this->ComputeMovingImageGradient();
+        if( !m_MovingImageMaskSpatialObject )
+        {
+            itkWarningMacro(<< "MovingImageMaskSpatialObject was not found, UseMovingImageMask is set to OFF");
+            m_UseMovingImageMask = false;
+        }
     }
 
+    if( !m_MovingImageGradientGPUImage )
+    {
+        if( m_Debug )
+            std::cout << "Preparing to compute image gradients.." << std::endl;
+        this->ComputeFixedImageGradient();
+        this->ComputeMovingImageGradient();
+
+        this->CreateGPUVariablesForCostFunction();
+
+        /* Build Orientation Matching Kernel */
+        std::ostringstream defines2;
+        defines2 << "#define SEL " << m_N << std::endl;
+        defines2 << "#define N " << m_Blocks * m_Threads << std::endl;
+        defines2 << "#define LOCALSIZE " << m_Threads << std::endl;
+        defines2 << "#define USEMASK " << m_ComputeMask << std::endl;
+
+        m_OrientationMatchingKernel = CreateKernelFromString(GPUOrientationMatchingMatrixTransformationSparseMaskKernel,
+            defines2.str().c_str(), "OrientationMatchingMetricSparseMask", "");
+    }
+    
     if(m_TransformMatrix == m_Transform->GetMatrix() && m_TransformOffset == m_TransformOffset)
        {
        return;

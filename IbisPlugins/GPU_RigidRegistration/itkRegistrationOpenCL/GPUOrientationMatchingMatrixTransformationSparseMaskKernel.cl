@@ -48,25 +48,32 @@ __kernel void OrientationMatchingMetricSparseMask(
   
   /* Interpolated Moving Gradient */
   REAL4 movingGrad = read_imagef(mgImage, mySampler, cId);  
-
-  REAL4 rctX = rigidContext[3];
-  REAL4 rctY = rigidContext[4];
-  REAL4 rctZ = rigidContext[5];  
-
-  /* Transformed Moving Gradient */
-  REAL4 trMovingGrad = (REAL4)(0.0f, 0.0f, 0.0f, 0.0f);
-  trMovingGrad.x = dot(rctX, movingGrad);
-  trMovingGrad.y = dot(rctY, movingGrad);
-  trMovingGrad.z = dot(rctZ, movingGrad);       
-
-  REAL4 trMovingGradN = normalize(trMovingGrad);
-
-  REAL4 fixedGrad = g_fg[gidx];      
-  REAL4 fixedGradN = normalize(fixedGrad);
-
-  REAL innerProduct = dot(fixedGradN, trMovingGradN);
-  REAL metricValue = pown(innerProduct, SEL);
+  REAL metricValue;
   
+  if( (!USEMASK && (movingGrad.w > -1.0f)) || (USEMASK && (movingGrad.w > 0.0f)) )
+  {
+      REAL4 rctX = rigidContext[3];
+      REAL4 rctY = rigidContext[4];
+      REAL4 rctZ = rigidContext[5];
+
+      /* Transformed Moving Gradient */
+      REAL4 trMovingGrad = (REAL4)(0.0f, 0.0f, 0.0f, 0.0f);
+      trMovingGrad.x = dot(rctX, movingGrad);
+      trMovingGrad.y = dot(rctY, movingGrad);
+      trMovingGrad.z = dot(rctZ, movingGrad);
+
+      REAL4 trMovingGradN = normalize(trMovingGrad);
+
+      REAL4 fixedGrad = g_fg[gidx];
+      REAL4 fixedGradN = normalize(fixedGrad);
+
+      REAL innerProduct = dot(fixedGradN, trMovingGradN);
+      metricValue = pown(innerProduct, SEL);
+  }
+  else
+  {
+      metricValue = 0.0f;
+  }
   metricAccums[lid] = metricValue;  
   
   barrier(CLK_LOCAL_MEM_FENCE);

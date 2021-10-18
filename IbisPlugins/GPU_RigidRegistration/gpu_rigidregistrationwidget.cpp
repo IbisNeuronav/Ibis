@@ -32,8 +32,6 @@ GPU_RigidRegistrationWidget::GPU_RigidRegistrationWidget(QWidget *parent) :
     connect(ui->debugCheckBox, SIGNAL(stateChanged(int)), this, SLOT(on_debugCheckBox_clicked()));
     ui->registrationOutputTextEdit->hide();
 
-    m_rigidRegistrator = new GPU_RigidRegistration();
-
 }
 
 GPU_RigidRegistrationWidget::~GPU_RigidRegistrationWidget()
@@ -91,34 +89,35 @@ void GPU_RigidRegistrationWidget::on_startButton_clicked()
 
     m_registrationTimer.start();
 
+    GPU_RigidRegistration * rigidRegistrator = new GPU_RigidRegistration();
     // Initialize parameters
-    m_rigidRegistrator->SetNumberOfPixels( ui->numebrOfPixelsDial->value() );
-    m_rigidRegistrator->SetOrientationSelectivity( ui->selectivityDial->value() );
-    m_rigidRegistrator->SetPopulationSize( ui->populationSizeDial->value() );
-    m_rigidRegistrator->SetInitialSigma( ui->initialSigmaComboBox->itemData( ui->initialSigmaComboBox->currentIndex() ).toDouble() );
-    m_rigidRegistrator->SetPercentile( ui->percentileComboBox->itemData( ui->percentileComboBox->currentIndex() ).toDouble() );
-    m_rigidRegistrator->SetUseMask( ui->computeMaskCheckBox->isChecked() );
-    m_rigidRegistrator->SetDebug( debug, &debugStringStream);
+    rigidRegistrator->SetNumberOfPixels( ui->numebrOfPixelsDial->value() );
+    rigidRegistrator->SetOrientationSelectivity( ui->selectivityDial->value() );
+    rigidRegistrator->SetPopulationSize( ui->populationSizeDial->value() );
+    rigidRegistrator->SetInitialSigma( ui->initialSigmaComboBox->itemData( ui->initialSigmaComboBox->currentIndex() ).toDouble() );
+    rigidRegistrator->SetPercentile( ui->percentileComboBox->itemData( ui->percentileComboBox->currentIndex() ).toDouble() );
+    rigidRegistrator->SetUseMask( ui->computeMaskCheckBox->isChecked() );
+    rigidRegistrator->SetDebug( debug, &debugStringStream);
 
     // Set image inputs
-    m_rigidRegistrator->SetItkSourceImage( itkSourceImage );
-    m_rigidRegistrator->SetItkTargetImage( itkTargetImage );
+    rigidRegistrator->SetItkSourceImage( itkSourceImage );
+    rigidRegistrator->SetItkTargetImage( itkTargetImage );
 
     // Set transform inputs
-    m_rigidRegistrator->SetVtkTransform( vtktransform );
-    m_rigidRegistrator->SetSourceVtkTransform( sourceVtkTransform );
-    m_rigidRegistrator->SetTargetVtkTransform( targetVtkTransform );
+    rigidRegistrator->SetVtkTransform( vtktransform );
+    rigidRegistrator->SetSourceVtkTransform( sourceVtkTransform );
+    rigidRegistrator->SetTargetVtkTransform( targetVtkTransform );
 
     if( transformObject->GetParent() )
     {
         vtkTransform * parentVtktransform = vtkTransform::SafeDownCast( transformObject->GetParent()->GetWorldTransform() );
-        Q_ASSERT_X( parentVtktransform, "VertebraRegistrationWidget::AddImageToQueue()", "Invalid transform" );
-        m_rigidRegistrator->SetParentVtkTransform(parentVtktransform);
+        Q_ASSERT_X( parentVtktransform, "GPU_RigidRegistrationWidget::AddImageToQueue()", "Invalid transform" );
+        rigidRegistrator->SetParentVtkTransform(parentVtktransform);
     }
 
     // Run registration
 //    transformObject->StartModifyingTransform();
-    m_rigidRegistrator->runRegistration();
+    rigidRegistrator->runRegistration();
 //    transformObject->FinishModifyingTransform();
 
     m_OptimizationRunning = true;
