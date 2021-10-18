@@ -51,6 +51,24 @@ class PointsObject;
 class QMenu;
 class IbisPreferences;
 
+/**
+ * @class   Application
+ * @brief   Main application class (Singleton)
+ *
+ *  Application will create on start all the main  elements of ibis: the main window, menus, docks etc.
+ */
+
+/**
+ * @struct  ApplicationSettings
+ * @brief   Global application settings stored as QSettings
+ *
+ * On Ubuntu saved in ~/.config/MNI-BIC-IPL/ibis.conf.
+ *
+ * On Windows 10 saved in registry HKEY_CURRENT_USER/SOFTWARE/MNI-BIC-IPL.
+ *
+ * The settings are loaded on ibis start and saved on exit.
+ *
+ **/
 struct ApplicationSettings
 {
     ApplicationSettings();
@@ -68,13 +86,15 @@ struct ApplicationSettings
     bool ViewFollowsReference;
     /** @name Cutting planes
      *  @brief these variables are used to set respective planes visibility
+     *
+     *  Axis X is red, axis Y is yellow, axis Z is green.
      * */
     ///@{
-    /** XPlane formed by axes Y and Z is later known as Saggital plane In ImagePlane settings and in View mwnu */
+    /** XPlane formed by axes Y and Z is later known as Saggital plane in ImagePlane settings and in View menu */
     int ShowXPlane;
-    /** YPlane formed by axes X and Z is later known as Coronal plane In ImagePlane settings and in View mwnu */
+    /** YPlane formed by axes X and Z is later known as Coronal plane in ImagePlane settings and in View menu */
     int ShowYPlane;
-    /** ZPlane formed by axes X and Y is later known as Transverse plane In ImagePlane settings and in View mwnu */
+    /** ZPlane formed by axes X and Y is later known as Transverse plane in ImagePlane settings and in View menu */
     int ShowZPlane;
     ///@}
 
@@ -87,8 +107,6 @@ struct ApplicationSettings
     QList<QString> PluginsWithOpenTab;
 };
 
-//===============================================================================
-// Main application class (Singleton)
 //===============================================================================
 class Application : public QObject
 {
