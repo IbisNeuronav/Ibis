@@ -196,8 +196,8 @@ signals:
 
 public:
 
-    /** @name Manage objects
-     *  @brief  add, remove, get SceneObject
+    /** @name  Manage objects
+     *  @brief Add, remove, get SceneObject.
      * */
     ///@{
     void AddObject( SceneObject * object, SceneObject * attachTo = 0 );
@@ -214,7 +214,38 @@ public:
     void GetAllPointerObjects( QList<PointerObject*> & all );
     void GetAllTrackedObjects( QList<TrackedSceneObject*> & all );
     void GetAllObjectsOfType( const char * typeName, QList<SceneObject*> & all );
+    SceneObject * GetObjectByID( int id );
+    SceneObject * GetCurrentObject( ) { return m_currentObject; }
+    void SetCurrentObject( SceneObject * cur  );
+    // returns list of all the user created/added objects with their parents.
+    int  GetNumberOfUserObjects();
+    void GetAllUserObjects(QList<SceneObject*> &);
+    // returns list of all the listable, non-tracked objects with their parents.
+    void GetAllListableNonTrackedObjects(QList<SceneObject*> &);
+    void GetChildrenListableNonTrackedObjects( SceneObject * obj, QList<SceneObject*> & );
     ///@}
+
+    /** @name  Reference object
+     *  @brief ImageObject used as a reference for all other objects
+     * */
+    ///@{
+    ImageObject * GetReferenceDataObject( );
+    void SetReferenceDataObject( SceneObject * );
+    bool CanBeReference( SceneObject * );
+    void GetReferenceBounds( double bounds[6] );
+    vtkTransform * GetReferenceTransform() { return m_referenceTransform; }
+    vtkTransform * GetInverseReferenceTransform() { return m_invReferenceTransform; }
+    ///@}
+
+    /** @name  Special root objects
+     *  @brief Scene Root and Axes
+     * */
+    ///@{
+    SceneObject * GetSceneRoot();
+    void SetAxesObject( vtkSmartPointer<PolyDataObject> obj );
+    vtkSmartPointer<PolyDataObject> GetAxesObject();
+    ///@}
+
 
     /** @name Manage cursor
      *  @brief set visibility and color - wrapper for TrippleCutPlane
@@ -230,102 +261,92 @@ public:
      *  @brief set visibility - wrapper for TrippleCutPlane
      * */
     ///@{
+    /** Show/Hide plane, index 0 = Sagittal, 1 = Coronal, 2 = Transverse */
     void ViewPlane( int index, bool show );
+    /** Check visibility */
     bool IsPlaneVisible( int index );
+    /** Show/Hide all cutting planes. */
     void ViewAllPlanes( bool show );
     ///@}
 
-    // Manage data interpolation for reslice and display - wrapper for TrippleCutPlane
+    //
+    /** @name  Data Interpolation
+     *  @brief Manage data interpolation for reslice and display - wrapper for TrippleCutPlane
+    ///@{
+    /** Set/Get interpolation type. */
     void SetResliceInterpolationType( int type );
-    int GetResliceInterpolationType();
+    int  GetResliceInterpolationType();
     void SetDisplayInterpolationType( int type );
-    int GetDisplayInterpolationType();
+    int  GetDisplayInterpolationType();
+    ///@}
 
-    // Description:
-    // Get object by ID
-    SceneObject * GetObjectByID( int id );
 
-    // Current object
-    SceneObject * GetCurrentObject( ) { return m_currentObject; }
-    void SetCurrentObject( SceneObject * cur  );
-
-    // Reference object
-    ImageObject * GetReferenceDataObject( );
-    void SetReferenceDataObject( SceneObject * );
-    bool CanBeReference( SceneObject * );
-    void GetReferenceBounds( double bounds[6] );
-    vtkTransform * GetReferenceTransform() { return m_referenceTransform; }
-    vtkTransform * GetInverseReferenceTransform() { return m_invReferenceTransform; }
-
-    // Special root objects
-    SceneObject * GetSceneRoot();
-    void SetAxesObject( vtkSmartPointer<PolyDataObject> obj );
-    vtkSmartPointer<PolyDataObject> GetAxesObject();
-
-    // Description:
-    // Function that is called by a window to using this manager. The
-    // function is called just before displaying to turn every object on.
-    // In particular, objects use this call to enable 3D widgets.
+    /** The function is called just before displaying the object.
+     * In particular, objects use this call to enable 3D widgets. */
     void PreDisplaySetup();
 
-    // Description:
-    // Utility function to reset the cameras in all views.
+    /** @name  Camera
+     *  @brief Utility functions to reset the cameras in all views.
+    ///@{
     void ResetAllCameras();
     void ResetAllCameras( double bounds[6] );
     void ZoomAllCameras(double factor);
+    ///@}
 
-    // Description:
-    // Setup all objects in the view passed as a parameter. This is typically used to
-    // initialize new Views.
+
+    /** @name Objects and Views
+     *  @brief Setup objects in Views
+     * */
+    ///@{
+    /** Setup/Release all objects in the view passed as a parameter. This is typically used to
+     * initialize new Views. */
     void SetupAllObjects( View * v );
     void ReleaseAllObjects( View * v );
 
-    // Description:
-    // Utility function to setup an object in all views
+    /** Utility function to setup an object in all views. */
     void SetupInAllViews( SceneObject * object );
 
-    // Description:
-    // Utility function to detach all views from the render window.
+    /** Utility function to detach all views from the render window. */
     void ReleaseAllViews();
 
-    //Description
-    // set one of the standard views (front, back, left, right, top, bottom) in 3D window
+    /** Set one of the standard views (front, back, left, right, top, bottom) in 3D window. */
     void SetStandardView(STANDARDVIEW type);
+    ///@}
 
-    //Description
-    // Set SceneSave version found in scene file in order to control loaded variables
+    /** Set SceneSave version found in scene file in order to control loaded variables. */
     const QString GetSupportedSceneSaveVersion() { return SupportedSceneSaveVersion; }
 
-    //Description
-    // Set working directory
+    /** Set working directory */
     void SetSceneDirectory( const QString &directory ) { SceneDirectory = directory; }
+    /** Get working directory */
     const QString GetSceneDirectory() { return SceneDirectory; }
+    /** Save the name of the scene xml file including full path */
     void SetSceneFile( const QString &fileName ) { SceneFile = fileName; }
+    /** Get the name of the scene xml file including full path */
     const QString GetSceneFile() { return SceneFile; }
 
-    //Description
-    //Remove all children added to system objects: world, preop and intraop, also all tools
+    /** @name  Global objects operations
+     *  @brief Add, remove, clean
+     * */
+    ///@{
+    /** Remove all children added to system objects: world and all tools. */
     void RemoveAllSceneObjects();
     void RemoveAllChildrenObjects(SceneObject *);
+    /** Remove all objects including system objects: world and all tools. */
     void ClearScene();
+    const ObjectList & GetAllObjects() { return AllObjects; }
+    ///@}
+
+    /** @name  Scene operations
+     *  @brief Load, Save, Read/Write scene files
+     * */
+    ///@{
     void LoadScene( QString & fileName, bool interactive = true );
     void SaveScene( QString & fileName );
     void NewScene();
     void ObjectReader( Serializer * ser, bool interactive );
     void ObjectWriter( Serializer * ser );
-
-    // Description
-    const ObjectList & GetAllObjects() { return AllObjects; }
-
-    // Description
-    // returns list of all the user created/added objects with their parents
-    int  GetNumberOfUserObjects();
-    void GetAllUserObjects(QList<SceneObject*> &);
-
-    // Description
-    // returns list of all the listable, non-tracked objects with their parents
-    void GetAllListableNonTrackedObjects(QList<SceneObject*> &);
-    void GetChildrenListableNonTrackedObjects( SceneObject * obj, QList<SceneObject*> & );
+    ///@}
 
     // Description
     // Manages interaction style of 3D views
