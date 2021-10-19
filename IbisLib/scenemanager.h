@@ -286,7 +286,7 @@ public:
     void PreDisplaySetup();
 
     /** @name  Camera
-     *  @brief Utility functions to reset the cameras in all views.
+     *  @brief Utility functions to reset the cameras in all views. */
     ///@{
     void ResetAllCameras();
     void ResetAllCameras( double bounds[6] );
