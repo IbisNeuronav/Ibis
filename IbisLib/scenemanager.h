@@ -49,7 +49,7 @@ class vtkInteractor;
 
 /**
  * @class   SceneManager
- * @brief   Management of display
+ * @brief   Management of the display
  *
  * This class is the main interface for all 3D/2D display. It manages the hierarchy
  * of 3D objects that compose the scene that can be displayed. It also manages
@@ -76,14 +76,17 @@ public:
     SceneManager();
     virtual ~SceneManager();
 
-    /** call instead of Delete(),  SceneManager has a lot of cleanup to do before it can be deleted */
+    /** Call instead of Delete(),  SceneManager has a lot of cleanup to do before it can be deleted */
     void Destroy();
 
+    /** Enable rection to changes in the hardware module */
     void OnStartMainLoop();
 
+    /** Save/Read scene data */
     virtual void Serialize( Serializer * ser );
-    void PostSceneRead( int n );
 
+    /** Update information and some variables after scene was loaded   */
+    void PostSceneRead( int n );
 
     /** @name Basic layout
      *  @brief  Create different view windows and/or window layouts
@@ -166,10 +169,15 @@ public:
      * in the plane if it is closer than .5 * voxel size of the reference volume. */
     bool IsInPlane( VIEWTYPES planeType, double pos[3] );
 
+    /** @name  Generic Label
+     *  @brief
+     * */
+    ///@{
     void EmitShowGenericLabel( bool );
     void EmitShowGenericLabelText();
     void SetGenericLabelText( const QString &text ) { GenericText = text; }
     const QString GetGenericLabelText( ) { return GenericText; }
+    ///@}
 
     bool ImportUsAcquisition();
 
@@ -272,6 +280,7 @@ public:
     //
     /** @name  Data Interpolation
      *  @brief Manage data interpolation for reslice and display - wrapper for TrippleCutPlane
+     */
     ///@{
     /** Set/Get interpolation type. */
     void SetResliceInterpolationType( int type );
