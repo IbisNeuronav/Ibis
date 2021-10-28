@@ -100,7 +100,7 @@ public:
     /** @name Getting views
      *  @brief  Create and access different views
      *
-     * There are 4 main views: Saggital, Coronal, 3D and Transverese.
+     * There are 4 main views: Saggital, Coronal, 3D and Transverse.
      * View types and IDs are defined in ibistypes.h.
      *
      * The next functions are used to get a pointer to one of the views of the scene.
@@ -150,8 +150,8 @@ public:
     void Set3DCameraViewAngle( double angle );
     ///@}
 
-    /** @name World and reference object space
-     *  @brief  transform between reference object space and world space coordinate systems
+    /** @name  World and reference object space
+     *  @brief Transform between reference object space and world space coordinate systems
      * */
     ///@{
     void WorldToReference( double worldPoint[3], double referencePoint[3] );
@@ -170,7 +170,9 @@ public:
     bool IsInPlane( VIEWTYPES planeType, double pos[3] );
 
     /** @name  Generic Label
-     *  @brief
+     *  @brief The label is used to display some additional information on the toolbar
+     *
+     *  Mostly it is used to display the distance from the pointer tip to some selected point.
      * */
     ///@{
     void EmitShowGenericLabel( bool );
@@ -179,13 +181,18 @@ public:
     const QString GetGenericLabelText( ) { return GenericText; }
     ///@}
 
+    /** Load a previously acquired US frames sequence into the scene. */
     bool ImportUsAcquisition();
 
 public slots:
 
+    /** Causes the cutting planes to move to cross in the center, cursor is at the crossing point of the planes. */
     void ResetCursorPosition();
+    /** Causes the cutting planes to move to the point given the local coordinates. */
     void SetCursorPosition( double * );
+    /** Causes the cutting planes to move to the point given the world coordinates. */
     void SetCursorWorldPosition( double * );
+    /** ClockTick is used to move the cutting planes to the pointer position when ibis is in navigation mode. */
     void ClockTick();
 
 private slots:
@@ -343,6 +350,7 @@ public:
     void RemoveAllChildrenObjects(SceneObject *);
     /** Remove all objects including system objects: world and all tools. */
     void ClearScene();
+    /** Get a list of all the objects in the scene. */
     const ObjectList & GetAllObjects() { return AllObjects; }
     ///@}
 
@@ -357,24 +365,41 @@ public:
     void ObjectWriter( Serializer * ser );
     ///@}
 
-    // Description
-    // Manages interaction style of 3D views
+    /** @name  Interactor style
+     *  @brief Manage interactor style in 3D views
+     * */
+    ///@{
+    /** Get/Set interaction style of 3D views. */
     void Set3DInteractorStyle( InteractorStyle style );
     InteractorStyle Get3DInteractorStyle() { return InteractorStyle3D; }
+    ///@}
 
-    // Description
-    // Utility functions
+    /** Create a unique name for your object. */
     static QString FindUniqueName( QString wantedName, QStringList & otherNames );
 
     // navigation
+    /** @name  Navigations
+     *  @brief Start, end navigation, access the pointer object.
+     * */
+    ///@{
+    /** Enable/disable navigation. */
     void EnablePointerNavigation( bool on);
+    /** Choose navigation pointer by ID. */
     void SetNavigationPointerID( int id );
+    /** Find navigation pointer ID. */
     int GetNavigationPointerObjectId() { return NavigationPointerID; }
+    /** Check if ibis is in navigation mode. */
     bool GetNavigationState() {return this->IsNavigating; }
+    /** Get navigation pointer object. */
     PointerObject *GetNavigationPointerObject( );
+    ///@}
+
+    /** Check if ibis is currently loadin a scene. */
     bool IsLoadingScene() { return LoadingScene; }
+
 public slots:
 
+    /** Inform the application that an object was renamed. */
     void EmitSignalObjectRenamed(QString, QString);
 
 private slots:
