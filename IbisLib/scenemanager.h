@@ -79,13 +79,15 @@ public:
     /** Call instead of Delete(),  SceneManager has a lot of cleanup to do before it can be deleted */
     void Destroy();
 
-    /** Enable rection to changes in the hardware module */
+    /** Enable reaction to changes in the hardware module */
     void OnStartMainLoop();
 
     /** Save/Read scene data */
     virtual void Serialize( Serializer * ser );
 
-    /** Update information and some variables after scene was loaded   */
+    /** Update information and some variables after scene was loaded.
+     *  @param n progress stage
+    */
     void PostSceneRead( int n );
 
     /** @name Basic layout
@@ -105,7 +107,7 @@ public:
      *
      * The next functions are used to get a pointer to one of the views of the scene.
      * GetViewByID(int) will return a view with the id passed in parameter
-     * or 0 if no such view exists.
+     * or null pointer if no such view exists.
      */
     ///@{
     QMap<View*, int> GetAllViews( ) {return this->Views;}
@@ -232,10 +234,8 @@ public:
     SceneObject * GetObjectByID( int id );
     SceneObject * GetCurrentObject( ) { return m_currentObject; }
     void SetCurrentObject( SceneObject * cur  );
-    // returns list of all the user created/added objects with their parents.
     int  GetNumberOfUserObjects();
     void GetAllUserObjects(QList<SceneObject*> &);
-    // returns list of all the listable, non-tracked objects with their parents.
     void GetAllListableNonTrackedObjects(QList<SceneObject*> &);
     void GetChildrenListableNonTrackedObjects( SceneObject * obj, QList<SceneObject*> & );
     ///@}
@@ -262,8 +262,8 @@ public:
     ///@}
 
 
-    /** @name Manage cursor
-     *  @brief set visibility and color - wrapper for TrippleCutPlane
+    /** @name  Manage cursor
+     *  @brief Set visibility and color - wrapper for TrippleCutPlane
      * */
     ///@{
     bool GetCursorVisible();
@@ -329,7 +329,7 @@ public:
     void SetStandardView(STANDARDVIEW type);
     ///@}
 
-    /** Set SceneSave version found in scene file in order to control loaded variables. */
+    /** Get saved scene version found in scene file in order to control loaded variables. */
     const QString GetSupportedSceneSaveVersion() { return SupportedSceneSaveVersion; }
 
     /** Set working directory */
@@ -394,7 +394,7 @@ public:
     PointerObject *GetNavigationPointerObject( );
     ///@}
 
-    /** Check if ibis is currently loadin a scene. */
+    /** Check if ibis is currently loading a scene. */
     bool IsLoadingScene() { return LoadingScene; }
 
 public slots:
@@ -436,75 +436,105 @@ protected:
     void NotifyPluginsSceneAboutToSave();
     void NotifyPluginsSceneFinishedSaving();
 
+    /** Next object id is set when adding an object. */
     int m_nextObjectID;
+    /** Next system object id is set when adding a system controlled object. */
     int m_nextSystemObjectID;
+    /** Currently selected object. */
     SceneObject * m_currentObject;
+    /** Reference object - all other objects are relating to it. */
     ImageObject * m_referenceDataObject;
+    /** World transform of the reference object. */
     vtkTransform * m_referenceTransform;
+    /** Inversed transform of the world transform of reference object. */
     vtkTransform * m_invReferenceTransform;
+    /** The parent object of all the objects in the scene, by defaulrt it is World. */
     WorldObject * m_sceneRoot;
+    /** Interactor style used in 3D view. */
     InteractorStyle InteractorStyle3D;
 
-    // Description:
-    // Allow settin object id when adding object
+    /** Allow setting object id when adding object.
+     *  @param object object added
+     *  @param attachTo parent object, 0 means add to scene root
+     *  @param objID proposed id
+    */
     void AddObjectUsingID( SceneObject * object, SceneObject * attachTo = 0, int objID = SceneManager::InvalidId);
 
-    // Description:
-    // Recursive function used to setup all objects bellow obj
-    // in view v.
+    /** Recursive function used to setup all objects bellow obj in view v. */
     void SetupOneObject( View * v, SceneObject * obj );
 
-    // Description:
-    // Creates a new interactor style object of the right type and assign it to the view passed as param.
+
+    /** Creates a new interactor style object of the right type and assign it to the view passed as param. */
     void AssignInteractorStyleToView( InteractorStyle style, View * v );
 
-    // Views
-    bool m_viewFollowsReferenceObject;
+    /** @name  Views
+     *  @brief Variables used to describe views.
+     * */
+    ///@{
     typedef QMap<View*, int> ViewMap;
     ViewMap Views;
-
-    // Objects
-    ObjectList AllObjects;
-
-    double ViewBackgroundColor[3];
-    double View3DBackgroundColor[3];
-    double CameraViewAngle3D;
-
-    // scene basic settings
-    QString SupportedSceneSaveVersion;
-
-    // scene loading/saving progress
-    QProgressDialog *m_sceneLoadSaveProgressDialog;
-    bool UpdateProgress(int value);
-
-    // navigation
-    int NavigationPointerID;
-    bool IsNavigating;
-
-    bool LoadingScene;
-
-    QString GenericText;
-
     int Main3DViewID;
     int MainCoronalViewID;
     int MainSagittalViewID;
     int MainTransverseViewID;
+    bool m_viewFollowsReferenceObject;
+    double ViewBackgroundColor[3];
+    double View3DBackgroundColor[3];
+    double CameraViewAngle3D;
+    ///@}
+
+    /** List of all the objects in the scene. */
+    ObjectList AllObjects;
+
+    /** Version number saved in the scene xml file, used to verify if the scene is still supported,
+     * some very old scenes cannot be loaded. */
+    QString SupportedSceneSaveVersion;
+
+    /** Scene loading/saving progress. */
+    QProgressDialog *m_sceneLoadSaveProgressDialog;
+    /** Update  scene loading/saving progress. */
+    bool UpdateProgress(int value);
+
+    /** Navigation pointer id. */
+    int NavigationPointerID;
+    /** Navigation mode flag. */
+    bool IsNavigating;
+
+    /** Loading scene mode flag. */
+    bool LoadingScene;
+
+    /** Text to display as a generic label on the tool bar. */
+    QString GenericText;
+
 private:
 
+    /** A set of 3 cutting planes used to show sagittal, coronal and transversal cross section of objects. */
     vtkSmartPointer<TripleCutPlaneObject> MainCutPlanes;
 
     friend class QuadViewWindow;
+
+    /** @name  Views ID
+     *  @brief Set specific view id.
+     * */
+    ///@{
     vtkSetMacro(Main3DViewID,int);
     vtkSetMacro(MainCoronalViewID,int);
     vtkSetMacro(MainSagittalViewID,int);
     vtkSetMacro(MainTransverseViewID,int);
+    ///@}
+
+    /** Directory containing files used in the current scene. */
     QString SceneDirectory;
+    /** Name of the xml file describing the current scene. */
     QString SceneFile;
-    // We declare these to make sure no one is registering or unregistering SceneManager
-    // since SceneManager should have only one instance and be deleted at the end
-    // by the unique instance of Application.
+
+    ///@{
+    /** We declare these to make sure no one is registering or unregistering SceneManager
+     * since SceneManager should have only one instance and be deleted at the end
+     * by the unique instance of Application. */
     virtual void Register(vtkObjectBase* o) override;
     virtual void UnRegister(vtkObjectBase* o) override;
+    ///@}
 };
 
 ObjectSerializationHeaderMacro( SceneManager );
