@@ -115,9 +115,9 @@ MainWindow::MainWindow( QWidget * parent )
     // Creates a View menu
     // -----------------------------------------
     QMenu * viewMenu = menuBar()->addMenu(tr("Vie&w"));
-    m_viewXPlaneAction = AddToggleAction( viewMenu, tr("&X Plane"), SLOT( ViewXPlaneToggled(bool)), QKeySequence("Alt+x"), true );
-    m_viewYPlaneAction = AddToggleAction( viewMenu, tr("&Y Plane"), SLOT( ViewYPlaneToggled(bool)), QKeySequence("Alt+y"), true );
-    m_viewZPlaneAction = AddToggleAction( viewMenu, tr("&Z Plane"), SLOT( ViewZPlaneToggled(bool)), QKeySequence("Alt+z"), true );
+    m_viewXPlaneAction = AddToggleAction( viewMenu, tr("&Sagittal Plane"), SLOT( ViewXPlaneToggled(bool)), QKeySequence("Alt+x"), true );
+    m_viewYPlaneAction = AddToggleAction( viewMenu, tr("&Coronal Plane"), SLOT( ViewYPlaneToggled(bool)), QKeySequence("Alt+y"), true );
+    m_viewZPlaneAction = AddToggleAction( viewMenu, tr("&Transverse Plane"), SLOT( ViewZPlaneToggled(bool)), QKeySequence("Alt+z"), true );
     m_showAllPlanesAction = viewMenu->addAction( tr("View All Planes"), this,  SLOT( ViewAllPlanes() ), QKeySequence("Alt+p") );
     m_hideAllPlanesAction = viewMenu->addAction( tr("Hide All Planes"), this, SLOT( HideAllPlanes() ), QKeySequence("Shift+Alt+p") );
     viewMenu->addSeparator();
