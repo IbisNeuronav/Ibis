@@ -90,7 +90,7 @@ struct ApplicationSettings
      *  Axis X is red, axis Y is yellow, axis Z is green.
      * */
     ///@{
-    /** XPlane formed by axes Y and Z is later known as Saggital plane in ImagePlane settings and in View menu */
+    /** XPlane formed by axes Y and Z is later known as Sagittal plane in ImagePlane settings and in View menu */
     int ShowXPlane;
     /** YPlane formed by axes X and Z is later known as Coronal plane in ImagePlane settings and in View menu */
     int ShowYPlane;

@@ -102,7 +102,7 @@ public:
     /** @name Getting views
      *  @brief  Create and access different views
      *
-     * There are 4 main views: Saggital, Coronal, 3D and Transverse.
+     * There are 4 main views: Sagittal, Coronal, 3D and Transverse.
      * View types and IDs are defined in ibistypes.h.
      *
      * The next functions are used to get a pointer to one of the views of the scene.
