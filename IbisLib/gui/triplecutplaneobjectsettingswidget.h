@@ -49,11 +49,9 @@ private slots:
     void on_displayInterpolationComboBox_currentIndexChanged(int index);
     void UpdateImageSliders();
     void on_sliceThicknessSpinBox_valueChanged( int val );
-
-private:
-
     void UpdateUI();
 
+private:
 
     struct SlidersInfo
     {
