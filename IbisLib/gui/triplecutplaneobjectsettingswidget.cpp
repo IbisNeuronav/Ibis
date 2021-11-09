@@ -36,6 +36,7 @@ void TripleCutPlaneObjectSettingsWidget::SetTripleCutPlaneObject( TripleCutPlane
     m_cutPlaneObject = obj;
     connect( m_cutPlaneObject->GetManager(), SIGNAL(ObjectAdded( int )), this, SLOT(UpdateImageSliders()) );
     connect( m_cutPlaneObject->GetManager(), SIGNAL(ObjectRemoved( int )), this, SLOT(UpdateImageSliders()) );
+    connect( m_cutPlaneObject, SIGNAL(ObjectModified()), this, SLOT(UpdateUI()) );
     UpdateUI();
     UpdateImageSliders();
 }
