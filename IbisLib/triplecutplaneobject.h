@@ -142,7 +142,10 @@ public:
     void SetSliceMixMode( int imageIndex, int mode );
     ///@}
 
-    // Manage color table and blending mode for individual images
+    /** @name  Blending
+     *  @brief Manage color table and blending mode for individual images.
+     */
+    ///@{
     void SetColorTable( int imageIndex, int colorTableIndex );
     int GetColorTable( int imageIndex );
     void SetImageIntensityFactor( int imageIndex, double factor );
@@ -151,12 +154,14 @@ public:
     QString GetBlendingModeName( int blendingModeIndex );
     void SetBlendingModeIndex( int imageIndex, int blendingModeIndex );
     int GetBlendingModeIndex( int imageIndex ) { return m_blendingModeIndices[ imageIndex ]; }
+    ///@}
 
+    /** Get Planes position in local coordinates. */
     void GetPlanesPosition( double pos[3] );
 
-    // Description:
-    // Determine whether the pos is in one of the 3 planes identified by planeType. Point is
-    // in the plane if it is closer than .5 * voxel size of the reference volume.
+    /** Determine whether the pos is in one of the 3 planes identified by planeType. Point is
+     * in the plane if it is closer than .5 * voxel size of the reference volume.
+     */
     bool IsInPlane( VIEWTYPES planeType, double pos[3] );
 
 public slots:
