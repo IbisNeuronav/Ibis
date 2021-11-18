@@ -27,7 +27,7 @@ class vtkEventQtSlotConnect;
 
 /**
  * @class   TripleCutPlaneObject
- * @brief   Three perpendicular planes showing cross sections of the object in scene views
+ * @brief   Three perpendicular planes showing cross sections of objects in scene views
  *
  * The planes are always acting tohether, their section point forms the cursor.
  * In 2D views the planes always face the camera, parallel projection is used.
@@ -107,7 +107,6 @@ public:
     void SetViewAllPlanes( int isOn );
     ///@}
 
-    // r
     /** @name  Cursor
      *  @brief Manage cursor visibility and color.
      */
