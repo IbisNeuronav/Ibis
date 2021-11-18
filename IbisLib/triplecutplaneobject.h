@@ -8,6 +8,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
+
 #ifndef TRIPLECUTPLANEOBJECT_H
 #define TRIPLECUTPLANEOBJECT_H
 
@@ -24,6 +25,18 @@ class QWidget;
 class vtkMultiImagePlaneWidget;
 class vtkEventQtSlotConnect;
 
+/**
+ * @class   TripleCutPlaneObject
+ * @brief   Three perpendicular planes showing cross sections of objects in scene views
+ *
+ * The planes are always acting tohether, their section point forms the cursor.
+ * In 2D views the planes always face the camera, parallel projection is used.
+ * In 3D view planes are rotated together, perspective projection is used.
+ * The real processing happens in vtkMultiImagePlaneWidget.
+ * TripleCutPlaneObject controls adding and removing images and setting parameters for rendering.
+ *
+ */
+
 class TripleCutPlaneObject : public SceneObject
 {
 
@@ -37,48 +50,101 @@ public:
 	TripleCutPlaneObject();
 	virtual ~TripleCutPlaneObject();
 
-    // SceneObject implementation
+    /** @name SceneObject reimplementation
+     *  @brief Saving/loading and setting up the objects in the scene
+     */
+    ///@{
+    /** Load/save TripleCutPlaneObject parameters */
     virtual void Serialize( Serializer * ser ) override;
+    /** Do adjustments after loading all scene elements. */
     virtual void PostSceneRead() override;
+    /** Setup objects in a view. */
     virtual void Setup( View * view ) override;
+    /** Release objects in a view, called whenever all the objects in scene are removed. */
     virtual void Release( View * view ) override;
+    /** ReleaseAllViews() will call Release() for every view. */
     virtual void ReleaseAllViews() override;
+    ///@}
 
+    /** @name  Settings widget
+     *  @brief Create dialogs that will allow setting planes parameters
+     */
+    ///@{
+    /** Main dialog. */
     virtual QWidget * CreateSettingsDialog( QWidget * parent ) override;
+    /** Additional dialogs added as tabs. */
     virtual void CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets) override {}
+    ///@}
 
-    // Original code
+    /** @name  Images
+     *  @brief Manage images, reset planes.
+     */
+    ///@{
+    /** Get the number of images. */
     int GetNumberOfImages() { return Images.size(); }
+    /** Get an ImageObject knowing its index. */
     ImageObject * GetImage( int index );
+    /** Add an ImageObject knowing its ID. */
     void AddImage( int imageID);
+    /** Remove an ImageObject knowing its ID. */
     void RemoveImage(int imageID );
+    /** Prepare to display. */
     void PreDisplaySetup() override;
-	void ResetPlanes();
+    /** Set all three planes in the initial position, i.e. cutting in the middle. */
+    void ResetPlanes();
+    ///@}
 
-	// Manage plane visibility
+
+    /** @name  Planes
+     *  @brief Manage planes visibility.
+     */
+    ///@{
+    /** Show/hide plane knowing its index. */
 	void SetViewPlane( int planeIndex, int isOn );
-	int GetViewPlane( int planeIndex );
+    /** Check plane visibility. */
+    int GetViewPlane( int planeIndex );
+    /** Show/hide all three planes. */
     void SetViewAllPlanes( int isOn );
+    ///@}
 
-    // Manage cursor visibility and color
+    /** @name  Cursor
+     *  @brief Manage cursor visibility and color.
+     */
+    ///@{
+    /** Is vcursor visible? */
     bool GetCursorVisible() { return CursorVisible; }
+    /** Show/hide cursor. */
     void SetCursorVisibility( bool v );
+    /** Set cursor color. */
     void SetCursorColor( const QColor & c );
+    /** Get cursor color. */
     QColor GetCursorColor();
+    ///@}
 
-    // Manage data interpolation for reslice and display
+    /** @name  Interpolation
+     *  @brief Manage data interpolation for reslice and display.
+     */
+    ///@{
     void SetResliceInterpolationType( int type );
     int GetResliceInterpolationType() { return m_resliceInterpolationType; }
     void SetDisplayInterpolationType( int type );
     int GetDisplayInterpolationType() { return m_displayInterpolationType; }
+    ///@}
 
-    // Manage slice thickness and voxel combination type
+    /** @name  Slicing
+     *  @brief Manage slice thickness and voxel combination type.
+     */
+    ///@{
     int GetSliceThickness() { return m_sliceThickness; }
     void SetSliceThickness( int );
     int GetSliceMixMode( int imageIndex ) { return m_sliceMixMode[ imageIndex ]; }
     void SetSliceMixMode( int imageIndex, int mode );
+    ///@}
 
-    // Manage color table and blending mode for individual images
+    /** @name  Blending
+     *  @brief Manage color table and blending mode for individual images.
+     */
+    ///@{
     void SetColorTable( int imageIndex, int colorTableIndex );
     int GetColorTable( int imageIndex );
     void SetImageIntensityFactor( int imageIndex, double factor );
@@ -87,12 +153,14 @@ public:
     QString GetBlendingModeName( int blendingModeIndex );
     void SetBlendingModeIndex( int imageIndex, int blendingModeIndex );
     int GetBlendingModeIndex( int imageIndex ) { return m_blendingModeIndices[ imageIndex ]; }
+    ///@}
 
+    /** Get Planes position in local coordinates. */
     void GetPlanesPosition( double pos[3] );
 
-    // Description:
-    // Determine whether the pos is in one of the 3 planes identified by planeType. Point is
-    // in the plane if it is closer than .5 * voxel size of the reference volume.
+    /** Determine whether the pos is in one of the 3 planes identified by planeType. Point is
+     * in the plane if it is closer than .5 * voxel size of the reference volume.
+     */
     bool IsInPlane( VIEWTYPES planeType, double pos[3] );
 
 public slots:
