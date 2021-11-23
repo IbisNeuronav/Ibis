@@ -120,6 +120,7 @@ public:
         finalMatrix->Multiply4x4( parentWorldMatrix, localMatrix_inv, localMatrix_inv );
     }
 
+    vtkMatrix4x4::Multiply4x4( localMatrix_inv, m_targetImageVtkTransform->GetMatrix(), localMatrix_inv);
     vtktransform->SetMatrix( localMatrix_inv );
     vtktransform->Modified();
 
@@ -237,6 +238,7 @@ void GPU_RigidRegistration::runRegistration()
     // Initialize Transform
     vtkSmartPointer<vtkMatrix4x4> finalMatrix = vtkSmartPointer<vtkMatrix4x4>::New();
     sourceVtkTransform->GetInverse(finalMatrix);
+    vtkMatrix4x4::Multiply4x4(targetVtkTransform->GetMatrix(), finalMatrix, finalMatrix);
 
     ItkRigidTransformType::OffsetType offset;
  
