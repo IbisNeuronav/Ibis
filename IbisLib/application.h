@@ -119,23 +119,37 @@ public:
 
     static void CreateInstance( bool viewerOnly );
     static void DeleteInstance();
+    /** Get pointer to the unique application instance. */
     static Application & GetInstance();
 
+    /** Set up GUI and plugins. */
     void SetMainWindow( MainWindow * mw );
+    /** Restore previous MainWindow settings - position, size, etc. */
     void LoadWindowSettings();
+    /** Get pointer to MainWindow. */
     MainWindow * GetMainWindow() { return m_mainWindow; }
+    /** Add a widget at the bottom of the main window, mainly used by plugins. */
     void AddBottomWidget( QWidget * w );
+    /** Remove the bottom widget. */
     void RemoveBottomWidget( QWidget * w );
 
+    /** Popup a dialog. */
     void ShowFloatingDock( QWidget * w, QFlags<QDockWidget::DockWidgetFeature> features=QDockWidget::AllDockWidgetFeatures );
 
+    /** Set up clock connection. */
     void OnStartMainLoop();
+    /** @name  Global Events
+     *  @brief Manage event hanlers and key events.
+     *
+     * */
+    ///@{
     void AddGlobalEventHandler( GlobalEventHandler * h );
     void RemoveGlobalEventHandler( GlobalEventHandler * h );
     bool GlobalKeyEvent( QKeyEvent * e );
+    ///@}
 
     void InitHardware();
-    void InitAPI();
+//    void InitAPI();
 
     void AddHardwareSettingsMenuEntries( QMenu * menu );
     void AddToolObjectsToScene();
