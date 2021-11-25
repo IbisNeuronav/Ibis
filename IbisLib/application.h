@@ -148,16 +148,26 @@ public:
     bool GlobalKeyEvent( QKeyEvent * e );
     ///@}
 
+    /** @name  Hardware
+     *  @brief Manage hardware modules.
+     *
+     * */
+    ///@{
     void InitHardware();
-//    void InitAPI();
 
     void AddHardwareSettingsMenuEntries( QMenu * menu );
     void AddToolObjectsToScene();
     void RemoveToolObjectsFromScene();
+    ///@}
 
+    /** Check if the application is in a viewer mode - no tracking. */
     bool IsViewerOnly() { return m_viewerOnly; }
 
-    // Info on version
+     /** @name  Version
+     *   @brief Information on application and git version.
+     *
+     * */
+    ///@{
     QString GetFullVersionString();
     QString GetVersionString();
     static QString GetConfigDirectory();
@@ -165,18 +175,40 @@ public:
     static QString GetGitHashShort();
     static bool GitCodeHasModifications();
     static bool GitInfoIsValid();
+    ///@}
 
+    /** Get pointer to SceneManager. */
     static SceneManager * GetSceneManager();
+    /** Get pointer to LookupTableManager. */
     static LookupTableManager * GetLookupTableManager();
 
-    // Application Settings (saved automatically at each run )
+    /** @name  Application Settings
+    *   @brief Application Settings are loaded at the start of the application and
+    *  saved automatically at each run.
+    *
+    * @sa ApplicationSettings
+    *
+    * */
+   ///@{
     ApplicationSettings * GetSettings();
     void UpdateApplicationSettings();
     void ApplyApplicationSettings();
+    ///@}
+
+    /** @name  Update
+    *   @brief Set/Get update frequency.
+    *
+    * */
+   ///@{
     void SetUpdateFrequency( double fps );
     double GetUpdateFrequency() { return GetSettings()->UpdateFrequency; }
+    ///@}
 
-    // Ibis Plugin management
+    /** @name  Plugins
+    *   @brief Plugin  and global objects management.
+    *
+    * */
+   ///@{
     void LoadPlugins();
     void SerializePlugins( Serializer * ser );
     IbisPlugin * GetPluginByName( QString name );
@@ -190,16 +222,37 @@ public:
     void GetAllToolPlugins( QList<ToolPluginInterface*> & allTools );
     void GetAllObjectPlugins( QList<ObjectPluginInterface*> & allObjects );
     void GetAllGeneratorPlugins( QList<GeneratorPluginInterface*> & allObjects );
+    ///@}
 
-    // Data file to load when the application starts up (typically specified on the command line)
+
+    /** @name  Files
+    *   @brief Manage loading and importing files.
+    *
+    * */
+   ///@{
+    /** Set initial data files to load when the application starts up, typically specified on the command line. */
     void SetInitialDataFiles( const QStringList & files ) { m_initialDataFiles = files; }
+    /** Get names of data files loaded on application start, typically specified on the command line. */
     const QStringList & GetInitialDataFiles() { return m_initialDataFiles; }
-
+    /** Open any file of a supported format .
+     *  Following file types are supported:
+     * Minc file: *.mnc *.mnc2 *.mnc.gz *.MNC *.MNC2 *.MNC.GZ
+     * Nifti file *.nii
+     * Object file *.obj PLY file *.ply
+     * Tag file *.tag
+     * VTK file: *.vtk *.vtp
+     * FIB file *.fib
+    */
     void OpenFiles( OpenFileParams * params, bool addToScene = true );
+    /** Open a transform file, supported format *xfm, and possibly set as a local transform of obj */
     bool OpenTransformFile( const char * filename, SceneObject * obj = 0 );
+    /** Open a transform file, supported format *xfm, and store in a 4x4 matrix. */
     bool OpenTransformFile( const char * filename, vtkMatrix4x4 * mat );
+    /** Import a sequence of previously acquired US images. */
     void ImportUsAcquisition();
+    /** Import previously saved CameraObject. */
     void ImportCamera();
+    ///@}
 
     // Getting data from files
     bool GetPointsFromTagFile(QString fileName, PointsObject *pts1, PointsObject *pts2 );
