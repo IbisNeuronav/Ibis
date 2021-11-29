@@ -12,6 +12,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "imageobject.h"
 #include "ibisapi.h"
 #include "sceneobject.h"
+#include "view.h"
 #include "generatedsurface.h"
 #include <QtPlugin>
 #include <QString>
@@ -32,6 +33,7 @@ SceneObject *ContourSurfacePluginInterface::CreateObject()
     Q_ASSERT(ibisAPI);
     m_generatedSurface = vtkSmartPointer<GeneratedSurface>::New();
     m_generatedSurface->SetPluginInterface( this );
+    connect( ibisAPI, SIGNAL(ObjectRemoved(int)), this, SLOT(OnObjectRemoved(int)) );
     if( ibisAPI->IsLoadingScene() )
     {
         ibisAPI->AddObject(m_generatedSurface);
@@ -76,3 +78,11 @@ bool ContourSurfacePluginInterface::CanBeActivated()
     return false;
 }
 
+void ContourSurfacePluginInterface::OnObjectRemoved(int objID)
+{
+   if( objID == m_generatedSurface->GetObjectID() )
+   {
+       //refresh 3D view
+       this->GetIbisAPI()->GetMain3DView()->NotifyNeedRender();
+    }
+}

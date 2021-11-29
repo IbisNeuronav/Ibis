@@ -47,6 +47,10 @@ public:
         return description;
     }
 
+public slots:
+
+    void OnObjectRemoved(int objID);
+
 protected:
     vtkSmartPointer<GeneratedSurface> m_generatedSurface;
 };
