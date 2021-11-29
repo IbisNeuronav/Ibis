@@ -236,12 +236,12 @@ public:
     const QStringList & GetInitialDataFiles() { return m_initialDataFiles; }
     /** Open any file of a supported format .
      *  Following file types are supported:
-     * Minc file: *.mnc *.mnc2 *.mnc.gz *.MNC *.MNC2 *.MNC.GZ
-     * Nifti file *.nii
-     * Object file *.obj PLY file *.ply
-     * Tag file *.tag
-     * VTK file: *.vtk *.vtp
-     * FIB file *.fib
+     * Minc file: *.mnc *.mnc2 *.mnc.gz *.MNC *.MNC2 *.MNC.GZ;
+     * Nifti file *.nii;
+     * Object file *.obj PLY file *.ply;
+     * Tag file *.tag;
+     * VTK file: *.vtk *.vtp;
+     * FIB file *.fib.
     */
     void OpenFiles( OpenFileParams * params, bool addToScene = true );
     /** Open a transform file, supported format *xfm, and possibly set as a local transform of obj */
@@ -254,15 +254,30 @@ public:
     void ImportCamera();
     ///@}
 
-    // Getting data from files
+    /** Getting points from a  tag file. */
     bool GetPointsFromTagFile(QString fileName, PointsObject *pts1, PointsObject *pts2 );
 
-    // Getting US Acquisitions
+    /** @name  US Acquisitions
+    *   @brief Manage loading acquired frames.
+    *
+    * */
+    ///@{
+    /** Get the number of components per pixel in the image. For grayscale
+     * number of components will be 1 otherwise it will be greater than one.
+     * Used to check what type of frames should be loaded.
+    */
     int GetNumberOfComponents( QString filename );
+    /** Load gray scale frames. */
     bool GetGrayFrame( QString filename, IbisItkUnsignedChar3ImageType::Pointer itkImage );
+    /** Load RGB frames. */
     bool GetRGBFrame( QString filename, IbisRGBImageType::Pointer itkImage );
+    ///@}
 
-    // Useful modal dialog
+    /** @name  Dialogs
+    *   @brief Opening files, getting directories, displaying warnings and progress.
+    *
+    * */
+    ///@{
     QString GetFileNameOpen( const QString & caption = QString(), const QString & dir = QString(), const QString & filter = QString() );
     QString GetFileNameSave( const QString & caption = QString(), const QString & dir = QString(), const QString & filter = QString() );
     QString GetExistingDirectory( const QString & caption = QString(), const QString & dir = QString() );
@@ -272,14 +287,33 @@ public:
 
     QProgressDialog * StartProgress( int max, const QString & caption = QString() );
     void StopProgress( QProgressDialog * progressDialog);
+    ///@}
 
+    /** Show dialog informing user that MINC1 files will be automatically converted to MINC2 if possible. */
     void ShowMinc1Warning( bool cando);
 
+    /** @name  Scenes
+    *   @brief Loading and saving.
+    *
+    * */
+    ///@{
+    /** Load saved scene. */
     void LoadScene( QString fileName );
+    /** Save current scene. */
     void SaveScene( QString fileName );
+    ///@}
 
+    /** @name  Preferences
+    *   @brief Preferences are used to save paths to tools used in Ibis.
+    *
+    * @sa IbisPreferences
+    * */
+    ///@{
+    /** Get preferences in use */
     IbisPreferences *GetIbisPreferences() { return m_preferences; }
+    /** Show dialog allowing to set the preferences. */
     void Preferences();
+    ///@}
 
 public slots:
     void UpdateProgress( QProgressDialog*, int current );
