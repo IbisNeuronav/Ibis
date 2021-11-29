@@ -119,31 +119,55 @@ public:
 
     static void CreateInstance( bool viewerOnly );
     static void DeleteInstance();
+    /** Get pointer to the unique application instance. */
     static Application & GetInstance();
 
+    /** Set up GUI and plugins. */
     void SetMainWindow( MainWindow * mw );
+    /** Restore previous MainWindow settings - position, size, etc. */
     void LoadWindowSettings();
+    /** Get pointer to MainWindow. */
     MainWindow * GetMainWindow() { return m_mainWindow; }
+    /** Add a widget at the bottom of the main window, mainly used by plugins. */
     void AddBottomWidget( QWidget * w );
+    /** Remove the bottom widget. */
     void RemoveBottomWidget( QWidget * w );
 
+    /** Popup a dialog. */
     void ShowFloatingDock( QWidget * w, QFlags<QDockWidget::DockWidgetFeature> features=QDockWidget::AllDockWidgetFeatures );
 
+    /** Set up clock connection. */
     void OnStartMainLoop();
+    /** @name  Global Events
+     *  @brief Manage event hanlers and key events.
+     *
+     * */
+    ///@{
     void AddGlobalEventHandler( GlobalEventHandler * h );
     void RemoveGlobalEventHandler( GlobalEventHandler * h );
     bool GlobalKeyEvent( QKeyEvent * e );
+    ///@}
 
+    /** @name  Hardware
+     *  @brief Manage hardware modules.
+     *
+     * */
+    ///@{
     void InitHardware();
-    void InitAPI();
 
     void AddHardwareSettingsMenuEntries( QMenu * menu );
     void AddToolObjectsToScene();
     void RemoveToolObjectsFromScene();
+    ///@}
 
+    /** Check if the application is in a viewer mode - no tracking. */
     bool IsViewerOnly() { return m_viewerOnly; }
 
-    // Info on version
+     /** @name  Version
+     *   @brief Information on application and git version.
+     *
+     * */
+    ///@{
     QString GetFullVersionString();
     QString GetVersionString();
     static QString GetConfigDirectory();
@@ -151,18 +175,40 @@ public:
     static QString GetGitHashShort();
     static bool GitCodeHasModifications();
     static bool GitInfoIsValid();
+    ///@}
 
+    /** Get pointer to SceneManager. */
     static SceneManager * GetSceneManager();
+    /** Get pointer to LookupTableManager. */
     static LookupTableManager * GetLookupTableManager();
 
-    // Application Settings (saved automatically at each run )
+    /** @name  Application Settings
+    *   @brief Application Settings are loaded at the start of the application and
+    *  saved automatically at each run.
+    *
+    * @sa ApplicationSettings
+    *
+    * */
+   ///@{
     ApplicationSettings * GetSettings();
     void UpdateApplicationSettings();
     void ApplyApplicationSettings();
+    ///@}
+
+    /** @name  Update
+    *   @brief Set/Get update frequency.
+    *
+    * */
+   ///@{
     void SetUpdateFrequency( double fps );
     double GetUpdateFrequency() { return GetSettings()->UpdateFrequency; }
+    ///@}
 
-    // Ibis Plugin management
+    /** @name  Plugins
+    *   @brief Plugin  and global objects management.
+    *
+    * */
+   ///@{
     void LoadPlugins();
     void SerializePlugins( Serializer * ser );
     IbisPlugin * GetPluginByName( QString name );
@@ -176,26 +222,62 @@ public:
     void GetAllToolPlugins( QList<ToolPluginInterface*> & allTools );
     void GetAllObjectPlugins( QList<ObjectPluginInterface*> & allObjects );
     void GetAllGeneratorPlugins( QList<GeneratorPluginInterface*> & allObjects );
+    ///@}
 
-    // Data file to load when the application starts up (typically specified on the command line)
+
+    /** @name  Files
+    *   @brief Manage loading and importing files.
+    *
+    * */
+   ///@{
+    /** Set initial data files to load when the application starts up, typically specified on the command line. */
     void SetInitialDataFiles( const QStringList & files ) { m_initialDataFiles = files; }
+    /** Get names of data files loaded on application start, typically specified on the command line. */
     const QStringList & GetInitialDataFiles() { return m_initialDataFiles; }
-
+    /** Open any file of a supported format .
+     *  Following file types are supported:
+     * Minc file: *.mnc *.mnc2 *.mnc.gz *.MNC *.MNC2 *.MNC.GZ;
+     * Nifti file *.nii;
+     * Object file *.obj PLY file *.ply;
+     * Tag file *.tag;
+     * VTK file: *.vtk *.vtp;
+     * FIB file *.fib.
+    */
     void OpenFiles( OpenFileParams * params, bool addToScene = true );
+    /** Open a transform file, supported format *xfm, and possibly set as a local transform of obj */
     bool OpenTransformFile( const char * filename, SceneObject * obj = 0 );
+    /** Open a transform file, supported format *xfm, and store in a 4x4 matrix. */
     bool OpenTransformFile( const char * filename, vtkMatrix4x4 * mat );
+    /** Import a sequence of previously acquired US images. */
     void ImportUsAcquisition();
+    /** Import previously saved CameraObject. */
     void ImportCamera();
+    ///@}
 
-    // Getting data from files
+    /** Getting points from a  tag file. */
     bool GetPointsFromTagFile(QString fileName, PointsObject *pts1, PointsObject *pts2 );
 
-    // Getting US Acquisitions
+    /** @name  US Acquisitions
+    *   @brief Manage loading acquired frames.
+    *
+    * */
+    ///@{
+    /** Get the number of components per pixel in the image. For grayscale
+     * number of components will be 1 otherwise it will be greater than one.
+     * Used to check what type of frames should be loaded.
+    */
     int GetNumberOfComponents( QString filename );
+    /** Load gray scale frames. */
     bool GetGrayFrame( QString filename, IbisItkUnsignedChar3ImageType::Pointer itkImage );
+    /** Load RGB frames. */
     bool GetRGBFrame( QString filename, IbisRGBImageType::Pointer itkImage );
+    ///@}
 
-    // Useful modal dialog
+    /** @name  Dialogs
+    *   @brief Opening files, getting directories, displaying warnings and progress.
+    *
+    * */
+    ///@{
     QString GetFileNameOpen( const QString & caption = QString(), const QString & dir = QString(), const QString & filter = QString() );
     QString GetFileNameSave( const QString & caption = QString(), const QString & dir = QString(), const QString & filter = QString() );
     QString GetExistingDirectory( const QString & caption = QString(), const QString & dir = QString() );
@@ -205,14 +287,33 @@ public:
 
     QProgressDialog * StartProgress( int max, const QString & caption = QString() );
     void StopProgress( QProgressDialog * progressDialog);
+    ///@}
 
+    /** Show dialog informing user that MINC1 files will be automatically converted to MINC2 if possible. */
     void ShowMinc1Warning( bool cando);
 
+    /** @name  Scenes
+    *   @brief Loading and saving.
+    *
+    * */
+    ///@{
+    /** Load saved scene. */
     void LoadScene( QString fileName );
+    /** Save current scene. */
     void SaveScene( QString fileName );
+    ///@}
 
+    /** @name  Preferences
+    *   @brief Preferences are used to save paths to tools used in Ibis.
+    *
+    * @sa IbisPreferences
+    * */
+    ///@{
+    /** Get preferences in use */
     IbisPreferences *GetIbisPreferences() { return m_preferences; }
+    /** Show dialog allowing to set the preferences. */
     void Preferences();
+    ///@}
 
 public slots:
     void UpdateProgress( QProgressDialog*, int current );
