@@ -20,32 +20,45 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <utility>
 #include <map>
 
-// Description:
-// This class is the base class for reading/writing xml files with
-// settings of a program. Typically, to write a file, you create an
-//
-// SerializerWriter writer;
-// writer.SetFilename("afile.xml");
-// writer.Start();
-// Serialize( &writer, "attributename", attributeValue );
-// ...
-// writer.BeginSection();
-// ...
-// Serialize( &writer, "anotherattributename", anotherattributeValue );
-// ...
-// writer.EndSection();
-// ...
-// Serialize( &writer, "anotherattributename", anotherattributeValue );
-// writer.Finish()
-//
-// and you do the same to read a file. The Serializer class and its children
-// where made so that we use the same code for reading and writing. The only
-// thing that changes is the instanciated Serializer (SerializerWriter to write
-// and SerializerReader to read). In some cases, if you have to execute different
-// code in reading and writing cases, you can call the function IsReader() to
-// know which one you are in.
-//
-// See also: SerializerReader SerializerWriter
+/**
+ * @class   Serializer
+ * @brief   Base class for reading/writing xml files to save the settings of Ibis
+ *
+ * Typically, to write a file, you create a
+ *
+ * SerializerWriter writer;
+ *
+ * writer.SetFilename("afile.xml");\n
+ * writer.Start();\n
+ * Serialize( &writer, "attributename", attributeValue );\n
+ * ...\n
+ * writer.BeginSection();\n
+ * ...\n
+ * Serialize( &writer, "anotherattributename", anotherattributeValue );\n
+ * ...\n
+ * writer.EndSection();\n
+ * ...\n
+ * Serialize( &writer, "anotherattributename", anotherattributeValue );\n
+ * writer.Finish()\n
+ *
+ * and you do the same to read a file. The Serializer class and its children
+ * where made so that we use the same code for reading and writing. The only
+ * thing that changes is the instanciated Serializer (SerializerWriter to write
+ * and SerializerReader to read). In some cases, if you have to execute different
+ * code in reading and writing cases, you can call the function IsReader() to
+ * know which one you are in.
+ *
+ * See serializerhelper.cpp/.h to find definitions of functions used to serialize vtk classes or
+ * classes from third party libs that are often used in Ibis:
+ *
+ * bool Serialize( Serializer * serial, const char * attrName, vtkGenericParamValues & value );\n
+ * bool Serialize( Serializer * serial, const char * attrName, vtkColorTransferFunction * colorFunc );\n
+ * bool Serialize( Serializer * serial, const char * attrName, vtkPiecewiseFunction * opacityFunc );\n
+ * bool Serialize( Serializer * serial, const char * attrName, Vec3 & v );\n
+ * bool Serialize( Serializer * serial, const char * attrName, vtkMatrix4x4 * mat );\n
+ *
+ * @sa SerializerReader SerializerWriter
+ */
 class Serializer
 {
     
@@ -59,52 +72,77 @@ public:
     }
     virtual ~Serializer() { } 
     
+    /** Check if the currently used serializer is a reader. */
     virtual int IsReader() = 0;
+    /** Set the name of the file to read/write. */
     void SetFilename( const char * name ) { m_filename = name; }
+    /** Get the directory of the currently read/written file. */
     QString GetSerializationDirectory()
     {
         QFileInfo info( QString(m_filename.c_str()) );
         return info.path();
     }
+    /** Find the version of Serializer which created currently read file. */
     void ReadVersionFromFile()
     {
         Q_ASSERT( IsReader() );
         Serialize( "Version" , m_versionFromFile );
     }
+    /** Set currently supported version of Serializer, scene with a different versions may load incorrectly or not load at all. */
     void SetSupportedVersion( QString version )
     {
         m_supportedVersion = version;
     }
+    /** Return Serializer version found in the currently read file. */
     QString GetVersionFromFile()
     {
         return m_versionFromFile;
     }
+    /** Find if Serializer version found in the currently read file is too old. */
     bool FileVersionOlderThanSupported()
     {
         return FileVersionIsLowerThan( m_supportedVersion );
     }
+    /** Find if Serializer version used to create currently read file is newer than supported. */
     bool FileVersionNewerThanSupported()
     {
         return QString::compare( m_versionFromFile, this->m_supportedVersion ) > 0;
     }
+    /** Find if Serializer version used to create currently read file is older than some other version. */
     bool FileVersionIsLowerThan( QString version )
     {
         return QString::compare( m_versionFromFile, version ) < 0;
     }
 
+
+    /** @name Reading and writing functions, defined respectively in SerializerReader and SerializerWriter
+     */
+    ///@{
+    /** Start() has to be called before any other function to initialize serializer. */
     virtual bool Start() = 0;
+    /** Finish() has to be called after all work is done to clean up. */
     virtual bool Finish() = 0;
+    /** Open a section for writing/reading. */
     virtual bool BeginSection( const char * attrName ) = 0;
+    /** Close section. */
     virtual void EndSection() = 0;
     
+    /** Serialize an integer number. */
     virtual bool Serialize( const char * attrName, int & value ) =  0;
+    /** Serialize a boolean. */
     virtual bool Serialize( const char * attrName, bool & value ) =  0;
+    /** Serialize a double. */
     virtual bool Serialize( const char * attrName, double & value ) = 0;
+    /** Serialize a standard string. */
     virtual bool Serialize( const char * attrName, std::string & value ) = 0;
+    /** Serialize a Qstring. */
     virtual bool Serialize( const char * attrName, QString & value ) = 0;
+    /** Serialize a nbElements of integers */
     virtual bool Serialize( const char * attrName, int * value, int nbElements ) = 0;
+    /** Serialize a nbElements of doubles */
     virtual bool Serialize( const char * attrName, double * value, int nbElements ) = 0;
-    
+    ///@}
+
 protected:
     
     std::string    m_filename;
@@ -117,6 +155,11 @@ protected:
 
 
 
+/**
+ * @class   SerializerWriter
+ * @brief   Write xml files to store the parameters of scenes, objects etc.
+ *
+ **/
 class SerializerWriter : public Serializer
 {
     
@@ -230,6 +273,11 @@ public:
 };
 
 
+/**
+ * @class   SerializerReader
+ * @brief   Read xml files to get the parameters of scenes, objects etc.
+ *
+ **/
 class SerializerReader : public Serializer
 {
 
