@@ -37,12 +37,12 @@ class OpenFileParams;
  *
  * Following file types are supported:
  *
- * Minc file: *.mnc *.mnc2 *.mnc.gz *.MNC *.MNC2 *.MNC.GZ
- * Nifti file *.nii
- * Object file *.obj
- * PLY file *.ply
- * Tag file *.tag
- * VTK file: *.vtk *.vtp
+ * Minc file: *.mnc *.mnc2 *.mnc.gz *.MNC *.MNC2 *.MNC.GZ\n
+ * Nifti file *.nii\n
+ * Object file *.obj\n
+ * PLY file *.ply\n
+ * Tag file *.tag\n
+ * VTK file: *.vtk *.vtp\n
  * FIB file *.fib
  *
  * The data is used to create a corresponding SceneObject.
