@@ -18,10 +18,13 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 class SceneObject;
 class QSettings;
 
-// Description:
-// Interface for a type of plugin that generate singleton
-// SceneObject ( i.e. SceneObjects for which there is only
-// one global instance ).
+/**
+ * @class   GlobalObjectPluginInterface
+ * @brief   Interface for a type of plugin that generates a singleton SceneObject
+ *
+ * Generates SceneObjects for which there is only one global instance.
+ * @sa IbisPlugin
+ */
 class GlobalObjectPluginInterface : public IbisPlugin
 {
 
@@ -32,7 +35,7 @@ public:
     GlobalObjectPluginInterface() {}
     virtual ~GlobalObjectPluginInterface() {}
 
-    // Implementation of IbisPlugin interface
+    /** Implementation of IbisPlugin interface */
     IbisPluginTypes GetPluginType()  override { return IbisPluginTypeGlobalObject; }
 
     virtual SceneObject * GetGlobalObjectInstance() = 0;

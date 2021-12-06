@@ -18,8 +18,13 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 class SceneObject;
 class QSettings;
 
-// Description:
-// Interface for a type of plugin that procedurally generates scene objects
+//
+/**
+ * @class   GeneratorPluginInterface
+ * @brief   Interface for a type of plugin that procedurally generates scene objects
+ *
+ * @sa IbisPlugin
+ */
 class GeneratorPluginInterface : public IbisPlugin
 {
 
@@ -30,13 +35,18 @@ public:
     GeneratorPluginInterface() {}
     virtual ~GeneratorPluginInterface() {}
 
-    // Implementation of IbisPlugin interface
+    /** Implementation of IbisPlugin interface */
     IbisPluginTypes GetPluginType()  override { return IbisPluginTypeGenerator; }
 
-    // Definition of the generator interface
+    /**  */
+    /** @name  Generator Plugin
+     *  @brief Definition of the generator interface
+    */
+    ///@{
     virtual QString GetMenuEntryString() = 0;
     virtual bool CanRun() { return true; }
     virtual void Run() = 0;
+    ///@}
 
 };
 

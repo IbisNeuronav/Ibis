@@ -24,12 +24,15 @@ class QSettings;
 
 /**
  * @class   IbisPlugin
- * @brief   base class defining plugins
+ * @brief   Base class defining plugins.
  *
  * All IBIS plugins derive from this class.
- * There are 3 types of plugins defined in IBIS - tool plugin, object plugin and generator plugin.
+ * There are 4 types of plugins defined in IBIS - tool plugin, object plugin, global object plugin and generator plugin.
  * Object plugin is used to create a scene object of a given type. Tool plugin will provide some functionality.
+ * Global object plugin will create a unique SceneObject.
  * Generator plugin will procedurally generate one or more scene objects.
+ *
+ * @sa SceneObject, IbisAPI
  */
 
 class IbisPlugin : public QObject, public vtkObject, public ViewInteractor
@@ -50,8 +53,10 @@ public:
 
     virtual void Serialize( Serializer * ser ) {}
 
+    /** @name Scene Loading and Saving
+     *  @brief Give plugin a chance to react before/after scene loading/saving
+    */
     ///@{
-    /** Give plugin a chance to react before/after scene loading/saving */
     virtual void SceneAboutToLoad() {}
     virtual void SceneFinishedLoading() {}
     virtual void SceneAboutToSave() {}

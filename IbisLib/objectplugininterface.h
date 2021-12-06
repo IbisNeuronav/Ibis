@@ -17,6 +17,14 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 class SceneObject;
 class Serializer;
 
+/**
+ * @class   ObjectPluginInterface
+ * @brief   Create a new object
+ *
+ * Create an object which must be derived from a SceneObject
+ *
+ * @sa IbisPlugin, SceneObject
+ */
 class ObjectPluginInterface : public IbisPlugin
 {
 
@@ -27,11 +35,18 @@ public:
     ObjectPluginInterface() {}
     virtual ~ObjectPluginInterface() {}
 
-    // Implementation of IbisPlugin interface
+    /** Implementation of IbisPlugin interface. */
     IbisPluginTypes GetPluginType() override { return IbisPluginTypeObject; }
     
+    /** @name Function that should be overriden in plugins.
+     */
+    ///@{
+    /** Set a plugin name that will be displayed in the Plugins menu. */
     virtual QString GetMenuEntryString() = 0;
+    /** Create the new object derived from SceneObject. */
     virtual SceneObject * CreateObject() = 0;
+    ///@}
+    /** Check if it is possible to create the object. */
     virtual bool CanBeActivated() { return true; }
 };
 
