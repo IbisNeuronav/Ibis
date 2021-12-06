@@ -24,7 +24,7 @@ class QSettings;
 
 /**
  * @class   IbisPlugin
- * @brief   base class defining plugins
+ * @brief   Base class defining plugins.
  *
  * All IBIS plugins derive from this class.
  * There are 3 types of plugins defined in IBIS - tool plugin, object plugin and generator plugin.
