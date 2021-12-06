@@ -38,10 +38,15 @@ public:
     /** Implementation of IbisPlugin interface */
     IbisPluginTypes GetPluginType()  override { return IbisPluginTypeGenerator; }
 
-    /** Definition of the generator interface */
+    /**  */
+    /** @name  Generator Plugin
+     *  @brief Definition of the generator interface
+    */
+    ///@{
     virtual QString GetMenuEntryString() = 0;
     virtual bool CanRun() { return true; }
     virtual void Run() = 0;
+    ///@}
 
 };
 

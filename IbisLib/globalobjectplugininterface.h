@@ -19,7 +19,7 @@ class SceneObject;
 class QSettings;
 
 /**
- * @class   GeneratorPluginInterface
+ * @class   GlobalObjectPluginInterface
  * @brief   Interface for a type of plugin that generates a singleton SceneObject
  *
  * Generates SceneObjects for which there is only one global instance.
