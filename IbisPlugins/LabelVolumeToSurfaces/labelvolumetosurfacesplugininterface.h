@@ -26,7 +26,7 @@ class LabelVolumeToSurfacesPluginInterface : public GeneratorPluginInterface
 public:
 
     LabelVolumeToSurfacesPluginInterface();
-    ~LabelVolumeToSurfacesPluginInterface();
+    virtual ~LabelVolumeToSurfacesPluginInterface();
 
     // IbisPlugin interface
     QString GetPluginName() override { return "LabelVolumeToSurfaces"; }
