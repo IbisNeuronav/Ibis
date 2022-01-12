@@ -61,13 +61,13 @@ public:
  *  There are 2 types of views - 2D and 3D.\n
  *  As standard in IBIS we have three 2D views and one 3D view.\n
  *  2D views will show cross sections of ImageObjects.\n
- *  As the primary application of IBIS is to show a brain and its cross sections, Views are named as follows:\n
+ *  As the primary application of IBIS is to show brain and its cross sections, Views are named as follows:\n
  *  Sagittal (bottom right), Coronal (bottom left), Transverse (top left) and ThreeD (top right).\n
- *  In order to manage better displayed objects every view has 3 renderers, main and two overlays.\n
+ *  In order to manage better the displayed objects every view has 3 renderers, main and two overlays.\n
  *  By default all renderers use the same camera.\n
- *  Default InteractorStyle is vtkInteractorStyleImage2 for 2D views and vtkInteractorStyleTrackballCamera for 3D.
+ *  The default InteractorStyle is vtkInteractorStyleImage2 for 2D views and vtkInteractorStyleTrackballCamera for 3D.
  *
- *  @sa vtkInteractorStyleImage2
+ *  @sa vtkInteractorStyleImage2 SceneManager SceneObject ViewController
  */
 class View : public QObject, public vtkObject
 {
@@ -84,6 +84,7 @@ public:
     View();
     virtual ~View() override;
 
+    /** Save/restore view parameters. */
     virtual void Serialize( Serializer * ser );
 
     /** Set view name */
@@ -139,34 +140,48 @@ public:
     /** Set SceneManager */
     void SetManager( SceneManager * manager );
 
+    /** Set view bacground color. */
     void SetBackgroundColor( double * color );
+    /** Get view window size. */
     int * GetWindowSize();
 
+    /** ReleaseView() starts cleaning and deleting the view. The function is called on the application exit.*/
     void ReleaseView();
-    void TakeControl( ViewController * c );
-    void ReleaseControl( ViewController * c );
-    void Fullscreen();
 
+    /** Transfer view control to the caller. */
+    void TakeControl( ViewController * c );
+    /** Return control to the view. */
+    void ReleaseControl( ViewController * c );
+    /** Expand view to full screen. */
+    void Fullscreen();
+    /** Add an object that will react to the interactions events of the view.
+     *  Such objects are kept in a Multimap associative container m_interactionObjects.*/
     void AddInteractionObject( ViewInteractor * obj, double priority );
+    /** Remove an object from m_interactionObjects. */
     void RemoveInteractionObject( ViewInteractor * obj );
+    /** Send the interaction events to the objects from m_interactionObjects. */
     void ProcessInteractionEvents( vtkObject * caller, unsigned long event, void * calldata );
 
+    /** Get window coordinates (xWin, yWin) of a world point (world[3]). */
     void WorldToWindow( double world[3], double & xWin, double & yWin );
 
 public slots:
 
-    // Description:
-    // Notify the view that something it contains needs render. The view is then
-    // going to emit a Modified event.
+    /** Notify the view that something it contains needs render. The view is then
+     *  going to emit a Modified event. */
     void NotifyNeedRender();
+    /** Update camera transform when the reference transform is modified. */
     void ReferenceTransformChanged();
 
-    // Description:
-    // Reset the active camera in the renderer of this view
+    /** Reset the active camera in the renderer of this view. */
     void ResetCamera();
+    /** Reset the active camera in the renderer of this view using predefined bounds. */
     void ResetCamera( double bounds[6] );
+    /** Zoom the active camera in the renderer of this view. */
     void ZoomCamera( double factor );
+    /** Get active camera view angle. */
     double GetViewAngle();
+    /** Set active camera view angle. */
     void SetViewAngle( double angle );
 
 private slots:
