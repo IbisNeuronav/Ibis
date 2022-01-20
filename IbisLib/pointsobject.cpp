@@ -125,7 +125,9 @@ void PointsObject::Serialize( Serializer * ser )
         }
         if( numberOfPoints > 0 && m_selectedPointIndex == InvalidPointIndex )
             m_selectedPointIndex = 0;
-        this->SetSelectedPoint( m_selectedPointIndex );
+
+        if( m_selectedPointIndex != InvalidPointIndex )
+            this->SetSelectedPoint( m_selectedPointIndex );
     }
 }
 

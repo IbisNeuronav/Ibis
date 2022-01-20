@@ -418,9 +418,12 @@ void LandmarkRegistrationObject::DeletePoint( int index )
 
 void LandmarkRegistrationObject::SelectPoint( int index )
 {
-    m_sourcePoints->SetSelectedPoint( index );
-    m_sourcePoints->MoveCursorToPoint( index );
-    m_targetPoints->SetSelectedPoint( index );
+    if( index != PointsObject::InvalidPointIndex )
+    {
+        m_sourcePoints->SetSelectedPoint( index );
+        m_sourcePoints->MoveCursorToPoint( index );
+        m_targetPoints->SetSelectedPoint( index );
+    }
 }
 
 void LandmarkRegistrationObject::SetPointLabel( int index, const QString & label )
