@@ -80,7 +80,6 @@ void PolyDataObject::Serialize( Serializer * ser )
     ::Serialize( ser, "ScalarSourceObjectId", this->ScalarSourceObjectId );
     ::Serialize( ser, "ShowTexture", this->showTexture );
     ::Serialize( ser, "TextureFileName", this->textureFileName );
-    ::Serialize( ser, "VertexColorMode", this->VertexColorMode );
     if( ser->IsReader() )
     {
         this->SetRenderingMode( this->renderingMode );
