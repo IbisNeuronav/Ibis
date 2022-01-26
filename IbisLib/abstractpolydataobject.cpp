@@ -120,11 +120,15 @@ void AbstractPolyDataObject::Serialize( Serializer * ser )
     ::Serialize( ser, "ClippingPlanesOrientation", clippingPlaneOrientation, 3 );
     if( ser->IsReader() )
     {
+        double currentColor[3];
+        currentColor[0] = objectColor[0];
+        currentColor[1] = objectColor[1];
+        currentColor[2] = objectColor[2];
         SetClippingPlanesOrientation( 0, clippingPlaneOrientation[0] == 1 ? true : false );
         SetClippingPlanesOrientation( 1, clippingPlaneOrientation[1] == 1 ? true : false );
         SetClippingPlanesOrientation( 2, clippingPlaneOrientation[2] == 1 ? true : false );
         this->SetOpacity( opacity );
-        this->SetColor( objectColor );
+        this->SetColor( currentColor );
         this->SetCrossSectionVisible( this->CrossSectionVisible );
     }
 }
