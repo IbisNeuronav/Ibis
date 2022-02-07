@@ -19,6 +19,12 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 class PolyDataObject;
 
+/**
+ * @class   WorldObject
+ * @brief   It is also called Scene Root, as it is the topmpost obect in a scene and all other objects are its children.
+ *
+ *  WorldObject
+ */
 class WorldObject : public SceneObject
 {
 
