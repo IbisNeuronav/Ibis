@@ -91,14 +91,24 @@ public:
     /** Get the color of 3D view. */
     QColor Get3DBackgroundColor();
 
+    /** Set interactor style of 3D view. */
     void Set3DInteractorStyle( InteractorStyle style );
+    /** Get interactor style of 3D view. */
     InteractorStyle Get3DInteractorStyle();
 
+    /** Get camera view angle of 3D view. */
     double Get3DCameraViewAngle();
+    /** Set camera view angle of 3D view. */
     void Set3DCameraViewAngle( double angle );
 
+    /** @name  Update
+    *   @brief Set/Get update frequency.
+    *
+    * */
+   ///@{
     void SetUpdateFrequency( double fps );
     double GetUpdateFrequency();
+    ///@}
 
     virtual QWidget * CreateSettingsDialog( QWidget * parent ) override;
     virtual void CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets) override {}
