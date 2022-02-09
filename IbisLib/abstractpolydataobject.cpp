@@ -122,7 +122,7 @@ void AbstractPolyDataObject::Serialize( Serializer * ser )
     {
         this->SetColor( objectColor );
         // We have to set color  first, otherwise  the objectColor will be recomputed and wrong.
-        // SetClippingPlanesOrientation() call ObjectModified(), that will call PolyDataObjectSettingsDialog::UpdateSettings(),
+        // SetClippingPlanesOrientation() calls ObjectModified(), that will call PolyDataObjectSettingsDialog::UpdateSettings(),
         // then PolyDataObjectSettingsDialog::UpdateUI() from this call to AbstractPolyDataObject::GetColor() and
         // this->Property->GetColor(), which is recomputing the color in vtkProperty::ComputeCompositeColor() from DiffusedColor.
         SetClippingPlanesOrientation( 0, clippingPlaneOrientation[0] == 1 ? true : false );
