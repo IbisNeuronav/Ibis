@@ -95,7 +95,7 @@ public:
     */
     void SetImage( vtkImageData * image, vtkTransform * tr=0 );
     
-    /** Manage object actiona after adding to the scene. */
+    /** Manage object actions after adding to the scene. */
     virtual void ObjectAddedToScene() override;
     /** Setup object in a specific view */
     virtual void Setup( View * view ) override;
