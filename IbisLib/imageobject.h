@@ -51,7 +51,12 @@ class vtkImageData;
  * Images loaded in IBIS are initially represented in grayscale. Colors can be set using a predefind LUT (Look Up Table).
  * All lookup tables are defined in LookupTableManager.
  *
- *  @sa SceneObject LookupTableManager vtkImageData
+ * Image data is kept in the class as: vtkImageData *Image\n
+ * and as an ITK image:\n
+ *    IbisItkFloat3ImageType::Pointer ItkImage  or  IbisItkUnsignedChar3ImageType::Pointer ItkLabelImage;
+
+ *
+ *  @sa SceneObject SceneManager LookupTableManager vtkImageData
  */
 
 class ImageObject : public SceneObject
@@ -70,47 +75,74 @@ public:
     virtual void Serialize( Serializer * ser ) override;
     virtual void Export() override;
     virtual bool IsExportable()  override { return true; }
-    /** Save image data as a MINC file (*.mnc). */
+    /** Save image data as a MINC2 file (*.mnc). */
     void SaveImageData(QString &name);
-    /* Check if this is a label image. */
+    /** Check if this is a label image. */
     bool IsLabelImage();
-    
+    /** Return image data, VTK format. */
     vtkImageData* GetImage( );
-    bool SetItkImage( IbisItkFloat3ImageType::Pointer image );  // for all others
-    bool SetItkLabelImage( IbisItkUnsignedChar3ImageType::Pointer image );  // for labels
+    /** Set ITK image, all except labels. */
+    bool SetItkImage( IbisItkFloat3ImageType::Pointer image );
+    /** Set ITK image for labels. */
+    bool SetItkLabelImage( IbisItkUnsignedChar3ImageType::Pointer image );
+    /** Return image data, ITK format. */
     IbisItkFloat3ImageType::Pointer GetItkImage() { return this->ItkImage; }
+    /** Return label image data, ITK format. */
     IbisItkUnsignedChar3ImageType::Pointer GetItkLabelImage() { return this->ItkLabelImage; }
+    /** Set image data, VTK format.
+     *  @param image input data
+     *  @param tr initial transform
+    */
     void SetImage( vtkImageData * image, vtkTransform * tr=0 );
     
-    // Implementation of parent virtual method
+    /** Manage object actiona after adding to the scene. */
     virtual void ObjectAddedToScene() override;
+    /** Setup object in a specific view */
     virtual void Setup( View * view ) override;
+    /** Release object from a specific view */
     virtual void Release( View * view ) override;
+    /** Create widgets specific to the object, they are added as tabs to the basic settings dialog. */
     virtual void CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets) override;
 
+    /** Set bounding box visibility in 3D view. */
     void SetViewOutline( int isOn );
+    /** Check bounding box visibility in 3D view. */
     int GetViewOutline();
 
-	// Choose from the set of lookup table templates available from the SceneManager
+    /** Choose from the set of lookup table templates available from the LookupTableManager. */
     int ChooseColorTable(int index);
+    /** Get the index of currently used LUT. */
     int GetLutIndex() {return lutIndex;}
+    /** Get currently used LUT. */
     vtkScalarsToColors * GetLut();
+    /** Get LUT range. */
     double * GetLutRange();
+    /** Set LUT range. */
     void SetLutRange( double r[2] );
+    /** Get scalar range from Image. */
     void GetImageScalarRange(double *range);
+    /** Get number of scalar components from Image. */
     int GetNumberOfScalarComponents();
+    /** Get image bounds from Image. */
     void GetBounds( double bounds[6] );
+    /** Get image center from Image. */
     void GetCenter( double center[3] );
+    /** Get image spacing from Image. */
     double * GetSpacing();
+    /** Set intensity factor, default is 1.0. */
     void SetIntensityFactor( double factor );
+    /** Get intensity factor. */
     double GetIntensityFactor();
 
+    /** Show the information found in the MINC file in a popup widget. */
     virtual void ShowMincInfo( );
 
     vtkImageAccumulate * GetHistogramComputer();
 
     // vtk volume rendering
+    /** Enable/disable volume rendering. */
     void SetVtkVolumeRenderingEnabled( bool on );
+    /** Check if volume rendering is enabled. */
     bool GetVtkVolumeRenderingEnabled() { return m_vtkVolumeRenderingEnabled; }
     vtkVolumeProperty * GetVolumeProperty();
     void SetVolumeRenderingWindow( double window );
