@@ -36,6 +36,24 @@ class vtkImageAccumulate;
 class vtkVolumeProperty;
 class vtkImageData;
 
+/**
+ * @class   ImageObject
+ * @brief   ImageObject is derived from SceneObject
+ *
+ * ImageObject is used to represents a geometric structure that is a topological and geometrical regular array of points.
+ *
+ * In IBIS we use ImageObject to show data from the following file types:
+ *
+ * Minc file: *.mnc *.mnc2 *.mnc.gz *.MNC *.MNC2 *.MNC.GZ\n
+ * Nifti file *.nii\n
+ * VTK file: *.vtk *.vtp\n
+ *
+ * Images loaded in IBIS are initially represented in grayscale. Colors can be set using a predefind LUT (Look Up Table).
+ * All lookup tables are defined in LookupTableManager.
+ *
+ *  @sa SceneObject LookupTableManager vtkImageData
+ */
+
 class ImageObject : public SceneObject
 {
     
@@ -52,8 +70,9 @@ public:
     virtual void Serialize( Serializer * ser ) override;
     virtual void Export() override;
     virtual bool IsExportable()  override { return true; }
+    /** Save image data as a MINC file (*.mnc). */
     void SaveImageData(QString &name);
-
+    /* Check if this is a label image. */
     bool IsLabelImage();
     
     vtkImageData* GetImage( );
