@@ -40,6 +40,7 @@ GeneratedSurface::GeneratedSurface()
     m_gaussianSmoothing = false;
     m_reductionPercent = 0;
     AllowChangeParent = false;
+    AllowManualTransformEdit = false;
 }
 
 GeneratedSurface::~GeneratedSurface()
