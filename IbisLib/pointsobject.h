@@ -37,8 +37,9 @@ class PolyDataObject;
  * Points are displayed using PointRepresentation, in 3D view a sphere, in 2D view a circle with a cross.
  * Points coordinates are stored as vtkPoints.\n
  * Points are read in and saved in a .tag file format.\n
- * Points may be enabled (active), or disabled. Disabled points cannot be picked.
- * Enabled, active and selected points are shown in different colors predefined in the constructor PointsObject().
+ * Points may be enabled (active), or disabled. Disabled points cannot be picked.\n
+ * Enabled, active and selected points are shown in different colors predefined in the constructor PointsObject().\n
+ * Disabling points is useful when we want to exclude some points from calculations, e.g. landmark registration.
  * @sa
  * Application SceneManager View SceneObject PolyDataObject PointRepresentation
  */

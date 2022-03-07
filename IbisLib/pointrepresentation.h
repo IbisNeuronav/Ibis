@@ -26,6 +26,15 @@ class View;
 
 #define INITIAL_TAG_LABEL_SCALE 8.0
 
+/**
+ * @class   PointRepresentation
+ * @brief   Graphic point representation
+ *
+ * PointRepresentation is a collection of actors that represent a point in all 4 main views.
+ * The appeareance of the point is controlled using vtkProperty.
+ * @sa
+ * PointsObject SceneObject
+ */
 class PointRepresentation : public SceneObject
 {
     
@@ -42,55 +51,49 @@ public:
     virtual void Setup( View * view ) override;
     virtual void Release( View * view ) override;
 
-    void CreatePointRepresentation();
-
-    // Description:
-    // set property colory
+    /** Set point's color. */
     void SetPropertyColor(double color[3]);
 
-    // Description:
-    // set respective properties colors
+    /** Set point's opacity. */
     void SetOpacity(double opacity);
 
-    // Description:
-    // Set point size
+    /** Set point's size in 3D view. */
     void SetPointSizeIn3D(double);
+    /** Set point's size in 2D view. */
     void SetPointSizeIn2D(double);
 
-    // Description:
-    // Set/get point index
+    /** Set point's index. */
     void SetPointIndex(int i) {m_pointIndex = i;}
+    /** Get point's index. */
     int GetPointIndex() {return m_pointIndex;}
 
-    // Description:
-    // Set point position
+    /** Set point's position. */
+    ///@{
     void SetPosition(double p[3]);
     void SetPosition(double x, double y, double z);
     void GetPosition(double p[3]);
+    ///@}
 
-    // Description
-    // Enable/disable picking
+    /** Enable/disable picking. */
     void SetActive(bool yes);
+    /** Check if the point is active. */
     bool GetActive() { return m_active; }
 
-    // Description
-    // Check if actor is used in any of the views. This is mainly for picking in 3D views
+    /** Check if actor is used in any of the views. This is mainly for picking in 3D views.*/
     bool HasActor( vtkActor * actor );
 
-    // Description:
-    // Set/Get the label of the point
+    /** Set the label of the point. */
     void SetLabel( const std::string & text );
+    /** Get the label of the point. */
     const char* GetLabel();
-    // Description:
-    // Show/hide the label of the point
+
+    /** Show/hide the label of the point. */
     void ShowLabel( bool show);
 
-    // Description:
-    // Set the Label size
+    /** Set label size. */
     void SetLabelScale(double s);
 
-    // Update the visibility of the point in 2D
-    // according to whether it is in a plane
+    /** Update the visibility of the point in 2D according to whether it is in a plane. */
     void UpdateVisibility();
 
 protected:
