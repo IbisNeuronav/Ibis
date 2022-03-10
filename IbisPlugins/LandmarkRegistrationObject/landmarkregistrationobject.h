@@ -78,6 +78,7 @@ protected:
     virtual void InternalPostSceneRead();
     virtual void Hide();
     virtual void Show();
+    virtual void SetHiddenChildren(SceneObject * parent, bool hide);
 
     void WriteTagFile( const QString & filename, bool saveEnabledOnly = false );
     void WriteXFMFile( const QString & filename );

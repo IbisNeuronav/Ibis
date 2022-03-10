@@ -297,6 +297,15 @@ void LandmarkRegistrationObject::Show()
     m_targetPoints->UpdatePointsVisibility();
 }
 
+void LandmarkRegistrationObject::SetHiddenChildren(SceneObject * parent, bool hide)
+{
+    // LandmarkRegistrationObject has two children, we just show/hide both.
+    m_sourcePoints->SetHidden( hide );
+    m_targetPoints->SetHidden( hide );
+    m_sourcePoints->UpdatePointsVisibility();
+    m_targetPoints->UpdatePointsVisibility();
+}
+
 void LandmarkRegistrationObject::SetSourcePoints( vtkSmartPointer<PointsObject> pts)
 {
     Q_ASSERT( GetManager() );
