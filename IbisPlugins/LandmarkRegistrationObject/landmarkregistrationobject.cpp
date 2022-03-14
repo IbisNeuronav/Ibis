@@ -186,6 +186,7 @@ void LandmarkRegistrationObject::ObjectAboutToBeRemovedFromScene()
     if( m_targetPoints )
         GetManager()->RemoveObject( m_targetPoints );
     disconnect( GetManager(), SIGNAL(CurrentObjectChanged()), this, SLOT(CurrentObjectChanged()));
+    disconnect( GetManager(), SIGNAL(CursorPositionChanged()), this, SLOT(CurrentObjectChanged()) );
 }
 
 void LandmarkRegistrationObject::Export()
