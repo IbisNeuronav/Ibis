@@ -95,6 +95,8 @@ public:
 
     /** Update the visibility of the point in 2D according to whether it is in a plane. */
     void UpdateVisibility();
+    /** Check visibility of the point in 2D according to whether it is in a plane. */
+    bool CheckVisibility();
 
 protected:
 

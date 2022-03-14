@@ -179,6 +179,8 @@ public:
     void SetPointCoordinates( int index, double coords[3] );
     /** Set point timestamp - time when point was created. */
     void SetPointTimeStamp( int index, const QString & stamp);
+    /** Check if the selected point is in the current planes. */
+    void ValidateSelectedPoint();
 
 signals:
     void PointAdded();

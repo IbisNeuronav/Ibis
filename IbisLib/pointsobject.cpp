@@ -391,14 +391,29 @@ vtkPoints * PointsObject::GetPoints()
 void PointsObject::SetSelectedPoint( int index )
 {
     // Set selected point
-    Q_ASSERT( index != InvalidPointIndex && index < m_pointCoordinates->GetNumberOfPoints() );
-    m_selectedPointIndex = index;
+    if ( index != InvalidPointIndex && index < m_pointCoordinates->GetNumberOfPoints() )
+        m_selectedPointIndex = index;
+    else
+        return;
 
     // Update points colors
     UpdatePoints();
 
     emit PointsChanged();
     emit ObjectModified();
+}
+
+void PointsObject::ValidateSelectedPoint()
+{
+    if( m_selectedPointIndex == InvalidPointIndex )
+        return;
+
+    vtkSmartPointer<PointRepresentation> pt = m_pointList.at( m_selectedPointIndex );
+    if( !pt->CheckVisibility() )
+    {
+        m_selectedPointIndex = InvalidPointIndex ;
+        emit ObjectModified();
+    }
 }
 
 void PointsObject::MoveCursorToPoint( int index )

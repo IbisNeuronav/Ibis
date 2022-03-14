@@ -141,6 +141,8 @@ void LandmarkRegistrationObject::CurrentObjectChanged()
     if( GetManager()->GetCurrentObject() == this )
     {
         EnablePicking( true );
+        m_sourcePoints->ValidateSelectedPoint();
+        emit ObjectModified();
     }
     else
         EnablePicking( false );
@@ -292,6 +294,7 @@ void LandmarkRegistrationObject::Hide()
 void LandmarkRegistrationObject::Show()
 {
     m_sourcePoints->SetHidden( false );
+    m_sourcePoints->ValidateSelectedPoint();
     m_targetPoints->SetHidden( false );
     m_sourcePoints->UpdatePointsVisibility();
     m_targetPoints->UpdatePointsVisibility();
@@ -301,6 +304,8 @@ void LandmarkRegistrationObject::SetHiddenChildren(SceneObject * parent, bool hi
 {
     // LandmarkRegistrationObject has two children, we just show/hide both.
     m_sourcePoints->SetHidden( hide );
+    if( !hide )
+        m_sourcePoints->ValidateSelectedPoint();
     m_targetPoints->SetHidden( hide );
     m_sourcePoints->UpdatePointsVisibility();
     m_targetPoints->UpdatePointsVisibility();
