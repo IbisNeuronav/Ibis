@@ -80,7 +80,7 @@ void LandmarkRegistrationObjectSettingsWidget::SetLandmarkRegistrationObject(Lan
         return;
     m_registrationObject = obj;
     m_registrationObject->Register(nullptr);
-    connect( m_registrationObject, SIGNAL(ObjectModified()), this, SLOT(UpdateUI()) );
+    connect( m_registrationObject, SIGNAL(UpdateSettings()), this, SLOT(UpdateUI()) );
     this->UpdateUI();
 }
 

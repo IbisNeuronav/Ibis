@@ -61,6 +61,7 @@ void LandmarkRegistrationObject::CreateSettingsWidgets( QWidget * parent, QVecto
     if( m_sourcePoints )
     {
         connect( m_sourcePoints, SIGNAL(ObjectModified()), props, SLOT(UpdateUI()) );
+        connect( this, SIGNAL(UpdateSettings()), props, SLOT(UpdateUI()) );
     }
     connect( this, SIGNAL(ObjectModified()), props, SLOT(UpdateUI()) );
     widgets->append(props);
@@ -142,7 +143,7 @@ void LandmarkRegistrationObject::CurrentObjectChanged()
     {
         EnablePicking( true );
         m_sourcePoints->ValidateSelectedPoint();
-        emit ObjectModified();
+        emit UpdateSettings();
     }
     else
         EnablePicking( false );
@@ -176,6 +177,7 @@ void LandmarkRegistrationObject::InternalPostSceneRead()
 void LandmarkRegistrationObject::ObjectAddedToScene()
 {
     connect( GetManager(), SIGNAL(CurrentObjectChanged()), this, SLOT(CurrentObjectChanged()));
+    connect( GetManager(), SIGNAL(CursorPositionChanged()), this, SLOT(CurrentObjectChanged()) );
 }
 
 void LandmarkRegistrationObject::ObjectAboutToBeRemovedFromScene()

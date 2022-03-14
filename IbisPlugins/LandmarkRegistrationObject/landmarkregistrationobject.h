@@ -60,6 +60,9 @@ public:
     void SetTargetPointTimeStamp( int index, const QString &stamp );
     void SetTagSize( int tagSize );
 
+signals:
+    void UpdateSettings();
+
 public slots:
     void PointAdded( );
     void PointRemoved( int );
