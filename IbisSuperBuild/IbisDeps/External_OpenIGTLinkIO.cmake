@@ -5,7 +5,7 @@ ExternalProject_Add( ${openigtlinkio_name}
   BINARY_DIR ${openigtlinkio_prefix}/build
   STAMP_DIR ${openigtlinkio_prefix}/stamp
   INSTALL_COMMAND ""
-  GIT_REPOSITORY "git://github.com/IGSIO/OpenIGTLinkIO.git"
+  GIT_REPOSITORY "https://github.com/IGSIO/OpenIGTLinkIO.git"
   GIT_TAG master
   CMAKE_ARGS -DCMAKE_OSX_SYSROOT:PATH=${CMAKE_OSX_SYSROOT}
              -DCMAKE_OSX_DEPLOYMENT_TARGET:STRING=${CMAKE_OSX_DEPLOYMENT_TARGET}
