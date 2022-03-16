@@ -5,7 +5,7 @@ ExternalProject_Add( ${openigtlinkio_name}
   BINARY_DIR ${openigtlinkio_prefix}/build
   STAMP_DIR ${openigtlinkio_prefix}/stamp
   INSTALL_COMMAND ""
-  GIT_REPOSITORY "git://github.com/IGSIO/OpenIGTLinkIO.git"
+  GIT_REPOSITORY "https://github.com/IGSIO/OpenIGTLinkIO.git"
   #the tag is used to mark the version that compiles and links with the first version of ibis 4.x, it will have to be removed altogether once OpenIGTLinkIO is stable
   GIT_TAG  30a04eb14e43b439178ba13130b7a2c1fb2b51c2
   CMAKE_ARGS -DCMAKE_OSX_SYSROOT:PATH=${CMAKE_OSX_SYSROOT}
