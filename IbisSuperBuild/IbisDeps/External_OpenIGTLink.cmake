@@ -5,7 +5,7 @@ ExternalProject_Add( ${openigtlink_name}
     BINARY_DIR ${openigtlink_prefix}/build
     STAMP_DIR ${openigtlink_prefix}/stamp
     INSTALL_COMMAND ""
-    GIT_REPOSITORY "git://github.com/openigtlink/OpenIGTLink.git"
+    GIT_REPOSITORY "https://github.com/openigtlink/OpenIGTLink.git"
     GIT_TAG master
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=${external_project_dir}/${openigtlink_name}/install
                -DCMAKE_OSX_SYSROOT:PATH=${CMAKE_OSX_SYSROOT}
