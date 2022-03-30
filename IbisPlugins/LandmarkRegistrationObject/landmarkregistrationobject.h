@@ -67,6 +67,7 @@ public slots:
     void PointAdded( );
     void PointRemoved( int );
     void Update();
+    void OnSourcePointsRemoved();
 
 protected slots:
 
