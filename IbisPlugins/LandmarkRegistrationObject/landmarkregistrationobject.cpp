@@ -571,6 +571,7 @@ void LandmarkRegistrationObject::UpdateLandmarkTransform( )
 
 void LandmarkRegistrationObject::OnSourcePointsRemoved()
 {
+    disconnect( m_sourcePoints, SIGNAL(RemovingFromScene()), this, SLOT(OnSourcePointsRemoved()) );
     m_sourcePoints = nullptr;
 }
 
