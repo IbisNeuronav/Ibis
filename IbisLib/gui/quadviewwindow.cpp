@@ -203,7 +203,7 @@ void QuadViewWindow::SetSceneManager( SceneManager * man )
     connect( man, SIGNAL(ShowGenericLabelText()), this, SLOT(OnShowGenericLabelText()) );
 
     m_sceneManager->PreDisplaySetup();
-    this->PlaceCornerText(); // It was temporarily blocked, seems to work now.
+//        this->PlaceCornerText(); temporarily blocked
 }
 
 void QuadViewWindow::AddBottomWidget( QWidget * w )
