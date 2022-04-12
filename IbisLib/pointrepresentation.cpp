@@ -212,6 +212,35 @@ void PointRepresentation::UpdateVisibility()
     }
 }
 
+bool PointRepresentation::CheckVisibility()
+{
+    bool visible = false;
+    // Compute point position in world space
+    vtkTransform * wt = this->GetWorldTransform();
+    PointsObject * parent = PointsObject::SafeDownCast( this->GetParent() );
+    double local[3];
+    parent->GetPointCoordinates( m_pointIndex, local );
+    double world[3];
+    wt->TransformPoint( local, world );
+
+    // check point's visibility in each of 2d views
+    PerViewContainer::iterator it = m_perViewContainer.begin( );
+    while( it != m_perViewContainer.end() )
+    {
+        View * view = (*it).first;
+        if( view->GetType() != THREED_VIEW_TYPE )
+        {
+            bool isInPlane = this->GetManager()->IsInPlane( (VIEWTYPES)view->GetType(), world );
+            if( isInPlane )
+            {
+                visible = true;
+            }
+        }
+        ++it;
+    }
+    return visible;
+}
+
 void PointRepresentation::SetPropertyColor(double color[3])
 {
     m_property->SetColor(color[0], color[1], color[2]);

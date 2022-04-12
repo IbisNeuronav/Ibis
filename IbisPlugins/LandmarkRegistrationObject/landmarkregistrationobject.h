@@ -60,10 +60,14 @@ public:
     void SetTargetPointTimeStamp( int index, const QString &stamp );
     void SetTagSize( int tagSize );
 
+signals:
+    void UpdateSettings();
+
 public slots:
     void PointAdded( );
     void PointRemoved( int );
     void Update();
+    void OnSourcePointsRemoved();
 
 protected slots:
 
@@ -78,6 +82,7 @@ protected:
     virtual void InternalPostSceneRead();
     virtual void Hide();
     virtual void Show();
+    virtual void SetHiddenChildren(SceneObject * parent, bool hide);
 
     void WriteTagFile( const QString & filename, bool saveEnabledOnly = false );
     void WriteXFMFile( const QString & filename );

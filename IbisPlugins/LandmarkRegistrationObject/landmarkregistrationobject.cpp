@@ -61,6 +61,7 @@ void LandmarkRegistrationObject::CreateSettingsWidgets( QWidget * parent, QVecto
     if( m_sourcePoints )
     {
         connect( m_sourcePoints, SIGNAL(ObjectModified()), props, SLOT(UpdateUI()) );
+        connect( this, SIGNAL(UpdateSettings()), props, SLOT(UpdateUI()) );
     }
     connect( this, SIGNAL(ObjectModified()), props, SLOT(UpdateUI()) );
     widgets->append(props);
@@ -138,12 +139,17 @@ void LandmarkRegistrationObject::PostSceneRead()
 
 void LandmarkRegistrationObject::CurrentObjectChanged()
 {
-    if( GetManager()->GetCurrentObject() == this )
+    if( m_sourcePoints != nullptr) // m_sourcePoints is set to nullptr when the points are deleted e.g. on app exit
     {
-        EnablePicking( true );
+        if( GetManager()->GetCurrentObject() == SceneObject::SafeDownCast(this) )
+        {
+            EnablePicking( true );
+            m_sourcePoints->ValidateSelectedPoint();
+            emit UpdateSettings();
+        }
+        else
+            EnablePicking( false );
     }
-    else
-        EnablePicking( false );
 }
 
 void LandmarkRegistrationObject::InternalPostSceneRead()
@@ -174,14 +180,16 @@ void LandmarkRegistrationObject::InternalPostSceneRead()
 void LandmarkRegistrationObject::ObjectAddedToScene()
 {
     connect( GetManager(), SIGNAL(CurrentObjectChanged()), this, SLOT(CurrentObjectChanged()));
+    connect( GetManager(), SIGNAL(CursorPositionChanged()), this, SLOT(CurrentObjectChanged()) );
 }
 
 void LandmarkRegistrationObject::ObjectAboutToBeRemovedFromScene()
 {
+    disconnect( GetManager(), SIGNAL(CurrentObjectChanged()), this, SLOT(CurrentObjectChanged()));
+    disconnect( GetManager(), SIGNAL(CursorPositionChanged()), this, SLOT(CurrentObjectChanged()) );
     // m_targetPoints is not a child of LandmarkRegistrationObject, it has to be removed explicitly
     if( m_targetPoints )
         GetManager()->RemoveObject( m_targetPoints );
-    disconnect( GetManager(), SIGNAL(CurrentObjectChanged()), this, SLOT(CurrentObjectChanged()));
 }
 
 void LandmarkRegistrationObject::Export()
@@ -292,7 +300,19 @@ void LandmarkRegistrationObject::Hide()
 void LandmarkRegistrationObject::Show()
 {
     m_sourcePoints->SetHidden( false );
+    m_sourcePoints->ValidateSelectedPoint();
     m_targetPoints->SetHidden( false );
+    m_sourcePoints->UpdatePointsVisibility();
+    m_targetPoints->UpdatePointsVisibility();
+}
+
+void LandmarkRegistrationObject::SetHiddenChildren(SceneObject * parent, bool hide)
+{
+    // LandmarkRegistrationObject has two children, we just show/hide both.
+    m_sourcePoints->SetHidden( hide );
+    if( !hide )
+        m_sourcePoints->ValidateSelectedPoint();
+    m_targetPoints->SetHidden( hide );
     m_sourcePoints->UpdatePointsVisibility();
     m_targetPoints->UpdatePointsVisibility();
 }
@@ -330,6 +350,7 @@ void LandmarkRegistrationObject::SetSourcePoints( vtkSmartPointer<PointsObject> 
         connect( m_sourcePoints, SIGNAL(PointAdded()), this, SLOT(PointAdded()) );
         connect( m_sourcePoints, SIGNAL(PointRemoved(int)), this, SLOT(PointRemoved(int)) );
         connect( m_sourcePoints, SIGNAL(PointsChanged()), this, SLOT(Update()) );
+        connect( m_sourcePoints, SIGNAL(RemovingFromScene()), this, SLOT(OnSourcePointsRemoved()) );
         disconnect( this->GetManager(), SIGNAL(CurrentObjectChanged()), m_sourcePoints, SLOT(OnCurrentObjectChanged()) );
         m_sourcePointsID = m_sourcePoints->GetObjectID();
     }
@@ -546,6 +567,12 @@ void LandmarkRegistrationObject::UpdateLandmarkTransform( )
     this->UpdateActivePoints();
     m_registrationTransform->UpdateRegistrationTransform( );
     this->WorldTransformChanged();
+}
+
+void LandmarkRegistrationObject::OnSourcePointsRemoved()
+{
+    disconnect( m_sourcePoints, SIGNAL(RemovingFromScene()), this, SLOT(OnSourcePointsRemoved()) );
+    m_sourcePoints = nullptr;
 }
 
 void LandmarkRegistrationObject::Update()

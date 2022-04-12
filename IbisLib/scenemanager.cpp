@@ -814,7 +814,7 @@ void SceneManager::RemoveObject( SceneObject * object )
 
     SceneObject * parent = object->GetParent();
 
-    if( m_currentObject == object )
+    if( object == SceneObject::SafeDownCast(m_currentObject ) )
     {
         if( parent )
             this->SetCurrentObject(parent);
@@ -826,7 +826,7 @@ void SceneManager::RemoveObject( SceneObject * object )
         emit StartRemovingObject( object->GetParent(), position );
 
     // Set ReferenceDataObject if needed
-    if (object == m_referenceDataObject)
+    if ( object == SceneObject::SafeDownCast(m_referenceDataObject) )
     {
         m_referenceDataObject  = nullptr;
         m_referenceTransform->Identity();

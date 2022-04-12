@@ -80,6 +80,7 @@ void LandmarkRegistrationObjectSettingsWidget::SetLandmarkRegistrationObject(Lan
         return;
     m_registrationObject = obj;
     m_registrationObject->Register(nullptr);
+    connect( m_registrationObject, SIGNAL(UpdateSettings()), this, SLOT(UpdateUI()) );
     this->UpdateUI();
 }
 
@@ -316,9 +317,8 @@ void LandmarkRegistrationObjectSettingsWidget::UpdateUI()
     if( m_registrationObject->GetNumberOfPoints() > 0 )
     {
         int selectedPointIndex = m_registrationObject->GetSourcePoints()->GetSelectedPointIndex();
-        if( selectedPointIndex == PointsObject::InvalidPointIndex  || selectedPointIndex >= m_registrationObject->GetNumberOfPoints() )
-            selectedPointIndex = 0;
-        ui->pointsTreeView->setCurrentIndex( m_model->index( selectedPointIndex, 0 ) );
+        if( selectedPointIndex != PointsObject::InvalidPointIndex  && selectedPointIndex < m_registrationObject->GetNumberOfPoints() )
+            ui->pointsTreeView->setCurrentIndex( m_model->index( selectedPointIndex, 0 ) );
     }
 }
 
