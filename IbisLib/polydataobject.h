@@ -29,10 +29,10 @@ class ImageObject;
  * @class   PolyDataObject
  * @brief   PolyDataObject is derived from AbstractPolyDataObject
  *
- * PolyDataObject provides a settings widget allowing you to set object's properties.
- * It may be exported as a *.vtk type file.
+ * PolyDataObject provides a mechanism allowing you to set object properties.
+ * PolyDataObject may be exported as a *.vtk type file.
  *
- *  @sa SceneObject SceneManager AbstractPolyDataObject
+ *  @sa SceneObject SceneManager ImageObject LookupTableManager AbstractPolyDataObject PolyDataObjectSettingsDialog
  */
 
 class PolyDataObject : public AbstractPolyDataObject
@@ -50,24 +50,34 @@ public:
     virtual void Serialize( Serializer * ser ) override;
     virtual void Export() override;
     virtual bool IsExportable()  override { return true; }
-    
+    /** Update clipping, colors, visibility. */
     virtual void UpdatePipeline() override;
     virtual void CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets) override;
 
-
+    /** Get current scalar source */
     ImageObject * GetScalarSource() { return this->ScalarSource; }
+    /** Set current scalar source */
     void SetScalarSource( ImageObject * im );
+    /** Get index to the current lookup table, lookup tables are defined in LookupTableManager. */
     int GetLutIndex() { return LutIndex; }
+    /** LUT index is set when Vertex Color is checked and Use Scalars is selected in PolyDataObjectSettingsDialog. */
     void SetLutIndex( int index );
+    /** Check if vertex color mode is used, */
     int GetVertexColorMode() { return VertexColorMode; }
+    /** Set vertex color mode. */
     void SetVertexColorMode( int mode );
+    /** Get current lookup table. */
     vtkScalarsToColors * GetCurrentLut();
     virtual void InternalPostSceneRead() override;
-
+    /**  Set image found in texture file as PolyData texture. */
     void SetTexture( vtkImageData * texImage );
+    /** Check if the texture is displayed. */
     bool GetShowTexture() { return showTexture; }
+    /** Show/hide texture. */
     void SetShowTexture( bool show );
+    /** Set the name of the file used for texture - .png format is used. */
     void SetTextureFileName( QString );
+    /**  Get the name of the file used for texture. */
     QString GetTextureFileName() { return textureFileName; }
 
 public slots:

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>275</width>
-    <height>706</height>
+    <width>291</width>
+    <height>739</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -96,7 +96,7 @@ border-radius: 7;</string>
    <item>
     <widget class="QGroupBox" name="vertexColorGroupBox">
      <property name="title">
-      <string>Vertex color</string>
+      <string>Vertex Color</string>
      </property>
      <property name="checkable">
       <bool>true</bool>
@@ -105,7 +105,7 @@ border-radius: 7;</string>
       <item>
        <widget class="QRadioButton" name="useDataScalarsRadioButton">
         <property name="text">
-         <string>Use data scalars</string>
+         <string>Use Data Scalars</string>
         </property>
        </widget>
       </item>
@@ -135,7 +135,7 @@ border-radius: 7;</string>
       <item>
        <widget class="QRadioButton" name="sampleFromVolumeRadioButton">
         <property name="text">
-         <string>Sample from volume</string>
+         <string>Sample from Volume</string>
         </property>
        </widget>
       </item>
@@ -174,7 +174,7 @@ border-radius: 7;</string>
       </sizepolicy>
      </property>
      <property name="title">
-      <string>Display mode</string>
+      <string>Display Mode</string>
      </property>
      <property name="flat">
       <bool>true</bool>
