@@ -25,6 +25,15 @@ class vtkProbeFilter;
 class vtkScalarsToColors;
 class ImageObject;
 
+/**
+ * @class   PolyDataObject
+ * @brief   PolyDataObject is derived from AbstractPolyDataObject
+ *
+ * PolyDataObject provides a settings widget allowing you to set object's properties.
+ * It may be exported as a *.vtk type file.
+ *
+ *  @sa SceneObject SceneManager AbstractPolyDataObject
+ */
 
 class PolyDataObject : public AbstractPolyDataObject
 {
@@ -46,8 +55,6 @@ public:
     virtual void CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets) override;
 
 
-    bool IsUsingScalarSource();
-    void UseScalarSource( bool use );
     ImageObject * GetScalarSource() { return this->ScalarSource; }
     void SetScalarSource( ImageObject * im );
     int GetLutIndex() { return LutIndex; }
