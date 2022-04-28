@@ -68,23 +68,37 @@ PolyDataObject::~PolyDataObject()
 void PolyDataObject::Serialize( Serializer * ser )
 {
     AbstractPolyDataObject::Serialize( ser );
+    QString newTextureFilePath;
+    QString textureFileNameOnly;
     if(!ser->IsReader())
     {
         if( this->ScalarSource )
             this->ScalarSourceObjectId = this->ScalarSource->GetObjectID();
         else
             this->ScalarSourceObjectId = SceneManager::InvalidId;
+        QString oldPath = this->textureFileName;
+        newTextureFilePath = QString(this->GetManager()->GetSceneDirectory());
+        newTextureFilePath.append("/");
+        if ( !oldPath.isEmpty() )
+        {
+            QFileInfo fi(this->textureFileName);
+            textureFileNameOnly = fi.fileName();
+            newTextureFilePath.append( textureFileNameOnly );
+            // Copy the file to the scene directory
+            if (!QFile::exists(newTextureFilePath))
+                QFile::copy(oldPath, newTextureFilePath);
+        }
     }
     ::Serialize( ser, "LutIndex", this->LutIndex );
     ::Serialize( ser, "VertexColorMode", this->VertexColorMode );
     ::Serialize( ser, "ScalarSourceObjectId", this->ScalarSourceObjectId );
     ::Serialize( ser, "ShowTexture", this->showTexture );
-    ::Serialize( ser, "TextureFileName", this->textureFileName );
     if( ser->IsReader() )
     {
-        this->SetRenderingMode( this->renderingMode );
-        this->SetShowTexture( this->showTexture );
+        ::Serialize( ser, "TextureFileName", this->textureFileName );
     }
+    else
+        ::Serialize( ser, "TextureFileName", textureFileNameOnly );
 }
 
 void PolyDataObject::Export()
@@ -247,12 +261,20 @@ void PolyDataObject::InternalPostSceneRead()
 {
     Q_ASSERT( this->GetManager() );
 
-    // reconnect to the image object from which scalars are computed
+    // reconnect to the image object from which scalars are computed, process texture
     if( this->ScalarSourceObjectId != SceneManager::InvalidId )
     {
         SceneObject * scalarObj = this->GetManager()->GetObjectByID( this->ScalarSourceObjectId );
         ImageObject * scalarImageObj = ImageObject::SafeDownCast( scalarObj );
         this->SetScalarSource( scalarImageObj );
+    }
+    QString textureFilePath;
+    if( !this->textureFileName.isEmpty() )
+    {
+        textureFilePath = this->GetManager()->GetSceneDirectory() + "/" + this->textureFileName;
+        this->SetTextureFileName( textureFilePath );
+        this->SetRenderingMode( this->renderingMode );
+        this->SetShowTexture( this->showTexture );
     }
     emit ObjectViewChanged();
 }
@@ -381,3 +403,9 @@ void PolyDataObject::SetTextureFileName( QString filename )
     }
 }
 
+void PolyDataObject::ObjectRemovedFromScene()
+{
+    Q_ASSERT( this->GetManager() );
+    //refresh 3D view
+    this->GetManager()->GetMain3DView()->NotifyNeedRender();
+}
