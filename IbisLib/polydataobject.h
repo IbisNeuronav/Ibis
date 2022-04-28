@@ -53,6 +53,7 @@ public:
     /** Update clipping, colors, visibility. */
     virtual void UpdatePipeline() override;
     virtual void CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets) override;
+    void ObjectRemovedFromScene() override;
 
     /** Get current scalar source */
     ImageObject * GetScalarSource() { return this->ScalarSource; }
