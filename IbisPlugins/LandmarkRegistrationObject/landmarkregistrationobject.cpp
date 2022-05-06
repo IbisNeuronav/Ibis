@@ -187,9 +187,8 @@ void LandmarkRegistrationObject::ObjectAboutToBeRemovedFromScene()
 {
     disconnect( GetManager(), SIGNAL(CurrentObjectChanged()), this, SLOT(CurrentObjectChanged()));
     disconnect( GetManager(), SIGNAL(CursorPositionChanged()), this, SLOT(CurrentObjectChanged()) );
-    // m_targetPoints is not a child of LandmarkRegistrationObject, it has to be removed explicitly
-    if( m_targetPoints )
-        GetManager()->RemoveObject( m_targetPoints );
+    // m_targetPoints is not a child of LandmarkRegistrationObject, it is removed as a World child
+    m_targetPoints = nullptr;
 }
 
 void LandmarkRegistrationObject::Export()
@@ -573,6 +572,7 @@ void LandmarkRegistrationObject::OnSourcePointsRemoved()
 {
     disconnect( m_sourcePoints, SIGNAL(RemovingFromScene()), this, SLOT(OnSourcePointsRemoved()) );
     m_sourcePoints = nullptr;
+    m_sourcePointsID = SceneManager::InvalidId;
 }
 
 void LandmarkRegistrationObject::Update()
