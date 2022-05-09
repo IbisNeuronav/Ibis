@@ -861,7 +861,7 @@ void SceneManager::RemoveObject( SceneObject * object )
     // Tell other this object is being removed
     object->RemoveFromScene();
     //at this moment object still exist, we send ObjectRemoved() signal
-    //in order to let other objects to deal with the a still valid object,
+    //in order to let other objects to deal with the still valid object,
     //unregister shoul trigger destruction of the object
     emit ObjectRemoved( objId );
 
