@@ -814,7 +814,7 @@ void SceneManager::RemoveObject( SceneObject * object )
 
     SceneObject * parent = object->GetParent();
 
-    if( object == SceneObject::SafeDownCast(m_currentObject ) )
+    if( object == m_currentObject )
     {
         if( parent )
             this->SetCurrentObject(parent);

@@ -307,7 +307,7 @@ void LandmarkRegistrationObject::Show()
 
 void LandmarkRegistrationObject::SetHiddenChildren(SceneObject * parent, bool hide)
 {
-    // LandmarkRegistrationObject has two children, we just show/hide both.
+    // LandmarkRegistrationObject manages two PointsObjects, we just show/hide both.
     m_sourcePoints->SetHidden( hide );
     if( !hide )
         m_sourcePoints->ValidateSelectedPoint();
@@ -570,7 +570,10 @@ void LandmarkRegistrationObject::UpdateLandmarkTransform( )
 
 void LandmarkRegistrationObject::OnSourcePointsRemoved()
 {
-    disconnect( m_sourcePoints, SIGNAL(RemovingFromScene()), this, SLOT(OnSourcePointsRemoved()) );
+    //No callback operation can be done when source points are removed/
+    disconnect( m_sourcePoints );
+    disconnect( this, SIGNAL(UpdateSettings()) );
+    disconnect( this, SIGNAL(ObjectModified()) );
     m_sourcePoints = nullptr;
     m_sourcePointsID = SceneManager::InvalidId;
 }
