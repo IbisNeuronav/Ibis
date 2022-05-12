@@ -881,7 +881,8 @@ void SceneManager::ChangeParent( SceneObject * object, SceneObject * newParent, 
     SceneObject * curParent = object->GetParent();
     int position = object->GetObjectListableIndex();
 
-    emit StartRemovingObject( curParent, position );
+    if (object->IsListable())
+        emit StartRemovingObject( curParent, position );
     curParent->RemoveChild( object );
     if( object->IsListable() )
         emit FinishRemovingObject();
