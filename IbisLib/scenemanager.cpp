@@ -868,10 +868,10 @@ void SceneManager::RemoveObject( SceneObject * object )
     // remove the object from the global list
     this->AllObjects.removeAt( indexAll );
 
-    object->UnRegister( this );
-
-    if( object->IsListable() )
+     if( object->IsListable() )
         emit FinishRemovingObject();
+
+    object->UnRegister(this); // Unregister may call delete if object->ReferenceCount == 1, then no operation on the object may be done.
 
     ValidatePointerObject();
 }
