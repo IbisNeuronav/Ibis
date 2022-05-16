@@ -187,9 +187,9 @@ void LandmarkRegistrationObject::ObjectAboutToBeRemovedFromScene()
 {
     disconnect( GetManager(), SIGNAL(CurrentObjectChanged()), this, SLOT(CurrentObjectChanged()));
     disconnect( GetManager(), SIGNAL(CursorPositionChanged()), this, SLOT(CurrentObjectChanged()) );
-    // m_targetPoints is not a child of LandmarkRegistrationObject, it has to be removed explicitly
-    if( m_targetPoints )
-        GetManager()->RemoveObject( m_targetPoints );
+    // m_targetPoints is not a child of LandmarkRegistrationObject, it is removed as a World child
+    m_targetPoints->UnRegister( this );
+    m_targetPoints = nullptr;
 }
 
 void LandmarkRegistrationObject::Export()
@@ -308,7 +308,7 @@ void LandmarkRegistrationObject::Show()
 
 void LandmarkRegistrationObject::SetHiddenChildren(SceneObject * parent, bool hide)
 {
-    // LandmarkRegistrationObject has two children, we just show/hide both.
+    // LandmarkRegistrationObject manages two PointsObjects, we just show/hide both.
     m_sourcePoints->SetHidden( hide );
     if( !hide )
         m_sourcePoints->ValidateSelectedPoint();
@@ -327,10 +327,12 @@ void LandmarkRegistrationObject::SetSourcePoints( vtkSmartPointer<PointsObject> 
     {
         m_sourcePoints->disconnect( this );
         this->GetManager()->RemoveObject( m_sourcePoints );
+        m_sourcePoints->UnRegister( this );
     }
     m_sourcePoints = pts;
     if ( m_sourcePoints )
     {
+        m_sourcePoints->Register( this );
         m_sourcePoints->SetListable( false );
         if( m_sourcePoints->GetObjectID() == SceneManager::InvalidId )
             this->GetManager()->AddObject( m_sourcePoints, this );
@@ -363,10 +365,12 @@ void LandmarkRegistrationObject::SetTargetPoints(vtkSmartPointer<PointsObject> p
     if( m_targetPoints )
     {
         this->GetManager()->RemoveObject( m_targetPoints );
+        m_targetPoints->UnRegister( this );
     }
     m_targetPoints = pts;
     if( m_targetPoints )
     {
+        m_targetPoints->Register( this );
         m_targetPoints->SetListable( false );
         if( m_targetObjectID == SceneManager::InvalidId )
             m_targetObjectID = this->GetManager()->GetSceneRoot()->GetObjectID();
@@ -571,8 +575,13 @@ void LandmarkRegistrationObject::UpdateLandmarkTransform( )
 
 void LandmarkRegistrationObject::OnSourcePointsRemoved()
 {
-    disconnect( m_sourcePoints, SIGNAL(RemovingFromScene()), this, SLOT(OnSourcePointsRemoved()) );
+    //No callback operation can be done when source points are removed/
+    disconnect( m_sourcePoints );
+    disconnect( this, SIGNAL(UpdateSettings()) );
+    disconnect( this, SIGNAL(ObjectModified()) );
+    m_sourcePoints->UnRegister( this );
     m_sourcePoints = nullptr;
+    m_sourcePointsID = SceneManager::InvalidId;
 }
 
 void LandmarkRegistrationObject::Update()

@@ -814,7 +814,7 @@ void SceneManager::RemoveObject( SceneObject * object )
 
     SceneObject * parent = object->GetParent();
 
-    if( object == SceneObject::SafeDownCast(m_currentObject ) )
+    if( object == m_currentObject )
     {
         if( parent )
             this->SetCurrentObject(parent);
@@ -861,17 +861,17 @@ void SceneManager::RemoveObject( SceneObject * object )
     // Tell other this object is being removed
     object->RemoveFromScene();
     //at this moment object still exist, we send ObjectRemoved() signal
-    //in order to let other objects to deal with the a still valid object,
+    //in order to let other objects to deal with the still valid object,
     //unregister shoul trigger destruction of the object
     emit ObjectRemoved( objId );
 
     // remove the object from the global list
     this->AllObjects.removeAt( indexAll );
 
-    object->UnRegister( this );
-
-    if( object->IsListable() )
+     if( object->IsListable() )
         emit FinishRemovingObject();
+
+    object->UnRegister(this); // Unregister may call delete if object->ReferenceCount == 1, then no operation on the object may be done.
 
     ValidatePointerObject();
 }
@@ -881,9 +881,11 @@ void SceneManager::ChangeParent( SceneObject * object, SceneObject * newParent, 
     SceneObject * curParent = object->GetParent();
     int position = object->GetObjectListableIndex();
 
-    emit StartRemovingObject( curParent, position );
+    if (object->IsListable())
+        emit StartRemovingObject( curParent, position );
     curParent->RemoveChild( object );
-    emit FinishRemovingObject();
+    if( object->IsListable() )
+        emit FinishRemovingObject();
 
     emit StartAddingObject( newParent, newChildIndex );
     newParent->InsertChild( object, newChildIndex );
