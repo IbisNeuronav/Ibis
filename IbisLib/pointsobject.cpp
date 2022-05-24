@@ -708,12 +708,7 @@ void PointsObject::ObjectAddedToScene()
 
 void PointsObject::ObjectAboutToBeRemovedFromScene()
 {
-    Q_ASSERT( GetManager() );
-
-    disconnect( this->GetManager(), SIGNAL(CurrentObjectChanged()), this, SLOT(OnCurrentObjectChanged()) );
-    disconnect( this, SIGNAL(WorldTransformChangedSignal()), this, SLOT(UpdatePointsVisibility()) );
-    disconnect( this->GetManager(), SIGNAL(CursorPositionChanged()), this, SLOT(UpdatePointsVisibility()) );
-    disconnect( this->GetManager(), SIGNAL(ReferenceTransformChanged()), this, SLOT(UpdatePointsVisibility()) );
+    disconnect( this );
 }
 
 // Distance will be properly computed for points picked on unregistered objects
