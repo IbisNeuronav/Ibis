@@ -7,6 +7,7 @@ ExternalProject_Add( ${vtk_name}
     INSTALL_COMMAND ""
     GIT_REPOSITORY "https://github.com/Kitware/VTK.git"
     GIT_TAG v${IBIS_VTK_LONG_VERSION}
+    PATCH_COMMAND patch -p1 < ${CMAKE_CURRENT_LIST_DIR}/patch/fixlimits.patch
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=${external_project_dir}/${vtk_name}/install
                -DCMAKE_OSX_SYSROOT:PATH=${CMAKE_OSX_SYSROOT}
                -DCMAKE_OSX_DEPLOYMENT_TARGET:STRING=${CMAKE_OSX_DEPLOYMENT_TARGET}
