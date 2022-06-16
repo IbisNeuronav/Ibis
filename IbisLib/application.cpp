@@ -518,7 +518,8 @@ void Application::OpenFiles( OpenFileParams * params, bool addToScene )
             QMessageBox::warning( nullptr, "Error", message );
         }
 
-        int initialNumberOfUserObjects = GetSceneManager()->GetNumberOfUserObjects();
+        int initialNumberOfImageObjects = GetSceneManager()->GetNumberOfImageObjects();
+
         if( addToScene )
         {
             for( int i = 0; i < params->filesParams.size(); ++i )
@@ -544,9 +545,9 @@ void Application::OpenFiles( OpenFileParams * params, bool addToScene )
                 }
             }
             // See if it is the first batch of objects loaded/created
-            // adding first set of objects has to call ResetAllCameras
+            // adding first image objects has to call ResetAllCameras
 
-            if( initialNumberOfUserObjects == 0 )
+            if( initialNumberOfImageObjects == 0 )
             {
                 Application::GetSceneManager()->ResetAllCameras();
             }
