@@ -29,6 +29,14 @@ class QFrame;
 class SceneManager;
 class vtkRenderWindowInteractor;
 
+/**
+ * @class   QuadViewWindow
+ * @brief   A widget used to show the four views.
+ *
+ *  QuadViewWindow controls showing views, zooming, rotation, cursor. There is a unique QuadViewWindow in the app.
+ *
+ *  @sa SceneManager
+ */
 class QuadViewWindow : public QWidget
 {
     Q_OBJECT
@@ -41,13 +49,36 @@ public:
     virtual void Serialize( Serializer * ser );
     virtual void SetSceneManager( SceneManager * man );
 
+    /**
+     * LoadSettings gets from previously loaded QSettings information about selected and/or expanded view.
+     */
     void LoadSettings( QSettings & s );
+    /**
+     * SaveSettings puts in QSettings information about selected and/or expanded view.
+     */
     void SaveSettings( QSettings & s );
 
+    /**
+     * AddBottomWidget - adds a widget at the bottom of QuadViewWindow.
+     */
     void AddBottomWidget( QWidget * w );
+    /**
+     * RemoveBottomWidget - removes previously added widget from the bottom of QuadViewWindow.
+     */
     void RemoveBottomWidget( QWidget * w );
+    /**
+     * SetExpandedView - expands current view
+     *  @param on - if true the current view is expanded and other views are hidden, if false all for views show up.
+     */
     void SetExpandedView( bool on );
+    /**
+     * SetCurrentViewWindow will store the index of the current view
+     * @param index  number from 0 to 3
+     */
     void SetCurrentViewWindow( int index );
+    /**
+     * SetShowToolbar - sets toolbar visibility.
+     */
     void SetShowToolbar( bool show );
 
 public slots:
