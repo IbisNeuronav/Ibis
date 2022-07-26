@@ -42,7 +42,7 @@ const QString QuadViewWindow::ViewNames[4] = { "Transverse","ThreeD","Coronal","
 QuadViewWindow::QuadViewWindow( QWidget* parent, Qt::WindowFlags fl ) : QWidget( parent, fl )
 {
     setObjectName( "QuadViewWindow" );
-    m_detachedWidget = 0;
+    m_detachedWidget = nullptr;
 
     m_generalLayout = new QVBoxLayout( this );
     m_generalLayout->setObjectName( "GeneralLayout" );
@@ -243,7 +243,7 @@ void QuadViewWindow::Attach3DView()
 {
     m_frameLayouts[1]->addWidget( m_vtkWidgets[1] );
     delete m_detachedWidget;
-    m_detachedWidget = 0;
+    m_detachedWidget = nullptr;
 }
 
 void QuadViewWindow::ZoomInButtonClicked()
