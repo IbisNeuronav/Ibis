@@ -151,12 +151,14 @@ void UsProbeObject::SerializeTracked( Serializer * ser )
 
 void UsProbeObject::AddClient()
 {
-    GetHardwareModule()->AddTrackedVideoClient( this );
+    if( IsDrivenByHardware() )
+        GetHardwareModule()->AddTrackedVideoClient( this );
 }
 
 void UsProbeObject::RemoveClient()
 {
-    GetHardwareModule()->RemoveTrackedVideoClient( this );
+    if( IsDrivenByHardware() )
+        GetHardwareModule()->RemoveTrackedVideoClient( this );
 }
 
 void UsProbeObject::ObjectAddedToScene()
