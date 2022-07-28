@@ -633,8 +633,8 @@ void SetDefaultView( vtkSmartPointer<vtkImageSlice> actor, vtkSmartPointer<vtkRe
     cam->SetParallelScale(scaley);
     double * prevPos = cam->GetPosition();
     double * prevFocal = cam->GetFocalPoint();
-    cam->SetPosition( scalex, scaley, prevPos[2] );
-    cam->SetFocalPoint( scalex, scaley, prevFocal[2] );
+    cam->SetPosition( diffx, diffy, prevPos[2] );
+    cam->SetFocalPoint( diffx, diffy, prevFocal[2] );
 }
 
 void DoubleViewWidget::SetDefaultViews()
