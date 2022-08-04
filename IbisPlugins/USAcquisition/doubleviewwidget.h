@@ -48,6 +48,7 @@ protected:
     void UpdatePipelineConnections();
     void MakeCrossLinesToShowProbeIsOutOfView();
     void SetDefaultViews();
+    void SetDefaultView( vtkSmartPointer<vtkImageSlice> actor, vtkSmartPointer<vtkRenderer> renderer );
 
 private slots:
 
