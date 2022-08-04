@@ -288,13 +288,8 @@ void DoubleViewWidget::UpdateInputs()
     ImageObject * im = m_pluginInterface->GetCurrentVolume();
     if( im )
     {
-        vtkImageData * image = im->GetImage();
         m_reslice->SetInputData(im->GetImage() );
         m_reslice->SetLookupTable( im->GetLut() );
-        double *bounds = m_mriActor->GetBounds();
-        double xShift = (ui->usImageWindow->width() - (bounds[1] - bounds[0]))/ 2;
-        double yShift = (ui->usImageWindow->height() - (bounds[3] - bounds[2])) / 2;
-        m_mriActor->SetPosition( xShift, yShift, 0);
         m_mriActor->VisibilityOn();
     }
     else
@@ -345,6 +340,10 @@ void DoubleViewWidget::UpdateInputs()
         m_usActor->VisibilityOn();
         m_usActor->GetMapper()->SetInputConnection( probe->GetVideoOutputPort() );
         m_usSlice->GetMapper()->SetInputConnection( probe->GetVideoOutputPort() );
+        double *bounds = m_mriActor->GetBounds();
+        double xShift = (ui->usImageWindow->width() - (bounds[1] - bounds[0]))/ 2;
+        double yShift = (ui->usImageWindow->height() - (bounds[3] - bounds[2])) / 2;
+        m_mriActor->SetPosition( xShift, yShift, 0);
     }
     else if( acq )
     {
