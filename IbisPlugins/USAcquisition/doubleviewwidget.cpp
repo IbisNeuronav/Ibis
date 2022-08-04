@@ -288,8 +288,13 @@ void DoubleViewWidget::UpdateInputs()
     ImageObject * im = m_pluginInterface->GetCurrentVolume();
     if( im )
     {
+        vtkImageData * image = im->GetImage();
         m_reslice->SetInputData(im->GetImage() );
         m_reslice->SetLookupTable( im->GetLut() );
+        double *bounds = m_mriActor->GetBounds();
+        double xShift = (ui->usImageWindow->width() - (bounds[1] - bounds[0]))/ 2;
+        double yShift = (ui->usImageWindow->height() - (bounds[3] - bounds[2])) / 2;
+        m_mriActor->SetPosition( xShift, yShift, 0);
         m_mriActor->VisibilityOn();
     }
     else
@@ -324,7 +329,11 @@ void DoubleViewWidget::UpdateInputs()
     UsProbeObject * probe = m_pluginInterface->GetCurrentUsProbe();
     if (probe)
     {
-        m_reslice->SetOutputExtent(0, probe->GetVideoImageWidth(), 0, probe->GetVideoImageHeight(), 0, 1);
+//        m_reslice->SetOutputExtent(0, probe->GetVideoImageWidth(), 0, probe->GetVideoImageHeight(), 0, 1);
+        // the size of video image may be different, we have to move the image to set its center in the window center
+        double xShift = (ui->usImageWindow->width() - probe->GetVideoImageWidth()) / 2;
+        double yShift = (ui->usImageWindow->height() - probe->GetVideoImageHeight()) / 2;
+        m_usSlice->SetPosition(xShift, yShift, 0);
         probe->disconnect(this, SLOT(UpdateViews()));
     }
 
@@ -641,7 +650,7 @@ void DoubleViewWidget::SetDefaultViews()
 {
     // adjust position of left image
     SetDefaultView( m_usActor, m_usRenderer );
-    // adjust position of rightt image
+    // adjust position of right image
     SetDefaultView( m_mriActor, m_mriRenderer );
 }
 
