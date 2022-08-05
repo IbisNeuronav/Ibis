@@ -132,7 +132,7 @@ void DoubleViewWidget::UpdateUi()
     Q_ASSERT( m_pluginInterface );
 
     USAcquisitionObject * acq = m_pluginInterface->GetCurrentAcquisition();
-    bool hasAcquisition =  acq != 0;
+    bool hasAcquisition =  acq != nullptr;
     bool isNotEmptyAcquisition = hasAcquisition && acq->GetNumberOfSlices() > 0;
     bool isRecording = hasAcquisition ? acq->IsRecording() : false;
 
@@ -294,7 +294,7 @@ void DoubleViewWidget::UpdateInputs()
     }
     else
     {
-        m_reslice->SetInputData( 0 );
+        m_reslice->SetInputData( nullptr );
         m_mriActor->VisibilityOff();
     }
 
@@ -306,7 +306,7 @@ void DoubleViewWidget::UpdateInputs()
     }
     else
     {
-        m_reslice2->SetInputData( 0 );
+        m_reslice2->SetInputData(nullptr );
     }
 
     // validate us acquisition
@@ -318,7 +318,7 @@ void DoubleViewWidget::UpdateInputs()
     }
 
     // Validate live video source
-    vtkTransform * usTransform = 0; // probe transform concatenated with calibration transform
+    vtkTransform * usTransform = nullptr; // probe transform concatenated with calibration transform
 
      // choose which source to use for display: live or acquisition
     UsProbeObject * probe = m_pluginInterface->GetCurrentUsProbe();
@@ -619,7 +619,7 @@ void DoubleViewWidget::on_maskAlphaSlider_valueChanged( int value )
     UpdateUi();
 }
 
-void SetDefaultView( vtkSmartPointer<vtkImageSlice> actor, vtkSmartPointer<vtkRenderer> renderer )
+void DoubleViewWidget::SetDefaultView( vtkSmartPointer<vtkImageSlice> actor, vtkSmartPointer<vtkRenderer> renderer )
 {
     actor->Update();
     double *bounds = actor->GetBounds();
@@ -633,14 +633,15 @@ void SetDefaultView( vtkSmartPointer<vtkImageSlice> actor, vtkSmartPointer<vtkRe
     cam->SetParallelScale(scaley);
     double * prevPos = cam->GetPosition();
     double * prevFocal = cam->GetFocalPoint();
-    cam->SetPosition( diffx, diffy, prevPos[2] );
-    cam->SetFocalPoint( diffx, diffy, prevFocal[2] );
+    cam->SetPosition( scalex, scaley, prevPos[2] );
+    cam->SetFocalPoint( scalex, scaley, prevFocal[2] );
 }
 
 void DoubleViewWidget::SetDefaultViews()
 {
-    SetDefaultView( m_usActor, m_usRenderer );
     // adjust position of left image
+    SetDefaultView( m_usActor, m_usRenderer );
+    // adjust position of rightt image
     SetDefaultView( m_mriActor, m_mriRenderer );
 }
 

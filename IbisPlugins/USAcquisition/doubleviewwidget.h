@@ -14,6 +14,24 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QWidget>
 #include <vtkSmartPointer.h>
 
+/**
+ * @class   DoubleViewWidget
+ * @brief   This class is used to show US acquisition together with MRI or other image data
+ *
+ *  DoubleViewWidget consists of two fixed size windows, placed horizontally side by side and surrounded by control buttons.
+ *  The left window is used to show the acquired frames, the right window shows some image data, usually pre-operational MRI.
+ *  Both images can be blended in the right side window.
+ *  A second image may be added to the right window and blended with the first one.
+ *  DoubleViewWidget may be used to show a live acquisition or a previously acquired and stored acquisition.
+ *  Initially the class was developed for a fised size framee, changes must be made to accomodate different size frames.
+ *
+ *  Variables starting with us or m_us are used to handle elements of the left window.
+ *  Variables starting with mri or m_mri are used to handle elements of the right window,
+ *  although some variables for the right window don't use mri part, e.g. m_reslice, m_reslice2.
+ *
+ *  @sa USAcquisitionObject ImageObject
+ */
+
 namespace Ui {
 class DoubleViewWidget;
 }
@@ -47,6 +65,7 @@ protected:
 
     void UpdatePipelineConnections();
     void MakeCrossLinesToShowProbeIsOutOfView();
+    void SetDefaultView( vtkSmartPointer<vtkImageSlice> actor, vtkSmartPointer<vtkRenderer> renderer );
     void SetDefaultViews();
 
 private slots:
