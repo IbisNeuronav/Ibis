@@ -682,18 +682,18 @@ void DoubleViewWidget::on_m_rewindButton_clicked()
     acq->SetCurrentFrame( 0 );
 }
 
-void DoubleViewWidget::on_currentFrameSpinBox_valueChanged( int newFrame )
+void DoubleViewWidget::on_currentFrameSpinBox_valueChanged(int frameNo )
 {
     USAcquisitionObject * acq = m_pluginInterface->GetCurrentAcquisition();
     Q_ASSERT( acq );
-    acq->SetCurrentFrame( newFrame );
+    acq->SetCurrentFrame( frameNo );
 }
 
-void DoubleViewWidget::on_m_frameSlider_valueChanged( int newFrame )
+void DoubleViewWidget::on_m_frameSlider_valueChanged(int frameNo )
 {
     USAcquisitionObject * acq = m_pluginInterface->GetCurrentAcquisition();
     Q_ASSERT( acq );
-    acq->SetCurrentFrame( newFrame );
+    acq->SetCurrentFrame( frameNo );
 }
 
 void DoubleViewWidget::on_m_liveCheckBox_toggled(bool checked)
