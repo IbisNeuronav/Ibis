@@ -74,7 +74,6 @@ protected:
     void SetDefaultView( vtkSmartPointer<vtkImageSlice> actor, vtkSmartPointer<vtkRenderer> renderer );
     /** Calls SetDefaultView() first for the left then for the right window. */
     void SetDefaultViews();
-    void SetDefaultView( vtkSmartPointer<vtkImageSlice> actor, vtkSmartPointer<vtkRenderer> renderer );
 
 private slots:
 
