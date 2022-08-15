@@ -132,7 +132,7 @@ void DoubleViewWidget::UpdateUi()
     Q_ASSERT( m_pluginInterface );
 
     USAcquisitionObject * acq = m_pluginInterface->GetCurrentAcquisition();
-    bool hasAcquisition =  acq != 0;
+    bool hasAcquisition =  acq != nullptr;
     bool isNotEmptyAcquisition = hasAcquisition && acq->GetNumberOfSlices() > 0;
     bool isRecording = hasAcquisition ? acq->IsRecording() : false;
 
@@ -294,7 +294,7 @@ void DoubleViewWidget::UpdateInputs()
     }
     else
     {
-        m_reslice->SetInputData( 0 );
+        m_reslice->SetInputData( nullptr );
         m_mriActor->VisibilityOff();
     }
 
@@ -306,7 +306,7 @@ void DoubleViewWidget::UpdateInputs()
     }
     else
     {
-        m_reslice2->SetInputData( 0 );
+        m_reslice2->SetInputData(nullptr );
     }
 
     // validate us acquisition
@@ -318,7 +318,7 @@ void DoubleViewWidget::UpdateInputs()
     }
 
     // Validate live video source
-    vtkTransform * usTransform = 0; // probe transform concatenated with calibration transform
+    vtkTransform * usTransform = nullptr; // probe transform concatenated with calibration transform
 
      // choose which source to use for display: live or acquisition
     UsProbeObject * probe = m_pluginInterface->GetCurrentUsProbe();
@@ -690,18 +690,18 @@ void DoubleViewWidget::on_m_rewindButton_clicked()
     acq->SetCurrentFrame( 0 );
 }
 
-void DoubleViewWidget::on_currentFrameSpinBox_valueChanged( int newFrame )
+void DoubleViewWidget::on_currentFrameSpinBox_valueChanged(int frameNo )
 {
     USAcquisitionObject * acq = m_pluginInterface->GetCurrentAcquisition();
     Q_ASSERT( acq );
-    acq->SetCurrentFrame( newFrame );
+    acq->SetCurrentFrame( frameNo );
 }
 
-void DoubleViewWidget::on_m_frameSlider_valueChanged( int newFrame )
+void DoubleViewWidget::on_m_frameSlider_valueChanged(int frameNo )
 {
     USAcquisitionObject * acq = m_pluginInterface->GetCurrentAcquisition();
     Q_ASSERT( acq );
-    acq->SetCurrentFrame( newFrame );
+    acq->SetCurrentFrame( frameNo );
 }
 
 void DoubleViewWidget::on_m_liveCheckBox_toggled(bool checked)
