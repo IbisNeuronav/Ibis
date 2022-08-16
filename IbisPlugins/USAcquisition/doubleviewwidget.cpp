@@ -431,12 +431,18 @@ void DoubleViewWidget::UpdateStatus()
         }
         else
             visibility = true;
+        m_usLine1Actor->SetVisibility(visibility);
+        m_usLine2Actor->SetVisibility(visibility);
+        m_mriLine1Actor->SetVisibility(visibility);
+        m_mriLine2Actor->SetVisibility(visibility);
     }
-
-    m_usLine1Actor->SetVisibility(visibility);
-    m_usLine2Actor->SetVisibility(visibility);
-    m_mriLine1Actor->SetVisibility(visibility);
-    m_mriLine2Actor->SetVisibility(visibility);
+    else
+    {
+        m_usLine1Actor->SetVisibility(false);
+        m_usLine2Actor->SetVisibility(false);
+        m_mriLine1Actor->SetVisibility(false);
+        m_mriLine2Actor->SetVisibility(false);
+    }
 }
 
 void DoubleViewWidget::MakeCrossLinesToShowProbeIsOutOfView()
