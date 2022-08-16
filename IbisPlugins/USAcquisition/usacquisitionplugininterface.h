@@ -99,6 +99,7 @@ private slots:
 
 protected:
 
+    void Init();
     void ValidateAllSceneObjects();
     void ValidateCurrentUsProbe();
     void ValidateCurrentAcquisition();
