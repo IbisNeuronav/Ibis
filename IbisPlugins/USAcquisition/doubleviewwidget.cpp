@@ -639,16 +639,8 @@ void DoubleViewWidget::SetDefaultView( vtkSmartPointer<vtkImageSlice> actor, vtk
     cam->SetParallelScale(scaley);
     double * prevPos = cam->GetPosition();
     double * prevFocal = cam->GetFocalPoint();
-    if( m_pluginInterface->IsLive() )
-    {
-        cam->SetPosition( diffx, diffy, prevPos[2] );
-        cam->SetFocalPoint( diffx, diffy, prevFocal[2] );
-    }
-    else
-    {
-        cam->SetPosition( scalex, scaley, prevPos[2] );
-        cam->SetFocalPoint( scalex, scaley, prevFocal[2] );
-    }
+    cam->SetPosition( scalex, scaley, prevPos[2] );
+    cam->SetFocalPoint( scalex, scaley, prevFocal[2] );
 }
 
 void DoubleViewWidget::SetDefaultViews()
