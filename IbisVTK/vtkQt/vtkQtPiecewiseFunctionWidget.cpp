@@ -19,6 +19,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QMouseEvent>
 
 #include <limits>
+#include <cmath>
 
 const int vtkQtPiecewiseFunctionWidget::m_pointRadius = 5;
 
