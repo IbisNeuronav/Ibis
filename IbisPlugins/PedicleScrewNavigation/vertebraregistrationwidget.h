@@ -178,7 +178,7 @@ private slots:
     void on_selectivityDial_valueChanged( int );
     void on_percentileDial_valueChanged( int );
     void on_optPopulationSizeComboBox_currentIndexChanged( int );
-    void on_initialSigmaComboBox_currentIndexChanged( int );
+    void on_optInitialSigmaComboBox_currentIndexChanged( int );
     void on_advancedSettingsButton_clicked();
     void on_addUSAcquisitionButton_clicked();
     void on_removeUSAcquisitionButton_clicked();

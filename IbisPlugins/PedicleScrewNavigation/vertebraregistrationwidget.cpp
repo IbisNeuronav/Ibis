@@ -994,7 +994,7 @@ void VertebraRegistrationWidget::on_optPopulationSizeComboBox_currentIndexChange
     m_optPopulationSize = ui->optPopulationSizeComboBox->itemData(value).toInt();
 }
 
-void VertebraRegistrationWidget::on_initialSigmaComboBox_currentIndexChanged( int value )
+void VertebraRegistrationWidget::on_optInitialSigmaComboBox_currentIndexChanged( int value )
 {
     m_optInitialSigma = ui->optInitialSigmaComboBox->itemData(value).toDouble();
 }

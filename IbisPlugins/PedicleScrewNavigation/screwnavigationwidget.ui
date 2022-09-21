@@ -29,7 +29,7 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="QVTKRenderWidget" name="axialImageWindow" native="true">
+      <widget class="QVTKOpenGLNativeWidget" name="axialImageWindow" native="true">
        <property name="minimumSize">
         <size>
          <width>640</width>
@@ -134,7 +134,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QVTKRenderWidget" name="sagittalImageWindow" native="true">
+      <widget class="QVTKOpenGLNativeWidget" name="sagittalImageWindow" native="true">
        <property name="minimumSize">
         <size>
          <width>640</width>
@@ -490,9 +490,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>QVTKRenderWidget</class>
+   <class>QVTKOpenGLNativeWidget</class>
    <extends>QWidget</extends>
-   <header>QVTKRenderWidget.h</header>
+   <header>QVTKOpenGLNativeWidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

@@ -20,7 +20,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QFileDialog>
 
 // VTK includes
-#include <QVTKRenderWidget.h>
+#include <QVTKOpenGLNativeWidget.h>
 #include <vtkImageData.h>
 #include <vtkImageSlice.h>
 #include <vtkImageSliceMapper.h>
@@ -156,6 +156,8 @@ private:
     vtkSmartPointer<vtkActor> m_rulerActor;
 
     vtkSmartPointer<vtkLineSource> m_axialScrewSource;
+    vtkSmartPointer<vtkRenderer> m_axialInstrumentRenderer;
+    vtkSmartPointer<vtkRenderer> m_sagittalInstrumentRenderer;
 
     vtkSmartPointer<vtkImageResliceToColors> m_axialReslice;
     vtkSmartPointer<vtkImageResliceToColors> m_axialScrewReslice;

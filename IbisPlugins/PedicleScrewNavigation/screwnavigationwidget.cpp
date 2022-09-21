@@ -28,42 +28,88 @@ ScrewNavigationWidget::ScrewNavigationWidget(std::vector<Screw *> plannedScrews,
 {
     ui->setupUi(this);
 
-    vtkRenderWindowInteractor * axialInteractor = ui->axialImageWindow->GetInteractor();
+    /* Setup axial view
+     * Use 2 renderers:
+     *  m_axialRenderer for image reslice (layer 0)
+     *  m_axialInstrumentRenderer for instrument, screw trajectory, ruler and planned screws (layer 1)
+     */
+
+    // Set interactor for image renderer
+    vtkRenderWindowInteractor * axialInteractor = ui->axialImageWindow->interactor();
     vtkSmartPointer<vtkInteractorStyleImage2> axialStyle = vtkSmartPointer<vtkInteractorStyleImage2>::New();
     axialInteractor->SetInteractorStyle( axialStyle );
 
-    m_axialRenderer = vtkSmartPointer<vtkRenderer>::New();
-    ui->axialImageWindow->GetRenderWindow()->AddRenderer( m_axialRenderer );
+    // Create 2 layers
+    ui->axialImageWindow->renderWindow()->SetNumberOfLayers(2);
 
+    // Add image renderer
+    m_axialRenderer = vtkSmartPointer<vtkRenderer>::New();
+    m_axialRenderer->SetLayer(0);
+    ui->axialImageWindow->renderWindow()->AddRenderer( m_axialRenderer );
+
+    // Add instruments renderer
+    m_axialInstrumentRenderer = vtkSmartPointer<vtkRenderer>::New();
+    m_axialInstrumentRenderer->SetLayer(1);
+    m_axialInstrumentRenderer->InteractiveOff();
+    ui->axialImageWindow->renderWindow()->AddRenderer( m_axialInstrumentRenderer );
+
+    // Assign same camera to image and instruments
+    m_axialInstrumentRenderer->SetActiveCamera(m_axialRenderer->GetActiveCamera());
+
+    // Add image actor that contains resliced image
     m_axialActor = vtkSmartPointer<vtkImageActor>::New();
     m_axialActor->InterpolateOff();
     m_axialActor->VisibilityOff();
-    m_axialRenderer->AddActor( m_axialActor );
+    m_axialRenderer->AddViewProp( m_axialActor );
 
+    // Create reslice
     m_axialReslice = vtkSmartPointer<vtkImageResliceToColors>::New();
-    m_axialReslice->SetInterpolationModeToLinear( );
+    m_axialReslice->SetInterpolationModeToLinear();
     m_axialReslice->SetOutputDimensionality(2);
 
-    m_axialScrewReslice = vtkSmartPointer<vtkImageResliceToColors>::New();
-    m_axialScrewReslice->SetInterpolationModeToLinear( );
-    m_axialScrewReslice->SetOutputDimensionality(2);
+//    m_axialScrewReslice = vtkSmartPointer<vtkImageResliceToColors>::New();
+//    m_axialScrewReslice->SetInterpolationModeToLinear( );
+//    m_axialScrewReslice->SetSlabNumberOfSlices(1);
+//    m_axialScrewReslice->SetOutputDimensionality(2);
 
     m_axialActor->GetMapper()->SetInputConnection( m_axialReslice->GetOutputPort() );
     m_axialActor->GetProperty()->SetLayerNumber( 0 );
 
-    // Sagittal view
-    vtkRenderWindowInteractor * sagittalInteractor = ui->sagittalImageWindow->GetInteractor();
+    /* Setup sagittal view
+     * Use 2 renderers:
+     *  m_sagittalRenderer for image reslice (layer 0)
+     *  m_sagittalInstrumentRenderer for instrument, screw trajectory, ruler and planned screws (layer 1)
+     */
+
+    // Set interactor for image renderer
+    vtkRenderWindowInteractor * sagittalInteractor = ui->sagittalImageWindow->interactor();
     vtkSmartPointer<vtkInteractorStyleImage2> sagittalStyle = vtkSmartPointer<vtkInteractorStyleImage2>::New();
     sagittalInteractor->SetInteractorStyle( sagittalStyle );
 
-    m_sagittalRenderer = vtkSmartPointer<vtkRenderer>::New();
-    ui->sagittalImageWindow->GetRenderWindow()->AddRenderer( m_sagittalRenderer );
+    // Create 2 layers
+    ui->sagittalImageWindow->renderWindow()->SetNumberOfLayers(2);
 
+    // Add image renderer
+    m_sagittalRenderer = vtkSmartPointer<vtkRenderer>::New();
+    m_sagittalRenderer->SetLayer(0);
+    ui->sagittalImageWindow->renderWindow()->AddRenderer( m_sagittalRenderer );
+
+    // Add instruments renderer
+    m_sagittalInstrumentRenderer = vtkSmartPointer<vtkRenderer>::New();
+    m_sagittalInstrumentRenderer->SetLayer(1);
+    m_sagittalInstrumentRenderer->InteractiveOff();
+    ui->sagittalImageWindow->renderWindow()->AddRenderer( m_sagittalInstrumentRenderer );
+
+    // Assign same camera to image and instruments
+    m_sagittalInstrumentRenderer->SetActiveCamera(m_sagittalRenderer->GetActiveCamera());
+
+    // Add image actor that contains resliced image
     m_sagittalActor = vtkSmartPointer<vtkImageActor>::New();
     m_sagittalActor->InterpolateOff();
     m_sagittalActor->VisibilityOff();
-    m_sagittalRenderer->AddActor( m_sagittalActor );
+    m_sagittalRenderer->AddViewProp( m_sagittalActor );
 
+    // Create reslice
     m_sagittalReslice = vtkSmartPointer<vtkImageResliceToColors>::New();
     m_sagittalReslice->SetInterpolationModeToLinear( );
     m_sagittalReslice->SetOutputDimensionality(2);
@@ -73,6 +119,7 @@ ScrewNavigationWidget::ScrewNavigationWidget(std::vector<Screw *> plannedScrews,
 
     m_screwPlanImageDataId = IbisAPI::InvalidId;
 
+    // Initialize plane position
     for (int i = 0; i < 3; ++i)
     {
         m_currentAxialPosition[i] = 0;
@@ -106,6 +153,7 @@ ScrewNavigationWidget::~ScrewNavigationWidget()
     m_sagittalActor->VisibilityOff();
     m_screwActor->VisibilityOff();
     m_rulerActor->VisibilityOff();
+    //TODO: remove vtkImageActors
     m_pluginInterface = 0;
     delete ui;
 }
@@ -362,6 +410,8 @@ void ScrewNavigationWidget::Navigate()
 
                 this->SetDefaultView( m_axialRenderer);
                 this->SetDefaultView( m_sagittalRenderer);
+                this->SetDefaultView( m_axialInstrumentRenderer );
+                this->SetDefaultView( m_sagittalInstrumentRenderer );
 
                 connect( ibisApi, SIGNAL(IbisClockTick()), this, SLOT(OnPointerPositionUpdated()) );
                 m_axialActor->VisibilityOn();
@@ -412,7 +462,7 @@ void ScrewNavigationWidget::SetPlannedScrews(std::vector<Screw *> screws)
 
         if(m_pluginInterface)
         {
-            m_axialRenderer->AddViewProp(screws[i]->GetAxialActor());
+            m_axialRenderer->AddActor(screws[i]->GetAxialActor());
             m_sagittalRenderer->AddViewProp(screws[i]->GetSagittalActor());
         }
     }
@@ -897,7 +947,7 @@ void ScrewNavigationWidget::AddPlannedScrew( double position[3], double orientat
     axialPlannedScrewActor->GetProperty()->SetPointSize(1);
     axialPlannedScrewActor->VisibilityOn();
 
-    m_axialRenderer->AddViewProp(axialPlannedScrewActor);
+    m_axialRenderer->AddActor(axialPlannedScrewActor);
     sp->SetAxialActor(axialPlannedScrewActor);
 
     m_PlannedScrewList.push_back(sp);
@@ -964,16 +1014,25 @@ void ScrewNavigationWidget::InitializeScrewDrawing()
     instrumentSource->SetPoint1(0.0, 0.0, 0.0);
     instrumentSource->SetPoint2(0.0, 2 * m_screwLength, 0.0);
 
-    vtkSmartPointer<vtkPolyDataMapper> instrumentLineMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
-    instrumentLineMapper->SetInputConnection(instrumentSource->GetOutputPort(0));
+    vtkSmartPointer<vtkPolyDataMapper> instrumentLineAxMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+    instrumentLineAxMapper->SetInputData(instrumentSource->GetOutput(0));
 
-    vtkSmartPointer<vtkActor> instrumentActor = vtkSmartPointer<vtkActor>::New();
-    instrumentActor->SetMapper(instrumentLineMapper);
-    instrumentActor->GetProperty()->SetLineWidth(3.0);
-    instrumentActor->GetProperty()->SetColor(1, 0, 0);
-    instrumentActor->VisibilityOn();
-    m_axialRenderer->AddViewProp(instrumentActor);
-    m_sagittalRenderer->AddViewProp(instrumentActor);
+    vtkSmartPointer<vtkActor> instrumentAxActor = vtkSmartPointer<vtkActor>::New();
+    instrumentAxActor->SetMapper(instrumentLineAxMapper);
+    instrumentAxActor->GetProperty()->SetLineWidth(3.0);
+    instrumentAxActor->GetProperty()->SetColor(1, 0, 0);
+    instrumentAxActor->VisibilityOn();
+    m_axialInstrumentRenderer->AddViewProp(instrumentAxActor);
+
+    vtkSmartPointer<vtkPolyDataMapper> instrumentSagLineMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+    instrumentSagLineMapper->SetInputData(instrumentSource->GetOutput(0));
+
+    vtkSmartPointer<vtkActor> instrumentSagActor = vtkSmartPointer<vtkActor>::New();
+    instrumentSagActor->SetMapper(instrumentSagLineMapper);
+    instrumentSagActor->GetProperty()->SetLineWidth(3.0);
+    instrumentSagActor->GetProperty()->SetColor(1, 0, 0);
+    instrumentSagActor->VisibilityOn();
+    m_sagittalInstrumentRenderer->AddViewProp(instrumentSagActor);
 
     // Create screw
     m_screwActor = vtkSmartPointer<vtkActor>::New();
@@ -983,8 +1042,8 @@ void ScrewNavigationWidget::InitializeScrewDrawing()
 
     this->UpdateScrewDrawing();
 
-    m_axialRenderer->AddViewProp(m_screwActor);
-    m_sagittalRenderer->AddViewProp(m_screwActor);
+    m_axialInstrumentRenderer->AddViewProp(m_screwActor);
+//    m_sagittalInstrumentRenderer->AddViewProp(m_screwActor);
 
 }
 
@@ -997,8 +1056,8 @@ void ScrewNavigationWidget::InitializeRulerDrawing()
     m_rulerActor->GetProperty()->SetColor(1, 1, 0);
     m_rulerActor->GetProperty()->SetOpacity(0.5);
     m_rulerActor->VisibilityOff();
-    m_axialRenderer->AddViewProp(m_rulerActor);
-    m_sagittalRenderer->AddViewProp(m_rulerActor);
+    m_axialInstrumentRenderer->AddViewProp(m_rulerActor);
+//    m_sagittalInstrumentRenderer->AddViewProp(m_rulerActor);
 
     this->UpdateRulerDrawing();
 
