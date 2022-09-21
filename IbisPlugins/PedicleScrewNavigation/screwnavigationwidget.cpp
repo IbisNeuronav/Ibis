@@ -67,11 +67,6 @@ ScrewNavigationWidget::ScrewNavigationWidget(std::vector<Screw *> plannedScrews,
     m_axialReslice->SetInterpolationModeToLinear();
     m_axialReslice->SetOutputDimensionality(2);
 
-//    m_axialScrewReslice = vtkSmartPointer<vtkImageResliceToColors>::New();
-//    m_axialScrewReslice->SetInterpolationModeToLinear( );
-//    m_axialScrewReslice->SetSlabNumberOfSlices(1);
-//    m_axialScrewReslice->SetOutputDimensionality(2);
-
     m_axialActor->GetMapper()->SetInputConnection( m_axialReslice->GetOutputPort() );
     m_axialActor->GetProperty()->SetLayerNumber( 0 );
 
@@ -85,6 +80,7 @@ ScrewNavigationWidget::ScrewNavigationWidget(std::vector<Screw *> plannedScrews,
     vtkRenderWindowInteractor * sagittalInteractor = ui->sagittalImageWindow->interactor();
     vtkSmartPointer<vtkInteractorStyleImage2> sagittalStyle = vtkSmartPointer<vtkInteractorStyleImage2>::New();
     sagittalInteractor->SetInteractorStyle( sagittalStyle );
+
 
     // Create 2 layers
     ui->sagittalImageWindow->renderWindow()->SetNumberOfLayers(2);
@@ -128,11 +124,15 @@ ScrewNavigationWidget::ScrewNavigationWidget(std::vector<Screw *> plannedScrews,
         m_currentSagittalOrientation[i] = 0;
     }
 
+    m_showScrew = ui->displayScrewCheckBox->isChecked();
+    m_showRuler = ui->displayRulerCheckBox->isChecked();
+    m_rulerLength = ui->rulerSpinBox->value();
+
     this->SetPlannedScrews(plannedScrews);
 
     this->UpdatePointerDirection();
-    this->InitializeScrewDrawing();
-    this->InitializeRulerDrawing();
+    this->UpdateInstrumentDrawing(m_axialInstrumentRenderer);
+    this->UpdateInstrumentDrawing(m_sagittalInstrumentRenderer);
     this->InitializeAnnotationDrawing();
 }
 
@@ -151,8 +151,6 @@ ScrewNavigationWidget::~ScrewNavigationWidget()
     }
     m_axialActor->VisibilityOff();
     m_sagittalActor->VisibilityOff();
-    m_screwActor->VisibilityOff();
-    m_rulerActor->VisibilityOff();
     //TODO: remove vtkImageActors
     m_pluginInterface = 0;
     delete ui;
@@ -416,8 +414,6 @@ void ScrewNavigationWidget::Navigate()
                 connect( ibisApi, SIGNAL(IbisClockTick()), this, SLOT(OnPointerPositionUpdated()) );
                 m_axialActor->VisibilityOn();
                 m_sagittalActor->VisibilityOn();
-                m_screwActor->VisibilityOn();
-                m_rulerActor->VisibilityOn();
             }
         }
     }
@@ -1007,59 +1003,50 @@ void ScrewNavigationWidget::SetDefaultView( vtkSmartPointer<vtkRenderer> rendere
     cam->SetFocalPoint( 0.0, -m_screwLength * 0.5, prevFocal[2] );
 }
 
-void ScrewNavigationWidget::InitializeScrewDrawing()
+void ScrewNavigationWidget::UpdateInstrumentDrawing( vtkSmartPointer<vtkRenderer> renderer )
 {
+    renderer->RemoveAllViewProps();
+
     // Create instrument line
     vtkSmartPointer<vtkLineSource> instrumentSource = vtkSmartPointer<vtkLineSource>::New();
     instrumentSource->SetPoint1(0.0, 0.0, 0.0);
     instrumentSource->SetPoint2(0.0, 2 * m_screwLength, 0.0);
 
-    vtkSmartPointer<vtkPolyDataMapper> instrumentLineAxMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
-    instrumentLineAxMapper->SetInputData(instrumentSource->GetOutput(0));
+    vtkSmartPointer<vtkPolyDataMapper> instrumentLineMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+    instrumentLineMapper->SetInputConnection(instrumentSource->GetOutputPort(0));
 
-    vtkSmartPointer<vtkActor> instrumentAxActor = vtkSmartPointer<vtkActor>::New();
-    instrumentAxActor->SetMapper(instrumentLineAxMapper);
-    instrumentAxActor->GetProperty()->SetLineWidth(3.0);
-    instrumentAxActor->GetProperty()->SetColor(1, 0, 0);
-    instrumentAxActor->VisibilityOn();
-    m_axialInstrumentRenderer->AddViewProp(instrumentAxActor);
-
-    vtkSmartPointer<vtkPolyDataMapper> instrumentSagLineMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
-    instrumentSagLineMapper->SetInputData(instrumentSource->GetOutput(0));
-
-    vtkSmartPointer<vtkActor> instrumentSagActor = vtkSmartPointer<vtkActor>::New();
-    instrumentSagActor->SetMapper(instrumentSagLineMapper);
-    instrumentSagActor->GetProperty()->SetLineWidth(3.0);
-    instrumentSagActor->GetProperty()->SetColor(1, 0, 0);
-    instrumentSagActor->VisibilityOn();
-    m_sagittalInstrumentRenderer->AddViewProp(instrumentSagActor);
+    vtkSmartPointer<vtkActor> instrumentActor = vtkSmartPointer<vtkActor>::New();
+    instrumentActor->SetMapper(instrumentLineMapper);
+    instrumentActor->GetProperty()->SetLineWidth(3.0);
+    instrumentActor->GetProperty()->SetColor(1, 0, 0);
+    instrumentActor->VisibilityOn();
+    renderer->AddViewProp(instrumentActor);
 
     // Create screw
-    m_screwActor = vtkSmartPointer<vtkActor>::New();
-    m_screwActor->GetProperty()->SetLineWidth(3.0);
-    m_screwActor->GetProperty()->SetColor(1, 0, 0);
-    m_screwActor->VisibilityOff();
+    vtkSmartPointer<vtkActor> screwActor = vtkSmartPointer<vtkActor>::New();
+    screwActor->GetProperty()->SetLineWidth(3.0);
+    screwActor->GetProperty()->SetColor(1, 0, 0);
+    screwActor->SetVisibility(m_showScrew);
 
-    this->UpdateScrewDrawing();
+    vtkSmartPointer<vtkPolyData> polyData = vtkSmartPointer<vtkPolyData>::New();
+    Screw::GetScrewPolyData(m_screwLength, m_screwDiameter, m_screwTipSize, polyData);
 
-    m_axialInstrumentRenderer->AddViewProp(m_screwActor);
-//    m_sagittalInstrumentRenderer->AddViewProp(m_screwActor);
+    vtkSmartPointer<vtkPolyDataMapper> lineMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+    lineMapper->SetInputData(polyData);
+    screwActor->SetMapper(lineMapper);
 
-}
+    renderer->AddViewProp(screwActor);
 
-void ScrewNavigationWidget::InitializeRulerDrawing()
-{
-    m_rulerLength = ui->rulerSpinBox->value();
+    // Create ruler
+    vtkSmartPointer<vtkActor> rulerActor = vtkSmartPointer<vtkActor>::New();
+    rulerActor->GetProperty()->SetLineWidth(0.5);
+    rulerActor->GetProperty()->SetColor(1, 1, 0);
+    rulerActor->GetProperty()->SetOpacity(0.5);
+    rulerActor->SetVisibility(m_showRuler);
 
-    m_rulerActor = vtkSmartPointer<vtkActor>::New();
-    m_rulerActor->GetProperty()->SetLineWidth(0.5);
-    m_rulerActor->GetProperty()->SetColor(1, 1, 0);
-    m_rulerActor->GetProperty()->SetOpacity(0.5);
-    m_rulerActor->VisibilityOff();
-    m_axialInstrumentRenderer->AddViewProp(m_rulerActor);
-//    m_sagittalInstrumentRenderer->AddViewProp(m_rulerActor);
+    renderer->AddViewProp(rulerActor);
 
-    this->UpdateRulerDrawing();
+    this->UpdateRulerDrawing(rulerActor);
 
 }
 
@@ -1101,31 +1088,7 @@ void ScrewNavigationWidget::InitializeAnnotationDrawing()
 
 }
 
-void ScrewNavigationWidget::UpdateScrewDrawing()
-{
-    vtkSmartPointer<vtkPolyData> polyData;
-    if (m_screwActor->GetMapper())
-    {
-        polyData = vtkPolyData::SafeDownCast(m_screwActor->GetMapper()->GetInput());
-        polyData->DeleteCells();
-    }
-    else
-    {
-        polyData = vtkSmartPointer<vtkPolyData>::New();
-    }
-
-    Screw::GetScrewPolyData(m_screwLength, m_screwDiameter, m_screwTipSize, polyData);
-
-    vtkSmartPointer<vtkPolyDataMapper> lineMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
-    lineMapper->SetInputData(polyData);
-
-    if (m_screwActor)
-    {
-        m_screwActor->SetMapper(lineMapper);
-    }
-}
-
-void ScrewNavigationWidget::UpdateRulerDrawing()
+void ScrewNavigationWidget::UpdateRulerDrawing(vtkSmartPointer<vtkActor> rulerActor)
 {
     vtkSmartPointer<vtkAppendPolyData> appendFilter = vtkSmartPointer<vtkAppendPolyData>::New();
 
@@ -1157,27 +1120,15 @@ void ScrewNavigationWidget::UpdateRulerDrawing()
     cleanFilter->SetInputConnection(appendFilter->GetOutputPort());
     cleanFilter->Update();
 
-    vtkSmartPointer<vtkPolyData> polyData;
-    if (m_rulerActor->GetMapper())
-    {
-        polyData = vtkPolyData::SafeDownCast(m_rulerActor->GetMapper()->GetInput());
-        polyData->DeleteCells();
-    }
-    else
-    {
-        polyData = vtkSmartPointer<vtkPolyData>::New();
-    }
+    vtkSmartPointer<vtkPolyData> polyData = vtkSmartPointer<vtkPolyData>::New();
 
     polyData->SetPoints(cleanFilter->GetOutput()->GetPoints());
     polyData->SetLines(cleanFilter->GetOutput()->GetLines());
 
     vtkSmartPointer<vtkPolyDataMapper> rulerMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
     rulerMapper->SetInputData(polyData);
+    rulerActor->SetMapper(rulerMapper);
 
-    if (m_rulerActor)
-    {
-        m_rulerActor->SetMapper(rulerMapper);
-    }
 }
 
 QString ScrewNavigationWidget::GetScrewName(double screwLength, double screwDiameter)
@@ -1206,13 +1157,16 @@ void ScrewNavigationWidget::OnScrewSizeComboBoxModified( int index )
         m_screwLength = 50.0;
         m_screwDiameter = 5.5;
     }
-    this->UpdateScrewDrawing();
+
+    this->UpdateInstrumentDrawing(m_axialInstrumentRenderer);
+    this->UpdateInstrumentDrawing(m_sagittalInstrumentRenderer);
 }
 
 void ScrewNavigationWidget::on_rulerSpinBox_valueChanged( int value)
 {
     m_rulerLength = value;
-    this->UpdateRulerDrawing();
+    this->UpdateInstrumentDrawing(m_axialInstrumentRenderer);
+    this->UpdateInstrumentDrawing(m_sagittalInstrumentRenderer);
 }
 
 void ScrewNavigationWidget::OnScrewListItemChanged(QListWidgetItem * item)
@@ -1294,13 +1248,17 @@ void ScrewNavigationWidget::NavigationPointerChangedSlot()
 
 void ScrewNavigationWidget::on_displayScrewCheckBox_toggled(bool checked)
 {
-    m_screwActor->SetVisibility((int) checked);
+    m_showScrew = checked;
+    this->UpdateInstrumentDrawing(m_axialInstrumentRenderer);
+    this->UpdateInstrumentDrawing(m_sagittalInstrumentRenderer);
 }
 
 void ScrewNavigationWidget::on_displayRulerCheckBox_toggled(bool checked)
 {
-    m_rulerActor->SetVisibility((int) checked);
     ui->rulerSpinBox->setEnabled(checked);
+    m_showRuler = checked;
+    this->UpdateInstrumentDrawing(m_axialInstrumentRenderer);
+    this->UpdateInstrumentDrawing(m_sagittalInstrumentRenderer);
 }
 
 void ScrewNavigationWidget::on_displayPlanningCheckBox_toggled(bool checked)

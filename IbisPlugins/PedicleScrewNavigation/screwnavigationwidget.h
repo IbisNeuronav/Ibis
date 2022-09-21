@@ -122,13 +122,11 @@ private:
     bool GetPointerDirection(double (&dir)[3]);
 
     void SetDefaultView( vtkSmartPointer<vtkRenderer> );
-    void InitializeScrewDrawing();
-    void InitializeRulerDrawing();
+    void UpdateInstrumentDrawing( vtkSmartPointer<vtkRenderer> );
     void InitializeAnnotationDrawing();
 
     void UpdatePointerDirection();
-    void UpdateScrewDrawing();
-    void UpdateRulerDrawing();
+    void UpdateRulerDrawing(vtkSmartPointer<vtkActor>);
     void RecenterResliceAxes(vtkMatrix4x4 *);
 
     QString GetScrewName(double, double);
@@ -151,6 +149,9 @@ private:
     bool m_isNavigating;
     bool m_isSagittalViewFlipped;
     bool m_isAxialViewFlipped;
+
+    bool m_showScrew;
+    bool m_showRuler;
 
     vtkSmartPointer<vtkActor> m_screwActor;
     vtkSmartPointer<vtkActor> m_rulerActor;
