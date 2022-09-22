@@ -172,11 +172,6 @@ private:
     vtkSmartPointer<vtkImageData> m_sagittalImage;
 
     double m_pointerDirection[3];
-    std::vector<vtkActor *> m_AxialPlannedScrewActorList;
-    std::vector<vtkActor *> m_SagittalPlannedScrewActorList;
-    std::vector<vtkPolyData *> m_PlannedScrewPolyDataList;
-    std::vector<vtkPolyData *> m_PlannedScrewCrossSectionPolyDataList;
-
     std::vector<Screw *> m_PlannedScrewList;
 
     vtkSmartPointer<vtkTransform> m_prevTransformTest;

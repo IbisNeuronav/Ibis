@@ -14,6 +14,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "ui_screwnavigationwidget.h"
 #include "screwtablewidget.h"
 
+#define INSTRUMENT_LENGTH 100
+
 ScrewNavigationWidget::ScrewNavigationWidget(std::vector<Screw *> plannedScrews, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::ScrewNavigationWidget),
@@ -458,8 +460,8 @@ void ScrewNavigationWidget::SetPlannedScrews(std::vector<Screw *> screws)
 
         if(m_pluginInterface)
         {
-            m_axialRenderer->AddActor(screws[i]->GetAxialActor());
-            m_sagittalRenderer->AddViewProp(screws[i]->GetSagittalActor());
+            m_axialInstrumentRenderer->AddViewProp(screws[i]->GetAxialActor());
+            m_sagittalInstrumentRenderer->AddViewProp(screws[i]->GetSagittalActor());
         }
     }
 }
@@ -772,11 +774,18 @@ void ScrewNavigationWidget::AddPlannedScrew(Screw *screw)
     screwTipSize = screw->GetScrewTipSize();
     useWorld = screw->IsCoordinateWorldTransform();
 
+    std::cout << "ADD SCREW: L x D x TS = " << screwLength << " x " << screwDiameter << " x " << screwTipSize << std::endl
+              << " [pos: " << position[0] << ", " << position[1] << ", " << position[2] << "]" << std::endl
+              << " [orientation: " << orientation[0] << ", " << orientation[1] << ", " << orientation[2] << "]\n" << std::endl;
+
     this->AddPlannedScrew(position, orientation, screwLength, screwDiameter, screwTipSize, useWorld);
 }
 
 void ScrewNavigationWidget::AddPlannedScrew( double position[3], double orientation[3], double screwLength, double screwDiameter, double screwTipSize, bool useWorld)
 {
+    std::cout << "!ADD SCREW: L x D x TS = " << screwLength << " x " << screwDiameter << " x " << screwTipSize << std::endl
+              << " [pos: " << position[0] << ", " << position[1] << ", " << position[2] << "]" << std::endl
+              << " [orientation: " << orientation[0] << ", " << orientation[1] << ", " << orientation[2] << "]\n" << std::endl;
 
     // create a polydata 3D screw
     // the screw consists of a cylinder representing the body + a cone representing the tip
@@ -930,11 +939,14 @@ void ScrewNavigationWidget::AddPlannedScrew( double position[3], double orientat
     sagittalPlannedScrewActor->GetProperty()->SetPointSize(1);
     sagittalPlannedScrewActor->VisibilityOn();
 
-    m_sagittalRenderer->AddViewProp(sagittalPlannedScrewActor);
+    m_sagittalInstrumentRenderer->AddViewProp(sagittalPlannedScrewActor);
     sp->SetSagittalActor(sagittalPlannedScrewActor);
 
+    vtkSmartPointer<vtkPolyDataMapper> axialPlannedScrewMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+    axialPlannedScrewMapper->SetInputData(screwPolyData);
+
     vtkSmartPointer<vtkActor> axialPlannedScrewActor = vtkSmartPointer<vtkActor>::New();
-    axialPlannedScrewActor->SetMapper(sagittalPlannedScrewMapper);
+    axialPlannedScrewActor->SetMapper(axialPlannedScrewMapper);
     axialPlannedScrewActor->GetProperty()->SetLineWidth(3);
     axialPlannedScrewActor->GetProperty()->SetColor(color);
     axialPlannedScrewActor->GetProperty()->SetOpacity(0.6);
@@ -943,7 +955,7 @@ void ScrewNavigationWidget::AddPlannedScrew( double position[3], double orientat
     axialPlannedScrewActor->GetProperty()->SetPointSize(1);
     axialPlannedScrewActor->VisibilityOn();
 
-    m_axialRenderer->AddActor(axialPlannedScrewActor);
+    m_axialInstrumentRenderer->AddViewProp(axialPlannedScrewActor);
     sp->SetAxialActor(axialPlannedScrewActor);
 
     m_PlannedScrewList.push_back(sp);
@@ -1010,7 +1022,7 @@ void ScrewNavigationWidget::UpdateInstrumentDrawing( vtkSmartPointer<vtkRenderer
     // Create instrument line
     vtkSmartPointer<vtkLineSource> instrumentSource = vtkSmartPointer<vtkLineSource>::New();
     instrumentSource->SetPoint1(0.0, 0.0, 0.0);
-    instrumentSource->SetPoint2(0.0, 2 * m_screwLength, 0.0);
+    instrumentSource->SetPoint2(0.0, INSTRUMENT_LENGTH, 0.0);
 
     vtkSmartPointer<vtkPolyDataMapper> instrumentLineMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
     instrumentLineMapper->SetInputConnection(instrumentSource->GetOutputPort(0));
@@ -1047,6 +1059,15 @@ void ScrewNavigationWidget::UpdateInstrumentDrawing( vtkSmartPointer<vtkRenderer
     renderer->AddViewProp(rulerActor);
 
     this->UpdateRulerDrawing(rulerActor);
+
+    for (int i = 0; i < m_PlannedScrewList.size(); ++i)
+    {
+        if(m_pluginInterface)
+        {
+            m_axialInstrumentRenderer->AddViewProp(m_PlannedScrewList[i]->GetAxialActor());
+            m_sagittalInstrumentRenderer->AddViewProp(m_PlannedScrewList[i]->GetSagittalActor());
+        }
+    }
 
 }
 
