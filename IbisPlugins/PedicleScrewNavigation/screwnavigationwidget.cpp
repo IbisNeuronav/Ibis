@@ -130,8 +130,10 @@ ScrewNavigationWidget::ScrewNavigationWidget(std::vector<Screw *> plannedScrews,
     m_showRuler = ui->displayRulerCheckBox->isChecked();
     m_rulerLength = ui->rulerSpinBox->value();
 
+    // Load planned screws, if any
     this->SetPlannedScrews(plannedScrews);
 
+    // Update displays
     this->UpdatePointerDirection();
     this->UpdateInstrumentDrawing(m_axialInstrumentRenderer);
     this->UpdateInstrumentDrawing(m_sagittalInstrumentRenderer);
@@ -1268,6 +1270,14 @@ void ScrewNavigationWidget::OnObjectRemovedSlot( int imageObjectId )
 void ScrewNavigationWidget::NavigationPointerChangedSlot()
 {
     this->UpdatePointerDirection();
+}
+
+void ScrewNavigationWidget::on_resetDefaultViewButton_clicked()
+{
+    this->SetDefaultView( m_axialRenderer);
+    this->SetDefaultView( m_sagittalRenderer);
+    this->SetDefaultView( m_axialInstrumentRenderer );
+    this->SetDefaultView( m_sagittalInstrumentRenderer );
 }
 
 void ScrewNavigationWidget::on_displayScrewCheckBox_toggled(bool checked)

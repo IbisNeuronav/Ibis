@@ -254,6 +254,16 @@
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_3">
           <item>
+           <widget class="QPushButton" name="resetDefaultViewButton">
+            <property name="toolTip">
+             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Reset camera to default view&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            </property>
+            <property name="text">
+             <string>Default view</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QCheckBox" name="flipAxialViewCheckBox">
             <property name="text">
              <string>Flip axial view (L-R)</string>

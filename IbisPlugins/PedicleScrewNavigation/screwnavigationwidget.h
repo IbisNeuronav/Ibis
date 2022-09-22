@@ -174,10 +174,6 @@ private:
     double m_pointerDirection[3];
     std::vector<Screw *> m_PlannedScrewList;
 
-    vtkSmartPointer<vtkTransform> m_prevTransformTest;
-    double m_savePos[3];
-    double saveDirection[3];
-
     double m_currentAxialPosition[3];       // stores the cursor position in axial plane
     double m_currentSagittalPosition[3];    // stores the cursor position in sagittal plane
     double m_currentAxialOrientation[3];    // stores the cursor orientation in axial plane
@@ -201,6 +197,8 @@ private slots:
     void OnObjectRemovedSlot( int );
     void UpdateScrewComboBox();
     void NavigationPointerChangedSlot();
+
+    void on_resetDefaultViewButton_clicked();
 
     void on_flipAxialViewCheckBox_toggled(bool);
     void on_flipSagittalViewCheckBox_toggled(bool);
