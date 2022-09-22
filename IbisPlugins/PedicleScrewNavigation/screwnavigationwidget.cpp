@@ -279,6 +279,8 @@ void ScrewNavigationWidget::UpdatePointerDirection()
                 }
                 else
                 {
+                    // If file format doesn't match
+                    std::cerr << "Something wrong happend while reading file " << file.errorString().toUtf8().constData() << std::endl;
                     m_pointerDirection[0] = 0.0;
                     m_pointerDirection[1] = 0.0;
                     m_pointerDirection[2] = 1.0;
@@ -289,7 +291,7 @@ void ScrewNavigationWidget::UpdatePointerDirection()
             else
             {
                 // If cannot open config file
-                std::cerr << file.errorString().toUtf8().constData() << std::endl;;
+                std::cerr << "Cannot open file " << file.errorString().toUtf8().constData() << std::endl;
                 m_pointerDirection[0] = 0.0;
                 m_pointerDirection[1] = 0.0;
                 m_pointerDirection[2] = 1.0;
@@ -299,6 +301,7 @@ void ScrewNavigationWidget::UpdatePointerDirection()
         else
         {
             // If config file does not exist
+            std::cerr << "File " << file.errorString().toUtf8().constData() << " doesn't exist." << std::endl;
             m_pointerDirection[0] = 0.0;
             m_pointerDirection[1] = 0.0;
             m_pointerDirection[2] = 1.0;
