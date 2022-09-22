@@ -227,7 +227,7 @@ vtkRenderer * ScrewNavigationWidget::GetSagittalRenderer()
 
 void ScrewNavigationWidget::UpdatePointerDirection()
 {
-    if(m_pluginInterface)
+    if(m_pluginInterface && m_isNavigating)
     {
         IbisAPI * ibisApi = m_pluginInterface->GetIbisAPI();
 
@@ -413,6 +413,8 @@ void ScrewNavigationWidget::Navigate()
             if ( (currentObject->IsA("ImageObject")) && (currentObject->GetObjectID() != IbisAPI::InvalidId) )
             {
                 m_isNavigating = true;
+
+                this->UpdatePointerDirection();
 
                 this->SetDefaultView( m_axialRenderer);
                 this->SetDefaultView( m_sagittalRenderer);
