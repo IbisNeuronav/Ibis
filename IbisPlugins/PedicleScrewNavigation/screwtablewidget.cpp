@@ -74,11 +74,21 @@ void ScrewTableWidget::UpdateTable()
     }
 }
 
+bool ScrewTableWidget::ScrewComparator(const ScrewProperties &s1, const ScrewProperties &s2)
+ {
+     if(s1.first == s2.first)
+     {
+         return s1.second < s2.second;
+     }
+     return s1.first < s2.first;
+ }
+
 void ScrewTableWidget::on_addScrewButton_clicked()
 {
     ScrewProperties screw(ui->lengthSpinBox->value(),
                 ui->diameterSpinBox->value());
     m_screwList.append(screw);
+    qSort(m_screwList.begin(), m_screwList.end(), this->ScrewComparator);
     this->UpdateTable();
 }
 

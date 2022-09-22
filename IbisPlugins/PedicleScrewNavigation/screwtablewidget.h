@@ -28,6 +28,7 @@ public:
 
 protected:
     void UpdateTable();
+    static bool ScrewComparator(const ScrewProperties &v1, const ScrewProperties &v2);
 
 private:
 
