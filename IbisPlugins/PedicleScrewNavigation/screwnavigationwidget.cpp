@@ -153,7 +153,10 @@ ScrewNavigationWidget::~ScrewNavigationWidget()
     }
     m_axialActor->VisibilityOff();
     m_sagittalActor->VisibilityOff();
-    //TODO: remove vtkImageActors
+    m_axialRenderer->RemoveAllViewProps();
+    m_axialInstrumentRenderer->RemoveAllViewProps();
+    m_sagittalRenderer->RemoveAllViewProps();
+    m_sagittalInstrumentRenderer->RemoveAllViewProps();
     m_pluginInterface = 0;
     delete ui;
 }
@@ -882,13 +885,13 @@ void ScrewNavigationWidget::AddPlannedScrew( double position[3], double orientat
     QString screwNameType;
     if(useWorld)
     {
-        // set color to red for navigated (world) screws
+        // set color to red for (navigated) world screws
         color[0] = 1.0; color[1] = 0.0; color[2] = 0.0;
         screwNameType = " (W)";
     }
     else
     {
-        // set color to yellow for imported (local) screws
+        // set color to yellow for (imported) local screws
         color[0] = 1.0; color[1] = 1.0; color[2] = 0.0;
         screwNameType = " (L)";
     }
