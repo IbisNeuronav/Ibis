@@ -15,6 +15,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "screwtablewidget.h"
 
 #define INSTRUMENT_LENGTH 100
+#define SCREW_TRAJECTORY_LENGTH 300
 
 ScrewNavigationWidget::ScrewNavigationWidget(std::vector<Screw *> plannedScrews, QWidget *parent) :
     QWidget(parent),
@@ -779,25 +780,18 @@ void ScrewNavigationWidget::AddPlannedScrew(Screw *screw)
     screwTipSize = screw->GetScrewTipSize();
     useWorld = screw->IsCoordinateWorldTransform();
 
-    std::cout << "ADD SCREW: L x D x TS = " << screwLength << " x " << screwDiameter << " x " << screwTipSize << std::endl
-              << " [pos: " << position[0] << ", " << position[1] << ", " << position[2] << "]" << std::endl
-              << " [orientation: " << orientation[0] << ", " << orientation[1] << ", " << orientation[2] << "]\n" << std::endl;
-
     this->AddPlannedScrew(position, orientation, screwLength, screwDiameter, screwTipSize, useWorld);
 }
 
 void ScrewNavigationWidget::AddPlannedScrew( double position[3], double orientation[3], double screwLength, double screwDiameter, double screwTipSize, bool useWorld)
 {
-    std::cout << "!ADD SCREW: L x D x TS = " << screwLength << " x " << screwDiameter << " x " << screwTipSize << std::endl
-              << " [pos: " << position[0] << ", " << position[1] << ", " << position[2] << "]" << std::endl
-              << " [orientation: " << orientation[0] << ", " << orientation[1] << ", " << orientation[2] << "]\n" << std::endl;
 
     // create a polydata 3D screw
     // the screw consists of a cylinder representing the body + a cone representing the tip
     vtkSmartPointer<vtkPolyData> trajectory = vtkPolyData::New();
     vtkSmartPointer<vtkCylinderSource> trajectorySource = vtkSmartPointer<vtkCylinderSource>::New();
     trajectorySource->SetRadius(0.5);
-    double trajectoryLength = 300;
+    double trajectoryLength = SCREW_TRAJECTORY_LENGTH;
     trajectorySource->SetHeight(trajectoryLength);
     trajectorySource->SetCenter(0, trajectoryLength/2.0, 0);
     trajectorySource->SetResolution(30);
@@ -995,17 +989,6 @@ bool ScrewNavigationWidget::GetPointerDirection(double (&direction)[3])
 
     return false;
 
-}
-
-void ScrewNavigationWidget::RecenterResliceAxes(vtkMatrix4x4 * matrix)
-{
-    // move the center point that we are slicing through
-    double point[4] = {0.0, 0.0, 0.0, 1.0};
-    double center[4];
-    matrix->MultiplyPoint(point, center);
-    matrix->SetElement(0, 3, center[0]);
-    matrix->SetElement(1, 3, center[1]);
-    matrix->SetElement(2, 3, center[2]);
 }
 
 void ScrewNavigationWidget::SetDefaultView( vtkSmartPointer<vtkRenderer> renderer )

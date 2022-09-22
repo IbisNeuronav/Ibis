@@ -127,11 +127,8 @@ private:
 
     void UpdatePointerDirection();
     void UpdateRulerDrawing(vtkSmartPointer<vtkActor>);
-    void RecenterResliceAxes(vtkMatrix4x4 *);
 
     QString GetScrewName(double, double);
-
-//    void UpdatePlanningImage();
 
     void InitializeUi();
 
