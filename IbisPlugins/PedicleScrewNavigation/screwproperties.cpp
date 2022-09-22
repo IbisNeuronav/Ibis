@@ -14,8 +14,6 @@ Screw::Screw()
 {
     m_axialActor = vtkSmartPointer<vtkActor>::New();
     m_sagittalActor = vtkSmartPointer<vtkActor>::New();
-    m_axialLeftLineSource = vtkSmartPointer<vtkLineSource>::New();
-    m_axialRightLineSource = vtkSmartPointer<vtkLineSource>::New();
 
     m_useWorldTransformCoordinate = false;
     m_axialPosition[0] = 0; m_axialPosition[1] = 0; m_axialPosition[2] = 0;
@@ -30,8 +28,6 @@ Screw::Screw(double axPos[3], double axOri[3], double sagPos[3], double sagOri[3
 {
     m_axialActor = vtkSmartPointer<vtkActor>::New();
     m_sagittalActor = vtkSmartPointer<vtkActor>::New();
-    m_axialLeftLineSource = vtkSmartPointer<vtkLineSource>::New();
-    m_axialRightLineSource = vtkSmartPointer<vtkLineSource>::New();
 
     m_useWorldTransformCoordinate = false;
     m_axialPosition[0] = axPos[0]; m_axialPosition[1] = axPos[1]; m_axialPosition[2] = axPos[2];
@@ -46,8 +42,6 @@ Screw::Screw(const Screw *in)
 {
     m_axialActor = vtkSmartPointer<vtkActor>::New();
     m_sagittalActor = vtkSmartPointer<vtkActor>::New();
-    m_axialLeftLineSource = vtkSmartPointer<vtkLineSource>::New();
-    m_axialRightLineSource = vtkSmartPointer<vtkLineSource>::New();
 
     m_useWorldTransformCoordinate = in->m_useWorldTransformCoordinate;
     m_length = in->m_length;
@@ -203,19 +197,19 @@ void Screw::Update()
 
 void Screw::UpdateInternal()
 {
-    m_axialLeftLineSource = vtkLineSource::New();
-    m_axialLeftLineSource->SetPoint1(-m_diameter/2.0, 0.0, 0.0);
-    m_axialLeftLineSource->SetPoint2(-m_diameter/2.0, -m_length, 0.0);
-    m_axialLeftLineSource->Update();
+    vtkLineSource * axialLeftLineSource = vtkLineSource::New();
+    axialLeftLineSource->SetPoint1(-m_diameter/2.0, 0.0, 0.0);
+    axialLeftLineSource->SetPoint2(-m_diameter/2.0, -m_length, 0.0);
+    axialLeftLineSource->Update();
 
-    m_axialRightLineSource = vtkLineSource::New();
-    m_axialRightLineSource->SetPoint1(m_diameter/2.0, 0.0, 0.0);
-    m_axialRightLineSource->SetPoint2(m_diameter/2.0, -m_length, 0.0);
-    m_axialRightLineSource->Update();
+    vtkLineSource * axialRightLineSource = vtkLineSource::New();
+    axialRightLineSource->SetPoint1(m_diameter/2.0, 0.0, 0.0);
+    axialRightLineSource->SetPoint2(m_diameter/2.0, -m_length, 0.0);
+    axialRightLineSource->Update();
 
     vtkSmartPointer<vtkAppendPolyData> axialTrajectoryPolydata = vtkSmartPointer<vtkAppendPolyData>::New();
-    axialTrajectoryPolydata->AddInputData(m_axialLeftLineSource->GetOutput());
-    axialTrajectoryPolydata->AddInputData(m_axialRightLineSource->GetOutput());
+    axialTrajectoryPolydata->AddInputData(axialLeftLineSource->GetOutput());
+    axialTrajectoryPolydata->AddInputData(axialRightLineSource->GetOutput());
     axialTrajectoryPolydata->Update();
 
     vtkSmartPointer<vtkPolyDataMapper> axialPlannedScrewMapper = vtkSmartPointer<vtkPolyDataMapper>::New();

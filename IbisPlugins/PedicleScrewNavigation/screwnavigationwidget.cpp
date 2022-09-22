@@ -722,11 +722,11 @@ void ScrewNavigationWidget::UpdatePlannedScrews()
                     axialTransform->Update();
                     m_PlannedScrewList[i]->GetAxialActor()->SetUserTransform(axialTransform);
                     if(ui->displayPlanningCheckBox->isChecked())
-                        m_PlannedScrewList[i]->GetAxialActor()->SetVisibility(1);
+                        m_PlannedScrewList[i]->GetAxialActor()->VisibilityOn();
                 }
                 else
                 {
-                    m_PlannedScrewList[i]->GetAxialActor()->SetVisibility(0);
+                    m_PlannedScrewList[i]->GetAxialActor()->VisibilityOff();
                 }
 
                 // move sagittal planning trajectory
@@ -759,11 +759,11 @@ void ScrewNavigationWidget::UpdatePlannedScrews()
                     sagittalTransform->Update();
                     m_PlannedScrewList[i]->GetSagittalActor()->SetUserTransform(sagittalTransform);
                     if(ui->displayPlanningCheckBox->isChecked())
-                        m_PlannedScrewList[i]->GetSagittalActor()->SetVisibility(1);
+                        m_PlannedScrewList[i]->GetSagittalActor()->VisibilityOn();
                 }
                 else
                 {
-                    m_PlannedScrewList[i]->GetSagittalActor()->SetVisibility(0);
+                    m_PlannedScrewList[i]->GetSagittalActor()->VisibilityOff();
                 }
             }
 
@@ -1187,13 +1187,13 @@ void ScrewNavigationWidget::OnScrewListItemChanged(QListWidgetItem * item)
 {
     if(item->checkState() == Qt::Checked)
     {
-        m_PlannedScrewList[ ui->screwListWidget->row(item) ]->GetAxialActor()->SetVisibility(true);
-        m_PlannedScrewList[ ui->screwListWidget->row(item) ]->GetSagittalActor()->SetVisibility(true);
+        m_PlannedScrewList[ ui->screwListWidget->row(item) ]->GetAxialActor()->VisibilityOn();
+        m_PlannedScrewList[ ui->screwListWidget->row(item) ]->GetSagittalActor()->VisibilityOn();
     }
     else
     {
-        m_PlannedScrewList[ ui->screwListWidget->row(item) ]->GetAxialActor()->SetVisibility(false);
-        m_PlannedScrewList[ ui->screwListWidget->row(item) ]->GetSagittalActor()->SetVisibility(false);
+        m_PlannedScrewList[ ui->screwListWidget->row(item) ]->GetAxialActor()->VisibilityOff();
+        m_PlannedScrewList[ ui->screwListWidget->row(item) ]->GetSagittalActor()->VisibilityOff();
     }
 }
 
