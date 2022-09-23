@@ -40,7 +40,7 @@ public:\
     QString GetPluginDescription() override
     {
         QString description;
-        description = "Pedicle Screw Navigation v. 1.0\n"
+        description = "Pedicle Screw Navigation v. 1.1\n"
                       "Author: Houssem Gueziri, PhD.\n"
                       "\n"
                       "This plugin provides functionalities for navigated spinal instrumentation using intraoperative ultrasound imaging. It includes:\n"
@@ -49,7 +49,7 @@ public:\
                       "   - Screw planning (create screws, load and save screw positions)\n"
                       "\n"
                       "Reference:\n"
-                      "TBA";
+                      "Gueziri et al. (2020). Open-source software for ultrasound-based guidance in spinal fusion surgery. Ultrasound Med Biol, 46(12), pp.3353-68.";
         return description;
     }
 
