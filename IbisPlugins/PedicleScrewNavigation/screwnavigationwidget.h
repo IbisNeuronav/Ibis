@@ -128,8 +128,6 @@ private:
     void UpdatePointerDirection();
     void UpdateRulerDrawing(vtkSmartPointer<vtkActor>);
 
-    QString GetScrewName(double, double);
-
     void InitializeUi();
 
 private:

@@ -326,30 +326,22 @@ void ScrewNavigationWidget::UpdateScrewComboBox()
 
         ui->screwSizeComboBox->clear();
         QList<ScrewTableWidget::ScrewProperties> screwList = ScrewTableWidget::GetTable(ibisApi->GetConfigDirectory());
-        QString length, diameter;
         for (int i = 0; i < screwList.size(); ++i)
         {
-            length.sprintf("%.1f", screwList.at(i).first);
-            diameter.sprintf("%.1f", screwList.at(i).second);
-            ui->screwSizeComboBox->addItem(length + tr(" mm X ") + diameter + tr(" mm"),
-                                           this->GetScrewName(screwList.at(i).first, screwList.at(i).second));
+            ui->screwSizeComboBox->addItem(Screw::GetName(screwList.at(i).first, screwList.at(i).second).c_str(),
+                                           Screw::GetScrewID(screwList.at(i).first, screwList.at(i).second).c_str());
         }
 
         if (ui->screwSizeComboBox->count() == 0)
         {
-            length.sprintf("%.1f", m_screwLength);
-            diameter.sprintf("%.1f", m_screwDiameter);
-            ui->screwSizeComboBox->addItem(length + tr(" mm X ") + diameter + tr(" mm"),
-                                           this->GetScrewName(m_screwLength, m_screwDiameter));
+            ui->screwSizeComboBox->addItem(Screw::GetName(m_screwLength, m_screwDiameter).c_str(),
+                                           Screw::GetScrewID(m_screwLength, m_screwDiameter).c_str());
         }
     }
     else
     {
-        QString length, diameter;
-        length.sprintf("%.1f", m_screwLength);
-        diameter.sprintf("%.1f", m_screwDiameter);
-        ui->screwSizeComboBox->addItem(length + tr(" mm X ") + diameter + tr(" mm"),
-                                       this->GetScrewName(m_screwLength, m_screwDiameter));
+        ui->screwSizeComboBox->addItem(Screw::GetName(m_screwLength, m_screwDiameter).c_str(),
+                                       Screw::GetScrewID(m_screwLength, m_screwDiameter).c_str());
     }
 }
 
@@ -451,7 +443,6 @@ void ScrewNavigationWidget::GetPlannedScrews(std::vector<Screw *> &screws)
     for (int i = 0; i < m_PlannedScrewList.size(); ++i)
     {
         Screw *sc = new Screw(m_PlannedScrewList[i]);
-        sc->Update();
         screws.push_back(sc);
     }
 }
@@ -897,7 +888,7 @@ void ScrewNavigationWidget::AddPlannedScrew( double position[3], double orientat
         screwNameType = " (L)";
     }
 
-    QString screwName = tr("Screw ") + QString::number(ui->screwListWidget->count()+1) + tr(": ") + this->GetScrewName(screwLength, screwDiameter) + screwNameType;
+    QString screwName = tr("Screw ") + QString::number(ui->screwListWidget->count()+1) + tr(": ") + tr(Screw::GetName(screwLength, screwDiameter).c_str()) + screwNameType;
 
     if( m_pluginInterface )
     {
@@ -919,7 +910,6 @@ void ScrewNavigationWidget::AddPlannedScrew( double position[3], double orientat
 
     // Create a polydata representing screw cross-section
     Screw *sp = new Screw();
-    sp->SetName( screwName.toUtf8().constData() );
     sp->SetPointerPosition(position);
     sp->SetPointerOrientation(orientation);
     sp->SetUseWorldTransformCoordinate(useWorld);
@@ -928,7 +918,6 @@ void ScrewNavigationWidget::AddPlannedScrew( double position[3], double orientat
 
     vtkSmartPointer<vtkPolyData> screwPolyData = vtkSmartPointer<vtkPolyData>::New();
     Screw::GetScrewPolyData(screwLength, screwDiameter, screwTipSize, screwPolyData);
-    sp->SetScrewPolyData(screwPolyData);
 
     vtkSmartPointer<vtkPolyDataMapper> sagittalPlannedScrewMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
     sagittalPlannedScrewMapper->SetInputData(screwPolyData);
@@ -1143,14 +1132,6 @@ void ScrewNavigationWidget::UpdateRulerDrawing(vtkSmartPointer<vtkActor> rulerAc
     rulerMapper->SetInputData(polyData);
     rulerActor->SetMapper(rulerMapper);
 
-}
-
-QString ScrewNavigationWidget::GetScrewName(double screwLength, double screwDiameter)
-{
-    QString length, diameter;
-    length.sprintf("%.1f", screwLength);
-    diameter.sprintf("%.1f", screwDiameter);
-    return length + tr("x") + diameter;
 }
 
 void ScrewNavigationWidget::OnScrewSizeComboBoxModified( int index )
