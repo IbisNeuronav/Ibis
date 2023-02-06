@@ -135,7 +135,7 @@ void VertebraRegistrationWidget::UpdateUi()
     ui->ultrasoundResolutionComboBox->addItem(tr("0.5 x 0.5 x 0.5"), 0.5);
     ui->ultrasoundResolutionComboBox->addItem(tr("1 x 1 x 1"), 1.0);
     ui->ultrasoundResolutionComboBox->addItem(tr("1.5 x 1.5 x 1.5"), 1.5);
-    ui->ultrasoundResolutionComboBox->setCurrentIndex(1);
+    ui->ultrasoundResolutionComboBox->setCurrentIndex(0);
 
     ui->ultrasoundSearchRadiusComboBox->addItem(tr("0"), 0);
     ui->ultrasoundSearchRadiusComboBox->addItem(tr("1"), 1);

@@ -9,6 +9,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
 // Author: Houssem-Eddine Gueziri
+#include <Windows.h>
+#include <cstdio>
 
 #include "screwnavigationwidget.h"
 #include "ui_screwnavigationwidget.h"
@@ -162,6 +164,7 @@ ScrewNavigationWidget::~ScrewNavigationWidget()
     m_sagittalInstrumentRenderer->RemoveAllViewProps();
     m_pluginInterface = 0;
     delete ui;
+
 }
 
 void ScrewNavigationWidget::SetPluginInterface( PedicleScrewNavigationPluginInterface * inter )
@@ -233,7 +236,7 @@ void ScrewNavigationWidget::UpdatePointerDirection()
 
         std::vector<double> ptip, pbase;
 
-        // Read config file of the pointer in ./ibis/PedicleScrewNavigationData/<ToolName>
+        // Read config file of the pointer in .ibis/PedicleScrewNavigationData/<ToolName>
         QString foldername(QDir(ibisApi->GetConfigDirectory()).filePath("PedicleScrewNavigationData"));
         QString filename(QDir(foldername).filePath(ibisApi->GetNavigationPointerObject()->GetName()));
         QFile file(filename);
@@ -678,15 +681,15 @@ void ScrewNavigationWidget::UpdatePlannedScrews()
                 if( m_PlannedScrewList[i]->IsCoordinateWorldTransform() )
                 {
                     inverseImageTransform->TransformPoint(pointerPos, pointerPos);
-                    inverseImageTransform->MultiplyPoint(pointerOrientation, pointerOrientation);
+                    inverseImageTransform->TransformPoint(pointerOrientation, pointerOrientation);
                 }
 
                 vtkMath::Normalize(pointerOrientation);
                 pointerOrientation[0] = std::acos( pointerOrientation[0] ) * 180.0 / vtkMath::Pi();
                 pointerOrientation[1] = std::acos( pointerOrientation[1] ) * 180.0 / vtkMath::Pi();
                 pointerOrientation[2] = std::acos( pointerOrientation[2] ) * 180.0 / vtkMath::Pi();
-
-                this->GetAxialPositionAndOrientation(currentObject, pointerTransform, m_currentAxialPosition, m_currentAxialOrientation );
+                
+                this->GetAxialPositionAndOrientation(currentObject, pointerTransform, m_currentAxialPosition, m_currentAxialOrientation);
 
                 double diffOrientation[3], diffPos[3];
                 vtkMath::Subtract( m_currentAxialOrientation, pointerOrientation, diffOrientation ); // TODO: remove
@@ -724,7 +727,7 @@ void ScrewNavigationWidget::UpdatePlannedScrews()
                 double sagPointerPos[3] = { -pointerPos[2], pointerPos[1], pointerPos[0] };
                 double sagPointerOrientation[3] = { pointerOrientation[0] + 90, pointerOrientation[1] + 90, pointerOrientation[2] + 90 };
 
-                this->GetSagittalPositionAndOrientation(currentObject, pointerTransform, m_currentSagittalPosition, m_currentSagittalOrientation );
+                this->GetSagittalPositionAndOrientation(currentObject, pointerTransform, m_currentSagittalPosition, m_currentSagittalOrientation);
 
                 vtkMath::Subtract( m_currentSagittalOrientation, sagPointerOrientation, diffOrientation ); // TODO: remove
                 vtkMath::Subtract( m_currentSagittalPosition, sagPointerPos, diffPos );
@@ -978,6 +981,21 @@ bool ScrewNavigationWidget::GetPointerDirection(double (&direction)[3])
         direction[1] = worldPointerTip[1] - worldPointerBase[1];
         direction[2] = worldPointerTip[2] - worldPointerBase[2];
         vtkMath::Normalize(direction);
+
+        //QString message = tr("m_pointerDirection : [") + QString::number(m_pointerDirection[0]) + 
+        //    tr(", ") + QString::number(m_pointerDirection[1]) + 
+        //    tr(", ") + QString::number(m_pointerDirection[2]) + tr("]\n");
+
+        //message += tr("worldPointerTip : [") + QString::number(worldPointerTip[0]) +
+        //    tr(", ") + QString::number(worldPointerTip[1]) +
+        //    tr(", ") + QString::number(worldPointerTip[2]) + tr("]\n");
+
+        //message += tr("worldPointerBase : [") + QString::number(worldPointerBase[0]) +
+        //    tr(", ") + QString::number(worldPointerBase[1]) +
+        //    tr(", ") + QString::number(worldPointerBase[2]) + tr("]\n");
+
+        //m_pluginInterface->GetIbisAPI()->Warning(tr("Pointer orientation"), message);
+
         return true;
     }
 
@@ -1297,8 +1315,14 @@ void ScrewNavigationWidget::on_saveScrewPositionButton_clicked()
 {
     double pointerOrientation[3] = {0.0, 0.0, 0.0};
     if( !this->GetPointerDirection(pointerOrientation) )
+    {
+        m_pluginInterface->GetIbisAPI()->Warning(tr("Pointer orientation"), tr("Warning! pointer orientation set to default, which may not match tool orientation."));
         pointerOrientation[1] = -1;
+    }
 
+    //QString message = tr("[") + QString::number(pointerOrientation[0]) + tr(", ") + QString::number(pointerOrientation[1]) + tr(", ") +
+    //    QString::number(pointerOrientation[2]) + tr("]");
+    //m_pluginInterface->GetIbisAPI()->Warning(tr("Pointer orientation"), message);
     double pointerPosition[3] = { 0.0, 0.0, 0.0 };
     if( m_pluginInterface )
     {
