@@ -29,7 +29,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "vtkCircleWithCrossSource.h"
 #include "vtkMatrix4x4Operators.h"
 #include <QTimer>
-#include <QTime>
+#include <QElapsedTimer>
 
 CameraCalibrationWidget::CameraCalibrationWidget(QWidget *parent) :
     QWidget(parent),
@@ -53,7 +53,7 @@ CameraCalibrationWidget::CameraCalibrationWidget(QWidget *parent) :
     GetInteractor()->SetInteractorStyle( interactorStyle );
     interactorStyle->Delete();
 
-    m_accumulationTime = new QTime;
+    m_accumulationTime = new QElapsedTimer;
 }
 
 CameraCalibrationWidget::~CameraCalibrationWidget()
