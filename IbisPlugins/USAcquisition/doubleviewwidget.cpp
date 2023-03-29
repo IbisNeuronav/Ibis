@@ -52,7 +52,7 @@ DoubleViewWidget::DoubleViewWidget( QWidget * parent, Qt::WindowFlags f )
     ui->setupUi( this );
 
     // Create the 2 view windows
-    vtkRenderWindowInteractor * usInteractor        = ui->usImageWindow->GetInteractor();
+    vtkRenderWindowInteractor * usInteractor        = ui->usImageWindow->interactor();
     vtkSmartPointer<vtkInteractorStyleImage2> style = vtkSmartPointer<vtkInteractorStyleImage2>::New();
     usInteractor->SetInteractorStyle( style );
 
@@ -103,7 +103,7 @@ DoubleViewWidget::DoubleViewWidget( QWidget * parent, Qt::WindowFlags f )
     ui->mriImageWindow->renderWindow()->AddRenderer( m_mriRenderer );
     m_mriRenderer->AddActor( m_mriActor );
 
-    vtkRenderWindowInteractor * mriInteractor        = ui->mriImageWindow->GetInteractor();
+    vtkRenderWindowInteractor * mriInteractor        = ui->mriImageWindow->interactor();
     vtkSmartPointer<vtkInteractorStyleImage2> style2 = vtkSmartPointer<vtkInteractorStyleImage2>::New();
     mriInteractor->SetInteractorStyle( style2 );
 

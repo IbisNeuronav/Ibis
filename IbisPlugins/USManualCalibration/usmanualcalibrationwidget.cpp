@@ -70,9 +70,9 @@ USManualCalibrationWidget::~USManualCalibrationWidget()
     delete ui;
 }
 
-vtkRenderWindow * USManualCalibrationWidget::GetRenderWindow() { return ui->videoWidget->GetRenderWindow(); }
+vtkRenderWindow * USManualCalibrationWidget::GetRenderWindow() { return ui->videoWidget->renderWindow(); }
 
-vtkRenderWindowInteractor * USManualCalibrationWidget::GetInteractor() { return ui->videoWidget->GetInteractor(); }
+vtkRenderWindowInteractor * USManualCalibrationWidget::GetInteractor() { return ui->videoWidget->interactor(); }
 
 void USManualCalibrationWidget::SetPluginInterface( USManualCalibrationPluginInterface * pluginInterface )
 {

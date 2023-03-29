@@ -441,7 +441,7 @@ void View::SetBackgroundColor( double * color )
     this->NotifyNeedRender();
 }
 
-int * View::GetWindowSize() { return this->RenderWidget->GetRenderWindow()->GetSize(); }
+int * View::GetWindowSize() { return this->RenderWidget->renderWindow()->GetSize(); }
 
 void View::ResetCamera()
 {

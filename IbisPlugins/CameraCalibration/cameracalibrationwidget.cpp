@@ -74,9 +74,9 @@ CameraCalibrationWidget::~CameraCalibrationWidget()
     delete ui;
 }
 
-vtkRenderWindow * CameraCalibrationWidget::GetRenderWindow() { return ui->videoWidget->GetRenderWindow(); }
+vtkRenderWindow * CameraCalibrationWidget::GetRenderWindow() { return ui->videoWidget->renderWindow(); }
 
-vtkRenderWindowInteractor * CameraCalibrationWidget::GetInteractor() { return ui->videoWidget->GetInteractor(); }
+vtkRenderWindowInteractor * CameraCalibrationWidget::GetInteractor() { return ui->videoWidget->interactor(); }
 
 void CameraCalibrationWidget::SetPluginInterface( CameraCalibrationPluginInterface * pluginInterface )
 {

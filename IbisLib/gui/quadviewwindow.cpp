@@ -185,22 +185,22 @@ void QuadViewWindow::SetSceneManager( SceneManager * man )
     View * view;
     view = man->CreateView( TRANSVERSE_VIEW_TYPE, ViewNames[0], TRANSVERSE_VIEW_ID );
     view->SetQtRenderWidget( m_vtkWidgets[0] );
-    view->SetInteractor( m_vtkWidgets[0]->GetInteractor() );
+    view->SetInteractor( m_vtkWidgets[0]->interactor() );
     man->SetMainTransverseViewID( TRANSVERSE_VIEW_ID );
 
     view = man->CreateView( THREED_VIEW_TYPE, ViewNames[1], THREED_VIEW_ID );
     view->SetQtRenderWidget( m_vtkWidgets[1] );
-    view->SetInteractor( m_vtkWidgets[1]->GetInteractor() );
+    view->SetInteractor( m_vtkWidgets[1]->interactor() );
     man->SetMain3DViewID( THREED_VIEW_ID );
 
     view = man->CreateView( CORONAL_VIEW_TYPE, ViewNames[2], CORONAL_VIEW_ID );
     view->SetQtRenderWidget( m_vtkWidgets[2] );
-    view->SetInteractor( m_vtkWidgets[2]->GetInteractor() );
+    view->SetInteractor( m_vtkWidgets[2]->interactor() );
     man->SetMainCoronalViewID( CORONAL_VIEW_ID );
 
     view = man->CreateView( SAGITTAL_VIEW_TYPE, ViewNames[3], SAGITTAL_VIEW_ID );
     view->SetQtRenderWidget( m_vtkWidgets[3] );
-    view->SetInteractor( m_vtkWidgets[3]->GetInteractor() );
+    view->SetInteractor( m_vtkWidgets[3]->interactor() );
     man->SetMainSagittalViewID( SAGITTAL_VIEW_ID );
 
     m_sceneManager = man;
