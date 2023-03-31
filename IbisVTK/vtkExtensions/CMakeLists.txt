@@ -19,8 +19,7 @@ SET( VTK_EXTENSIONS_SRC
     vtkSimpleProp3D.cxx
     stringtools.cpp
     vtkMatrix4x4Operators.cxx
-    GlslShader.cpp
-    DrawableTexture.cpp )
+    GlslShader.cpp )
 
 SET( VTK_EXTENSIONS_HDR
     vtkIbisImagePlaneMapper.h
@@ -37,8 +36,7 @@ SET( VTK_EXTENSIONS_HDR
     vtkGenericParam.h
     stringtools.h
     vtkMatrix4x4Operators.h
-    GlslShader.h
-    DrawableTexture.h )
+    GlslShader.h )
 
 #================================
 # Process GLSL shader files
