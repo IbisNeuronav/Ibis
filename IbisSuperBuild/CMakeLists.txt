@@ -14,6 +14,7 @@ include(ExternalProject)
 option( IBIS_BUILD_IGTL_HARDWARE_SUPPORT "Build hardware module based on OpenIGTLink and dependencies (OpenIGTLink and OpenIGTLinkIO)" ON )
 option( IBIS_INSTALL_OPENCV "Install OpenCV library needed in some plugins" OFF )
 option( IBIS_BUILD_ELASTIX "Build the Elastix library needed in some plugins" OFF )
+option( IBIS_BUILD_OIGTL_WITH_H264 "Build the OpenIGTLink library with H264 support" OFF )
 
 # Build All External Dependencies except Qt (vtk, Itk, minc, etc.)
 set( vtk_name vtk-${IBIS_VTK_LONG_VERSION} )
