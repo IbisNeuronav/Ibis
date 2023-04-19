@@ -31,9 +31,13 @@ set( IBIS_EXTERNAL_DEPENDENCIES_DIR ${CMAKE_CURRENT_BINARY_DIR}/../IbisDeps CACH
 # Look for QT5 (required)
 #==================================================================
 option( IBIS_USE_QT_MULTIMEDIA "Find and link with the Multimedia module in Qt. This is not required by Ibis but may be used by some plugins." OFF )
+option( IBIS_USE_QT_NETWORK "Find and link with the Network module in Qt. This is not required by Ibis but may be used by some plugins." OFF )
 set( IbisQtModules Widgets OpenGL Xml )
 if( IBIS_USE_QT_MULTIMEDIA )
     list( APPEND IbisQtModules Multimedia )
+endif()
+if( IBIS_USE_QT_NETWORK )
+    list( APPEND IbisQtModules Network )
 endif()
 if(UNIX AND NOT APPLE)
     list( APPEND IbisQtModules X11Extras )
