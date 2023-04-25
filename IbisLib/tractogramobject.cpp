@@ -47,6 +47,9 @@ TractogramObject::TractogramObject()
 
     this->tube_enabled = false;
     this->renderingMode = VTK_WIREFRAME;
+
+    this->SetScalarsVisible(true);
+    this->SetVertexColorMode(2);
 }
 
 TractogramObject::~TractogramObject()
@@ -237,3 +240,4 @@ void TractogramObject::AddLocalColor(vtkSmartPointer<vtkUnsignedCharArray> color
 
         colors->SetTuple3(current_id, x*norm, y*norm, z*norm);
 }
+
