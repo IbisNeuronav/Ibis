@@ -47,6 +47,9 @@ TractogramObject::TractogramObject()
 
     this->tube_enabled = false;
     this->renderingMode = VTK_WIREFRAME;
+
+    this->SetScalarsVisible(true);
+    this->SetVertexColorMode(2);
 }
 
 TractogramObject::~TractogramObject()
