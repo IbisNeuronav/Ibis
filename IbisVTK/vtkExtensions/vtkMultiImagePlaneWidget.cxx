@@ -275,7 +275,7 @@ void vtkMultiImagePlaneWidget::InternalAddRenderer( vtkRenderer * ren, vtkAssemb
     texturePlaneActor->SetUserTransform( this->BoundingTransform );
     vtkProperty * properties = texturePlaneActor->GetProperty();
     properties->SetColor( 1.0, 1.0, 1.0 );
-    properties->SetAmbient( 1.0 );
+    properties->SetAmbient( 0.0 );
     properties->SetDiffuse( 1.0 );
     properties->LightingOff();
     properties->ShadingOff();
