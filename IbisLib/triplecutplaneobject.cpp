@@ -25,20 +25,20 @@ ObjectSerializationMacro( TripleCutPlaneObject );
 //===== Blending modes =====
 struct BlendingModeInfo
 {
-    BlendingModeInfo( QString n, int m ) : name(n), mode(m) {}
+    BlendingModeInfo(QString n, vtkTexture::VTKTextureBlendingMode m) : name(n), mode(m) {}
     QString name;
-    int mode;
+    vtkTexture::VTKTextureBlendingMode mode;
 };
 
 std::vector<BlendingModeInfo> FillBlendingModeInfo()
 {
     std::vector<BlendingModeInfo> modes;
-    modes.push_back( BlendingModeInfo( "Replace", 1 /* vtkTexture::VTK_TEXTURE_BLENDING_MODE_REPLACE */ ) );
-    modes.push_back( BlendingModeInfo( "Modulate", 2 /* vtkTexture::VTK_TEXTURE_BLENDING_MODE_MODULATE */ ) );
-    modes.push_back( BlendingModeInfo( "Add", 3 /* vtkTexture::VTK_TEXTURE_BLENDING_MODE_ADD */ ) );
-    modes.push_back( BlendingModeInfo( "Add signed", 4 /* vtkTexture::VTK_TEXTURE_BLENDING_MODE_ADD_SIGNED */ ) );
-    modes.push_back( BlendingModeInfo( "Interpolate", 5 /* vtkTexture::VTK_TEXTURE_BLENDING_MODE_INTERPOLATE */ ) );
-    modes.push_back( BlendingModeInfo( "Subtract", 6 /* vtkTexture::VTK_TEXTURE_BLENDING_MODE_SUBTRACT */ ) );
+    modes.push_back(BlendingModeInfo("Replace", vtkTexture::VTK_TEXTURE_BLENDING_MODE_REPLACE));
+    modes.push_back(BlendingModeInfo("Modulate", vtkTexture::VTK_TEXTURE_BLENDING_MODE_MODULATE));
+    modes.push_back(BlendingModeInfo("Add", vtkTexture::VTK_TEXTURE_BLENDING_MODE_ADD));
+    modes.push_back(BlendingModeInfo("Add signed", vtkTexture::VTK_TEXTURE_BLENDING_MODE_ADD_SIGNED));
+    modes.push_back(BlendingModeInfo("Interpolate", vtkTexture::VTK_TEXTURE_BLENDING_MODE_INTERPOLATE));
+    modes.push_back(BlendingModeInfo("Subtract", vtkTexture::VTK_TEXTURE_BLENDING_MODE_SUBTRACT));
     return modes;
 }
 
@@ -177,7 +177,7 @@ void TripleCutPlaneObject::AddImage( int imageID )
     // Make sure the image is not already there
     ImageContainer::iterator it = std::find( Images.begin(), Images.end(), imageID );
     if( it != Images.end() )
-            return;
+        return;
 
     ImageObject * im = ImageObject::SafeDownCast( this->GetManager()->GetObjectByID( imageID ) );
     Q_ASSERT(im);
@@ -187,17 +187,14 @@ void TripleCutPlaneObject::AddImage( int imageID )
     if( m_blendingModeIndices.size() < Images.size() )
         m_blendingModeIndices.push_back( 2 );//this is index of vtkTexture::VTK_TEXTURE_BLENDING_MODE_ADD in BlendingModes vector
 
-    bool refImage = false;
-    if( Images.size() == 1 )
-        refImage = true;
-
     for( int i = 0; i < 3; ++i )
     {
         bool canInterpolate = !im->IsLabelImage();
         this->Planes[i]->AddInput( im->GetImage(), im->GetLut(), im->GetWorldTransform(), canInterpolate );
         this->Planes[i]->SetImageHidden( im->GetImage(), im->IsHidden() );
         this->Planes[i]->SetBlendingMode( Images.size() - 1, BlendingModes[ m_blendingModeIndices[ Images.size() - 1 ] ].mode );
-        if( refImage )
+        // First image is reference
+        if( Images.size() == 1 )
         {
             this->Planes[i]->SetBoundingVolume( im->GetImage(), im->GetWorldTransform() );
         }
@@ -220,7 +217,7 @@ void TripleCutPlaneObject::RemoveImage( int imageID )
     }
 
     if( it == Images.end() )
-            return;
+        return;
 
     Images.erase( it );
     this->AdjustAllImages();

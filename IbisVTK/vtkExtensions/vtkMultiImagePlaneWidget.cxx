@@ -983,7 +983,7 @@ void vtkMultiImagePlaneWidget::SetSliceMixMode( int imageIndex, int mode )
     Inputs[ imageIndex ].Reslice->SetSlabMode( mode );
 }
 
-void vtkMultiImagePlaneWidget::SetBlendingMode( int imageIndex, int mode )
+void vtkMultiImagePlaneWidget::SetBlendingMode( int imageIndex, vtkTexture::VTKTextureBlendingMode mode)
 {
     Inputs[ imageIndex ].Texture->SetBlendingMode( mode );
 }
