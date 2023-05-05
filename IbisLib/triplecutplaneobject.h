@@ -29,7 +29,7 @@ class vtkEventQtSlotConnect;
  * @class   TripleCutPlaneObject
  * @brief   Three perpendicular planes showing cross sections of objects in scene views
  *
- * The planes are always acting tohether, their section point forms the cursor.
+ * The planes are always acting together, their section point forms the cursor.
  * In 2D views the planes always face the camera, parallel projection is used.
  * In 3D view planes are rotated together, perspective projection is used.
  * The real processing happens in vtkMultiImagePlaneWidget.
@@ -171,12 +171,12 @@ public slots:
     void PlaneInteractionEvent( vtkObject * caller, unsigned long event );
     void PlaneEndInteractionEvent( vtkObject * caller, unsigned long event );
     // Adjust planes
-    void AdjustAllImages(  );
+    void AdjustAllImages();
     void UpdateLut( int imageID );
     void ObjectAddedSlot( int objectId );
-    void ObjectRemovedSlot(int objectId );
+    void ObjectRemovedSlot( int objectId );
     virtual void MarkModified() override;
-    void SetImageHidden(int imageID );
+    void SetImageHidden( int imageID );
 
 signals:
     void StartPlaneMoved(int);
@@ -197,7 +197,7 @@ protected:
     int GetPlaneIndex( vtkObject * caller );
     void UpdateOtherPlanesPosition( int planeIndex );
 
-    typedef std::vector< int > ImageContainer;
+    typedef std::vector<int> ImageContainer;
 	ImageContainer Images;
 
     int m_sliceThickness;
@@ -219,7 +219,7 @@ protected:
 
 private:
     void UpdateAllPlanesVisibility();
-    void UpdatePlanesVisibility(View *view );
+    void UpdatePlanesVisibility( View *view );
 
 };
 
