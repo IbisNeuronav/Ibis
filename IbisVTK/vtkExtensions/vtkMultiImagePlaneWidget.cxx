@@ -1056,8 +1056,9 @@ void vtkMultiImagePlaneWidget::CreateDefaultProperties()
     if ( ! this->PlaneProperty )
     {
         this->PlaneProperty = vtkProperty::New();
-        this->PlaneProperty->SetAmbient(1);
-        this->PlaneProperty->SetColor(1,1,1);
+        this->PlaneProperty->SetAmbient( 0. );
+        this->PlaneProperty->SetDiffuse( 1. );
+        this->PlaneProperty->SetColor( 1., 1. , 1. );
         this->PlaneProperty->SetRepresentationToWireframe();
         this->PlaneProperty->SetInterpolationToFlat();
     }
@@ -1065,8 +1066,9 @@ void vtkMultiImagePlaneWidget::CreateDefaultProperties()
     if ( ! this->SelectedPlaneProperty )
     {
         this->SelectedPlaneProperty = vtkProperty::New();
-        this->SelectedPlaneProperty->SetAmbient(1);
-        this->SelectedPlaneProperty->SetColor(0,1,0);
+        this->SelectedPlaneProperty->SetAmbient( 0. );
+        this->SelectedPlaneProperty->SetDiffuse( 1. );
+        this->SelectedPlaneProperty->SetColor( 0., 1., 0. );
         this->SelectedPlaneProperty->SetRepresentationToWireframe();
         this->SelectedPlaneProperty->SetInterpolationToFlat();
     }
@@ -1074,7 +1076,8 @@ void vtkMultiImagePlaneWidget::CreateDefaultProperties()
     if ( ! this->CursorProperty )
     {
         this->CursorProperty = vtkProperty::New();
-        this->CursorProperty->SetAmbient(1);
+        this->CursorProperty->SetAmbient( 0. );
+        this->CursorProperty->SetDiffuse( 1. );
         this->CursorProperty->SetColor( 1.0, 0.7, 0.25 );
         this->CursorProperty->SetLineWidth( .5 );
         this->CursorProperty->SetRepresentationToWireframe();
@@ -1084,8 +1087,9 @@ void vtkMultiImagePlaneWidget::CreateDefaultProperties()
     if ( ! this->MarginProperty )
     {
         this->MarginProperty = vtkProperty::New();
-        this->MarginProperty->SetAmbient(1);
-        this->MarginProperty->SetColor(0,0,1);
+        this->MarginProperty->SetAmbient( 0. );
+        this->MarginProperty->SetDiffuse( 1. );
+        this->MarginProperty->SetColor( 0., 0., 1. );
         this->MarginProperty->SetRepresentationToWireframe();
         this->MarginProperty->SetInterpolationToFlat();
     }
