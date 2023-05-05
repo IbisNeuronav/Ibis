@@ -134,7 +134,7 @@ public:
     void RemoveBottomWidget( QWidget * w );
 
     /** Popup a dialog. */
-    void ShowFloatingDock( QWidget * w, QFlags<QDockWidget::DockWidgetFeature> features=QDockWidget::AllDockWidgetFeatures );
+    void ShowFloatingDock( QWidget * w, QFlags<QDockWidget::DockWidgetFeature> features=QDockWidget::DockWidgetClosable | QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable );
 
     /** Set up clock connection. */
     void OnStartMainLoop();

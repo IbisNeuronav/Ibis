@@ -44,7 +44,7 @@ public:
     virtual void Serialize( Serializer * ser );
     void AddBottomWidget( QWidget * w );
     void RemoveBottomWidget( QWidget * w );
-    void ShowFloatingDock( QWidget * w, QFlags<QDockWidget::DockWidgetFeature> features=QDockWidget::AllDockWidgetFeatures );
+    void ShowFloatingDock( QWidget * w, QFlags<QDockWidget::DockWidgetFeature> features=QDockWidget::DockWidgetClosable | QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable );
     void SetShowToolbar( bool show );
     void SetShowLeftPanel( bool show );
     void SetShowRightPanel( bool show );
