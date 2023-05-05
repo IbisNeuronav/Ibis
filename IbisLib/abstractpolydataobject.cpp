@@ -66,7 +66,8 @@ AbstractPolyDataObject::AbstractPolyDataObject()
     this->CrossSectionVisible = false;
 
     m_2dProperty = vtkSmartPointer<vtkProperty>::New();
-    m_2dProperty->SetAmbient( 1.0 );
+    m_2dProperty->SetAmbient( 0.0 );
+    m_2dProperty->SetDiffuse( 1.0 );
     m_2dProperty->LightingOff();
 }
 
