@@ -27,6 +27,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "sceneobject.h"
 #include "imageobject.h"
 #include "SVL.h"
+#include "application.h"
 
 vtkCxxSetObjectMacro(View,Picker,vtkCellPicker);
 
@@ -70,6 +71,8 @@ View::View()
     m_rightButtonDown = false;
     m_backupWindowParent = nullptr;
     CurrentController = nullptr;
+
+    connect(&Application::GetInstance(), SIGNAL(IbisClockTick()), this, SLOT(EnableRendering()));
 }
 
 
@@ -77,6 +80,8 @@ View::~View()
 {
     if( this->Picker )
         this->Picker->Delete();
+
+    disconnect(&Application::GetInstance(), SIGNAL(IbisClockTick()), this, SLOT(EnableRendering()));
 }
 
 void View::Serialize( Serializer * ser )
@@ -260,7 +265,9 @@ vtkRenderer * View::GetOverlayRenderer2()
 void View::SetManager( SceneManager * manager )
 {
     if( this->Manager )
-        disconnect( this->Manager, SIGNAL(ReferenceTransformChanged()), this, SLOT(ReferenceTransformChanged()) );
+    {
+        disconnect(this->Manager, SIGNAL(ReferenceTransformChanged()), this, SLOT(ReferenceTransformChanged()));
+    }
 
     this->Manager = manager;
 
@@ -507,6 +514,11 @@ void View::NotifyNeedRender()
     }
 }
 
+void View::EnableRendering()
+{
+    this->SetRenderingEnabled(true);
+}
+
 void View::ReferenceTransformChanged()
 {
     // We update transform only if it is a 2D view or if Manager says we follow 3D views as well
@@ -551,9 +563,12 @@ void View::WindowStartsRendering()
 // Really call the vtk rendering code
 void View::DoVTKRender()
 {
+    if( !this->m_renderingEnabled ) return;
+
     if( this->Interactor )
     {
         this->Interactor->Render();
+        this->SetRenderingEnabled(false);
     }
 }
 
