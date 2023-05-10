@@ -1,0 +1,23 @@
+---
+BasedOnStyle: Google
+IndentWidth: 4
+---
+Language: Cpp
+ColumnLimit: 120
+AccessModifierOffset: -4
+SpaceBeforeParens: Never
+SpacesInParentheses: true
+SpaceInEmptyParentheses: false
+SpaceInEmptyBlock: false
+SpaceAroundPointerQualifiers: Both
+SpaceAfterLogicalNot: false
+SpaceBeforeAssignmentOperators: true
+AlignConsecutiveAssignments: Consecutive
+BreakBeforeBraces: Allman
+AlignAfterOpenBracket: Align
+DerivePointerAlignment: false
+PointerAlignment: Middle
+AllowShortLambdasOnASingleLine: Empty
+UseTab: Never
+SpacesInSquareBrackets: false
+---
