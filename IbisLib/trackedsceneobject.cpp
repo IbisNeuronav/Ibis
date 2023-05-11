@@ -1,22 +1,24 @@
 #include "trackedsceneobject.h"
-#include <vtkTransform.h>
-#include <vtkRenderer.h>
+
+#include <vtkActor.h>
 #include <vtkAxes.h>
 #include <vtkPolyDataMapper.h>
-#include <vtkActor.h>
+#include <vtkRenderer.h>
+#include <vtkTransform.h>
+
+#include "hardwaremodule.h"
 #include "serializerhelper.h"
 #include "view.h"
-#include "hardwaremodule.h"
 
 ObjectSerializationMacro( TrackedSceneObject );
 
 TrackedSceneObject::TrackedSceneObject()
 {
-    m_timestamp = -1;
-    m_hardwareModule = nullptr;
-    m_state = Undefined;
-    m_transform = vtkTransform::New();
-    m_calibrationTransform = vtkTransform::New();
+    m_timestamp                   = -1;
+    m_hardwareModule              = nullptr;
+    m_state                       = Undefined;
+    m_transform                   = vtkTransform::New();
+    m_calibrationTransform        = vtkTransform::New();
     vtkTransform * localTransform = vtkTransform::New();
     localTransform->Concatenate( m_transform );
     localTransform->Concatenate( m_calibrationTransform );
@@ -70,7 +72,7 @@ void TrackedSceneObject::Release( View * view )
         PerViewActors::iterator it = m_genericActors.find( view );
         if( it != m_genericActors.end() )
         {
-            vtkActor * actor = (*it).second;
+            vtkActor * actor = ( *it ).second;
             view->GetRenderer()->RemoveViewProp( actor );
             actor->Delete();
             m_genericActors.erase( it );
@@ -83,7 +85,7 @@ void TrackedSceneObject::Hide()
     PerViewActors::iterator it = m_genericActors.begin();
     while( it != m_genericActors.end() )
     {
-        vtkActor * actor = (*it).second;
+        vtkActor * actor = ( *it ).second;
         actor->VisibilityOff();
         ++it;
     }
@@ -95,7 +97,7 @@ void TrackedSceneObject::Show()
     PerViewActors::iterator it = m_genericActors.begin();
     while( it != m_genericActors.end() )
     {
-        vtkActor * actor = (*it).second;
+        vtkActor * actor = ( *it ).second;
         actor->VisibilityOn();
         ++it;
     }
@@ -114,8 +116,7 @@ void TrackedSceneObject::SerializeTracked( Serializer * ser )
     m_calibrationTransform->GetMatrix( calibrationMat );
     ::Serialize( ser, "CalibrationMatrix", calibrationMat );
 
-    if (ser->IsReader())
-        SetCalibrationMatrix( calibrationMat );
+    if( ser->IsReader() ) SetCalibrationMatrix( calibrationMat );
 
     calibrationMat->Delete();
 }
@@ -132,10 +133,7 @@ void TrackedSceneObject::SetInputMatrix( vtkMatrix4x4 * m )
     emit ObjectModified();
 }
 
-void TrackedSceneObject::SetInputTransform( vtkTransform * t )
-{
-    m_transform->SetInput( t );
-}
+void TrackedSceneObject::SetInputTransform( vtkTransform * t ) { m_transform->SetInput( t ); }
 
 void TrackedSceneObject::SetCalibrationMatrix( vtkMatrix4x4 * mat )
 {
@@ -143,10 +141,7 @@ void TrackedSceneObject::SetCalibrationMatrix( vtkMatrix4x4 * mat )
     emit ObjectModified();
 }
 
-vtkMatrix4x4 * TrackedSceneObject::GetCalibrationMatrix()
-{
-    return m_calibrationTransform->GetMatrix();
-}
+vtkMatrix4x4 * TrackedSceneObject::GetCalibrationMatrix() { return m_calibrationTransform->GetMatrix(); }
 
 vtkTransform * TrackedSceneObject::GetReferenceToolTransform()
 {
@@ -175,8 +170,7 @@ void TrackedSceneObject::InternalUpdateWorldTransform()
     SceneObject::UpdateWorldTransform();
 
     m_uncalibratedWorldTransform->Identity();
-    if( Parent )
-        m_uncalibratedWorldTransform->Concatenate( Parent->GetWorldTransform() );
+    if( Parent ) m_uncalibratedWorldTransform->Concatenate( Parent->GetWorldTransform() );
     m_uncalibratedWorldTransform->Concatenate( m_transform );
 }
 
@@ -184,9 +178,9 @@ void TrackedSceneObject::ObjectAboutToBeRemovedFromScene()
 {
     // We mark the object as not driven by hardware, removing it from the list of tracked objects.
     // We also mark it as not managed by tracker and not managed by system.
-    // We have to remember that the object is known to the SceneManager until it is removed from the list of all objects.
-    // Before the final removal from the list there are many callbacks that may access the object and we do not want it
-    // to be treated as a special object.
+    // We have to remember that the object is known to the SceneManager until it is removed from the list of all
+    // objects. Before the final removal from the list there are many callbacks that may access the object and we do not
+    // want it to be treated as a special object.
     this->SetHardwareModule( nullptr );
     this->SetObjectManagedBySystem( false );
     this->SetObjectManagedByTracker( false );

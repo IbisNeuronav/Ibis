@@ -11,10 +11,12 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef __PointRepresentation_h_
 #define __PointRepresentation_h_
 
-#include "serializer.h"
-#include "sceneobject.h"
 #include <vtkSmartPointer.h>
+
 #include <QObject>
+
+#include "sceneobject.h"
+#include "serializer.h"
 
 class vtkActor;
 class vtkProperty;
@@ -37,14 +39,12 @@ class View;
  */
 class PointRepresentation : public SceneObject
 {
-    
-Q_OBJECT
+    Q_OBJECT
 
 public:
-        
     static PointRepresentation * New() { return new PointRepresentation; }
-    vtkTypeMacro(PointRepresentation,SceneObject);
-    
+    vtkTypeMacro( PointRepresentation, SceneObject );
+
     PointRepresentation();
     virtual ~PointRepresentation();
 
@@ -52,30 +52,30 @@ public:
     virtual void Release( View * view ) override;
 
     /** Set point's color. */
-    void SetPropertyColor(double color[3]);
+    void SetPropertyColor( double color[ 3 ] );
 
     /** Set point's opacity. */
-    void SetOpacity(double opacity);
+    void SetOpacity( double opacity );
 
     /** Set point's size in 3D view. */
-    void SetPointSizeIn3D(double);
+    void SetPointSizeIn3D( double );
     /** Set point's size in 2D view. */
-    void SetPointSizeIn2D(double);
+    void SetPointSizeIn2D( double );
 
     /** Set point's index. */
-    void SetPointIndex(int i) {m_pointIndex = i;}
+    void SetPointIndex( int i ) { m_pointIndex = i; }
     /** Get point's index. */
-    int GetPointIndex() {return m_pointIndex;}
+    int GetPointIndex() { return m_pointIndex; }
 
     /** Set point's position. */
     ///@{
-    void SetPosition(double p[3]);
-    void SetPosition(double x, double y, double z);
-    void GetPosition(double p[3]);
+    void SetPosition( double p[ 3 ] );
+    void SetPosition( double x, double y, double z );
+    void GetPosition( double p[ 3 ] );
     ///@}
 
     /** Enable/disable picking. */
-    void SetActive(bool yes);
+    void SetActive( bool yes );
     /** Check if the point is active. */
     bool GetActive() { return m_active; }
 
@@ -85,13 +85,13 @@ public:
     /** Set the label of the point. */
     void SetLabel( const std::string & text );
     /** Get the label of the point. */
-    const char* GetLabel();
+    const char * GetLabel();
 
     /** Show/hide the label of the point. */
-    void ShowLabel( bool show);
+    void ShowLabel( bool show );
 
     /** Set label size. */
-    void SetLabelScale(double s);
+    void SetLabelScale( double s );
 
     /** Update the visibility of the point in 2D according to whether it is in a plane. */
     void UpdateVisibility();
@@ -99,7 +99,6 @@ public:
     bool CheckVisibility();
 
 protected:
-
     int m_pointIndex;
     vtkSmartPointer<vtkSphereSource> m_sphere;
     vtkSmartPointer<vtkCircleWithCrossSource> m_circle;
@@ -126,7 +125,7 @@ protected:
         vtkSmartPointer<vtkActor> pointRepresentationActor;
         vtkSmartPointer<vtkFollower> labelActor;
     };
-    typedef std::map< View*, PerViewElements* > PerViewContainer;
+    typedef std::map<View *, PerViewElements *> PerViewContainer;
     PerViewContainer m_perViewContainer;
 
     // Property used to control the appearance of selected objects and

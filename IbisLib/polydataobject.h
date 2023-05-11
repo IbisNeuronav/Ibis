@@ -11,13 +11,14 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef __PolyDataObject_h_
 #define __PolyDataObject_h_
 
-#include <map>
-#include <QVector>
 #include <vtkSmartPointer.h>
 
+#include <QVector>
+#include <map>
+
+#include "abstractpolydataobject.h"
 #include "sceneobject.h"
 #include "serializer.h"
-#include "abstractpolydataobject.h"
 
 class vtkDataSetAlgorithm;
 class vtkImageData;
@@ -37,22 +38,20 @@ class ImageObject;
 
 class PolyDataObject : public AbstractPolyDataObject
 {
-    
-Q_OBJECT
+    Q_OBJECT
 
 public:
-        
     static PolyDataObject * New() { return new PolyDataObject; }
-    vtkTypeMacro(PolyDataObject,AbstractPolyDataObject);
-    
+    vtkTypeMacro( PolyDataObject, AbstractPolyDataObject );
+
     PolyDataObject();
     virtual ~PolyDataObject();
     virtual void Serialize( Serializer * ser ) override;
     virtual void Export() override;
-    virtual bool IsExportable()  override { return true; }
+    virtual bool IsExportable() override { return true; }
     /** Update clipping, colors, visibility. */
     virtual void UpdatePipeline() override;
-    virtual void CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets) override;
+    virtual void CreateSettingsWidgets( QWidget * parent, QVector<QWidget *> * widgets ) override;
     void ObjectRemovedFromScene() override;
 
     /** Get current scalar source */
@@ -87,20 +86,19 @@ public slots:
     void OnScalarSourceModified();
 
 protected:
-
     vtkSmartPointer<vtkScalarsToColors> CurrentLut;
     ImageObject * ScalarSource;
     vtkSmartPointer<vtkScalarsToColors> LutBackup;
     vtkSmartPointer<vtkProbeFilter> ProbeFilter;
 
-    int VertexColorMode;   // 0 : use scalars in data, 1 : get scalars from object ScalarSourceObjectId
+    int VertexColorMode;  // 0 : use scalars in data, 1 : get scalars from object ScalarSourceObjectId
     int ScalarSourceObjectId;
     int LutIndex;
 
-    vtkImageData* Texture;
+    vtkImageData * Texture;
     vtkSmartPointer<vtkDataSetAlgorithm> TextureMap;
-    bool      showTexture;
-    QString   textureFileName;
+    bool showTexture;
+    QString textureFileName;
     static vtkSmartPointer<vtkImageData> checkerBoardTexture;
 };
 

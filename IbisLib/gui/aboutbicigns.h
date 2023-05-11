@@ -12,28 +12,26 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #define TAG_ABOUTBICIGNS_H
 
 #include <QDialog>
-#include <QString>
 #include <QObject>
+#include <QString>
 
-namespace Ui {
-    class AboutBICIgns;
+namespace Ui
+{
+class AboutBICIgns;
 }
 
 class AboutBICIgns : public QDialog
 {
-Q_OBJECT
+    Q_OBJECT
 
 public:
-
     AboutBICIgns( QWidget * parent = 0, const char * name = 0 );
     ~AboutBICIgns();
-        
+
     void Initialize( QString appName, QString version, QString buildDate );
 
 private:
-
-    Ui::AboutBICIgns *ui;
+    Ui::AboutBICIgns * ui;
 };
-
 
 #endif  // TAG_ABOUTBICIGNS_H

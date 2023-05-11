@@ -12,28 +12,30 @@
 
 =========================================================================*/
 #include "pointercalibrationdialog.h"
-#include <QPushButton>
-#include <QLineEdit>
-#include <vtkMatrix4x4.h>
-#include "pointerobject.h"
-#include "application.h"
 
-PointerCalibrationDialog::PointerCalibrationDialog( QWidget * parent ) : QWidget(parent)
+#include <vtkMatrix4x4.h>
+
+#include <QLineEdit>
+#include <QPushButton>
+
+#include "application.h"
+#include "pointerobject.h"
+
+PointerCalibrationDialog::PointerCalibrationDialog( QWidget * parent ) : QWidget( parent )
 {
-    setupUi(this);
+    setupUi( this );
     m_pointer = 0;
 }
 
 PointerCalibrationDialog::~PointerCalibrationDialog()
 {
-    if( m_pointer && m_pointer->IsCalibratingTip() )
-        m_pointer->CancelTipCalibration();
+    if( m_pointer && m_pointer->IsCalibratingTip() ) m_pointer->CancelTipCalibration();
 }
 
 void PointerCalibrationDialog::SetPointer( PointerObject * p )
 {
     m_pointer = p;
-    connect( m_pointer, SIGNAL(ObjectModified()), this, SLOT(update()) );
+    connect( m_pointer, SIGNAL( ObjectModified() ), this, SLOT( update() ) );
     Update();
 }
 
@@ -42,19 +44,19 @@ void PointerCalibrationDialog::CalibrateButtonClicked()
     if( !m_pointer->IsCalibratingTip() )
     {
         m_pointer->StartTipCalibration();
-        connect( &Application::GetInstance(), SIGNAL(IbisClockTick()), this, SLOT(Update()) );
+        connect( &Application::GetInstance(), SIGNAL( IbisClockTick() ), this, SLOT( Update() ) );
     }
     else
     {
         m_pointer->StopTipCalibration();
-        disconnect( &Application::GetInstance(), SIGNAL(IbisClockTick()), this, SLOT(Update()) );
+        disconnect( &Application::GetInstance(), SIGNAL( IbisClockTick() ), this, SLOT( Update() ) );
     }
     Update();
 }
 
 void PointerCalibrationDialog::CancelButtonClicked()
 {
-    disconnect( &Application::GetInstance(), SIGNAL(IbisClockTick()), this, SLOT(Update()) );
+    disconnect( &Application::GetInstance(), SIGNAL( IbisClockTick() ), this, SLOT( Update() ) );
     m_pointer->CancelTipCalibration();
     this->Update();
 }
@@ -63,11 +65,11 @@ void PointerCalibrationDialog::Update()
 {
     cancelButton->setEnabled( m_pointer->IsCalibratingTip() );
     if( m_pointer->IsCalibratingTip() )
-        calibrateButton->setText("Stop");
+        calibrateButton->setText( "Stop" );
     else
-        calibrateButton->setText("Start");
+        calibrateButton->setText( "Start" );
 
-    double rms = m_pointer->GetTipCalibrationRMSError();
+    double rms         = m_pointer->GetTipCalibrationRMSError();
     vtkMatrix4x4 * mat = m_pointer->GetCalibrationMatrix();
     if( mat && rms != 0 )
     {
@@ -81,13 +83,13 @@ void PointerCalibrationDialog::Update()
     {
         if( m_pointer->IsCalibratingTip() )
         {
-            tipRMSEdit->setText("---Not enough points---");
-            tipVectorEdit->setText("---Not enough points---");
+            tipRMSEdit->setText( "---Not enough points---" );
+            tipVectorEdit->setText( "---Not enough points---" );
         }
         else
         {
-            tipRMSEdit->setText("-------");
-            tipVectorEdit->setText("------");
+            tipRMSEdit->setText( "-------" );
+            tipVectorEdit->setText( "------" );
         }
     }
 }

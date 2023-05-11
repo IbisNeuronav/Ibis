@@ -24,9 +24,7 @@ class TrackedSceneObject;
 
 class HardwareModule : public IbisPlugin
 {
-
 public:
-
     vtkTypeMacro( HardwareModule, IbisPlugin );
 
     HardwareModule() {}
@@ -35,22 +33,21 @@ public:
     virtual IbisPluginTypes GetPluginType() override { return IbisPluginTypeHardwareModule; }
 
     virtual void AddSettingsMenuEntries( QMenu * menu ) {}
-    virtual void Init() = 0;
-    virtual void Update() = 0;
+    virtual void Init()     = 0;
+    virtual void Update()   = 0;
     virtual bool ShutDown() = 0;
 
-    virtual void AddToolObjectsToScene() = 0;
+    virtual void AddToolObjectsToScene()      = 0;
     virtual void RemoveToolObjectsFromScene() = 0;
 
     virtual vtkTransform * GetReferenceTransform() = 0;
 
-    virtual bool IsTransformFrozen( TrackedSceneObject * obj ) = 0;
+    virtual bool IsTransformFrozen( TrackedSceneObject * obj )              = 0;
     virtual void FreezeTransform( TrackedSceneObject * obj, int nbSamples ) = 0;
-    virtual void UnFreezeTransform( TrackedSceneObject * obj ) = 0;
+    virtual void UnFreezeTransform( TrackedSceneObject * obj )              = 0;
 
-    virtual void AddTrackedVideoClient( TrackedSceneObject * obj ) = 0;
-    virtual void RemoveTrackedVideoClient( TrackedSceneObject * obj) = 0;
-
+    virtual void AddTrackedVideoClient( TrackedSceneObject * obj )    = 0;
+    virtual void RemoveTrackedVideoClient( TrackedSceneObject * obj ) = 0;
 };
 
 #endif

@@ -17,25 +17,21 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 class vtkInteractorStyleImage2 : public vtkInteractorStyleImage
 {
-
 public:
-
-    static vtkInteractorStyleImage2 *New();
+    static vtkInteractorStyleImage2 * New();
 
     vtkInteractorStyleImage2();
     ~vtkInteractorStyleImage2();
 
-    vtkTypeMacro(vtkInteractorStyleImage2,vtkInteractorStyleImage);
-    void PrintSelf(ostream& os, vtkIndent indent) override;
+    vtkTypeMacro( vtkInteractorStyleImage2, vtkInteractorStyleImage );
+    void PrintSelf( ostream & os, vtkIndent indent ) override;
 
     // Reimplemented to prevent rotation
     virtual void OnLeftButtonDown() override;
 
 private:
-
-    vtkInteractorStyleImage2(const vtkInteractorStyleImage2&);  //Not implemented
-    void operator=(const vtkInteractorStyleImage2&);  //Not implemented
-
+    vtkInteractorStyleImage2( const vtkInteractorStyleImage2 & );  // Not implemented
+    void operator=( const vtkInteractorStyleImage2 & );            // Not implemented
 };
 
 #endif

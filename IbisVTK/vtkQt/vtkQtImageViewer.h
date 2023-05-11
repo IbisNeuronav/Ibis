@@ -13,8 +13,9 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef VTKQTIMAGEVIEWER_H
 #define VTKQTIMAGEVIEWER_H
 
-#include <QObject>
 #include <QVTKRenderWidget.h>
+
+#include <QObject>
 
 class vtkImageActor;
 class vtkRenderer;
@@ -22,30 +23,23 @@ class vtkInteractorStyle;
 class vtkImageData;
 class QWidget;
 
-
 class vtkQtImageViewer : public QVTKRenderWidget
 {
-	
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-
     vtkQtImageViewer( QWidget * parent = 0 );
     ~vtkQtImageViewer();
-    
+
     static vtkQtImageViewer * New();
-    void PrintSelf(ostream& os, vtkIndent indent);
+    void PrintSelf( ostream & os, vtkIndent indent );
 
     void SetInput( vtkImageData * input );
     void RenderFirst();
-    
-private:
-    
-    vtkImageActor                  * m_actor;
-    vtkRenderer                    * m_renderer;
 
+private:
+    vtkImageActor * m_actor;
+    vtkRenderer * m_renderer;
 };
 
-
 #endif
-

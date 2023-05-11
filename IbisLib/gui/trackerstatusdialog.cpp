@@ -1,22 +1,22 @@
 #include "trackerstatusdialog.h"
-#include "application.h"
-#include "pointerobject.h"
-#include "scenemanager.h"
-#include <vtkQtMatrixDialog.h>
+
 #include <vtkMatrix4x4.h>
+#include <vtkQtMatrixDialog.h>
 #include <vtkTransform.h>
 
-#include <QVariant>
-#include <QPushButton>
-#include <QLabel>
-#include <QLayout>
 #include <QCheckBox>
 #include <QComboBox>
-#include "guiutilities.h"
+#include <QLabel>
+#include <QLayout>
+#include <QPushButton>
+#include <QVariant>
 
-ToolUI::ToolUI( QWidget * parent )
-    : QWidget( parent)
-    , SnapshotMatrixWidget( 0 )
+#include "application.h"
+#include "guiutilities.h"
+#include "pointerobject.h"
+#include "scenemanager.h"
+
+ToolUI::ToolUI( QWidget * parent ) : QWidget( parent ), SnapshotMatrixWidget( 0 )
 {
     this->ToolLayout = new QHBoxLayout( this );
 
@@ -29,19 +29,19 @@ ToolUI::ToolUI( QWidget * parent )
     this->ToolStateLabel->setMinimumSize( QSize( 100, 0 ) );
     this->ToolStateLabel->setFrameShape( QLabel::Box );
     this->ToolStateLabel->setFrameShadow( QLabel::Plain );
-    this->ToolStateLabel->setAlignment( Qt::AlignCenter  );
+    this->ToolStateLabel->setAlignment( Qt::AlignCenter );
     this->ToolStateLabel->setIndent( -1 );
     this->ToolLayout->addWidget( this->ToolStateLabel );
 
     this->ToolLayout->addSpacing( 15 );
 
-    this->SnapshotButton = new QPushButton(this);
+    this->SnapshotButton = new QPushButton( this );
     this->SnapshotButton->setSizePolicy( QSizePolicy::Fixed, QSizePolicy::Fixed );
     this->SnapshotButton->setMinimumSize( 20, 20 );
     this->SnapshotButton->setMaximumSize( 20, 20 );
-    this->SnapshotButton->setText("S");
+    this->SnapshotButton->setText( "S" );
     this->ToolLayout->addWidget( this->SnapshotButton );
-    connect( this->SnapshotButton, SIGNAL(clicked()), this, SLOT(SnapshotButtonClicked()) );
+    connect( this->SnapshotButton, SIGNAL( clicked() ), this, SLOT( SnapshotButtonClicked() ) );
 
     this->m_toolObjectId = SceneManager::InvalidId;
 }
@@ -50,7 +50,7 @@ ToolUI::~ToolUI()
 {
     if( this->SnapshotMatrixWidget )
     {
-        disconnect( this->SnapshotMatrixWidget, SIGNAL(destroyed()), this, SLOT(SnapshotMatrixWidgetClosed()) );
+        disconnect( this->SnapshotMatrixWidget, SIGNAL( destroyed() ), this, SLOT( SnapshotMatrixWidgetClosed() ) );
         this->SnapshotMatrixWidget->close();
         delete this->SnapshotMatrixWidget;
     }
@@ -58,7 +58,7 @@ ToolUI::~ToolUI()
 
 void ToolUI::SetSceneManager( SceneManager * man, int toolObjectId )
 {
-    m_manager = man;
+    m_manager      = man;
     m_toolObjectId = toolObjectId;
     UpdateUI();
 }
@@ -74,34 +74,34 @@ void ToolUI::UpdateUI()
     TrackerToolState newState = toolObject->GetState();
     switch( newState )
     {
-    case Ok:
-        this->ToolStateLabel->setText( "OK" );
-        this->ToolStateLabel->setStyleSheet("background-color: lightGreen");
-        break;
-    case Missing:
-        this->ToolStateLabel->setText( "Missing" );
-        this->ToolStateLabel->setStyleSheet("background-color: red");
-        break;
-    case OutOfVolume:
-        this->ToolStateLabel->setText( "Out of volume" );
-        this->ToolStateLabel->setStyleSheet("background-color: yellow");
-        break;
-    case OutOfView:
-        this->ToolStateLabel->setText( "Out of view" );
-        this->ToolStateLabel->setStyleSheet("background-color: red");
-        break;
-	  case HighError:
-		    this->ToolStateLabel->setText( "High error" );
-		    this->ToolStateLabel->setStyleSheet("background-color: red");
-		    break;
-	  case Disabled:
-		    this->ToolStateLabel->setText( "Disabled" );
-		    this->ToolStateLabel->setStyleSheet("background-color: grey");
-		    break;
-    case Undefined:
-        this->ToolStateLabel->setText( "Undefined" );
-        this->ToolStateLabel->setStyleSheet("background-color: grey");
-        break;
+        case Ok:
+            this->ToolStateLabel->setText( "OK" );
+            this->ToolStateLabel->setStyleSheet( "background-color: lightGreen" );
+            break;
+        case Missing:
+            this->ToolStateLabel->setText( "Missing" );
+            this->ToolStateLabel->setStyleSheet( "background-color: red" );
+            break;
+        case OutOfVolume:
+            this->ToolStateLabel->setText( "Out of volume" );
+            this->ToolStateLabel->setStyleSheet( "background-color: yellow" );
+            break;
+        case OutOfView:
+            this->ToolStateLabel->setText( "Out of view" );
+            this->ToolStateLabel->setStyleSheet( "background-color: red" );
+            break;
+        case HighError:
+            this->ToolStateLabel->setText( "High error" );
+            this->ToolStateLabel->setStyleSheet( "background-color: red" );
+            break;
+        case Disabled:
+            this->ToolStateLabel->setText( "Disabled" );
+            this->ToolStateLabel->setStyleSheet( "background-color: grey" );
+            break;
+        case Undefined:
+            this->ToolStateLabel->setText( "Undefined" );
+            this->ToolStateLabel->setStyleSheet( "background-color: grey" );
+            break;
     }
 }
 
@@ -113,9 +113,8 @@ void ToolUI::SnapshotButtonClicked()
     if( !this->SnapshotMatrixWidget )
     {
         this->SnapshotMatrixWidget = new vtkQtMatrixDialog( true );
-        connect( this->SnapshotMatrixWidget, SIGNAL(destroyed()), this, SLOT(SnapshotMatrixWidgetClosed()) );
+        connect( this->SnapshotMatrixWidget, SIGNAL( destroyed() ), this, SLOT( SnapshotMatrixWidgetClosed() ) );
     }
-
 
     vtkMatrix4x4 * mat = vtkMatrix4x4::New();
     mat->DeepCopy( toolObject->GetWorldTransform()->GetMatrix() );
@@ -133,9 +132,9 @@ void ToolUI::SnapshotMatrixWidgetClosed()
 TrackerStatusDialog::TrackerStatusDialog( QWidget * parent ) : QWidget( parent )
 {
     m_sceneManager = 0;
-    setWindowTitle("Tracker status");
+    setWindowTitle( "Tracker status" );
 
-	this->setSizePolicy( QSizePolicy::MinimumExpanding, QSizePolicy::Fixed );
+    this->setSizePolicy( QSizePolicy::MinimumExpanding, QSizePolicy::Fixed );
 
     // General layout
     m_trackerStatusDialogLayout = new QVBoxLayout( this );
@@ -144,47 +143,43 @@ TrackerStatusDialog::TrackerStatusDialog( QWidget * parent ) : QWidget( parent )
     QVBoxLayout * layout1 = new QVBoxLayout();
 
     // navigation checkbox
-    m_navigationCheckBox = new QCheckBox(this);
-    m_navigationCheckBox->setText(tr("Navigation"));
-    m_navigationCheckBox->setChecked(false);
-    layout1->addWidget(m_navigationCheckBox);
+    m_navigationCheckBox = new QCheckBox( this );
+    m_navigationCheckBox->setText( tr( "Navigation" ) );
+    m_navigationCheckBox->setChecked( false );
+    layout1->addWidget( m_navigationCheckBox );
 
     // navigation pointer checkbox
     m_pointersLabel = new QLabel( this );
-    m_pointersLabel->setText(tr("Navigation Pointer:"));
-    m_pointersLabel->setMaximumWidth(140);
-    m_pointerToolCombo = new QComboBox(this);
-    m_pointerToolCombo->setMinimumWidth(100);
+    m_pointersLabel->setText( tr( "Navigation Pointer:" ) );
+    m_pointersLabel->setMaximumWidth( 140 );
+    m_pointerToolCombo = new QComboBox( this );
+    m_pointerToolCombo->setMinimumWidth( 100 );
     QHBoxLayout * layout2 = new QHBoxLayout();
-    layout2->addWidget(m_pointersLabel);
-    layout2->addWidget(m_pointerToolCombo);
-    layout1->addLayout(layout2);
+    layout2->addWidget( m_pointersLabel );
+    layout2->addWidget( m_pointerToolCombo );
+    layout1->addLayout( layout2 );
     m_trackerStatusDialogLayout->addLayout( layout1 );
 
-    connect(m_pointerToolCombo, SIGNAL(activated(int)), this, SLOT(OnNavigationComboBoxActivated(int)));
-    connect(m_navigationCheckBox, SIGNAL(toggled(bool)), this, SLOT(OnNavigationCheckboxToggled(bool)));
+    connect( m_pointerToolCombo, SIGNAL( activated( int ) ), this, SLOT( OnNavigationComboBoxActivated( int ) ) );
+    connect( m_navigationCheckBox, SIGNAL( toggled( bool ) ), this, SLOT( OnNavigationCheckboxToggled( bool ) ) );
 }
 
-TrackerStatusDialog::~TrackerStatusDialog()
-{
-    ClearAllTools();
-}
+TrackerStatusDialog::~TrackerStatusDialog() { ClearAllTools(); }
 
 void TrackerStatusDialog::SetSceneManager( SceneManager * man )
 {
     m_sceneManager = man;
-    connect( m_sceneManager, SIGNAL(ObjectAdded(int)), this, SLOT(UpdateUI()) );
-    connect( m_sceneManager, SIGNAL(ObjectRemoved(int)), this, SLOT(UpdateUI()) );
-    connect( m_sceneManager, SIGNAL(ObjectNameChanged(QString,QString)), this, SLOT(UpdateUI()) );
-    connect( m_sceneManager, SIGNAL(NavigationPointerChanged()), this, SLOT(UpdateUI()) );
-    connect( &Application::GetInstance(), SIGNAL(IbisClockTick()), this, SLOT(OnIbisClockTick()) );
+    connect( m_sceneManager, SIGNAL( ObjectAdded( int ) ), this, SLOT( UpdateUI() ) );
+    connect( m_sceneManager, SIGNAL( ObjectRemoved( int ) ), this, SLOT( UpdateUI() ) );
+    connect( m_sceneManager, SIGNAL( ObjectNameChanged( QString, QString ) ), this, SLOT( UpdateUI() ) );
+    connect( m_sceneManager, SIGNAL( NavigationPointerChanged() ), this, SLOT( UpdateUI() ) );
+    connect( &Application::GetInstance(), SIGNAL( IbisClockTick() ), this, SLOT( OnIbisClockTick() ) );
     UpdateUI();
 }
 
 void TrackerStatusDialog::OnIbisClockTick()
 {
-    for( int i = 0; i < m_toolsWidget.size(); ++i )
-        m_toolsWidget[i]->UpdateUI();
+    for( int i = 0; i < m_toolsWidget.size(); ++i ) m_toolsWidget[ i ]->UpdateUI();
 }
 
 void TrackerStatusDialog::UpdateUI()
@@ -197,18 +192,19 @@ void TrackerStatusDialog::UpdateUI()
     m_navigationCheckBox->blockSignals( false );
 
     // nav pointer
-    QList<PointerObject*> allPointers;
+    QList<PointerObject *> allPointers;
     m_sceneManager->GetAllPointerObjects( allPointers );
-    GuiUtilities::UpdateSceneObjectComboBox( m_pointerToolCombo, allPointers, m_sceneManager->GetNavigationPointerObjectId() );
+    GuiUtilities::UpdateSceneObjectComboBox( m_pointerToolCombo, allPointers,
+                                             m_sceneManager->GetNavigationPointerObjectId() );
 
     // tool list
     this->ClearAllTools();
-    QList<TrackedSceneObject*> allTools;
+    QList<TrackedSceneObject *> allTools;
     m_sceneManager->GetAllTrackedObjects( allTools );
     for( int i = 0; i < allTools.size(); i++ )
     {
         ToolUI * tool = new ToolUI( this );
-        tool->SetSceneManager( m_sceneManager, allTools[i]->GetObjectID() );
+        tool->SetSceneManager( m_sceneManager, allTools[ i ]->GetObjectID() );
         this->m_trackerStatusDialogLayout->addWidget( tool );
         tool->show();
         this->m_toolsWidget.push_back( tool );
@@ -232,7 +228,7 @@ void TrackerStatusDialog::ClearAllTools()
 {
     for( int i = 0; i < m_toolsWidget.size(); ++i )
     {
-        delete m_toolsWidget[i];
+        delete m_toolsWidget[ i ];
     }
     this->m_toolsWidget.clear();
 }

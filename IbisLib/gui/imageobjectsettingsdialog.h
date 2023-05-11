@@ -13,41 +13,38 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include <QObject>
 #include <vector>
+
 #include "ui_imageobjectsettingsdialog.h"
 
 class ImageObject;
 
-class ImageObjectSettingsDialog :  public QWidget, public Ui::ImageObjectSettingsDialog
+class ImageObjectSettingsDialog : public QWidget, public Ui::ImageObjectSettingsDialog
 {
     Q_OBJECT
 
 public:
-
-    ImageObjectSettingsDialog( QWidget* parent = 0, Qt::WindowFlags fl = 0 );
+    ImageObjectSettingsDialog( QWidget * parent = 0, Qt::WindowFlags fl = 0 );
     virtual ~ImageObjectSettingsDialog();
 
     virtual void SetImageObject( ImageObject * obj );
-    
+
 public slots:
 
-    virtual void SelectColorTableComboBoxActivated(int);
+    virtual void SelectColorTableComboBoxActivated( int );
     virtual void RangeSlidersValuesChanged( double min, double max );
-    virtual void ViewBoundingBoxCheckboxToggled(bool);
+    virtual void ViewBoundingBoxCheckboxToggled( bool );
     virtual void UpdateUI();
 
 protected slots:
 
-	virtual void languageChange();
-    
+    virtual void languageChange();
+
 protected:
-    
     ImageObject * m_imageObject;
     int m_rangeSlider;
 
 private:
-
-    void AllControlsBlockSignals(bool yes);
-    
+    void AllControlsBlockSignals( bool yes );
 };
 
 #endif

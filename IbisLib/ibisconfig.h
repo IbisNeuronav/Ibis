@@ -12,6 +12,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef TAG_CONFIGURATION_H
 #define TAG_CONFIGURATION_H
 
-#define IBIS_CONFIGURATION_SUBDIRECTORY  ".ibis"
+#define IBIS_CONFIGURATION_SUBDIRECTORY ".ibis"
 
-#endif //TAG_CONFIGURATION_H
+#endif  // TAG_CONFIGURATION_H

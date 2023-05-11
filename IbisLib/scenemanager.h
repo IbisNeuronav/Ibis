@@ -13,21 +13,21 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include <vtkObject.h>
 #include <vtkSmartPointer.h>
-#include "ibistypes.h"
-#include <QString>
-#include <QStringList>
+
+#include <QColor>
 #include <QList>
 #include <QMap>
-#include <QProgressDialog>
 #include <QObject>
-
-#include <vector>
+#include <QProgressDialog>
+#include <QString>
+#include <QStringList>
 #include <algorithm>
+#include <vector>
 
+#include "ibistypes.h"
 #include "sceneobject.h"
 #include "serializer.h"
 #include "view.h"
-#include <QColor>
 
 class QWidget;
 class QStringList;
@@ -57,21 +57,28 @@ class vtkInteractor;
  * Furthermore, it is responsible for creating different Qt windows and/or window layouts.
  * */
 
-enum STANDARDVIEW {SV_NONE, SV_FRONT, SV_BACK, SV_LEFT, SV_RIGHT, SV_TOP, SV_BOTTOM };
+enum STANDARDVIEW
+{
+    SV_NONE,
+    SV_FRONT,
+    SV_BACK,
+    SV_LEFT,
+    SV_RIGHT,
+    SV_TOP,
+    SV_BOTTOM
+};
 
 class SceneManager : public QObject, public vtkObject
 {
-
     Q_OBJECT
 
 public:
-
-    typedef QList< SceneObject* > ObjectList;
+    typedef QList<SceneObject *> ObjectList;
     static const int InvalidId;
 
     static SceneManager * New() { return new SceneManager; }
 
-    vtkTypeMacro(SceneManager,vtkObject);
+    vtkTypeMacro( SceneManager, vtkObject );
 
     SceneManager();
     virtual ~SceneManager();
@@ -87,7 +94,7 @@ public:
 
     /** Update information and some variables after scene was loaded.
      *  @param n progress stage
-    */
+     */
     void PostSceneRead( int n );
 
     /** @name Basic layout
@@ -110,14 +117,14 @@ public:
      * or null pointer if no such view exists.
      */
     ///@{
-    QMap<View*, int> GetAllViews( ) {return this->Views;}
+    QMap<View *, int> GetAllViews() { return this->Views; }
     int GetNumberOfViews() { return this->Views.size(); }
-    vtkGetMacro(Main3DViewID,int);
-    vtkGetMacro(MainCoronalViewID,int);
-    vtkGetMacro(MainSagittalViewID,int);
-    vtkGetMacro(MainTransverseViewID,int);
+    vtkGetMacro( Main3DViewID, int );
+    vtkGetMacro( MainCoronalViewID, int );
+    vtkGetMacro( MainSagittalViewID, int );
+    vtkGetMacro( MainTransverseViewID, int );
     View * GetViewByID( int id );
-    View * CreateView(int type, QString name = QString::null, int id = InvalidId );
+    View * CreateView( int type, QString name = QString::null, int id = InvalidId );
     View * GetMain3DView();
     View * GetMainCoronalView();
     View * GetMainSagittalView();
@@ -143,7 +150,7 @@ public:
     /** Get the color of 3D view. */
     vtkGetVector3Macro( View3DBackgroundColor, double );
     /** Get renderer of the view by view ID. */
-    vtkRenderer *GetViewRenderer(int viewID);
+    vtkRenderer * GetViewRenderer( int viewID );
     /** Eneble/disable rendering in all views. */
     void SetRenderingEnabled( bool r );
     /** Get camera view angle in main 3D view. */
@@ -156,20 +163,19 @@ public:
      *  @brief Transform between reference object space and world space coordinate systems
      * */
     ///@{
-    void WorldToReference( double worldPoint[3], double referencePoint[3] );
-    void ReferenceToWorld( double referencePoint[3], double worldPoint[3] );
+    void WorldToReference( double worldPoint[ 3 ], double referencePoint[ 3 ] );
+    void ReferenceToWorld( double referencePoint[ 3 ], double worldPoint[ 3 ] );
     void GetReferenceOrientation( vtkMatrix4x4 * mat );
     ///@}
 
     /** Manipulate the global cursor. The cursor is a general concept that
      * can be used by any module as a 3D reference point. Amongst other things,
      * its position is used to place the Triple Cut planes. */
-    void GetCursorPosition( double pos[3] );
-
+    void GetCursorPosition( double pos[ 3 ] );
 
     /** Determine whether the pos is in one of the 3 planes identified by planeType. Point is
      * in the plane if it is closer than .5 * voxel size of the reference volume. */
-    bool IsInPlane( VIEWTYPES planeType, double pos[3] );
+    bool IsInPlane( VIEWTYPES planeType, double pos[ 3 ] );
 
     /** @name  Generic Label
      *  @brief The label is used to display some additional information on the toolbar
@@ -179,8 +185,8 @@ public:
     ///@{
     void EmitShowGenericLabel( bool );
     void EmitShowGenericLabelText();
-    void SetGenericLabelText( const QString &text ) { GenericText = text; }
-    const QString GetGenericLabelText( ) { return GenericText; }
+    void SetGenericLabelText( const QString & text ) { GenericText = text; }
+    const QString GetGenericLabelText() { return GenericText; }
     ///@}
 
     /** Load a previously acquired US frames sequence into the scene. */
@@ -209,45 +215,44 @@ signals:
     void StartCursorInteraction();
     void EndCursorInteraction();
     void ShowGenericLabel( bool );
-    void ShowGenericLabelText( );
+    void ShowGenericLabelText();
 
 public:
-
     /** @name  Manage objects
      *  @brief Add, remove, get SceneObject.
      * */
     ///@{
     void AddObject( SceneObject * object, SceneObject * attachTo = 0 );
     void RemoveObjectById( int objectId );
-    void RemoveObject(SceneObject * object );
+    void RemoveObject( SceneObject * object );
     void ChangeParent( SceneObject * object, SceneObject * newParent, int newChildIndex );
-    int  GetNumberOfImageObjects();
-    void GetAllImageObjects( QList<ImageObject*> & objects );
-    void GetAllPolydataObjects( QList<PolyDataObject*> & objects );
-    void GetAllPointsObjects( QList<PointsObject*> & objects );
-    void GetAllCameraObjects( QList<CameraObject*> & all );
-    void GetAllUSAcquisitionObjects( QList<USAcquisitionObject*> & all );
-    void GetAllUsProbeObjects( QList<UsProbeObject*> & all );
-    void GetAllPointerObjects( QList<PointerObject*> & all );
-    void GetAllTrackedObjects( QList<TrackedSceneObject*> & all );
-    void GetAllObjectsOfType( const char * typeName, QList<SceneObject*> & all );
+    int GetNumberOfImageObjects();
+    void GetAllImageObjects( QList<ImageObject *> & objects );
+    void GetAllPolydataObjects( QList<PolyDataObject *> & objects );
+    void GetAllPointsObjects( QList<PointsObject *> & objects );
+    void GetAllCameraObjects( QList<CameraObject *> & all );
+    void GetAllUSAcquisitionObjects( QList<USAcquisitionObject *> & all );
+    void GetAllUsProbeObjects( QList<UsProbeObject *> & all );
+    void GetAllPointerObjects( QList<PointerObject *> & all );
+    void GetAllTrackedObjects( QList<TrackedSceneObject *> & all );
+    void GetAllObjectsOfType( const char * typeName, QList<SceneObject *> & all );
     SceneObject * GetObjectByID( int id );
-    SceneObject * GetCurrentObject( ) { return m_currentObject; }
-    void SetCurrentObject( SceneObject * cur  );
-    int  GetNumberOfUserObjects();
-    void GetAllUserObjects(QList<SceneObject*> &);
-    void GetAllListableNonTrackedObjects(QList<SceneObject*> &);
-    void GetChildrenListableNonTrackedObjects( SceneObject * obj, QList<SceneObject*> & );
+    SceneObject * GetCurrentObject() { return m_currentObject; }
+    void SetCurrentObject( SceneObject * cur );
+    int GetNumberOfUserObjects();
+    void GetAllUserObjects( QList<SceneObject *> & );
+    void GetAllListableNonTrackedObjects( QList<SceneObject *> & );
+    void GetChildrenListableNonTrackedObjects( SceneObject * obj, QList<SceneObject *> & );
     ///@}
 
     /** @name  Reference object
      *  @brief ImageObject used as a reference for all other objects
      * */
     ///@{
-    ImageObject * GetReferenceDataObject( );
+    ImageObject * GetReferenceDataObject();
     void SetReferenceDataObject( SceneObject * );
     bool CanBeReference( SceneObject * );
-    void GetReferenceBounds( double bounds[6] );
+    void GetReferenceBounds( double bounds[ 6 ] );
     vtkTransform * GetReferenceTransform() { return m_referenceTransform; }
     vtkTransform * GetInverseReferenceTransform() { return m_invReferenceTransform; }
     ///@}
@@ -260,7 +265,6 @@ public:
     void SetAxesObject( vtkSmartPointer<PolyDataObject> obj );
     vtkSmartPointer<PolyDataObject> GetAxesObject();
     ///@}
-
 
     /** @name  Manage cursor
      *  @brief Set visibility and color - wrapper for TrippleCutPlane
@@ -291,11 +295,10 @@ public:
     ///@{
     /** Set/Get interpolation type. */
     void SetResliceInterpolationType( int type );
-    int  GetResliceInterpolationType();
+    int GetResliceInterpolationType();
     void SetDisplayInterpolationType( int type );
-    int  GetDisplayInterpolationType();
+    int GetDisplayInterpolationType();
     ///@}
-
 
     /** The function is called just before displaying the object.
      * In particular, objects use this call to enable 3D widgets. */
@@ -305,10 +308,9 @@ public:
      *  @brief Utility functions to reset the cameras in all views. */
     ///@{
     void ResetAllCameras();
-    void ResetAllCameras( double bounds[6] );
-    void ZoomAllCameras(double factor);
+    void ResetAllCameras( double bounds[ 6 ] );
+    void ZoomAllCameras( double factor );
     ///@}
-
 
     /** @name Objects and Views
      *  @brief Setup objects in Views
@@ -326,18 +328,18 @@ public:
     void ReleaseAllViews();
 
     /** Set one of the standard views (front, back, left, right, top, bottom) in 3D window. */
-    void SetStandardView(STANDARDVIEW type);
+    void SetStandardView( STANDARDVIEW type );
     ///@}
 
     /** Get saved scene version found in scene file in order to control loaded variables. */
     const QString GetSupportedSceneSaveVersion() { return SupportedSceneSaveVersion; }
 
     /** Set working directory */
-    void SetSceneDirectory( const QString &directory ) { SceneDirectory = directory; }
+    void SetSceneDirectory( const QString & directory ) { SceneDirectory = directory; }
     /** Get working directory */
     const QString GetSceneDirectory() { return SceneDirectory; }
     /** Save the name of the scene xml file including full path */
-    void SetSceneFile( const QString &fileName ) { SceneFile = fileName; }
+    void SetSceneFile( const QString & fileName ) { SceneFile = fileName; }
     /** Get the name of the scene xml file including full path */
     const QString GetSceneFile() { return SceneFile; }
 
@@ -347,7 +349,7 @@ public:
     ///@{
     /** Remove all children added to system objects: world and all tools. */
     void RemoveAllSceneObjects();
-    void RemoveAllChildrenObjects(SceneObject *);
+    void RemoveAllChildrenObjects( SceneObject * );
     /** Remove all objects including system objects: world and all tools. */
     void ClearScene();
     /** Get a list of all the objects in the scene. */
@@ -383,15 +385,15 @@ public:
      * */
     ///@{
     /** Enable/disable navigation. */
-    void EnablePointerNavigation( bool on);
+    void EnablePointerNavigation( bool on );
     /** Choose navigation pointer by ID. */
     void SetNavigationPointerID( int id );
     /** Find navigation pointer ID. */
     int GetNavigationPointerObjectId() { return NavigationPointerID; }
     /** Check if ibis is in navigation mode. */
-    bool GetNavigationState() {return this->IsNavigating; }
+    bool GetNavigationState() { return this->IsNavigating; }
     /** Get navigation pointer object. */
-    PointerObject *GetNavigationPointerObject( );
+    PointerObject * GetNavigationPointerObject();
     ///@}
 
     /** Check if ibis is currently loading a scene. */
@@ -400,32 +402,31 @@ public:
 public slots:
 
     /** Inform the application that an object was renamed. */
-    void EmitSignalObjectRenamed(QString, QString);
+    void EmitSignalObjectRenamed( QString, QString );
 
 private slots:
 
     void ReferenceTransformChangedSlot();
     void CancelProgress();
-    void EmitSignalObjectAttributesChanged( SceneObject* obj );
+    void EmitSignalObjectAttributesChanged( SceneObject * obj );
 
 signals:
 
-    void StartAddingObject( SceneObject*, int );
+    void StartAddingObject( SceneObject *, int );
     void FinishAddingObject();
-    void StartRemovingObject( SceneObject*, int );
+    void StartRemovingObject( SceneObject *, int );
     void FinishRemovingObject();
 
     void ObjectAdded( int );
     void ObjectRemoved( int );
-    void ObjectNameChanged(QString, QString);
+    void ObjectNameChanged( QString, QString );
     void NavigationPointerChanged();
     void CurrentObjectChanged();
     void ReferenceTransformChanged();
     void ReferenceObjectChanged();
-    void ObjectAttributesChanged(  SceneObject* );
+    void ObjectAttributesChanged( SceneObject * );
 
 protected:
-
     void ValidatePointerObject();
 
     void InternalClearScene();
@@ -457,12 +458,11 @@ protected:
      *  @param object object added
      *  @param attachTo parent object, 0 means add to scene root
      *  @param objID proposed id
-    */
-    void AddObjectUsingID( SceneObject * object, SceneObject * attachTo = 0, int objID = SceneManager::InvalidId);
+     */
+    void AddObjectUsingID( SceneObject * object, SceneObject * attachTo = 0, int objID = SceneManager::InvalidId );
 
     /** Recursive function used to setup all objects bellow obj in view v. */
     void SetupOneObject( View * v, SceneObject * obj );
-
 
     /** Creates a new interactor style object of the right type and assign it to the view passed as param. */
     void AssignInteractorStyleToView( InteractorStyle style, View * v );
@@ -471,15 +471,15 @@ protected:
      *  @brief Variables used to describe views.
      * */
     ///@{
-    typedef QMap<View*, int> ViewMap;
+    typedef QMap<View *, int> ViewMap;
     ViewMap Views;
     int Main3DViewID;
     int MainCoronalViewID;
     int MainSagittalViewID;
     int MainTransverseViewID;
     bool m_viewFollowsReferenceObject;
-    double ViewBackgroundColor[3];
-    double View3DBackgroundColor[3];
+    double ViewBackgroundColor[ 3 ];
+    double View3DBackgroundColor[ 3 ];
     double CameraViewAngle3D;
     ///@}
 
@@ -491,9 +491,9 @@ protected:
     QString SupportedSceneSaveVersion;
 
     /** Scene loading/saving progress. */
-    QProgressDialog *m_sceneLoadSaveProgressDialog;
+    QProgressDialog * m_sceneLoadSaveProgressDialog;
     /** Update  scene loading/saving progress. */
-    bool UpdateProgress(int value);
+    bool UpdateProgress( int value );
 
     /** Navigation pointer id. */
     int NavigationPointerID;
@@ -507,7 +507,6 @@ protected:
     QString GenericText;
 
 private:
-
     /** A set of 3 cutting planes used to show sagittal, coronal and transversal cross section of objects. */
     vtkSmartPointer<TripleCutPlaneObject> MainCutPlanes;
 
@@ -517,10 +516,10 @@ private:
      *  @brief Set specific view id.
      * */
     ///@{
-    vtkSetMacro(Main3DViewID,int);
-    vtkSetMacro(MainCoronalViewID,int);
-    vtkSetMacro(MainSagittalViewID,int);
-    vtkSetMacro(MainTransverseViewID,int);
+    vtkSetMacro( Main3DViewID, int );
+    vtkSetMacro( MainCoronalViewID, int );
+    vtkSetMacro( MainSagittalViewID, int );
+    vtkSetMacro( MainTransverseViewID, int );
     ///@}
 
     /** Directory containing files used in the current scene. */
@@ -532,11 +531,11 @@ private:
     /** We declare these to make sure no one is registering or unregistering SceneManager
      * since SceneManager should have only one instance and be deleted at the end
      * by the unique instance of Application. */
-    virtual void Register(vtkObjectBase* o) override;
-    virtual void UnRegister(vtkObjectBase* o) override;
+    virtual void Register( vtkObjectBase * o ) override;
+    virtual void UnRegister( vtkObjectBase * o ) override;
     ///@}
 };
 
 ObjectSerializationHeaderMacro( SceneManager );
 
-#endif //TAG_SCENEMANAGER_H
+#endif  // TAG_SCENEMANAGER_H

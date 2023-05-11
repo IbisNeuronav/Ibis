@@ -18,63 +18,51 @@
 #ifndef __vtkObjectCallback_h
 #define __vtkObjectCallback_h
 
-
 #include "vtkCommand.h"
-
 
 template <class T>
 class vtkObjectCallback : public vtkCommand
 {
-    
 public:
-    
-    typedef void (T::*MethodAttrib)( vtkObject *, unsigned long, void * );
-    typedef void (T::*MethodNoAttrib)();
-    
-    static vtkObjectCallback *New()
-    {
-        return new vtkObjectCallback;
-    };
+    typedef void ( T::*MethodAttrib )( vtkObject *, unsigned long, void * );
+    typedef void ( T::*MethodNoAttrib )();
+
+    static vtkObjectCallback * New() { return new vtkObjectCallback; };
 
     // Description:
     // Satisfy the superclass API for callbacks. Recall that the caller is
     // the instance invoking the event; eid is the event id (see
     // vtkCommand.h); and calldata is information sent when the callback
     // was invoked (e.g., progress value in the vtkCommand::ProgressEvent).
-    void Execute(vtkObject *caller, unsigned long eid, void *callData)
+    void Execute( vtkObject * caller, unsigned long eid, void * callData )
     {
         if( this->Object )
         {
-            if( this->CallbackAttrib )
-                (this->Object->*CallbackAttrib)( caller, eid, callData );
-            if( this->CallbackNoAttrib )
-                (this->Object->*CallbackNoAttrib)();
+            if( this->CallbackAttrib ) ( this->Object->*CallbackAttrib )( caller, eid, callData );
+            if( this->CallbackNoAttrib ) ( this->Object->*CallbackNoAttrib )();
         }
     }
 
     void SetCallback( T * object, MethodAttrib func )
     {
-        this->Object = object;
+        this->Object         = object;
         this->CallbackAttrib = func;
-    }    
-    
+    }
+
     void SetCallback( T * object, MethodNoAttrib func )
     {
-        this->Object = object;
+        this->Object           = object;
         this->CallbackNoAttrib = func;
     }
-    
 
 protected:
     T * Object;
-    
-    vtkObjectCallback() : Object(0), CallbackAttrib(0), CallbackNoAttrib(0) {}
+
+    vtkObjectCallback() : Object( 0 ), CallbackAttrib( 0 ), CallbackNoAttrib( 0 ) {}
     ~vtkObjectCallback() {}
-    
+
     MethodAttrib CallbackAttrib;
     MethodNoAttrib CallbackNoAttrib;
 };
-
-
 
 #endif

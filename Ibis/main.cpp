@@ -8,18 +8,20 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
-#include <QApplication>
-#include <QTimer>
-#include <QFile>
-#include <QDir>
-#include <QMessageBox>
-#include "application.h"
-#include "mainwindow.h"
-#include "commandlinearguments.h"
-#include <vtkObject.h>
 #include <QVTKRenderWidget.h>
+#include <vtkObject.h>
 
-int main( int argc, char** argv )
+#include <QApplication>
+#include <QDir>
+#include <QFile>
+#include <QMessageBox>
+#include <QTimer>
+
+#include "application.h"
+#include "commandlinearguments.h"
+#include "mainwindow.h"
+
+int main( int argc, char ** argv )
 {
     // Disable VTK warnings unless not wanted
 #ifdef VTK_NO_WARNINGS
@@ -27,17 +29,17 @@ int main( int argc, char** argv )
 #endif
 
     // Set default format for render windows - Warning: has to be done before QApplication instanciation
-    QSurfaceFormat::setDefaultFormat(QVTKRenderWidget::defaultFormat());
+    QSurfaceFormat::setDefaultFormat( QVTKRenderWidget::defaultFormat() );
 
     // Create Qt app
     QApplication a( argc, argv );
-    Q_INIT_RESOURCE(IbisLib);
+    Q_INIT_RESOURCE( IbisLib );
 
     // Warning : IBIS IS NOT APPROVED FOR CLINICAL USE.
-    if( !QFile::exists( QDir::homePath() + QString("/.ibis/no-clinical-warning.txt")  ) )
-        QMessageBox::warning( nullptr, "WARNING!", QString("The Ibis platform is not approved for clinical use.") );
-	
-	// On Mac, we always do Viewer-mode only without command-line params for now
+    if( !QFile::exists( QDir::homePath() + QString( "/.ibis/no-clinical-warning.txt" ) ) )
+        QMessageBox::warning( nullptr, "WARNING!", QString( "The Ibis platform is not approved for clinical use." ) );
+
+    // On Mac, we always do Viewer-mode only without command-line params for now
     // Parse command-line arguments
     CommandLineArguments cmdArgs;
     QStringList args = a.arguments();
@@ -70,7 +72,7 @@ int main( int argc, char** argv )
     a.installEventFilter( mw );
 
     // Will cause OnStartMainLoop slot to be called after main loop is started
-    QTimer::singleShot( 0, mw, SLOT(OnStartMainLoop()) );
+    QTimer::singleShot( 0, mw, SLOT( OnStartMainLoop() ) );
 
     // Start main loop
     int ret = a.exec();

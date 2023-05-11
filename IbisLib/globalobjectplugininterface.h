@@ -11,8 +11,9 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef __GlobalObjectPluginInterface_h_
 #define __GlobalObjectPluginInterface_h_
 
-#include <QString>
 #include <QObject>
+#include <QString>
+
 #include "ibisplugin.h"
 
 class SceneObject;
@@ -27,20 +28,16 @@ class QSettings;
  */
 class GlobalObjectPluginInterface : public IbisPlugin
 {
-
 public:
-
     vtkTypeMacro( GlobalObjectPluginInterface, IbisPlugin );
 
     GlobalObjectPluginInterface() {}
     virtual ~GlobalObjectPluginInterface() {}
 
     /** Implementation of IbisPlugin interface */
-    IbisPluginTypes GetPluginType()  override { return IbisPluginTypeGlobalObject; }
+    IbisPluginTypes GetPluginType() override { return IbisPluginTypeGlobalObject; }
 
     virtual SceneObject * GetGlobalObjectInstance() = 0;
-
 };
-
 
 #endif

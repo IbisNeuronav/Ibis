@@ -21,36 +21,27 @@ class vtkMatrix4x4;
 
 class vtkXFMWriter : public vtkObject
 {
-
 public:
-
     static vtkXFMWriter * New();
-    vtkTypeMacro(vtkXFMWriter,vtkObject);
+    vtkTypeMacro( vtkXFMWriter, vtkObject );
 
-    vtkSetStringMacro(FileName);
-    
-    virtual void Write();   
-    virtual void SetMatrix(vtkMatrix4x4 *mat);
-    
-    void PrintSelf(ostream &os, vtkIndent indent) override;
+    vtkSetStringMacro( FileName );
+
+    virtual void Write();
+    virtual void SetMatrix( vtkMatrix4x4 * mat );
+
+    void PrintSelf( ostream & os, vtkIndent indent ) override;
 
 protected:
-
     char * FileName;
-    vtkMatrix4x4 *Matrix;
+    vtkMatrix4x4 * Matrix;
 
     vtkXFMWriter();
     virtual ~vtkXFMWriter();
 
 private:
-    
-    vtkXFMWriter(const vtkXFMWriter&);    // Not implemented.
-    void operator=(const vtkXFMWriter&);  // Not implemented.
-
+    vtkXFMWriter( const vtkXFMWriter & );    // Not implemented.
+    void operator=( const vtkXFMWriter & );  // Not implemented.
 };
 
-#endif //TAG_VTKXFMWRITER_H
-
-
-
-
+#endif  // TAG_VTKXFMWRITER_H

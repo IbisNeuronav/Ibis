@@ -11,13 +11,15 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef __PointerObject_h_
 #define __PointerObject_h_
 
-#include <QList>
-#include "trackedsceneobject.h"
-#include "hardwaremodule.h"
-#include <map>
-#include <QVector>
-#include <QObject>
 #include <vtkSmartPointer.h>
+
+#include <QList>
+#include <QObject>
+#include <QVector>
+#include <map>
+
+#include "hardwaremodule.h"
+#include "trackedsceneobject.h"
 
 class vtkImageData;
 class vtkMatrix4x4;
@@ -29,25 +31,23 @@ class vtkDoubleArray;
 
 class PointerObject : public TrackedSceneObject
 {
-    
-Q_OBJECT
+    Q_OBJECT
 
 public:
-        
     static PointerObject * New() { return new PointerObject; }
     vtkTypeMacro( PointerObject, TrackedSceneObject );
-    
+
     PointerObject();
     virtual ~PointerObject();
-    
+
     // Implementation of parent virtual method
     virtual void Setup( View * view ) override;
     virtual void Release( View * view ) override;
 
-    virtual void CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets) override;
+    virtual void CreateSettingsWidgets( QWidget * parent, QVector<QWidget *> * widgets ) override;
 
     double * GetTipPosition();
-    void GetMainAxisPosition( double pos[3] );
+    void GetMainAxisPosition( double pos[ 3 ] );
 
     // Tip calibration
     void StartTipCalibration();
@@ -59,24 +59,29 @@ public:
 
     void CreatePointerPickedPointsObject();
     void ManagerAddPointerPickedPointsObject();
-    vtkSmartPointer<PointsObject> GetCurrentPointerPickedPointsObject() {return this->CurrentPointerPickedPointsObject;}
-    void SetCurrentPointerPickedPointsObject(vtkSmartPointer<PointsObject> obj);
-    const QList<vtkSmartPointer<PointsObject> > & GetPointerPickedPointsObjects() { return PointerPickedPointsObjectList; }
+    vtkSmartPointer<PointsObject> GetCurrentPointerPickedPointsObject()
+    {
+        return this->CurrentPointerPickedPointsObject;
+    }
+    void SetCurrentPointerPickedPointsObject( vtkSmartPointer<PointsObject> obj );
+    const QList<vtkSmartPointer<PointsObject> > & GetPointerPickedPointsObjects()
+    {
+        return PointerPickedPointsObjectList;
+    }
 
 public slots:
 
     void UpdateTipCalibration();
-    void RemovePointerPickedPointsObject(int objID);
+    void RemovePointerPickedPointsObject( int objID );
     void UpdateSettings();
 
 signals:
     void SettingsChanged();
-       
+
 private slots:
     void UpdateTip();
 
 protected:
-
     virtual void Hide() override;
     virtual void Show() override;
     void ObjectAddedToScene() override;
@@ -88,15 +93,15 @@ protected:
 
     vtkSmartPointer<PointsObject> CurrentPointerPickedPointsObject;
 
-    double m_pointerAxis[3];
-    double m_pointerUpDir[3];
+    double m_pointerAxis[ 3 ];
+    double m_pointerUpDir[ 3 ];
     double m_tipLength;
 
     int m_calibrating;
     vtkAmoebaMinimizer * m_minimizer;
     vtkDoubleArray * m_calibrationArray;
 
-    friend void vtkTrackerToolCalibrationFunction(void *userData);
+    friend void vtkTrackerToolCalibrationFunction( void * userData );
 
     struct PerViewElements
     {
@@ -104,11 +109,11 @@ protected:
         ~PerViewElements();
         vtkActor * tipActor;
     };
-    
-    typedef std::map<View*,PerViewElements*> PointerObjectViewAssociation;
+
+    typedef std::map<View *, PerViewElements *> PointerObjectViewAssociation;
     PointerObjectViewAssociation pointerObjectInstances;
 
-    typedef QList <vtkSmartPointer<PointsObject> > PointerPickedPointsObjects;
+    typedef QList<vtkSmartPointer<PointsObject> > PointerPickedPointsObjects;
     PointerPickedPointsObjects PointerPickedPointsObjectList;
 };
 

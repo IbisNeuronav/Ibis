@@ -9,64 +9,59 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
 #include "ibishardwareIGSIO.h"
-#include "plusserverinterface.h"
-#include "configio.h"
-#include "logger.h"
 
-#include "ibisapi.h"
-#include "pointerobject.h"
-#include "usprobeobject.h"
-#include "cameraobject.h"
-#include "polydataobject.h"
+#include <igtlioImageConverter.h>
+#include <igtlioImageDevice.h>
+#include <igtlioLogic.h>
+#include <igtlioStatusDevice.h>
+#include <igtlioTransformConverter.h>
+#include <igtlioTransformDevice.h>
+#include <igtlioVideoConverter.h>
+#include <igtlioVideoDevice.h>
+#include <vtkEventQtSlotConnect.h>
+#include <vtkImageData.h>
+#include <vtkPLYReader.h>
+#include <vtkTimerLog.h>
+#include <vtkTransform.h>
 
 #include <QDir>
 #include <QMenu>
-#include <QSettings>
 #include <QMessageBox>
+#include <QSettings>
 
-#include "qIGTLIOLogicController.h"
-#include "qIGTLIOClientWidget.h"
+#include "cameraobject.h"
+#include "configio.h"
+#include "ibisapi.h"
 #include "ibishardwareIGSIOsettingswidget.h"
-
-#include <vtkTransform.h>
-#include <vtkImageData.h>
-#include <vtkEventQtSlotConnect.h>
-#include <vtkPLYReader.h>
-#include <vtkTimerLog.h>
-
-#include <igtlioLogic.h>
-#include <igtlioTransformDevice.h>
-#include <igtlioImageDevice.h>
-#include <igtlioVideoDevice.h>
-#include <igtlioImageConverter.h>
-#include <igtlioTransformConverter.h>
-#include <igtlioVideoConverter.h>
-#include <igtlioStatusDevice.h>
+#include "logger.h"
+#include "plusserverinterface.h"
+#include "pointerobject.h"
+#include "polydataobject.h"
+#include "qIGTLIOClientWidget.h"
+#include "qIGTLIOLogicController.h"
+#include "usprobeobject.h"
 
 const double IbisHardwareIGSIO::MaxTimeBetweenTransformSamples = 0.2;
-const QString IbisHardwareIGSIO::PlusServerExecutable = "PlusServerExecutable";
+const QString IbisHardwareIGSIO::PlusServerExecutable          = "PlusServerExecutable";
 
 IbisHardwareIGSIO::IbisHardwareIGSIO()
 {
-    m_logicController = nullptr;
-    m_logic = nullptr;
-    m_clientWidget = nullptr;
-    m_logicCallbacks = vtkSmartPointer<vtkEventQtSlotConnect>::New();
-    m_settingsWidget = nullptr;
-    m_autoStartLastConfig = false;
-	m_currentIbisPlusConfigFile = "";
-    m_log = new Logger;
+    m_logicController           = nullptr;
+    m_logic                     = nullptr;
+    m_clientWidget              = nullptr;
+    m_logicCallbacks            = vtkSmartPointer<vtkEventQtSlotConnect>::New();
+    m_settingsWidget            = nullptr;
+    m_autoStartLastConfig       = false;
+    m_currentIbisPlusConfigFile = "";
+    m_log                       = new Logger;
 }
 
-IbisHardwareIGSIO::~IbisHardwareIGSIO()
-{
-    delete m_log;
-}
+IbisHardwareIGSIO::~IbisHardwareIGSIO() { delete m_log; }
 
 void IbisHardwareIGSIO::LoadSettings( QSettings & s )
 {
     m_lastIbisPlusConfigFile = s.value( "LastConfigFile", "" ).toString();
-    m_autoStartLastConfig = s.value( "AutoStartLastConfig", QVariant(false) ).toBool();
+    m_autoStartLastConfig    = s.value( "AutoStartLastConfig", QVariant( false ) ).toBool();
 }
 
 void IbisHardwareIGSIO::SaveSettings( QSettings & s )
@@ -77,22 +72,22 @@ void IbisHardwareIGSIO::SaveSettings( QSettings & s )
 
 void IbisHardwareIGSIO::AddSettingsMenuEntries( QMenu * menu )
 {
-    menu->addAction( tr("&IGSIO Config file"), this, SLOT( OpenConfigFileWidget() ) );
-    menu->addAction( tr("&IGSIO Settings"), this, SLOT( OpenSettingsWidget() ) );
+    menu->addAction( tr( "&IGSIO Config file" ), this, SLOT( OpenConfigFileWidget() ) );
+    menu->addAction( tr( "&IGSIO Settings" ), this, SLOT( OpenSettingsWidget() ) );
 }
 
 void IbisHardwareIGSIO::Init()
 {
     m_logicController = new qIGTLIOLogicController;
-    m_logic = vtkSmartPointer<igtlioLogic>::New();
+    m_logic           = vtkSmartPointer<igtlioLogic>::New();
     m_logicController->setLogic( m_logic );
-    m_logicCallbacks->Connect( m_logic, igtlioLogic::NewDeviceEvent, this, SLOT(OnDeviceNew(vtkObject*, unsigned long, void*, void*)) );
-    m_logicCallbacks->Connect( m_logic, igtlioLogic::RemovedDeviceEvent, this, SLOT(OnDeviceRemoved(vtkObject*, unsigned long, void*, void*)) );
-
+    m_logicCallbacks->Connect( m_logic, igtlioLogic::NewDeviceEvent, this,
+                               SLOT( OnDeviceNew( vtkObject *, unsigned long, void *, void * ) ) );
+    m_logicCallbacks->Connect( m_logic, igtlioLogic::RemovedDeviceEvent, this,
+                               SLOT( OnDeviceRemoved( vtkObject *, unsigned long, void *, void * ) ) );
 
     // Initialize with last config file
-    if( m_autoStartLastConfig )
-        StartConfig( m_lastIbisPlusConfigFile );
+    if( m_autoStartLastConfig ) StartConfig( m_lastIbisPlusConfigFile );
 }
 
 void IbisHardwareIGSIO::StartConfig( QString configFile )
@@ -108,14 +103,13 @@ void IbisHardwareIGSIO::StartConfig( QString configFile )
     // Instanciate Ibis scene objects specified in config file
     for( int i = 0; i < in.GetNumberOfTools(); ++i )
     {
-        Tool * newTool = new Tool;
-        newTool->sceneObject = InstanciateSceneObjectFromType( in.GetToolName(i), in.GetToolType( i ) );
-        newTool->toolModel = InstanciateToolModel(in.GetToolModelFile(i));
-        ReadToolConfig( in.GetToolParamFile(i), newTool->sceneObject );
+        Tool * newTool       = new Tool;
+        newTool->sceneObject = InstanciateSceneObjectFromType( in.GetToolName( i ), in.GetToolType( i ) );
+        newTool->toolModel   = InstanciateToolModel( in.GetToolModelFile( i ) );
+        ReadToolConfig( in.GetToolParamFile( i ), newTool->sceneObject );
         m_tools.append( newTool );
         GetIbisAPI()->AddObject( newTool->sceneObject );
-        if (newTool->toolModel)
-            GetIbisAPI()->AddObject(newTool->toolModel, newTool->sceneObject);
+        if( newTool->toolModel ) GetIbisAPI()->AddObject( newTool->toolModel, newTool->sceneObject );
     }
 
     // Keep track of Plus device to Ibis tool association
@@ -125,13 +119,13 @@ void IbisHardwareIGSIO::StartConfig( QString configFile )
     for( int i = 0; i < in.GetNumberOfServers(); ++i )
     {
         // If the server is local and should be launched automatically, then launch it
-        if( in.GetServerIPAddress(i) == "localhost" && in.GetStartAuto(i) )
+        if( in.GetServerIPAddress( i ) == "localhost" && in.GetStartAuto( i ) )
         {
-            LaunchLocalServer( in.GetPlusConfigFile(i) );
+            LaunchLocalServer( in.GetPlusConfigFile( i ) );
         }
 
         // Now try to connect to server
-        Connect( in.GetServerIPAddress(i), in.GetServerPort(i), in.GetConnectAuto(i) );
+        Connect( in.GetServerIPAddress( i ), in.GetServerPort( i ), in.GetConnectAuto( i ) );
     }
 
     m_lastIbisPlusConfigFile = configFile;
@@ -190,8 +184,8 @@ bool IbisHardwareIGSIO::ShutDown()
     ClearConfig();
 
     delete m_logicController;
-    m_logicController = nullptr;
-    m_logic = nullptr;
+    m_logicController           = nullptr;
+    m_logic                     = nullptr;
     m_currentIbisPlusConfigFile = "";
 
     return true;
@@ -216,31 +210,17 @@ void IbisHardwareIGSIO::RemoveToolObjectsFromScene()
     }
 }
 
-vtkTransform * IbisHardwareIGSIO::GetReferenceTransform()
-{
-    return nullptr;
-}
+vtkTransform * IbisHardwareIGSIO::GetReferenceTransform() { return nullptr; }
 
-bool IbisHardwareIGSIO::IsTransformFrozen( TrackedSceneObject * /*obj*/ )
-{
-    return false;
-}
+bool IbisHardwareIGSIO::IsTransformFrozen( TrackedSceneObject * /*obj*/ ) { return false; }
 
-void IbisHardwareIGSIO::FreezeTransform( TrackedSceneObject * /*obj*/, int /*nbSamples*/ )
-{
-}
+void IbisHardwareIGSIO::FreezeTransform( TrackedSceneObject * /*obj*/, int /*nbSamples*/ ) {}
 
-void IbisHardwareIGSIO::UnFreezeTransform( TrackedSceneObject * /*obj*/ )
-{
-}
+void IbisHardwareIGSIO::UnFreezeTransform( TrackedSceneObject * /*obj*/ ) {}
 
-void IbisHardwareIGSIO::AddTrackedVideoClient( TrackedSceneObject * /*obj*/ )
-{
-}
+void IbisHardwareIGSIO::AddTrackedVideoClient( TrackedSceneObject * /*obj*/ ) {}
 
-void IbisHardwareIGSIO::RemoveTrackedVideoClient( TrackedSceneObject * /*obj*/ )
-{
-}
+void IbisHardwareIGSIO::RemoveTrackedVideoClient( TrackedSceneObject * /*obj*/ ) {}
 
 void IbisHardwareIGSIO::OpenSettingsWidget()
 {
@@ -248,19 +228,16 @@ void IbisHardwareIGSIO::OpenSettingsWidget()
     {
         m_clientWidget = new qIGTLIOClientWidget;
         m_clientWidget->setLogic( m_logic );
-        m_clientWidget->setGeometry(0,0, 859, 811);
+        m_clientWidget->setGeometry( 0, 0, 859, 811 );
         m_clientWidget->setAttribute( Qt::WA_DeleteOnClose );
-        m_clientWidget->setWindowFlag( Qt::WindowStaysOnTopHint, true);
-        connect( m_clientWidget, SIGNAL(destroyed(QObject*)), this, SLOT(OnSettingsWidgetClosed()));
+        m_clientWidget->setWindowFlag( Qt::WindowStaysOnTopHint, true );
+        connect( m_clientWidget, SIGNAL( destroyed( QObject * ) ), this, SLOT( OnSettingsWidgetClosed() ) );
     }
 
     m_clientWidget->show();
 }
 
-void IbisHardwareIGSIO::OnSettingsWidgetClosed()
-{
-    m_clientWidget = nullptr;
-}
+void IbisHardwareIGSIO::OnSettingsWidgetClosed() { m_clientWidget = nullptr; }
 
 void IbisHardwareIGSIO::OpenConfigFileWidget()
 {
@@ -269,36 +246,32 @@ void IbisHardwareIGSIO::OpenConfigFileWidget()
         m_settingsWidget = new IbisHardwareIGSIOSettingsWidget();
         m_settingsWidget->SetIgsio( this );
         m_settingsWidget->setAttribute( Qt::WA_DeleteOnClose );
-        connect( m_settingsWidget, SIGNAL(destroyed(QObject*)), this, SLOT(OnConfigFileWidgetClosed()));
+        connect( m_settingsWidget, SIGNAL( destroyed( QObject * ) ), this, SLOT( OnConfigFileWidgetClosed() ) );
         GetIbisAPI()->ShowFloatingDock( m_settingsWidget );
     }
 }
 
-void IbisHardwareIGSIO::OnConfigFileWidgetClosed()
-{
-    m_settingsWidget = nullptr;
-}
+void IbisHardwareIGSIO::OnConfigFileWidgetClosed() { m_settingsWidget = nullptr; }
 
-void IbisHardwareIGSIO::OnDeviceNew( vtkObject*, unsigned long, void*, void * callData )
+void IbisHardwareIGSIO::OnDeviceNew( vtkObject *, unsigned long, void *, void * callData )
 {
-    igtlioDevicePointer device = reinterpret_cast<igtlioDevice*>( callData );
+    igtlioDevicePointer device = reinterpret_cast<igtlioDevice *>( callData );
     QString toolName, toolPart;
     QString deviceName( device->GetDeviceName().c_str() );
     std::cout << "New device: " << deviceName.toUtf8().data() << std::endl;
     m_deviceToolAssociations.ToolAndPartFromDevice( deviceName, toolName, toolPart );
-    if( toolName.isEmpty() )
-        return;
+    if( toolName.isEmpty() ) return;
     int toolIndex = FindToolByName( toolName );
-    if( toolIndex == -1 )
-        return;
+    if( toolIndex == -1 ) return;
 
-    std::cout << "----> Connected to tool ( " << toolName.toUtf8().data() << " ), part ( " << toolPart.toUtf8().data() << " )" << std::endl;
+    std::cout << "----> Connected to tool ( " << toolName.toUtf8().data() << " ), part ( " << toolPart.toUtf8().data()
+              << " )" << std::endl;
 
     // Assign image data of new device to the video input of the scene object
     if( toolPart == "ImageAndTransform" || toolPart == "Image" )
     {
-        AssignDeviceImageToTool( device, m_tools[toolIndex] );
-        m_tools[toolIndex]->imageDevice = device;
+        AssignDeviceImageToTool( device, m_tools[ toolIndex ] );
+        m_tools[ toolIndex ]->imageDevice = device;
     }
 
     // Specify the device should be used to recover transform on every update
@@ -308,16 +281,14 @@ void IbisHardwareIGSIO::OnDeviceNew( vtkObject*, unsigned long, void*, void * ca
     }
 }
 
-void IbisHardwareIGSIO::OnDeviceRemoved( vtkObject*, unsigned long, void*, void * callData )
+void IbisHardwareIGSIO::OnDeviceRemoved( vtkObject *, unsigned long, void *, void * callData )
 {
-    igtlioDevice * device = reinterpret_cast<igtlioDevice*>( callData );
+    igtlioDevice * device = reinterpret_cast<igtlioDevice *>( callData );
     QString toolName, toolPart;
-    m_deviceToolAssociations.ToolAndPartFromDevice( QString(device->GetDeviceName().c_str()), toolName, toolPart );
-    if( toolName.isEmpty() )
-        return;
+    m_deviceToolAssociations.ToolAndPartFromDevice( QString( device->GetDeviceName().c_str() ), toolName, toolPart );
+    if( toolName.isEmpty() ) return;
     int toolIndex = FindToolByName( toolName );
-    if( toolIndex == -1 )
-        return;
+    if( toolIndex == -1 ) return;
 
     if( toolPart == "ImageAndTransform" )
     {
@@ -332,9 +303,9 @@ void IbisHardwareIGSIO::OnDeviceRemoved( vtkObject*, unsigned long, void*, void 
 void IbisHardwareIGSIO::InitPlugin()
 {
     // Look for the Plus Toolkit path and Plus Server executable
-    m_plusConfigDirectory = GetIbisAPI()->GetConfigDirectory() + QString("PlusToolkit/");
-    m_ibisPlusConfigFilesDirectory = m_plusConfigDirectory + QString("IbisPlusConfigFiles/");
-    m_plusConfigFilesDirectory = m_plusConfigDirectory + QString("PlusConfigFiles/");
+    m_plusConfigDirectory          = GetIbisAPI()->GetConfigDirectory() + QString( "PlusToolkit/" );
+    m_ibisPlusConfigFilesDirectory = m_plusConfigDirectory + QString( "IbisPlusConfigFiles/" );
+    m_plusConfigFilesDirectory     = m_plusConfigDirectory + QString( "PlusConfigFiles/" );
 
     // Is PlusServer registered, if not, make a placeholder in custom preferences
     if( !GetIbisAPI()->IsCustomPathRegistered( PlusServerExecutable ) )
@@ -349,16 +320,16 @@ bool IbisHardwareIGSIO::LaunchLocalServer( QString plusConfigFile )
     if( plusServerExec == QString::null || plusServerExec.isEmpty() )
     {
         QString message;
-        message = QString("PlusServer executable path not defined.\n");
-        message = QString("Go to Settings/Preferences and set PlusServer executable.");
-        QMessageBox::warning(nullptr, "Error", message);
+        message = QString( "PlusServer executable path not defined.\n" );
+        message = QString( "Go to Settings/Preferences and set PlusServer executable." );
+        QMessageBox::warning( nullptr, "Error", message );
         return false;
     }
     QFileInfo fi( plusServerExec );
     if( !( fi.isFile() && fi.isExecutable() ) )
     {
-        QString message = QString("Can't execute PlusServer: %1").arg(plusServerExec);
-        QMessageBox::warning(nullptr,"Error", message );
+        QString message = QString( "Can't execute PlusServer: %1" ).arg( plusServerExec );
+        QMessageBox::warning( nullptr, "Error", message );
         return false;
     }
     vtkSmartPointer<PlusServerInterface> plusLauncher = vtkSmartPointer<PlusServerInterface>::New();
@@ -368,7 +339,7 @@ bool IbisHardwareIGSIO::LaunchLocalServer( QString plusConfigFile )
     m_plusLaunchers.push_back( plusLauncher );
 
     QString plusConfigFileFullPath = m_plusConfigFilesDirectory + plusConfigFile;
-    bool didLaunch = plusLauncher->StartServer( plusConfigFileFullPath );
+    bool didLaunch                 = plusLauncher->StartServer( plusConfigFileFullPath );
 
     return didLaunch;
 }
@@ -377,143 +348,137 @@ void IbisHardwareIGSIO::Connect( std::string ip, int port, bool start )
 {
     igtlioConnectorPointer c = m_logic->CreateConnector();
     c->SetTypeClient( ip, port );
-    if(start){
+    if( start )
+    {
         c->Start();
     }
-    m_logicCallbacks->Connect( c , igtlioConnector::ConnectedEvent, this, SLOT(OnConnectionEstablished(vtkObject*, unsigned long, void*, void*)) );
+    m_logicCallbacks->Connect( c, igtlioConnector::ConnectedEvent, this,
+                               SLOT( OnConnectionEstablished( vtkObject *, unsigned long, void *, void * ) ) );
 }
 
-void IbisHardwareIGSIO::OnConnectionEstablished(vtkObject* caller, unsigned long, void*, void *)
+void IbisHardwareIGSIO::OnConnectionEstablished( vtkObject * caller, unsigned long, void *, void * )
 {
     // send a dummy message with metadata to force v2 message exchange
-    igtlioConnectorPointer connector = reinterpret_cast<igtlioConnector *>(caller);
+    igtlioConnectorPointer connector = reinterpret_cast<igtlioConnector *>( caller );
     igtlioDeviceKeyType key;
-    key.name = "";
-    key.type = "STATUS";
-    vtkSmartPointer<igtlioStatusDevice> statusDevice = igtlioStatusDevice::SafeDownCast(connector->GetDevice(key));
-    if (!statusDevice)
+    key.name                                         = "";
+    key.type                                         = "STATUS";
+    vtkSmartPointer<igtlioStatusDevice> statusDevice = igtlioStatusDevice::SafeDownCast( connector->GetDevice( key ) );
+    if( !statusDevice )
     {
-      statusDevice = vtkSmartPointer<igtlioStatusDevice>::New();
-      connector->AddDevice(statusDevice);
+        statusDevice = vtkSmartPointer<igtlioStatusDevice>::New();
+        connector->AddDevice( statusDevice );
     }
 
-    statusDevice->SetMetaDataElement("dummy", "dummy"); // existence of metadata makes the IO connector send a header v2 message
-    connector->SendMessage(igtlioDeviceKeyType::CreateDeviceKey(statusDevice));
-    connector->RemoveDevice(statusDevice);
+    statusDevice->SetMetaDataElement(
+        "dummy", "dummy" );  // existence of metadata makes the IO connector send a header v2 message
+    connector->SendMessage( igtlioDeviceKeyType::CreateDeviceKey( statusDevice ) );
+    connector->RemoveDevice( statusDevice );
 }
-
 
 void IbisHardwareIGSIO::DisconnectAllServers()
 {
     for( int i = 0; i < m_logic->GetNumberOfConnectors(); ++i )
     {
-        m_logic->GetConnector( static_cast<unsigned>(i) )->Stop();
+        m_logic->GetConnector( static_cast<unsigned>( i ) )->Stop();
     }
 
     // Clear all connectors
-    while( m_logic->GetNumberOfConnectors() > 0 )
-      m_logic->RemoveConnector( 0 );
+    while( m_logic->GetNumberOfConnectors() > 0 ) m_logic->RemoveConnector( 0 );
 }
 
 void IbisHardwareIGSIO::ShutDownLocalServers()
 {
     for( int i = 0; i < m_plusLaunchers.size(); ++i )
     {
-        m_plusLaunchers[i]->StopServer();
+        m_plusLaunchers[ i ]->StopServer();
     }
     m_plusLaunchers.clear();
 }
 
 TrackerToolState StatusStringToState( const std::string & status )
 {
-    QString qstatus(status.c_str());
-    if( qstatus.toUpper().toStdString() == "OK" )
-        return Ok;
-    if ( qstatus.toUpper().toStdString() == "OUTOFVIEW" )
-        return OutOfView;
-    if( qstatus.toUpper().toStdString() == "OUTOFVOLUME" )
-        return OutOfVolume;
-    if ( qstatus.toUpper().toStdString() == "HIGHERROR" )
-        return HighError;
-    if ( qstatus.toUpper().toStdString() == "DISABLED" )
-        return Disabled;
-    if( qstatus.toUpper().toStdString() == "MISSING" )
-        return Missing;
+    QString qstatus( status.c_str() );
+    if( qstatus.toUpper().toStdString() == "OK" ) return Ok;
+    if( qstatus.toUpper().toStdString() == "OUTOFVIEW" ) return OutOfView;
+    if( qstatus.toUpper().toStdString() == "OUTOFVOLUME" ) return OutOfVolume;
+    if( qstatus.toUpper().toStdString() == "HIGHERROR" ) return HighError;
+    if( qstatus.toUpper().toStdString() == "DISABLED" ) return Disabled;
+    if( qstatus.toUpper().toStdString() == "MISSING" ) return Missing;
     return Undefined;
 }
 
 std::string GetMetaData( igtlioDevicePointer dev, const std::string & key )
 {
-    for (igtl::MessageBase::MetaDataMap::const_iterator iter = dev->GetMetaData().begin(); iter != dev->GetMetaData().end(); ++iter)
+    for( igtl::MessageBase::MetaDataMap::const_iterator iter = dev->GetMetaData().begin();
+         iter != dev->GetMetaData().end(); ++iter )
     {
-        if (iter->first.find(key) != std::string::npos)
+        if( iter->first.find( key ) != std::string::npos )
         {
             return iter->second.second.c_str();
         }
     }
-    return std::string("");
+    return std::string( "" );
 }
 
 TrackerToolState IbisHardwareIGSIO::ComputeToolStatus( igtlioDevicePointer dev, Tool * t )
 {
     // First, try to find a status in the metadata
     std::string statusString = GetMetaData( dev, "Status" );
-    if( !statusString.empty() )
-        return StatusStringToState( statusString );
+    if( !statusString.empty() ) return StatusStringToState( statusString );
 
     // If status is not found in metadata, use timestamps to guess
-    double newTimeStamp = dev->GetTimestamp();
+    double newTimeStamp   = dev->GetTimestamp();
     bool timeStampChanged = newTimeStamp > t->lastTimeStamp;
-    double now = vtkTimerLog::GetUniversalTime();
+    double now            = vtkTimerLog::GetUniversalTime();
     if( timeStampChanged )
     {
-        t->lastTimeStamp = newTimeStamp;
+        t->lastTimeStamp             = newTimeStamp;
         t->lastTimeStampModifiedTime = now;
     }
     double timeSinceLastTimeStampChanged = now - t->lastTimeStampModifiedTime;
 
-    if( timeSinceLastTimeStampChanged < MaxTimeBetweenTransformSamples )
-        return Ok;
+    if( timeSinceLastTimeStampChanged < MaxTimeBetweenTransformSamples ) return Ok;
     return Missing;
 }
 
 int IbisHardwareIGSIO::FindToolByName( QString name )
 {
     for( int i = 0; i < m_tools.size(); ++i )
-        if( m_tools[i]->sceneObject->GetName() == name )
-            return i;
+        if( m_tools[ i ]->sceneObject->GetName() == name ) return i;
     return -1;
 }
 
 void IbisHardwareIGSIO::AssignDeviceImageToTool( igtlioDevicePointer device, Tool * tool )
 {
-  vtkImageData * imageContent = nullptr;
-  if( IsDeviceImage( device ) )
-  {
-      igtlioImageDevicePointer imageDev = igtlioImageDevice::SafeDownCast( device );
-      if( !(imageDev->GetContent().image == nullptr) ) {
-          imageContent = imageDev->GetContent().image;
-          // OpenIGTLink specifications has origin as center of image
-          double origin[3] = { 0., 0., 0. };
-          imageContent->SetOrigin(origin);
-      }
-  }
-  else if( IsDeviceVideo( device ) )
-  {
-      igtlioVideoDevicePointer videoDev = igtlioVideoDevice::SafeDownCast( device );
-      imageContent = videoDev->GetContent().image;
-  }
+    vtkImageData * imageContent = nullptr;
+    if( IsDeviceImage( device ) )
+    {
+        igtlioImageDevicePointer imageDev = igtlioImageDevice::SafeDownCast( device );
+        if( !( imageDev->GetContent().image == nullptr ) )
+        {
+            imageContent = imageDev->GetContent().image;
+            // OpenIGTLink specifications has origin as center of image
+            double origin[ 3 ] = { 0., 0., 0. };
+            imageContent->SetOrigin( origin );
+        }
+    }
+    else if( IsDeviceVideo( device ) )
+    {
+        igtlioVideoDevicePointer videoDev = igtlioVideoDevice::SafeDownCast( device );
+        imageContent                      = videoDev->GetContent().image;
+    }
 
-  if( tool->sceneObject->IsA( "CameraObject" ) )
-  {
-      vtkSmartPointer<CameraObject> cam = CameraObject::SafeDownCast( tool->sceneObject );
-      cam->SetVideoInputData( imageContent );
-  }
-  else if( tool->sceneObject->IsA( "UsProbeObject" ) )
-  {
-      vtkSmartPointer<UsProbeObject> probe = UsProbeObject::SafeDownCast( tool->sceneObject );
-      probe->SetVideoInputData( imageContent );
-  }
+    if( tool->sceneObject->IsA( "CameraObject" ) )
+    {
+        vtkSmartPointer<CameraObject> cam = CameraObject::SafeDownCast( tool->sceneObject );
+        cam->SetVideoInputData( imageContent );
+    }
+    else if( tool->sceneObject->IsA( "UsProbeObject" ) )
+    {
+        vtkSmartPointer<UsProbeObject> probe = UsProbeObject::SafeDownCast( tool->sceneObject );
+        probe->SetVideoInputData( imageContent );
+    }
 }
 
 TrackedSceneObject * IbisHardwareIGSIO::InstanciateSceneObjectFromType( QString objectName, QString objectType )
@@ -531,7 +496,7 @@ TrackedSceneObject * IbisHardwareIGSIO::InstanciateSceneObjectFromType( QString 
     res->SetName( objectName );
     res->SetObjectManagedBySystem( true );
     res->SetCanAppendChildren( false );
-    res->SetObjectManagedByTracker(true);
+    res->SetObjectManagedByTracker( true );
     res->SetCanChangeParent( false );
     res->SetCanEditTransformManually( false );
     res->SetHardwareModule( this );
@@ -542,43 +507,41 @@ TrackedSceneObject * IbisHardwareIGSIO::InstanciateSceneObjectFromType( QString 
 vtkSmartPointer<PolyDataObject> IbisHardwareIGSIO::InstanciateToolModel( QString filename )
 {
     vtkSmartPointer<PolyDataObject> model;
-    QString toolModelDir = m_plusConfigDirectory + "/ToolModels";
+    QString toolModelDir  = m_plusConfigDirectory + "/ToolModels";
     QString modelFileName = toolModelDir + "/" + filename;
-    if (QFile::exists(modelFileName) && !filename.isEmpty())
+    if( QFile::exists( modelFileName ) && !filename.isEmpty() )
     {
         vtkPLYReader * reader = vtkPLYReader::New();
-        reader->SetFileName(modelFileName.toUtf8().data());
+        reader->SetFileName( modelFileName.toUtf8().data() );
         reader->Update();
         model = vtkSmartPointer<PolyDataObject>::New();
-        model->SetNameChangeable(false);
-        model->SetCanChangeParent(false);
-        model->SetObjectManagedBySystem(true);
-        model->SetObjectManagedByTracker(true);
-        model->SetPolyData(reader->GetOutput());
-        model->SetScalarsVisible(true);
+        model->SetNameChangeable( false );
+        model->SetCanChangeParent( false );
+        model->SetObjectManagedBySystem( true );
+        model->SetObjectManagedByTracker( true );
+        model->SetPolyData( reader->GetOutput() );
+        model->SetScalarsVisible( true );
         reader->Delete();
-        model->SetName("3D Model");
+        model->SetName( "3D Model" );
     }
     return model;
 }
 
-void IbisHardwareIGSIO::ReadToolConfig(QString filename, vtkSmartPointer<TrackedSceneObject> tool)
+void IbisHardwareIGSIO::ReadToolConfig( QString filename, vtkSmartPointer<TrackedSceneObject> tool )
 {
-    if (filename.isEmpty())
-        return;
+    if( filename.isEmpty() ) return;
 
     QString path = m_ibisPlusConfigFilesDirectory + "/" + filename;
 
     // Make sure the config file exists
-    QFileInfo info(path);
-    if (!info.exists() || !info.isReadable())
-        return;
+    QFileInfo info( path );
+    if( !info.exists() || !info.isReadable() ) return;
 
     // Read config file
     SerializerReader reader;
-    reader.SetFilename(path.toUtf8().data());
+    reader.SetFilename( path.toUtf8().data() );
     reader.Start();
-    tool->Serialize(&reader);
+    tool->Serialize( &reader );
     reader.Finish();
 }
 
@@ -599,48 +562,43 @@ bool IbisHardwareIGSIO::IsDeviceVideo( igtlioDevicePointer device )
 
 void IbisHardwareIGSIO::WriteToolConfig()
 {
-	QString configFilePath = m_ibisPlusConfigFilesDirectory + m_currentIbisPlusConfigFile;
-	ConfigIO in(configFilePath);
+    QString configFilePath = m_ibisPlusConfigFilesDirectory + m_currentIbisPlusConfigFile;
+    ConfigIO in( configFilePath );
 
-	// Instanciate Ibis scene objects specified in config file
-	for (int i = 0; i < in.GetNumberOfTools(); ++i)
-	{
-		QString filename = in.GetToolParamFile(i);
-		QFileInfo info(filename);
-		if (info.exists() && !info.isWritable())
-		{
-			QString message;
-			message = QString("Hardware config file %1 is not writable.").arg(filename);
-			message += QString(" Hardware config for device %1 will not be saved").arg(in.GetToolName(i));
-      QMessageBox::warning(nullptr, "Warning", message);
-			return;
-		}
-		QString generalConfigFileName = m_ibisPlusConfigFilesDirectory + filename;
-		InternalWriteToolConfig(generalConfigFileName, m_tools[ i ]);
-	}
-}
-
-
-void IbisHardwareIGSIO::InternalWriteToolConfig(QString filename, Tool* tool)
-{
-	SerializerWriter writer0;
-	writer0.SetFilename(filename.toUtf8().data());
-	writer0.Start();
-	tool->sceneObject->SerializeTracked(&writer0);
-	writer0.EndSection();
-	writer0.Finish();
-}
-
-void IbisHardwareIGSIO::SceneAboutToLoad()
-{
-    this->ClearConfig();
-}
-
-void IbisHardwareIGSIO::SceneFinishedLoading()
-{
-    if (m_autoStartLastConfig)
+    // Instanciate Ibis scene objects specified in config file
+    for( int i = 0; i < in.GetNumberOfTools(); ++i )
     {
-        StartConfig(m_lastIbisPlusConfigFile);
+        QString filename = in.GetToolParamFile( i );
+        QFileInfo info( filename );
+        if( info.exists() && !info.isWritable() )
+        {
+            QString message;
+            message = QString( "Hardware config file %1 is not writable." ).arg( filename );
+            message += QString( " Hardware config for device %1 will not be saved" ).arg( in.GetToolName( i ) );
+            QMessageBox::warning( nullptr, "Warning", message );
+            return;
+        }
+        QString generalConfigFileName = m_ibisPlusConfigFilesDirectory + filename;
+        InternalWriteToolConfig( generalConfigFileName, m_tools[ i ] );
     }
 }
 
+void IbisHardwareIGSIO::InternalWriteToolConfig( QString filename, Tool * tool )
+{
+    SerializerWriter writer0;
+    writer0.SetFilename( filename.toUtf8().data() );
+    writer0.Start();
+    tool->sceneObject->SerializeTracked( &writer0 );
+    writer0.EndSection();
+    writer0.Finish();
+}
+
+void IbisHardwareIGSIO::SceneAboutToLoad() { this->ClearConfig(); }
+
+void IbisHardwareIGSIO::SceneFinishedLoading()
+{
+    if( m_autoStartLastConfig )
+    {
+        StartConfig( m_lastIbisPlusConfigFile );
+    }
+}

@@ -12,6 +12,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #define __LookupTableManager_h_
 
 #include <QString>
+
 #include "vtkSmartPointer.h"
 
 class vtkLookupTable;
@@ -19,16 +20,14 @@ class vtkPiecewiseFunctionLookupTable;
 
 class LookupTableManager
 {
-
 public:
-
     LookupTableManager();
 
-    void CreateLookupTable(const QString tableName, double range[2], vtkSmartPointer<vtkPiecewiseFunctionLookupTable> lut );
+    void CreateLookupTable( const QString tableName, double range[ 2 ],
+                            vtkSmartPointer<vtkPiecewiseFunctionLookupTable> lut );
     int GetNumberOfTemplateLookupTables() const;
-    const QString GetTemplateLookupTableName(int index);
+    const QString GetTemplateLookupTableName( int index );
     void CreateLabelLookupTable( vtkSmartPointer<vtkLookupTable> lut );
-
 };
 
 #endif

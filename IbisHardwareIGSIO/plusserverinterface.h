@@ -1,9 +1,10 @@
 #ifndef PlusServerInterface_h
 #define PlusServerInterface_h
 
-#include <QObject>
 #include <vtkObject.h>
 #include <vtkSmartPointer.h>
+
+#include <QObject>
 #include <QProcess>
 
 class Logger;
@@ -15,11 +16,18 @@ class PlusServerInterface : public QObject, public vtkObject
     Q_OBJECT
 
 public:
+    enum ServerState
+    {
+        Idle,
+        Starting,
+        Running,
+        Terminated,
+        Crashed,
+        NbOfServerStates
+    };
 
-    enum ServerState{ Idle, Starting, Running, Terminated, Crashed, NbOfServerStates };
-
-    static PlusServerInterface *New();
-    vtkTypeMacro(PlusServerInterface, vtkObject);
+    static PlusServerInterface * New();
+    vtkTypeMacro( PlusServerInterface, vtkObject );
 
     void SetServerExecutable( QString e ) { m_plusServerExecutable = e; }
     void SetServerWorkingDirectory( QString wd ) { m_plusServerWorkingDirectory = wd; }
@@ -27,9 +35,10 @@ public:
     void SetLogger( Logger * l ) { m_logger = l; }
 
     // Start server process, connect outputs to logger. Returns with true on success.
-    bool StartServer(const QString& configFilePath);
+    bool StartServer( const QString & configFilePath );
 
-    // Stop server process, disconnect outputs. Returns with true on success (shutdown on request was successful, without forcing).
+    // Stop server process, disconnect outputs. Returns with true on success (shutdown on request was successful,
+    // without forcing).
     bool StopServer();
 
     ServerState GetState() { return m_state; }
@@ -45,24 +54,22 @@ protected slots:
 
     void StdOutMsgReceived();
     void StdErrMsgReceived();
-    void ErrorReceived(QProcess::ProcessError);
-    void ServerExecutableFinished(int returnCode, QProcess::ExitStatus status);
+    void ErrorReceived( QProcess::ProcessError );
+    void ServerExecutableFinished( int returnCode, QProcess::ExitStatus status );
 
 protected:
-
     void SetState( ServerState s );
 
     void LogMessage( const QString & s );
 
     // Receive standard output or error and send it to the log
-    void ParseServerOutput(const QByteArray& strData);
+    void ParseServerOutput( const QByteArray & strData );
 
 private:
-
     PlusServerInterface();
     virtual ~PlusServerInterface() override;
-    PlusServerInterface(const PlusServerInterface&); // Not implemented
-    void operator=(const PlusServerInterface&); // Not implemented
+    PlusServerInterface( const PlusServerInterface & );  // Not implemented
+    void operator=( const PlusServerInterface & );       // Not implemented
 
     QString m_plusServerExecutable;
     QString m_plusServerWorkingDirectory;

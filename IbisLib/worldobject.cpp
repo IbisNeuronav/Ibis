@@ -9,42 +9,38 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
 #include "worldobject.h"
-#include "worldobjectsettingswidget.h"
-#include "scenemanager.h"
-#include "polydataobject.h"
+
 #include "application.h"
+#include "polydataobject.h"
+#include "scenemanager.h"
+#include "worldobjectsettingswidget.h"
 
 WorldObject::WorldObject()
 {
-    this->Name = QString("World");
-    this->ObjectHidden = false;
-    this->AllowHiding = false;
+    this->Name            = QString( "World" );
+    this->ObjectHidden    = false;
+    this->AllowHiding     = false;
     this->ObjectDeletable = false;
-    this->NameChangeable = false;
+    this->NameChangeable  = false;
 }
 
-WorldObject::~WorldObject()
-{
-}
+WorldObject::~WorldObject() {}
 
-void WorldObject::SetAxesObject(vtkSmartPointer<PolyDataObject> obj )
+void WorldObject::SetAxesObject( vtkSmartPointer<PolyDataObject> obj )
 {
-    if( obj == this->m_axesObject )
-        return;
+    if( obj == this->m_axesObject ) return;
 
     this->m_axesObject = obj;
 }
 
 void WorldObject::SetAxesHidden( bool h )
 {
-    if( this->m_axesObject )
-        this->m_axesObject->SetHidden( h );
+    if( this->m_axesObject ) this->m_axesObject->SetHidden( h );
 }
 
 bool WorldObject::AxesHidden()
 {
-    if( this->m_axesObject )
-        return this->m_axesObject->IsHidden();
+    if( this->m_axesObject ) return this->m_axesObject->IsHidden();
     return true;
 }
 
@@ -75,14 +71,14 @@ bool WorldObject::GetCursorVisible()
 void WorldObject::SetCursorColor( const QColor & c )
 {
     Q_ASSERT( this->GetManager() );
-    this->GetManager()->SetCursorColor(c);
+    this->GetManager()->SetCursorColor( c );
 }
 
-void WorldObject::SetCursorColor( double color[3] )
+void WorldObject::SetCursorColor( double color[ 3 ] )
 {
     Q_ASSERT( this->GetManager() );
-    QColor col( (int)(color[0] * 255), (int)(color[1] * 255), (int)(color[2] * 255) );
-    this->GetManager()->SetCursorColor(col);
+    QColor col( (int)( color[ 0 ] * 255 ), (int)( color[ 1 ] * 255 ), (int)( color[ 2 ] * 255 ) );
+    this->GetManager()->SetCursorColor( col );
 }
 
 QColor WorldObject::GetCursorColor()
@@ -94,10 +90,10 @@ QColor WorldObject::GetCursorColor()
 void WorldObject::SetBackgroundColor( const QColor & c )
 {
     Q_ASSERT( this->GetManager() );
-    double newColorfloat[3] = { 1, 1, 1 };
-    newColorfloat[0] = double( c.red() ) / 255.0;
-    newColorfloat[1] = double( c.green() ) / 255.0;
-    newColorfloat[2] = double( c.blue() ) / 255.0;
+    double newColorfloat[ 3 ] = { 1, 1, 1 };
+    newColorfloat[ 0 ]        = double( c.red() ) / 255.0;
+    newColorfloat[ 1 ]        = double( c.green() ) / 255.0;
+    newColorfloat[ 2 ]        = double( c.blue() ) / 255.0;
     this->GetManager()->SetViewBackgroundColor( newColorfloat );
     this->GetManager()->SetView3DBackgroundColor( newColorfloat );
 }
@@ -105,28 +101,28 @@ void WorldObject::SetBackgroundColor( const QColor & c )
 QColor WorldObject::GetBackgroundColor()
 {
     Q_ASSERT( this->GetManager() );
-    double color[3];
+    double color[ 3 ];
     this->GetManager()->GetViewBackgroundColor( color );
-    QColor ret( (int)(color[0] * 255), (int)(color[1] * 255), (int)(color[2] * 255) );
+    QColor ret( (int)( color[ 0 ] * 255 ), (int)( color[ 1 ] * 255 ), (int)( color[ 2 ] * 255 ) );
     return ret;
 }
 
 void WorldObject::Set3DBackgroundColor( const QColor & c )
 {
     Q_ASSERT( this->GetManager() );
-    double newColorfloat[3] = { 1, 1, 1 };
-    newColorfloat[0] = double( c.red() ) / 255.0;
-    newColorfloat[1] = double( c.green() ) / 255.0;
-    newColorfloat[2] = double( c.blue() ) / 255.0;
+    double newColorfloat[ 3 ] = { 1, 1, 1 };
+    newColorfloat[ 0 ]        = double( c.red() ) / 255.0;
+    newColorfloat[ 1 ]        = double( c.green() ) / 255.0;
+    newColorfloat[ 2 ]        = double( c.blue() ) / 255.0;
     this->GetManager()->SetView3DBackgroundColor( newColorfloat );
 }
 
 QColor WorldObject::Get3DBackgroundColor()
 {
     Q_ASSERT( this->GetManager() );
-    double color[3];
+    double color[ 3 ];
     this->GetManager()->GetView3DBackgroundColor( color );
-    QColor ret( (int)(color[0] * 255), (int)(color[1] * 255), (int)(color[2] * 255) );
+    QColor ret( (int)( color[ 0 ] * 255 ), (int)( color[ 1 ] * 255 ), (int)( color[ 2 ] * 255 ) );
     return ret;
 }
 
@@ -154,21 +150,15 @@ void WorldObject::Set3DCameraViewAngle( double angle )
     return this->GetManager()->Set3DCameraViewAngle( angle );
 }
 
-void WorldObject::SetUpdateFrequency( double fps )
-{
-    Application::GetInstance().SetUpdateFrequency( fps );
-}
+void WorldObject::SetUpdateFrequency( double fps ) { Application::GetInstance().SetUpdateFrequency( fps ); }
 
-double WorldObject::GetUpdateFrequency()
-{
-    return Application::GetInstance().GetUpdateFrequency();
-}
+double WorldObject::GetUpdateFrequency() { return Application::GetInstance().GetUpdateFrequency(); }
 
 QWidget * WorldObject::CreateSettingsDialog( QWidget * parent )
 {
     WorldObjectSettingsWidget * res = new WorldObjectSettingsWidget( parent );
     res->setObjectName( "WorldObjectSettingsWidget" );
-    res->setAttribute(Qt::WA_DeleteOnClose);
+    res->setAttribute( Qt::WA_DeleteOnClose );
     res->SetWorldObject( this );
     return res;
 }

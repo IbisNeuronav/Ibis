@@ -19,9 +19,7 @@ class vtkUnsignedCharArray;
 
 class LinesFactory
 {
-
 public:
-
     LinesFactory();
     ~LinesFactory();
 
@@ -30,7 +28,7 @@ public:
     bool IsStartingSegment() { return m_startSegment; }
     void SetColor( unsigned char r, unsigned char g, unsigned char b, unsigned char a );
     int GetNumberOfPoints();
-    void SetPoint( int index, double pt[3] );
+    void SetPoint( int index, double pt[ 3 ] );
     double * GetPoint( int index );
     void AddPoint( double x, double y, double z );
     void AddPoint( double x, double y, double z, unsigned char r, unsigned char g, unsigned char b, unsigned char a );
@@ -38,14 +36,12 @@ public:
     void Clear();
 
 protected:
-
     bool m_startSegment;
     vtkSmartPointer<vtkPolyData> m_poly;
     vtkSmartPointer<vtkPoints> m_pts;
     vtkSmartPointer<vtkCellArray> m_lines;
     vtkSmartPointer<vtkUnsignedCharArray> m_scalars;
-    unsigned char m_color[4];
+    unsigned char m_color[ 4 ];
 };
-
 
 #endif

@@ -9,36 +9,39 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
 #include "opendatafiledialog.h"
-#include "ui_opendatafiledialog.h"
-#include <QFileDialog>
+
 #include <vtkTransform.h>
-#include "sceneobject.h"
+
+#include <QFileDialog>
+
 #include "ibisapi.h"
 #include "scenemanager.h"
-    
-OpenDataFileDialog::OpenDataFileDialog( QWidget* parent, Qt::WindowFlags fl, SceneManager * man, OpenFileParams *params )
-    : QDialog( parent, fl ),
-      m_fileParams( params ),
-      m_sceneManager( man ),
-      ui(new Ui::OpenDataFileDialog)
+#include "sceneobject.h"
+#include "ui_opendatafiledialog.h"
+
+OpenDataFileDialog::OpenDataFileDialog( QWidget * parent, Qt::WindowFlags fl, SceneManager * man,
+                                        OpenFileParams * params )
+    : QDialog( parent, fl ), m_fileParams( params ), m_sceneManager( man ), ui( new Ui::OpenDataFileDialog )
 {
     m_isLabel = false;
-    ui->setupUi(this);
+    ui->setupUi( this );
     Update();
 }
 
-OpenDataFileDialog::~OpenDataFileDialog()
-{
-}
+OpenDataFileDialog::~OpenDataFileDialog() {}
 
 void OpenDataFileDialog::BrowsePushButtonClicked()
 {
-    QString filter = tr("All valid files(*.mnc *.mnc2 *.mnc.gz *.MNC *.MNC2 *.MNC.GZ *.nii *.obj *.ply *.tag *.vtk *.vtp *.fib);;Minc file (*.mnc *.mnc2 *.mnc.gz *.MNC *.MNC2 *.MNC.GZ);;Nifti file (*.nii);;Object file (*.obj);;PLY file (*.ply);;Tag file (*.tag);;VTK file (*.vtk);;VTP file (*.vtp);;FIB file (*.fib)");
-    QStringList inputFiles = QFileDialog::getOpenFileNames( this, tr("Open Files"), m_fileParams->lastVisitedDir, filter, nullptr, QFileDialog::DontUseNativeDialog );
+    QString filter =
+        tr( "All valid files(*.mnc *.mnc2 *.mnc.gz *.MNC *.MNC2 *.MNC.GZ *.nii *.obj *.ply *.tag *.vtk *.vtp "
+            "*.fib);;Minc file (*.mnc *.mnc2 *.mnc.gz *.MNC *.MNC2 *.MNC.GZ);;Nifti file (*.nii);;Object file "
+            "(*.obj);;PLY file (*.ply);;Tag file (*.tag);;VTK file (*.vtk);;VTP file (*.vtp);;FIB file (*.fib)" );
+    QStringList inputFiles = QFileDialog::getOpenFileNames( this, tr( "Open Files" ), m_fileParams->lastVisitedDir,
+                                                            filter, nullptr, QFileDialog::DontUseNativeDialog );
     for( int i = 0; i < inputFiles.size(); ++i )
     {
         OpenFileParams::SingleFileParam param;
-        param.fileName = inputFiles[i];
+        param.fileName = inputFiles[ i ];
         m_fileParams->filesParams.push_back( param );
     }
 
@@ -47,8 +50,8 @@ void OpenDataFileDialog::BrowsePushButtonClicked()
 
 void OpenDataFileDialog::on_parentComboBox_activated( int index )
 {
-    QVariant v = ui->parentComboBox->itemData( index );
-    bool ok = false;
+    QVariant v   = ui->parentComboBox->itemData( index );
+    bool ok      = false;
     int objectId = v.toInt( &ok );
     Q_ASSERT_X( ok, "OpenDataFileDialog::on_parentComboBox_activated()", "Invalid object id in combo box item." );
     SceneObject * parent = m_sceneManager->GetObjectByID( objectId );
@@ -62,24 +65,24 @@ void OpenDataFileDialog::Update()
     QString tmp;
     for( int i = 0; i < m_fileParams->filesParams.size(); ++i )
     {
-        QString filename = m_fileParams->filesParams[i].fileName;
+        QString filename = m_fileParams->filesParams[ i ].fileName;
         tmp += filename + " ";
     }
-    ui->openFileLineEdit->setText(tmp);
+    ui->openFileLineEdit->setText( tmp );
 
     // Fill the parent combo box
-    QList<SceneObject*> allObjects;
+    QList<SceneObject *> allObjects;
     ui->parentComboBox->clear();
     m_sceneManager->GetAllListableNonTrackedObjects( allObjects );
-    ui->parentComboBox->addItem( m_sceneManager->GetSceneRoot()->GetName(), m_sceneManager->GetSceneRoot()->GetObjectID()  );
+    ui->parentComboBox->addItem( m_sceneManager->GetSceneRoot()->GetName(),
+                                 m_sceneManager->GetSceneRoot()->GetObjectID() );
     int index = 1;
     for( int i = 0; i < allObjects.size(); ++i )
     {
-        if( allObjects[i]->CanAppendChildren() && allObjects[i]->IsListable() )
+        if( allObjects[ i ]->CanAppendChildren() && allObjects[ i ]->IsListable() )
         {
-            ui->parentComboBox->addItem( allObjects[i]->GetName(), QVariant( allObjects[i]->GetObjectID() ) );
-            if( allObjects[i] == m_fileParams->defaultParent )
-                ui->parentComboBox->setCurrentIndex( index );
+            ui->parentComboBox->addItem( allObjects[ i ]->GetName(), QVariant( allObjects[ i ]->GetObjectID() ) );
+            if( allObjects[ i ] == m_fileParams->defaultParent ) ui->parentComboBox->setCurrentIndex( index );
             ++index;
         }
     }
@@ -88,16 +91,13 @@ void OpenDataFileDialog::Update()
     ui->lablelImageCheckBox->setChecked( m_isLabel );
 }
 
-void OpenDataFileDialog::on_lablelImageCheckBox_toggled(bool checked)
-{
-    m_isLabel = checked;
-}
+void OpenDataFileDialog::on_lablelImageCheckBox_toggled( bool checked ) { m_isLabel = checked; }
 
 void OpenDataFileDialog::on_buttonOk_clicked()
 {
     for( int i = 0; i < m_fileParams->filesParams.size(); ++i )
     {
-        m_fileParams->filesParams[i].isLabel = m_isLabel;
+        m_fileParams->filesParams[ i ].isLabel = m_isLabel;
     }
     accept();
 }

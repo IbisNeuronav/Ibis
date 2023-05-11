@@ -11,8 +11,9 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef __GeneratorPluginInterface_h_
 #define __GeneratorPluginInterface_h_
 
-#include <QString>
 #include <QObject>
+#include <QString>
+
 #include "ibisplugin.h"
 
 class SceneObject;
@@ -27,28 +28,24 @@ class QSettings;
  */
 class GeneratorPluginInterface : public IbisPlugin
 {
-
 public:
-
     vtkTypeMacro( GeneratorPluginInterface, IbisPlugin );
 
     GeneratorPluginInterface() {}
     virtual ~GeneratorPluginInterface() {}
 
     /** Implementation of IbisPlugin interface */
-    IbisPluginTypes GetPluginType()  override { return IbisPluginTypeGenerator; }
+    IbisPluginTypes GetPluginType() override { return IbisPluginTypeGenerator; }
 
     /**  */
     /** @name  Generator Plugin
      *  @brief Definition of the generator interface
-    */
+     */
     ///@{
     virtual QString GetMenuEntryString() = 0;
     virtual bool CanRun() { return true; }
     virtual void Run() = 0;
     ///@}
-
 };
-
 
 #endif

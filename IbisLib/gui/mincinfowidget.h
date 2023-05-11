@@ -11,8 +11,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef MINCINFOWIDGET_H
 #define MINCINFOWIDGET_H
 
-#include <QWidget>
 #include <QObject>
+#include <QWidget>
 
 class ImageObject;
 
@@ -21,15 +21,15 @@ class MincInfoWidget : public QWidget
     Q_OBJECT
 
 public:
-    explicit MincInfoWidget(QWidget *parent = 0);
+    explicit MincInfoWidget( QWidget * parent = 0 );
     ~MincInfoWidget();
 
-    void SetImageObject( ImageObject *img );
+    void SetImageObject( ImageObject * img );
 
 private:
     void UpdateUI();
 
-    ImageObject *m_imageObj;
+    ImageObject * m_imageObj;
 };
 
-#endif // MINCINFOWIDGET_H
+#endif  // MINCINFOWIDGET_H

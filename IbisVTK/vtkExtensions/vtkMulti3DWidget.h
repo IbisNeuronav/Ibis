@@ -21,36 +21,34 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 // .SECTION See Also
 // vtkImagePlaneWidget2
 
-
 #ifndef __vtkMulti3DWidget_h
 #define __vtkMulti3DWidget_h
 
-
 #include <vtkSmartPointer.h>
-#include "vtkMultiInteractorObserver.h"
+
 #include <vector>
+
+#include "vtkMultiInteractorObserver.h"
 
 class vtkAssembly;
 class vtkDataSet;
 class vtkRenderer;
 class vtkProp3D;
-template< class T > class vtkObjectCallback;
-
+template <class T>
+class vtkObjectCallback;
 
 class vtkMulti3DWidget : public vtkMultiInteractorObserver
 {
-
 public:
-
     vtkMulti3DWidget();
     ~vtkMulti3DWidget();
 
-    vtkTypeMacro(vtkMulti3DWidget,vtkMultiInteractorObserver);
-    void PrintSelf(ostream& os, vtkIndent indent) override;
+    vtkTypeMacro( vtkMulti3DWidget, vtkMultiInteractorObserver );
+    void PrintSelf( ostream & os, vtkIndent indent ) override;
 
     // Description:
     // Methods that satisfy the superclass' API.
-    void SetEnabled(int) override;
+    void SetEnabled( int ) override;
 
     // Description:
     // This method is used to initially place the widget.  The placement of the
@@ -60,9 +58,9 @@ public:
     // bounds with the PlaceWidget(bounds) method. Note: PlaceWidget(bounds)
     // is required by all subclasses; the other methods are provided as
     // convenience methods.
-    virtual void PlaceWidget(double bounds[6]) = 0;
-	virtual void PlaceWidget() = 0;
-    virtual void PlaceWidget(double xmin, double xmax, double ymin, double ymax, double zmin, double zmax);
+    virtual void PlaceWidget( double bounds[ 6 ] ) = 0;
+    virtual void PlaceWidget()                     = 0;
+    virtual void PlaceWidget( double xmin, double xmax, double ymin, double ymax, double zmin, double zmax );
 
     // Description:
     // these methods are used to manipulate the set of renderers who's scene
@@ -71,13 +69,12 @@ public:
     // using the following set of functions. It is also possible to associate
     // a prop3D to each renderer. That way, the geometry will be added has a
     // child of the associated Prop3D in each renderer.
-	int AddRenderer( vtkRenderer * ren, vtkAssembly * assembly = 0 );
+    int AddRenderer( vtkRenderer * ren, vtkAssembly * assembly = 0 );
     int GetNumberOfRenderers();
     vtkRenderer * GetRenderer( int index );
     vtkAssembly * GetAssembly( int index );
     vtkAssembly * GetAssembly( vtkRenderer * ren );
     void RemoveRenderer( vtkRenderer * ren );
-
 
     // Description:
     // Set/Get a factor representing the scaling of the widget upon placement
@@ -85,28 +82,28 @@ public:
     // it just fits within the bounding box defined in PlaceWidget(bounds).
     // The PlaceFactor will make the widget larger (PlaceFactor > 1) or smaller
     // (PlaceFactor < 1). By default, PlaceFactor is set to 0.5.
-    vtkSetClampMacro(PlaceFactor,double,0.01,VTK_FLOAT_MAX);
-    vtkGetMacro(PlaceFactor,double);
+    vtkSetClampMacro( PlaceFactor, double, 0.01, VTK_FLOAT_MAX );
+    vtkGetMacro( PlaceFactor, double );
 
     // Description:
     // Set/Get the factor that controls the size of the handles that
     // appear as part of the widget. These handles (like spheres, etc.)
     // are used to manipulate the widget, and are sized as a fraction of
     // the screen diagonal.
-    vtkSetClampMacro(HandleSize,double,0.001,0.5);
-    vtkGetMacro(HandleSize,double);
+    vtkSetClampMacro( HandleSize, double, 0.001, 0.5 );
+    vtkGetMacro( HandleSize, double );
 
     // Description:
     // Enable/disable mouse interaction so the widget remains on display.
-    void SetInteraction(int interact);
-    vtkGetMacro(Interaction,int);
-    vtkBooleanMacro(Interaction,int);
+    void SetInteraction( int interact );
+    vtkGetMacro( Interaction, int );
+    vtkBooleanMacro( Interaction, int );
 
     // Description:
     // Let the user disable the widget if shift and/or control key is pressed
-	vtkGetMacro( NoModifierDisables, int );
-	vtkSetMacro( NoModifierDisables, int );
-	vtkBooleanMacro( NoModifierDisables, int );
+    vtkGetMacro( NoModifierDisables, int );
+    vtkSetMacro( NoModifierDisables, int );
+    vtkBooleanMacro( NoModifierDisables, int );
     vtkGetMacro( ControlDisables, int );
     vtkSetMacro( ControlDisables, int );
     vtkBooleanMacro( ControlDisables, int );
@@ -115,12 +112,11 @@ public:
     vtkBooleanMacro( ShiftDisables, int );
 
 protected:
-
     // Description:
     // Let subclasses react the the addition of renderers
     virtual void InternalAddRenderer( vtkRenderer * ren, vtkAssembly * assembly ) {}
     virtual void InternalRemoveRenderer( int index ) {}
-    
+
     // Description:
     // Let subclasses react to the addition-removal of interactors
     virtual void InternalRemoveInteractor( int index ) override;
@@ -133,8 +129,8 @@ protected:
     // Description:
     // Helper method for subclasses. index is the index of the renderer for which we
     // want to perform the operation.
-    void ComputeDisplayToWorld( unsigned int index, double x, double y, double z, double worldPt[4] );
-    void ComputeWorldToDisplay( unsigned int index, double x, double y, double z, double displayPt[3] );
+    void ComputeDisplayToWorld( unsigned int index, double x, double y, double z, double worldPt[ 4 ] );
+    void ComputeWorldToDisplay( unsigned int index, double x, double y, double z, double displayPt[ 3 ] );
 
     // Description:
     // Add/Remove all observers to/from all interactors
@@ -149,7 +145,7 @@ protected:
     // Description:
     // Render all RenderWindowInteractors
     void RenderAll();
-    
+
     // Description:
     // Utility function to find the uppermost parent of a vtkProp. If the prop passed in
     // parameter is not attached to the renderer passed in parameter, then 0 is returned.
@@ -165,7 +161,7 @@ protected:
     int LastButtonPressed;
 
     // Let the user disable the widget if shift or control key is pressed
-	int NoModifierDisables;
+    int NoModifierDisables;
     int ControlDisables;
     int ShiftDisables;
 
@@ -187,7 +183,7 @@ protected:
     int FindPokedRenderer( vtkRenderWindowInteractor * interactor, int x, int y );
 
     // Callback used to observe the interactors
-    vtkSmartPointer< vtkObjectCallback<vtkMulti3DWidget> > Callback;
+    vtkSmartPointer<vtkObjectCallback<vtkMulti3DWidget> > Callback;
 
     // Event observed
     typedef std::vector<unsigned long> EventIdVec;
@@ -199,30 +195,29 @@ protected:
     // has the widget ever been placed
     double PlaceFactor;
     int Placed;
-    void AdjustBounds(double bounds[6], double newBounds[6], double center[3]);
+    void AdjustBounds( double bounds[ 6 ], double newBounds[ 6 ], double center[ 3 ] );
 
     // control the size of handles (if there are any)
-    double InitialBounds[6];
+    double InitialBounds[ 6 ];
     double InitialLength;
     double HandleSize;
-    double SizeHandles(double factor);
-    virtual void SizeHandles() {}//subclass in turn invokes parent's SizeHandles()
+    double SizeHandles( double factor );
+    virtual void SizeHandles() {}  // subclass in turn invokes parent's SizeHandles()
 
     // used to track the depth of the last pick; also interacts with handle sizing
-    int   ValidPick;
-    double LastPickPosition[3];
+    int ValidPick;
+    double LastPickPosition[ 3 ];
 
     // The renderers used to interact with the scene
-    typedef std::vector<vtkRenderer*> RendererVec;
+    typedef std::vector<vtkRenderer *> RendererVec;
     RendererVec Renderers;
-    typedef std::vector<vtkAssembly*> AssemblyVec;
+    typedef std::vector<vtkAssembly *> AssemblyVec;
     AssemblyVec Assemblies;
     int CurrentRendererIndex;
 
 private:
-
-    vtkMulti3DWidget(const vtkMulti3DWidget&);  //Not implemented
-    void operator=(const vtkMulti3DWidget&);  //Not implemented
+    vtkMulti3DWidget( const vtkMulti3DWidget & );  // Not implemented
+    void operator=( const vtkMulti3DWidget & );    // Not implemented
 };
 
 #endif

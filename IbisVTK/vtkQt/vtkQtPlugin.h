@@ -1,24 +1,21 @@
 #ifndef __vtkQtPlugin_h_
 #define __vtkQtPlugin_h_
 
-#include <QDesignerCustomWidgetInterface>
 #include <QDesignerCustomWidgetCollectionInterface>
-#include <QtPlugin>
+#include <QDesignerCustomWidgetInterface>
 #include <QObject>
 #include <QWidget>
-
+#include <QtPlugin>
 
 class vtkQtHistogramWidgetPlugin : public QDesignerCustomWidgetInterface
 {
-
 public:
-
     vtkQtHistogramWidgetPlugin();
     ~vtkQtHistogramWidgetPlugin();
-    
+
     QString name() const;
     QString domXml() const;
-    QWidget* createWidget(QWidget* parent = 0);
+    QWidget * createWidget( QWidget * parent = 0 );
     QString group() const;
     QIcon icon() const;
     QString includeFile() const;
@@ -29,15 +26,13 @@ public:
 
 class vtkQtPiecewiseFunctionWidgetPlugin : public QDesignerCustomWidgetInterface
 {
-
 public:
-
     vtkQtPiecewiseFunctionWidgetPlugin();
     ~vtkQtPiecewiseFunctionWidgetPlugin();
 
     QString name() const;
     QString domXml() const;
-    QWidget* createWidget(QWidget* parent = 0);
+    QWidget * createWidget( QWidget * parent = 0 );
     QString group() const;
     QIcon icon() const;
     QString includeFile() const;
@@ -48,15 +43,13 @@ public:
 
 class vtkQtColorTransferFunctionWidgetPlugin : public QDesignerCustomWidgetInterface
 {
-
 public:
-
     vtkQtColorTransferFunctionWidgetPlugin();
     ~vtkQtColorTransferFunctionWidgetPlugin();
 
     QString name() const;
     QString domXml() const;
-    QWidget* createWidget(QWidget* parent = 0);
+    QWidget * createWidget( QWidget * parent = 0 );
     QString group() const;
     QIcon icon() const;
     QString includeFile() const;
@@ -69,21 +62,18 @@ public:
 class vtkQtPlugin : public QObject, public QDesignerCustomWidgetCollectionInterface
 {
     Q_OBJECT
-    Q_INTERFACES(QDesignerCustomWidgetCollectionInterface)
+    Q_INTERFACES( QDesignerCustomWidgetCollectionInterface )
 
 public:
-
-     vtkQtPlugin();
+    vtkQtPlugin();
     ~vtkQtPlugin();
 
-    virtual QList<QDesignerCustomWidgetInterface*> customWidgets() const;
+    virtual QList<QDesignerCustomWidgetInterface *> customWidgets() const;
 
 private:
-
     vtkQtHistogramWidgetPlugin * m_histogramWidgetPlugin;
     vtkQtPiecewiseFunctionWidgetPlugin * m_piecewiseFunctionWidgetPlugin;
     vtkQtColorTransferFunctionWidgetPlugin * m_colorTransferFunctionWidgetPlugin;
 };
-
 
 #endif

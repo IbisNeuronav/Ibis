@@ -30,38 +30,31 @@ class vtkSimpleProp3D;
 
 class vtkSimpleMapper3D : public vtkAbstractMapper3D
 {
-
 public:
+    vtkTypeMacro( vtkSimpleMapper3D, vtkAbstractMapper3D );
 
-  vtkTypeMacro(vtkSimpleMapper3D,vtkAbstractMapper3D);
+    // Description:
+    // WARNING: INTERNAL METHOD - NOT INTENDED FOR GENERAL USE
+    // DO NOT USE THIS METHOD OUTSIDE OF THE RENDERING PROCESS
+    // Implement any of these in subclasses to do the rendering
+    virtual int RenderOpaqueGeometry( vtkRenderer * ren, vtkSimpleProp3D * prop ) { return 0; }
+    virtual int HasTranslucentPolygonalGeometry() { return 0; }
+    virtual int RenderTranslucentPolygonalGeometry( vtkRenderer * ren, vtkSimpleProp3D * prop ) { return 0; }
+    virtual int RenderVolumetricGeometry( vtkRenderer * ren, vtkSimpleProp3D * prop ) { return 0; }
+    virtual int RenderOverlay( vtkRenderer * ren, vtkSimpleProp3D * prop ) { return 0; }
 
-  // Description:
-  // WARNING: INTERNAL METHOD - NOT INTENDED FOR GENERAL USE
-  // DO NOT USE THIS METHOD OUTSIDE OF THE RENDERING PROCESS
-  // Implement any of these in subclasses to do the rendering
-  virtual int RenderOpaqueGeometry( vtkRenderer *ren, vtkSimpleProp3D * prop ) { return 0; }
-  virtual int HasTranslucentPolygonalGeometry() { return 0; }
-  virtual int RenderTranslucentPolygonalGeometry( vtkRenderer *ren, vtkSimpleProp3D * prop ) { return 0; }
-  virtual int RenderVolumetricGeometry( vtkRenderer *ren, vtkSimpleProp3D * prop ) { return 0; }
-  virtual int RenderOverlay( vtkRenderer *ren, vtkSimpleProp3D * prop ) { return 0; }
-
-  // Description:
-  // Reimplement this function in subclasses to take into account
-  // MTime of all dependent objects (data, filters, etc.)
-  virtual unsigned long int GetRedrawMTime() { return this->GetMTime(); }
+    // Description:
+    // Reimplement this function in subclasses to take into account
+    // MTime of all dependent objects (data, filters, etc.)
+    virtual unsigned long int GetRedrawMTime() { return this->GetMTime(); }
 
 protected:
+    vtkSimpleMapper3D();
+    ~vtkSimpleMapper3D();
 
-  vtkSimpleMapper3D();
-  ~vtkSimpleMapper3D();
-  
 private:
-
-  vtkSimpleMapper3D(const vtkSimpleMapper3D&);  // Not implemented.
-  void operator=(const vtkSimpleMapper3D&);  // Not implemented.
+    vtkSimpleMapper3D( const vtkSimpleMapper3D & );  // Not implemented.
+    void operator=( const vtkSimpleMapper3D & );     // Not implemented.
 };
 
-
 #endif
-
-
