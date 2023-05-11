@@ -11,11 +11,13 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef __FileReader_h_
 #define __FileReader_h_
 
-#include <QThread>
-#include <QStringList>
-#include <QObject>
-#include <itkMetaDataObject.h>
 #include <itkMetaDataDictionary.h>
+#include <itkMetaDataObject.h>
+
+#include <QObject>
+#include <QStringList>
+#include <QThread>
+
 #include "ibisitkvtkconverter.h"
 
 class SceneManager;
@@ -58,7 +60,6 @@ class FileReader : public QThread
     Q_OBJECT
 
 public:
-
     FileReader( QObject * parent = 0 );
     ~FileReader();
 
@@ -70,7 +71,7 @@ public:
     /** Helper function that eventually calls SetParams. */
     void SetFileNames( QStringList & filenames );
     /** Return a list of objects read in from open files. */
-    void GetReadObjects( QList<SceneObject*> & objects );
+    void GetReadObjects( QList<SceneObject *> & objects );
 
     /** Warnings are accumulated during reading and then returned in a list of strings. */
     const QStringList & GetWarnings() { return m_warnings; }
@@ -80,7 +81,7 @@ public:
     QString GetCurrentlyReadFile();
 
     /** Used for debugging */
-    void PrintMetadata(itk::MetaDataDictionary &dict);
+    void PrintMetadata( itk::MetaDataDictionary & dict );
 
     /** @name MINC1 and MINC2
      * @brief MINC1 dtecting and converting to MINC2
@@ -92,12 +93,13 @@ public:
     bool HasMincConverter();
     /** Is the file of MINC1 type? */
     bool IsMINC1( QString fileName );
-    /** Convert MINC1 file to MINC2 file using mincconvert, if it is a frame from US acquisition, additionaly use mincalc. */
-    bool ConvertMINC1toMINC2(QString &inputileName, QString &outputileName , bool isVideoFrame = false );
+    /** Convert MINC1 file to MINC2 file using mincconvert, if it is a frame from US acquisition, additionaly use
+     * mincalc. */
+    bool ConvertMINC1toMINC2( QString & inputileName, QString & outputileName, bool isVideoFrame = false );
     ///@}
 
     /** Return one or two PointsObjects loaded from a tag file. */
-    bool GetPointsDataFromTagFile( QString filename, PointsObject *pts1, PointsObject *pts2 );
+    bool GetPointsDataFromTagFile( QString filename, PointsObject * pts1, PointsObject * pts2 );
 
     /** @name US acquisitions
      * @brief Getting US acquisition files
@@ -112,30 +114,30 @@ public:
     ///@}
 
     /** IbisAPI is used to communicate between plugins and the core of ibis application
-    *   In FileReader it is used to get from preferences the path to the directory containing MINC tools
-    */
-    void SetIbisAPI(IbisAPI *api );
+     *   In FileReader it is used to get from preferences the path to the directory containing MINC tools
+     */
+    void SetIbisAPI( IbisAPI * api );
 
 private slots:
 
-    void OnReaderProgress( vtkObject*, unsigned long );
+    void OnReaderProgress( vtkObject *, unsigned long );
 
 protected:
-
     void ReaderProgress( double fileProgress );
 
     void run();
 
-    bool OpenFile        (QList<SceneObject*> & readObjects, QString filename, const QString & dataObjectName = "", bool isLabel = false);
-    bool OpenItkFile     ( QList<SceneObject*> & readObjects, QString filename, const QString & dataObjectName = "" );
-    bool OpenItkLabelFile( QList<SceneObject*> & readObjects, QString filename, const QString & dataObjectName = "" );
-    bool OpenObjFile     ( QList<SceneObject*> & readObjects, QString filename, const QString & dataObjectName = "" );
-    bool OpenWavObjFile  ( QList<SceneObject*> & readObjects, QString filename, const QString & dataObjectName = "" );
-    bool OpenPlyFile     ( QList<SceneObject*> & readObjects, QString filename, const QString & dataObjectName );
-    bool OpenVTKFile     ( QList<SceneObject*> & readObjects, QString filename, const QString & dataObjectName = "" );
-    bool OpenFIBFile     ( QList<SceneObject*> & readObjects, QString filename, const QString & dataObjectName = "" );
-    bool OpenVTPFile     ( QList<SceneObject*> & readObjects, QString filename, const QString & dataObjectName = "" );
-    bool OpenTagFile     ( QList<SceneObject*> & readObjects, QString filename, const QString & dataObjectName = "" );
+    bool OpenFile( QList<SceneObject *> & readObjects, QString filename, const QString & dataObjectName = "",
+                   bool isLabel = false );
+    bool OpenItkFile( QList<SceneObject *> & readObjects, QString filename, const QString & dataObjectName = "" );
+    bool OpenItkLabelFile( QList<SceneObject *> & readObjects, QString filename, const QString & dataObjectName = "" );
+    bool OpenObjFile( QList<SceneObject *> & readObjects, QString filename, const QString & dataObjectName = "" );
+    bool OpenWavObjFile( QList<SceneObject *> & readObjects, QString filename, const QString & dataObjectName = "" );
+    bool OpenPlyFile( QList<SceneObject *> & readObjects, QString filename, const QString & dataObjectName );
+    bool OpenVTKFile( QList<SceneObject *> & readObjects, QString filename, const QString & dataObjectName = "" );
+    bool OpenFIBFile( QList<SceneObject *> & readObjects, QString filename, const QString & dataObjectName = "" );
+    bool OpenVTPFile( QList<SceneObject *> & readObjects, QString filename, const QString & dataObjectName = "" );
+    bool OpenTagFile( QList<SceneObject *> & readObjects, QString filename, const QString & dataObjectName = "" );
 
     /** Set the name to show on the objects tree together with the file name and full [ath to the file. */
     void SetObjectName( SceneObject * obj, QString objName, QString filename );
@@ -169,7 +171,7 @@ protected:
     QString m_minccalc;
 
     /** IbisAPI is used to get the path to the directory containing MINC tools */
-    IbisAPI *m_ibisAPI;
+    IbisAPI * m_ibisAPI;
 };
 
 #endif

@@ -11,15 +11,17 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef POINTEROBJECTSETTINGSDIALOG_H
 #define POINTEROBJECTSETTINGSDIALOG_H
 
-#include <QWidget>
+#include <vtkSmartPointer.h>
+
 #include <QList>
 #include <QObject>
-#include <vtkSmartPointer.h>
+#include <QWidget>
 
 class vtkQtMatrixDialog;
 
-namespace Ui {
-    class PointerObjectSettingsDialog;
+namespace Ui
+{
+class PointerObjectSettingsDialog;
 }
 
 class PointerObject;
@@ -30,17 +32,17 @@ class PointerObjectSettingsDialog : public QWidget
 {
     Q_OBJECT
 public:
-    PointerObjectSettingsDialog(QWidget *parent = 0);
+    PointerObjectSettingsDialog( QWidget * parent = 0 );
     virtual ~PointerObjectSettingsDialog();
 
-    void SetPointer(PointerObject *);
-    void SetPointerPickedPointsObject(vtkSmartPointer<PointsObject>);
+    void SetPointer( PointerObject * );
+    void SetPointerPickedPointsObject( vtkSmartPointer<PointsObject> );
 
 public slots:
     void UpdateUI();
 
 protected:
-    PointerObject *m_pointer;
+    PointerObject * m_pointer;
     vtkSmartPointer<PointsObject> m_pointerPickedPointsObject;
 
     void UpdatePointSetsComboBox();
@@ -49,20 +51,18 @@ private slots:
 
     virtual void on_savePositionPushButton_clicked();
     virtual void on_newPointsObjectPushButton_clicked();
-    virtual void on_pointSetsComboBox_activated(int);
-    virtual void on_calibrateTipButton_toggled(bool checked);
+    virtual void on_pointSetsComboBox_activated( int );
+    virtual void on_calibrateTipButton_toggled( bool checked );
     virtual void on_calibrationMatrixPushButton_toggled( bool on );
     virtual void OnTipCalibrationDialogClosed();
     void OnCalibrationMatrixDialogClosed();
 
 private:
-
     vtkQtMatrixDialog * m_matrixDialog;
 
-    Ui::PointerObjectSettingsDialog *ui;
+    Ui::PointerObjectSettingsDialog * ui;
 
-    PointerCalibrationDialog *  m_tipCalibrationWidget;
-
+    PointerCalibrationDialog * m_tipCalibrationWidget;
 };
 
-#endif // POINTEROBJECTSETTINGSDIALOG_H
+#endif  // POINTEROBJECTSETTINGSDIALOG_H

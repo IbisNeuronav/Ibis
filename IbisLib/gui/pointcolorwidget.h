@@ -11,12 +11,14 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef POINTCOLORWIDGET_H
 #define POINTCOLORWIDGET_H
 
-#include <QWidget>
 #include <QObject>
+#include <QWidget>
+
 #include "pointsobject.h"
 
-namespace Ui {
-    class PointColorWidget;
+namespace Ui
+{
+class PointColorWidget;
 }
 
 class PointColorWidget : public QWidget
@@ -24,27 +26,26 @@ class PointColorWidget : public QWidget
     Q_OBJECT
 
 public:
-    explicit PointColorWidget(QWidget *parent = 0);
+    explicit PointColorWidget( QWidget * parent = 0 );
     ~PointColorWidget();
 
 public slots:
-    virtual void OpacitySliderValueChanged(int);
-    virtual void OpacityTextEditChanged(const QString &);
+    virtual void OpacitySliderValueChanged( int );
+    virtual void OpacityTextEditChanged( const QString & );
     virtual void DisabledColorSetButtonClicked();
     virtual void EnabledColorSetButtonClicked();
     virtual void SelectedColorSetButtonClicked();
     virtual void LineColorSetButtonClicked();
 
-    void SetPointsObject(PointsObject *obj);
+    void SetPointsObject( PointsObject * obj );
 
 protected:
-
     void UpdateUI();
-    PointsObject *m_points;
+    PointsObject * m_points;
     void UpdateOpacityUI();
 
 private:
-    Ui::PointColorWidget *ui;
+    Ui::PointColorWidget * ui;
 };
 
-#endif // POINTCOLORWIDGET_H
+#endif  // POINTCOLORWIDGET_H

@@ -12,12 +12,12 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include "vtkMultiInteractorObserver.h"
 
-#include "vtkObjectCallback.h"
 #include <vtkObjectFactory.h>
-#include <vtkRenderer.h>
 #include <vtkRenderWindow.h>
 #include <vtkRenderWindowInteractor.h>
+#include <vtkRenderer.h>
 
+#include "vtkObjectCallback.h"
 
 vtkMultiInteractorObserver::vtkMultiInteractorObserver()
 {
@@ -29,29 +29,28 @@ vtkMultiInteractorObserver::vtkMultiInteractorObserver()
 
     this->Priority = 0.0;
 
-    this->KeyPressActivation = 1;
+    this->KeyPressActivation      = 1;
     this->KeyPressActivationValue = 'i';
-    
+
     this->CurrentInteractorIndex = -1;
 }
 
 vtkMultiInteractorObserver::~vtkMultiInteractorObserver()
 {
-    this->SetEnabled(0);
+    this->SetEnabled( 0 );
     this->KeyPressCallbackCommand->Delete();
-    
+
     // remove reference from interactors
     InteractorVec::iterator itInt = this->Interactors.begin();
     while( itInt != this->Interactors.end() )
     {
-        if( (*itInt) )
+        if( ( *itInt ) )
         {
-            (*itInt)->UnRegister( this );
+            ( *itInt )->UnRegister( this );
         }
         ++itInt;
     }
 }
-
 
 void vtkMultiInteractorObserver::AddInteractor( vtkRenderWindowInteractor * interactor )
 {
@@ -65,38 +64,32 @@ void vtkMultiInteractorObserver::AddInteractor( vtkRenderWindowInteractor * inte
     }
 }
 
-
 void vtkMultiInteractorObserver::RemoveInteractor( vtkRenderWindowInteractor * interactor )
 {
     if( interactor )
     {
         InteractorVec::iterator it = this->Interactors.begin();
-        int index = 0;
+        int index                  = 0;
         for( ; it != this->Interactors.end(); ++it, ++index )
         {
-            if( (*it) == interactor )
+            if( ( *it ) == interactor )
             {
                 break;
             }
         }
-        
+
         if( it != this->Interactors.end() )
         {
-            (*it)->RemoveObserver( this->KeyPressCallbackCommand );
+            ( *it )->RemoveObserver( this->KeyPressCallbackCommand );
             this->InternalRemoveInteractor( index );
-            (*it)->UnRegister( this );
+            ( *it )->UnRegister( this );
             this->Interactors.erase( it );
             this->Modified();
         }
     }
 }
 
-
-int vtkMultiInteractorObserver::GetNumberOfInteractors()
-{
-    return this->Interactors.size();
-}
-
+int vtkMultiInteractorObserver::GetNumberOfInteractors() { return this->Interactors.size(); }
 
 vtkRenderWindowInteractor * vtkMultiInteractorObserver::GetInteractor( unsigned int index )
 {
@@ -107,14 +100,13 @@ vtkRenderWindowInteractor * vtkMultiInteractorObserver::GetInteractor( unsigned 
     return 0;
 }
 
-
 //----------------------------------------------------------------------------
 void vtkMultiInteractorObserver::StartInteraction()
 {
     InteractorVec::iterator it = this->Interactors.begin();
     while( it != this->Interactors.end() )
     {
-        (*it)->GetRenderWindow()->SetDesiredUpdateRate( (*it)->GetDesiredUpdateRate() );
+        ( *it )->GetRenderWindow()->SetDesiredUpdateRate( ( *it )->GetDesiredUpdateRate() );
         ++it;
     }
 }
@@ -125,22 +117,21 @@ void vtkMultiInteractorObserver::EndInteraction()
     InteractorVec::iterator it = this->Interactors.begin();
     while( it != this->Interactors.end() )
     {
-        (*it)->GetRenderWindow()->SetDesiredUpdateRate( (*it)->GetStillUpdateRate() );
+        ( *it )->GetRenderWindow()->SetDesiredUpdateRate( ( *it )->GetStillUpdateRate() );
         ++it;
     }
 }
 
-
 void vtkMultiInteractorObserver::OnChar( vtkObject * caller, unsigned long eventId, void * callData )
 {
     vtkRenderWindowInteractor * interactor = vtkRenderWindowInteractor::SafeDownCast( caller );
-    
+
     // catch additional keycodes otherwise
-    if ( this->KeyPressActivation && interactor )
+    if( this->KeyPressActivation && interactor )
     {
-        if ( interactor->GetKeyCode() == this->KeyPressActivationValue )
+        if( interactor->GetKeyCode() == this->KeyPressActivationValue )
         {
-            if ( !this->Enabled )
+            if( !this->Enabled )
             {
                 this->On();
             }
@@ -148,19 +139,17 @@ void vtkMultiInteractorObserver::OnChar( vtkObject * caller, unsigned long event
             {
                 this->Off();
             }
-            this->KeyPressCallbackCommand->SetAbortFlag(1);
+            this->KeyPressCallbackCommand->SetAbortFlag( 1 );
         }
     }
 }
 
-void vtkMultiInteractorObserver::PrintSelf(ostream& os, vtkIndent indent)
+void vtkMultiInteractorObserver::PrintSelf( ostream & os, vtkIndent indent )
 {
-    this->Superclass::PrintSelf(os,indent);
+    this->Superclass::PrintSelf( os, indent );
 
     os << indent << "Enabled: " << this->Enabled << "\n";
     os << indent << "Priority: " << this->Priority << "\n";
-    os << indent << "Key Press Activation: " << (this->KeyPressActivation ? "On" : "Off") << "\n";
+    os << indent << "Key Press Activation: " << ( this->KeyPressActivation ? "On" : "Off" ) << "\n";
     os << indent << "Key Press Activation Value: " << this->KeyPressActivationValue << "\n";
 }
-
-

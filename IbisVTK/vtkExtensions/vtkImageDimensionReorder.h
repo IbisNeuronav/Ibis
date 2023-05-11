@@ -28,7 +28,6 @@
 // The SetInputOrder call tells the class that the input image is in
 // z, y, x order. The filter will always reorder to put it in x,y,z order.
 
-
 #ifndef __vtkImageDimensionReorder_h
 #define __vtkImageDimensionReorder_h
 
@@ -36,35 +35,27 @@
 
 class vtkImageDimensionReorder : public vtkSimpleImageToImageFilter
 {
-
 public:
+    static vtkImageDimensionReorder * New();
+    vtkTypeRevisionMacro( vtkImageDimensionReorder, vtkSimpleImageToImageFilter );
+    void PrintSelf( ostream & os, vtkIndent indent );
 
-  static vtkImageDimensionReorder *New();
-  vtkTypeRevisionMacro(vtkImageDimensionReorder,vtkSimpleImageToImageFilter);
-  void PrintSelf(ostream& os, vtkIndent indent);
-
-  vtkSetVector3Macro(InputOrder,int);
-  vtkGetVector3Macro(InputOrder,int);
+    vtkSetVector3Macro( InputOrder, int );
+    vtkGetVector3Macro( InputOrder, int );
 
 protected:
+    vtkImageDimensionReorder();
+    ~vtkImageDimensionReorder(){};
 
-  vtkImageDimensionReorder();
-  ~vtkImageDimensionReorder() {};
+    int InputOrder[ 3 ];
+    int OutputStep[ 3 ];
 
-  int InputOrder[3];
-  int OutputStep[3];
-
-  void ExecuteInformation();
-  void SimpleExecute( vtkImageData * inData, vtkImageData * outData );
+    void ExecuteInformation();
+    void SimpleExecute( vtkImageData * inData, vtkImageData * outData );
 
 private:
-
-  vtkImageDimensionReorder(const vtkImageDimensionReorder&);  // Not implemented.
-  void operator=(const vtkImageDimensionReorder&);  // Not implemented.
-
+    vtkImageDimensionReorder( const vtkImageDimensionReorder & );  // Not implemented.
+    void operator=( const vtkImageDimensionReorder & );            // Not implemented.
 };
 
 #endif
-
-
-

@@ -3,8 +3,9 @@
 
 #include <QObject>
 #include <map>
-#include "sceneobject.h"
+
 #include "ibistypes.h"
+#include "sceneobject.h"
 
 class vtkActor;
 class HardwareModule;
@@ -14,7 +15,6 @@ class TrackedSceneObject : public SceneObject
     Q_OBJECT
 
 public:
-
     static TrackedSceneObject * New() { return new TrackedSceneObject; }
     vtkTypeMacro( TrackedSceneObject, SceneObject );
 
@@ -23,7 +23,7 @@ public:
 
     void SetHardwareModule( HardwareModule * hw ) { m_hardwareModule = hw; }
     bool IsDrivenByHardware() { return m_hardwareModule != 0; }
-    HardwareModule * GetHardwareModule()  { return m_hardwareModule; }
+    HardwareModule * GetHardwareModule() { return m_hardwareModule; }
 
     virtual void Setup( View * view ) override;
     virtual void Release( View * view ) override;
@@ -44,7 +44,7 @@ public:
     void SetInputTransform( vtkTransform * t );
     vtkTransform * GetUncalibratedTransform() { return m_transform; }
     void SetCalibrationMatrix( vtkMatrix4x4 * mat );
-    void SetTimestamp(double timestamp) { (timestamp < 0) ? m_timestamp = -1 : m_timestamp = timestamp; }
+    void SetTimestamp( double timestamp ) { ( timestamp < 0 ) ? m_timestamp = -1 : m_timestamp = timestamp; }
     vtkMatrix4x4 * GetCalibrationMatrix();
 
     vtkTransform * GetCalibrationTransform() { return m_calibrationTransform; }
@@ -57,14 +57,13 @@ public:
     void UnFreezeTransform();
 
 protected:
-
     virtual void InternalUpdateWorldTransform();
     virtual void ObjectAboutToBeRemovedFromScene() override;
 
     HardwareModule * m_hardwareModule;
 
     // Generic representation
-    typedef std::map< View *, vtkActor* > PerViewActors;
+    typedef std::map<View *, vtkActor *> PerViewActors;
     PerViewActors m_genericActors;
 
     TrackerToolState m_state;

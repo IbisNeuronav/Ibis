@@ -11,51 +11,49 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef __WorldObjectSettingsWidget_h_
 #define __WorldObjectSettingsWidget_h_
 
-#include <QWidget>
 #include <QObject>
+#include <QWidget>
 
-namespace Ui {
-    class WorldObjectSettingsWidget;
+namespace Ui
+{
+class WorldObjectSettingsWidget;
 }
 
 class WorldObject;
 
 class WorldObjectSettingsWidget : public QWidget
 {
-
     Q_OBJECT
 
 public:
-
-    explicit WorldObjectSettingsWidget(QWidget *parent = 0);
+    explicit WorldObjectSettingsWidget( QWidget * parent = 0 );
     ~WorldObjectSettingsWidget();
 
     void SetWorldObject( WorldObject * obj );
 
 public slots:
 
-    void On3DInteractionButtonClicked(int);
+    void On3DInteractionButtonClicked( int );
 
 private slots:
 
-    void on_updateMaxFrequencySlider_valueChanged(int value);
-    void on_viewFollowsReferenceCheckBox_toggled(bool checked);
-    void on_cameraAngleSlider_valueChanged(int value);
-    void on_cameraAngleSpinBox_valueChanged(int arg1);
+    void on_updateMaxFrequencySlider_valueChanged( int value );
+    void on_viewFollowsReferenceCheckBox_toggled( bool checked );
+    void on_cameraAngleSlider_valueChanged( int value );
+    void on_cameraAngleSpinBox_valueChanged( int arg1 );
     void on_changeColorButton_clicked();
     void on_change3DColorButton_clicked();
     void on_changeCursorColorButton_clicked();
-    void on_showAxesCheckBox_toggled(bool);
-    void on_showCursorCheckBox_toggled(bool);
+    void on_showAxesCheckBox_toggled( bool );
+    void on_showCursorCheckBox_toggled( bool );
 
 private:
-
     void UpdateUi();
     int GetUpdateFrequencyIndex( double fps );
 
     WorldObject * m_worldObject;
 
-    Ui::WorldObjectSettingsWidget *ui;
+    Ui::WorldObjectSettingsWidget * ui;
 };
 
 #endif

@@ -12,6 +12,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #define OBJECTPLUGININTERFACE_h_
 
 #include <QString>
+
 #include "ibisplugin.h"
 
 class SceneObject;
@@ -27,17 +28,15 @@ class Serializer;
  */
 class ObjectPluginInterface : public IbisPlugin
 {
-
 public:
-
     vtkTypeMacro( ObjectPluginInterface, IbisPlugin );
-    
+
     ObjectPluginInterface() {}
     virtual ~ObjectPluginInterface() {}
 
     /** Implementation of IbisPlugin interface. */
     IbisPluginTypes GetPluginType() override { return IbisPluginTypeObject; }
-    
+
     /** @name Function that should be overriden in plugins.
      */
     ///@{

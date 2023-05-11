@@ -9,34 +9,32 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
 #include "triplecutplaneobjectsettingswidget.h"
-#include "ui_triplecutplaneobjectsettingswidget.h"
-#include "triplecutplaneobjectmixerwidget.h"
-#include "triplecutplaneobject.h"
-#include "scenemanager.h"
-#include "imageobject.h"
-#include <QVBoxLayout>
-#include <QComboBox>
 
-TripleCutPlaneObjectSettingsWidget::TripleCutPlaneObjectSettingsWidget(QWidget *parent) :
-    QWidget(parent),
-    ui(new Ui::TripleCutPlaneObjectSettingsWidget)
+#include <QComboBox>
+#include <QVBoxLayout>
+
+#include "imageobject.h"
+#include "scenemanager.h"
+#include "triplecutplaneobject.h"
+#include "triplecutplaneobjectmixerwidget.h"
+#include "ui_triplecutplaneobjectsettingswidget.h"
+
+TripleCutPlaneObjectSettingsWidget::TripleCutPlaneObjectSettingsWidget( QWidget * parent )
+    : QWidget( parent ), ui( new Ui::TripleCutPlaneObjectSettingsWidget )
 {
     m_cutPlaneObject = 0;
-    ui->setupUi(this);
+    ui->setupUi( this );
     m_volumeContributionLayout = new QVBoxLayout( ui->volumeContributionGroupBox );
 }
 
-TripleCutPlaneObjectSettingsWidget::~TripleCutPlaneObjectSettingsWidget()
-{
-    delete ui;
-}
+TripleCutPlaneObjectSettingsWidget::~TripleCutPlaneObjectSettingsWidget() { delete ui; }
 
 void TripleCutPlaneObjectSettingsWidget::SetTripleCutPlaneObject( TripleCutPlaneObject * obj )
 {
     m_cutPlaneObject = obj;
-    connect( m_cutPlaneObject->GetManager(), SIGNAL(ObjectAdded( int )), this, SLOT(UpdateImageSliders()) );
-    connect( m_cutPlaneObject->GetManager(), SIGNAL(ObjectRemoved( int )), this, SLOT(UpdateImageSliders()) );
-    connect( m_cutPlaneObject, SIGNAL(ObjectModified()), this, SLOT(UpdateUI()) );
+    connect( m_cutPlaneObject->GetManager(), SIGNAL( ObjectAdded( int ) ), this, SLOT( UpdateImageSliders() ) );
+    connect( m_cutPlaneObject->GetManager(), SIGNAL( ObjectRemoved( int ) ), this, SLOT( UpdateImageSliders() ) );
+    connect( m_cutPlaneObject, SIGNAL( ObjectModified() ), this, SLOT( UpdateUI() ) );
     UpdateUI();
     UpdateImageSliders();
 }
@@ -91,17 +89,17 @@ void TripleCutPlaneObjectSettingsWidget::UpdateUI()
     ui->sliceThicknessSpinBox->blockSignals( false );
 }
 
-void TripleCutPlaneObjectSettingsWidget::on_sagittalPlaneCheckBox_toggled(bool checked)
+void TripleCutPlaneObjectSettingsWidget::on_sagittalPlaneCheckBox_toggled( bool checked )
 {
     m_cutPlaneObject->SetViewPlane( 0, checked ? 1 : 0 );
 }
 
-void TripleCutPlaneObjectSettingsWidget::on_coronalPlaneCheckBox_toggled(bool checked)
+void TripleCutPlaneObjectSettingsWidget::on_coronalPlaneCheckBox_toggled( bool checked )
 {
     m_cutPlaneObject->SetViewPlane( 1, checked ? 1 : 0 );
 }
 
-void TripleCutPlaneObjectSettingsWidget::on_transversePlaneCheckBox_toggled(bool checked)
+void TripleCutPlaneObjectSettingsWidget::on_transversePlaneCheckBox_toggled( bool checked )
 {
     m_cutPlaneObject->SetViewPlane( 2, checked ? 1 : 0 );
 }

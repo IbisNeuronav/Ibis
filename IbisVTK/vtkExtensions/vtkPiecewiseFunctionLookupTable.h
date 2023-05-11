@@ -27,52 +27,42 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 class vtkColorTransferFunction;
 class vtkPiecewiseFunction;
 
-
 class vtkPiecewiseFunctionLookupTable : public vtkLookupTable
 {
-
 public:
+    // Description:
+    // Construct with range=[0,1]; and hsv ranges set up for rainbow color table
+    // (from red to blue).
+    static vtkPiecewiseFunctionLookupTable * New();
 
-  // Description:
-  // Construct with range=[0,1]; and hsv ranges set up for rainbow color table
-  // (from red to blue).
-  static vtkPiecewiseFunctionLookupTable *New();
+    vtkTypeMacro( vtkPiecewiseFunctionLookupTable, vtkLookupTable );
+    void PrintSelf( ostream & os, vtkIndent indent ) override;
 
-  vtkTypeMacro(vtkPiecewiseFunctionLookupTable,vtkLookupTable);
-  void PrintSelf(ostream& os, vtkIndent indent) override;
+    void SetIntensityFactor( double f );
 
-  void SetIntensityFactor( double f );
+    // Description:
+    // Force the lookup table to regenerate.
+    virtual void ForceBuild() override;
 
-  // Description:
-  // Force the lookup table to regenerate.
-  virtual void ForceBuild() override;
+    void AddColorPoint( float value, float r, float g, float b );
+    void AddAlphaPoint( float value, float alpha );
+    void RemoveAllPoints();
 
-  void AddColorPoint( float value, float r, float g, float b );
-  void AddAlphaPoint( float value, float alpha );
-  void RemoveAllPoints();
-
-  vtkColorTransferFunction * GetColorFunction() { return ColorFunction; }
-  vtkPiecewiseFunction * GetAlphaFunction() { return AlphaFunction; }
+    vtkColorTransferFunction * GetColorFunction() { return ColorFunction; }
+    vtkPiecewiseFunction * GetAlphaFunction() { return AlphaFunction; }
 
 protected:
-
     double IntensityFactor;
 
     vtkColorTransferFunction * ColorFunction;
     vtkPiecewiseFunction * AlphaFunction;
 
-  vtkPiecewiseFunctionLookupTable();
-  ~vtkPiecewiseFunctionLookupTable();
+    vtkPiecewiseFunctionLookupTable();
+    ~vtkPiecewiseFunctionLookupTable();
 
 private:
-
-  vtkPiecewiseFunctionLookupTable(const vtkPiecewiseFunctionLookupTable&);  // Not implemented.
-  void operator=(const vtkPiecewiseFunctionLookupTable&);  // Not implemented.
-
+    vtkPiecewiseFunctionLookupTable( const vtkPiecewiseFunctionLookupTable & );  // Not implemented.
+    void operator=( const vtkPiecewiseFunctionLookupTable & );                   // Not implemented.
 };
 
-
 #endif
-
-
-

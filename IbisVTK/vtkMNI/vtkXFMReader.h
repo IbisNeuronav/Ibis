@@ -17,40 +17,32 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include <vtkObject.h>
 
-
 class vtkMatrix4x4;
 
 class vtkXFMReader : public vtkObject
 {
-
 public:
-
     static vtkXFMReader * New();
-    vtkTypeMacro(vtkXFMReader,vtkObject);
+    vtkTypeMacro( vtkXFMReader, vtkObject );
 
-    vtkSetStringMacro(FileName);
+    vtkSetStringMacro( FileName );
     virtual void Update();
-    virtual void SetMatrix(vtkMatrix4x4 *mat);
+    virtual void SetMatrix( vtkMatrix4x4 * mat );
     virtual int CanReadFile( const char * fname );
-    
-    void PrintSelf(ostream &os, vtkIndent indent) override;
 
-//BTX
+    void PrintSelf( ostream & os, vtkIndent indent ) override;
+
+    // BTX
 protected:
-
     char * FileName;
-    vtkMatrix4x4 *Matrix;
+    vtkMatrix4x4 * Matrix;
 
     vtkXFMReader();
     ~vtkXFMReader();
 
 private:
-    vtkXFMReader(const vtkXFMReader&);      // Not implemented.
-    void operator=(const vtkXFMReader&);  // Not implemented.
-//ETX
+    vtkXFMReader( const vtkXFMReader & );    // Not implemented.
+    void operator=( const vtkXFMReader & );  // Not implemented.
+    // ETX
 };
-#endif //TAG_VTKXFMREADER_H
-
-
-
-
+#endif  // TAG_VTKXFMREADER_H

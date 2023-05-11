@@ -11,11 +11,12 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef __ToolPluginInterface_h_
 #define __ToolPluginInterface_h_
 
-#include <QString>
 #include <QPoint>
 #include <QSize>
-#include "serializer.h"
+#include <QString>
+
 #include "ibisplugin.h"
+#include "serializer.h"
 
 class SceneManager;
 class QSettings;
@@ -31,16 +32,14 @@ class QWidget;
  */
 class ToolPluginInterface : public IbisPlugin
 {
-
 public:
-
     vtkTypeMacro( ToolPluginInterface, IbisPlugin );
-    
+
     ToolPluginInterface() {}
     virtual ~ToolPluginInterface() override {}
 
     /** Implementation of IbisPlugin interface. */
-    IbisPluginTypes GetPluginType()  override { return IbisPluginTypeTool; }
+    IbisPluginTypes GetPluginType() override { return IbisPluginTypeTool; }
 
     /** Serialize plugin parameters. */
     virtual void Serialize( Serializer * serializer ) override;
@@ -52,7 +51,7 @@ public:
         QSize winSize;
         bool active;
     };
-    
+
     /** Plugin settings. */
     Settings & GetSettings() { return m_settings; }
 
@@ -80,12 +79,10 @@ public:
     virtual bool WidgetAboutToClose() { return true; }
 
 protected:
-
     virtual void PluginTypeLoadSettings( QSettings & s ) override;
     virtual void PluginTypeSaveSettings( QSettings & s ) override;
 
     Settings m_settings;
-
 };
 
 ObjectSerializationHeaderMacro( ToolPluginInterface );

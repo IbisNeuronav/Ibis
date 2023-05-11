@@ -11,10 +11,11 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef IMAGEOBJECTVOLUMESETTINGSWIDGET_H
 #define IMAGEOBJECTVOLUMESETTINGSWIDGET_H
 
-#include <QWidget>
 #include <QObject>
+#include <QWidget>
 
-namespace Ui {
+namespace Ui
+{
 class ImageObjectVolumeSettingsWidget;
 }
 
@@ -23,35 +24,33 @@ class ImageObject;
 class ImageObjectVolumeSettingsWidget : public QWidget
 {
     Q_OBJECT
-    
-public:
 
-    explicit ImageObjectVolumeSettingsWidget(QWidget *parent = 0);
+public:
+    explicit ImageObjectVolumeSettingsWidget( QWidget * parent = 0 );
     ~ImageObjectVolumeSettingsWidget();
 
     void SetImageObject( ImageObject * img );
-    
+
 private slots:
 
-    void on_enableVolumeRenderingCheckBox_toggled(bool checked);
-    void on_shadingCheckBox_toggled(bool checked);
-    void on_ambiantSpinBox_valueChanged(double arg1);
-    void on_diffuseSpinBox_valueChanged(double arg1);
-    void on_specularSpinBox_valueChanged(double arg1);
-    void on_specularPowerSpinBox_valueChanged(double arg1);
-    void on_levelSpinBox_valueChanged(double arg1);
-    void on_windowSpinBox_valueChanged(double arg1);
-    void on_autoSampleDistanceCheckBox_toggled(bool checked);
-    void on_sampleDistanceSpinBox_valueChanged(double arg1);
-    void on_showClippingWidgetCheckBox_toggled(bool checked);
+    void on_enableVolumeRenderingCheckBox_toggled( bool checked );
+    void on_shadingCheckBox_toggled( bool checked );
+    void on_ambiantSpinBox_valueChanged( double arg1 );
+    void on_diffuseSpinBox_valueChanged( double arg1 );
+    void on_specularSpinBox_valueChanged( double arg1 );
+    void on_specularPowerSpinBox_valueChanged( double arg1 );
+    void on_levelSpinBox_valueChanged( double arg1 );
+    void on_windowSpinBox_valueChanged( double arg1 );
+    void on_autoSampleDistanceCheckBox_toggled( bool checked );
+    void on_sampleDistanceSpinBox_valueChanged( double arg1 );
+    void on_showClippingWidgetCheckBox_toggled( bool checked );
 
 private:
-
     void UpdateUi();
 
     ImageObject * m_imageObject;
 
-    Ui::ImageObjectVolumeSettingsWidget *ui;
+    Ui::ImageObjectVolumeSettingsWidget * ui;
 };
 
 #endif

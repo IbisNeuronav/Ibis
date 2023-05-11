@@ -6,11 +6,10 @@
 
 class Logger : public QObject
 {
-
     Q_OBJECT
 
 public:
-    explicit Logger(QObject *parent = nullptr);
+    explicit Logger( QObject * parent = nullptr );
     void AddLog( const QString & log );
     void ClearLog();
     QString GetAll() const;
@@ -22,10 +21,8 @@ signals:
     void LogCleared();
 
 protected:
-
     static const int m_maxNumberOfLogs;
     QStringList m_log;
-
 };
 
 #endif

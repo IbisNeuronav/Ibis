@@ -9,22 +9,20 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
 #include "imageobjectvolumesettingswidget.h"
-#include "ui_imageobjectvolumesettingswidget.h"
-#include "imageobject.h"
+
 #include <vtkVolumeProperty.h>
 
-ImageObjectVolumeSettingsWidget::ImageObjectVolumeSettingsWidget(QWidget *parent) :
-    QWidget(parent),
-    ui(new Ui::ImageObjectVolumeSettingsWidget)
+#include "imageobject.h"
+#include "ui_imageobjectvolumesettingswidget.h"
+
+ImageObjectVolumeSettingsWidget::ImageObjectVolumeSettingsWidget( QWidget * parent )
+    : QWidget( parent ), ui( new Ui::ImageObjectVolumeSettingsWidget )
 {
     m_imageObject = 0;
-    ui->setupUi(this);
+    ui->setupUi( this );
 }
 
-ImageObjectVolumeSettingsWidget::~ImageObjectVolumeSettingsWidget()
-{
-    delete ui;
-}
+ImageObjectVolumeSettingsWidget::~ImageObjectVolumeSettingsWidget() { delete ui; }
 
 void ImageObjectVolumeSettingsWidget::SetImageObject( ImageObject * img )
 {
@@ -88,7 +86,7 @@ void ImageObjectVolumeSettingsWidget::UpdateUi()
 
     ui->specularPowerSpinBox->blockSignals( true );
     ui->specularPowerSpinBox->setValue( prop->GetSpecularPower() );
-    ui->specularPowerSpinBox->blockSignals( false );   
+    ui->specularPowerSpinBox->blockSignals( false );
 }
 
 void ImageObjectVolumeSettingsWidget::on_enableVolumeRenderingCheckBox_toggled( bool checked )
@@ -97,7 +95,7 @@ void ImageObjectVolumeSettingsWidget::on_enableVolumeRenderingCheckBox_toggled( 
     m_imageObject->SetVtkVolumeRenderingEnabled( checked );
 }
 
-void ImageObjectVolumeSettingsWidget::on_shadingCheckBox_toggled(bool checked)
+void ImageObjectVolumeSettingsWidget::on_shadingCheckBox_toggled( bool checked )
 {
     Q_ASSERT( m_imageObject );
     m_imageObject->GetVolumeProperty()->SetShade( checked ? 1 : 0 );
@@ -139,7 +137,7 @@ void ImageObjectVolumeSettingsWidget::on_windowSpinBox_valueChanged( double val 
     m_imageObject->SetVolumeRenderingWindow( val );
 }
 
-void ImageObjectVolumeSettingsWidget::on_autoSampleDistanceCheckBox_toggled(bool checked)
+void ImageObjectVolumeSettingsWidget::on_autoSampleDistanceCheckBox_toggled( bool checked )
 {
     Q_ASSERT( m_imageObject );
     m_imageObject->SetAutoSampleDistance( checked );
@@ -151,7 +149,7 @@ void ImageObjectVolumeSettingsWidget::on_sampleDistanceSpinBox_valueChanged( dou
     m_imageObject->SetSampleDistance( val );
 }
 
-void ImageObjectVolumeSettingsWidget::on_showClippingWidgetCheckBox_toggled(bool checked)
+void ImageObjectVolumeSettingsWidget::on_showClippingWidgetCheckBox_toggled( bool checked )
 {
     Q_ASSERT( m_imageObject );
     m_imageObject->SetShowVolumeClippingWidget( checked );

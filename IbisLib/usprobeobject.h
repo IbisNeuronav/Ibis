@@ -11,11 +11,13 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef __UsProbeObject_h_
 #define __UsProbeObject_h_
 
-#include "trackedsceneobject.h"
-#include <map>
-#include <QObject>
-#include "hardwaremodule.h"
 #include <vtkSmartPointer.h>
+
+#include <QObject>
+#include <map>
+
+#include "hardwaremodule.h"
+#include "trackedsceneobject.h"
 
 class vtkImageData;
 class vtkImageActor;
@@ -30,14 +32,12 @@ class USMask;
 
 class UsProbeObject : public TrackedSceneObject
 {
+    Q_OBJECT
 
-Q_OBJECT
-    
 public:
-        
     static UsProbeObject * New() { return new UsProbeObject; }
     vtkTypeMacro( UsProbeObject, TrackedSceneObject );
-    
+
     UsProbeObject();
     virtual ~UsProbeObject();
 
@@ -45,15 +45,15 @@ public:
 
     void AddClient();
     void RemoveClient();
-    
+
     void SetUseMask( bool useMask );
     bool GetUseMask() { return m_maskOn; }
-    USMask *GetMask() { return m_mask; }
+    USMask * GetMask() { return m_mask; }
 
     // Implementation of standard SceneObject method
     virtual void Setup( View * view ) override;
     virtual void Release( View * view ) override;
-    virtual void CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets) override;
+    virtual void CreateSettingsWidgets( QWidget * parent, QVector<QWidget *> * widgets ) override;
 
     void SetVideoInputConnection( vtkAlgorithmOutput * port );
     void SetVideoInputData( vtkImageData * image );
@@ -72,11 +72,17 @@ public:
     QString GetCurrentCalibrationMatrixName();
     void SetCurrentCalibrationMatrix( vtkMatrix4x4 * mat );
     vtkMatrix4x4 * GetCurrentCalibrationMatrix();
-    void AddCalibrationMatrix( QString name ); //the matrix will be identity, user may change it using calibrationMatrix button in settings
+    void AddCalibrationMatrix(
+        QString name );  // the matrix will be identity, user may change it using calibrationMatrix button in settings
 
-    enum ACQ_TYPE {ACQ_B_MODE = 0, ACQ_DOPPLER = 1, ACQ_POWER_DOPPLER = 2};
-    void SetAcquisitionType(ACQ_TYPE type);
-    ACQ_TYPE GetAcquisitionType() { return m_acquisitionType; }    
+    enum ACQ_TYPE
+    {
+        ACQ_B_MODE        = 0,
+        ACQ_DOPPLER       = 1,
+        ACQ_POWER_DOPPLER = 2
+    };
+    void SetAcquisitionType( ACQ_TYPE type );
+    ACQ_TYPE GetAcquisitionType() { return m_acquisitionType; }
 
     int GetNumberOfAvailableLUT();
     QString GetLUTName( int index );
@@ -101,7 +107,6 @@ private slots:
     void UpdateMask();
 
 protected:
-
     void ObjectAddedToScene() override;
     void ObjectRemovedFromScene() override;
     virtual void Hide() override;
@@ -111,33 +116,32 @@ protected:
     int m_lutIndex;
     unsigned int m_screenShotIndex;
 
-    vtkSmartPointer<vtkPassThrough>         m_videoInput;
-    vtkSmartPointer<vtkPassThrough>         m_actorInput;
-    USMask                 * m_mask;
-    USMask                 * m_defaultMask;
-    vtkSmartPointer<vtkImageMapToColors>    m_mapToColors;
+    vtkSmartPointer<vtkPassThrough> m_videoInput;
+    vtkSmartPointer<vtkPassThrough> m_actorInput;
+    USMask * m_mask;
+    USMask * m_defaultMask;
+    vtkSmartPointer<vtkImageMapToColors> m_mapToColors;
     vtkSmartPointer<vtkImageToImageStencil> m_imageStencilSource;
-    vtkSmartPointer<vtkImageStencil>        m_sliceStencil;
-    vtkSmartPointer<vtkImageConstantPad>    m_constantPad;
+    vtkSmartPointer<vtkImageStencil> m_sliceStencil;
+    vtkSmartPointer<vtkImageConstantPad> m_constantPad;
 
-    vtkSmartPointer<vtkTransform>           m_imageTransform;
+    vtkSmartPointer<vtkTransform> m_imageTransform;
 
     // Calibration matrices for different scale levels
     int m_currentCalibrationMatrixIndex;
-    QList< CalibrationMatrixInfo > m_calibrationMatrices;
+    QList<CalibrationMatrixInfo> m_calibrationMatrices;
 
     struct PerViewElements
     {
-        PerViewElements() : imageActor(0) {}
+        PerViewElements() : imageActor( 0 ) {}
         vtkImageActor * imageActor;
     };
-    typedef std::map<View*,PerViewElements> PerViewContainer;
+    typedef std::map<View *, PerViewElements> PerViewContainer;
     PerViewContainer m_perViews;
 
     void UpdatePipeline();
 
     ACQ_TYPE m_acquisitionType;
-
 };
 
 ObjectSerializationHeaderMacro( UsProbeObject );

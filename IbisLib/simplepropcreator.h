@@ -11,22 +11,22 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef __SimplePropCreator_h_
 #define __SimplePropCreator_h_
 
-#include "SVL.h"
 #include <vector>
+
+#include "SVL.h"
 
 class vtkProp3D;
 
 class SimplePropCreator
 {
 public:
-
     // 3D props
-    static vtkProp3D * CreateLine( double start[3], double end[3], double color[4] );
-    static vtkProp3D * CreatePath( std::vector< Vec3 > & points, double color[4] );
-    static vtkProp3D * CreateSphere( double center[3], double radius, double color[4] );
+    static vtkProp3D * CreateLine( double start[ 3 ], double end[ 3 ], double color[ 4 ] );
+    static vtkProp3D * CreatePath( std::vector<Vec3> & points, double color[ 4 ] );
+    static vtkProp3D * CreateSphere( double center[ 3 ], double radius, double color[ 4 ] );
 
     // 2D props
-    static vtkProp3D * CreateTarget( double center[3], double radius, double color[4] );
+    static vtkProp3D * CreateTarget( double center[ 3 ], double radius, double color[ 4 ] );
 
 private:
     // This class in not just a collection of static functions

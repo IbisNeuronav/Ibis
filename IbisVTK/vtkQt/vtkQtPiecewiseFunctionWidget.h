@@ -13,8 +13,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef __vtkQtPiecewiseFunctionWidget_h_
 #define __vtkQtPiecewiseFunctionWidget_h_
 
-#include <QWidget>
 #include <QObject>
+#include <QWidget>
 #include <vector>
 
 class QPaintEvent;
@@ -27,12 +27,10 @@ class vtkPiecewiseFunction;
 
 class vtkQtPiecewiseFunctionWidget : public QWidget
 {
-
     Q_OBJECT
 
 public:
-
-    vtkQtPiecewiseFunctionWidget( QWidget* parent );
+    vtkQtPiecewiseFunctionWidget( QWidget * parent );
     ~vtkQtPiecewiseFunctionWidget();
     void SetFunction( vtkPiecewiseFunction * func );
     void SetXRange( double xMin, double xMax );
@@ -43,7 +41,6 @@ public slots:
     void resetGraph();
 
 private:
-
     void drawGraph( QPainter & painter, const QColor & drawColor );
 
     void paintEvent( QPaintEvent * event );
@@ -52,19 +49,19 @@ private:
     void mouseReleaseEvent( QMouseEvent * event );
     void mouseMoveEvent( QMouseEvent * event );
     void mousePressEvent( QMouseEvent * event );
-    void mouseDoubleClickEvent ( QMouseEvent * event );
+    void mouseDoubleClickEvent( QMouseEvent * event );
     void leaveEvent( QEvent * event );
 
     void AddPoint( int x, int y );
     void RemovePoint( int index );
     int PointIndexFromPixCoord( int x, int y );
-    void GetPixCoordFromNodeCoord( int index, int point[2] );
+    void GetPixCoordFromNodeCoord( int index, int point[ 2 ] );
     void SetNodeCoordFromPixCoord( int x, int y, int index );
     void NodeCoordFromPixCoord( int x, int y, double & xNode, double & yNode );
 
     static const int m_pointRadius;
-    double m_xRange[2];
-    double m_yRange[2];
+    double m_xRange[ 2 ];
+    double m_yRange[ 2 ];
     int m_movingPointIndex;
     vtkPiecewiseFunction * m_function;
 };

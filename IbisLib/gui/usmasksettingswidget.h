@@ -11,13 +11,16 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef USMASKSETTINGSWIDGET_H
 #define USMASKSETTINGSWIDGET_H
 
-#include <QWidget>
-#include <QLineEdit>
-#include <QObject>
-#include "usmask.h"
 #include <Constants.h>
 
-namespace Ui {
+#include <QLineEdit>
+#include <QObject>
+#include <QWidget>
+
+#include "usmask.h"
+
+namespace Ui
+{
 class USMaskSettingsWidget;
 }
 
@@ -26,13 +29,13 @@ class USMaskSettingsWidget : public QWidget
     Q_OBJECT
 
 public:
-    explicit USMaskSettingsWidget(QWidget *parent = 0);
+    explicit USMaskSettingsWidget( QWidget * parent = 0 );
     ~USMaskSettingsWidget();
-    void SetMask( USMask *mask );
+    void SetMask( USMask * mask );
     void DisableSetASDefault();
 
-    inline double to_degrees(double radians) { return radians * (180.0 / vl_pi ); }
-    inline double to_radians(double degrees) { return degrees * (vl_pi / 180.0); }
+    inline double to_degrees( double radians ) { return radians * ( 180.0 / vl_pi ); }
+    inline double to_radians( double degrees ) { return degrees * ( vl_pi / 180.0 ); }
 
 private slots:
 
@@ -46,14 +49,14 @@ private slots:
     void on_rightAngleDoubleSpinBox_valueChanged( double val );
     void on_originXDoubleSpinBox_valueChanged( double val );
     void on_originYDoubleSpinBox_valueChanged( double val );
-    void on_defaultPushButton_clicked( );
-    void on_setDefaultPushButton_clicked( );
+    void on_defaultPushButton_clicked();
+    void on_setDefaultPushButton_clicked();
 
 private:
-    Ui::USMaskSettingsWidget *ui;
-    USMask *m_mask;
+    Ui::USMaskSettingsWidget * ui;
+    USMask * m_mask;
 
     void UpdateUI();
 };
 
-#endif // USMASKSETTINGSWIDGET_H
+#endif  // USMASKSETTINGSWIDGET_H

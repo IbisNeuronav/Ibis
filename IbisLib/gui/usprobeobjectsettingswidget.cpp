@@ -9,23 +9,24 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
 #include "usprobeobjectsettingswidget.h"
-#include "ui_usprobeobjectsettingswidget.h"
-#include "usprobeobject.h"
+
 #include <vtkQtMatrixDialog.h>
 #include <vtkTransform.h>
 
-#include <QPushButton>
-#include <QLabel>
 #include <QComboBox>
-#include <QLineEdit>
+#include <QLabel>
 #include <QLayout>
+#include <QLineEdit>
+#include <QPushButton>
 #include <QVariant>
 
-UsProbeObjectSettingsWidget::UsProbeObjectSettingsWidget(QWidget *parent) :
-    QWidget(parent),
-    ui(new Ui::UsProbeObjectSettingsWidget)
+#include "ui_usprobeobjectsettingswidget.h"
+#include "usprobeobject.h"
+
+UsProbeObjectSettingsWidget::UsProbeObjectSettingsWidget( QWidget * parent )
+    : QWidget( parent ), ui( new Ui::UsProbeObjectSettingsWidget )
 {
-    ui->setupUi(this);
+    ui->setupUi( this );
 
     QPalette palette;
     QColor backColor( 255, 0, 0 );
@@ -33,11 +34,11 @@ UsProbeObjectSettingsWidget::UsProbeObjectSettingsWidget(QWidget *parent) :
     ui->probeStatusLabel->setPalette( palette );
     ui->probeStatusLabel->setFrameShape( QLabel::Box );
     ui->probeStatusLabel->setAlignment( Qt::AlignCenter );
-    ui->probeStatusLabel->setText("");
+    ui->probeStatusLabel->setText( "" );
 
     m_usProbeObject = 0;
-    m_matrixDialog = 0;
-    connect(ui->depthComboBox->lineEdit(), SIGNAL(returnPressed()), this, SLOT(MatrixAdded()));
+    m_matrixDialog  = 0;
+    connect( ui->depthComboBox->lineEdit(), SIGNAL( returnPressed() ), this, SLOT( MatrixAdded() ) );
 }
 
 UsProbeObjectSettingsWidget::~UsProbeObjectSettingsWidget()
@@ -89,71 +90,71 @@ void UsProbeObjectSettingsWidget::UpdateToolStatus()
     TrackerToolState newState = m_usProbeObject->GetState();
     switch( newState )
     {
-    case Ok:
-        ui->probeStatusLabel->setText( "OK" );
-        ui->probeStatusLabel->setStyleSheet( "background-color: lightGreen" );
-        ui->snapshotPushButton->setEnabled(true);
-        break;
-    case Missing:
-        ui->probeStatusLabel->setText( "Missing" );
-        ui->probeStatusLabel->setStyleSheet( "background-color: red" );
-        ui->snapshotPushButton->setEnabled(false);
-        break;
-    case OutOfVolume:
-        ui->probeStatusLabel->setText( "Out of volume" );
-        ui->probeStatusLabel->setStyleSheet( "background-color: yellow" );
-        ui->snapshotPushButton->setEnabled(true);
-        break;
-    case OutOfView:
-        ui->probeStatusLabel->setText( "Out of view" );
-        ui->probeStatusLabel->setStyleSheet( "background-color: red" );
-        ui->snapshotPushButton->setEnabled(false);
-        break;
-	case HighError:
-		ui->probeStatusLabel->setText("High error");
-		ui->probeStatusLabel->setStyleSheet("background-color: red");
-        ui->snapshotPushButton->setEnabled(false);
-		break;
-	case Disabled:
-		ui->probeStatusLabel->setText("Disabled");
-		ui->probeStatusLabel->setStyleSheet("background-color: grey");
-        ui->snapshotPushButton->setEnabled(false);
-		break;
-    case Undefined:
-        ui->probeStatusLabel->setText( "Ultrasound probe not initialized" );
-        ui->probeStatusLabel->setStyleSheet( "background-color: grey" );
-        ui->snapshotPushButton->setEnabled(false);
-        break;
+        case Ok:
+            ui->probeStatusLabel->setText( "OK" );
+            ui->probeStatusLabel->setStyleSheet( "background-color: lightGreen" );
+            ui->snapshotPushButton->setEnabled( true );
+            break;
+        case Missing:
+            ui->probeStatusLabel->setText( "Missing" );
+            ui->probeStatusLabel->setStyleSheet( "background-color: red" );
+            ui->snapshotPushButton->setEnabled( false );
+            break;
+        case OutOfVolume:
+            ui->probeStatusLabel->setText( "Out of volume" );
+            ui->probeStatusLabel->setStyleSheet( "background-color: yellow" );
+            ui->snapshotPushButton->setEnabled( true );
+            break;
+        case OutOfView:
+            ui->probeStatusLabel->setText( "Out of view" );
+            ui->probeStatusLabel->setStyleSheet( "background-color: red" );
+            ui->snapshotPushButton->setEnabled( false );
+            break;
+        case HighError:
+            ui->probeStatusLabel->setText( "High error" );
+            ui->probeStatusLabel->setStyleSheet( "background-color: red" );
+            ui->snapshotPushButton->setEnabled( false );
+            break;
+        case Disabled:
+            ui->probeStatusLabel->setText( "Disabled" );
+            ui->probeStatusLabel->setStyleSheet( "background-color: grey" );
+            ui->snapshotPushButton->setEnabled( false );
+            break;
+        case Undefined:
+            ui->probeStatusLabel->setText( "Ultrasound probe not initialized" );
+            ui->probeStatusLabel->setStyleSheet( "background-color: grey" );
+            ui->snapshotPushButton->setEnabled( false );
+            break;
     }
 }
 
 void UsProbeObjectSettingsWidget::UpdateDepth()
 {
     Q_ASSERT( m_usProbeObject );
-    ui->depthComboBox->blockSignals(true);
+    ui->depthComboBox->blockSignals( true );
     ui->depthComboBox->clear();
 
-    int currentIndex = -1;
-    int newSettings = -1;
+    int currentIndex           = -1;
+    int newSettings            = -1;
     QString currentScaleFactor = m_usProbeObject->GetCurrentCalibrationMatrixName();
-    int numberOfScaleFactors = m_usProbeObject->GetNumberOfCalibrationMatrices();
+    int numberOfScaleFactors   = m_usProbeObject->GetNumberOfCalibrationMatrices();
     for( int i = 0; i < numberOfScaleFactors; ++i )
     {
         QString name = m_usProbeObject->GetCalibrationMatrixName( i );
-        ui->depthComboBox->addItem( name, QVariant(i) );
+        ui->depthComboBox->addItem( name, QVariant( i ) );
         if( name == currentScaleFactor )
         {
             currentIndex = i;
         }
     }
-    ui->depthComboBox->addItem( "Add New", QVariant( newSettings) );
+    ui->depthComboBox->addItem( "Add New", QVariant( newSettings ) );
     if( currentIndex == -1 )
     {
         currentIndex = 0;
     }
     ui->depthComboBox->setCurrentIndex( currentIndex );
 
-    ui->depthComboBox->blockSignals(false);
+    ui->depthComboBox->blockSignals( false );
 }
 
 void UsProbeObjectSettingsWidget::on_bModeRadioButton_clicked()
@@ -186,13 +187,13 @@ void UsProbeObjectSettingsWidget::UpdateUI()
     ui->colorMapComboBox->blockSignals( true );
     if( m_usProbeObject->GetAcquisitionType() == UsProbeObject::ACQ_B_MODE )
     {
-       ui->colorMapGroupBox->setHidden( false );
-       ui->colorMapComboBox->clear();
-       for( int i = 0; i < m_usProbeObject->GetNumberOfAvailableLUT(); ++i )
-       {
-           ui->colorMapComboBox->addItem( m_usProbeObject->GetLUTName( i ) );
-       }
-       ui->colorMapComboBox->setCurrentIndex( m_usProbeObject->GetCurrentLUTIndex() );
+        ui->colorMapGroupBox->setHidden( false );
+        ui->colorMapComboBox->clear();
+        for( int i = 0; i < m_usProbeObject->GetNumberOfAvailableLUT(); ++i )
+        {
+            ui->colorMapComboBox->addItem( m_usProbeObject->GetLUTName( i ) );
+        }
+        ui->colorMapComboBox->setCurrentIndex( m_usProbeObject->GetCurrentLUTIndex() );
     }
     else
     {
@@ -201,7 +202,7 @@ void UsProbeObjectSettingsWidget::UpdateUI()
         {
             ui->colorDopplerRadioButton->setChecked( true );
         }
-        else // ACQ_POWER_DOPPLER
+        else  // ACQ_POWER_DOPPLER
         {
             ui->powerDopplerRadioButton->setChecked( true );
         }
@@ -212,12 +213,9 @@ void UsProbeObjectSettingsWidget::UpdateUI()
     ui->colorMapComboBox->blockSignals( false );
 }
 
-void UsProbeObjectSettingsWidget::on_useMaskCheckBox_toggled( bool checked )
-{
-    m_usProbeObject->SetUseMask( checked );
-}
+void UsProbeObjectSettingsWidget::on_useMaskCheckBox_toggled( bool checked ) { m_usProbeObject->SetUseMask( checked ); }
 
-void UsProbeObjectSettingsWidget::on_colorMapComboBox_currentIndexChanged(int index)
+void UsProbeObjectSettingsWidget::on_colorMapComboBox_currentIndexChanged( int index )
 {
     m_usProbeObject->SetCurrentLUTIndex( index );
 }
@@ -226,7 +224,8 @@ void UsProbeObjectSettingsWidget::on_calibrationMatrixPushButton_toggled( bool o
 {
     if( on )
     {
-        Q_ASSERT_X( m_usProbeObject, "TransformEditWidget::on_calibrationMatrixPushButton_toggled", "Can't call this function without setting UsProbeObject." );
+        Q_ASSERT_X( m_usProbeObject, "TransformEditWidget::on_calibrationMatrixPushButton_toggled",
+                    "Can't call this function without setting UsProbeObject." );
         Q_ASSERT( !m_matrixDialog );
 
         QString dialogTitle = m_usProbeObject->GetName();
@@ -237,7 +236,7 @@ void UsProbeObjectSettingsWidget::on_calibrationMatrixPushButton_toggled( bool o
         m_matrixDialog->setAttribute( Qt::WA_DeleteOnClose );
         m_matrixDialog->SetMatrix( m_usProbeObject->GetCurrentCalibrationMatrix() );
         m_matrixDialog->show();
-        connect( m_matrixDialog, SIGNAL(destroyed()), this, SLOT(OnCalibrationMatrixDialogClosed()) );
+        connect( m_matrixDialog, SIGNAL( destroyed() ), this, SLOT( OnCalibrationMatrixDialogClosed() ) );
     }
     else
     {
@@ -257,7 +256,5 @@ void UsProbeObjectSettingsWidget::OnCalibrationMatrixDialogClosed()
 
 void UsProbeObjectSettingsWidget::on_snapshotPushButton_clicked()
 {
-    if (m_usProbeObject)
-        m_usProbeObject->TakeSnapshot();
-
+    if( m_usProbeObject ) m_usProbeObject->TakeSnapshot();
 }

@@ -9,38 +9,38 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
 #include "trackedvideobuffer.h"
-#include "serializer.h"
+
 #include <vtkImageData.h>
 #include <vtkMatrix4x4.h>
 #include <vtkPassThrough.h>
 #include <vtkTransform.h>
-#include "application.h"
+
 #include <QProgressDialog>
+
+#include "application.h"
+#include "serializer.h"
 
 static int DefaultNumberOfScalarComponents = 1;
 
 TrackedVideoBuffer::TrackedVideoBuffer( int w, int h )
 {
-    m_defaultImageSize[0] = w;
-    m_defaultImageSize[1] = h;
-    m_currentFrame = -1;
-    m_videoOutput = vtkSmartPointer<vtkImageData>::New();
-    m_output = vtkSmartPointer<vtkPassThrough>::New();
-    m_output->SetInputData( m_videoOutput);
+    m_defaultImageSize[ 0 ] = w;
+    m_defaultImageSize[ 1 ] = h;
+    m_currentFrame          = -1;
+    m_videoOutput           = vtkSmartPointer<vtkImageData>::New();
+    m_output                = vtkSmartPointer<vtkPassThrough>::New();
+    m_output->SetInputData( m_videoOutput );
     m_outputTransform = vtkSmartPointer<vtkTransform>::New();
 }
 
-TrackedVideoBuffer::~TrackedVideoBuffer()
-{
-    Clear();
-}
+TrackedVideoBuffer::~TrackedVideoBuffer() { Clear(); }
 
 void TrackedVideoBuffer::Clear()
 {
     for( int i = 0; i < m_frames.size(); ++i )
     {
-        m_frames[i]->Delete();
-        m_matrices[i]->Delete();
+        m_frames[ i ]->Delete();
+        m_matrices[ i ]->Delete();
     }
     m_frames.clear();
     m_matrices.clear();
@@ -51,26 +51,23 @@ void TrackedVideoBuffer::Clear()
 
 int TrackedVideoBuffer::GetFrameWidth()
 {
-    if( m_frames.size() > 0 )
-        return m_frames[0]->GetDimensions()[0];
-    return m_defaultImageSize[0];
+    if( m_frames.size() > 0 ) return m_frames[ 0 ]->GetDimensions()[ 0 ];
+    return m_defaultImageSize[ 0 ];
 }
 
 int TrackedVideoBuffer::GetFrameHeight()
 {
-    if( m_frames.size() > 0 )
-        return m_frames[0]->GetDimensions()[1];
-    return m_defaultImageSize[1];
+    if( m_frames.size() > 0 ) return m_frames[ 0 ]->GetDimensions()[ 1 ];
+    return m_defaultImageSize[ 1 ];
 }
 
 int TrackedVideoBuffer::GetFrameNumberOfComponents()
 {
-    if( m_frames.size() > 0 )
-        return m_frames[0]->GetNumberOfScalarComponents();
+    if( m_frames.size() > 0 ) return m_frames[ 0 ]->GetNumberOfScalarComponents();
     return DefaultNumberOfScalarComponents;
 }
 
-void TrackedVideoBuffer::AddFrame(vtkImageData * frame, vtkMatrix4x4 * mat , double timestamp )
+void TrackedVideoBuffer::AddFrame( vtkImageData * frame, vtkMatrix4x4 * mat, double timestamp )
 {
     vtkImageData * im = vtkImageData::New();
     im->DeepCopy( frame );
@@ -109,32 +106,28 @@ vtkImageData * TrackedVideoBuffer::GetCurrentImage()
 double TrackedVideoBuffer::GetCurrentTimestamp()
 {
     Q_ASSERT( m_currentFrame != -1 && m_frames.size() > 0 );
-    return m_timestamps[m_currentFrame ];
+    return m_timestamps[ m_currentFrame ];
 }
-
 
 vtkMatrix4x4 * TrackedVideoBuffer::GetMatrix( int index )
 {
     Q_ASSERT( index >= 0 && index < m_frames.size() );
-    return m_matrices[index];
+    return m_matrices[ index ];
 }
 
 vtkImageData * TrackedVideoBuffer::GetImage( int index )
 {
     Q_ASSERT( index >= 0 && index < m_frames.size() );
-    return m_frames[index];
+    return m_frames[ index ];
 }
 
 double TrackedVideoBuffer::GetTimestamp( int index )
 {
     Q_ASSERT( index >= 0 && index < m_frames.size() );
-    return m_timestamps[index];
+    return m_timestamps[ index ];
 }
 
-vtkAlgorithmOutput * TrackedVideoBuffer::GetVideoOutputPort()
-{
-    return m_output->GetOutputPort();
-}
+vtkAlgorithmOutput * TrackedVideoBuffer::GetVideoOutputPort() { return m_output->GetOutputPort(); }
 
 bool TrackedVideoBuffer::Serialize( Serializer * ser, QString dataDirectory )
 {
@@ -142,7 +135,7 @@ bool TrackedVideoBuffer::Serialize( Serializer * ser, QString dataDirectory )
 
     // If we are writing and dir already exists, sequence has been saved so we can skip writing
     // todo: find smarter way to handle this
-    QFileInfo info(dataDirectory);
+    QFileInfo info( dataDirectory );
     bool needsSerialization = !( !ser->IsReader() && info.exists() && info.isDir() );
 
     if( needsSerialization )
@@ -158,8 +151,7 @@ bool TrackedVideoBuffer::Serialize( Serializer * ser, QString dataDirectory )
             ReadImages( m_matrices.size(), dataDirectory );
     }
 
-    if( ser->IsReader() && m_currentFrame != -1 )
-        SetCurrentFrame( m_currentFrame );
+    if( ser->IsReader() && m_currentFrame != -1 ) SetCurrentFrame( m_currentFrame );
 
     return true;
 }
@@ -187,13 +179,14 @@ void TrackedVideoBuffer::ReadMatrix( QString filename, vtkMatrix4x4 * mat )
     reader->Delete();
 }
 
-void TrackedVideoBuffer::ReadMatrices( QList< vtkMatrix4x4 * > & matrices, QString dirName )
+void TrackedVideoBuffer::ReadMatrices( QList<vtkMatrix4x4 *> & matrices, QString dirName )
 {
     int index = 0;
     bool done = false;
     while( !done )
     {
-        QString uncalMatrixFilename = QString("%1/uncalMat_%2.xfm").arg( dirName ).arg( index, 4, 10, QLatin1Char('0') );
+        QString uncalMatrixFilename =
+            QString( "%1/uncalMat_%2.xfm" ).arg( dirName ).arg( index, 4, 10, QLatin1Char( '0' ) );
         QFileInfo uncalMatInfo( uncalMatrixFilename );
         if( uncalMatInfo.exists() )
         {
@@ -217,12 +210,12 @@ void TrackedVideoBuffer::WriteMatrix( vtkMatrix4x4 * mat, QString filename )
     writer->Write();
 }
 
-void TrackedVideoBuffer::WriteMatrices( QList< vtkMatrix4x4 * > & matrices, QString dirName )
+void TrackedVideoBuffer::WriteMatrices( QList<vtkMatrix4x4 *> & matrices, QString dirName )
 {
     for( int i = 0; i < matrices.size(); ++i )
     {
-        QString matrixFilename = dirName + QString("/uncalMat_%1.xfm").arg( i, 4, 10, QLatin1Char('0') );
-        WriteMatrix( matrices[i], matrixFilename );
+        QString matrixFilename = dirName + QString( "/uncalMat_%1.xfm" ).arg( i, 4, 10, QLatin1Char( '0' ) );
+        WriteMatrix( matrices[ i ], matrixFilename );
     }
 }
 
@@ -233,9 +226,9 @@ void TrackedVideoBuffer::WriteImages( QString dirName, QProgressDialog * progres
     vtkPNGWriter * writer = vtkPNGWriter::New();
     for( int i = 0; i < m_frames.size(); ++i )
     {
-        QString filename = dirName + QString("/frame_%1").arg( i, 4, 10, QLatin1Char('0') );
+        QString filename = dirName + QString( "/frame_%1" ).arg( i, 4, 10, QLatin1Char( '0' ) );
         writer->SetFileName( filename.toUtf8().data() );
-        writer->SetInputData( m_frames[i] );
+        writer->SetInputData( m_frames[ i ] );
         writer->Write();
 
         if( progressDlg )
@@ -251,7 +244,7 @@ void TrackedVideoBuffer::ReadImages( int nbImages, QString dirName, QProgressDia
     vtkPNGReader * reader = vtkPNGReader::New();
     for( int i = 0; i < nbImages; ++i )
     {
-        QString filename = dirName + QString("/frame_%1").arg( i, 4, 10, QLatin1Char('0') );
+        QString filename = dirName + QString( "/frame_%1" ).arg( i, 4, 10, QLatin1Char( '0' ) );
         reader->SetFileName( filename.toUtf8().data() );
         reader->Update();
         vtkImageData * image = vtkImageData::New();
@@ -264,8 +257,4 @@ void TrackedVideoBuffer::ReadImages( int nbImages, QString dirName, QProgressDia
     reader->Delete();
 }
 
-vtkImageData *TrackedVideoBuffer:: GetVideoOutput()
-{
-    return m_videoOutput;
-}
-
+vtkImageData * TrackedVideoBuffer::GetVideoOutput() { return m_videoOutput; }

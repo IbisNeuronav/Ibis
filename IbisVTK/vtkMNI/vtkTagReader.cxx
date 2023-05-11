@@ -9,22 +9,19 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
 #include "vtkTagReader.h"
+
 #include <vtkPoints.h>
-#include <sstream>
+
 #include <fstream>
+#include <sstream>
+
 #include "stringtools.h"
 
 using namespace std;
 
-vtkTagReader * vtkTagReader::New()
-{
-    return new vtkTagReader();
-}
+vtkTagReader * vtkTagReader::New() { return new vtkTagReader(); }
 
-int vtkTagReader::GetNumberOfVolumes()
-{
-    return this->Volumes.size();
-}
+int vtkTagReader::GetNumberOfVolumes() { return this->Volumes.size(); }
 
 vtkPoints * vtkTagReader::GetVolume( int volumeIndex )
 {
@@ -43,7 +40,7 @@ void vtkTagReader::Update()
     PointsVec::iterator it = this->Volumes.begin();
     for( ; it != this->Volumes.end(); ++it )
     {
-        (*it)->Reset();
+        ( *it )->Reset();
     }
     this->PointNames.clear();
     this->VolumeNames.clear();
@@ -52,7 +49,7 @@ void vtkTagReader::Update()
     // See if a filename has been provided
     if( !this->FileName )
     {
-        vtkErrorMacro(<< "No tag file name was provided" << endl);
+        vtkErrorMacro( << "No tag file name was provided" << endl );
         return;
     }
 
@@ -63,10 +60,10 @@ void vtkTagReader::Update()
         vtkErrorMacro( << "Couldn't open file " << this->FileName << endl );
         return;
     }
-    
+
     // Get the number of volumes in the file
     int found = 0;
-    char tempLine[MAX_LINE_LENGTH];
+    char tempLine[ MAX_LINE_LENGTH ];
     unsigned int numberOfVolumes = 0;
     while( !found && !f.eof() )
     {
@@ -74,14 +71,14 @@ void vtkTagReader::Update()
         std::string line( tempLine );
         std::vector<std::string> tokens;
         Tokenize( line, tokens );
-        if( tokens.size() == 3 && tokens[0] == "Volumes" )
+        if( tokens.size() == 3 && tokens[ 0 ] == "Volumes" )
         {
-            std::istringstream stream( tokens[2] );
+            std::istringstream stream( tokens[ 2 ] );
             stream >> numberOfVolumes;
             found = 1;
         }
     }
-    
+
     if( !found )
     {
         vtkErrorMacro( << "Couldn't determine the number of volumes in the file" << endl );
@@ -93,7 +90,7 @@ void vtkTagReader::Update()
         vtkPoints * volume = vtkPoints::New();
         this->Volumes.push_back( volume );
     }
-    
+
     // find the definition of the points and maybe the volume's names if present
     found = 0;
     while( !found && !f.eof() )
@@ -104,33 +101,33 @@ void vtkTagReader::Update()
         Tokenize( line, tokens );
         if( tokens.size() )
         {
-            if( tokens[0] == "%Volume:" )
+            if( tokens[ 0 ] == "%Volume:" )
             {
                 if( tokens.size() > 1 )
-                    this->VolumeNames.push_back( tokens[1] );
+                    this->VolumeNames.push_back( tokens[ 1 ] );
                 else
                     this->VolumeNames.push_back( "" );
             }
-            else if( tokens[0] == "%ReferenceDataFile:" )
+            else if( tokens[ 0 ] == "%ReferenceDataFile:" )
             {
-                strcpy(this->ReferenceDataFile, tokens[1].c_str());
+                strcpy( this->ReferenceDataFile, tokens[ 1 ].c_str() );
             }
-            else if( tokens[0] == "%Transform:" )
+            else if( tokens[ 0 ] == "%Transform:" )
             {
                 // read matrix elements
                 unsigned int tokenIndex = 1;
-                this->SavedTransform = vtkMatrix4x4::New();
+                this->SavedTransform    = vtkMatrix4x4::New();
                 this->SavedTransform->Identity();
                 for( i = 0; i < 3; i++ )
                 {
-                    for ( j = 0; j < 4; j ++)
+                    for( j = 0; j < 4; j++ )
                     {
-                        this->SavedTransform->SetElement(i, j, atof(tokens[tokenIndex].c_str()));
+                        this->SavedTransform->SetElement( i, j, atof( tokens[ tokenIndex ].c_str() ) );
                         tokenIndex++;
                     }
                 }
             }
-            else if( tokens[0] == "Points" )
+            else if( tokens[ 0 ] == "Points" )
             {
                 found = 1;
             }
@@ -143,7 +140,7 @@ void vtkTagReader::Update()
             this->VolumeNames.push_back( "" );
         }
     }
-    
+
     if( !found )
     {
         vtkErrorMacro( << "Couldn't find the beginning of the definition of points in the file" << endl );
@@ -157,8 +154,8 @@ void vtkTagReader::Update()
         f.getline( tempLine, MAX_LINE_LENGTH );
         std::string line( tempLine );
         std::vector<std::string> tokens;
-        TokenizeRemovingQuotes( line, tokens);
-        
+        TokenizeRemovingQuotes( line, tokens );
+
         if( tokens.size() )
         {
             int timeStampIndex = 0;
@@ -171,24 +168,23 @@ void vtkTagReader::Update()
             unsigned int tokenIndex = 0;
             for( i = 0; i < numberOfVolumes; i++ )
             {
-                double newPoint[3] = { 0, 0, 0 };
+                double newPoint[ 3 ] = { 0, 0, 0 };
                 for( int j = 0; j < 3; j++ )
                 {
                     std::istringstream stream( tokens[ tokenIndex ] );
-                    stream >> newPoint[j];
+                    stream >> newPoint[ j ];
                     tokenIndex++;
                 }
-                this->Volumes[i]->InsertNextPoint( newPoint );
+                this->Volumes[ i ]->InsertNextPoint( newPoint );
             }
 
             // See if the last token is a comment, if yes, discard it
             int n = tokens.size();
-            if (tokens[n-1][0] == '%')
-                n -=1;
-            if (tokens[n-2] == "%TimeStamp")
+            if( tokens[ n - 1 ][ 0 ] == '%' ) n -= 1;
+            if( tokens[ n - 2 ] == "%TimeStamp" )
             {
-                timeStampIndex = n-1;
-                n -=2;
+                timeStampIndex = n - 1;
+                n -= 2;
             }
             // lets see if we have <Weight> <Structure> <Patient> data which is optional
             if( n > 3 * numberOfVolumes + 1 )
@@ -200,15 +196,15 @@ void vtkTagReader::Update()
             // Let's see if we have a tag name
             if( tokens.size() > tokenIndex )
             {
-                this->PointNames.push_back(tokens[tokenIndex]); // quotes removed in TokenizeRemovingQuotes()
+                this->PointNames.push_back( tokens[ tokenIndex ] );  // quotes removed in TokenizeRemovingQuotes()
             }
             else
             {
                 this->PointNames.push_back( "" );
             }
-            if ( timeStampIndex > 0 )
+            if( timeStampIndex > 0 )
             {
-                this->TimeStamps.push_back(tokens[timeStampIndex]);
+                this->TimeStamps.push_back( tokens[ timeStampIndex ] );
             }
             else
             {
@@ -225,7 +221,7 @@ void vtkTagReader::ClearOutput()
     PointsVec::iterator it = this->Volumes.begin();
     for( ; it != this->Volumes.end(); ++it )
     {
-        (*it)->Delete();
+        ( *it )->Delete();
     }
     this->PointNames.clear();
     this->VolumeNames.clear();
@@ -234,48 +230,41 @@ void vtkTagReader::ClearOutput()
 
 char * vtkTagReader::GetReferenceDataFileName()
 {
-    if (this->ReferenceDataFile[0])
-        return this->ReferenceDataFile;
-    return 0;        
+    if( this->ReferenceDataFile[ 0 ] ) return this->ReferenceDataFile;
+    return 0;
 }
 
-vtkMatrix4x4 * vtkTagReader::GetSavedTransform()
-{
-    return this->SavedTransform;
-}
+vtkMatrix4x4 * vtkTagReader::GetSavedTransform() { return this->SavedTransform; }
 
 vtkTagReader::vtkTagReader()
 {
-    this->SavedTransform = 0;
-    this->ReferenceDataFile[0] = 0;
-    this->FileName = 0;
+    this->SavedTransform         = 0;
+    this->ReferenceDataFile[ 0 ] = 0;
+    this->FileName               = 0;
 }
 
 vtkTagReader::~vtkTagReader()
 {
     this->ClearOutput();
-    
-    if( this->FileName )
-        delete this->FileName;
-    if (this->SavedTransform)        
-        this->SavedTransform->Delete();
+
+    if( this->FileName ) delete this->FileName;
+    if( this->SavedTransform ) this->SavedTransform->Delete();
 }
 
-
-void vtkTagReader::PrintSelf(ostream &os, vtkIndent indent)
+void vtkTagReader::PrintSelf( ostream & os, vtkIndent indent )
 {
     os << indent << "FileName: " << this->FileName << endl;
     os << indent << "NumberOfVolumes: " << this->Volumes.size() << endl;
     for( unsigned int i = 0; i < this->Volumes.size(); i++ )
     {
-        os << indent << "Volume name: " << this->VolumeNames[i].c_str() << endl;
+        os << indent << "Volume name: " << this->VolumeNames[ i ].c_str() << endl;
         os << indent << "Points:" << endl;
-        for( int j = 0; j < this->Volumes[i]->GetNumberOfPoints(); j++ )
+        for( int j = 0; j < this->Volumes[ i ]->GetNumberOfPoints(); j++ )
         {
-            double * point = this->Volumes[i]->GetPoint( j );
-            os << indent << "( " << point[0] << ", " << point[1] << ", " << point[2] << " )" << endl;
+            double * point = this->Volumes[ i ]->GetPoint( j );
+            os << indent << "( " << point[ 0 ] << ", " << point[ 1 ] << ", " << point[ 2 ] << " )" << endl;
         }
-    }        
+    }
 }
 
 //-------------------------------------------------------------------------------
@@ -287,9 +276,9 @@ int vtkTagReader::CanReadFile( const char * fname )
         vtkErrorMacro( << "Couldn't open file " << this->FileName << endl );
         return 0;
     }
-    
+
     // read the first line of the file to make sure it is a tag file
-    char fileType[30];
+    char fileType[ 30 ];
     f.getline( fileType, 30 );
     f.close();
     if( strncmp( fileType, "MNI Tag Point File", 18 ) != 0 )
@@ -299,4 +288,3 @@ int vtkTagReader::CanReadFile( const char * fname )
     }
     return 1;
 }
-

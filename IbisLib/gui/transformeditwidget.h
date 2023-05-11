@@ -11,38 +11,35 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef TRANSFORMEDITWIDGET_H
 #define TRANSFORMEDITWIDGET_H
 
-#include <QWidget>
 #include <QObject>
+#include <QWidget>
 
 class vtkEventQtSlotConnect;
 class vtkQtMatrixDialog;
 class vtkMatrix4x4;
 class SceneObject;
 
-namespace Ui {
-    class TransformEditWidget;
+namespace Ui
+{
+class TransformEditWidget;
 }
 
 class TransformEditWidget : public QWidget
 {
-
     Q_OBJECT
 
 public:
-
-    explicit TransformEditWidget(QWidget *parent = 0);
+    explicit TransformEditWidget( QWidget * parent = 0 );
     ~TransformEditWidget();
 
     void SetSceneObject( SceneObject * obj );
 
 protected:
-
     void EnableSpinBoxes( bool on );
     void BlockSpinboxSignals( bool block );
 
 private:
-
-    Ui::TransformEditWidget *ui;
+    Ui::TransformEditWidget * ui;
     SceneObject * m_sceneObject;
     vtkEventQtSlotConnect * m_transformModifiedConnection;
     bool m_selfUpdating;
@@ -50,8 +47,8 @@ private:
     vtkQtMatrixDialog * m_worldMatrixDialog;
 
 public slots:
-    void UpdateUi();         // take data in transform and put it in ui
-    void TransformModified( vtkMatrix4x4 *mat );
+    void UpdateUi();  // take data in transform and put it in ui
+    void TransformModified( vtkMatrix4x4 * mat );
 
 private slots:
 
@@ -61,7 +58,6 @@ private slots:
     void WorldMatrixButtonToggled( bool isOn );
     void WorldMatrixDialogClosed();
     void SetIdentityButtonClicked();
-
 };
 
-#endif // TRANSFORMEDITWIDGET_H
+#endif  // TRANSFORMEDITWIDGET_H

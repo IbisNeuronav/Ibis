@@ -11,9 +11,10 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef __AbstractPolyDataObject_h_
 #define __AbstractPolyDataObject_h_
 
-#include <map>
 #include <vtkProperty.h>
 #include <vtkSmartPointer.h>
+
+#include <map>
 
 #include "sceneobject.h"
 #include "serializer.h"
@@ -27,8 +28,12 @@ class vtkCutter;
 class vtkPlane;
 class vtkPlanes;
 
-enum RenderingMode{ Solid = 0, Wireframe = 1, Both = 2 };
-
+enum RenderingMode
+{
+    Solid     = 0,
+    Wireframe = 1,
+    Both      = 2
+};
 
 /**
  * @class   AbstractPolyDataObject
@@ -45,25 +50,23 @@ enum RenderingMode{ Solid = 0, Wireframe = 1, Both = 2 };
  */
 class AbstractPolyDataObject : public SceneObject
 {
-    
-Q_OBJECT
+    Q_OBJECT
 
 public:
-    vtkTypeMacro(AbstractPolyDataObject,SceneObject);
-    
+    vtkTypeMacro( AbstractPolyDataObject, SceneObject );
+
     AbstractPolyDataObject();
     virtual ~AbstractPolyDataObject();
     virtual void Serialize( Serializer * ser ) override;
-    
+
     // Implementation of parent virtual method
     virtual void Setup( View * view ) override;
     virtual void Release( View * view ) override;
 
-
     /** Get PolyData.*/
-    vtkPolyData *GetPolyData();
+    vtkPolyData * GetPolyData();
     /** Set PolyData.*/
-    void SetPolyData( vtkPolyData *data );
+    void SetPolyData( vtkPolyData * data );
 
     /** Return current rendering mode, possible VTK_POINTS, VTK_WIREFRAME or VTK_SURFACE. */
     int GetRenderingMode() { return this->renderingMode; }
@@ -79,9 +82,9 @@ public:
     /** Set PolyData opacity. */
     void SetOpacity( double opacity );
     /** Set PolyData color. */
-    void SetColor(double r, double g, double b );
+    void SetColor( double r, double g, double b );
     /** Set PolyData color. */
-    void SetColor(double color[3]) { SetColor( color[0], color[1], color[2] ); }
+    void SetColor( double color[ 3 ] ) { SetColor( color[ 0 ], color[ 1 ], color[ 2 ] ); }
     /** Get PolyData color. */
     double * GetColor();
     /** Set line width. */
@@ -89,7 +92,7 @@ public:
     /** Used to signal that PolyData is changed and settings need to be refreshed. */
     void UpdateSettingsWidget();
     /** Check if the cross section with main plains is visible.*/
-    bool GetCrossSectionVisible() {return CrossSectionVisible;}
+    bool GetCrossSectionVisible() { return CrossSectionVisible; }
     /** Set visibility of the cross section with main plains is visible.*/
     void SetCrossSectionVisible( bool );
     /** Enable/disable clipping of the PolyData.*/
@@ -101,8 +104,8 @@ public:
     /** Get the orientation of clipping planes. */
     bool GetClippingPlanesOrientation( int plane );
     /** Save PolyData in a file. */
-    void SavePolyData( QString &fileName );
-     
+    void SavePolyData( QString & fileName );
+
 public slots:
 
     void OnStartCursorInteraction();
@@ -113,9 +116,8 @@ public slots:
 signals:
 
     void ObjectViewChanged();
-    
-protected:
 
+protected:
     virtual void UpdatePipeline() = 0;
 
     // SceneObject overrides
@@ -128,23 +130,23 @@ protected:
     void UpdateClippingPlanes();
     void UpdateCuttingPlane();
     void InitializeClippingPlanes();
-        
-    vtkPolyData *PolyData;
+
+    vtkPolyData * PolyData;
     vtkSmartPointer<vtkPassThrough> m_clippingSwitch;
     vtkSmartPointer<vtkPassThrough> m_colorSwitch;
 
     vtkSmartPointer<vtkProperty> Property;
     vtkSmartPointer<vtkProperty> m_2dProperty;
-    
-    typedef std::map< View*,vtkSmartPointer<vtkActor> > PolyDataObjectViewAssociation;
+
+    typedef std::map<View *, vtkSmartPointer<vtkActor> > PolyDataObjectViewAssociation;
     PolyDataObjectViewAssociation polydataObjectInstances;
-    
-    int renderingMode;  // one of VTK_POINTS, VTK_WIREFRAME or VTK_SURFACE
+
+    int renderingMode;   // one of VTK_POINTS, VTK_WIREFRAME or VTK_SURFACE
     int ScalarsVisible;  // Whether scalars in the PolyData are used to color the object or not.
 
     // Cross section in 2d views
-    vtkSmartPointer<vtkCutter> m_cutter[3];
-    vtkSmartPointer<vtkPlane> m_cuttingPlane[3];
+    vtkSmartPointer<vtkCutter> m_cutter[ 3 ];
+    vtkSmartPointer<vtkPlane> m_cuttingPlane[ 3 ];
     bool CrossSectionVisible;
 
     // Clipping an octant from surface
@@ -154,7 +156,6 @@ protected:
     bool m_clippingOn;
     bool m_interacting;
 };
-
 
 ObjectSerializationHeaderMacro( AbstractPolyDataObject );
 

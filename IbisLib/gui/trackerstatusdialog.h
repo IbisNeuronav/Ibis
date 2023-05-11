@@ -2,8 +2,8 @@
 #define __TrackerStatusDialog_h_
 
 #include <QList>
-#include <QWidget>
 #include <QObject>
+#include <QWidget>
 
 class QVBoxLayout;
 class QHBoxLayout;
@@ -17,14 +17,12 @@ class SceneManager;
 
 class ToolUI : public QWidget
 {
- 
-Q_OBJECT
-            
+    Q_OBJECT
+
 public:
-    
     ToolUI( QWidget * parent = 0 );
     ~ToolUI();
-    
+
     void SetSceneManager( SceneManager * man, int m_toolObjectId );
 
 public slots:
@@ -34,33 +32,30 @@ protected slots:
 
     void SnapshotButtonClicked();
     void SnapshotMatrixWidgetClosed();
-    
-protected:
 
+protected:
     SceneManager * m_manager;
     int m_toolObjectId;
-    
+
     QHBoxLayout * ToolLayout;
     QPushButton * SnapshotButton;
     QLabel * ToolNameLabel;
     QLabel * ToolStateLabel;
-    vtkQtMatrixDialog * SnapshotMatrixWidget;  
+    vtkQtMatrixDialog * SnapshotMatrixWidget;
 };
-
 
 class TrackerStatusDialog : public QWidget
 {
     Q_OBJECT
 
 public:
-    
     TrackerStatusDialog( QWidget * parent = 0 );
     ~TrackerStatusDialog();
 
     void SetSceneManager( SceneManager * man );
 
 public slots:
-    
+
     void OnIbisClockTick();
     void UpdateUI();
 
@@ -68,7 +63,6 @@ public slots:
     void OnNavigationCheckboxToggled( bool );
 
 protected:
-    
     void ClearAllTools();
 
     // GUI elements
@@ -78,7 +72,7 @@ protected:
 
     // GUI for each tool
     QVBoxLayout * m_trackerStatusDialogLayout;
-    QList< ToolUI * > m_toolsWidget;
+    QList<ToolUI *> m_toolsWidget;
 
     SceneManager * m_sceneManager;
 };

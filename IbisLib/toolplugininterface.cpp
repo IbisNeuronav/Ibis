@@ -9,15 +9,16 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
 #include "toolplugininterface.h"
+
 #include <QSettings>
 
 ObjectSerializationMacro( ToolPluginInterface );
 
 void ToolPluginInterface::PluginTypeLoadSettings( QSettings & s )
 {
-    m_settings.winPos = s.value( "WindowPosition", QPoint( 0, 0 ) ).toPoint();
+    m_settings.winPos  = s.value( "WindowPosition", QPoint( 0, 0 ) ).toPoint();
     m_settings.winSize = s.value( "WindowSize", QSize( -1, -1 ) ).toSize();
-    m_settings.active = s.value( "Active", false ).toBool();
+    m_settings.active  = s.value( "Active", false ).toBool();
 }
 
 void ToolPluginInterface::PluginTypeSaveSettings( QSettings & s )
@@ -27,6 +28,4 @@ void ToolPluginInterface::PluginTypeSaveSettings( QSettings & s )
     s.setValue( "Active", m_settings.active );
 }
 
-void ToolPluginInterface::Serialize( Serializer * ser )
-{
-}
+void ToolPluginInterface::Serialize( Serializer * ser ) {}

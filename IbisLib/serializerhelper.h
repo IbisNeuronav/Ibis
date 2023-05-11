@@ -19,10 +19,10 @@ class Vec3;
 class vtkMatrix4x4;
 
 /** @name Serializer Helper
-*   @brief This file contains a collection of functions used to serialize vtk classes or
-* classes from third party libs that are often used in Ibis
-*
-*/
+ *   @brief This file contains a collection of functions used to serialize vtk classes or
+ * classes from third party libs that are often used in Ibis
+ *
+ */
 
 bool Serialize( Serializer * serial, const char * attrName, vtkGenericParamValues & value );
 bool Serialize( Serializer * serial, const char * attrName, vtkColorTransferFunction * colorFunc );

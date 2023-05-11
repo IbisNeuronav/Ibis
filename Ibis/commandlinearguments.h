@@ -15,9 +15,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 class CommandLineArguments
 {
-
 public:
-
     CommandLineArguments();
     bool ParseArguments( QStringList & args );
 
@@ -29,14 +27,12 @@ public:
     QStringList GetDataFilesToLoad() { return m_loadFileNames; }
 
 protected:
-
     bool m_viewerOnly;
     bool m_loadPrevConfig;
     bool m_loadDefaultConfig;
     bool m_loadConfigFile;
     QString m_configFile;
     QStringList m_loadFileNames;
-
 };
 
 #endif

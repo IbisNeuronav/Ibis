@@ -12,6 +12,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #define __PointerCalibrationDialog_h_
 
 #include <QObject>
+
 #include "ui_pointercalibrationdialog.h"
 
 class vtkMatrix4x4;
@@ -22,10 +23,9 @@ class PointerCalibrationDialog : public QWidget, public Ui::PointerCalibrationDi
     Q_OBJECT
 
 public:
-
     PointerCalibrationDialog( QWidget * parent = 0 );
     virtual ~PointerCalibrationDialog();
-    
+
     void SetPointer( PointerObject * p );
 
 public slots:
@@ -35,7 +35,6 @@ public slots:
     void Update();
 
 protected:
-    
     PointerObject * m_pointer;
 };
 

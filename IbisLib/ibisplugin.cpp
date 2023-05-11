@@ -9,15 +9,14 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
 #include "ibisplugin.h"
-#include "ibisapi.h"
+
 #include <QSettings>
+
+#include "ibisapi.h"
 
 ObjectSerializationMacro( IbisPlugin );
 
-IbisPlugin::IbisPlugin()
-{
-    m_ibisAPI = 0;
-}
+IbisPlugin::IbisPlugin() { m_ibisAPI = 0; }
 
 void IbisPlugin::BaseLoadSettings( QSettings & s )
 {
@@ -38,32 +37,29 @@ void IbisPlugin::BaseSaveSettings( QSettings & s )
 QString IbisPlugin::GetPluginTypeAsString()
 {
     IbisPluginTypes type = this->GetPluginType();
-    QString ret = "Unknown Type";
-    switch (type)
+    QString ret          = "Unknown Type";
+    switch( type )
     {
-    case IbisPluginTypeTool:
-        ret = "Tool";
-        break;
-    case IbisPluginTypeObject:
-        ret = "Object";
-        break;
-    case IbisPluginTypeGlobalObject:
-        ret = "Global Object";
-        break;
-    case IbisPluginTypeImportExport:
-        ret = "Import/Export";
-        break;
-    case IbisPluginTypeHardwareModule:
-        ret = "Hardware Module";
-        break;
-    case IbisPluginTypeGenerator:
-        ret = "Generator";
-        break;
+        case IbisPluginTypeTool:
+            ret = "Tool";
+            break;
+        case IbisPluginTypeObject:
+            ret = "Object";
+            break;
+        case IbisPluginTypeGlobalObject:
+            ret = "Global Object";
+            break;
+        case IbisPluginTypeImportExport:
+            ret = "Import/Export";
+            break;
+        case IbisPluginTypeHardwareModule:
+            ret = "Hardware Module";
+            break;
+        case IbisPluginTypeGenerator:
+            ret = "Generator";
+            break;
     }
     return ret;
 }
 
-QString IbisPlugin::GetPluginDescription()
-{
-    return QString("This plugin didn't provide any description");
-}
+QString IbisPlugin::GetPluginDescription() { return QString( "This plugin didn't provide any description" ); }

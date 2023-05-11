@@ -9,46 +9,44 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
 #include "usacquisitionsettingswidget.h"
-#include "ui_usacquisitionsettingswidget.h"
 
 #include <vtkQtMatrixDialog.h>
 #include <vtkTransform.h>
-#include "usacquisitionobject.h"
+
 #include "application.h"
 #include "lookuptablemanager.h"
+#include "ui_usacquisitionsettingswidget.h"
+#include "usacquisitionobject.h"
 
-UsAcquisitionSettingsWidget::UsAcquisitionSettingsWidget(QWidget *parent) :
-    QWidget(parent),
-    ui(new Ui::UsAcquisitionSettingsWidget)
+UsAcquisitionSettingsWidget::UsAcquisitionSettingsWidget( QWidget * parent )
+    : QWidget( parent ), ui( new Ui::UsAcquisitionSettingsWidget )
 {
-    m_acquisitionObject = 0;
+    m_acquisitionObject       = 0;
     m_calibrationMatrixWidget = 0;
-    ui->setupUi(this);
-    connect( this, SIGNAL(destroyed()), this, SLOT(OnClose()) );
+    ui->setupUi( this );
+    connect( this, SIGNAL( destroyed() ), this, SLOT( OnClose() ) );
 }
 
 UsAcquisitionSettingsWidget::~UsAcquisitionSettingsWidget()
 {
-    if( m_calibrationMatrixWidget )
-        m_calibrationMatrixWidget->close();
+    if( m_calibrationMatrixWidget ) m_calibrationMatrixWidget->close();
     delete ui;
 }
 
 void UsAcquisitionSettingsWidget::SetUSAcquisitionObject( USAcquisitionObject * acq )
 {
-    if( m_acquisitionObject == acq )
-        return;
+    if( m_acquisitionObject == acq ) return;
 
-    if (m_acquisitionObject)
+    if( m_acquisitionObject )
     {
-        disconnect( m_acquisitionObject, SIGNAL(ObjectModified()), this, SLOT(UpdateUi()) );
+        disconnect( m_acquisitionObject, SIGNAL( ObjectModified() ), this, SLOT( UpdateUi() ) );
     }
     m_acquisitionObject = acq;
-    if (m_acquisitionObject)
+    if( m_acquisitionObject )
     {
-        if (m_acquisitionObject->GetNumberOfSlices() > 0)
-            m_acquisitionObject->SetNumberOfStaticSlices(m_acquisitionObject->GetNumberOfStaticSlices());
-        connect( m_acquisitionObject, SIGNAL(ObjectModified()), this, SLOT(UpdateUi()) );
+        if( m_acquisitionObject->GetNumberOfSlices() > 0 )
+            m_acquisitionObject->SetNumberOfStaticSlices( m_acquisitionObject->GetNumberOfStaticSlices() );
+        connect( m_acquisitionObject, SIGNAL( ObjectModified() ), this, SLOT( UpdateUi() ) );
         UpdateUi();
     }
 }
@@ -59,9 +57,12 @@ void UsAcquisitionSettingsWidget::UpdateUi()
 
     // Fill text box with properties
     QString acquisitionPropString( "" );
-    acquisitionPropString += QString( "Acquisition type: %1 \n" ).arg( m_acquisitionObject->GetAcquisitionTypeAsString() );
+    acquisitionPropString +=
+        QString( "Acquisition type: %1 \n" ).arg( m_acquisitionObject->GetAcquisitionTypeAsString() );
     acquisitionPropString += QString( "Pixel Format: %1 \n" ).arg( m_acquisitionObject->GetAcquisitionColor() );
-    acquisitionPropString += QString( "Frame Size: %1 x %2 \n" ).arg( m_acquisitionObject->GetSliceWidth() ).arg( m_acquisitionObject->GetSliceHeight() );
+    acquisitionPropString += QString( "Frame Size: %1 x %2 \n" )
+                                 .arg( m_acquisitionObject->GetSliceWidth() )
+                                 .arg( m_acquisitionObject->GetSliceHeight() );
     acquisitionPropString += QString( "Probe Depth: %1 \n" ).arg( m_acquisitionObject->GetUsDepth() );
     acquisitionPropString += QString( "Number of frames: %1\n" ).arg( m_acquisitionObject->GetNumberOfSlices() );
     ui->acquisitionPropertiesTextEdit->setPlainText( acquisitionPropString );
@@ -82,16 +83,15 @@ void UsAcquisitionSettingsWidget::UpdateUi()
     ui->opacitySlider->blockSignals( false );
 
     ui->useDopplerCheckBox->blockSignals( true );
-    ui->useDopplerCheckBox->setChecked(m_acquisitionObject->IsUsingDoppler());
+    ui->useDopplerCheckBox->setChecked( m_acquisitionObject->IsUsingDoppler() );
     ui->useDopplerCheckBox->blockSignals( false );
 
-
-    ui->currentSliceColorComboBox->blockSignals( true ); // change to toggle between modes Mar 2, 2016, by Xiao
-    ui->currentSliceColorComboBox->setEnabled(!m_acquisitionObject->IsUsingDoppler());
+    ui->currentSliceColorComboBox->blockSignals( true );  // change to toggle between modes Mar 2, 2016, by Xiao
+    ui->currentSliceColorComboBox->setEnabled( !m_acquisitionObject->IsUsingDoppler() );
     ui->currentSliceColorComboBox->clear();
 
     for( int i = 0; i < Application::GetLookupTableManager()->GetNumberOfTemplateLookupTables(); i++ )
-        ui->currentSliceColorComboBox->addItem( Application::GetLookupTableManager()->GetTemplateLookupTableName(i) );
+        ui->currentSliceColorComboBox->addItem( Application::GetLookupTableManager()->GetTemplateLookupTableName( i ) );
     ui->currentSliceColorComboBox->setCurrentIndex( m_acquisitionObject->GetSliceLutIndex() );
     ui->currentSliceColorComboBox->blockSignals( false );
 
@@ -119,7 +119,7 @@ void UsAcquisitionSettingsWidget::UpdateUi()
     ui->staticSlicesColorComboBox->blockSignals( true );
     ui->staticSlicesColorComboBox->clear();
     for( int i = 0; i < Application::GetLookupTableManager()->GetNumberOfTemplateLookupTables(); i++ )
-        ui->staticSlicesColorComboBox->addItem( Application::GetLookupTableManager()->GetTemplateLookupTableName(i) );
+        ui->staticSlicesColorComboBox->addItem( Application::GetLookupTableManager()->GetTemplateLookupTableName( i ) );
     ui->staticSlicesColorComboBox->setCurrentIndex( m_acquisitionObject->GetStaticSlicesLutIndex() );
     ui->staticSlicesColorComboBox->blockSignals( false );
 
@@ -127,7 +127,7 @@ void UsAcquisitionSettingsWidget::UpdateUi()
     ui->useMaskCheckBox->setChecked( m_acquisitionObject->IsUsingMask() );
     ui->useMaskCheckBox->blockSignals( false );
 
-    ui->useDopplerCheckBox->blockSignals( true ); // added Mar 3, 2016, Xiao
+    ui->useDopplerCheckBox->blockSignals( true );  // added Mar 3, 2016, Xiao
     ui->useDopplerCheckBox->setChecked( m_acquisitionObject->IsUsingDoppler() );
     ui->useDopplerCheckBox->blockSignals( false );
 }
@@ -152,7 +152,7 @@ void UsAcquisitionSettingsWidget::on_sliceSpinBox_valueChanged( int value )
     m_acquisitionObject->SetCurrentFrame( value );
 }
 
-void UsAcquisitionSettingsWidget::on_opacitySlider_valueChanged(int value)
+void UsAcquisitionSettingsWidget::on_opacitySlider_valueChanged( int value )
 {
     Q_ASSERT( m_acquisitionObject );
     m_acquisitionObject->SetSliceImageOpacity( (double)value * 0.01 );
@@ -175,7 +175,7 @@ void UsAcquisitionSettingsWidget::on_nbStaticSlicesSpinBox_valueChanged( int nbS
     m_acquisitionObject->SetNumberOfStaticSlices( nbSlices );
 }
 
-void UsAcquisitionSettingsWidget::on_staticSlicesOpacitySlider_valueChanged(int value)
+void UsAcquisitionSettingsWidget::on_staticSlicesOpacitySlider_valueChanged( int value )
 {
     Q_ASSERT( m_acquisitionObject );
     m_acquisitionObject->SetStaticSlicesOpacity( (double)value * 0.01 );
@@ -187,17 +187,16 @@ void UsAcquisitionSettingsWidget::on_staticSlicesColorComboBox_currentIndexChang
     m_acquisitionObject->SetStaticSlicesLutIndex( index );
 }
 
-void UsAcquisitionSettingsWidget::on_useMaskCheckBox_toggled(bool checked)
+void UsAcquisitionSettingsWidget::on_useMaskCheckBox_toggled( bool checked )
 {
     m_acquisitionObject->SetUseMask( checked );
 }
 
-//added Mar 1, 2016, Xiao
-void UsAcquisitionSettingsWidget::on_useDopplerCheckBox_toggled(bool checked)
+// added Mar 1, 2016, Xiao
+void UsAcquisitionSettingsWidget::on_useDopplerCheckBox_toggled( bool checked )
 {
     m_acquisitionObject->SetUseDoppler( checked );
 }
-
 
 void UsAcquisitionSettingsWidget::on_calibrationMatrixButton_toggled( bool checked )
 {
@@ -207,8 +206,8 @@ void UsAcquisitionSettingsWidget::on_calibrationMatrixButton_toggled( bool check
         m_calibrationMatrixWidget = new vtkQtMatrixDialog( true, 0 );
         m_calibrationMatrixWidget->setAttribute( Qt::WA_DeleteOnClose );
         m_calibrationMatrixWidget->SetMatrix( m_acquisitionObject->GetCalibrationTransform()->GetMatrix() );
-        m_calibrationMatrixWidget->setWindowTitle( m_acquisitionObject->GetName() + QString(" Calibration Matrix") );
-        connect( m_calibrationMatrixWidget, SIGNAL(destroyed()), this, SLOT(OnCalibrationMatrixWidgetClosed()) );
+        m_calibrationMatrixWidget->setWindowTitle( m_acquisitionObject->GetName() + QString( " Calibration Matrix" ) );
+        connect( m_calibrationMatrixWidget, SIGNAL( destroyed() ), this, SLOT( OnCalibrationMatrixWidgetClosed() ) );
         m_calibrationMatrixWidget->show();
     }
     else
@@ -221,7 +220,6 @@ void UsAcquisitionSettingsWidget::on_calibrationMatrixButton_toggled( bool check
 
 void UsAcquisitionSettingsWidget::OnClose()
 {
-    if( m_calibrationMatrixWidget )
-        m_calibrationMatrixWidget->close();
+    if( m_calibrationMatrixWidget ) m_calibrationMatrixWidget->close();
     m_calibrationMatrixWidget = 0;
 }

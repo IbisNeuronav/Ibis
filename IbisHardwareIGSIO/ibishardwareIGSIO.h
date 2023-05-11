@@ -11,9 +11,10 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef __IbisHardwareIGSIO_h_
 #define __IbisHardwareIGSIO_h_
 
-#include "hardwaremodule.h"
 #include <igtlioDevice.h>
+
 #include "configio.h"
+#include "hardwaremodule.h"
 
 class igtlioLogic;
 class igtlioConnector;
@@ -29,13 +30,11 @@ class Logger;
 
 class IbisHardwareIGSIO : public HardwareModule
 {
-    
     Q_OBJECT
     Q_INTERFACES( IbisPlugin )
-    Q_PLUGIN_METADATA(IID "Ibis.IbisHardwareIGSIO" )
-    
-public:
+    Q_PLUGIN_METADATA( IID "Ibis.IbisHardwareIGSIO" )
 
+public:
     vtkTypeMacro( IbisHardwareIGSIO, HardwareModule );
 
     static IbisHardwareIGSIO * New() { return new IbisHardwareIGSIO; }
@@ -45,7 +44,7 @@ public:
     static const QString PlusServerExecutable;
 
     // Implementation of IbisPlugin interface
-    virtual QString GetPluginName() override { return QString("IbisHardwareIGSIO"); }
+    virtual QString GetPluginName() override { return QString( "IbisHardwareIGSIO" ); }
 
     // Load/Save settings
     virtual void LoadSettings( QSettings & s ) override;
@@ -58,7 +57,7 @@ public:
     QString GetLastIbisPlusConfigFilename() { return m_lastIbisPlusConfigFile; }
     void StartConfig( QString configFile );
     void ClearConfig();
-	
+
     // Implementation of the HardwareModule interface
     virtual void AddSettingsMenuEntries( QMenu * menu ) override;
     virtual void Init() override;
@@ -75,7 +74,7 @@ public:
     virtual void UnFreezeTransform( TrackedSceneObject * obj ) override;
 
     virtual void AddTrackedVideoClient( TrackedSceneObject * obj ) override;
-    virtual void RemoveTrackedVideoClient( TrackedSceneObject * obj) override;
+    virtual void RemoveTrackedVideoClient( TrackedSceneObject * obj ) override;
 
     virtual void SceneAboutToLoad() override;
     virtual void SceneFinishedLoading() override;
@@ -88,12 +87,11 @@ private slots:
     void OnSettingsWidgetClosed();
     void OpenConfigFileWidget();
     void OnConfigFileWidgetClosed();
-    void OnDeviceNew( vtkObject*, unsigned long, void*, void* );
-    void OnDeviceRemoved( vtkObject*, unsigned long, void*, void* );
-    void OnConnectionEstablished( vtkObject*, unsigned long, void*, void* );
+    void OnDeviceNew( vtkObject *, unsigned long, void *, void * );
+    void OnDeviceRemoved( vtkObject *, unsigned long, void *, void * );
+    void OnConnectionEstablished( vtkObject *, unsigned long, void *, void * );
 
 protected:
-
     virtual void InitPlugin() override;
 
     // Launch a Plus server and connect
@@ -104,7 +102,11 @@ protected:
 
     struct Tool
     {
-        Tool() { lastTimeStamp = 0.0; lastTimeStampModifiedTime = 0.0; }
+        Tool()
+        {
+            lastTimeStamp             = 0.0;
+            lastTimeStampModifiedTime = 0.0;
+        }
         vtkSmartPointer<TrackedSceneObject> sceneObject;
         vtkSmartPointer<PolyDataObject> toolModel;
         igtlioDevicePointer transformDevice;
@@ -114,7 +116,7 @@ protected:
         double lastTimeStamp;              // The timestamp of the last message we received
         double lastTimeStampModifiedTime;  // The last time the timestamp has changed
     };
-    typedef QList< Tool* > toolList;
+    typedef QList<Tool *> toolList;
     toolList m_tools;
 
     // Utility functions
@@ -122,20 +124,20 @@ protected:
     int FindToolByName( QString name );
     void AssignDeviceImageToTool( igtlioDevicePointer device, Tool * tool );
     TrackedSceneObject * InstanciateSceneObjectFromType( QString objectName, QString objectType );
-    vtkSmartPointer<PolyDataObject> InstanciateToolModel(QString filename);
-    void ReadToolConfig(QString filename,vtkSmartPointer<TrackedSceneObject> tool);
+    vtkSmartPointer<PolyDataObject> InstanciateToolModel( QString filename );
+    void ReadToolConfig( QString filename, vtkSmartPointer<TrackedSceneObject> tool );
     bool IsDeviceImage( igtlioDevicePointer device );
     bool IsDeviceTransform( igtlioDevicePointer device );
     bool IsDeviceVideo( igtlioDevicePointer device );
 
     void WriteToolConfig();
-    void InternalWriteToolConfig(QString, Tool*);
+    void InternalWriteToolConfig( QString, Tool * );
 
     DeviceToolMap m_deviceToolAssociations;
 
     vtkSmartPointer<igtlioLogic> m_logic;
     vtkSmartPointer<vtkEventQtSlotConnect> m_logicCallbacks;
-    QList< vtkSmartPointer<PlusServerInterface> > m_plusLaunchers;
+    QList<vtkSmartPointer<PlusServerInterface> > m_plusLaunchers;
     qIGTLIOLogicController * m_logicController;
 
     bool m_autoStartLastConfig;
@@ -157,14 +159,15 @@ protected:
     QString m_lastIbisPlusConfigFile;
     // Default directory where all config files needed for Plus support in Ibis are located
     QString m_plusConfigDirectory;
-    // Default directory where IbisPlus configuration files, i.e. files that contain the specification of plus servers, are located.
+    // Default directory where IbisPlus configuration files, i.e. files that contain the specification of plus servers,
+    // are located.
     QString m_ibisPlusConfigFilesDirectory;
     // Name and path of the text file that contains the location of the Plus server
     QString m_plusToolkitPathsFilename;
     // Default directory where Plus Toolkit config files are located
     QString m_plusConfigFilesDirectory;
-	// Current ibisplus config file loaded
-	QString m_currentIbisPlusConfigFile;
+    // Current ibisplus config file loaded
+    QString m_currentIbisPlusConfigFile;
 };
 
 #endif

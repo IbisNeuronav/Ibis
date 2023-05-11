@@ -11,8 +11,9 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef POINTCLOUDOBJECTSETTINGSDIALOG_H
 #define POINTCLOUDOBJECTSETTINGSDIALOG_H
 
-#include <vector>
 #include <QObject>
+#include <vector>
+
 #include "ui_pointcloudobjectsettingsdialog.h"
 
 class PointCloudObject;
@@ -23,29 +24,26 @@ class PointCloudObjectSettingsDialog : public QWidget, public Ui::PointCloudObje
     Q_OBJECT
 
 public:
-    
     PointCloudObjectSettingsDialog( QWidget * parent = 0, Qt::WindowFlags fl = 0 );
     virtual ~PointCloudObjectSettingsDialog();
 
     void SetPointCloudObject( PointCloudObject * object );
 
 public slots:
-    
+
     virtual void ColorSwatchClicked();
-    virtual void OpacitySliderValueChanged(int);
+    virtual void OpacitySliderValueChanged( int );
     virtual void OpacityEditTextChanged( const QString & );
 
     virtual void UpdateSettings();
 
 protected:
-        
     PointCloudObject * m_object;
     QButtonGroup * vertexColorButtonGroup;
     QButtonGroup * displayModeButtonGroup;
 
     void UpdateUI();
     void UpdateOpacityUI();
-
 };
 
 #endif

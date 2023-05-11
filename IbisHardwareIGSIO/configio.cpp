@@ -1,6 +1,8 @@
 #include "configio.h"
-#include "serializer.h"
+
 #include <QFileInfo>
+
+#include "serializer.h"
 
 ObjectSerializationMacro( ServerConfig );
 ObjectSerializationMacro( ToolConfig );
@@ -8,10 +10,10 @@ ObjectSerializationMacro( DeviceToolAssociation );
 
 ServerConfig::ServerConfig()
 {
-    m_serverName = "Local";
-    m_ipAddress = "localhost";
-    m_port = 18944; // There should be a constant in IO for this
-    m_startAuto = true;
+    m_serverName  = "Local";
+    m_ipAddress   = "localhost";
+    m_port        = 18944;  // There should be a constant in IO for this
+    m_startAuto   = true;
     m_connectAuto = true;
 }
 
@@ -29,8 +31,8 @@ void ToolConfig::Serialize( Serializer * ser )
 {
     ::Serialize( ser, "ToolName", ToolName );
     ::Serialize( ser, "ToolType", ToolType );
-    ::Serialize( ser, "ToolModelFile", ToolModelFile);
-    ::Serialize(ser, "ToolParamFile", ToolParamFile);
+    ::Serialize( ser, "ToolModelFile", ToolModelFile );
+    ::Serialize( ser, "ToolParamFile", ToolParamFile );
 }
 
 void DeviceToolAssociation::Serialize( Serializer * ser )
@@ -42,75 +44,72 @@ void DeviceToolAssociation::Serialize( Serializer * ser )
 
 void DeviceToolMap::ToolAndPartFromDevice( const QString & device, QString & tool, QString & part )
 {
-	QPair<QString, QString> defaultValue( QString(""), QString("") );
-    QPair<QString,QString> val = value( device, defaultValue );
-    tool = val.first;
-    part = val.second;
+    QPair<QString, QString> defaultValue( QString( "" ), QString( "" ) );
+    QPair<QString, QString> val = value( device, defaultValue );
+    tool                        = val.first;
+    part                        = val.second;
 }
 
-ConfigIO::ConfigIO( QString configDir )
-{
-    ReadConfig( configDir );
-}
+ConfigIO::ConfigIO( QString configDir ) { ReadConfig( configDir ); }
 
 std::string ConfigIO::GetServerName( int index )
 {
-    Q_ASSERT( index >=0 && index < m_servers.size() );
-    return m_servers[index].m_serverName;
+    Q_ASSERT( index >= 0 && index < m_servers.size() );
+    return m_servers[ index ].m_serverName;
 }
 
 std::string ConfigIO::GetServerIPAddress( int index )
 {
-    Q_ASSERT( index >=0 && index < m_servers.size() );
-    return m_servers[index].m_ipAddress;
+    Q_ASSERT( index >= 0 && index < m_servers.size() );
+    return m_servers[ index ].m_ipAddress;
 }
 
 int ConfigIO::GetServerPort( int index )
 {
-    Q_ASSERT( index >=0 && index < m_servers.size() );
-    return m_servers[index].m_port;
+    Q_ASSERT( index >= 0 && index < m_servers.size() );
+    return m_servers[ index ].m_port;
 }
 
 bool ConfigIO::GetStartAuto( int index )
 {
-    Q_ASSERT( index >=0 && index < m_servers.size() );
-    return m_servers[index].m_startAuto;
+    Q_ASSERT( index >= 0 && index < m_servers.size() );
+    return m_servers[ index ].m_startAuto;
 }
 
 bool ConfigIO::GetConnectAuto( int index )
 {
-    Q_ASSERT( index >=0 && index < m_servers.size() );
-    return m_servers[index].m_connectAuto;
+    Q_ASSERT( index >= 0 && index < m_servers.size() );
+    return m_servers[ index ].m_connectAuto;
 }
 
 QString ConfigIO::GetPlusConfigFile( int index )
 {
-    Q_ASSERT( index >=0 && index < m_servers.size() );
-    return m_servers[index].m_plusConfigFile;
+    Q_ASSERT( index >= 0 && index < m_servers.size() );
+    return m_servers[ index ].m_plusConfigFile;
 }
 
 QString ConfigIO::GetToolName( int index )
 {
-    Q_ASSERT( index >=0 && index < m_tools.size() );
-    return m_tools[index].ToolName;
+    Q_ASSERT( index >= 0 && index < m_tools.size() );
+    return m_tools[ index ].ToolName;
 }
 
 QString ConfigIO::GetToolType( int index )
 {
-    Q_ASSERT( index >=0 && index < m_tools.size() );
-    return m_tools[index].ToolType;
+    Q_ASSERT( index >= 0 && index < m_tools.size() );
+    return m_tools[ index ].ToolType;
 }
 
-QString ConfigIO::GetToolModelFile(int index)
+QString ConfigIO::GetToolModelFile( int index )
 {
-    Q_ASSERT(index >= 0 && index < m_tools.size());
-    return m_tools[index].ToolModelFile;
+    Q_ASSERT( index >= 0 && index < m_tools.size() );
+    return m_tools[ index ].ToolModelFile;
 }
 
-QString ConfigIO::GetToolParamFile(int index)
+QString ConfigIO::GetToolParamFile( int index )
 {
-    Q_ASSERT(index >= 0 && index < m_tools.size());
-    return m_tools[index].ToolParamFile;
+    Q_ASSERT( index >= 0 && index < m_tools.size() );
+    return m_tools[ index ].ToolParamFile;
 }
 
 DeviceToolMap ConfigIO::GetAssociations()
@@ -118,7 +117,8 @@ DeviceToolMap ConfigIO::GetAssociations()
     DeviceToolMap res;
     for( int i = 0; i < m_associations.size(); ++i )
     {
-        res[ m_associations[i].deviceName ] = QPair<QString,QString>( m_associations[i].toolName, m_associations[i].toolPart );
+        res[ m_associations[ i ].deviceName ] =
+            QPair<QString, QString>( m_associations[ i ].toolName, m_associations[ i ].toolPart );
     }
     return res;
 }
@@ -129,8 +129,7 @@ bool ConfigIO::ReadConfig( QString configFile )
 {
     // Make sure the config file exists
     QFileInfo info( configFile );
-    if( !info.exists() || !info.isReadable() )
-        return false;
+    if( !info.exists() || !info.isReadable() ) return false;
 
     // Read config file
     SerializerReader reader;

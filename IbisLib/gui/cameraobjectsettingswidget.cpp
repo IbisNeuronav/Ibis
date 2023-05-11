@@ -9,28 +9,27 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
 #include "cameraobjectsettingswidget.h"
-#include "ui_cameraobjectsettingswidget.h"
-#include "cameraobject.h"
-#include <vtkQtMatrixDialog.h>
+
 #include <vtkMatrix4x4.h>
+#include <vtkQtMatrixDialog.h>
+
+#include "cameraobject.h"
+#include "ui_cameraobjectsettingswidget.h"
 #include "vtkMatrix4x4Operators.h"
 
 static double minLensDisplacement = -5.0;
 static double maxLensDisplacement = 5.0;
 
-CameraObjectSettingsWidget::CameraObjectSettingsWidget(QWidget *parent) :
-    QWidget(parent)
-    , m_calibrationMatrixDialog(0)
-    , ui( new Ui::CameraObjectSettingsWidget )
+CameraObjectSettingsWidget::CameraObjectSettingsWidget( QWidget * parent )
+    : QWidget( parent ), m_calibrationMatrixDialog( 0 ), ui( new Ui::CameraObjectSettingsWidget )
 {
     m_camera = 0;
-    ui->setupUi(this);
+    ui->setupUi( this );
 }
 
 CameraObjectSettingsWidget::~CameraObjectSettingsWidget()
 {
-    if( m_calibrationMatrixDialog )
-        m_calibrationMatrixDialog->close();
+    if( m_calibrationMatrixDialog ) m_calibrationMatrixDialog->close();
     delete ui;
 }
 
@@ -38,8 +37,8 @@ void CameraObjectSettingsWidget::SetCamera( CameraObject * cam )
 {
     Q_ASSERT( m_camera == 0 );
     m_camera = cam;
-    connect( m_camera, SIGNAL(ParamsModified()), this, SLOT(CameraParamsModified()) );
-    connect( m_camera, SIGNAL(ObjectModified()), this, SLOT(CameraModified()) );
+    connect( m_camera, SIGNAL( ParamsModified() ), this, SLOT( CameraParamsModified() ) );
+    connect( m_camera, SIGNAL( ObjectModified() ), this, SLOT( CameraModified() ) );
     UpdateUI();
 }
 
@@ -51,7 +50,7 @@ void CameraObjectSettingsWidget::UpdateUI()
     ui->trackCameraPushButton->blockSignals( false );
 
     if( m_camera->IsDrivenByHardware() )
-    {    
+    {
         ui->freezeButton->blockSignals( true );
         ui->freezeButton->setHidden( false );
         ui->freezeButton->setChecked( m_camera->IsTransformFrozen() );
@@ -84,7 +83,7 @@ void CameraObjectSettingsWidget::UpdateUI()
             ui->currentFrameSlider->setRange( 0, m_camera->GetNumberOfFrames() - 1 );
             ui->currentFrameSlider->setValue( m_camera->GetCurrentFrame() );
             ui->currentFrameSlider->blockSignals( false );
-            ui->currentFrameEdit->setText( QString::number( m_camera->GetCurrentFrame()) );
+            ui->currentFrameEdit->setText( QString::number( m_camera->GetCurrentFrame() ) );
         }
         else
         {
@@ -106,7 +105,7 @@ void CameraObjectSettingsWidget::UpdateUI()
 
     // Focal
     double fx, fy;
-    m_camera->GetFocalPix(fx,fy);
+    m_camera->GetFocalPix( fx, fy );
     ui->fxSpinBox->blockSignals( true );
     ui->fxSpinBox->setValue( fx );
     ui->fxSpinBox->blockSignals( false );
@@ -116,15 +115,15 @@ void CameraObjectSettingsWidget::UpdateUI()
     ui->fySpinBox->blockSignals( false );
 
     // Image center
-    double center[2] = { 0.0, 0.0 };
-    m_camera->GetImageCenterPix( center[0], center[1] );
+    double center[ 2 ] = { 0.0, 0.0 };
+    m_camera->GetImageCenterPix( center[ 0 ], center[ 1 ] );
 
     ui->xImageCenterSpinBox->blockSignals( true );
-    ui->xImageCenterSpinBox->setValue( center[0] );
+    ui->xImageCenterSpinBox->setValue( center[ 0 ] );
     ui->xImageCenterSpinBox->blockSignals( false );
 
     ui->yImageCenterSpinBox->blockSignals( true );
-    ui->yImageCenterSpinBox->setValue( center[1] );
+    ui->yImageCenterSpinBox->setValue( center[ 1 ] );
     ui->yImageCenterSpinBox->blockSignals( false );
 
     ui->distortionSpinBox->blockSignals( true );
@@ -133,7 +132,8 @@ void CameraObjectSettingsWidget::UpdateUI()
 
     // Lens displacement
     ui->lensDisplacementSlider->blockSignals( true );
-    int sliderVal = (int) ( ( m_camera->GetLensDisplacement() - minLensDisplacement ) / ( maxLensDisplacement - minLensDisplacement ) * 100.0 );
+    int sliderVal = (int)( ( m_camera->GetLensDisplacement() - minLensDisplacement ) /
+                           ( maxLensDisplacement - minLensDisplacement ) * 100.0 );
     ui->lensDisplacementSlider->setValue( sliderVal );
     ui->lensDisplacementSlider->blockSignals( false );
     ui->lensDisplacementSpinBox->blockSignals( true );
@@ -141,28 +141,27 @@ void CameraObjectSettingsWidget::UpdateUI()
     ui->lensDisplacementSpinBox->blockSignals( false );
 
     // Update translation and rotation of calibration matrix
-    double trans[3] = { 0.0, 0.0, 0.0 };
-    double rot[3] = { 0.0, 0.0, 0.0 };
+    double trans[ 3 ] = { 0.0, 0.0, 0.0 };
+    double rot[ 3 ]   = { 0.0, 0.0, 0.0 };
     vtkMatrix4x4Operators::MatrixToTransRot( m_camera->GetCalibrationMatrix(), trans, rot );
     ui->xtransSpinBox->blockSignals( true );
-    ui->xtransSpinBox->setValue( trans[0] );
+    ui->xtransSpinBox->setValue( trans[ 0 ] );
     ui->xtransSpinBox->blockSignals( false );
     ui->ytransSpinBox->blockSignals( true );
-    ui->ytransSpinBox->setValue( trans[1] );
+    ui->ytransSpinBox->setValue( trans[ 1 ] );
     ui->ytransSpinBox->blockSignals( false );
     ui->ztransSpinBox->blockSignals( true );
-    ui->ztransSpinBox->setValue( trans[2] );
+    ui->ztransSpinBox->setValue( trans[ 2 ] );
     ui->ztransSpinBox->blockSignals( false );
     ui->xrotSpinBox->blockSignals( true );
-    ui->xrotSpinBox->setValue( rot[0] );
+    ui->xrotSpinBox->setValue( rot[ 0 ] );
     ui->xrotSpinBox->blockSignals( false );
     ui->yrotSpinBox->blockSignals( true );
-    ui->yrotSpinBox->setValue( rot[1] );
+    ui->yrotSpinBox->setValue( rot[ 1 ] );
     ui->yrotSpinBox->blockSignals( false );
     ui->zrotSpinBox->blockSignals( true );
-    ui->zrotSpinBox->setValue( rot[2] );
+    ui->zrotSpinBox->setValue( rot[ 2 ] );
     ui->zrotSpinBox->blockSignals( false );
-
 
     ui->targetTransparencyGroupBox->blockSignals( true );
     ui->targetTransparencyGroupBox->setChecked( m_camera->IsUsingTransparency() );
@@ -177,15 +176,15 @@ void CameraObjectSettingsWidget::UpdateUI()
     ui->showMaskCheckBox->blockSignals( false );
 
     ui->opacitySlider->blockSignals( true );
-    ui->opacitySlider->setValue( (int)(m_camera->GetGlobalOpacity() * 100.0) );
+    ui->opacitySlider->setValue( (int)( m_camera->GetGlobalOpacity() * 100.0 ) );
     ui->opacitySlider->blockSignals( false );
 
     ui->saturationSlider->blockSignals( true );
-    ui->saturationSlider->setValue( (int)(m_camera->GetSaturation() * 100.0) );
+    ui->saturationSlider->setValue( (int)( m_camera->GetSaturation() * 100.0 ) );
     ui->saturationSlider->blockSignals( false );
 
     ui->brightnessSlider->blockSignals( true );
-    ui->brightnessSlider->setValue( (int)(m_camera->GetBrightness() * 100.0) );
+    ui->brightnessSlider->setValue( (int)( m_camera->GetBrightness() * 100.0 ) );
     ui->brightnessSlider->blockSignals( false );
 
     ui->trackTransparencyCenterCheckBox->blockSignals( true );
@@ -195,37 +194,30 @@ void CameraObjectSettingsWidget::UpdateUI()
     UpdateTransparencyCenterUI();
 
     ui->minTransparencyRadiusSlider->blockSignals( true );
-    ui->minTransparencyRadiusSlider->setValue( (int)(m_camera->GetTransparencyRadius()[0] * 100.0) );
+    ui->minTransparencyRadiusSlider->setValue( (int)( m_camera->GetTransparencyRadius()[ 0 ] * 100.0 ) );
     ui->minTransparencyRadiusSlider->blockSignals( false );
 
     ui->maxTransparencyRadiusSlider->blockSignals( true );
-    ui->maxTransparencyRadiusSlider->setValue( (int)(m_camera->GetTransparencyRadius()[1] * 100.0) );
+    ui->maxTransparencyRadiusSlider->setValue( (int)( m_camera->GetTransparencyRadius()[ 1 ] * 100.0 ) );
     ui->maxTransparencyRadiusSlider->blockSignals( false );
-
 }
 
 void CameraObjectSettingsWidget::UpdateTransparencyCenterUI()
 {
     ui->xTransparencyCenterSlider->blockSignals( true );
     ui->xTransparencyCenterSlider->setEnabled( !m_camera->IsTransparencyCenterTracked() );
-    ui->xTransparencyCenterSlider->setValue( (int)(m_camera->GetTransparencyCenter()[0] * 100.0) );
+    ui->xTransparencyCenterSlider->setValue( (int)( m_camera->GetTransparencyCenter()[ 0 ] * 100.0 ) );
     ui->xTransparencyCenterSlider->blockSignals( false );
 
     ui->yTransparencyCenterSlider->blockSignals( true );
     ui->yTransparencyCenterSlider->setEnabled( !m_camera->IsTransparencyCenterTracked() );
-    ui->yTransparencyCenterSlider->setValue( (int)(m_camera->GetTransparencyCenter()[1] * 100.0) );
+    ui->yTransparencyCenterSlider->setValue( (int)( m_camera->GetTransparencyCenter()[ 1 ] * 100.0 ) );
     ui->yTransparencyCenterSlider->blockSignals( false );
 }
 
-void CameraObjectSettingsWidget::CameraModified()
-{
-    UpdateTransparencyCenterUI();
-}
+void CameraObjectSettingsWidget::CameraModified() { UpdateTransparencyCenterUI(); }
 
- void CameraObjectSettingsWidget::CameraParamsModified()
- {
-    UpdateUI();
- }
+void CameraObjectSettingsWidget::CameraParamsModified() { UpdateUI(); }
 
 void CameraObjectSettingsWidget::on_trackCameraPushButton_toggled( bool checked )
 {
@@ -251,7 +243,8 @@ void CameraObjectSettingsWidget::on_calibrationMatrixButton_toggled( bool isOn )
     }
     else
     {
-        Q_ASSERT_X( m_camera, "CameraObjectSettingsWidget::on_calibrationMatrixButton_toggled(bool)", "Can't call this function without setting CameraObject." );
+        Q_ASSERT_X( m_camera, "CameraObjectSettingsWidget::on_calibrationMatrixButton_toggled(bool)",
+                    "Can't call this function without setting CameraObject." );
 
         if( m_camera->GetCalibrationMatrix() )
         {
@@ -262,7 +255,7 @@ void CameraObjectSettingsWidget::on_calibrationMatrixButton_toggled( bool isOn )
             m_calibrationMatrixDialog->setAttribute( Qt::WA_DeleteOnClose );
             m_calibrationMatrixDialog->SetMatrix( m_camera->GetCalibrationMatrix() );
             m_calibrationMatrixDialog->show();
-            connect( m_calibrationMatrixDialog, SIGNAL(destroyed()), this, SLOT(CalibrationMatrixDialogClosed()) );
+            connect( m_calibrationMatrixDialog, SIGNAL( destroyed() ), this, SLOT( CalibrationMatrixDialogClosed() ) );
         }
     }
 }
@@ -273,47 +266,45 @@ void CameraObjectSettingsWidget::CalibrationMatrixDialogClosed()
     ui->calibrationMatrixButton->setChecked( false );
 }
 
-void CameraObjectSettingsWidget::on_xTransparencyCenterSlider_valueChanged(int value)
+void CameraObjectSettingsWidget::on_xTransparencyCenterSlider_valueChanged( int value )
 {
     Q_ASSERT( m_camera );
-    double realValue = (double)value * .01;
-    double yRealValue = (double)(ui->yTransparencyCenterSlider->value()) * .01;
+    double realValue  = (double)value * .01;
+    double yRealValue = (double)( ui->yTransparencyCenterSlider->value() ) * .01;
     m_camera->SetTransparencyCenter( realValue, yRealValue );
     UpdateUI();
 }
 
-void CameraObjectSettingsWidget::on_yTransparencyCenterSlider_valueChanged(int value)
+void CameraObjectSettingsWidget::on_yTransparencyCenterSlider_valueChanged( int value )
 {
     Q_ASSERT( m_camera );
-    double realValue = (double)value * .01;
-    double xRealValue = (double)(ui->xTransparencyCenterSlider->value()) * .01;
+    double realValue  = (double)value * .01;
+    double xRealValue = (double)( ui->xTransparencyCenterSlider->value() ) * .01;
     m_camera->SetTransparencyCenter( xRealValue, realValue );
     UpdateUI();
 }
 
-void CameraObjectSettingsWidget::on_minTransparencyRadiusSlider_valueChanged(int value)
+void CameraObjectSettingsWidget::on_minTransparencyRadiusSlider_valueChanged( int value )
 {
     Q_ASSERT( m_camera );
-    double realValue = (double)value * .01;
-    double maxRealValue = (double)(ui->maxTransparencyRadiusSlider->value()) * .01;
-    if( realValue > maxRealValue )
-        realValue = maxRealValue;
+    double realValue    = (double)value * .01;
+    double maxRealValue = (double)( ui->maxTransparencyRadiusSlider->value() ) * .01;
+    if( realValue > maxRealValue ) realValue = maxRealValue;
     m_camera->SetTransparencyRadius( realValue, maxRealValue );
     UpdateUI();
 }
 
-void CameraObjectSettingsWidget::on_maxTransparencyRadiusSlider_valueChanged(int value)
+void CameraObjectSettingsWidget::on_maxTransparencyRadiusSlider_valueChanged( int value )
 {
     Q_ASSERT( m_camera );
-    double realValue = (double)value * .01;
-    double minRealValue = (double)(ui->minTransparencyRadiusSlider->value()) * .01;
-    if( realValue < minRealValue )
-        realValue = minRealValue;
+    double realValue    = (double)value * .01;
+    double minRealValue = (double)( ui->minTransparencyRadiusSlider->value() ) * .01;
+    if( realValue < minRealValue ) realValue = minRealValue;
     m_camera->SetTransparencyRadius( minRealValue, realValue );
     UpdateUI();
 }
 
-void CameraObjectSettingsWidget::on_freezeButton_toggled(bool checked)
+void CameraObjectSettingsWidget::on_freezeButton_toggled( bool checked )
 {
     Q_ASSERT( m_camera );
     if( checked )
@@ -336,25 +327,25 @@ void CameraObjectSettingsWidget::on_opacitySlider_valueChanged( int value )
     m_camera->SetGlobalOpacity( opacity );
 }
 
-void CameraObjectSettingsWidget::on_targetTransparencyGroupBox_toggled(bool checked)
+void CameraObjectSettingsWidget::on_targetTransparencyGroupBox_toggled( bool checked )
 {
     Q_ASSERT( m_camera );
     m_camera->SetUseTransparency( checked );
 }
 
-void CameraObjectSettingsWidget::on_useGradientCheckBox_toggled(bool checked)
+void CameraObjectSettingsWidget::on_useGradientCheckBox_toggled( bool checked )
 {
     Q_ASSERT( m_camera );
     m_camera->SetUseGradient( checked );
 }
 
-void CameraObjectSettingsWidget::on_showMaskCheckBox_toggled(bool checked)
+void CameraObjectSettingsWidget::on_showMaskCheckBox_toggled( bool checked )
 {
     Q_ASSERT( m_camera );
     m_camera->SetShowMask( checked );
 }
 
-void CameraObjectSettingsWidget::on_fxSpinBox_valueChanged(double )
+void CameraObjectSettingsWidget::on_fxSpinBox_valueChanged( double )
 {
     Q_ASSERT( m_camera );
     double fx = ui->fxSpinBox->value();
@@ -362,7 +353,7 @@ void CameraObjectSettingsWidget::on_fxSpinBox_valueChanged(double )
     m_camera->SetFocalPix( fx, fy );
 }
 
-void CameraObjectSettingsWidget::on_fySpinBox_valueChanged(double )
+void CameraObjectSettingsWidget::on_fySpinBox_valueChanged( double )
 {
     Q_ASSERT( m_camera );
     double fx = ui->fxSpinBox->value();
@@ -370,7 +361,7 @@ void CameraObjectSettingsWidget::on_fySpinBox_valueChanged(double )
     m_camera->SetFocalPix( fx, fy );
 }
 
-void CameraObjectSettingsWidget::on_xImageCenterSpinBox_valueChanged(double)
+void CameraObjectSettingsWidget::on_xImageCenterSpinBox_valueChanged( double )
 {
     Q_ASSERT( m_camera );
     double x = ui->xImageCenterSpinBox->value();
@@ -378,7 +369,7 @@ void CameraObjectSettingsWidget::on_xImageCenterSpinBox_valueChanged(double)
     m_camera->SetImageCenterPix( x, y );
 }
 
-void CameraObjectSettingsWidget::on_yImageCenterSpinBox_valueChanged(double)
+void CameraObjectSettingsWidget::on_yImageCenterSpinBox_valueChanged( double )
 {
     Q_ASSERT( m_camera );
     double x = ui->xImageCenterSpinBox->value();
@@ -386,7 +377,7 @@ void CameraObjectSettingsWidget::on_yImageCenterSpinBox_valueChanged(double)
     m_camera->SetImageCenterPix( x, y );
 }
 
-void CameraObjectSettingsWidget::on_distortionSpinBox_valueChanged(double)
+void CameraObjectSettingsWidget::on_distortionSpinBox_valueChanged( double )
 {
     Q_ASSERT( m_camera );
     double dist = ui->distortionSpinBox->value();
@@ -404,111 +395,93 @@ void CameraObjectSettingsWidget::on_recordButton_clicked()
     UpdateUI();
 }
 
-void CameraObjectSettingsWidget::on_currentFrameSlider_valueChanged(int value)
+void CameraObjectSettingsWidget::on_currentFrameSlider_valueChanged( int value )
 {
     Q_ASSERT( m_camera );
     m_camera->SetCurrentFrame( value );
     UpdateUI();
 }
 
-void CameraObjectSettingsWidget::on_intrinsicParamsGroupBox_toggled(bool arg1)
+void CameraObjectSettingsWidget::on_intrinsicParamsGroupBox_toggled( bool arg1 )
 {
     Q_ASSERT( m_camera );
     m_camera->SetIntrinsicEditable( arg1 );
     UpdateUI();
 }
 
-void CameraObjectSettingsWidget::on_extrinsicParamsGroupBox_toggled(bool arg1)
+void CameraObjectSettingsWidget::on_extrinsicParamsGroupBox_toggled( bool arg1 )
 {
     Q_ASSERT( m_camera );
     m_camera->SetExtrinsicEditable( arg1 );
     UpdateUI();
 }
 
-void CameraObjectSettingsWidget::on_xtransSpinBox_valueChanged(double )
-{
-    UpdateExtrinsicTransform();
-}
+void CameraObjectSettingsWidget::on_xtransSpinBox_valueChanged( double ) { UpdateExtrinsicTransform(); }
 
-void CameraObjectSettingsWidget::on_ytransSpinBox_valueChanged(double )
-{
-    UpdateExtrinsicTransform();
-}
+void CameraObjectSettingsWidget::on_ytransSpinBox_valueChanged( double ) { UpdateExtrinsicTransform(); }
 
-void CameraObjectSettingsWidget::on_ztransSpinBox_valueChanged(double )
-{
-    UpdateExtrinsicTransform();
-}
+void CameraObjectSettingsWidget::on_ztransSpinBox_valueChanged( double ) { UpdateExtrinsicTransform(); }
 
-void CameraObjectSettingsWidget::on_xrotSpinBox_valueChanged(double )
-{
-    UpdateExtrinsicTransform();
-}
+void CameraObjectSettingsWidget::on_xrotSpinBox_valueChanged( double ) { UpdateExtrinsicTransform(); }
 
-void CameraObjectSettingsWidget::on_yrotSpinBox_valueChanged(double )
-{
-    UpdateExtrinsicTransform();
-}
+void CameraObjectSettingsWidget::on_yrotSpinBox_valueChanged( double ) { UpdateExtrinsicTransform(); }
 
-void CameraObjectSettingsWidget::on_zrotSpinBox_valueChanged(double )
-{
-    UpdateExtrinsicTransform();
-}
+void CameraObjectSettingsWidget::on_zrotSpinBox_valueChanged( double ) { UpdateExtrinsicTransform(); }
 
 void CameraObjectSettingsWidget::UpdateExtrinsicTransform()
 {
-    double trans[3];
-    trans[0] = ui->xtransSpinBox->value();
-    trans[1] = ui->ytransSpinBox->value();
-    trans[2] = ui->ztransSpinBox->value();
-    double rot[3];
-    rot[0] = ui->xrotSpinBox->value();
-    rot[1] = ui->yrotSpinBox->value();
-    rot[2] = ui->zrotSpinBox->value();
+    double trans[ 3 ];
+    trans[ 0 ] = ui->xtransSpinBox->value();
+    trans[ 1 ] = ui->ytransSpinBox->value();
+    trans[ 2 ] = ui->ztransSpinBox->value();
+    double rot[ 3 ];
+    rot[ 0 ]                 = ui->xrotSpinBox->value();
+    rot[ 1 ]                 = ui->yrotSpinBox->value();
+    rot[ 2 ]                 = ui->zrotSpinBox->value();
     vtkMatrix4x4 * calMatrix = vtkMatrix4x4::New();
     vtkMatrix4x4Operators::TransRotToMatrix( trans, rot, calMatrix );
     m_camera->SetCalibrationMatrix( calMatrix );
     calMatrix->Delete();
 }
 
-void CameraObjectSettingsWidget::on_verticalAngleSpinBox_valueChanged(double arg1)
+void CameraObjectSettingsWidget::on_verticalAngleSpinBox_valueChanged( double arg1 )
 {
     Q_ASSERT( m_camera );
     m_camera->SetVerticalAngleDegrees( arg1 );
 }
 
-void CameraObjectSettingsWidget::on_trackTransparencyCenterCheckBox_toggled(bool checked)
+void CameraObjectSettingsWidget::on_trackTransparencyCenterCheckBox_toggled( bool checked )
 {
     Q_ASSERT( m_camera );
     m_camera->SetTransparencyCenterTracked( checked );
 }
 
-void CameraObjectSettingsWidget::on_saturationSlider_valueChanged(int value)
+void CameraObjectSettingsWidget::on_saturationSlider_valueChanged( int value )
 {
     Q_ASSERT( m_camera );
     double s = (double)value * 0.01;
     m_camera->SetSaturation( s );
 }
 
-void CameraObjectSettingsWidget::on_brightnessSlider_valueChanged(int value)
+void CameraObjectSettingsWidget::on_brightnessSlider_valueChanged( int value )
 {
     Q_ASSERT( m_camera );
     double b = (double)value * 0.01;
     m_camera->SetBrightness( b );
 }
 
-void CameraObjectSettingsWidget::on_lensDisplacementSlider_valueChanged(int value)
+void CameraObjectSettingsWidget::on_lensDisplacementSlider_valueChanged( int value )
 {
     Q_ASSERT( m_camera );
-    double newDisplacement = minLensDisplacement + (double)value / 100.0 * ( maxLensDisplacement - minLensDisplacement );
+    double newDisplacement =
+        minLensDisplacement + (double)value / 100.0 * ( maxLensDisplacement - minLensDisplacement );
     m_camera->SetLensDisplacement( newDisplacement );
     UpdateUI();
 }
 
-void CameraObjectSettingsWidget::on_lensDisplacementSpinBox_valueChanged(double arg1)
+void CameraObjectSettingsWidget::on_lensDisplacementSpinBox_valueChanged( double arg1 )
 {
     Q_ASSERT( m_camera );
     m_camera->SetLensDisplacement( arg1 );
     UpdateUI();
 }
-

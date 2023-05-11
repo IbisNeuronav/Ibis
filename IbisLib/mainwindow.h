@@ -11,10 +11,11 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef __MainWindow_h_
 #define __MainWindow_h_
 
+#include <QDockWidget>
 #include <QMainWindow>
 #include <QMap>
-#include <QDockWidget>
 #include <QObject>
+
 #include "serializer.h"
 
 class QAction;
@@ -37,14 +38,16 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-
     MainWindow( QWidget * parent = 0 );
     ~MainWindow();
 
     virtual void Serialize( Serializer * ser );
     void AddBottomWidget( QWidget * w );
     void RemoveBottomWidget( QWidget * w );
-    void ShowFloatingDock( QWidget * w, QFlags<QDockWidget::DockWidgetFeature> features=QDockWidget::DockWidgetClosable | QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable );
+    void ShowFloatingDock( QWidget * w,
+                           QFlags<QDockWidget::DockWidgetFeature> features = QDockWidget::DockWidgetClosable |
+                                                                             QDockWidget::DockWidgetMovable |
+                                                                             QDockWidget::DockWidgetFloatable );
     void SetShowToolbar( bool show );
     void SetShowLeftPanel( bool show );
     void SetShowRightPanel( bool show );
@@ -62,7 +65,7 @@ private slots:
 
     void about();
     void AboutPlugins();
-    void fileOpenFile(); 
+    void fileOpenFile();
     void fileExportFile();
     void fileImportUsAcquisition();
     void fileImportCamera();
@@ -71,53 +74,53 @@ private slots:
     void fileLoadScene();
     void fileNewScene();
     void NewPointSet();
-    void ModifyFileMenu( );
-    void ModifyNewObjectFileMenu( );
+    void ModifyFileMenu();
+    void ModifyNewObjectFileMenu();
     void FileGenerateMenuAboutToShow();
-    void ModifyViewMenu( );
+    void ModifyViewMenu();
     void ViewXPlaneToggled( bool );
     void ViewYPlaneToggled( bool );
     void ViewZPlaneToggled( bool );
     void ViewAllPlanes();
     void HideAllPlanes();
-    void View3DFront( );
-    void View3DLeft( );
-    void View3DRight( );
-    void View3DBack( );
-    void View3DTop( );
-    void View3DBottom( );
-    void ViewResetPlanes( );
+    void View3DFront();
+    void View3DLeft();
+    void View3DRight();
+    void View3DBack();
+    void View3DTop();
+    void View3DBottom();
+    void ViewResetPlanes();
     void ViewFullscreen();
-    void ObjectListWidgetChanged(QWidget*);
+    void ObjectListWidgetChanged( QWidget * );
     void ToggleToolPlugin( ToolPluginInterface * toolPlugin, bool isOn );
-    void ToolPluginsMenuActionToggled(bool);
+    void ToolPluginsMenuActionToggled( bool );
     void FloatingPluginWidgetClosed();
     void PluginTabClosed( int tabIndex );
     void ObjectPluginsMenuActionTriggered();
     void GeneratePluginsMenuActionTriggered();
     void MainSplitterMoved( int pos, int index );
-    void SaveScene(bool);
+    void SaveScene( bool );
     void Preferences();
 
 protected:
-
     void OpenFiles( OpenFileParams * params );
-    void CreateNewObjectPluginsUi(QMenu *);
-    QAction * AddToggleAction( QMenu * menu, const QString & title, const char * member, const QKeySequence & shortcut, bool checked );
+    void CreateNewObjectPluginsUi( QMenu * );
+    QAction * AddToggleAction( QMenu * menu, const QString & title, const char * member, const QKeySequence & shortcut,
+                               bool checked );
     void closeEvent( QCloseEvent * event );
     void ClosePluginTab( QAction * action, int index );
     void UpdateMainSplitter();
 
     // Handling of Drag and Drop
-    void dragEnterEvent(QDragEnterEvent *event);
-    void dragMoveEvent(QDragMoveEvent *event);
-    void dragLeaveEvent(QDragLeaveEvent *event);
-    void dropEvent(QDropEvent *event);
-	
-	// Capture events sent to application (ex.:fileopen event on OSX)
-	bool eventFilter(QObject *obj, QEvent *event);
+    void dragEnterEvent( QDragEnterEvent * event );
+    void dragMoveEvent( QDragMoveEvent * event );
+    void dragLeaveEvent( QDragLeaveEvent * event );
+    void dropEvent( QDropEvent * event );
 
-    QuadViewWindow *m_4Views;
+    // Capture events sent to application (ex.:fileopen event on OSX)
+    bool eventFilter( QObject * obj, QEvent * event );
+
+    QuadViewWindow * m_4Views;
     QAction * m_viewXPlaneAction;
     QAction * m_viewYPlaneAction;
     QAction * m_viewZPlaneAction;
@@ -137,15 +140,14 @@ protected:
     QScrollArea * m_objectSettingsScrollArea;
     QSpacerItem * m_leftEndSpacer;
 
-    typedef QMap< QAction*, QWidget* > PluginWidgetMap;
+    typedef QMap<QAction *, QWidget *> PluginWidgetMap;
     PluginWidgetMap m_pluginWidgets;
     PluginWidgetMap m_pluginTabs;
 
-    typedef QMap< ToolPluginInterface*, QAction* > PluginActionMap;
+    typedef QMap<ToolPluginInterface *, QAction *> PluginActionMap;
     PluginActionMap m_pluginActions;
 
     bool m_windowClosing;
-
 };
 
 ObjectSerializationHeaderMacro( MainWindow );

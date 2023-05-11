@@ -90,14 +90,15 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 // vtk3DWidget vtkBoxWidget vtkLineWidget  vtkPlaneWidget vtkPointWidget
 // vtkPolyDataSourceWidget vtkSphereWidget vtkImplicitPlaneWidget
 
-
 #ifndef __vtkMultiImagePlaneWidget_h
 #define __vtkMultiImagePlaneWidget_h
 
-#include "vtkMulti3DWidget.h"
-#include <vector>
 #include <vtkMatrix4x4.h>
 #include <vtkTexture.h>
+
+#include <vector>
+
+#include "vtkMulti3DWidget.h"
 
 class vtkActor;
 class vtkCellPicker;
@@ -118,28 +119,28 @@ class vtkMultiTextureMapToPlane;
 class vtkTransform;
 
 #define VTK_NEAREST_RESLICE 0
-#define VTK_LINEAR_RESLICE  1
-#define VTK_CUBIC_RESLICE   2
+#define VTK_LINEAR_RESLICE 1
+#define VTK_CUBIC_RESLICE 2
 
 class vtkMultiImagePlaneWidget : public vtkMulti3DWidget
 {
 public:
     // Description:
     // Instantiate the object.
-    static vtkMultiImagePlaneWidget *New();
-    vtkTypeMacro(vtkMultiImagePlaneWidget,vtkMulti3DWidget);
-    void PrintSelf(ostream& os, vtkIndent indent) override;
+    static vtkMultiImagePlaneWidget * New();
+    vtkTypeMacro( vtkMultiImagePlaneWidget, vtkMulti3DWidget );
+    void PrintSelf( ostream & os, vtkIndent indent ) override;
 
     // Description:
     // Methods that satisfy the superclass' API.
-    virtual void PlaceWidget(double bounds[6]) override;
+    virtual void PlaceWidget( double bounds[ 6 ] ) override;
     void PlaceWidget() override;
 
     // Description:
     // Set the vtkImageData* input for the vtkImageReslice.
     int AddInput( vtkImageData * in, vtkScalarsToColors * lut, vtkTransform * t, bool canInterpolate );
     void SetImageHidden( vtkImageData * im, bool hidden );
-	void ClearAllInputs();
+    void ClearAllInputs();
 
     // Description:
     // Set the volume and transform that are used to compute the bounds inside which the plane can move
@@ -154,101 +155,91 @@ public:
 
     // Description:
     // Set/Get the origin of the plane.
-    void SetOrigin(double x, double y, double z);
-    void SetOrigin(double xyz[3]);
-    double* GetOrigin();
-    void GetOrigin(double xyz[3]);
+    void SetOrigin( double x, double y, double z );
+    void SetOrigin( double xyz[ 3 ] );
+    double * GetOrigin();
+    void GetOrigin( double xyz[ 3 ] );
 
     // Description:
     // Set/Get the position of the point defining the first axis of the plane.
-    void SetPoint1(double x, double y, double z);
-    void SetPoint1(double xyz[3]);
-    double* GetPoint1();
-    void GetPoint1(double xyz[3]);
+    void SetPoint1( double x, double y, double z );
+    void SetPoint1( double xyz[ 3 ] );
+    double * GetPoint1();
+    void GetPoint1( double xyz[ 3 ] );
 
     // Description:
     // Set/Get the position of the point defining the second axis of the plane.
-    void SetPoint2(double x, double y, double z);
-    void SetPoint2(double xyz[3]);
-    double* GetPoint2();
-    void GetPoint2(double xyz[3]);
+    void SetPoint2( double x, double y, double z );
+    void SetPoint2( double xyz[ 3 ] );
+    double * GetPoint2();
+    void GetPoint2( double xyz[ 3 ] );
 
     // Description:
     // Get the center of the plane.
-    double* GetCenter();
-    void GetCenter(double xyz[3]);
+    double * GetCenter();
+    void GetCenter( double xyz[ 3 ] );
 
     // Description:
     // Get the normal to the plane.
-    double* GetNormal();
-    void GetNormal(double xyz[3]);
+    double * GetNormal();
+    void GetNormal( double xyz[ 3 ] );
 
     // Description:
     // Get the vector from the plane origin to point1.
-    void GetVector1(double v1[3]);
+    void GetVector1( double v1[ 3 ] );
 
     // Description:
     // Get the vector from the plane origin to point2.
-    void GetVector2(double v2[3]);
+    void GetVector2( double v2[ 3 ] );
 
     // Description:
     // Move the plane along its normal until it hits the point passed and then adjust the cursor to be on the point
-    void SetGlobalPosition( double position[3] );  // position is global
-    void SetPosition( double position[3] );        // position is in ref volume space
-    void GetPosition( double position[3] );
+    void SetGlobalPosition( double position[ 3 ] );  // position is global
+    void SetPosition( double position[ 3 ] );        // position is in ref volume space
+    void GetPosition( double position[ 3 ] );
     void MoveNSlices( int nbSlices );
 
     // Description:
     // Get the distance between the point passed and the plane. Point is in world coords
-    double DistanceToPlane( double position[3] );
+    double DistanceToPlane( double position[ 3 ] );
 
     // Description:
     // Manage cursor
-    void ActivateCursor(int active);
-    virtual void SetCursorProperty(vtkProperty*);
-    vtkGetObjectMacro(CursorProperty,vtkProperty);
+    void ActivateCursor( int active );
+    virtual void SetCursorProperty( vtkProperty * );
+    vtkGetObjectMacro( CursorProperty, vtkProperty );
 
     // Description:
     // Set the interpolation to use when texturing the plane.
-    void SetResliceInterpolate(int);
-    vtkGetMacro(ResliceInterpolate,int);
-    void SetResliceInterpolateToNearestNeighbour()
-    {
-        this->SetResliceInterpolate(VTK_NEAREST_RESLICE);
-    }
-    void SetResliceInterpolateToLinear()
-    {
-        this->SetResliceInterpolate(VTK_LINEAR_RESLICE);
-    }
-    void SetResliceInterpolateToCubic()
-    {
-        this->SetResliceInterpolate(VTK_CUBIC_RESLICE);
-    }
-
+    void SetResliceInterpolate( int );
+    vtkGetMacro( ResliceInterpolate, int );
+    void SetResliceInterpolateToNearestNeighbour() { this->SetResliceInterpolate( VTK_NEAREST_RESLICE ); }
+    void SetResliceInterpolateToLinear() { this->SetResliceInterpolate( VTK_LINEAR_RESLICE ); }
+    void SetResliceInterpolateToCubic() { this->SetResliceInterpolate( VTK_CUBIC_RESLICE ); }
 
     // Description:
     // Make sure that the plane remains within the volume.
     // Default is On.
-    vtkSetMacro(RestrictPlaneToVolume,int);
-    vtkGetMacro(RestrictPlaneToVolume,int);
-    vtkBooleanMacro(RestrictPlaneToVolume,int);
+    vtkSetMacro( RestrictPlaneToVolume, int );
+    vtkGetMacro( RestrictPlaneToVolume, int );
+    vtkBooleanMacro( RestrictPlaneToVolume, int );
 
     // Description:
     // Let the user control the lookup table. NOTE: apply this method BEFORE
     // applying the SetLookupTable method.
     // Default is Off.
-    vtkSetMacro(UserControlledLookupTable,int);
-    vtkGetMacro(UserControlledLookupTable,int);
-    vtkBooleanMacro(UserControlledLookupTable,int);
+    vtkSetMacro( UserControlledLookupTable, int );
+    vtkGetMacro( UserControlledLookupTable, int );
+    vtkBooleanMacro( UserControlledLookupTable, int );
 
     // Description:
     // Specify whether to interpolate the texture or not. When off, the
     // reslice interpolation is nearest neighbour regardless of how the
     // interpolation is set through the API. Set before setting the
     // vtkImageData imput. Default is On.
-    void SetTextureInterpolate(int);
-    vtkGetMacro(TextureInterpolate,int);
-    vtkBooleanMacro(TextureInterpolate,int);
+    void SetTextureInterpolate( int );
+    vtkGetMacro( TextureInterpolate, int );
+    vtkBooleanMacro( TextureInterpolate, int );
 
     // Description:
     // Grab the polydata (including points) that defines the plane.  The
@@ -257,38 +248,29 @@ public:
     // are guaranteed to be up-to-date when either the InteractionEvent or
     // EndInteraction events are invoked. The user provides the vtkPolyData and
     // the points and polyplane are added to it.
-    void GetPolyData(vtkPolyData *pd);
+    void GetPolyData( vtkPolyData * pd );
 
     // Description:
     // Satisfies superclass API.  This will change the state of the widget to
     // match changes that have been made to the underlying PolyDataSource
-    void UpdatePlacement(void);
+    void UpdatePlacement( void );
 
     // Description:
     // Set/Get the plane's outline properties. The properties of the plane's
     // outline when selected and unselected can be manipulated.
-    virtual void SetPlaneProperty(vtkProperty*);
-    vtkGetObjectMacro(PlaneProperty,vtkProperty);
-    virtual void SetSelectedPlaneProperty(vtkProperty*);
-    vtkGetObjectMacro(SelectedPlaneProperty,vtkProperty);
+    virtual void SetPlaneProperty( vtkProperty * );
+    vtkGetObjectMacro( PlaneProperty, vtkProperty );
+    virtual void SetSelectedPlaneProperty( vtkProperty * );
+    vtkGetObjectMacro( SelectedPlaneProperty, vtkProperty );
 
     // Description:
     // Convenience method sets the plane orientation normal to the
     // x, y, or z axes.  Default is XAxes (0).
-    void SetPlaneOrientation(int);
-    vtkGetMacro(PlaneOrientation,int);
-    void SetPlaneOrientationToXAxes()
-    {
-        this->SetPlaneOrientation(0);
-    }
-    void SetPlaneOrientationToYAxes()
-    {
-        this->SetPlaneOrientation(1);
-    }
-    void SetPlaneOrientationToZAxes()
-    {
-        this->SetPlaneOrientation(2);
-    }
+    void SetPlaneOrientation( int );
+    vtkGetMacro( PlaneOrientation, int );
+    void SetPlaneOrientationToXAxes() { this->SetPlaneOrientation( 0 ); }
+    void SetPlaneOrientationToYAxes() { this->SetPlaneOrientation( 1 ); }
+    void SetPlaneOrientationToZAxes() { this->SetPlaneOrientation( 2 ); }
 
     // Description:
     // Set the internal picker to one defined by the user.  In this way,
@@ -299,37 +281,37 @@ public:
 
     // Description:
     // Set/Get the internal lookuptable (lut) to one defined by the user, or,
-	// alternatively, to the lut of another vtkImagePlaneWidget.  In this way,
+    // alternatively, to the lut of another vtkImagePlaneWidget.  In this way,
     // a set of three orthogonal planes can share the same lut so that
     // window-levelling is performed uniformly among planes.  The default
     // internal lut can be re- set/allocated by setting to 0 (NULL).
-	// the volume(vtkImageData) passed is used to identify which input will
-	// be affected by the lut.
+    // the volume(vtkImageData) passed is used to identify which input will
+    // be affected by the lut.
     virtual void SetLookupTable( vtkImageData * volume, vtkScalarsToColors * lut );
     vtkScalarsToColors * GetLookupTable( vtkImageData * volume );
 
-	// Description:
-	// Enable/disable plane rotation/spinning together with display of the margin.
-	vtkSetMacro( DisableRotatingAndSpinning, int );
-	vtkGetMacro( DisableRotatingAndSpinning, int );
-	vtkBooleanMacro( DisableRotatingAndSpinning, int );
+    // Description:
+    // Enable/disable plane rotation/spinning together with display of the margin.
+    vtkSetMacro( DisableRotatingAndSpinning, int );
+    vtkGetMacro( DisableRotatingAndSpinning, int );
+    vtkBooleanMacro( DisableRotatingAndSpinning, int );
 
-	// Description:
-	// Show/Hide plane outline
-	vtkSetMacro( ShowPlaneOutline, int );
-	vtkGetMacro( ShowPlaneOutline, int );
-	vtkBooleanMacro( ShowPlaneOutline, int );
+    // Description:
+    // Show/Hide plane outline
+    vtkSetMacro( ShowPlaneOutline, int );
+    vtkGetMacro( ShowPlaneOutline, int );
+    vtkBooleanMacro( ShowPlaneOutline, int );
 
-	// Description:
-	// Show/Hide highlighted plane outline
-	vtkSetMacro( ShowHighlightedPlaneOutline, int );
-	vtkGetMacro( ShowHighlightedPlaneOutline, int );
-	vtkBooleanMacro( ShowHighlightedPlaneOutline, int );
+    // Description:
+    // Show/Hide highlighted plane outline
+    vtkSetMacro( ShowHighlightedPlaneOutline, int );
+    vtkGetMacro( ShowHighlightedPlaneOutline, int );
+    vtkBooleanMacro( ShowHighlightedPlaneOutline, int );
 
     // Description:
     // Set the properties of the margins.
-    virtual void SetMarginProperty(vtkProperty*);
-    vtkGetObjectMacro(MarginProperty,vtkProperty);
+    virtual void SetMarginProperty( vtkProperty * );
+    vtkGetObjectMacro( MarginProperty, vtkProperty );
 
     void SetSliceThickness( int nbSlices );
     void SetSliceMixMode( int imageIndex, int mode );
@@ -339,52 +321,50 @@ public:
     // Description:
     // Get the image coordinate position and voxel value.  Currently only
     // supports single component image data.
-    int GetCursorData(double xyzv[4]);
+    int GetCursorData( double xyzv[ 4 ] );
 
     // Description:
     // Set action associated to buttons.
-    //BTX
+    // BTX
     enum
     {
-		NO_ACTION			= 0,
-		CURSOR_ACTION       = 1,
+        NO_ACTION           = 0,
+        CURSOR_ACTION       = 1,
         SLICE_MOTION_ACTION = 2
     };
-    //ETX
-    vtkSetClampMacro(LeftButtonAction,int, NO_ACTION, SLICE_MOTION_ACTION);
-    vtkGetMacro(LeftButtonAction, int);
-    vtkSetClampMacro(MiddleButtonAction,int, NO_ACTION, SLICE_MOTION_ACTION);
-    vtkGetMacro(MiddleButtonAction, int);
-    vtkSetClampMacro(RightButtonAction,int, NO_ACTION, SLICE_MOTION_ACTION);
-    vtkGetMacro(RightButtonAction, int);
+    // ETX
+    vtkSetClampMacro( LeftButtonAction, int, NO_ACTION, SLICE_MOTION_ACTION );
+    vtkGetMacro( LeftButtonAction, int );
+    vtkSetClampMacro( MiddleButtonAction, int, NO_ACTION, SLICE_MOTION_ACTION );
+    vtkGetMacro( MiddleButtonAction, int );
+    vtkSetClampMacro( RightButtonAction, int, NO_ACTION, SLICE_MOTION_ACTION );
+    vtkGetMacro( RightButtonAction, int );
 
-    vtkSetClampMacro(LeftButton2DAction,int, NO_ACTION, SLICE_MOTION_ACTION);
-    vtkGetMacro(LeftButton2DAction, int);
+    vtkSetClampMacro( LeftButton2DAction, int, NO_ACTION, SLICE_MOTION_ACTION );
+    vtkGetMacro( LeftButton2DAction, int );
 
-    vtkSetClampMacro(LeftButtonCtrlAction,int, NO_ACTION, SLICE_MOTION_ACTION);
-	vtkGetMacro(LeftButtonCtrlAction, int);
-    vtkSetClampMacro(MiddleButtonCtrlAction,int, NO_ACTION, SLICE_MOTION_ACTION);
-	vtkGetMacro(MiddleButtonCtrlAction, int);
-    vtkSetClampMacro(RightButtonCtrlAction,int, NO_ACTION, SLICE_MOTION_ACTION);
-	vtkGetMacro(RightButtonCtrlAction, int);
+    vtkSetClampMacro( LeftButtonCtrlAction, int, NO_ACTION, SLICE_MOTION_ACTION );
+    vtkGetMacro( LeftButtonCtrlAction, int );
+    vtkSetClampMacro( MiddleButtonCtrlAction, int, NO_ACTION, SLICE_MOTION_ACTION );
+    vtkGetMacro( MiddleButtonCtrlAction, int );
+    vtkSetClampMacro( RightButtonCtrlAction, int, NO_ACTION, SLICE_MOTION_ACTION );
+    vtkGetMacro( RightButtonCtrlAction, int );
 
-    vtkSetClampMacro(LeftButtonShiftAction,int, NO_ACTION, SLICE_MOTION_ACTION);
-	vtkGetMacro(LeftButtonShiftAction, int);
-    vtkSetClampMacro(MiddleButtonShiftAction,int, NO_ACTION, SLICE_MOTION_ACTION);
-	vtkGetMacro(MiddleButtonShiftAction, int);
-    vtkSetClampMacro(RightButtonShiftAction,int, NO_ACTION, SLICE_MOTION_ACTION);
-	vtkGetMacro(RightButtonShiftAction, int);
+    vtkSetClampMacro( LeftButtonShiftAction, int, NO_ACTION, SLICE_MOTION_ACTION );
+    vtkGetMacro( LeftButtonShiftAction, int );
+    vtkSetClampMacro( MiddleButtonShiftAction, int, NO_ACTION, SLICE_MOTION_ACTION );
+    vtkGetMacro( MiddleButtonShiftAction, int );
+    vtkSetClampMacro( RightButtonShiftAction, int, NO_ACTION, SLICE_MOTION_ACTION );
+    vtkGetMacro( RightButtonShiftAction, int );
 
-
-	enum PlaneMoveMethod
-	{
-		Move2D,
-		Move3D
-	};
-	void SetPlaneMoveMethod( int rendererIndex, PlaneMoveMethod moveMethod );
+    enum PlaneMoveMethod
+    {
+        Move2D,
+        Move3D
+    };
+    void SetPlaneMoveMethod( int rendererIndex, PlaneMoveMethod moveMethod );
 
 protected:
-
     vtkMultiImagePlaneWidget();
     ~vtkMultiImagePlaneWidget();
 
@@ -393,7 +373,7 @@ protected:
     void InternalAddRenderer( vtkRenderer * ren, vtkAssembly * assembly ) override;
     void InternalRemoveRenderer( int index ) override;
 
-	// Utility
+    // Utility
     void AddTextureToPlane( vtkActor * planeActor, vtkPolyDataMapper * planeMapper, int inputIndex );
     void UpdateTextureUnits();
 
@@ -412,19 +392,19 @@ protected:
 
     int LeftButton2DAction;
 
-	int LeftButtonCtrlAction;
-	int MiddleButtonCtrlAction;
-	int RightButtonCtrlAction;
+    int LeftButtonCtrlAction;
+    int MiddleButtonCtrlAction;
+    int RightButtonCtrlAction;
 
-	int LeftButtonShiftAction;
-	int MiddleButtonShiftAction;
-	int RightButtonShiftAction;
+    int LeftButtonShiftAction;
+    int MiddleButtonShiftAction;
+    int RightButtonShiftAction;
 
-    //BTX - manage the state of the widget
+    // BTX - manage the state of the widget
     int State;
     enum WidgetState
     {
-        Start=0,
+        Start = 0,
         Cursoring,
         Pushing,
         Spinning,
@@ -433,7 +413,7 @@ protected:
         Scaling,
         Outside
     };
-    //ETX
+    // ETX
 
     // Catch events from vtk3DWidget2
     virtual void OnMouseMove() override;
@@ -445,141 +425,152 @@ protected:
     virtual void OnRightButtonUp() override;
     virtual void OnMouseWheelForward() override;
     virtual void OnMouseWheelBackward() override;
-	void OnButtonDown( int action, int shiftAction, int ctrlAction );
-	void OnButtonUp( int action, int shiftAction, int ctrlAction );
+    void OnButtonDown( int action, int shiftAction, int ctrlAction );
+    void OnButtonUp( int action, int shiftAction, int ctrlAction );
 
     virtual void StartSliceMotion();
     virtual void StopSliceMotion();
     virtual void StartCursor();
     virtual void StopCursor();
-    void SetCursorPosition( double pos[3] );
+    void SetCursorPosition( double pos[ 3 ] );
 
     // controlling ivars
-    int   Interaction; // Is the widget responsive to mouse events
-    int   PlaneOrientation;
-    int   RestrictPlaneToVolume;
+    int Interaction;  // Is the widget responsive to mouse events
+    int PlaneOrientation;
+    int RestrictPlaneToVolume;
     double OriginalWindow;
     double OriginalLevel;
     double CurrentWindow;
     double CurrentLevel;
-    int   ResliceInterpolate;
-    int   TextureInterpolate;
-    int   UserControlledLookupTable;
-    int   DisplayText;
-	int   DisableRotatingAndSpinning;
+    int ResliceInterpolate;
+    int TextureInterpolate;
+    int UserControlledLookupTable;
+    int DisplayText;
+    int DisableRotatingAndSpinning;
     double MarginSize;
-	int  ShowHighlightedPlaneOutline;
-	int  ShowPlaneOutline;
-	std::vector< PlaneMoveMethod > PlaneMoveMethods;
+    int ShowHighlightedPlaneOutline;
+    int ShowPlaneOutline;
+    std::vector<PlaneMoveMethod> PlaneMoveMethods;
 
-    typedef std::vector<vtkActor*> ActorVec;
-    typedef std::vector<vtkPolyDataMapper*> PolyDataMapperVec;
+    typedef std::vector<vtkActor *> ActorVec;
+    typedef std::vector<vtkPolyDataMapper *> PolyDataMapperVec;
 
     // The geometric represenation of the plane and it's outline
-    vtkPlaneSource    *PlaneSource;
-    vtkMultiTextureMapToPlane *TexturePlaneCoords;
-    double             Normal[3]; // plane normal normalized
-    vtkPolyData       *PlaneOutlinePolyData;
-    ActorVec           PlaneOutlineActors;
-    PolyDataMapperVec  PlaneOutlineMappers;
-    void               HighlightPlane(int highlight);
-    void               GeneratePlaneOutline();
+    vtkPlaneSource * PlaneSource;
+    vtkMultiTextureMapToPlane * TexturePlaneCoords;
+    double Normal[ 3 ];  // plane normal normalized
+    vtkPolyData * PlaneOutlinePolyData;
+    ActorVec PlaneOutlineActors;
+    PolyDataMapperVec PlaneOutlineMappers;
+    void HighlightPlane( int highlight );
+    void GeneratePlaneOutline();
 
     // Re-builds the plane outline based on the plane source
     void BuildRepresentation();
 
     // Do the picking
-    typedef std::vector<vtkCellPicker*> PickerVec;
+    typedef std::vector<vtkCellPicker *> PickerVec;
     PickerVec PlanePickers;
 
     // Methods to manipulate the plane
-    void WindowLevel(int X, int Y);
-    void Push(double *p1, double *p2);
-    void Spin(double *p1, double *p2);
-    void Rotate(double *p1, double *p2, double *vpn);
-    void Scale(double *p1, double *p2, int X, int Y);
-    void Translate(double *p1, double *p2);
+    void WindowLevel( int X, int Y );
+    void Push( double * p1, double * p2 );
+    void Spin( double * p1, double * p2 );
+    void Rotate( double * p1, double * p2, double * vpn );
+    void Scale( double * p1, double * p2, int X, int Y );
+    void Translate( double * p1, double * p2 );
 
-	// One per volume
-	struct PerVolumeObjects
-	{
-        PerVolumeObjects() : ImageData(0), Reslice(0), ColorMap(0), Texture(0), LookupTable(0), IsHidden(false), CanInterpolate(true) {}
-		vtkImageData         *ImageData;
-		vtkImageReslice      *Reslice;
-		vtkImageMapToColors  *ColorMap;
-		vtkTexture           *Texture;
-        vtkScalarsToColors   *LookupTable;
-        bool                  IsHidden;
-        bool                  CanInterpolate;
-	};
+    // One per volume
+    struct PerVolumeObjects
+    {
+        PerVolumeObjects()
+            : ImageData( 0 ),
+              Reslice( 0 ),
+              ColorMap( 0 ),
+              Texture( 0 ),
+              LookupTable( 0 ),
+              IsHidden( false ),
+              CanInterpolate( true )
+        {
+        }
+        vtkImageData * ImageData;
+        vtkImageReslice * Reslice;
+        vtkImageMapToColors * ColorMap;
+        vtkTexture * Texture;
+        vtkScalarsToColors * LookupTable;
+        bool IsHidden;
+        bool CanInterpolate;
+    };
 
-	typedef std::vector< PerVolumeObjects > PerVolumeObjectsVec;
-	PerVolumeObjectsVec Inputs;
+    typedef std::vector<PerVolumeObjects> PerVolumeObjectsVec;
+    PerVolumeObjectsVec Inputs;
 
     vtkImageData * BoundingImage;
     vtkTransform * BoundingTransform;
 
-	int GetPerVolumeIndex( vtkImageData * volume );
+    int GetPerVolumeIndex( vtkImageData * volume );
 
-	vtkLookupTable       *CreateDefaultLookupTable();
+    vtkLookupTable * CreateDefaultLookupTable();
 
-	// Working object (used locally but doesn't store info)
-	vtkMatrix4x4         *ResliceAxes;
-	vtkTransform         *Transform;
+    // Working object (used locally but doesn't store info)
+    vtkMatrix4x4 * ResliceAxes;
+    vtkTransform * Transform;
 
-	// One per Renderer
-    PolyDataMapperVec     TexturePlaneMappers;
-    ActorVec              TexturePlaneActors;
+    // One per Renderer
+    PolyDataMapperVec TexturePlaneMappers;
+    ActorVec TexturePlaneActors;
 
     // Properties used to control the appearance of selected objects and
     // the manipulator in general.  The plane property is actually that for
-	// the outline.
-    vtkProperty   *PlaneProperty;
-    vtkProperty   *SelectedPlaneProperty;
-    vtkProperty   *CursorProperty;
-    vtkProperty   *MarginProperty;
-    void           CreateDefaultProperties();
+    // the outline.
+    vtkProperty * PlaneProperty;
+    vtkProperty * SelectedPlaneProperty;
+    vtkProperty * CursorProperty;
+    vtkProperty * MarginProperty;
+    void CreateDefaultProperties();
 
     // Reslice and texture management
 public:
     void UpdateNormal();
+
 protected:
     void ComputeBounds( double globalBounds[] );
     std::string ComposeTextureCoordName( int index );
     std::string ComposeTextureName( int index );
 
     // The cross-hair cursor
-    int                CursorActive;
-    vtkPolyData       *CursorPolyData;
-    PolyDataMapperVec  CursorMappers;
-    ActorVec           CursorActors;
-    double             CursorPosition[2];  // (x,y) position of the cursor on the plane. Cursor position is updated using this and plane points and origin
-    double             CurrentImageValue; // Set to VTK_FLOAT_MAX when invalid
-    void               GenerateCursor();
-    void               UpdateCursor(int,int);
-    void               UpdateCursor();
+    int CursorActive;
+    vtkPolyData * CursorPolyData;
+    PolyDataMapperVec CursorMappers;
+    ActorVec CursorActors;
+    double CursorPosition[ 2 ];  // (x,y) position of the cursor on the plane. Cursor position is updated using this and
+                                 // plane points and origin
+    double CurrentImageValue;    // Set to VTK_FLOAT_MAX when invalid
+    void GenerateCursor();
+    void UpdateCursor( int, int );
+    void UpdateCursor();
 
     // Oblique reslice control
-    double RotateAxis[3];
-    double RadiusVector[3];
-    void  AdjustState();
+    double RotateAxis[ 3 ];
+    double RadiusVector[ 3 ];
+    void AdjustState();
 
     // Visible margins to assist user interaction
-    vtkPolyData       *MarginPolyData;
-    PolyDataMapperVec  MarginMappers;
-    ActorVec           MarginActors;
-    int                MarginSelectMode;
-    void               GenerateMargins();
-    void               UpdateMargins();
-    void               ActivateMargins(int);
-    
+    vtkPolyData * MarginPolyData;
+    PolyDataMapperVec MarginMappers;
+    ActorVec MarginActors;
+    int MarginSelectMode;
+    void GenerateMargins();
+    void UpdateMargins();
+    void ActivateMargins( int );
+
     // Utility function used to transform a vector from
     // world space to input image space.
     void TransformToImageSpace( double * in, double * out );
 
 private:
-    vtkMultiImagePlaneWidget(const vtkMultiImagePlaneWidget&);  //Not implemented
-    void operator=(const vtkMultiImagePlaneWidget&);  //Not implemented
+    vtkMultiImagePlaneWidget( const vtkMultiImagePlaneWidget & );  // Not implemented
+    void operator=( const vtkMultiImagePlaneWidget & );            // Not implemented
 };
 
-#endif //__vtkMultiImagePlaneWidget_h
+#endif  //__vtkMultiImagePlaneWidget_h
