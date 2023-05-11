@@ -121,6 +121,7 @@ void vtkQtColorTransferFunctionWidget::mouseDoubleClickEvent( QMouseEvent * even
         int pixPos = GetColorNodePixPosition( index );
         if( abs( pixPos - event->x() ) <= m_hotspotRadius )
         {
+            // clang-format off
             QColor currentColor = GetColorNodeColor( index );
             QColor newColor     = QColorDialog::getColor( currentColor, nullptr, tr( "Choose Color" ),
                                                           QColorDialog::DontUseNativeDialog );
@@ -128,6 +129,7 @@ void vtkQtColorTransferFunctionWidget::mouseDoubleClickEvent( QMouseEvent * even
             {
                 SetColorNodeColor( index, newColor );
             }
+            // clang-format on
         }
     }
     // Anywhere else, remove point if close to one and add one if not
