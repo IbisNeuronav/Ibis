@@ -11,13 +11,13 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef USMASKSETTINGSWIDGET_H
 #define USMASKSETTINGSWIDGET_H
 
-#include <Constants.h>
-
 #include <QLineEdit>
 #include <QObject>
 #include <QWidget>
 
 #include "usmask.h"
+
+#include <Constants.h>
 
 namespace Ui
 {
