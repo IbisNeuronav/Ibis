@@ -95,6 +95,8 @@ public:
     int GetSelectedPointIndex() { return m_selectedPointIndex; }
     /** Select point using its index. */
     void SetSelectedPoint( int index );
+    /** Unselect points */
+    void UnselectAllPoints();
     /** Show cursor at the point specidfied by its index. */
     void MoveCursorToPoint( int index );
 
