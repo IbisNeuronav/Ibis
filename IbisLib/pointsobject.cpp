@@ -403,6 +403,15 @@ void PointsObject::SetSelectedPoint( int index )
     emit ObjectModified();
 }
 
+void PointsObject::UnselectAllPoints()
+{
+    m_selectedPointIndex = InvalidPointIndex;
+    // Update points colors
+    UpdatePoints();
+    emit PointsChanged();
+    emit ObjectModified();
+}
+
 void PointsObject::ValidateSelectedPoint()
 {
     if( m_selectedPointIndex == InvalidPointIndex )
