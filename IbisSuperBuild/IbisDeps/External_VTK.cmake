@@ -1,22 +1,72 @@
 set( vtk_prefix ${external_project_dir}/${vtk_name} )
-ExternalProject_Add( ${vtk_name}
-    PREFIX ${vtk_prefix}
-    SOURCE_DIR ${vtk_prefix}/src
-    BINARY_DIR ${vtk_prefix}/build
-    STAMP_DIR ${vtk_prefix}/stamp
-    INSTALL_COMMAND ""
-    GIT_REPOSITORY "https://github.com/Kitware/VTK.git"
-    GIT_TAG v${IBIS_VTK_LONG_VERSION}
-    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=${external_project_dir}/${vtk_name}/install
-               -DCMAKE_OSX_SYSROOT:PATH=${CMAKE_OSX_SYSROOT}
-               -DCMAKE_OSX_DEPLOYMENT_TARGET:STRING=${CMAKE_OSX_DEPLOYMENT_TARGET}
-               -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
-               -DBUILD_TESTING:BOOL=FALSE
-               -DBUILD_SHARED_LIBS:BOOL=FALSE
-               -DCMAKE_CXX_FLAGS:STRING=-fPIC
-               -DVTK_QT_VERSION:STRING=5
-               -DVTK_MODULE_ENABLE_VTK_GUISupportQt:STRING=YES
-               -DVTK_MODULE_ENABLE_VTK_hdf5:STRING=NO  # hdf5 doesn't build with XCode 12 compiler, could be re-enabled later, but not needed
-               -DQt5_DIR:PATH=${Qt5_DIR}
-               -DVTK_LEGACY_SILENT:BOOL=ON
-               -DVTK_RENDERING_BACKEND:STRING=OpenGL )
+
+if( SUPERBUILD_BUILD_MINIMAL_VTK )
+	ExternalProject_Add( ${vtk_name}
+		PREFIX ${vtk_prefix}
+		SOURCE_DIR ${vtk_prefix}/src
+		BINARY_DIR ${vtk_prefix}/build
+		STAMP_DIR ${vtk_prefix}/stamp
+		INSTALL_COMMAND ""
+		GIT_REPOSITORY "https://github.com/Kitware/VTK.git"
+		GIT_TAG v${IBIS_VTK_LONG_VERSION}
+		CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=${external_project_dir}/${vtk_name}/install
+				   -DCMAKE_OSX_SYSROOT:PATH=${CMAKE_OSX_SYSROOT}
+				   -DCMAKE_OSX_DEPLOYMENT_TARGET:STRING=${CMAKE_OSX_DEPLOYMENT_TARGET}
+				   -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
+				   -DVTK_BUILD_TESTING:STRING=OFF
+				   -DBUILD_SHARED_LIBS:BOOL=FALSE
+				   -DCMAKE_CXX_FLAGS:STRING=-fPIC
+				   -DVTK_QT_VERSION:STRING=5
+				   -DQt5_DIR:PATH=${Qt5_DIR}
+				   -DVTK_LEGACY_SILENT:BOOL=TRUE
+				   # Make minimal build (debug output):
+				   -DVTK_BUILD_ALL_MODULES:BOOL=FALSE
+				   -DVTK_DEBUG_MODULE:BOOL=TRUE
+				   -DVTK_DEBUG_MODULE_ALL:BOOL=TRUE
+				   # Deselect all groups:
+				   -DVTK_GROUP_ENABLE_Imaging:STRING=DONT_WANT
+				   -DVTK_GROUP_ENABLE_MPI:STRING=DONT_WANT
+				   -DVTK_GROUP_ENABLE_Qt:STRING=DONT_WANT
+				   -DVTK_GROUP_ENABLE_Rendering:STRING=DONT_WANT
+				   -DVTK_GROUP_ENABLE_StandAlone:STRING=DONT_WANT
+				   -DVTK_GROUP_ENABLE_Views:STRING=DONT_WANT
+				   -DVTK_GROUP_ENABLE_Web:STRING=DONT_WANT
+				   # Select only desired modules:
+				   -DVTK_MODULE_ENABLE_VTK_FiltersTexture:STRING=YES
+				   -DVTK_MODULE_ENABLE_VTK_GUISupportQt:STRING=YES
+				   -DVTK_MODULE_ENABLE_VTK_ImagingStatistics:STRING=YES
+				   -DVTK_MODULE_ENABLE_VTK_ImagingStencil:STRING=YES
+				   -DVTK_MODULE_ENABLE_VTK_InteractionStyle:STRING=YES
+				   -DVTK_MODULE_ENABLE_VTK_InteractionWidgets:STRING=YES
+				   -DVTK_MODULE_ENABLE_VTK_IOGeometry:STRING=YES
+				   -DVTK_MODULE_ENABLE_VTK_IOLegacy:STRING=YES
+				   -DVTK_MODULE_ENABLE_VTK_IOPLY:STRING=YES
+				   -DVTK_MODULE_ENABLE_VTK_IOXML:STRING=YES
+				   -DVTK_MODULE_ENABLE_VTK_RenderingAnnotation:STRING=YES
+				   -DVTK_MODULE_ENABLE_VTK_RenderingImage:STRING=YES
+				   -DVTK_MODULE_ENABLE_VTK_RenderingOpenGL2:STRING=YES
+				   -DVTK_MODULE_ENABLE_VTK_RenderingVolumeOpenGL2:STRING=YES
+				   -DVTK_RENDERING_BACKEND:STRING=OpenGL )
+else()
+	ExternalProject_Add( ${vtk_name}
+		PREFIX ${vtk_prefix}
+		SOURCE_DIR ${vtk_prefix}/src
+		BINARY_DIR ${vtk_prefix}/build
+		STAMP_DIR ${vtk_prefix}/stamp
+		INSTALL_COMMAND ""
+		GIT_REPOSITORY "https://github.com/Kitware/VTK.git"
+		GIT_TAG v${IBIS_VTK_LONG_VERSION}
+		CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=${external_project_dir}/${vtk_name}/install
+				   -DCMAKE_OSX_SYSROOT:PATH=${CMAKE_OSX_SYSROOT}
+				   -DCMAKE_OSX_DEPLOYMENT_TARGET:STRING=${CMAKE_OSX_DEPLOYMENT_TARGET}
+				   -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
+				   -DBUILD_TESTING:BOOL=FALSE
+				   -DBUILD_SHARED_LIBS:BOOL=FALSE
+				   -DCMAKE_CXX_FLAGS:STRING=-fPIC
+				   -DVTK_QT_VERSION:STRING=5
+				   -DVTK_MODULE_ENABLE_VTK_GUISupportQt:STRING=YES
+				   -DVTK_MODULE_ENABLE_VTK_hdf5:STRING=NO  # hdf5 doesn't build with XCode 12 compiler, could be re-enabled later, but not needed
+				   -DQt5_DIR:PATH=${Qt5_DIR}
+				   -DVTK_LEGACY_SILENT:BOOL=ON
+				   -DVTK_RENDERING_BACKEND:STRING=OpenGL )
+endif()
