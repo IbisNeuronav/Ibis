@@ -15,6 +15,9 @@ option( IBIS_BUILD_IGTL_HARDWARE_SUPPORT "Build hardware module based on OpenIGT
 option( IBIS_BUILD_OPENCV "Build OpenCV library needed in some plugins" OFF )
 option( IBIS_BUILD_ELASTIX "Build the Elastix library needed in some plugins" OFF )
 option( IBIS_BUILD_MINIMAL_VTK "Build only the minimal set of VTK modules required by Ibis during the superbuild" ON )
+if( IBIS_BUILD_ELASTIX )
+    option( IBIS_BUILD_MINIMAL_ELASTIX "Build only the minimal set of Elastix modules required by Ibis during the superbuild" ON )
+endif()
 
 # Build All External Dependencies except Qt (vtk, Itk, minc, etc.)
 set( vtk_name vtk-${IBIS_VTK_LONG_VERSION} )

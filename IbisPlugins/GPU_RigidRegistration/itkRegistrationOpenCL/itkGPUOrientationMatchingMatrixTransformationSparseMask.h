@@ -22,6 +22,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <itkSampleToHistogramFilter.h>
 #include <itkListSample.h>
 #include <itkHistogram.h>
+#include <itkImageMaskSpatialObject.h>
+#include <itkImageRegionIteratorWithIndex.h>
 
 #include <itkImageSample.h>
 #include <itkImageSamplerBase.h>
@@ -29,9 +31,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <itkImageRandomSampler.h>
 #include <itkImageGridSampler.h>
 #include <itkImageFullSampler.h>
-
-#include <itkImageMaskSpatialObject.h>
-#include <itkImageRegionIteratorWithIndex.h>
 
 namespace itk
 {
