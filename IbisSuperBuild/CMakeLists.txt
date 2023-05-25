@@ -1,6 +1,27 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required( VERSION 3.5 )
 set( project_name IbisSuperBuild )
+
 project( ${project_name} )
+
+# Set build type:
+# Ibis does not currently support multi-configuration and defaults to Release when config unspecified
+if( WIN32 )
+    if( "${CMAKE_CONFIGURATION_TYPES}" MATCHES ".*;.*" )
+        set( CMAKE_CONFIGURATION_TYPES "Release" CACHE STRING "Build type" FORCE )
+        message( STATUS "Multi-configuration is replaced with default build type" )
+    endif()
+    set_property( CACHE CMAKE_CONFIGURATION_TYPES PROPERTY STRINGS Release Debug )
+    # For OpenCV build
+    set( CMAKE_BUILD_TYPE "${CMAKE_CONFIGURATION_TYPES}" )
+    message( STATUS "Building with configuration: ${CMAKE_CONFIGURATION_TYPES}" )
+else()
+    if( CMAKE_BUILD_TYPE STREQUAL "" )
+        set( CMAKE_BUILD_TYPE "Release" CACHE STRING "Build type" FORCE )
+        message( STATUS "Unspecified build type defaults to Release" )
+    endif()
+    set_property( CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS Release Debug )
+    message( STATUS "Building with configuration: ${CMAKE_BUILD_TYPE}" )
+endif()
 
 # Find Qt5
 find_package( Qt5 COMPONENTS Widgets REQUIRED )
@@ -56,6 +77,7 @@ ExternalProject_Add(
                -DCMAKE_OSX_SYSROOT:PATH=${CMAKE_OSX_SYSROOT}
                -DCMAKE_OSX_DEPLOYMENT_TARGET:STRING=${CMAKE_OSX_DEPLOYMENT_TARGET}
                -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_INSTALL_PREFIX}
+               -DCMAKE_CONFIGURATION_TYPES:STRING=${CMAKE_CONFIGURATION_TYPES}
                -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
                -DCMAKE_CONFIGURATION_TYPES:STRING=${CMAKE_CONFIGURATION_TYPES}
                -DQt5_DIR:PATH=${Qt5_DIR}
