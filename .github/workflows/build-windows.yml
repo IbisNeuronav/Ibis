@@ -1,6 +1,6 @@
 name: Build-Windows
 
-on: [push]
+on: [push, pull_request]
 env:
   BUILD_TYPE: Release
   QT_VERSION: 5.15.2
