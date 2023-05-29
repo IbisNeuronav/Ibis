@@ -1,0 +1,27 @@
+name: Build-Windows
+
+on: [push]
+env:
+  BUILD_TYPE: Release
+  QT_VERSION: 5.15.2
+  ARTIFACT: ibis-install-windows
+jobs:
+  build:
+    runs-on: [self-hosted, windows, x64 ]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Configure CMake
+        run: cmake IbisSuperBuild -G "Visual Studio 16 2019" -A x64 -B ${{github.workspace}}/b -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_CONFIGURATION_TYPES=${{env.BUILD_TYPE}} -DQt5_DIR=D:/Qt/5.15.2/msvc2019_64/lib/cmake/Qt5
+
+      - name: Build
+        run: cmake --build ${{github.workspace}}/b --config ${{env.BUILD_TYPE}} -j2
+
+      - name: Save build artifact
+        uses: actions/upload-artifact@master
+        with:
+          name: ${{ env.ARTIFACT }}
+          path: ${{github.workspace}}/b/Ibis/Ibis/${{env.BUILD_TYPE}}
