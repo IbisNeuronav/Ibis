@@ -6,14 +6,18 @@ project( ${project_name} )
 find_package( Qt5 COMPONENTS Widgets REQUIRED )
 
 # Find out version numbers of dependencies
-include(${CMAKE_CURRENT_SOURCE_DIR}/../CMakeCommon/DependencyVersions.cmake)
+include( ${CMAKE_CURRENT_SOURCE_DIR}/../CMakeCommon/DependencyVersions.cmake )
 
-include(ExternalProject)
+include( ExternalProject )
 
 # Optional builds
 option( IBIS_BUILD_IGTL_HARDWARE_SUPPORT "Build hardware module based on OpenIGTLink and dependencies (OpenIGTLink and OpenIGTLinkIO)" ON )
-option( IBIS_INSTALL_OPENCV "Install OpenCV library needed in some plugins" OFF )
+option( IBIS_BUILD_OPENCV "Build OpenCV library needed in some plugins" OFF )
 option( IBIS_BUILD_ELASTIX "Build the Elastix library needed in some plugins" OFF )
+option( IBIS_BUILD_MINIMAL_VTK "Build only the minimal set of VTK modules required by Ibis during the superbuild" ON )
+if( IBIS_BUILD_ELASTIX )
+    option( IBIS_BUILD_MINIMAL_ELASTIX "Build only the minimal set of Elastix modules required by Ibis during the superbuild" ON )
+endif()
 
 # Build All External Dependencies except Qt (vtk, Itk, minc, etc.)
 set( vtk_name vtk-${IBIS_VTK_LONG_VERSION} )
@@ -33,7 +37,7 @@ add_subdirectory( IbisDeps )
 # Build Ibis
 set( CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR}/Ibis-install )
 set( ibis_dependencies ${vtk_name} ${itk_name} )
-if( IBIS_INSTALL_OPENCV )
+if( IBIS_BUILD_OPENCV )
     list( APPEND ibis_dependencies ${opencv_name} )
 endif()
 if( IBIS_BUILD_ELASTIX )
@@ -47,7 +51,7 @@ ExternalProject_Add(
     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/Ibis
     SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../
     BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/Ibis
-    CMAKE_ARGS -DIBIS_USE_OPENCV=${IBIS_INSTALL_OPENCV}
+    CMAKE_ARGS -DIBIS_USE_OPENCV=${IBIS_BUILD_OPENCV}
                -DOpenCV_DIR=${IBIS_OPENCV_DIR}
                -DCMAKE_OSX_SYSROOT:PATH=${CMAKE_OSX_SYSROOT}
                -DCMAKE_OSX_DEPLOYMENT_TARGET:STRING=${CMAKE_OSX_DEPLOYMENT_TARGET}
