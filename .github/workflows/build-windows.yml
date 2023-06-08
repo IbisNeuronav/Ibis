@@ -38,7 +38,7 @@ jobs:
         if: github.event_name == 'push' && github.ref == 'refs/heads/master'
         uses: ncipollo/release-action@v1
         with:
-          tag: "latest dev"
+          tag: "latest_dev"
           name: Latest development build
           artifacts: ${{ env.ARTIFACT }}.zip
           allowUpdates: true
