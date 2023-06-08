@@ -240,4 +240,3 @@ void TractogramObject::AddLocalColor(vtkSmartPointer<vtkUnsignedCharArray> color
 
         colors->SetTuple3(current_id, x*norm, y*norm, z*norm);
 }
-
