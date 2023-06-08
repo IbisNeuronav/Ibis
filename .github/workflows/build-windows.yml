@@ -5,6 +5,8 @@ env:
   BUILD_TYPE: Release
   QT_VERSION: 5.15.2
   ARTIFACT: ibis-install-windows
+permissions:
+  contents: write
 jobs:
   build:
     runs-on: [self-hosted, windows, x64 ]
@@ -42,7 +44,7 @@ jobs:
           allowUpdates: true
           artifactErrorsFailBuild: true
           commit: master
-          makeLatest: true
+          # makeLatest: true
           prerelease: true
           replacesArtifacts: true
           updateOnlyUnreleased: true
