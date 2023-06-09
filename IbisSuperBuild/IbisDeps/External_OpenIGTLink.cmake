@@ -19,4 +19,5 @@ ExternalProject_Add( ${openigtlink_name}
                -DOpenIGTLink_PROTOCOL_VERSION_2:BOOL=OFF
                -DOpenIGTLink_PROTOCOL_VERSION_3:BOOL=ON
                -DOpenIGTLink_ENABLE_VIDEOSTREAMING:BOOL=ON
+               -DOpenIGTLink_USE_H264:BOOL=${IBIS_BUILD_OIGTL_WITH_H264}
     INSTALL_COMMAND "" )
