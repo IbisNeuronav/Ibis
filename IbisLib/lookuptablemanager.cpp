@@ -29,8 +29,8 @@ void LookupTableManager::CreateLookupTable(const QString tableName, double range
         ct->AddColorPoint( 0.5,  1.0, 0.5, 0.0 );
         ct->AddColorPoint( 0.75, 1.0, 1.0, 0.5 );
         ct->AddColorPoint( 1.0,  1.0, 1.0, 1.0 );
-        ct->AddAlphaPoint(0.0, 1.0);
-        ct->AddAlphaPoint(1.0, 1.0);
+        ct->AddAlphaPoint( 0.0, 1.0 );
+        ct->AddAlphaPoint( 1.0, 1.0 );
     }
     else if( tableName == "Hot Metal Neg")
     {
@@ -39,8 +39,8 @@ void LookupTableManager::CreateLookupTable(const QString tableName, double range
         ct->AddColorPoint( 0.5,  1.0, 0.5, 0.0 );
         ct->AddColorPoint( 0.75, 0.5, 0.0, 0.0 );
         ct->AddColorPoint( 1.0,  0.0, 0.0, 0.0 );
-        ct->AddAlphaPoint(0.0, 1.0);
-        ct->AddAlphaPoint(1.0, 1.0);
+        ct->AddAlphaPoint( 0.0, 1.0 );
+        ct->AddAlphaPoint( 1.0, 1.0 );
     }
     else if( tableName == "Cold Metal")
     {
@@ -49,8 +49,8 @@ void LookupTableManager::CreateLookupTable(const QString tableName, double range
         ct->AddColorPoint( 0.5,  0.0, 0.5, 1.0 );
         ct->AddColorPoint( 0.75, 0.5, 1.0, 1.0 );
         ct->AddColorPoint( 1.0,  1.0, 1.0, 1.0 );
-        ct->AddAlphaPoint(0.0, 1.0);
-        ct->AddAlphaPoint(1.0, 1.0);
+        ct->AddAlphaPoint( 0.0, 1.0 );
+        ct->AddAlphaPoint( 1.0, 1.0 );
     }
     else if( tableName == "Cold Metal Neg")
     {
@@ -59,8 +59,8 @@ void LookupTableManager::CreateLookupTable(const QString tableName, double range
         ct->AddColorPoint( 0.5,  0.0, 0.5, 1.0 );
         ct->AddColorPoint( 0.75, 0.0, 0.0, 0.5 );
         ct->AddColorPoint( 1.0,  0.0, 0.0, 0.0 );
-        ct->AddAlphaPoint(0.0, 1.0);
-        ct->AddAlphaPoint(1.0, 1.0);
+        ct->AddAlphaPoint( 0.0, 1.0 );
+        ct->AddAlphaPoint( 1.0, 1.0 );
     }
     else if( tableName == "Contour" )
     {
@@ -76,79 +76,79 @@ void LookupTableManager::CreateLookupTable(const QString tableName, double range
         ct->AddColorPoint( 0.833, 1.0, 0.0, 0.0 );
         ct->AddColorPoint( 0.833, 0.3, 0.3, 0.3 );
         ct->AddColorPoint( 1.0,   1.0, 1.0, 1.0 );
-        ct->AddAlphaPoint(0.0, 1.0);
-        ct->AddAlphaPoint(1.0, 1.0);
+        ct->AddAlphaPoint( 0.0, 1.0 );
+        ct->AddAlphaPoint( 1.0, 1.0 );
     }
     else if ( tableName == "Spectrum" )
     {
-        ct->AddColorPoint( 0.00, 0.0000,0.0000,0.0000 );
-        ct->AddColorPoint( 0.05, 0.4667,0.0000,0.5333 );
-        ct->AddColorPoint( 0.10, 0.5333,0.0000,0.6000 );
-        ct->AddColorPoint( 0.15, 0.0000,0.0000,0.6667 );
-        ct->AddColorPoint( 0.20, 0.0000,0.0000,0.8667 );
-        ct->AddColorPoint( 0.25, 0.0000,0.4667,0.8667 );
-        ct->AddColorPoint( 0.30, 0.0000,0.6000,0.8667 );
-        ct->AddColorPoint( 0.35, 0.0000,0.6667,0.6667 );
-        ct->AddColorPoint( 0.40, 0.0000,0.6667,0.5333 );
-        ct->AddColorPoint( 0.45, 0.0000,0.6000,0.0000 );
-        ct->AddColorPoint( 0.50, 0.0000,0.7333,0.0000 );
-        ct->AddColorPoint( 0.55, 0.0000,0.8667,0.0000 );
-        ct->AddColorPoint( 0.60, 0.0000,1.0000,0.0000 );
-        ct->AddColorPoint( 0.65, 0.7333,1.0000,0.0000 );
-        ct->AddColorPoint( 0.70, 0.9333,0.9333,0.0000 );
-        ct->AddColorPoint( 0.75, 1.0000,0.8000,0.0000 );
-        ct->AddColorPoint( 0.80, 1.0000,0.6000,0.0000 );
-        ct->AddColorPoint( 0.85, 1.0000,0.0000,0.0000 );
-        ct->AddColorPoint( 0.90, 0.8667,0.0000,0.0000 );
-        ct->AddColorPoint( 0.95, 0.8000,0.0000,0.0000 );
-        ct->AddColorPoint( 1.00, 0.8000,0.8000,0.8000 );
-        ct->AddAlphaPoint(0.0, 1.0);
-        ct->AddAlphaPoint(1.0, 1.0);
+        ct->AddColorPoint( 0.00, 0.0000, 0.0000, 0.0000 );
+        ct->AddColorPoint( 0.05, 0.4667, 0.0000, 0.5333 );
+        ct->AddColorPoint( 0.10, 0.5333, 0.0000, 0.6000 );
+        ct->AddColorPoint( 0.15, 0.0000, 0.0000, 0.6667 );
+        ct->AddColorPoint( 0.20, 0.0000, 0.0000, 0.8667 );
+        ct->AddColorPoint( 0.25, 0.0000, 0.4667, 0.8667 );
+        ct->AddColorPoint( 0.30, 0.0000, 0.6000, 0.8667 );
+        ct->AddColorPoint( 0.35, 0.0000, 0.6667, 0.6667 );
+        ct->AddColorPoint( 0.40, 0.0000, 0.6667, 0.5333 );
+        ct->AddColorPoint( 0.45, 0.0000, 0.6000, 0.0000 );
+        ct->AddColorPoint( 0.50, 0.0000, 0.7333, 0.0000 );
+        ct->AddColorPoint( 0.55, 0.0000, 0.8667, 0.0000 );
+        ct->AddColorPoint( 0.60, 0.0000, 1.0000, 0.0000 );
+        ct->AddColorPoint( 0.65, 0.7333, 1.0000, 0.0000 );
+        ct->AddColorPoint( 0.70, 0.9333, 0.9333, 0.0000 );
+        ct->AddColorPoint( 0.75, 1.0000, 0.8000, 0.0000 );
+        ct->AddColorPoint( 0.80, 1.0000, 0.6000, 0.0000 );
+        ct->AddColorPoint( 0.85, 1.0000, 0.0000, 0.0000 );
+        ct->AddColorPoint( 0.90, 0.8667, 0.0000, 0.0000 );
+        ct->AddColorPoint( 0.95, 0.8000, 0.0000, 0.0000 );
+        ct->AddColorPoint( 1.00, 0.8000, 0.8000, 0.8000 );
+        ct->AddAlphaPoint( 0.0, 1.0 );
+        ct->AddAlphaPoint( 1.0, 1.0 );
     }
     else if ( tableName == "Red" )
     {
         ct->AddColorPoint( 0.0, 0.0, 0.0, 0.0 );
         ct->AddColorPoint( 1.0, 1.0, 0.0, 0.0 );
-        ct->AddAlphaPoint(0.0, 1.0);
-        ct->AddAlphaPoint(1.0, 1.0);
+        ct->AddAlphaPoint( 0.0, 1.0 );
+        ct->AddAlphaPoint( 1.0, 1.0 );
     }
     else if ( tableName == "Green" )
     {
         ct->AddColorPoint( 0.0, 0.0, 0.0, 0.0 );
         ct->AddColorPoint( 1.0, 0.0, 1.0, 0.0 );
-        ct->AddAlphaPoint(0.0, 1.0);
-        ct->AddAlphaPoint(1.0, 1.0);
+        ct->AddAlphaPoint( 0.0, 1.0 );
+        ct->AddAlphaPoint( 1.0, 1.0 );
     }
     else if ( tableName == "Blue" )
     {
         ct->AddColorPoint( 0.0, 0.0, 0.0, 0.0 );
         ct->AddColorPoint( 1.0, 0.0, 0.0, 1.0 );
-        ct->AddAlphaPoint(0.0, 1.0);
-        ct->AddAlphaPoint(1.0, 1.0);
+        ct->AddAlphaPoint( 0.0, 1.0 );
+        ct->AddAlphaPoint( 1.0, 1.0 );
     }
     else if( tableName == "Path Planning" )
     {
-        ct->AddColorPoint( 0.0,  0.0, 1.0, 0.0); // green
+        ct->AddColorPoint( 0.0,  0.0, 1.0, 0.0 ); // green
         //ct->AddColorPoint( 0.1,  0.0, 1.0, 0.0); // green
-        ct->AddColorPoint( 0.25,  1.0, 1.0, 0.0); // yellow <-- I would really like to be able to move this point on the GUI)
-        ct->AddColorPoint( 0.98, 1.0, 0.0, 0.0); // red
-        ct->AddColorPoint( 1.0,  0.5, 0.5, 0.5); // gray (for unprocessed area)
-        ct->AddAlphaPoint(0.0, 1.0);
-        ct->AddAlphaPoint(1.0, 1.0);
+        ct->AddColorPoint( 0.25, 1.0, 1.0, 0.0 ); // yellow <-- I would really like to be able to move this point on the GUI)
+        ct->AddColorPoint( 0.98, 1.0, 0.0, 0.0 ); // red
+        ct->AddColorPoint( 1.0,  0.5, 0.5, 0.5 ); // gray (for unprocessed area)
+        ct->AddAlphaPoint( 0.0, 1.0 );
+        ct->AddAlphaPoint( 1.0, 1.0 );
     }
     else if( tableName == "Jacobian" )
     {
-        ct->AddColorPoint(0.000,0.8,1.0,1.0);
-        ct->AddColorPoint(0.125,0.4,0.9,1.0);
-        ct->AddColorPoint(0.250,0.0,0.6,1.0);
-        ct->AddColorPoint(0.375,0.0,0.2,0.5);
-        ct->AddColorPoint(0.500,0.0,0.0,0.0);
-        ct->AddColorPoint(0.625,0.5,0.0,0.0);
-        ct->AddColorPoint(0.750,1.0,0.4,0.0);
-        ct->AddColorPoint(0.825,1.0,0.8,0.4);
-        ct->AddColorPoint(1.000,1.0,0.8,0.8);
-        ct->AddAlphaPoint(0.0, 1.0);
-        ct->AddAlphaPoint(1.0, 1.0);
+        ct->AddColorPoint( 0.000, 0.8, 1.0, 1.0 );
+        ct->AddColorPoint( 0.125, 0.4, 0.9, 1.0 );
+        ct->AddColorPoint( 0.250, 0.0, 0.6, 1.0 );
+        ct->AddColorPoint( 0.375, 0.0, 0.2, 0.5 );
+        ct->AddColorPoint( 0.500, 0.0, 0.0, 0.0 );
+        ct->AddColorPoint( 0.625, 0.5, 0.0, 0.0 );
+        ct->AddColorPoint( 0.750, 1.0, 0.4, 0.0 );
+        ct->AddColorPoint( 0.825, 1.0, 0.8, 0.4 );
+        ct->AddColorPoint( 1.000, 1.0, 0.8, 0.8 );
+        ct->AddAlphaPoint( 0.0, 1.0 );
+        ct->AddAlphaPoint( 1.0, 1.0 );
     }
     else if( tableName == "Mask" )
     {
@@ -161,8 +161,8 @@ void LookupTableManager::CreateLookupTable(const QString tableName, double range
     {
         ct->AddColorPoint( 0.0, 0.0, 0.0, 0.0 );
         ct->AddColorPoint( 1.0, 1.0, 1.0, 1.0 );
-        ct->AddAlphaPoint(0.0, 1.0);
-        ct->AddAlphaPoint(1.0, 1.0);
+        ct->AddAlphaPoint( 0.0, 1.0 );
+        ct->AddAlphaPoint( 1.0, 1.0 );
     }
 
     ct->Build();

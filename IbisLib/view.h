@@ -170,6 +170,8 @@ public slots:
     /** Notify the view that something it contains needs render. The view is then
      *  going to emit a Modified event. */
     void NotifyNeedRender();
+    /** Set enable render to true to refresh rendering */
+    void EnableRendering();
     /** Update camera transform when the reference transform is modified. */
     void ReferenceTransformChanged();
 

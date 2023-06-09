@@ -491,7 +491,12 @@ void IbisHardwareIGSIO::AssignDeviceImageToTool( igtlioDevicePointer device, Too
   if( IsDeviceImage( device ) )
   {
       igtlioImageDevicePointer imageDev = igtlioImageDevice::SafeDownCast( device );
-      imageContent = imageDev->GetContent().image;
+      if( !(imageDev->GetContent().image == nullptr) ) {
+          imageContent = imageDev->GetContent().image;
+          // OpenIGTLink specifications has origin as center of image
+          double origin[3] = { 0., 0., 0. };
+          imageContent->SetOrigin(origin);
+      }
   }
   else if( IsDeviceVideo( device ) )
   {

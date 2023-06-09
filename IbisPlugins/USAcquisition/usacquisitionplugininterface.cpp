@@ -26,7 +26,20 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 USAcquisitionPluginInterface::USAcquisitionPluginInterface() : m_allowTrackerlessCapture(false)
 {
     m_interfaceWidget = 0;
+    Init();
+}
 
+USAcquisitionPluginInterface::~USAcquisitionPluginInterface()
+{
+}
+
+bool USAcquisitionPluginInterface::CanRun()
+{
+    return true;
+}
+
+void USAcquisitionPluginInterface::Init()
+{
     m_isLive = false;
     m_isBlending = false;
     m_blendingPercent = 0.5;
@@ -42,15 +55,6 @@ USAcquisitionPluginInterface::USAcquisitionPluginInterface() : m_allowTrackerles
     m_addedVolumeObjectId = SceneManager::InvalidId;
 }
 
-USAcquisitionPluginInterface::~USAcquisitionPluginInterface()
-{
-}
-
-bool USAcquisitionPluginInterface::CanRun()
-{
-    return true;
-}
-
 QWidget *USAcquisitionPluginInterface::CreateFloatingWidget()
 {
     IbisAPI *ibisAPI = GetIbisAPI();
@@ -59,6 +63,7 @@ QWidget *USAcquisitionPluginInterface::CreateFloatingWidget()
     m_baseDir.append("/");
     m_baseDir.append(ACQ_BASE_DIR);
 
+    Init();
     // Watch for objects added and removed from the scene
     connect( ibisAPI, SIGNAL(ObjectAdded(int)), this, SLOT(SceneContentChanged()) );
     connect( ibisAPI, SIGNAL(ObjectRemoved(int)), this, SLOT(SceneContentChanged()) );

@@ -26,6 +26,7 @@ class vtkRenderWindowInteractor;
 class vtkImageActor;
 class vtkRenderer;
 class vtkActor;
+class QElapsedTimer;
 class CameraCalibrationPluginInterface;
 
 class CameraCalibrationWidget : public QWidget
@@ -80,7 +81,7 @@ private:
 
     CameraCalibrationPluginInterface * m_pluginInterface;
 
-    QTime * m_accumulationTime;
+    QElapsedTimer * m_accumulationTime;
 
 };
 

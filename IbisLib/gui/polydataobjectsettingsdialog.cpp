@@ -101,7 +101,7 @@ void PolyDataObjectSettingsDialog::UpdateUI()
     // Update color ui
     double * color = m_object->GetColor();
     QString styleColor = QString("background-color: rgb(%1,%2,%3);").arg( (int)(color[0] * 255) ).arg( (int)(color[1] * 255) ).arg( (int)(color[2] * 255) );
-    QString style = QString("border-width: 2px; border-style: solid; border-radius: 7;border-color: black;" );
+    QString style = QString("border-width: 2px; border-style: solid; border-radius: 7; border-color: black;" );
     styleColor += style;
     this->changeColorButton->setStyleSheet( styleColor );
     this->changeColorButton->setFlat( false );

@@ -686,7 +686,7 @@ int ImageObject::ChooseColorTable(int index)
     if( IsLabelImage() )
     {
         vtkSmartPointer<vtkLookupTable> lut = vtkSmartPointer<vtkLookupTable>::New();
-        Application::GetLookupTableManager()->CreateLabelLookupTable( lut);
+        Application::GetLookupTableManager()->CreateLabelLookupTable( lut );
         this->SetLut( lut );
     }
     else
