@@ -376,9 +376,9 @@ void DoubleViewWidget::UpdateInputs()
     }
     m_reslice2->SetResliceTransform( concat2 );
 
-    this->SetDefaultViews();
     this->UpdateUi();
     UpdateCurrentFrameUi();
+    this->SetDefaultViews();
 }
 
 void DoubleViewWidget::UpdatePipelineConnections()
@@ -423,12 +423,18 @@ void DoubleViewWidget::UpdateStatus()
         }
         else
             visibility = true;
+        m_usLine1Actor->SetVisibility(visibility);
+        m_usLine2Actor->SetVisibility(visibility);
+        m_mriLine1Actor->SetVisibility(visibility);
+        m_mriLine2Actor->SetVisibility(visibility);
     }
-
-    m_usLine1Actor->SetVisibility(visibility);
-    m_usLine2Actor->SetVisibility(visibility);
-    m_mriLine1Actor->SetVisibility(visibility);
-    m_mriLine2Actor->SetVisibility(visibility);
+    else
+    {
+        m_usLine1Actor->SetVisibility(false);
+        m_usLine2Actor->SetVisibility(false);
+        m_mriLine1Actor->SetVisibility(false);
+        m_mriLine2Actor->SetVisibility(false);
+    }
 }
 
 void DoubleViewWidget::MakeCrossLinesToShowProbeIsOutOfView()
@@ -641,7 +647,7 @@ void DoubleViewWidget::SetDefaultViews()
 {
     // adjust position of left image
     SetDefaultView( m_usActor, m_usRenderer );
-    // adjust position of rightt image
+    // adjust position of right image
     SetDefaultView( m_mriActor, m_mriRenderer );
 }
 

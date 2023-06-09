@@ -20,6 +20,16 @@ class UsProbeObject;
 class DoubleViewWidget;
 class ImageObject;
 
+/**
+ * @class   USAcquisitionPluginInterface
+ * @brief   This is a plugin used to handle US acquisitions, live or saved.
+ *
+ * Using IbisAPI the plugin communicates with the application in order to start and stop acquisition
+ * and set acquisition's parameters. The acquisition is shown in the DoubleViewWindow together with the correxponding volume.
+ * The acquisition and the volume can be blended in order to see the difference between both.
+ *
+ * @sa USAcquisitionObject UsProbeObject DoubleViewWidget ImageObject IbisAPI
+ * */
 class USAcquisitionPluginInterface : public ToolPluginInterface
 {
 
@@ -32,14 +42,14 @@ public:
     vtkTypeMacro( USAcquisitionPluginInterface, ToolPluginInterface );
 
     USAcquisitionPluginInterface();
-    ~USAcquisitionPluginInterface();
-    QString GetMenuEntryString() override { return QString("US Acquisition Double View"); }
+    virtual ~USAcquisitionPluginInterface();
+    virtual QString GetMenuEntryString() override { return QString("US Acquisition Double View"); }
     virtual QString GetPluginName() override { return QString("USAcquisitionDoubleView"); }
-    bool CanRun() override;
-    QWidget * CreateFloatingWidget() override;
+    virtual bool CanRun() override;
+    virtual QWidget * CreateFloatingWidget() override;
     virtual bool WidgetAboutToClose() override;
 
-    QString GetPluginDescription() override
+    virtual QString GetPluginDescription() override
     {
         QString description;
         description = "US Acquisition Double View\n"
@@ -51,39 +61,60 @@ public:
         return description;
     }
 
+    /** Get the pointer to the currently used US probe.*/
     UsProbeObject * GetCurrentUsProbe();
+    /** Get the pointer to the current acquisition object.*/
     USAcquisitionObject * GetCurrentAcquisition();
+    /** Start acquisition.*/
     void NewAcquisition();
+    /** Get pointer to the primary volume. displayed in the right window.*/
     ImageObject * GetCurrentVolume();
+    /** Get pointer to the secondary volume. displayed in the right window.*/
     ImageObject * GetAddedVolume();
-
+    /** Check if there is a US probe.*/
     bool CanCaptureTrackedVideo();
+    /** Check if trackless capture is allowede.*/
     bool IsTrackerlessCaptureAllowed() { return m_allowTrackerlessCapture; }
+    /** Check if the acquisition is live.*/
     bool IsLive() { return m_isLive; }
+    /** Start/stop live acquisition.*/
     void SetLive( bool l );
 
+    /** Check if the acquisition is blended with the volume.*/
     bool IsBlending() { return m_isBlending; }
+    /** Blend or remove blending.*/
     void SetBlending( bool b ) { m_isBlending = b; }
+    /** What is blending percent?*/
     double GetBlendingPercent() { return m_blendingPercent; }
+    /** Set blending opacity.*/
     void SetBlendingPercent( double p ) { m_blendingPercent = p; }
+    /** Is the acquisition masked?*/
     bool IsMasking() { return m_isMasking; }
+    /** Set the acquisition's mask.*/
     void SetMasking( bool m ) { m_isMasking = m; }
+    /** Get masking percentage.*/
     double GetMaskingPercent() { return m_maskingPercent; }
+    /** Set masking percentage.*/
     void SetMaskingPercent( double p ) { m_maskingPercent = p; }
-
+    /** Get the object id of the current acquisition.*/
     int GetCurrentAcquisitionObjectId() { return m_currentAcquisitionObjectId; }
+    /** Set the object id of the current acquisition.*/
     void SetCurrentAcquisitionObjectId( int id );
-
+    /** Get the object id of the current volume.*/
     int GetCurrentVolumeObjectId() { return m_currentVolumeObjectId; }
+    /** Set the object id of the current volume.*/
     void SetCurrentVolumeObjectId( int id );
-
+    /** Are the two volumes in the right window blended?*/
     bool IsBlendingVolumes() { return m_isBlendingVolumes; }
+    /** Blend the two volumes in the right window or remove blending.*/
     void SetBlendingVolumes( bool b ) { m_isBlendingVolumes = b; }
-
+    /** Get blending percentage of the two volumes in the right window.*/
     double GetBlendingVolumesPercent() { return m_blendingVolumesPercent; }
+    /** Set blending percentage of the two volumes in the right window.*/
     void SetBlendingVolumesPercent( double p ) { m_blendingVolumesPercent = p; }
-
+    /** Get the object id of the secondary volume.*/
     int GetAddedVolumeObjectId() { return m_addedVolumeObjectId; }
+    /** Set the object id of the secondary volume.*/
     void SetAddedVolumeObjectId( int id );
 
 signals:
@@ -99,6 +130,7 @@ private slots:
 
 protected:
 
+    void Init();
     void ValidateAllSceneObjects();
     void ValidateCurrentUsProbe();
     void ValidateCurrentAcquisition();
