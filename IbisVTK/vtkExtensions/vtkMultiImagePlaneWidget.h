@@ -97,6 +97,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "vtkMulti3DWidget.h"
 #include <vector>
 #include <vtkMatrix4x4.h>
+#include <vtkTexture.h>
 
 class vtkActor;
 class vtkCellPicker;
@@ -333,7 +334,7 @@ public:
     void SetSliceThickness( int nbSlices );
     void SetSliceMixMode( int imageIndex, int mode );
 
-    void SetBlendingMode( int imageIndex, int mode );
+    void SetBlendingMode( int imageIndex, vtkTexture::VTKTextureBlendingMode mode );
 
     // Description:
     // Get the image coordinate position and voxel value.  Currently only

@@ -19,7 +19,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <vtkTransform.h>
 #include <QComboBox>
 #include <QMessageBox>
-#include <unistd.h>
+#include <thread>
 
 ImageFilterExampleWidget::ImageFilterExampleWidget(QWidget *parent) :
     QWidget(parent),
@@ -79,7 +79,7 @@ void ImageFilterExampleWidget::on_startButton_clicked()
     {
         ui->progressBar->setValue( i );
         QCoreApplication::processEvents();
-        usleep( 50000 ); // sleep 50 ms
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
 
     ui->startButton->setEnabled( true );

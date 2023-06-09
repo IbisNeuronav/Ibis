@@ -1,2 +1,0 @@
-This plugin was developed by Francois Rheault at the Sherbrooke Connectivity Imaging Lab (http://scil.dinf.usherbrooke.ca/) and is based on original code from the FiberNavigator application (http://scilus.github.io/fibernavigator/)
-

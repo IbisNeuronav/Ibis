@@ -11,7 +11,7 @@ include( External_VTK.cmake )
 include( External_ITK.cmake )
 
 # Get and build OpenCV
-if( IBIS_INSTALL_OPENCV )
+if( IBIS_BUILD_OPENCV )
     include( External_OpenCV.cmake )
 endif()
 
