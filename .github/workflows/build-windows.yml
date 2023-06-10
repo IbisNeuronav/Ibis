@@ -5,6 +5,7 @@ env:
   BUILD_TYPE: Release
   QT_VERSION: 5.15.2
   ARTIFACT: ibis-install-windows
+  RELEASE_TAG: latest_dev
 permissions:
   contents: write
 jobs:
@@ -29,16 +30,18 @@ jobs:
           path: ${{github.workspace}}/b/Ibis/Ibis/${{env.BUILD_TYPE}}
           
       # When updating master, create realease
-      - name: Zip build
+      - name: Zip build and tag
         if: github.event_name == 'push' && github.ref == 'refs/heads/master'
         working-directory: ${{github.workspace}}
         run:  |
               7z a ${{ env.ARTIFACT }}.zip ${{github.workspace}}/b/Ibis/Ibis/${{env.BUILD_TYPE}} -r
-      - name: Create a GitHub release
+              git tag -f ${{ env.RELEASE_TAG }}
+              git push -f origin ${{ env.RELEASE_TAG }}
+      - name: Update GitHub release
         if: github.event_name == 'push' && github.ref == 'refs/heads/master'
         uses: ncipollo/release-action@v1
         with:
-          tag: "latest_dev"
+          tag: ${{ env.RELEASE_TAG }}
           name: Latest development build
           artifacts: ${{ env.ARTIFACT }}.zip
           allowUpdates: true
