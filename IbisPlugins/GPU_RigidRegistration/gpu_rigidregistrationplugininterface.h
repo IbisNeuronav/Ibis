@@ -18,23 +18,20 @@ class GPU_RigidRegistrationWidget;
 
 class GPU_RigidRegistrationPluginInterface : public ToolPluginInterface
 {
-
     Q_OBJECT
-    Q_INTERFACES(IbisPlugin)
-    Q_PLUGIN_METADATA(IID "Ibis.GPU_RigidRegistrationPluginInterface" )
+    Q_INTERFACES( IbisPlugin )
+    Q_PLUGIN_METADATA( IID "Ibis.GPU_RigidRegistrationPluginInterface" )
 
 public:
-
     vtkTypeMacro( GPU_RigidRegistrationPluginInterface, ToolPluginInterface );
 
     GPU_RigidRegistrationPluginInterface();
     ~GPU_RigidRegistrationPluginInterface();
-    virtual QString GetPluginName() override { return QString("GPU_RigidRegistration"); }
+    virtual QString GetPluginName() override { return QString( "GPU_RigidRegistration" ); }
     bool CanRun() override;
-    QString GetMenuEntryString() override { return QString("Rigid Registration With GPU"); }
+    QString GetMenuEntryString() override { return QString( "Rigid Registration With GPU" ); }
 
     QWidget * CreateFloatingWidget() override;
-
 };
 
 #endif

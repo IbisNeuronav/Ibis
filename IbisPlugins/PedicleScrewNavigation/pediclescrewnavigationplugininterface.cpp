@@ -10,47 +10,35 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 // Author: Houssem-Eddine Gueziri
 
+#include <QtPlugin>
+#include "application.h"
 #include "pediclescrewnavigationplugininterface.h"
 #include "vertebraregistrationwidget.h"
-#include "application.h"
-#include <QtPlugin>
 
-PedicleScrewNavigationPluginInterface::PedicleScrewNavigationPluginInterface() :
-    m_interfaceWidget(nullptr)
-{
-}
+PedicleScrewNavigationPluginInterface::PedicleScrewNavigationPluginInterface() : m_interfaceWidget( nullptr ) {}
 
-PedicleScrewNavigationPluginInterface::~PedicleScrewNavigationPluginInterface()
-{
-}
+PedicleScrewNavigationPluginInterface::~PedicleScrewNavigationPluginInterface() {}
 
-bool PedicleScrewNavigationPluginInterface::CanRun()
-{
-    return true;
-}
+bool PedicleScrewNavigationPluginInterface::CanRun() { return true; }
 
 QWidget * PedicleScrewNavigationPluginInterface::CreateTab()
 {
-
     // Start the window
-    m_interfaceWidget = new VertebraRegistrationWidget(0);
+    m_interfaceWidget = new VertebraRegistrationWidget( 0 );
     m_interfaceWidget->SetPluginInterface( this );
     m_interfaceWidget->setAttribute( Qt::WA_DeleteOnClose, true );
 
     return m_interfaceWidget;
 }
 
-
 vtkRenderer * PedicleScrewNavigationPluginInterface::GetScrewNavigationAxialRenderer()
 {
-    if( !m_interfaceWidget )
-        return nullptr;
+    if( !m_interfaceWidget ) return nullptr;
     return m_interfaceWidget->GetScrewNavigationAxialRenderer();
 }
 
 vtkRenderer * PedicleScrewNavigationPluginInterface::GetScrewNavigationSagittalRenderer()
 {
-    if( !m_interfaceWidget )
-        return nullptr;
+    if( !m_interfaceWidget ) return nullptr;
     return m_interfaceWidget->GetScrewNavigationSagittalRenderer();
 }

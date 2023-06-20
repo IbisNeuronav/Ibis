@@ -179,7 +179,7 @@ void TrackerStatusDialog::SetSceneManager( SceneManager * man )
 
 void TrackerStatusDialog::OnIbisClockTick()
 {
-    for( int i = 0; i < m_toolsWidget.size(); ++i ) m_toolsWidget[ i ]->UpdateUI();
+    for( int i = 0; i < m_toolsWidget.size(); ++i ) m_toolsWidget[i]->UpdateUI();
 }
 
 void TrackerStatusDialog::UpdateUI()
@@ -204,7 +204,7 @@ void TrackerStatusDialog::UpdateUI()
     for( int i = 0; i < allTools.size(); i++ )
     {
         ToolUI * tool = new ToolUI( this );
-        tool->SetSceneManager( m_sceneManager, allTools[ i ]->GetObjectID() );
+        tool->SetSceneManager( m_sceneManager, allTools[i]->GetObjectID() );
         this->m_trackerStatusDialogLayout->addWidget( tool );
         tool->show();
         this->m_toolsWidget.push_back( tool );
@@ -228,7 +228,7 @@ void TrackerStatusDialog::ClearAllTools()
 {
     for( int i = 0; i < m_toolsWidget.size(); ++i )
     {
-        delete m_toolsWidget[ i ];
+        delete m_toolsWidget[i];
     }
     this->m_toolsWidget.clear();
 }

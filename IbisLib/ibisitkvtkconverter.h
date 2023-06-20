@@ -27,7 +27,7 @@ protected:
     typedef typename InputImageType::Pointer InputImagePointer;
     IbisItkVTKImageExport();
     double * OriginCallback() override;
-    double vtkOrigin[ 3 ];
+    double vtkOrigin[3];
 };
 typedef IbisItkVTKImageExport<IbisItkFloat3ImageType> ItkExporterType;
 typedef IbisItkVTKImageExport<IbisRGBImageType> ItkRGBImageExporterType;

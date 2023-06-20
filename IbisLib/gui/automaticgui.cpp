@@ -49,7 +49,7 @@ ComboParamGui::ComboParamGui( vtkComboParam * param, QWidget * parent ) : ParamG
     m_param->GetValidChoices( validChoices );
     for( unsigned i = 0; i < validChoices.size(); ++i )
     {
-        m_comboBox->addItem( QString( validChoices[ i ].c_str() ) );
+        m_comboBox->addItem( QString( validChoices[i].c_str() ) );
     }
     layout->addWidget( label );
     layout->addWidget( m_comboBox );

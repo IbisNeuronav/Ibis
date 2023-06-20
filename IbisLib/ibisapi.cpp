@@ -171,13 +171,13 @@ QString IbisAPI::FindUniqueName( QString wantedName, QStringList & otherNames )
     return SceneManager::FindUniqueName( wantedName, otherNames );
 }
 
-void IbisAPI::GetCursorPosition( double pos[ 3 ] ) { m_sceneManager->GetCursorPosition( pos ); }
+void IbisAPI::GetCursorPosition( double pos[3] ) { m_sceneManager->GetCursorPosition( pos ); }
 
 void IbisAPI::SetCursorPosition( double * pos ) { m_sceneManager->SetCursorPosition( pos ); }
 
-void IbisAPI::GetCursorWorldPosition( double pos[ 3 ] )
+void IbisAPI::GetCursorWorldPosition( double pos[3] )
 {
-    double curPos[ 3 ];
+    double curPos[3];
     m_sceneManager->GetCursorPosition( curPos );
     m_sceneManager->ReferenceToWorld( curPos, pos );
 }

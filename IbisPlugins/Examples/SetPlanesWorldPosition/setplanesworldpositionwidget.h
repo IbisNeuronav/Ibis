@@ -4,7 +4,8 @@
 #include <QWidget>
 #include "setplanesworldpositionplugininterface.h"
 
-namespace Ui {
+namespace Ui
+{
 class SetPlanesWorldPositionWidget;
 }
 
@@ -13,10 +14,10 @@ class SetPlanesWorldPositionWidget : public QWidget
     Q_OBJECT
 
 public:
-    explicit SetPlanesWorldPositionWidget(QWidget *parent = 0);
+    explicit SetPlanesWorldPositionWidget( QWidget * parent = 0 );
     ~SetPlanesWorldPositionWidget();
 
-    void SetInterface( SetPlanesWorldPositionPluginInterface *intf );
+    void SetInterface( SetPlanesWorldPositionPluginInterface * intf );
 
 public slots:
     void UpdateUI();
@@ -25,9 +26,9 @@ private slots:
     void on_applyPushButton_clicked();
 
 private:
-    SetPlanesWorldPositionPluginInterface *m_pluginInterface;
+    SetPlanesWorldPositionPluginInterface * m_pluginInterface;
 
-    Ui::SetPlanesWorldPositionWidget *ui;
+    Ui::SetPlanesWorldPositionWidget * ui;
 };
 
-#endif // SETPLANESWORLDPOSITIONWIDGET_H
+#endif  // SETPLANESWORLDPOSITIONWIDGET_H

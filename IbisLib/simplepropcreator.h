@@ -21,12 +21,12 @@ class SimplePropCreator
 {
 public:
     // 3D props
-    static vtkProp3D * CreateLine( double start[ 3 ], double end[ 3 ], double color[ 4 ] );
-    static vtkProp3D * CreatePath( std::vector<Vec3> & points, double color[ 4 ] );
-    static vtkProp3D * CreateSphere( double center[ 3 ], double radius, double color[ 4 ] );
+    static vtkProp3D * CreateLine( double start[3], double end[3], double color[4] );
+    static vtkProp3D * CreatePath( std::vector<Vec3> & points, double color[4] );
+    static vtkProp3D * CreateSphere( double center[3], double radius, double color[4] );
 
     // 2D props
-    static vtkProp3D * CreateTarget( double center[ 3 ], double radius, double color[ 4 ] );
+    static vtkProp3D * CreateTarget( double center[3], double radius, double color[4] );
 
 private:
     // This class in not just a collection of static functions

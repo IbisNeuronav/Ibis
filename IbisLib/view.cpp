@@ -35,12 +35,12 @@ vtkCxxSetObjectMacro( View, Picker, vtkCellPicker );
 
 ObjectSerializationMacro( View );
 
-const char DefaultViewNames[ 4 ][ 20 ] = { "Sagittal\0", "Coronal\0", "Transverse\0", "ThreeD\0" };
+const char DefaultViewNames[4][20] = {"Sagittal\0", "Coronal\0", "Transverse\0", "ThreeD\0"};
 
 View::View()
 {
     this->Name = "";
-    this->SetName( DefaultViewNames[ THREED_VIEW_TYPE ] );
+    this->SetName( DefaultViewNames[THREED_VIEW_TYPE] );
     this->RenderWidget       = nullptr;
     this->m_renderingEnabled = true;
     this->InteractorStyle    = vtkSmartPointer<vtkInteractorStyleTerrain>::New();
@@ -89,8 +89,8 @@ void View::Serialize( Serializer * ser )
     // camera settings: position, focal point, zoom factor
     vtkCamera * camera = this->Renderer->GetActiveCamera();
     int parallel       = camera->GetParallelProjection();
-    double fp[ 3 ], pos[ 3 ], scale;
-    double viewUp[ 3 ], viewAngle;
+    double fp[3], pos[3], scale;
+    double viewUp[3], viewAngle;
     // get current camera parameters to save then in scene or to set them as defzult.
     camera->GetPosition( pos );
     camera->GetFocalPoint( fp );
@@ -142,7 +142,7 @@ void View::SetType( int type )
             {
                 this->InteractorStyle = vtkSmartPointer<vtkInteractorStyleImage2>::New();
             }
-            this->SetName( DefaultViewNames[ SAGITTAL_VIEW_TYPE ] );
+            this->SetName( DefaultViewNames[SAGITTAL_VIEW_TYPE] );
             break;
         case CORONAL_VIEW_TYPE:
             this->Renderer->GetActiveCamera()->ParallelProjectionOn();
@@ -153,7 +153,7 @@ void View::SetType( int type )
             {
                 this->InteractorStyle = vtkSmartPointer<vtkInteractorStyleImage2>::New();
             }
-            this->SetName( DefaultViewNames[ CORONAL_VIEW_TYPE ] );
+            this->SetName( DefaultViewNames[CORONAL_VIEW_TYPE] );
             break;
         case TRANSVERSE_VIEW_TYPE:  // axial
             this->Renderer->GetActiveCamera()->ParallelProjectionOn();
@@ -164,7 +164,7 @@ void View::SetType( int type )
             {
                 this->InteractorStyle = vtkSmartPointer<vtkInteractorStyleImage2>::New();
             }
-            this->SetName( DefaultViewNames[ TRANSVERSE_VIEW_TYPE ] );
+            this->SetName( DefaultViewNames[TRANSVERSE_VIEW_TYPE] );
             break;
         case THREED_VIEW_TYPE:
             this->Renderer->GetActiveCamera()->SetPosition( 1, 0, 0 );
@@ -385,30 +385,30 @@ void View::ProcessInteractionEvents( vtkObject * /*caller*/, unsigned long event
         {
             case vtkCommand::LeftButtonPressEvent:
                 m_leftButtonDown = true;
-                swallow          = obj->OnLeftButtonPressed( this, pos[ 0 ], pos[ 1 ], modifier );
+                swallow          = obj->OnLeftButtonPressed( this, pos[0], pos[1], modifier );
                 break;
             case vtkCommand::LeftButtonReleaseEvent:
                 m_leftButtonDown = false;
-                swallow          = obj->OnLeftButtonReleased( this, pos[ 0 ], pos[ 1 ], modifier );
+                swallow          = obj->OnLeftButtonReleased( this, pos[0], pos[1], modifier );
                 break;
             case vtkCommand::MiddleButtonPressEvent:
                 m_middleButtonDown = true;
-                swallow            = obj->OnMiddleButtonPressed( this, pos[ 0 ], pos[ 1 ], modifier );
+                swallow            = obj->OnMiddleButtonPressed( this, pos[0], pos[1], modifier );
                 break;
             case vtkCommand::MiddleButtonReleaseEvent:
                 m_middleButtonDown = false;
-                swallow            = obj->OnMiddleButtonReleased( this, pos[ 0 ], pos[ 1 ], modifier );
+                swallow            = obj->OnMiddleButtonReleased( this, pos[0], pos[1], modifier );
                 break;
             case vtkCommand::RightButtonPressEvent:
                 m_rightButtonDown = true;
-                swallow           = obj->OnRightButtonPressed( this, pos[ 0 ], pos[ 1 ], modifier );
+                swallow           = obj->OnRightButtonPressed( this, pos[0], pos[1], modifier );
                 break;
             case vtkCommand::RightButtonReleaseEvent:
                 m_rightButtonDown = false;
-                swallow           = obj->OnRightButtonReleased( this, pos[ 0 ], pos[ 1 ], modifier );
+                swallow           = obj->OnRightButtonReleased( this, pos[0], pos[1], modifier );
                 break;
             case vtkCommand::MouseMoveEvent:
-                swallow = obj->OnMouseMoved( this, pos[ 0 ], pos[ 1 ], modifier );
+                swallow = obj->OnMouseMoved( this, pos[0], pos[1], modifier );
                 break;
         }
 
@@ -422,17 +422,17 @@ void View::ProcessInteractionEvents( vtkObject * /*caller*/, unsigned long event
     }
 }
 
-void View::WorldToWindow( double world[ 3 ], double & xWin, double & yWin )
+void View::WorldToWindow( double world[3], double & xWin, double & yWin )
 {
-    double w4[ 4 ];
-    w4[ 0 ] = world[ 0 ];
-    w4[ 1 ] = world[ 1 ];
-    w4[ 2 ] = world[ 2 ];
-    w4[ 3 ] = 1.0;
+    double w4[4];
+    w4[0] = world[0];
+    w4[1] = world[1];
+    w4[2] = world[2];
+    w4[3] = 1.0;
     this->Renderer->SetWorldPoint( w4 );
     this->Renderer->WorldToDisplay();
-    xWin = this->Renderer->GetDisplayPoint()[ 0 ];
-    yWin = this->Renderer->GetDisplayPoint()[ 1 ];
+    xWin = this->Renderer->GetDisplayPoint()[0];
+    yWin = this->Renderer->GetDisplayPoint()[1];
 }
 
 void View::SetBackgroundColor( double * color )
@@ -452,7 +452,7 @@ void View::ResetCamera()
     this->NotifyNeedRender();
 }
 
-void View::ResetCamera( double bounds[ 6 ] )
+void View::ResetCamera( double bounds[6] )
 {
     double prevViewAngle = this->Renderer->GetActiveCamera()->GetViewAngle();
     this->Renderer->ResetCamera( bounds );
@@ -596,16 +596,16 @@ void View::Reset2DView()
         switch( this->Type )
         {
             case SAGITTAL_VIEW_TYPE:
-                normal[ 0 ] = -1;
-                up[ 2 ]     = 1;
+                normal[0] = -1;
+                up[2]     = 1;
                 break;
             case CORONAL_VIEW_TYPE:
-                normal[ 1 ] = -1;
-                up[ 2 ]     = 1;
+                normal[1] = -1;
+                up[2]     = 1;
                 break;
             case TRANSVERSE_VIEW_TYPE:
-                normal[ 2 ] = 1;
-                up[ 1 ]     = 1;
+                normal[2] = 1;
+                up[1]     = 1;
                 break;
             case THREED_VIEW_TYPE:
                 return;
@@ -630,18 +630,18 @@ void View::SetRotationCenter3D()
         vtkCamera * cam             = this->Renderer->GetActiveCamera();
         vtkTransform * refTransform = obj->GetWorldTransform();
 
-        double center[ 3 ];
-        double focal[ 3 ];
-        double newFocal[ 3 ];
-        double pos[ 3 ];
-        double newPos[ 3 ];
+        double center[3];
+        double focal[3];
+        double newFocal[3];
+        double pos[3];
+        double newPos[3];
         cam->GetPosition( pos );
         cam->GetFocalPoint( focal );
         obj->GetCenter( center );
         refTransform->TransformPoint( center, newFocal );
         for( int i = 0; i < 3; i++ )
         {
-            newPos[ i ] = pos[ i ] + newFocal[ i ] - focal[ i ];
+            newPos[i] = pos[i] + newFocal[i] - focal[i];
         }
 
         cam->SetFocalPoint( newFocal );

@@ -17,7 +17,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 double IbisMath::Average( std::vector<double> & samples )
 {
     double sum = 0.0;
-    for( int i = 0; i < samples.size(); ++i ) sum += samples[ i ];
+    for( int i = 0; i < samples.size(); ++i ) sum += samples[i];
     if( samples.size() > 0 ) sum /= samples.size();
     return sum;
 }
@@ -27,7 +27,7 @@ double IbisMath::StdDev( std::vector<double> & samples, double average )
     double sum = 0.0;
     for( int i = 0; i < samples.size(); ++i )
     {
-        double diff = samples[ i ] - average;
+        double diff = samples[i] - average;
         sum += diff * diff;
     }
     if( samples.size() > 0 ) sum = sqrt( sum / samples.size() );
@@ -45,7 +45,7 @@ Vec3 IbisMath::AverageVec3( std::vector<Vec3> & allVecs )
     Vec3 sum( 0.0, 0.0, 0.0 );
     for( int i = 0; i < allVecs.size(); ++i )
     {
-        sum += allVecs[ i ];
+        sum += allVecs[i];
     }
     sum /= allVecs.size();
     return sum;
@@ -58,11 +58,11 @@ Vec3 IbisMath::StdDevVec3( std::vector<Vec3> & allVecs )
     Vec3 sum = Vec3( 0.0, 0.0, 0.0 );
     for( int i = 0; i < allVecs.size(); ++i )
     {
-        Vec3 diff = allVecs[ i ] - avg;
+        Vec3 diff = allVecs[i] - avg;
         sum += diff * diff;
     }
     sum /= allVecs.size();
-    Vec3 stdDev = Vec3( sqrt( sum[ 0 ] ), sqrt( sum[ 1 ] ), sqrt( sum[ 2 ] ) );
+    Vec3 stdDev = Vec3( sqrt( sum[0] ), sqrt( sum[1] ), sqrt( sum[2] ) );
     return stdDev;
 }
 
@@ -80,7 +80,7 @@ Vec3 IbisMath::MultMat4Point3( vtkMatrix4x4 * mat, const Vec3 & in )
 {
     Vec4 in4( in, 1.0 );
     mat->MultiplyPoint( in4.Ref(), in4.Ref() );
-    return Vec3( in4[ 0 ], in4[ 1 ], in4[ 2 ] );
+    return Vec3( in4[0], in4[1], in4[2] );
 }
 
 vtkMatrix4x4 * IbisMath::DuplicateMat4( vtkMatrix4x4 * in )
@@ -92,6 +92,6 @@ vtkMatrix4x4 * IbisMath::DuplicateMat4( vtkMatrix4x4 * in )
 
 void IbisMath::ClearMat4Array( std::vector<vtkMatrix4x4 *> & allMats )
 {
-    for( int i = 0; i < allMats.size(); ++i ) allMats[ i ]->Delete();
+    for( int i = 0; i < allMats.size(); ++i ) allMats[i]->Delete();
     allMats.clear();
 }

@@ -19,21 +19,18 @@ class ImageFilterExampleWidget;
 
 class ImageFilterExamplePluginInterface : public ToolPluginInterface
 {
-
     Q_OBJECT
-    Q_INTERFACES(IbisPlugin)
-    Q_PLUGIN_METADATA(IID "Ibis.ImageFilterExamplePluginInterface" )
+    Q_INTERFACES( IbisPlugin )
+    Q_PLUGIN_METADATA( IID "Ibis.ImageFilterExamplePluginInterface" )
 
 public:
-
     ImageFilterExamplePluginInterface();
     ~ImageFilterExamplePluginInterface();
-    virtual QString GetPluginName() override { return QString("ImageFilterExample"); }
+    virtual QString GetPluginName() override { return QString( "ImageFilterExample" ); }
     bool CanRun() override;
-    QString GetMenuEntryString() override { return QString("Image Filter Example"); }
+    QString GetMenuEntryString() override { return QString( "Image Filter Example" ); }
 
     QWidget * CreateFloatingWidget() override;
-
 };
 
 #endif

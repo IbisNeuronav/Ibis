@@ -15,7 +15,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include "toolplugininterface.h"
 
-#define CALIBRATIONPHANTOMFILE @CALIBRATIONPHANTOMFILE@
+#define CALIBRATIONPHANTOMFILE @CALIBRATIONPHANTOMFILE @
 
 class USManualCalibrationWidget;
 class UsProbeObject;
@@ -23,20 +23,22 @@ class SceneObject;
 
 class USManualCalibrationPluginInterface : public ToolPluginInterface
 {
-
     Q_OBJECT
-    Q_INTERFACES(IbisPlugin)
-    Q_PLUGIN_METADATA(IID "Ibis.USManualCalibrationPluginInterface" )
+    Q_INTERFACES( IbisPlugin )
+    Q_PLUGIN_METADATA( IID "Ibis.USManualCalibrationPluginInterface" )
 
 public:
-
-    enum PhantomSize { MEDIUMDEPTH = 0, SHALLOWDEPTH = 1 };
+    enum PhantomSize
+    {
+        MEDIUMDEPTH  = 0,
+        SHALLOWDEPTH = 1
+    };
 
     USManualCalibrationPluginInterface();
     ~USManualCalibrationPluginInterface();
-    virtual QString GetPluginName() override { return QString("USManualCalibration"); }
+    virtual QString GetPluginName() override { return QString( "USManualCalibration" ); }
     bool CanRun() override;
-    QString GetMenuEntryString() override { return QString("US Manual Calibration"); }
+    QString GetMenuEntryString() override { return QString( "US Manual Calibration" ); }
 
     virtual QWidget * CreateFloatingWidget() override;
     virtual bool WidgetAboutToClose() override;
@@ -49,10 +51,9 @@ public:
     const double * GetPhantomPoint( int nIndex, int pointIndex );
     SceneObject * GetPhantomWiresObject();
 
-    void SetPhatonSize(int);
+    void SetPhatonSize( int );
 
 protected:
-
     void ValidateUsProbe();
     void BuildWiresRepresentation();
     void BuildCalibrationPhantomRepresentation();

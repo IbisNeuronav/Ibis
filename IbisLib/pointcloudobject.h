@@ -49,7 +49,7 @@ public:
 
     double GetOpacity() { return this->m_Opacity; }
     void SetOpacity( double opacity );
-    void SetColor( double color[ 3 ] );
+    void SetColor( double color[3] );
     void UpdateSettingsWidget();
     void SetProperty( vtkProperty * property );
     vtkGetObjectMacro( Property, vtkProperty );
@@ -74,7 +74,7 @@ protected:
     PointCloudObjectViewAssociationType m_PointCloudObjectInstances;
 
     double m_Opacity;  // between 0 and 1
-    double m_Color[ 3 ];
+    double m_Color[3];
 };
 
 ObjectSerializationHeaderMacro( PointCloudObject );

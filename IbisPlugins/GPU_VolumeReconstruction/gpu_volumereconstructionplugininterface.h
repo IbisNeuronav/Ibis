@@ -19,25 +19,22 @@ class GPU_VolumeReconstructionWidget;
 
 class GPU_VolumeReconstructionPluginInterface : public ToolPluginInterface
 {
-
     Q_OBJECT
-    Q_INTERFACES(IbisPlugin)
-    Q_PLUGIN_METADATA(IID "Ibis.GPU_VolumeReconstructionPluginInterface" )
+    Q_INTERFACES( IbisPlugin )
+    Q_PLUGIN_METADATA( IID "Ibis.GPU_VolumeReconstructionPluginInterface" )
 
 public:
-
     vtkTypeMacro( GPU_VolumeReconstructionPluginInterface, ToolPluginInterface );
 
     GPU_VolumeReconstructionPluginInterface();
     ~GPU_VolumeReconstructionPluginInterface();
-    virtual QString GetPluginName() override { return QString("GPU_VolumeReconstruction"); }
+    virtual QString GetPluginName() override { return QString( "GPU_VolumeReconstruction" ); }
     bool CanRun() override;
-    QString GetMenuEntryString() override { return QString("US Volume Reconstruction With GPU"); }
+    QString GetMenuEntryString() override { return QString( "US Volume Reconstruction With GPU" ); }
 
     QWidget * CreateFloatingWidget() override;
 
 protected:
-
     GPU_VolumeReconstructionWidget * m_volumeReconstructionWidget;
 };
 

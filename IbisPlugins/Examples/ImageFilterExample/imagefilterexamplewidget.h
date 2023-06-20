@@ -19,34 +19,28 @@ class ImageFilterExamplePluginInterface;
 
 namespace Ui
 {
-    class ImageFilterExampleWidget;
+class ImageFilterExampleWidget;
 }
-
 
 class ImageFilterExampleWidget : public QWidget
 {
-
     Q_OBJECT
 
 public:
-
-    explicit ImageFilterExampleWidget(QWidget *parent = 0);
+    explicit ImageFilterExampleWidget( QWidget * parent = 0 );
     ~ImageFilterExampleWidget();
 
     void SetPluginInterface( ImageFilterExamplePluginInterface * interf );
 
 private:
-
     void UpdateUi();
 
     Ui::ImageFilterExampleWidget * ui;
     ImageFilterExamplePluginInterface * m_pluginInterface;
 
-
 private slots:
 
     void on_startButton_clicked();
-
 };
 
 #endif

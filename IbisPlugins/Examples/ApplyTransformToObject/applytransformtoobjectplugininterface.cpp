@@ -1,16 +1,12 @@
 
-#include "applytransformtoobjectplugininterface.h"
-#include <QtPlugin>
 #include <QString>
+#include <QtPlugin>
+#include "applytransformtoobjectplugininterface.h"
 #include "applytransformtoobjectwidget.h"
 
-ApplyTransformToObjectPluginInterface::ApplyTransformToObjectPluginInterface()
-{
-}
+ApplyTransformToObjectPluginInterface::ApplyTransformToObjectPluginInterface() {}
 
-ApplyTransformToObjectPluginInterface::~ApplyTransformToObjectPluginInterface()
-{
-}
+ApplyTransformToObjectPluginInterface::~ApplyTransformToObjectPluginInterface() {}
 
 QWidget * ApplyTransformToObjectPluginInterface::CreateFloatingWidget()
 {

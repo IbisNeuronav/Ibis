@@ -119,15 +119,15 @@ public:
     /** Get LUT range. */
     double * GetLutRange();
     /** Set LUT range. */
-    void SetLutRange( double r[ 2 ] );
+    void SetLutRange( double r[2] );
     /** Get scalar range from Image. */
     void GetImageScalarRange( double * range );
     /** Get number of scalar components from Image. */
     int GetNumberOfScalarComponents();
     /** Get image bounds from Image. */
-    void GetBounds( double bounds[ 6 ] );
+    void GetBounds( double bounds[6] );
     /** Get image center from Image. */
-    void GetCenter( double center[ 3 ] );
+    void GetCenter( double center[3] );
     /** Get image spacing from Image. */
     double * GetSpacing();
     /** Set intensity factor, default is 1.0. */
@@ -196,7 +196,7 @@ protected:
     int viewOutline;
     int outlineWasVisible;
     int lutIndex;
-    double lutRange[ 2 ];
+    double lutRange[2];
     double intensityFactor;
 
     // vtk volume rendering attributes
@@ -212,7 +212,7 @@ protected:
     double m_sampleDistance;
 
     bool m_showVolumeClippingBox;
-    double m_volumeRenderingBounds[ 6 ];
+    double m_volumeRenderingBounds[6];
     vtkSmartPointer<vtkEventQtSlotConnect> m_volumeClippingBoxWatcher;
 
     struct PerViewElements

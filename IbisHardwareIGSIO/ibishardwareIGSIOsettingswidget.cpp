@@ -43,7 +43,7 @@ void IbisHardwareIGSIOSettingsWidget::UpdateUI()
     ui->configFileComboBox->setCurrentIndex( 0 );
     for( int i = 0; i < allConfigFiles.size(); ++i )
     {
-        QString fileName = allConfigFiles[ i ].fileName();
+        QString fileName = allConfigFiles[i].fileName();
         ui->configFileComboBox->addItem( fileName );
         if( fileName == m_igsio->GetLastIbisPlusConfigFilename() ) ui->configFileComboBox->setCurrentIndex( i + 1 );
     }

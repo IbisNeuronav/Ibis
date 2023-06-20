@@ -61,7 +61,7 @@ void TrackedSceneObject::Setup( View * view )
         markerActor->SetUserTransform( this->GetWorldTransform() );
 
         // remember what we put in that view
-        m_genericActors[ view ] = markerActor;
+        m_genericActors[view] = markerActor;
     }
 }
 

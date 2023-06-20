@@ -12,8 +12,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #define USACQUISITIONPLUGININTERFACE_H
 
 #include <QWidget>
-#include "toolplugininterface.h"
 #include "serializer.h"
+#include "toolplugininterface.h"
 
 class USAcquisitionObject;
 class UsProbeObject;
@@ -25,26 +25,24 @@ class ImageObject;
  * @brief   This is a plugin used to handle US acquisitions, live or saved.
  *
  * Using IbisAPI the plugin communicates with the application in order to start and stop acquisition
- * and set acquisition's parameters. The acquisition is shown in the DoubleViewWindow together with the correxponding volume.
- * The acquisition and the volume can be blended in order to see the difference between both.
+ * and set acquisition's parameters. The acquisition is shown in the DoubleViewWindow together with the correxponding
+ * volume. The acquisition and the volume can be blended in order to see the difference between both.
  *
  * @sa USAcquisitionObject UsProbeObject DoubleViewWidget ImageObject IbisAPI
  * */
 class USAcquisitionPluginInterface : public ToolPluginInterface
 {
-
     Q_OBJECT
-    Q_INTERFACES(IbisPlugin)
-    Q_PLUGIN_METADATA(IID "Ibis.USAcquisitionPluginInterface" )
+    Q_INTERFACES( IbisPlugin )
+    Q_PLUGIN_METADATA( IID "Ibis.USAcquisitionPluginInterface" )
 
 public:
-
     vtkTypeMacro( USAcquisitionPluginInterface, ToolPluginInterface );
 
     USAcquisitionPluginInterface();
     virtual ~USAcquisitionPluginInterface();
-    virtual QString GetMenuEntryString() override { return QString("US Acquisition Double View"); }
-    virtual QString GetPluginName() override { return QString("USAcquisitionDoubleView"); }
+    virtual QString GetMenuEntryString() override { return QString( "US Acquisition Double View" ); }
+    virtual QString GetPluginName() override { return QString( "USAcquisitionDoubleView" ); }
     virtual bool CanRun() override;
     virtual QWidget * CreateFloatingWidget() override;
     virtual bool WidgetAboutToClose() override;
@@ -52,12 +50,13 @@ public:
     virtual QString GetPluginDescription() override
     {
         QString description;
-        description = "US Acquisition Double View\n"
-                      "This plugin is used to collect and review an ultrasound sweep.\n"
-                      "The double window allows user to show\n"
-                      "image and acquisition data side by side.\n"
-                      "Both images may be blended to show better the differences."
-                      "\n";
+        description =
+            "US Acquisition Double View\n"
+            "This plugin is used to collect and review an ultrasound sweep.\n"
+            "The double window allows user to show\n"
+            "image and acquisition data side by side.\n"
+            "Both images may be blended to show better the differences."
+            "\n";
         return description;
     }
 
@@ -129,7 +128,6 @@ private slots:
     void OnImageChanged();
 
 protected:
-
     void Init();
     void ValidateAllSceneObjects();
     void ValidateCurrentUsProbe();
@@ -147,16 +145,15 @@ protected:
     double m_maskingPercent;
     int m_currentProbeObjectId;
     int m_currentAcquisitionObjectId;
-    int m_currentVolumeObjectId;  //main modality MRI
+    int m_currentVolumeObjectId;  // main modality MRI
 
     // added content May 13, 2015 by Xiao
     bool m_isBlendingVolumes;
     double m_blendingVolumesPercent;
     int m_addedVolumeObjectId;
 
-
     QString m_baseDir;
-    void MakeAcquisitionName(QString & name);
+    void MakeAcquisitionName( QString & name );
 };
 
 #endif

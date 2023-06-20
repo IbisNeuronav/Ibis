@@ -43,13 +43,13 @@ bool Serialize( Serializer * serial, const char * attrName, vtkColorTransferFunc
 
         for( int i = 0; i < nbColorPoints; ++i )
         {
-            double nodeValue[ 6 ];
+            double nodeValue[6];
             if( !serial->IsReader() ) colorFunc->GetNodeValue( i, nodeValue );
             QString elemName = QString( "ColorPoint_%1" ).arg( i );
             Serialize( serial, elemName.toUtf8().data(), nodeValue, 6 );
             if( serial->IsReader() )
-                colorFunc->AddRGBPoint( nodeValue[ 0 ], nodeValue[ 1 ], nodeValue[ 2 ], nodeValue[ 3 ], nodeValue[ 4 ],
-                                        nodeValue[ 5 ] );
+                colorFunc->AddRGBPoint( nodeValue[0], nodeValue[1], nodeValue[2], nodeValue[3], nodeValue[4],
+                                        nodeValue[5] );
         }
         serial->EndSection();
         return true;
@@ -68,12 +68,11 @@ bool Serialize( Serializer * serial, const char * attrName, vtkPiecewiseFunction
 
         for( int i = 0; i < nbPoints; ++i )
         {
-            double nodeValue[ 4 ];
+            double nodeValue[4];
             if( !serial->IsReader() ) opacityFunc->GetNodeValue( i, nodeValue );
             QString elemName = QString( "Point_%1" ).arg( i );
             Serialize( serial, elemName.toUtf8().data(), nodeValue, 4 );
-            if( serial->IsReader() )
-                opacityFunc->AddPoint( nodeValue[ 0 ], nodeValue[ 1 ], nodeValue[ 2 ], nodeValue[ 3 ] );
+            if( serial->IsReader() ) opacityFunc->AddPoint( nodeValue[0], nodeValue[1], nodeValue[2], nodeValue[3] );
         }
         serial->EndSection();
         return true;

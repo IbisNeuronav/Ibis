@@ -186,7 +186,7 @@ void UsProbeObject::Setup( View * view )
 
         view->GetRenderer()->AddActor( pv.imageActor );
 
-        m_perViews[ view ] = pv;
+        m_perViews[view] = pv;
     }
 }
 
@@ -236,9 +236,9 @@ void UsProbeObject::Show()
     emit ObjectModified();
 }
 
-int UsProbeObject::GetVideoImageWidth() { return GetVideoOutput()->GetDimensions()[ 0 ]; }
+int UsProbeObject::GetVideoImageWidth() { return GetVideoOutput()->GetDimensions()[0]; }
 
-int UsProbeObject::GetVideoImageHeight() { return GetVideoOutput()->GetDimensions()[ 1 ]; }
+int UsProbeObject::GetVideoImageHeight() { return GetVideoOutput()->GetDimensions()[1]; }
 
 int UsProbeObject::GetVideoImageNumberOfComponents() { return GetVideoOutput()->GetNumberOfScalarComponents(); }
 
@@ -252,38 +252,38 @@ void UsProbeObject::SetCurrentCalibrationMatrixIndex( int index )
 {
     Q_ASSERT( index >= 0 && index < m_calibrationMatrices.size() );
     m_currentCalibrationMatrixIndex = index;
-    SetCalibrationMatrix( m_calibrationMatrices[ index ].matrix );
+    SetCalibrationMatrix( m_calibrationMatrices[index].matrix );
 }
 
 QString UsProbeObject::GetCalibrationMatrixName( int index )
 {
     Q_ASSERT( index >= 0 && index < m_calibrationMatrices.size() );
-    return m_calibrationMatrices[ index ].name;
+    return m_calibrationMatrices[index].name;
 }
 
 void UsProbeObject::SetCurrentCalibrationMatrixName( QString name )
 {
     Q_ASSERT( m_currentCalibrationMatrixIndex >= 0 && m_currentCalibrationMatrixIndex < m_calibrationMatrices.size() );
-    m_calibrationMatrices[ m_currentCalibrationMatrixIndex ].name = name;
+    m_calibrationMatrices[m_currentCalibrationMatrixIndex].name = name;
 }
 
 QString UsProbeObject::GetCurrentCalibrationMatrixName()
 {
-    if( m_currentCalibrationMatrixIndex >= 0 ) return m_calibrationMatrices[ m_currentCalibrationMatrixIndex ].name;
+    if( m_currentCalibrationMatrixIndex >= 0 ) return m_calibrationMatrices[m_currentCalibrationMatrixIndex].name;
     return QString( "NONE" );
 }
 
 void UsProbeObject::SetCurrentCalibrationMatrix( vtkMatrix4x4 * mat )
 {
     Q_ASSERT( m_currentCalibrationMatrixIndex >= 0 && m_currentCalibrationMatrixIndex < m_calibrationMatrices.size() );
-    m_calibrationMatrices[ m_currentCalibrationMatrixIndex ].matrix->DeepCopy( mat );
+    m_calibrationMatrices[m_currentCalibrationMatrixIndex].matrix->DeepCopy( mat );
     SetCalibrationMatrix( mat );
 }
 
 vtkMatrix4x4 * UsProbeObject::GetCurrentCalibrationMatrix()
 {
     Q_ASSERT( m_currentCalibrationMatrixIndex >= 0 && m_currentCalibrationMatrixIndex < m_calibrationMatrices.size() );
-    return m_calibrationMatrices[ m_currentCalibrationMatrixIndex ].matrix;
+    return m_calibrationMatrices[m_currentCalibrationMatrixIndex].matrix;
 }
 
 void UsProbeObject::AddCalibrationMatrix( QString name )
@@ -347,7 +347,7 @@ QString UsProbeObject::GetLUTName( int index )
 void UsProbeObject::SetCurrentLUTIndex( int index )
 {
     m_lutIndex            = index;
-    double range[ 2 ]     = { 0.0, 255.0 };
+    double range[2]       = {0.0, 255.0};
     QString slicesLutName = Application::GetLookupTableManager()->GetTemplateLookupTableName( m_lutIndex );
     vtkSmartPointer<vtkPiecewiseFunctionLookupTable> lut = vtkSmartPointer<vtkPiecewiseFunctionLookupTable>::New();
     lut->SetIntensityFactor( 1.0 );

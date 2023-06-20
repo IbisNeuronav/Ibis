@@ -20,10 +20,10 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 LinesFactory::LinesFactory()
 {
     m_startSegment = true;
-    m_color[ 0 ]   = 255;
-    m_color[ 1 ]   = 255;
-    m_color[ 2 ]   = 255;
-    m_color[ 3 ]   = 255;
+    m_color[0]     = 255;
+    m_color[1]     = 255;
+    m_color[2]     = 255;
+    m_color[3]     = 255;
 
     m_pts     = vtkSmartPointer<vtkPoints>::New();
     m_lines   = vtkSmartPointer<vtkCellArray>::New();
@@ -43,15 +43,15 @@ void LinesFactory::StartNewSegment() { m_startSegment = true; }
 
 void LinesFactory::SetColor( unsigned char r, unsigned char g, unsigned char b, unsigned char a )
 {
-    m_color[ 0 ] = r;
-    m_color[ 1 ] = g;
-    m_color[ 2 ] = b;
-    m_color[ 3 ] = a;
+    m_color[0] = r;
+    m_color[1] = g;
+    m_color[2] = b;
+    m_color[3] = a;
 }
 
 int LinesFactory::GetNumberOfPoints() { return m_pts->GetNumberOfPoints(); }
 
-void LinesFactory::SetPoint( int index, double pt[ 3 ] )
+void LinesFactory::SetPoint( int index, double pt[3] )
 {
     Q_ASSERT( m_pts->GetNumberOfPoints() > index );
     m_pts->SetPoint( index, pt );
@@ -66,7 +66,7 @@ double * LinesFactory::GetPoint( int index )
 
 void LinesFactory::AddPoint( double x, double y, double z )
 {
-    AddPoint( x, y, z, m_color[ 0 ], m_color[ 1 ], m_color[ 2 ], m_color[ 3 ] );
+    AddPoint( x, y, z, m_color[0], m_color[1], m_color[2], m_color[3] );
 }
 
 void LinesFactory::AddPoint( double x, double y, double z, unsigned char r, unsigned char g, unsigned char b,

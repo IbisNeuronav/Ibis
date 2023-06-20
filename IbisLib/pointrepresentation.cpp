@@ -151,7 +151,7 @@ void PointRepresentation::Setup( View * view )
     PerViewElements * perView         = new PerViewElements;
     perView->pointRepresentationActor = pointActor;
     perView->labelActor               = labelActor;
-    m_perViewContainer[ view ]        = perView;
+    m_perViewContainer[view]          = perView;
     connect( this, SIGNAL( ObjectModified() ), view, SLOT( NotifyNeedRender() ) );
 }
 
@@ -181,9 +181,9 @@ void PointRepresentation::UpdateVisibility()
     // Compute point position in world space
     vtkTransform * wt     = this->GetWorldTransform();
     PointsObject * parent = PointsObject::SafeDownCast( this->GetParent() );
-    double local[ 3 ];
+    double local[3];
     parent->GetPointCoordinates( m_pointIndex, local );
-    double world[ 3 ];
+    double world[3];
     wt->TransformPoint( local, world );
 
     // update its visibility in each of the 2d views
@@ -210,9 +210,9 @@ bool PointRepresentation::CheckVisibility()
     // Compute point position in world space
     vtkTransform * wt     = this->GetWorldTransform();
     PointsObject * parent = PointsObject::SafeDownCast( this->GetParent() );
-    double local[ 3 ];
+    double local[3];
     parent->GetPointCoordinates( m_pointIndex, local );
-    double world[ 3 ];
+    double world[3];
     wt->TransformPoint( local, world );
 
     // check point's visibility in each of 2d views
@@ -233,14 +233,11 @@ bool PointRepresentation::CheckVisibility()
     return visible;
 }
 
-void PointRepresentation::SetPropertyColor( double color[ 3 ] )
-{
-    m_property->SetColor( color[ 0 ], color[ 1 ], color[ 2 ] );
-}
+void PointRepresentation::SetPropertyColor( double color[3] ) { m_property->SetColor( color[0], color[1], color[2] ); }
 
 void PointRepresentation::SetOpacity( double opacity ) { m_property->SetOpacity( opacity ); }
 
-void PointRepresentation::SetPosition( double p[ 3 ] ) { this->SetPosition( p[ 0 ], p[ 1 ], p[ 2 ] ); }
+void PointRepresentation::SetPosition( double p[3] ) { this->SetPosition( p[0], p[1], p[2] ); }
 
 void PointRepresentation::SetPosition( double x, double y, double z )
 {
@@ -251,12 +248,12 @@ void PointRepresentation::SetPosition( double x, double y, double z )
     UpdateAllTransforms();
 }
 
-void PointRepresentation::GetPosition( double p[ 3 ] )
+void PointRepresentation::GetPosition( double p[3] )
 {
     vtkMatrix4x4 * m = m_posTransform->GetMatrix();
-    p[ 0 ]           = m->GetElement( 0, 3 );
-    p[ 1 ]           = m->GetElement( 1, 3 );
-    p[ 2 ]           = m->GetElement( 2, 3 );
+    p[0]             = m->GetElement( 0, 3 );
+    p[1]             = m->GetElement( 1, 3 );
+    p[2]             = m->GetElement( 2, 3 );
 }
 
 void PointRepresentation::SetPointSizeIn3D( double r ) { m_sphere->SetRadius( r ); }

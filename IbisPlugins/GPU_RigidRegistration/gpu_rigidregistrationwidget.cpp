@@ -9,35 +9,33 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
 // Thanks to Dante De Nigris for writing this class
-#include "gpu_rigidregistrationwidget.h"
-#include "gpu_rigidregistrationplugininterface.h"
+#include <vnl/algo/vnl_real_eigensystem.h>
+#include <vnl/algo/vnl_symmetric_eigensystem.h>
+#include <vtkSmartPointer.h>
 #include <QComboBox>
 #include <QMessageBox>
-#include <vnl/algo/vnl_symmetric_eigensystem.h>
-#include <vnl/algo/vnl_real_eigensystem.h>
-#include <vtkSmartPointer.h>
+#include "gpu_rigidregistrationplugininterface.h"
+#include "gpu_rigidregistrationwidget.h"
 #include "ibisapi.h"
 
-GPU_RigidRegistrationWidget::GPU_RigidRegistrationWidget(QWidget *parent) :
-    QWidget(parent),
-    ui(new Ui::GPU_RigidRegistrationWidget),
-    m_pluginInterface(0),
-    m_OptimizationRunning(false)
+GPU_RigidRegistrationWidget::GPU_RigidRegistrationWidget( QWidget * parent )
+    : QWidget( parent ),
+      ui( new Ui::GPU_RigidRegistrationWidget ),
+      m_pluginInterface( 0 ),
+      m_OptimizationRunning( false )
 {
-    ui->setupUi(this);
+    ui->setupUi( this );
     setWindowTitle( "Rigid Registration With GPU" );
-    connect(ui->numebrOfPixelsDial , SIGNAL(valueChanged(int)), ui->numberOfSamplesValueLabel, SLOT(setNum(int)));
-    connect(ui->selectivityDial, SIGNAL(valueChanged(int)), ui->parameterNValueLabel, SLOT(setNum(int)));
-    connect(ui->populationSizeDial, SIGNAL(valueChanged(int)), ui->populationSizeValueLabel, SLOT(setNum(int)));
-    connect(ui->debugCheckBox, SIGNAL(stateChanged(int)), this, SLOT(on_debugCheckBox_clicked()));
+    connect( ui->numebrOfPixelsDial, SIGNAL( valueChanged( int ) ), ui->numberOfSamplesValueLabel,
+             SLOT( setNum( int ) ) );
+    connect( ui->selectivityDial, SIGNAL( valueChanged( int ) ), ui->parameterNValueLabel, SLOT( setNum( int ) ) );
+    connect( ui->populationSizeDial, SIGNAL( valueChanged( int ) ), ui->populationSizeValueLabel,
+             SLOT( setNum( int ) ) );
+    connect( ui->debugCheckBox, SIGNAL( stateChanged( int ) ), this, SLOT( on_debugCheckBox_clicked() ) );
     ui->registrationOutputTextEdit->hide();
-
 }
 
-GPU_RigidRegistrationWidget::~GPU_RigidRegistrationWidget()
-{
-    delete ui;
-}
+GPU_RigidRegistrationWidget::~GPU_RigidRegistrationWidget() { delete ui; }
 
 void GPU_RigidRegistrationWidget::SetPluginInterface( GPU_RigidRegistrationPluginInterface * ifc )
 {
@@ -50,17 +48,21 @@ void GPU_RigidRegistrationWidget::on_startButton_clicked()
     // Make sure all params have been specified
     int sourceImageObjectId = ui->sourceImageComboBox->itemData( ui->sourceImageComboBox->currentIndex() ).toInt();
     int targetImageObjectId = ui->targetImageComboBox->itemData( ui->targetImageComboBox->currentIndex() ).toInt();
-    int transformObjectId = ui->transformObjectComboBox->itemData( ui->transformObjectComboBox->currentIndex() ).toInt();
+    int transformObjectId =
+        ui->transformObjectComboBox->itemData( ui->transformObjectComboBox->currentIndex() ).toInt();
 
-    if( transformObjectId == -1 || sourceImageObjectId == -1 || targetImageObjectId == -1 || sourceImageObjectId == targetImageObjectId)
+    if( transformObjectId == -1 || sourceImageObjectId == -1 || targetImageObjectId == -1 ||
+        sourceImageObjectId == targetImageObjectId )
     {
-        QMessageBox::information( this, "Rigid Registration on GPU", "Need to specify Fixed image, Moving image (different from Fixed Image) and Transform Object before processing" );
+        QMessageBox::information( this, "Rigid Registration on GPU",
+                                  "Need to specify Fixed image, Moving image (different from Fixed Image) and "
+                                  "Transform Object before processing" );
         return;
     }
 
     // Get input images
-    IbisAPI *ibisAPI = m_pluginInterface->GetIbisAPI();
-    Q_ASSERT(ibisAPI);
+    IbisAPI * ibisAPI = m_pluginInterface->GetIbisAPI();
+    Q_ASSERT( ibisAPI );
     ImageObject * sourceImageObject = ImageObject::SafeDownCast( ibisAPI->GetObjectByID( sourceImageObjectId ) );
     Q_ASSERT_X( sourceImageObject, "GPU_RigidRegistrationWidget::on_startButton_clicked()", "Invalid source object" );
     vtkTransform * sourceVtkTransform = vtkTransform::SafeDownCast( sourceImageObject->GetWorldTransform() );
@@ -70,13 +72,13 @@ void GPU_RigidRegistrationWidget::on_startButton_clicked()
     vtkTransform * targetVtkTransform = vtkTransform::SafeDownCast( targetImageObject->GetWorldTransform() );
 
     SceneObject * transformObject = ibisAPI->GetObjectByID( transformObjectId );
-    vtkTransform * vtktransform = vtkTransform::SafeDownCast( transformObject->GetLocalTransform() );
+    vtkTransform * vtktransform   = vtkTransform::SafeDownCast( transformObject->GetLocalTransform() );
     Q_ASSERT_X( vtktransform, "GPU_RigidRegistrationWidget::on_startButton_clicked()", "Invalid transform" );
 
     IbisItkFloat3ImageType::Pointer itkSourceImage = sourceImageObject->GetItkImage();
     IbisItkFloat3ImageType::Pointer itkTargetImage = targetImageObject->GetItkImage();
 
-    ui->userFeedbackLabel->setText(QString("Processing..(patience is a virtue)"));
+    ui->userFeedbackLabel->setText( QString( "Processing..(patience is a virtue)" ) );
     /*
       Send std::cout from elastix to QTextEdit.
       Issue. QTextEdit doesn't sync properly, and we only get a text dump
@@ -85,7 +87,7 @@ void GPU_RigidRegistrationWidget::on_startButton_clicked()
     bool debug = ui->debugCheckBox->isChecked();
 
     std::stringstream debugStringStream;
-    QDebugStream qout(debugStringStream,  ui->registrationOutputTextEdit);
+    QDebugStream qout( debugStringStream, ui->registrationOutputTextEdit );
 
     m_registrationTimer.start();
 
@@ -94,10 +96,12 @@ void GPU_RigidRegistrationWidget::on_startButton_clicked()
     rigidRegistrator->SetNumberOfPixels( ui->numebrOfPixelsDial->value() );
     rigidRegistrator->SetOrientationSelectivity( ui->selectivityDial->value() );
     rigidRegistrator->SetPopulationSize( ui->populationSizeDial->value() );
-    rigidRegistrator->SetInitialSigma( ui->initialSigmaComboBox->itemData( ui->initialSigmaComboBox->currentIndex() ).toDouble() );
-    rigidRegistrator->SetPercentile( ui->percentileComboBox->itemData( ui->percentileComboBox->currentIndex() ).toDouble() );
+    rigidRegistrator->SetInitialSigma(
+        ui->initialSigmaComboBox->itemData( ui->initialSigmaComboBox->currentIndex() ).toDouble() );
+    rigidRegistrator->SetPercentile(
+        ui->percentileComboBox->itemData( ui->percentileComboBox->currentIndex() ).toDouble() );
     rigidRegistrator->SetUseMask( ui->computeMaskCheckBox->isChecked() );
-    rigidRegistrator->SetDebug( debug, &debugStringStream);
+    rigidRegistrator->SetDebug( debug, &debugStringStream );
 
     // Set image inputs
     rigidRegistrator->SetItkSourceImage( itkSourceImage );
@@ -110,121 +114,121 @@ void GPU_RigidRegistrationWidget::on_startButton_clicked()
 
     if( transformObject->GetParent() )
     {
-        vtkTransform * parentVtktransform = vtkTransform::SafeDownCast( transformObject->GetParent()->GetWorldTransform() );
+        vtkTransform * parentVtktransform =
+            vtkTransform::SafeDownCast( transformObject->GetParent()->GetWorldTransform() );
         Q_ASSERT_X( parentVtktransform, "GPU_RigidRegistrationWidget::AddImageToQueue()", "Invalid transform" );
-        rigidRegistrator->SetParentVtkTransform(parentVtktransform);
+        rigidRegistrator->SetParentVtkTransform( parentVtktransform );
     }
 
     // Run registration
-//    transformObject->StartModifyingTransform();
+    //    transformObject->StartModifyingTransform();
     rigidRegistrator->runRegistration();
-//    transformObject->FinishModifyingTransform();
+    //    transformObject->FinishModifyingTransform();
 
     m_OptimizationRunning = true;
 
     qint64 registrationTime = m_registrationTimer.elapsed();
 
-
-    QString feedbackString = QString("Full Registration finished in %1 secs").arg(qreal(registrationTime)/1000.0);
-    ui->userFeedbackLabel->setText(feedbackString);
+    QString feedbackString =
+        QString( "Full Registration finished in %1 secs" ).arg( qreal( registrationTime ) / 1000.0 );
+    ui->userFeedbackLabel->setText( feedbackString );
     m_OptimizationRunning = false;
 
-//    setWindowFlags( originalFlags ) ;
+    //    setWindowFlags( originalFlags ) ;
 
-//    this->updateTagsDistance();
+    //    this->updateTagsDistance();
 }
 
 void GPU_RigidRegistrationWidget::UpdateUi()
 {
-  ui->sourceImageComboBox->clear();
-  ui->targetImageComboBox->clear();
-  ui->transformObjectComboBox->clear();
-  //Set Parameters First
-  ui->percentileComboBox->addItem( "0.6", QVariant( 0.6 ) );
-  ui->percentileComboBox->addItem( "0.7", QVariant( 0.7 ) );
-  ui->percentileComboBox->addItem( "0.8", QVariant( 0.8 ) );
-  ui->percentileComboBox->addItem( "0.9", QVariant( 0.9 ) );
-  ui->percentileComboBox->setCurrentIndex( 2 );
+    ui->sourceImageComboBox->clear();
+    ui->targetImageComboBox->clear();
+    ui->transformObjectComboBox->clear();
+    // Set Parameters First
+    ui->percentileComboBox->addItem( "0.6", QVariant( 0.6 ) );
+    ui->percentileComboBox->addItem( "0.7", QVariant( 0.7 ) );
+    ui->percentileComboBox->addItem( "0.8", QVariant( 0.8 ) );
+    ui->percentileComboBox->addItem( "0.9", QVariant( 0.9 ) );
+    ui->percentileComboBox->setCurrentIndex( 2 );
 
-  ui->initialSigmaComboBox->addItem( "0.1", QVariant( 0.1 ) );
-  ui->initialSigmaComboBox->addItem( "1.0", QVariant( 1.0 ) );
-  ui->initialSigmaComboBox->addItem( "2.0", QVariant( 2.0 ) );
-  ui->initialSigmaComboBox->addItem( "4.0", QVariant( 4.0 ) );
-  ui->initialSigmaComboBox->addItem( "8.0", QVariant( 8.0 ) );
-  ui->initialSigmaComboBox->setCurrentIndex( 1 );
+    ui->initialSigmaComboBox->addItem( "0.1", QVariant( 0.1 ) );
+    ui->initialSigmaComboBox->addItem( "1.0", QVariant( 1.0 ) );
+    ui->initialSigmaComboBox->addItem( "2.0", QVariant( 2.0 ) );
+    ui->initialSigmaComboBox->addItem( "4.0", QVariant( 4.0 ) );
+    ui->initialSigmaComboBox->addItem( "8.0", QVariant( 8.0 ) );
+    ui->initialSigmaComboBox->setCurrentIndex( 1 );
 
-  IbisAPI *ibisAPI = m_pluginInterface->GetIbisAPI();
-  Q_ASSERT(ibisAPI);
-  const QList< SceneObject* > &allObjects = ibisAPI->GetAllObjects();
-  for( int i = 0; i < allObjects.size(); ++i )
-  {
-      SceneObject * current = allObjects[i];
-      if( current != ibisAPI->GetSceneRoot() && current->IsListable() && !current->IsManagedByTracker())
-      {
-          if( current->IsA("ImageObject") )
-          {
-              ui->targetImageComboBox->addItem( current->GetName(), QVariant( current->GetObjectID() ) );
-              ui->sourceImageComboBox->addItem( current->GetName(), QVariant( current->GetObjectID() ) );
-          }
-      }
-  }
-
-  if( ui->targetImageComboBox->count() == 0 )
+    IbisAPI * ibisAPI = m_pluginInterface->GetIbisAPI();
+    Q_ASSERT( ibisAPI );
+    const QList<SceneObject *> & allObjects = ibisAPI->GetAllObjects();
+    for( int i = 0; i < allObjects.size(); ++i )
     {
-      ui->targetImageComboBox->addItem( "None", QVariant(-1) );
+        SceneObject * current = allObjects[i];
+        if( current != ibisAPI->GetSceneRoot() && current->IsListable() && !current->IsManagedByTracker() )
+        {
+            if( current->IsA( "ImageObject" ) )
+            {
+                ui->targetImageComboBox->addItem( current->GetName(), QVariant( current->GetObjectID() ) );
+                ui->sourceImageComboBox->addItem( current->GetName(), QVariant( current->GetObjectID() ) );
+            }
+        }
     }
 
-
-  if( ui->sourceImageComboBox->count() == 0 )
-  {
-      ui->sourceImageComboBox->addItem( "None", QVariant(-1) );
-  }
-  else
-  {
-      int sourceId = ui->sourceImageComboBox->itemData( ui->sourceImageComboBox->currentIndex() ).toInt();
-      ImageObject * sourceImageObject = ImageObject::SafeDownCast( ibisAPI->GetObjectByID( sourceId ) );
-
-      if( sourceImageObject->CanEditTransformManually() )
-      {
-          ui->transformObjectComboBox->addItem( sourceImageObject->GetName(), QVariant( sourceId ) );
-      }
-      if(sourceImageObject->GetParent() )
-      {
-          if(sourceImageObject->GetParent()->CanEditTransformManually())
-              ui->transformObjectComboBox->addItem( sourceImageObject->GetParent()->GetName(), QVariant( sourceImageObject->GetParent()->GetObjectID() ) );
-      }
-  }
-
-
-  if( ui->transformObjectComboBox->count() == 0 )
+    if( ui->targetImageComboBox->count() == 0 )
     {
-      ui->transformObjectComboBox->addItem( "None", QVariant(-1) );
+        ui->targetImageComboBox->addItem( "None", QVariant( -1 ) );
+    }
+
+    if( ui->sourceImageComboBox->count() == 0 )
+    {
+        ui->sourceImageComboBox->addItem( "None", QVariant( -1 ) );
+    }
+    else
+    {
+        int sourceId = ui->sourceImageComboBox->itemData( ui->sourceImageComboBox->currentIndex() ).toInt();
+        ImageObject * sourceImageObject = ImageObject::SafeDownCast( ibisAPI->GetObjectByID( sourceId ) );
+
+        if( sourceImageObject->CanEditTransformManually() )
+        {
+            ui->transformObjectComboBox->addItem( sourceImageObject->GetName(), QVariant( sourceId ) );
+        }
+        if( sourceImageObject->GetParent() )
+        {
+            if( sourceImageObject->GetParent()->CanEditTransformManually() )
+                ui->transformObjectComboBox->addItem( sourceImageObject->GetParent()->GetName(),
+                                                      QVariant( sourceImageObject->GetParent()->GetObjectID() ) );
+        }
+    }
+
+    if( ui->transformObjectComboBox->count() == 0 )
+    {
+        ui->transformObjectComboBox->addItem( "None", QVariant( -1 ) );
     }
 }
 
-void GPU_RigidRegistrationWidget::on_sourceImageComboBox_activated(int index)
-{  
-  int sourceId = ui->sourceImageComboBox->itemData( ui->sourceImageComboBox->currentIndex() ).toInt();
-  if( sourceId != -1)
-  {
-      ui->transformObjectComboBox->clear();    
-      IbisAPI *ibisAPI = m_pluginInterface->GetIbisAPI();
-      Q_ASSERT(ibisAPI);
-      ImageObject * sourceImageObject = ImageObject::SafeDownCast( ibisAPI->GetObjectByID( sourceId ) );
-      ui->transformObjectComboBox->addItem( sourceImageObject->GetName(), QVariant( sourceId ) );
-      if(sourceImageObject->GetParent() )
-      {
-          if(sourceImageObject->GetParent()->CanEditTransformManually())
-              ui->transformObjectComboBox->addItem( sourceImageObject->GetParent()->GetName(), QVariant( sourceImageObject->GetParent()->GetObjectID() ) );
-      }
-
-  }
+void GPU_RigidRegistrationWidget::on_sourceImageComboBox_activated( int index )
+{
+    int sourceId = ui->sourceImageComboBox->itemData( ui->sourceImageComboBox->currentIndex() ).toInt();
+    if( sourceId != -1 )
+    {
+        ui->transformObjectComboBox->clear();
+        IbisAPI * ibisAPI = m_pluginInterface->GetIbisAPI();
+        Q_ASSERT( ibisAPI );
+        ImageObject * sourceImageObject = ImageObject::SafeDownCast( ibisAPI->GetObjectByID( sourceId ) );
+        ui->transformObjectComboBox->addItem( sourceImageObject->GetName(), QVariant( sourceId ) );
+        if( sourceImageObject->GetParent() )
+        {
+            if( sourceImageObject->GetParent()->CanEditTransformManually() )
+                ui->transformObjectComboBox->addItem( sourceImageObject->GetParent()->GetName(),
+                                                      QVariant( sourceImageObject->GetParent()->GetObjectID() ) );
+        }
+    }
 }
 
 void GPU_RigidRegistrationWidget::on_debugCheckBox_clicked()
 {
-    if(ui->debugCheckBox->isChecked())
-      ui->registrationOutputTextEdit->show();
+    if( ui->debugCheckBox->isChecked() )
+        ui->registrationOutputTextEdit->show();
     else
-      ui->registrationOutputTextEdit->hide();
+        ui->registrationOutputTextEdit->hide();
 }

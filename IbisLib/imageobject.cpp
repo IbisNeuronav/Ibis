@@ -64,18 +64,18 @@ ImageObject::ImageObject()
     this->viewOutline       = 0;
     this->outlineWasVisible = 0;
     this->lutIndex          = -1;
-    this->lutRange[ 0 ]     = 0.0;
-    this->lutRange[ 1 ]     = 0.0;
+    this->lutRange[0]       = 0.0;
+    this->lutRange[1]       = 0.0;
     this->intensityFactor   = 1.0;
     this->HistogramComputer = vtkSmartPointer<vtkImageAccumulate>::New();
 
-    m_showVolumeClippingBox      = false;
-    m_volumeRenderingBounds[ 0 ] = 0.0;
-    m_volumeRenderingBounds[ 1 ] = 1.0;
-    m_volumeRenderingBounds[ 2 ] = 0.0;
-    m_volumeRenderingBounds[ 3 ] = 1.0;
-    m_volumeRenderingBounds[ 4 ] = 0.0;
-    m_volumeRenderingBounds[ 5 ] = 1.0;
+    m_showVolumeClippingBox    = false;
+    m_volumeRenderingBounds[0] = 0.0;
+    m_volumeRenderingBounds[1] = 1.0;
+    m_volumeRenderingBounds[2] = 0.0;
+    m_volumeRenderingBounds[3] = 1.0;
+    m_volumeRenderingBounds[4] = 0.0;
+    m_volumeRenderingBounds[5] = 1.0;
 
     // setup default volume properties for vtk volume rendering
     m_vtkVolumeRenderingEnabled = false;
@@ -296,7 +296,7 @@ void ImageObject::SetInternalImage( vtkImageData * image )
         this->Image->GetBounds( m_volumeRenderingBounds );
     }
 
-    double range[ 2 ];
+    double range[2];
     this->Image->GetScalarRange( range );
     this->HistogramComputer->SetInputData( this->Image );
     SetupHistogramComputer();
@@ -318,11 +318,11 @@ void ImageObject::SetupHistogramComputer()
     Q_ASSERT_X( this->NumberOfBinsInHistogram > 0, "ImageObject::SetupHistogramComputer()",
                 "Number of bins has to be > 0." );
 
-    double range[ 2 ];
+    double range[2];
     this->Image->GetScalarRange( range );
-    double binSize = ( range[ 1 ] - range[ 0 ] ) / this->NumberOfBinsInHistogram;
+    double binSize = ( range[1] - range[0] ) / this->NumberOfBinsInHistogram;
 
-    this->HistogramComputer->SetComponentOrigin( range[ 0 ], 0, 0 );
+    this->HistogramComputer->SetComponentOrigin( range[0], 0, 0 );
     this->HistogramComputer->SetComponentExtent( 0, this->NumberOfBinsInHistogram - 1, 0, 0, 0, 0 );
     this->HistogramComputer->SetComponentSpacing( binSize, 1, 1 );
     this->HistogramComputer->Update();
@@ -334,7 +334,7 @@ void ImageObject::SetupInCutPlanes()
     if( this->Image && this->Image->GetNumberOfScalarComponents() == 1 )
     {
         if( this->lutIndex < 0 ) this->lutIndex = 0;
-        if( this->lutRange[ 0 ] == 0.0 && this->lutRange[ 1 ] == 0.0 ) this->Image->GetScalarRange( this->lutRange );
+        if( this->lutRange[0] == 0.0 && this->lutRange[1] == 0.0 ) this->Image->GetScalarRange( this->lutRange );
         this->ChooseColorTable( this->lutIndex );
     }
 }
@@ -543,10 +543,10 @@ void ImageObject::Setup3DRepresentation( View * view )
     vtkSmartPointer<vtkImageShiftScale> volumeShiftScale = vtkSmartPointer<vtkImageShiftScale>::New();
     volumeShiftScale->SetOutputScalarTypeToUnsignedChar();
     volumeShiftScale->SetInputData( this->GetImage() );
-    double imageScalarRange[ 2 ];
+    double imageScalarRange[2];
     this->GetImage()->GetScalarRange( imageScalarRange );
-    volumeShiftScale->SetShift( -imageScalarRange[ 0 ] );
-    double scale = 255.0 / ( imageScalarRange[ 1 ] - imageScalarRange[ 0 ] );
+    volumeShiftScale->SetShift( -imageScalarRange[0] );
+    double scale = 255.0 / ( imageScalarRange[1] - imageScalarRange[0] );
     volumeShiftScale->SetScale( scale );
     volumeMapper->SetInputConnection( volumeShiftScale->GetOutputPort() );
     vtkSmartPointer<vtkVolume> volume = vtkSmartPointer<vtkVolume>::New();
@@ -572,11 +572,11 @@ void ImageObject::Setup3DRepresentation( View * view )
                                          SLOT( OnVolumeClippingBoxModified( vtkObject * ) ) );
 
     // Add the actors to the map of instances we keep
-    PerViewElements * elem             = new PerViewElements;
-    elem->outlineActor                 = outActor;
-    elem->volume                       = volume;
-    elem->volumeClippingWidget         = volumeClippingWidget;
-    this->imageObjectInstances[ view ] = elem;
+    PerViewElements * elem           = new PerViewElements;
+    elem->outlineActor               = outActor;
+    elem->volume                     = volume;
+    elem->volumeClippingWidget       = volumeClippingWidget;
+    this->imageObjectInstances[view] = elem;
 
     UpdateVolumeRenderingParamsInMapper();
 }
@@ -618,9 +618,9 @@ void ImageObject::Setup2DRepresentation( int viewType, View * view )
     outActor->VisibilityOff();
 
     // Add the actor to the map of instances we keep
-    PerViewElements * elem             = new PerViewElements;
-    elem->outlineActor                 = outActor;
-    this->imageObjectInstances[ view ] = elem;
+    PerViewElements * elem           = new PerViewElements;
+    elem->outlineActor               = outActor;
+    this->imageObjectInstances[view] = elem;
 }
 
 void ImageObject::Release2DRepresentation( int viewType, View * view )
@@ -686,10 +686,10 @@ int ImageObject::ChooseColorTable( int index )
 
 double * ImageObject::GetLutRange() { return this->lutRange; }
 
-void ImageObject::SetLutRange( double r[ 2 ] )
+void ImageObject::SetLutRange( double r[2] )
 {
-    this->lutRange[ 0 ] = r[ 0 ];
-    this->lutRange[ 1 ] = r[ 1 ];
+    this->lutRange[0] = r[0];
+    this->lutRange[1] = r[1];
     this->Lut->SetRange( r );
     emit ObjectModified();
 }
@@ -704,9 +704,9 @@ int ImageObject::GetNumberOfScalarComponents()
         return 0;
 }
 
-void ImageObject::GetBounds( double bounds[ 6 ] ) { this->Image->GetBounds( bounds ); }
+void ImageObject::GetBounds( double bounds[6] ) { this->Image->GetBounds( bounds ); }
 
-void ImageObject::GetCenter( double center[ 3 ] ) { this->Image->GetCenter( center ); }
+void ImageObject::GetCenter( double center[3] ) { this->Image->GetCenter( center ); }
 
 double * ImageObject::GetSpacing() { return this->Image->GetSpacing(); }
 
@@ -729,13 +729,13 @@ void ImageObject::OnVolumeClippingBoxModified( vtkObject * caller )
     Q_ASSERT( widget );
     vtkBoxRepresentation * box = vtkBoxRepresentation::SafeDownCast( widget->GetRepresentation() );
     Q_ASSERT( box );
-    double * bounds              = box->GetBounds();
-    m_volumeRenderingBounds[ 0 ] = bounds[ 0 ];
-    m_volumeRenderingBounds[ 1 ] = bounds[ 1 ];
-    m_volumeRenderingBounds[ 2 ] = bounds[ 2 ];
-    m_volumeRenderingBounds[ 3 ] = bounds[ 3 ];
-    m_volumeRenderingBounds[ 4 ] = bounds[ 4 ];
-    m_volumeRenderingBounds[ 5 ] = bounds[ 5 ];
+    double * bounds            = box->GetBounds();
+    m_volumeRenderingBounds[0] = bounds[0];
+    m_volumeRenderingBounds[1] = bounds[1];
+    m_volumeRenderingBounds[2] = bounds[2];
+    m_volumeRenderingBounds[3] = bounds[3];
+    m_volumeRenderingBounds[4] = bounds[4];
+    m_volumeRenderingBounds[5] = bounds[5];
     UpdateVolumeRenderingParamsInMapper();
 }
 

@@ -18,7 +18,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 namespace Ui
 {
-    class USManualCalibrationWidget;
+class USManualCalibrationWidget;
 }
 
 class vtkRenderWindow;
@@ -33,11 +33,9 @@ class USManualCalibrationPluginInterface;
 
 class USManualCalibrationWidget : public QWidget
 {
-
     Q_OBJECT
 
 public:
-
     explicit USManualCalibrationWidget( QWidget * parent = 0 );
     ~USManualCalibrationWidget();
 
@@ -51,12 +49,11 @@ protected slots:
 private slots:
 
     void OnManipulatorsModified();
-    void on_freezeVideoButton_toggled(bool checked);
+    void on_freezeVideoButton_toggled( bool checked );
     void on_resetButton_clicked();
-    void on_depthComboBox_currentIndexChanged(int);
+    void on_depthComboBox_currentIndexChanged( int );
 
 private:
-
     void ComputeCalibration();
     void UpdateUSProbeStatus();
 
@@ -82,7 +79,6 @@ private:
     vtkEventQtSlotConnect * m_manipulatorsCallbacks;
 
     USManualCalibrationPluginInterface * m_pluginInterface;
-
 };
 
 #endif

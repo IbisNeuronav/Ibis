@@ -10,34 +10,33 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 // Thanks to Simon Drouin for writing this class
 
-#include "cameracalibrationwidget.h"
-#include "cameracalibrator.h"
-#include "cameracalibrationplugininterface.h"
-#include "ui_cameracalibrationwidget.h"
-#include "cameraobject.h"
-#include <vtkImageActor.h>
-#include <vtkRenderer.h>
-#include <vtkRenderWindow.h>
-#include <vtkInteractorStyleImage.h>
-#include <vtkImageData.h>
 #include <vtkCamera.h>
+#include <vtkImageActor.h>
+#include <vtkImageData.h>
+#include <vtkInteractorStyleImage.h>
+#include <vtkMath.h>
+#include <vtkMatrix4x4.h>
 #include <vtkPolyDataMapper.h>
 #include <vtkProperty.h>
-#include <vtkMath.h>
+#include <vtkRenderWindow.h>
+#include <vtkRenderer.h>
 #include <vtkTransform.h>
-#include <vtkMatrix4x4.h>
+#include <QElapsedTimer>
+#include <QTimer>
+#include "cameracalibrationplugininterface.h"
+#include "cameracalibrationwidget.h"
+#include "cameracalibrator.h"
+#include "cameraobject.h"
+#include "ui_cameracalibrationwidget.h"
 #include "vtkCircleWithCrossSource.h"
 #include "vtkMatrix4x4Operators.h"
-#include <QTimer>
-#include <QElapsedTimer>
 
-CameraCalibrationWidget::CameraCalibrationWidget(QWidget *parent) :
-    QWidget(parent),
-    ui(new Ui::CameraCalibrationWidget)
+CameraCalibrationWidget::CameraCalibrationWidget( QWidget * parent )
+    : QWidget( parent ), ui( new Ui::CameraCalibrationWidget )
 {
     m_pluginInterface = nullptr;
 
-    ui->setupUi(this);
+    ui->setupUi( this );
 
     setWindowTitle( "Camera calibration" );
 
@@ -58,8 +57,7 @@ CameraCalibrationWidget::CameraCalibrationWidget(QWidget *parent) :
 
 CameraCalibrationWidget::~CameraCalibrationWidget()
 {
-    if( m_pluginInterface && m_pluginInterface->IsAccumulating() )
-        m_pluginInterface->CancelAccumulation();
+    if( m_pluginInterface && m_pluginInterface->IsAccumulating() ) m_pluginInterface->CancelAccumulation();
 
     this->DeleteGrid();
 
@@ -73,15 +71,9 @@ CameraCalibrationWidget::~CameraCalibrationWidget()
     delete ui;
 }
 
-vtkRenderWindow * CameraCalibrationWidget::GetRenderWindow()
-{
-    return ui->videoWidget->GetRenderWindow();
-}
+vtkRenderWindow * CameraCalibrationWidget::GetRenderWindow() { return ui->videoWidget->GetRenderWindow(); }
 
-vtkRenderWindowInteractor * CameraCalibrationWidget::GetInteractor()
-{
-    return ui->videoWidget->GetInteractor();
-}
+vtkRenderWindowInteractor * CameraCalibrationWidget::GetInteractor() { return ui->videoWidget->GetInteractor(); }
 
 void CameraCalibrationWidget::SetPluginInterface( CameraCalibrationPluginInterface * pluginInterface )
 {
@@ -93,7 +85,7 @@ void CameraCalibrationWidget::SetPluginInterface( CameraCalibrationPluginInterfa
     if( currentCamera )
     {
         m_imageActor->SetInputData( currentCamera->GetVideoOutput() );
-        connect( currentCamera, SIGNAL(VideoUpdatedSignal()), this, SLOT(UpdateDisplay()) );
+        connect( currentCamera, SIGNAL( VideoUpdatedSignal() ), this, SLOT( UpdateDisplay() ) );
         currentCamera->AddClient();
         this->RenderFirst();
     }
@@ -134,13 +126,13 @@ void CameraCalibrationWidget::UpdateDisplay()
 
             // update the position of markers
             std::vector<cv::Point2f>::iterator itPoints = currentImagePoints.begin();
-            std::vector<vtkActor*>::iterator itActors = m_markerActors.begin();
+            std::vector<vtkActor *>::iterator itActors  = m_markerActors.begin();
             while( itPoints != currentImagePoints.end() && itActors != m_markerActors.end() )
             {
-                vtkActor * a = *itActors;
+                vtkActor * a        = *itActors;
                 cv::Point2f & point = *itPoints;
-                double y = dims[1] - point.y - 1.0;
-                a->SetPosition( point.x, y , 0.0 );
+                double y            = dims[1] - point.y - 1.0;
+                a->SetPosition( point.x, y, 0.0 );
                 ++itPoints;
                 ++itActors;
             }
@@ -156,15 +148,15 @@ void CameraCalibrationWidget::CreateGrid()
     vtkCircleWithCrossSource * source = vtkCircleWithCrossSource::New();
     source->SetRadius( 5 );
     source->SetResolution( 5 );
-    double basePos[2] = { 50, 50 };
-    int patternWidth = m_pluginInterface->GetCalibrationGridWidth();
+    double basePos[2] = {50, 50};
+    int patternWidth  = m_pluginInterface->GetCalibrationGridWidth();
     int patternHeight = m_pluginInterface->GetCalibrationGridHeight();
-    double offset = m_pluginInterface->GetCalibrationGridCellSize();
+    double offset     = m_pluginInterface->GetCalibrationGridCellSize();
 
     double hueRowOffset = 1.0 / patternHeight;
     double hueColOffset = hueRowOffset / ( 2 * patternWidth );
-    double hueRow = 0.0;
-    double hue = 0.0;
+    double hueRow       = 0.0;
+    double hue          = 0.0;
 
     for( int j = 0; j < patternHeight; ++j )
     {
@@ -206,7 +198,7 @@ void CameraCalibrationWidget::CreateGrid()
 
 void CameraCalibrationWidget::DeleteGrid()
 {
-    std::vector< vtkActor* >::iterator it = m_markerActors.begin();
+    std::vector<vtkActor *>::iterator it = m_markerActors.begin();
     while( it != m_markerActors.end() )
     {
         vtkActor * actor = *it;
@@ -219,7 +211,7 @@ void CameraCalibrationWidget::DeleteGrid()
 
 void CameraCalibrationWidget::ShowGrid( bool show )
 {
-    std::vector< vtkActor* >::iterator it = m_markerActors.begin();
+    std::vector<vtkActor *>::iterator it = m_markerActors.begin();
     while( it != m_markerActors.end() )
     {
         vtkActor * actor = *it;
@@ -233,16 +225,16 @@ void CameraCalibrationWidget::ShowGrid( bool show )
 
 void CameraCalibrationWidget::RenderFirst()
 {
-    int * extent = m_imageActor->GetInput()->GetExtent();
-    int diffx = extent[1] - extent[0] + 1;
-    double scalex = static_cast<double>(diffx) / 2.0;
-    int diffy = extent[3] - extent[2] + 1;
-    double scaley = static_cast<double>(diffy) / 2.0;
+    int * extent  = m_imageActor->GetInput()->GetExtent();
+    int diffx     = extent[1] - extent[0] + 1;
+    double scalex = static_cast<double>( diffx ) / 2.0;
+    int diffy     = extent[3] - extent[2] + 1;
+    double scaley = static_cast<double>( diffy ) / 2.0;
 
     vtkCamera * cam = m_renderer->GetActiveCamera();
     cam->ParallelProjectionOn();
     cam->SetParallelScale( scaley );
-    double * prevPos = cam->GetPosition();
+    double * prevPos   = cam->GetPosition();
     double * prevFocal = cam->GetFocalPoint();
     cam->SetPosition( scalex, scaley, prevPos[2] );
     cam->SetFocalPoint( scalex, scaley, prevFocal[2] );
@@ -266,11 +258,12 @@ void CameraCalibrationWidget::UpdateUi()
 
     ui->intrinsicRadioButton->blockSignals( true );
     ui->extrinsicRadioButton->blockSignals( true );
-    ui->bothRadioButton->blockSignals(true);
+    ui->bothRadioButton->blockSignals( true );
     bool intrinsic = m_pluginInterface->GetComputeIntrinsic();
     bool extrinsic = m_pluginInterface->GetComputeExtrinsic();
     ui->intrinsicRadioButton->setChecked( intrinsic && !extrinsic );
-    ui->extrinsicRadioButton->setEnabled( false );  // For now it is not possible to do only extrinsic calib, this is work in progress
+    ui->extrinsicRadioButton->setEnabled(
+        false );  // For now it is not possible to do only extrinsic calib, this is work in progress
     ui->extrinsicRadioButton->setChecked( extrinsic && !intrinsic );
     ui->bothRadioButton->setChecked( intrinsic && extrinsic );
     ui->intrinsicRadioButton->blockSignals( false );
@@ -297,37 +290,44 @@ void CameraCalibrationWidget::UpdateUi()
 
     if( isAccum )
     {
-        QString bt = QString("%1 of %2").arg( m_pluginInterface->GetNumberOfAccumulatedViews() ).arg( m_pluginInterface->GetNumberOfViewsToAccumulate() );
+        QString bt = QString( "%1 of %2" )
+                         .arg( m_pluginInterface->GetNumberOfAccumulatedViews() )
+                         .arg( m_pluginInterface->GetNumberOfViewsToAccumulate() );
         ui->captureViewButton->setText( bt );
     }
     else
     {
-        ui->captureViewButton->setText("Capture");
+        ui->captureViewButton->setText( "Capture" );
     }
 
     // Calibration results
     CameraObject * currentCamera = m_pluginInterface->GetCurrentCameraObject();
     if( currentCamera )
     {
-        QString calibResults = QString( "===== Intrinsic results =====\n\n");
-        calibResults += QString( "Number of views: %1\n" ).arg( m_pluginInterface->GetCameraCalibrator()->GetNumberOfViews() );
+        QString calibResults = QString( "===== Intrinsic results =====\n\n" );
+        calibResults +=
+            QString( "Number of views: %1\n" ).arg( m_pluginInterface->GetCameraCalibrator()->GetNumberOfViews() );
         const CameraIntrinsicParams & params = currentCamera->GetIntrinsicParams();
-        calibResults += QString("Intrinsic reprojection error: %1\n").arg( params.m_reprojectionError );
-        calibResults += QString("Focal: ( %1, %2 )\n").arg( params.m_focal[0] ).arg( params.m_focal[1] );
-        calibResults += QString("Center: ( %1, %2 )\n").arg( params.m_center[0] ).arg( params.m_center[1] );
-        calibResults += QString("Distortion: %1\n").arg( params.m_distorsionK1 );
-        calibResults += QString("Vertical angle: %1\n").arg( params.GetVerticalAngleDegrees() );
+        calibResults += QString( "Intrinsic reprojection error: %1\n" ).arg( params.m_reprojectionError );
+        calibResults += QString( "Focal: ( %1, %2 )\n" ).arg( params.m_focal[0] ).arg( params.m_focal[1] );
+        calibResults += QString( "Center: ( %1, %2 )\n" ).arg( params.m_center[0] ).arg( params.m_center[1] );
+        calibResults += QString( "Distortion: %1\n" ).arg( params.m_distorsionK1 );
+        calibResults += QString( "Vertical angle: %1\n" ).arg( params.GetVerticalAngleDegrees() );
         calibResults += QString( "\n===== Extrinsic results =====\n\n" );
         vtkMatrix4x4 * calibrationMat = currentCamera->GetCalibrationMatrix();
-        double translation[3] = { 0.0, 0.0, 0.0 };
-        double rotation[3] = { 0.0, 0.0, 0.0 };
+        double translation[3]         = {0.0, 0.0, 0.0};
+        double rotation[3]            = {0.0, 0.0, 0.0};
         vtkMatrix4x4Operators::MatrixToTransRot( calibrationMat, translation, rotation );
-        calibResults += QString("Translation: ( %1, %2, %3 )\n").arg( translation[0] ).arg( translation[1] ).arg( translation[2] );
-        calibResults += QString("Rotation: ( %1, %2, %3 )\n").arg( rotation[0] ).arg( rotation[1] ).arg( rotation[2] );
+        calibResults += QString( "Translation: ( %1, %2, %3 )\n" )
+                            .arg( translation[0] )
+                            .arg( translation[1] )
+                            .arg( translation[2] );
+        calibResults +=
+            QString( "Rotation: ( %1, %2, %3 )\n" ).arg( rotation[0] ).arg( rotation[1] ).arg( rotation[2] );
         ui->calibrationResultTextEdit->setPlainText( calibResults );
     }
     else
-        ui->calibrationResultTextEdit->setPlainText( QString("No current camera selected") );
+        ui->calibrationResultTextEdit->setPlainText( QString( "No current camera selected" ) );
 }
 
 void CameraCalibrationWidget::on_clearCalibrationViewsButton_clicked()
@@ -350,7 +350,7 @@ void CameraCalibrationWidget::on_computeDistortionCheckBox_toggled( bool checked
     UpdateUi();
 }
 
-void CameraCalibrationWidget::on_accumulateCheckBox_toggled(bool checked)
+void CameraCalibrationWidget::on_accumulateCheckBox_toggled( bool checked )
 {
     Q_ASSERT( m_pluginInterface );
     m_pluginInterface->SetUseAccumulation( checked );
@@ -366,13 +366,13 @@ void CameraCalibrationWidget::on_captureViewButton_clicked()
         m_pluginInterface->StartAccumulating();
         m_accumulationTime->restart();
     }
-    else // capture
+    else  // capture
     {
         m_pluginInterface->CaptureCalibrationView();
     }
 }
 
-void CameraCalibrationWidget::on_intrinsicRadioButton_toggled(bool checked)
+void CameraCalibrationWidget::on_intrinsicRadioButton_toggled( bool checked )
 {
     Q_ASSERT( m_pluginInterface );
     if( checked )
@@ -382,7 +382,7 @@ void CameraCalibrationWidget::on_intrinsicRadioButton_toggled(bool checked)
     }
 }
 
-void CameraCalibrationWidget::on_extrinsicRadioButton_toggled(bool checked)
+void CameraCalibrationWidget::on_extrinsicRadioButton_toggled( bool checked )
 {
     Q_ASSERT( m_pluginInterface );
     if( checked )
@@ -392,7 +392,7 @@ void CameraCalibrationWidget::on_extrinsicRadioButton_toggled(bool checked)
     }
 }
 
-void CameraCalibrationWidget::on_bothRadioButton_toggled(bool checked)
+void CameraCalibrationWidget::on_bothRadioButton_toggled( bool checked )
 {
     Q_ASSERT( m_pluginInterface );
     if( checked )
@@ -402,7 +402,7 @@ void CameraCalibrationWidget::on_bothRadioButton_toggled(bool checked)
     }
 }
 
-void CameraCalibrationWidget::on_optimizeGridDetectCheckBox_toggled(bool checked)
+void CameraCalibrationWidget::on_optimizeGridDetectCheckBox_toggled( bool checked )
 {
     Q_ASSERT( m_pluginInterface );
     m_pluginInterface->SetOptimizeGridDetection( checked );

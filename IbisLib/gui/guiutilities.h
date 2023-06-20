@@ -29,8 +29,8 @@ public:
         cb->clear();
         for( int i = 0; i < allObjs.size(); ++i )
         {
-            cb->addItem( allObjs[ i ]->GetName(), QVariant( allObjs[ i ]->GetObjectID() ) );
-            if( allObjs[ i ]->GetObjectID() == currentObjectId ) cb->setCurrentIndex( i );
+            cb->addItem( allObjs[i]->GetName(), QVariant( allObjs[i]->GetObjectID() ) );
+            if( allObjs[i]->GetObjectID() == currentObjectId ) cb->setCurrentIndex( i );
         }
         if( allObjs.size() == 0 ) cb->addItem( "None", QVariant( IbisAPI::InvalidId ) );
         cb->blockSignals( false );

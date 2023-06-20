@@ -76,14 +76,14 @@ void TransformEditWidget::UpdateTransform()
         vtkTransform * localTransform = m_sceneObject->GetLocalTransform();
         vtkMatrix4x4 * mat            = vtkMatrix4x4::New();
         mat->DeepCopy( localTransform->GetMatrix() );
-        double rot[ 3 ];
-        rot[ 0 ] = ui->rotateXSpinBox->value();
-        rot[ 1 ] = ui->rotateYSpinBox->value();
-        rot[ 2 ] = ui->rotateZSpinBox->value();
-        double trans[ 3 ];
-        trans[ 0 ] = ui->translateXSpinBox->value();
-        trans[ 1 ] = ui->translateYSpinBox->value();
-        trans[ 2 ] = ui->translateZSpinBox->value();
+        double rot[3];
+        rot[0] = ui->rotateXSpinBox->value();
+        rot[1] = ui->rotateYSpinBox->value();
+        rot[2] = ui->rotateZSpinBox->value();
+        double trans[3];
+        trans[0] = ui->translateXSpinBox->value();
+        trans[1] = ui->translateYSpinBox->value();
+        trans[2] = ui->translateZSpinBox->value();
         vtkMatrix4x4Operators::TransRotToMatrix( trans, rot, mat );
         localTransform->SetMatrix( mat );
         localTransform->Modified();
@@ -118,15 +118,15 @@ void TransformEditWidget::UpdateUi()
         {
             if( m_sceneObject->CanEditTransformManually() ) EnableSpinBoxes( true );
 
-            double t[ 3 ] = { 0.0, 0.0, 0.0 };
-            double r[ 3 ] = { 0.0, 0.0, 0.0 };
+            double t[3] = {0.0, 0.0, 0.0};
+            double r[3] = {0.0, 0.0, 0.0};
             vtkMatrix4x4Operators::MatrixToTransRot( localTransform->GetMatrix(), t, r );
-            ui->translateXSpinBox->setValue( t[ 0 ] );
-            ui->translateYSpinBox->setValue( t[ 1 ] );
-            ui->translateZSpinBox->setValue( t[ 2 ] );
-            ui->rotateXSpinBox->setValue( r[ 0 ] );
-            ui->rotateYSpinBox->setValue( r[ 1 ] );
-            ui->rotateZSpinBox->setValue( r[ 2 ] );
+            ui->translateXSpinBox->setValue( t[0] );
+            ui->translateYSpinBox->setValue( t[1] );
+            ui->translateZSpinBox->setValue( t[2] );
+            ui->rotateXSpinBox->setValue( r[0] );
+            ui->rotateYSpinBox->setValue( r[1] );
+            ui->rotateZSpinBox->setValue( r[2] );
         }
         BlockSpinboxSignals( false );
     }

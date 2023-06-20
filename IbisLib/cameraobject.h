@@ -47,8 +47,8 @@ public:
 
     // Internal representation is independent of the image resolution
     // center and focal length are expressed as a percentage of the image width and height
-    double m_center[ 2 ];
-    double m_focal[ 2 ];
+    double m_center[2];
+    double m_focal[2];
     double m_distorsionK1;
     double m_reprojectionError;  // cached reprojection error of last calibration
 };
@@ -148,11 +148,11 @@ public:
     void WindowToImage( int x, int y, View * v, double & xIm, double & yIm );
 
     // Drawing overlay on the image
-    void DrawLine( double x1, double y1, double x2, double y2, double color[ 4 ] );
-    void DrawPath( std::vector<Vec2> & points, double color[ 4 ] );
-    void DrawWorldPath( std::vector<Vec3> & points, double color[ 4 ] );
-    void DrawRect( double x, double y, double width, double height, double color[ 4 ] );
-    void DrawTarget( double x, double y, double radius, double color[ 4 ] );
+    void DrawLine( double x1, double y1, double x2, double y2, double color[4] );
+    void DrawPath( std::vector<Vec2> & points, double color[4] );
+    void DrawWorldPath( std::vector<Vec3> & points, double color[4] );
+    void DrawRect( double x, double y, double width, double height, double color[4] );
+    void DrawTarget( double x, double y, double radius, double color[4] );
     void ClearDrawing();
 
 signals:
@@ -167,7 +167,7 @@ protected slots:
 
 protected:
     void ListenForIbisClockTick( bool listen );
-    void InternalDrawPath( std::vector<Vec3> & p3d, double color[ 4 ] );
+    void InternalDrawPath( std::vector<Vec3> & p3d, double color[4] );
 
     // Base classes overrides
     virtual void Hide() override;
@@ -216,8 +216,8 @@ protected:
     bool m_useGradientTargetTransparencyModulation;
     bool m_showTargetTransparencyMask;
     bool m_trackTargetTransparencyCenter;
-    double m_transparencyCenter[ 2 ];
-    double m_transparencyRadius[ 2 ];
+    double m_transparencyCenter[2];
+    double m_transparencyRadius[2];
     bool m_mouseMovingTransparency;
 
     vtkSmartPointer<vtkPassThrough> m_videoInputSwitch;
@@ -231,7 +231,7 @@ protected:
     vtkSmartPointer<CameraObject> m_recordingCamera;
 
     bool m_trackingCamera;
-    int m_cachedImageSize[ 2 ];  // used to determine when image size is changed
+    int m_cachedImageSize[2];  // used to determine when image size is changed
 };
 
 ObjectSerializationHeaderMacro( CameraObject );

@@ -12,15 +12,15 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef __GPU_RigidRegistrationWidget_h_
 #define __GPU_RigidRegistrationWidget_h_
 
+#include <vtkMatrix4x4.h>
+#include <vtkTransform.h>
+#include <QMessageBox>
 #include <QWidget>
 #include <QtGui>
-#include <QMessageBox>
-#include "qdebugstream.h"
-#include "ui_gpu_rigidregistrationwidget.h"
-#include "sceneobject.h"
 #include "imageobject.h"
-#include <vtkTransform.h>
-#include <vtkMatrix4x4.h>
+#include "qdebugstream.h"
+#include "sceneobject.h"
+#include "ui_gpu_rigidregistrationwidget.h"
 
 #include "gpu_rigidregistration.h"
 
@@ -29,24 +29,20 @@ class GPU_RigidRegistration;
 
 namespace Ui
 {
-    class GPU_RigidRegistrationWidget;
+class GPU_RigidRegistrationWidget;
 }
-
 
 class GPU_RigidRegistrationWidget : public QWidget
 {
-
     Q_OBJECT
 
 public:
-
-    explicit GPU_RigidRegistrationWidget(QWidget *parent = 0);
+    explicit GPU_RigidRegistrationWidget( QWidget * parent = 0 );
     ~GPU_RigidRegistrationWidget();
 
     void SetPluginInterface( GPU_RigidRegistrationPluginInterface * ifc );
 
 private:
-
     void UpdateUi();
 
     void updateTagsDistance();
@@ -54,17 +50,17 @@ private:
     Ui::GPU_RigidRegistrationWidget * ui;
     GPU_RigidRegistrationPluginInterface * m_pluginInterface;
     QElapsedTimer m_registrationTimer;
-    bool          m_OptimizationRunning;
+    bool m_OptimizationRunning;
 
 private slots:
 
     void on_startButton_clicked();
-    void on_sourceImageComboBox_activated(int index);
+    void on_sourceImageComboBox_activated( int index );
     void on_debugCheckBox_clicked();
 
 protected:
-    void closeEvent(QCloseEvent *event)
-     {
+    void closeEvent( QCloseEvent * event )
+    {
         if( m_OptimizationRunning )
         {
             event->ignore();
@@ -74,8 +70,7 @@ protected:
         {
             event->accept();
         }
-     }
-
+    }
 };
 
 #endif

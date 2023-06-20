@@ -33,7 +33,7 @@ PointCloudObject::PointCloudObject()
 {
     this->Property  = vtkProperty::New();
     this->m_Opacity = 1.0;
-    for( int i = 0; i < 3; i++ ) this->m_Color[ i ] = 1.0;
+    for( int i = 0; i < 3; i++ ) this->m_Color[i] = 1.0;
 
     this->m_PointCloudArray = vtkSmartPointer<vtkPoints>::New();
     this->m_PointsPolydata  = vtkSmartPointer<vtkPolyData>::New();
@@ -105,7 +105,7 @@ void PointCloudObject::Setup( View * view )
 
         actor->SetProperty( this->Property );
         view->GetRenderer()->AddActor( actor );
-        this->m_PointCloudObjectInstances[ view ] = actor;
+        this->m_PointCloudObjectInstances[view] = actor;
 
         actor->GetMapper()->SetInputConnection( m_PointCloudGlyphFilter->GetOutputPort() );
 
@@ -125,9 +125,9 @@ void PointCloudObject::SetPointCloudArray( vtkPoints * pointCloudArray )
     emit ObjectModified();
 }
 
-void PointCloudObject::SetColor( double color[ 3 ] )
+void PointCloudObject::SetColor( double color[3] )
 {
-    for( int i = 0; i < 3; i++ ) this->m_Color[ i ] = color[ i ];
+    for( int i = 0; i < 3; i++ ) this->m_Color[i] = color[i];
     this->Property->SetColor( this->m_Color );
     emit ObjectModified();
 }

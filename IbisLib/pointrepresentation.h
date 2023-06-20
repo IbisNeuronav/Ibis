@@ -52,7 +52,7 @@ public:
     virtual void Release( View * view ) override;
 
     /** Set point's color. */
-    void SetPropertyColor( double color[ 3 ] );
+    void SetPropertyColor( double color[3] );
 
     /** Set point's opacity. */
     void SetOpacity( double opacity );
@@ -69,9 +69,9 @@ public:
 
     /** Set point's position. */
     ///@{
-    void SetPosition( double p[ 3 ] );
+    void SetPosition( double p[3] );
     void SetPosition( double x, double y, double z );
-    void GetPosition( double p[ 3 ] );
+    void GetPosition( double p[3] );
     ///@}
 
     /** Enable/disable picking. */

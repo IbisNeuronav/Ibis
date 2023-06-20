@@ -85,7 +85,7 @@ public:
     /** Get the total number of points. */
     int GetNumberOfPoints() { return m_pointCoordinates->GetNumberOfPoints(); }
     /** Add a new point. */
-    void AddPoint( const QString & name, double coords[ 3 ] );
+    void AddPoint( const QString & name, double coords[3] );
     /** Allow/disallow picking points with mouse. */
     void SetPickable( bool p ) { m_pickable = p; }
     /** Allow/disallow picking points with mouse. */
@@ -117,23 +117,23 @@ public:
     /** Get size of point's label. */
     double GetLabelSize() { return m_labelSize; }
     /** Set color of enabled points. */
-    void SetEnabledColor( double color[ 3 ] );
+    void SetEnabledColor( double color[3] );
     /** Get color of enabled points. */
     double * GetEnabledColor() { return m_activeColor; }
     /** Get color of enabled points. */
-    void GetEnabledColor( double color[ 3 ] );
+    void GetEnabledColor( double color[3] );
     /** Set color of disabled points. */
-    void SetDisabledColor( double color[ 3 ] );
+    void SetDisabledColor( double color[3] );
     /** Get color of disabled points. */
     double * GetDisabledColor() { return m_inactiveColor; }
     /** Get color of disabled points. */
-    void GetDisabledColor( double color[ 3 ] );
+    void GetDisabledColor( double color[3] );
     /** Set color of selected point. */
-    void SetSelectedColor( double color[ 3 ] );
+    void SetSelectedColor( double color[3] );
     /** Get color of selected point. */
     double * GetSelectedColor() { return m_selectedColor; }
     /** Get color of selected point. */
-    void GetSelectedColor( double color[ 3 ] );
+    void GetSelectedColor( double color[3] );
     /** Set points opacity. */
     void SetOpacity( double opacity );
     /** Get points opacity. */
@@ -147,11 +147,11 @@ public:
      */
     ///@{
     /** Set line color. */
-    void SetLineToPointerColor( double color[ 3 ] );
+    void SetLineToPointerColor( double color[3] );
     /** Get line color. */
     double * GetLineToPointerColor() { return m_lineToPointerColor; }
     /** Get line color. */
-    void GetLineToPointerColor( double color[ 3 ] );
+    void GetLineToPointerColor( double color[3] );
     /** Enable computing distance from the point to the pointer tip. */
     void EnableComputeDistance( bool enable );
     /** Check if computing distance between point and pointer tip is enabled. */
@@ -175,9 +175,9 @@ public:
     /** Get point coordinates. */
     double * GetPointCoordinates( int index );
     /** Get point coordinates. */
-    void GetPointCoordinates( int index, double coords[ 3 ] );
+    void GetPointCoordinates( int index, double coords[3] );
     /** Set point coordinates. */
-    void SetPointCoordinates( int index, double coords[ 3 ] );
+    void SetPointCoordinates( int index, double coords[3] );
     /** Set point timestamp - time when point was created. */
     void SetPointTimeStamp( int index, const QString & stamp );
     /** Check if the selected point is in the current planes. */
@@ -198,13 +198,13 @@ public slots:
     virtual void UpdateDistance();
 
 protected:
-    vtkActor * DoPicking( int x, int y, vtkRenderer * ren, double pickedPoint[ 3 ] );
+    vtkActor * DoPicking( int x, int y, vtkRenderer * ren, double pickedPoint[3] );
     virtual bool OnLeftButtonPressed( View * v, int x, int y, unsigned modifiers ) override;
     virtual bool OnLeftButtonReleased( View * v, int x, int y, unsigned modifiers ) override;
     virtual bool OnRightButtonPressed( View * v, int x, int y, unsigned modifiers ) override;
     virtual bool OnMouseMoved( View * v, int x, int y, unsigned modifiers ) override;
 
-    void AddPointLocal( double coords[ 3 ], QString name = QString(), QString timestamp = QString() );
+    void AddPointLocal( double coords[3], QString name = QString(), QString timestamp = QString() );
     int FindPoint( vtkActor * actor, double * pos, int viewType );
 
     virtual void Hide() override;
@@ -225,9 +225,9 @@ protected:
     double m_pointRadius3D;
     double m_pointRadius2D;
     double m_labelSize;
-    double m_activeColor[ 3 ];
-    double m_inactiveColor[ 3 ];
-    double m_selectedColor[ 3 ];
+    double m_activeColor[3];
+    double m_inactiveColor[3];
+    double m_selectedColor[3];
     double m_opacity;
     bool m_pickable;
     bool m_pickabilityLocked;
@@ -235,7 +235,7 @@ protected:
     bool m_computeDistance;
 
 private:
-    void LineToPointerTip( double selectedPoint[ 3 ], double pointerTip[ 3 ] );
+    void LineToPointerTip( double selectedPoint[3], double pointerTip[3] );
 
     typedef QList<vtkSmartPointer<PointRepresentation> > PointList;
     PointList m_pointList;
@@ -245,7 +245,7 @@ private:
     int m_movingPointIndex;
 
     vtkSmartPointer<PolyDataObject> m_lineToPointerTip;
-    double m_lineToPointerColor[ 3 ];
+    double m_lineToPointerColor[3];
 };
 
 ObjectSerializationHeaderMacro( PointsObject );

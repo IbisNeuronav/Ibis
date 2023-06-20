@@ -74,10 +74,10 @@ void WorldObject::SetCursorColor( const QColor & c )
     this->GetManager()->SetCursorColor( c );
 }
 
-void WorldObject::SetCursorColor( double color[ 3 ] )
+void WorldObject::SetCursorColor( double color[3] )
 {
     Q_ASSERT( this->GetManager() );
-    QColor col( (int)( color[ 0 ] * 255 ), (int)( color[ 1 ] * 255 ), (int)( color[ 2 ] * 255 ) );
+    QColor col( (int)( color[0] * 255 ), (int)( color[1] * 255 ), (int)( color[2] * 255 ) );
     this->GetManager()->SetCursorColor( col );
 }
 
@@ -90,10 +90,10 @@ QColor WorldObject::GetCursorColor()
 void WorldObject::SetBackgroundColor( const QColor & c )
 {
     Q_ASSERT( this->GetManager() );
-    double newColorfloat[ 3 ] = { 1, 1, 1 };
-    newColorfloat[ 0 ]        = double( c.red() ) / 255.0;
-    newColorfloat[ 1 ]        = double( c.green() ) / 255.0;
-    newColorfloat[ 2 ]        = double( c.blue() ) / 255.0;
+    double newColorfloat[3] = {1, 1, 1};
+    newColorfloat[0]        = double( c.red() ) / 255.0;
+    newColorfloat[1]        = double( c.green() ) / 255.0;
+    newColorfloat[2]        = double( c.blue() ) / 255.0;
     this->GetManager()->SetViewBackgroundColor( newColorfloat );
     this->GetManager()->SetView3DBackgroundColor( newColorfloat );
 }
@@ -101,28 +101,28 @@ void WorldObject::SetBackgroundColor( const QColor & c )
 QColor WorldObject::GetBackgroundColor()
 {
     Q_ASSERT( this->GetManager() );
-    double color[ 3 ];
+    double color[3];
     this->GetManager()->GetViewBackgroundColor( color );
-    QColor ret( (int)( color[ 0 ] * 255 ), (int)( color[ 1 ] * 255 ), (int)( color[ 2 ] * 255 ) );
+    QColor ret( (int)( color[0] * 255 ), (int)( color[1] * 255 ), (int)( color[2] * 255 ) );
     return ret;
 }
 
 void WorldObject::Set3DBackgroundColor( const QColor & c )
 {
     Q_ASSERT( this->GetManager() );
-    double newColorfloat[ 3 ] = { 1, 1, 1 };
-    newColorfloat[ 0 ]        = double( c.red() ) / 255.0;
-    newColorfloat[ 1 ]        = double( c.green() ) / 255.0;
-    newColorfloat[ 2 ]        = double( c.blue() ) / 255.0;
+    double newColorfloat[3] = {1, 1, 1};
+    newColorfloat[0]        = double( c.red() ) / 255.0;
+    newColorfloat[1]        = double( c.green() ) / 255.0;
+    newColorfloat[2]        = double( c.blue() ) / 255.0;
     this->GetManager()->SetView3DBackgroundColor( newColorfloat );
 }
 
 QColor WorldObject::Get3DBackgroundColor()
 {
     Q_ASSERT( this->GetManager() );
-    double color[ 3 ];
+    double color[3];
     this->GetManager()->GetView3DBackgroundColor( color );
-    QColor ret( (int)( color[ 0 ] * 255 ), (int)( color[ 1 ] * 255 ), (int)( color[ 2 ] * 255 ) );
+    QColor ret( (int)( color[0] * 255 ), (int)( color[1] * 255 ), (int)( color[2] * 255 ) );
     return ret;
 }
 

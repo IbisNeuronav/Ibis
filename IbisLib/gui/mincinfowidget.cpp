@@ -74,10 +74,10 @@ void MincInfoWidget::UpdateUI()
             varValue = "double";
         list.append( QPair<QString, QString>( varName, varValue ) );
     }
-    double range[ 2 ];
+    double range[2];
     m_imageObj->GetImage()->GetScalarRange( range );
     varName  = "scalar Range";
-    varValue = QString::number( (int)floor( range[ 0 ] ) ) + "  " + QString::number( (int)ceil( range[ 1 ] ) );
+    varValue = QString::number( (int)floor( range[0] ) ) + "  " + QString::number( (int)ceil( range[1] ) );
     list.append( QPair<QString, QString>( varName, varValue ) );
 
     it = dictionary.Find( "dimension_order" );
@@ -100,34 +100,34 @@ void MincInfoWidget::UpdateUI()
     // get variables from ImageObject and add elements to list
     double * spacing = m_imageObj->GetSpacing();
     int * dims       = m_imageObj->GetImage()->GetDimensions();
-    double bounds[ 6 ];
+    double bounds[6];
     m_imageObj->GetBounds( bounds );
     varName  = "xspace length";
-    varValue = QString::number( dims[ 0 ] );
+    varValue = QString::number( dims[0] );
     list.append( QPair<QString, QString>( varName, varValue ) );
     varName  = "yspace length";
-    varValue = QString::number( dims[ 1 ] );
+    varValue = QString::number( dims[1] );
     list.append( QPair<QString, QString>( varName, varValue ) );
     varName  = "zspace length";
-    varValue = QString::number( dims[ 2 ] );
+    varValue = QString::number( dims[2] );
     list.append( QPair<QString, QString>( varName, varValue ) );
     varName  = "x step";
-    varValue = QString::number( spacing[ 0 ] );
+    varValue = QString::number( spacing[0] );
     list.append( QPair<QString, QString>( varName, varValue ) );
     varName  = "y step";
-    varValue = QString::number( spacing[ 1 ] );
+    varValue = QString::number( spacing[1] );
     list.append( QPair<QString, QString>( varName, varValue ) );
     varName  = "z step";
-    varValue = QString::number( spacing[ 2 ] );
+    varValue = QString::number( spacing[2] );
     list.append( QPair<QString, QString>( varName, varValue ) );
     varName  = "x start";
-    varValue = QString::number( bounds[ 0 ] );
+    varValue = QString::number( bounds[0] );
     list.append( QPair<QString, QString>( varName, varValue ) );
     varName  = "y start";
-    varValue = QString::number( bounds[ 2 ] );
+    varValue = QString::number( bounds[2] );
     list.append( QPair<QString, QString>( varName, varValue ) );
     varName  = "z start";
-    varValue = QString::number( bounds[ 4 ] );
+    varValue = QString::number( bounds[4] );
     list.append( QPair<QString, QString>( varName, varValue ) );
 
     for( itk::MetaDataDictionary::ConstIterator it = dictionary.Begin(); it != dictionary.End(); ++it )

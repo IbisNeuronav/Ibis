@@ -13,9 +13,9 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef __CameraCalibrator_h_
 #define __CameraCalibrator_h_
 
-#include <opencv2/opencv.hpp>
-#include <opencv2/highgui/highgui_c.h>
 #include <opencv2/calib3d/calib3d_c.h>
+#include <opencv2/highgui/highgui_c.h>
+#include <opencv2/opencv.hpp>
 #include "cameraobject.h"
 
 class vtkImageData;
@@ -42,9 +42,7 @@ struct CameraExtrinsicParams
 
 class CameraCalibrator
 {
-
 public:
-
     CameraCalibrator();
     ~CameraCalibrator();
 
@@ -67,7 +65,8 @@ public:
     void ClearAccumulatedViews();
     void AddAccumulatedViews( vtkImageData * im );
     void AddView( vtkImageData * im, std::vector<cv::Point2f> & imagePoints, vtkMatrix4x4 * trackerMatrix );
-    void Calibrate( bool computeCenter, bool computeDistortion, CameraIntrinsicParams & params, CameraExtrinsicParams & extParams );
+    void Calibrate( bool computeCenter, bool computeDistortion, CameraIntrinsicParams & params,
+                    CameraExtrinsicParams & extParams );
 
     // Used to show camera views that were used to compute intrinsic calibration
     bool IsViewEnabled( int index );
@@ -79,19 +78,19 @@ public:
     vtkMatrix4x4 * GetTrackingMatrix( int index );
 
     // Compute Cross-Validation - returns average reprojection error
-    double ComputeCrossValidation( double translationScale, double rotationScale, double & stdDevReprojError, double & minDist, double & maxDist, QProgressDialog * progressDlg );
+    double ComputeCrossValidation( double translationScale, double rotationScale, double & stdDevReprojError,
+                                   double & minDist, double & maxDist, QProgressDialog * progressDlg );
 
     double GetViewReprojectionError( int viewIndex );
 
-    void SetPluginInterface( CameraCalibrationPluginInterface *ifc );
+    void SetPluginInterface( CameraCalibrationPluginInterface * ifc );
 
 protected:
-
     void InitGridWorldPoints();
-    void ClearMatrixArray( std::vector< vtkMatrix4x4 * > & matVec );
+    void ClearMatrixArray( std::vector<vtkMatrix4x4 *> & matVec );
     double ComputeAvgReprojectionError( CameraIntrinsicParams & intParams, CameraExtrinsicParams & extParams );
 
-    CameraCalibrationPluginInterface *m_pluginInterface;
+    CameraCalibrationPluginInterface * m_pluginInterface;
 
     // Grid description
     int m_gridWidth;
@@ -100,28 +99,28 @@ protected:
 
     // Calibration data
     bool m_optimizeGridDetection;
-    std::vector<cv::Point3f>  m_objectPointsOneView;
+    std::vector<cv::Point3f> m_objectPointsOneView;
     std::vector<bool> m_viewEnabled;
-    std::vector< std::vector<cv::Point3f> > m_objectPoints;
-    std::vector< std::vector<cv::Point2f> > m_imagePoints;
-    std::vector< vtkImageData * > m_cameraImages;
-    std::vector< vtkMatrix4x4 * > m_camToGridMatrices;
-    std::vector< vtkMatrix4x4 * > m_gridToCamMatrices;
-    std::vector< vtkMatrix4x4 * > m_trackingMatrices;
+    std::vector<std::vector<cv::Point3f> > m_objectPoints;
+    std::vector<std::vector<cv::Point2f> > m_imagePoints;
+    std::vector<vtkImageData *> m_cameraImages;
+    std::vector<vtkMatrix4x4 *> m_camToGridMatrices;
+    std::vector<vtkMatrix4x4 *> m_gridToCamMatrices;
+    std::vector<vtkMatrix4x4 *> m_trackingMatrices;
 
     // Accumulated calibration data
-    std::vector< vtkMatrix4x4 * > m_accumulatedTrackingMatrices;
-    std::vector< std::vector<cv::Point2f> > m_accumulatedImagePoints;
+    std::vector<vtkMatrix4x4 *> m_accumulatedTrackingMatrices;
+    std::vector<std::vector<cv::Point2f> > m_accumulatedImagePoints;
 
     // Extrinsic optimization
     void DoExtrinsicCalibration( CameraExtrinsicParams & params );
     static void ExtrinsicCalibrationCostFunction( void * userData );
-    void ComputeMeanAndStdDevOfGridCorners( cv::Point3f & meanTL, cv::Point3f & meanTR, cv::Point3f & meanBL, cv::Point3f & meanBR, double & val );
+    void ComputeMeanAndStdDevOfGridCorners( cv::Point3f & meanTL, cv::Point3f & meanTR, cv::Point3f & meanBL,
+                                            cv::Point3f & meanBR, double & val );
     vtkAmoebaMinimizer * m_minimizer;
 
     // Results
-    std::vector< double > m_perViewAvgReprojectionError;
-
+    std::vector<double> m_perViewAvgReprojectionError;
 };
 
 #endif

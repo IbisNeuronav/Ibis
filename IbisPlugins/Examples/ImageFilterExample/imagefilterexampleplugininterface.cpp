@@ -10,22 +10,15 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 // Thanks to Simon Drouin for writing this class
 
+#include <QtPlugin>
 #include "imagefilterexampleplugininterface.h"
 #include "imagefilterexamplewidget.h"
-#include <QtPlugin>
 
-ImageFilterExamplePluginInterface::ImageFilterExamplePluginInterface()
-{
-}
+ImageFilterExamplePluginInterface::ImageFilterExamplePluginInterface() {}
 
-ImageFilterExamplePluginInterface::~ImageFilterExamplePluginInterface()
-{
-}
+ImageFilterExamplePluginInterface::~ImageFilterExamplePluginInterface() {}
 
-bool ImageFilterExamplePluginInterface::CanRun()
-{
-    return true;
-}
+bool ImageFilterExamplePluginInterface::CanRun() { return true; }
 
 QWidget * ImageFilterExamplePluginInterface::CreateFloatingWidget()
 {
@@ -33,4 +26,3 @@ QWidget * ImageFilterExamplePluginInterface::CreateFloatingWidget()
     widget->SetPluginInterface( this );
     return widget;
 }
-

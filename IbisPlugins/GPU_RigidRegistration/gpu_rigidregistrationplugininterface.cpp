@@ -10,22 +10,15 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 // Thanks to Dante De Nigris for writing this class
 
+#include <QtPlugin>
 #include "gpu_rigidregistrationplugininterface.h"
 #include "gpu_rigidregistrationwidget.h"
-#include <QtPlugin>
 
-GPU_RigidRegistrationPluginInterface::GPU_RigidRegistrationPluginInterface()
-{
-}
+GPU_RigidRegistrationPluginInterface::GPU_RigidRegistrationPluginInterface() {}
 
-GPU_RigidRegistrationPluginInterface::~GPU_RigidRegistrationPluginInterface()
-{
-}
+GPU_RigidRegistrationPluginInterface::~GPU_RigidRegistrationPluginInterface() {}
 
-bool GPU_RigidRegistrationPluginInterface::CanRun()
-{
-    return true;
-}
+bool GPU_RigidRegistrationPluginInterface::CanRun() { return true; }
 
 QWidget * GPU_RigidRegistrationPluginInterface::CreateFloatingWidget()
 {
@@ -33,4 +26,3 @@ QWidget * GPU_RigidRegistrationPluginInterface::CreateFloatingWidget()
     widget->SetPluginInterface( this );
     return widget;
 }
-

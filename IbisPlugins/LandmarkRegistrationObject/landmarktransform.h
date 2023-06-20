@@ -11,11 +11,11 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef LANDMARKTRANSFORM_H
 #define LANDMARKTRANSFORM_H
 
-#include <QString>
-#include <vector>
-#include <sstream>
 #include <vtkObject.h>
 #include <vtkSmartPointer.h>
+#include <QString>
+#include <sstream>
+#include <vector>
 
 class vtkPoints;
 class vtkIntArray;
@@ -26,23 +26,22 @@ class LandmarkTransform : public vtkObject
 {
 public:
     static LandmarkTransform * New() { return new LandmarkTransform; }
-    vtkTypeMacro(LandmarkTransform,vtkObject);
-
+    vtkTypeMacro( LandmarkTransform, vtkObject );
 
     LandmarkTransform();
     virtual ~LandmarkTransform();
 
-    void SetSourcePoints(vtkSmartPointer<vtkPoints> pts);
-    void SetTargetPoints(vtkSmartPointer<vtkPoints> pts);
+    void SetSourcePoints( vtkSmartPointer<vtkPoints> pts );
+    void SetTargetPoints( vtkSmartPointer<vtkPoints> pts );
 
-    bool GetFRE(int index , double &fre );
-    bool GetRMS(int index, double &rms );
-    double GetFinalRMS() {return this->FinalRMS;}
+    bool GetFRE( int index, double & fre );
+    bool GetRMS( int index, double & rms );
+    double GetFinalRMS() { return this->FinalRMS; }
 
     bool IsScalingAllowed();
     void SetScalingAllowed( bool allow );
 
-    vtkLandmarkTransform *GetRegistrationTransform();
+    vtkLandmarkTransform * GetRegistrationTransform();
 
     // Description:
     // recompute transformation based on current source and
@@ -54,7 +53,6 @@ public:
     void Reset();
 
 private:
-
     void Init();
     void Clear();
 
@@ -66,7 +64,6 @@ private:
     double FinalRMS;
     vtkSmartPointer<vtkLandmarkTransform> InternalTransform;
     vtkSmartPointer<vtkLandmarkTransform> RegistrationTransform;
-
 };
 
-#endif // LANDMARKTRANSFORM_H
+#endif  // LANDMARKTRANSFORM_H

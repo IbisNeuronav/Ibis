@@ -13,38 +13,34 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef __GPU_RigidRegistration_h_
 #define __GPU_RigidRegistration_h_
 
-
-#include "imageobject.h"
-#include <vtkTransform.h>
 #include <vtkMatrix4x4.h>
+#include <vtkTransform.h>
+#include "imageobject.h"
 
-#include "itkGPU3DRigidSimilarityMetric.h"
 #include <itkEuler3DTransform.h>
+#include "itkGPU3DRigidSimilarityMetric.h"
 
 #include <itkAmoebaOptimizer.h>
-#include <itkSPSAOptimizer.h>
 #include <itkCMAEvolutionStrategyOptimizer.h>
+#include <itkSPSAOptimizer.h>
 
 #include <itkImageMaskSpatialObject.h>
 #include <sstream>
 
 class GPU_RigidRegistration
 {
-
 public:
+    typedef itk::CMAEvolutionStrategyOptimizer OptimizerType;
 
-    typedef itk::CMAEvolutionStrategyOptimizer            OptimizerType;
+    typedef itk::GPU3DRigidSimilarityMetric<IbisItkFloat3ImageType, IbisItkFloat3ImageType> GPUCostFunctionType;
+    typedef GPUCostFunctionType::Pointer GPUCostFunctionPointer;
 
-    typedef itk::GPU3DRigidSimilarityMetric<IbisItkFloat3ImageType,IbisItkFloat3ImageType>
-                                                        GPUCostFunctionType;
-    typedef GPUCostFunctionType::Pointer                GPUCostFunctionPointer;
+    typedef GPUCostFunctionType::GPUMetricType GPUMetricType;
+    typedef GPUCostFunctionType::GPUMetricPointer GPUMetricPointer;
 
-    typedef  GPUCostFunctionType::GPUMetricType         GPUMetricType;
-    typedef  GPUCostFunctionType::GPUMetricPointer      GPUMetricPointer;
+    typedef itk::Euler3DTransform<double> ItkRigidTransformType;
 
-    typedef itk::Euler3DTransform<double>                ItkRigidTransformType;
-
-    using ImageMaskType = itk::ImageMaskSpatialObject< 3 >;
+    using ImageMaskType    = itk::ImageMaskSpatialObject<3>;
     using ImageMaskPointer = ImageMaskType::Pointer;
 
     explicit GPU_RigidRegistration();
@@ -52,25 +48,37 @@ public:
 
     void runRegistration();
 
-    void SetItkSourceImage(IbisItkFloat3ImageType::Pointer image) { this->m_itkSourceImage = image; }
-    void SetItkTargetImage(IbisItkFloat3ImageType::Pointer image) { this->m_itkTargetImage = image; }
-    void SetSourceVtkTransform(vtkTransform * transform) { this->m_sourceVtkTransform = transform; } // WorldTransform of the ImageObject
-    void SetTargetVtkTransform(vtkTransform * transform) { this->m_targetVtkTransform = transform; } // WorldTransform of the ImageObject
-    void SetVtkTransform(vtkTransform * transform) { this->m_resultTransform = transform; } // LocalTransform of the ImageObject
-    void SetPercentile(double percentile) { this->m_percentile = percentile; }
-    void SetInitialSigma(double initialSigma) { this->m_initialSigma = initialSigma; }
-    void SetNumberOfPixels(unsigned int numberOfPixels) { this->m_numberOfPixels = numberOfPixels; }
-    void SetOrientationSelectivity(unsigned int orientationSelectivity) { m_orientationSelectivity = orientationSelectivity; }
-    void SetPopulationSize(unsigned int populationSize) { this->m_populationSize = populationSize; }
+    void SetItkSourceImage( IbisItkFloat3ImageType::Pointer image ) { this->m_itkSourceImage = image; }
+    void SetItkTargetImage( IbisItkFloat3ImageType::Pointer image ) { this->m_itkTargetImage = image; }
+    void SetSourceVtkTransform( vtkTransform * transform )
+    {
+        this->m_sourceVtkTransform = transform;
+    }  // WorldTransform of the ImageObject
+    void SetTargetVtkTransform( vtkTransform * transform )
+    {
+        this->m_targetVtkTransform = transform;
+    }  // WorldTransform of the ImageObject
+    void SetVtkTransform( vtkTransform * transform )
+    {
+        this->m_resultTransform = transform;
+    }  // LocalTransform of the ImageObject
+    void SetPercentile( double percentile ) { this->m_percentile = percentile; }
+    void SetInitialSigma( double initialSigma ) { this->m_initialSigma = initialSigma; }
+    void SetNumberOfPixels( unsigned int numberOfPixels ) { this->m_numberOfPixels = numberOfPixels; }
+    void SetOrientationSelectivity( unsigned int orientationSelectivity )
+    {
+        m_orientationSelectivity = orientationSelectivity;
+    }
+    void SetPopulationSize( unsigned int populationSize ) { this->m_populationSize = populationSize; }
     void SetParentVtkTransform( vtkTransform * transform ) { this->m_parentVtkTransform = transform; }
-    //void SetDebugOn() { m_debug = true; }
-    //void SetDebugOff() { m_debug = false; }
-    void SetDebug(bool debug, std::stringstream *strstream) 
-        { 
-        this->m_debug = debug;
+    // void SetDebugOn() { m_debug = true; }
+    // void SetDebugOff() { m_debug = false; }
+    void SetDebug( bool debug, std::stringstream * strstream )
+    {
+        this->m_debug       = debug;
         this->m_debugStream = strstream;
-        }
-    void SetUseMask(bool usemask) { this->m_useMask = usemask; }
+    }
+    void SetUseMask( bool usemask ) { this->m_useMask = usemask; }
 
     double GetPercentile() { return m_percentile; }
     double GetInitialSigma() { return m_initialSigma; }
@@ -81,23 +89,21 @@ public:
     bool GetUseMask() { return m_useMask; }
 
     using SamplingStrategy = GPUMetricType::SamplingStrategyType;
-    void SetSamplingStrategyToRandom()    { this->m_samplingStrategy = SamplingStrategy::RANDOM; }
-    void SetSamplingStrategyToGrid()      { this->m_samplingStrategy = SamplingStrategy::GRID; }
-    void SetSamplingStrategyToFull()      { this->m_samplingStrategy = SamplingStrategy::FULL; }
+    void SetSamplingStrategyToRandom() { this->m_samplingStrategy = SamplingStrategy::RANDOM; }
+    void SetSamplingStrategyToGrid() { this->m_samplingStrategy = SamplingStrategy::GRID; }
+    void SetSamplingStrategyToFull() { this->m_samplingStrategy = SamplingStrategy::FULL; }
     SamplingStrategy GetSamplingStrategy() { return this->m_samplingStrategy; }
 
-
-    void SetTargetMask(ImageMaskPointer mask) { this->m_targetSpatialObjectMask = mask;}
-    void SetSourceMask(ImageMaskPointer mask) { this->m_sourceSpatialObjectMask = mask; }
+    void SetTargetMask( ImageMaskPointer mask ) { this->m_targetSpatialObjectMask = mask; }
+    void SetSourceMask( ImageMaskPointer mask ) { this->m_sourceSpatialObjectMask = mask; }
 
 private:
-
     void updateTagsDistance();
 
     bool m_OptimizationRunning;
     bool m_debug;
     bool m_useMask;
-    std::stringstream *m_debugStream;
+    std::stringstream * m_debugStream;
 
     IbisItkFloat3ImageType::Pointer m_itkSourceImage;
     IbisItkFloat3ImageType::Pointer m_itkTargetImage;
@@ -118,7 +124,6 @@ private:
 
     vtkTransform * m_parentVtkTransform;
     SamplingStrategy m_samplingStrategy;
-
 };
 
 #endif

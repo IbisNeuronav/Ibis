@@ -76,7 +76,7 @@ protected:
     QList<vtkMatrix4x4 *> m_matrices;
     QList<double> m_timestamps;
 
-    int m_defaultImageSize[ 2 ];
+    int m_defaultImageSize[2];
 };
 
 #endif

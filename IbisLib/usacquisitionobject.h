@@ -170,7 +170,7 @@ protected:
     int m_usProbeObjectId;  // probe we record from
 
     // Images and matrices
-    int m_defaultImageSize[ 2 ];
+    int m_defaultImageSize[2];
     TrackedVideoBuffer * m_videoBuffer;
 
     // Importing

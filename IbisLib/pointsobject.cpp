@@ -49,15 +49,15 @@ PointsObject::PointsObject() : SceneObject()
     m_pointRadius3D      = 2.0;
     m_pointRadius2D      = 20.0;
     m_labelSize          = 8.0;
-    m_activeColor[ 0 ]   = 1.0;
-    m_activeColor[ 1 ]   = 0.7;
-    m_activeColor[ 2 ]   = 0.0;
-    m_inactiveColor[ 0 ] = 0.7;
-    m_inactiveColor[ 1 ] = 0.7;
-    m_inactiveColor[ 2 ] = 0.6;
-    m_selectedColor[ 0 ] = 0.0;
-    m_selectedColor[ 1 ] = 1.0;
-    m_selectedColor[ 2 ] = 0.0;
+    m_activeColor[0]     = 1.0;
+    m_activeColor[1]     = 0.7;
+    m_activeColor[2]     = 0.0;
+    m_inactiveColor[0]   = 0.7;
+    m_inactiveColor[1]   = 0.7;
+    m_inactiveColor[2]   = 0.6;
+    m_selectedColor[0]   = 0.0;
+    m_selectedColor[1]   = 1.0;
+    m_selectedColor[2]   = 0.0;
     m_opacity            = 1.0;
     m_movingPointIndex   = PointsObject::InvalidPointIndex;
     m_picker             = vtkSmartPointer<vtkCellPicker>::New();
@@ -66,7 +66,7 @@ PointsObject::PointsObject() : SceneObject()
     m_showLabels         = true;
     m_computeDistance    = false;
     m_lineToPointerTip   = 0;
-    for( int i = 0; i < 3; i++ ) m_lineToPointerColor[ i ] = 1.0;
+    for( int i = 0; i < 3; i++ ) m_lineToPointerColor[i] = 1.0;
 }
 
 PointsObject::~PointsObject() {}
@@ -85,7 +85,7 @@ void PointsObject::Serialize( Serializer * ser )
     ::Serialize( ser, "Opacity", m_opacity );
     ::Serialize( ser, "SelectedPointIndex", m_selectedPointIndex );
     int numberOfPoints;
-    double coords[ 3 ];
+    double coords[3];
     QString pointName, timeStamp( "n/a" );
     if( !ser->IsReader() )
     {
@@ -223,21 +223,21 @@ void PointsObject::CreateSettingsWidgets( QWidget * parent, QVector<QWidget *> *
     widgets->append( color );
 }
 
-void PointsObject::AddPoint( const QString & name, double coords[ 3 ] )
+void PointsObject::AddPoint( const QString & name, double coords[3] )
 {
     // transform coords to local
-    double localCoords[ 3 ];
+    double localCoords[3];
     this->WorldToLocal( coords, localCoords );
 
     AddPointLocal( localCoords, name );
 }
 
-vtkActor * PointsObject::DoPicking( int x, int y, vtkRenderer * ren, double pickedPoint[ 3 ] )
+vtkActor * PointsObject::DoPicking( int x, int y, vtkRenderer * ren, double pickedPoint[3] )
 {
     int validPickedPoint = m_picker->Pick( x, y, 0, ren );
-    double pickPosition[ 4 ];
+    double pickPosition[4];
     m_picker->GetPickPosition( pickPosition );
-    pickPosition[ 3 ] = 1;
+    pickPosition[3] = 1;
 
     // Transform the point in the space of its parent PointsObject
     // Apply inverse of points object world transform to worldPoint
@@ -248,12 +248,12 @@ vtkActor * PointsObject::DoPicking( int x, int y, vtkRenderer * ren, double pick
     vtkSmartPointer<vtkMatrix4x4> inverseMat = vtkSmartPointer<vtkMatrix4x4>::New();
     this->GetWorldTransform()->GetInverse( inverseMat );
 
-    double transformedPoint[ 4 ];
+    double transformedPoint[4];
     inverseMat->MultiplyPoint( pickPosition, transformedPoint );
 
-    pickedPoint[ 0 ] = transformedPoint[ 0 ];
-    pickedPoint[ 1 ] = transformedPoint[ 1 ];
-    pickedPoint[ 2 ] = transformedPoint[ 2 ];
+    pickedPoint[0] = transformedPoint[0];
+    pickedPoint[1] = transformedPoint[1];
+    pickedPoint[2] = transformedPoint[2];
 
     if( validPickedPoint ) return m_picker->GetActor();
     return 0;
@@ -265,7 +265,7 @@ bool PointsObject::OnLeftButtonPressed( View * v, int x, int y, unsigned modifie
     bool shift = ( modifiers & ShiftModifier ) != 0;
     if( !m_pickable || !shift || this->IsHidden() ) return false;
 
-    double realPosition[ 3 ];
+    double realPosition[3];
     vtkActor * picked = DoPicking( x, y, v->GetRenderer(), realPosition );
     if( picked )
     {
@@ -294,7 +294,7 @@ bool PointsObject::OnLeftButtonReleased( View * v, int x, int y, unsigned modifi
 {
     if( m_movingPointIndex == PointsObject::InvalidPointIndex ) return false;
 
-    double realPosition[ 3 ];
+    double realPosition[3];
     vtkActor * picked = DoPicking( x, y, v->GetRenderer(), realPosition );
     if( picked ) SetPointCoordinates( m_movingPointIndex, realPosition );
 
@@ -310,7 +310,7 @@ bool PointsObject::OnRightButtonPressed( View * v, int x, int y, unsigned modifi
     bool shift = ( modifiers & ShiftModifier ) != 0;
     if( !m_pickable || !shift || this->IsHidden() ) return false;
 
-    double realPosition[ 3 ];
+    double realPosition[3];
     vtkActor * picked = DoPicking( x, y, v->GetRenderer(), realPosition );
     if( picked )
     {
@@ -325,14 +325,14 @@ bool PointsObject::OnMouseMoved( View * v, int x, int y, unsigned modifiers )
 {
     if( m_movingPointIndex == PointsObject::InvalidPointIndex ) return false;
 
-    double realPosition[ 3 ];
+    double realPosition[3];
     vtkActor * picked = DoPicking( x, y, v->GetRenderer(), realPosition );
     if( picked ) SetPointCoordinates( m_movingPointIndex, realPosition );
 
     return true;
 }
 
-void PointsObject::AddPointLocal( double coords[ 3 ], QString name, QString timestamp )
+void PointsObject::AddPointLocal( double coords[3], QString name, QString timestamp )
 {
     if( name.isEmpty() ) name = QString::number( GetNumberOfPoints() + 1 );
 
@@ -413,7 +413,7 @@ void PointsObject::MoveCursorToPoint( int index )
     if( !this->IsHidden() )
     {
         double * pos = m_pointCoordinates->GetPoint( index );  // in PointsObject space
-        double worldPos[ 3 ];
+        double worldPos[3];
         this->GetWorldTransform()->TransformPoint( pos, worldPos );
         this->GetManager()->SetCursorWorldPosition( worldPos );
     }
@@ -426,7 +426,7 @@ int PointsObject::FindPoint( vtkActor * actor, double * pos, int viewType )
     if( m_pointList.isEmpty() ) return InvalidPointIndex;
 
     int n = m_pointList.count();
-    double pointPosition[ 3 ];
+    double pointPosition[3];
     vtkSmartPointer<PointRepresentation> point;
     // first check if 3D actor was picked
     int i = 0;
@@ -442,7 +442,7 @@ int PointsObject::FindPoint( vtkActor * actor, double * pos, int viewType )
     if( viewType == THREED_VIEW_TYPE ) return InvalidPointIndex;
     // Now see if any of 2D actors are picked
     vtkTransform * wt = this->GetWorldTransform();
-    double worldPicked[ 3 ], worldPt[ 3 ];
+    double worldPicked[3], worldPt[3];
     wt->TransformPoint( pos, worldPicked );
     for( int i = 0; i < n; i++ )
     {
@@ -460,7 +460,7 @@ void PointsObject::UpdatePointsVisibility()
 {
     for( int i = 0; i < m_pointList.size(); ++i )
     {
-        m_pointList[ i ]->UpdateVisibility();
+        m_pointList[i]->UpdateVisibility();
     }
 }
 
@@ -504,37 +504,37 @@ void PointsObject::SetLabelSize( double s )
     this->UpdatePoints();
 }
 
-void PointsObject::SetEnabledColor( double color[ 3 ] )
+void PointsObject::SetEnabledColor( double color[3] )
 {
-    for( int i = 0; i < 3; i++ ) m_activeColor[ i ] = color[ i ];
+    for( int i = 0; i < 3; i++ ) m_activeColor[i] = color[i];
     this->UpdatePoints();
 }
 
-void PointsObject::GetEnabledColor( double color[ 3 ] )
+void PointsObject::GetEnabledColor( double color[3] )
 {
-    for( int i = 0; i < 3; i++ ) color[ i ] = m_activeColor[ i ];
+    for( int i = 0; i < 3; i++ ) color[i] = m_activeColor[i];
 }
 
-void PointsObject::SetDisabledColor( double color[ 3 ] )
+void PointsObject::SetDisabledColor( double color[3] )
 {
-    for( int i = 0; i < 3; i++ ) m_inactiveColor[ i ] = color[ i ];
+    for( int i = 0; i < 3; i++ ) m_inactiveColor[i] = color[i];
     this->UpdatePoints();
 }
 
-void PointsObject::GetDisabledColor( double color[ 3 ] )
+void PointsObject::GetDisabledColor( double color[3] )
 {
-    for( int i = 0; i < 3; i++ ) color[ i ] = m_inactiveColor[ i ];
+    for( int i = 0; i < 3; i++ ) color[i] = m_inactiveColor[i];
 }
 
-void PointsObject::SetSelectedColor( double color[ 3 ] )
+void PointsObject::SetSelectedColor( double color[3] )
 {
-    for( int i = 0; i < 3; i++ ) m_selectedColor[ i ] = color[ i ];
+    for( int i = 0; i < 3; i++ ) m_selectedColor[i] = color[i];
     this->UpdatePoints();
 }
 
-void PointsObject::GetSelectedColor( double color[ 3 ] )
+void PointsObject::GetSelectedColor( double color[3] )
 {
-    for( int i = 0; i < 3; i++ ) color[ i ] = m_selectedColor[ i ];
+    for( int i = 0; i < 3; i++ ) color[i] = m_selectedColor[i];
 }
 
 void PointsObject::SetOpacity( double opacity )
@@ -565,9 +565,9 @@ void PointsObject::RemovePoint( int index )
     m_timeStamps.erase( m_timeStamps.begin() + index );
 
     // Update point representations
-    if( GetManager() ) GetManager()->RemoveObject( m_pointList[ index ] );
+    if( GetManager() ) GetManager()->RemoveObject( m_pointList[index] );
     m_pointList.removeAt( index );
-    for( int i = 0; i < m_pointList.size(); ++i ) m_pointList[ i ]->SetPointIndex( i );
+    for( int i = 0; i < m_pointList.size(); ++i ) m_pointList[i]->SetPointIndex( i );
 
     // Update selected point index
     if( m_selectedPointIndex >= GetNumberOfPoints() )
@@ -634,12 +634,9 @@ const QString PointsObject::GetPointLabel( int index ) { return m_pointNames.at(
 
 double * PointsObject::GetPointCoordinates( int index ) { return m_pointCoordinates->GetPoint( index ); }
 
-void PointsObject::GetPointCoordinates( int index, double coords[ 3 ] )
-{
-    m_pointCoordinates->GetPoint( index, coords );
-}
+void PointsObject::GetPointCoordinates( int index, double coords[3] ) { m_pointCoordinates->GetPoint( index, coords ); }
 
-void PointsObject::SetPointCoordinates( int index, double coords[ 3 ] )
+void PointsObject::SetPointCoordinates( int index, double coords[3] )
 {
     Q_ASSERT( index >= 0 && index < m_pointCoordinates->GetNumberOfPoints() );
     m_pointCoordinates->SetPoint( index, coords );
@@ -660,7 +657,7 @@ void PointsObject::ObjectAddedToScene()
     // add all point representations to scene
     for( int i = 0; i < m_pointList.size(); ++i )
     {
-        GetManager()->AddObject( m_pointList[ i ], this );
+        GetManager()->AddObject( m_pointList[i], this );
     }
 
     connect( this->GetManager(), SIGNAL( CurrentObjectChanged() ), this, SLOT( OnCurrentObjectChanged() ) );
@@ -683,18 +680,18 @@ void PointsObject::ComputeDistanceFromSelectedPointToPointerTip()
     SceneManager * manager = this->GetManager();
     Q_ASSERT( manager );
     PointerObject * pointer = manager->GetNavigationPointerObject();
-    double pointerPos[ 3 ], *pos1 = pointer->GetTipPosition();
-    double pointPos[ 3 ], *pos2   = this->GetPointCoordinates( m_selectedPointIndex );
+    double pointerPos[3], *pos1 = pointer->GetTipPosition();
+    double pointPos[3], *pos2   = this->GetPointCoordinates( m_selectedPointIndex );
     for( int i = 0; i < 3; i++ )
     {
-        pointerPos[ i ] = pos1[ i ];
-        pointPos[ i ]   = pos2[ i ];
+        pointerPos[i] = pos1[i];
+        pointPos[i]   = pos2[i];
     }
-    double tmpPos[ 3 ];
+    double tmpPos[3];
     vtkTransform * transform = this->GetLocalTransform();
     transform->TransformPoint( pointPos, tmpPos );
     // convert to world
-    double worldCoords[ 3 ];
+    double worldCoords[3];
     this->LocalToWorld( tmpPos, worldCoords );
     double distance = sqrt( vtkMath::Distance2BetweenPoints( worldCoords, pointerPos ) );
     // Setup the text and add it to the window
@@ -732,10 +729,10 @@ void PointsObject::EnableComputeDistance( bool enable )
         m_lineToPointerTip->SetListable( false );
         m_lineToPointerTip->SetCanEditTransformManually( false );
         m_lineToPointerTip->SetObjectManagedByTracker( true );
-        m_lineToPointerTip->SetColor( m_lineToPointerColor[ 0 ], m_lineToPointerColor[ 1 ], m_lineToPointerColor[ 2 ] );
-        double pointPos[ 3 ];
+        m_lineToPointerTip->SetColor( m_lineToPointerColor[0], m_lineToPointerColor[1], m_lineToPointerColor[2] );
+        double pointPos[3];
         this->GetPointCoordinates( m_selectedPointIndex, pointPos );
-        double worldCoords[ 3 ];
+        double worldCoords[3];
         this->LocalToWorld( pointPos, worldCoords );
         this->LineToPointerTip( worldCoords, worldCoords );
         this->GetManager()->AddObject( m_lineToPointerTip );
@@ -749,17 +746,17 @@ void PointsObject::EnableComputeDistance( bool enable )
     }
 }
 
-void PointsObject::LineToPointerTip( double selectedPoint[ 3 ], double pointerTip[ 3 ] )
+void PointsObject::LineToPointerTip( double selectedPoint[3], double pointerTip[3] )
 {
     vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
     points->SetNumberOfPoints( 2 );
-    points->SetPoint( 0, selectedPoint[ 0 ], selectedPoint[ 1 ], selectedPoint[ 2 ] );
-    points->SetPoint( 1, pointerTip[ 0 ], pointerTip[ 1 ], pointerTip[ 2 ] );
+    points->SetPoint( 0, selectedPoint[0], selectedPoint[1], selectedPoint[2] );
+    points->SetPoint( 1, pointerTip[0], pointerTip[1], pointerTip[2] );
 
     vtkSmartPointer<vtkCellArray> cells = vtkSmartPointer<vtkCellArray>::New();
-    vtkIdType pts[ 2 ];
-    pts[ 0 ] = 0;
-    pts[ 1 ] = 1;
+    vtkIdType pts[2];
+    pts[0] = 0;
+    pts[1] = 1;
     cells->InsertNextCell( 2, pts );
 
     vtkSmartPointer<vtkPolyData> linesPolyData = vtkSmartPointer<vtkPolyData>::New();
@@ -770,13 +767,13 @@ void PointsObject::LineToPointerTip( double selectedPoint[ 3 ], double pointerTi
     emit ObjectModified();
 }
 
-void PointsObject::SetLineToPointerColor( double color[ 3 ] )
+void PointsObject::SetLineToPointerColor( double color[3] )
 {
-    for( int i = 0; i < 3; i++ ) m_lineToPointerColor[ i ] = color[ i ];
+    for( int i = 0; i < 3; i++ ) m_lineToPointerColor[i] = color[i];
     emit ObjectModified();
 }
 
-void PointsObject::GetLineToPointerColor( double color[ 3 ] )
+void PointsObject::GetLineToPointerColor( double color[3] )
 {
-    for( int i = 0; i < 3; i++ ) color[ i ] = m_lineToPointerColor[ i ];
+    for( int i = 0; i < 3; i++ ) color[i] = m_lineToPointerColor[i];
 }

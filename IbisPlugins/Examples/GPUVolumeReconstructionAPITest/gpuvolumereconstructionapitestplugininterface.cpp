@@ -1,65 +1,58 @@
 
-#include "gpuvolumereconstructionapitestplugininterface.h"
-#include <QtPlugin>
 #include <QMessageBox>
+#include <QtPlugin>
+#include "gpuvolumereconstructionapitestplugininterface.h"
 
-#include <vtkTransform.h>
 #include <vtkImageData.h>
 #include <vtkSmartPointer.h>
-#include "imageobject.h"
-#include "gpu_volumereconstructionplugininterface.h"
+#include <vtkTransform.h>
 #include "gpu_volumereconstruction.h"
-#include "usacquisitionobject.h"
+#include "gpu_volumereconstructionplugininterface.h"
 #include "ibisapi.h"
+#include "imageobject.h"
+#include "usacquisitionobject.h"
 
-GPUVolumeReconstructionAPITestPluginInterface::GPUVolumeReconstructionAPITestPluginInterface()
-{
-}
+GPUVolumeReconstructionAPITestPluginInterface::GPUVolumeReconstructionAPITestPluginInterface() {}
 
-GPUVolumeReconstructionAPITestPluginInterface::~GPUVolumeReconstructionAPITestPluginInterface()
-{
-}
+GPUVolumeReconstructionAPITestPluginInterface::~GPUVolumeReconstructionAPITestPluginInterface() {}
 
-bool GPUVolumeReconstructionAPITestPluginInterface::CanRun()
-{
-    return true;
-}
+bool GPUVolumeReconstructionAPITestPluginInterface::CanRun() { return true; }
 
 QWidget * GPUVolumeReconstructionAPITestPluginInterface::CreateFloatingWidget()
 {
-    IbisAPI *ibisAPI = this->GetIbisAPI();
-    Q_ASSERT(ibisAPI);
-    ToolPluginInterface * toolPlugin = ibisAPI->GetToolPluginByName( "GPU_VolumeReconstruction");
-    if( !toolPlugin )
-        return 0;
-    GPU_VolumeReconstructionPluginInterface *volumeReconstructorPlugin = GPU_VolumeReconstructionPluginInterface::SafeDownCast( toolPlugin );
+    IbisAPI * ibisAPI = this->GetIbisAPI();
+    Q_ASSERT( ibisAPI );
+    ToolPluginInterface * toolPlugin = ibisAPI->GetToolPluginByName( "GPU_VolumeReconstruction" );
+    if( !toolPlugin ) return 0;
+    GPU_VolumeReconstructionPluginInterface * volumeReconstructorPlugin =
+        GPU_VolumeReconstructionPluginInterface::SafeDownCast( toolPlugin );
     Q_ASSERT( volumeReconstructorPlugin );
-    QList<USAcquisitionObject*> acquisitions;
+    QList<USAcquisitionObject *> acquisitions;
     ibisAPI->GetAllUSAcquisitionObjects( acquisitions );
 
     int numberOfAcquisitions = acquisitions.count();
     if( numberOfAcquisitions > 0 )
     {
-        GPU_VolumeReconstruction *reconstructor = GPU_VolumeReconstruction::New();
+        GPU_VolumeReconstruction * reconstructor = GPU_VolumeReconstruction::New();
         reconstructor->SetDebugFlag( false );
         for( int i = 0; i < numberOfAcquisitions; i++ )
         {
             USAcquisitionObject * acq = acquisitions[i];
-            int nbrOfSlices = acq->GetNumberOfSlices();
+            int nbrOfSlices           = acq->GetNumberOfSlices();
             reconstructor->SetNumberOfSlices( nbrOfSlices );
             reconstructor->SetFixedSliceMask( acq->GetMask() );
             reconstructor->SetUSSearchRadius( 3 );
             reconstructor->SetVolumeSpacing( 1.0 );
             reconstructor->SetKernelStdDev( 0.5 );
-            vtkSmartPointer<vtkMatrix4x4> sliceTransformMatrix = vtkSmartPointer<vtkMatrix4x4>::New() ;
-            vtkSmartPointer<vtkImageData> slice = vtkSmartPointer<vtkImageData>::New();
-            for(int j = 0; j < nbrOfSlices; j++)
+            vtkSmartPointer<vtkMatrix4x4> sliceTransformMatrix = vtkSmartPointer<vtkMatrix4x4>::New();
+            vtkSmartPointer<vtkImageData> slice                = vtkSmartPointer<vtkImageData>::New();
+            for( int j = 0; j < nbrOfSlices; j++ )
             {
                 acq->GetFrameData( j, slice, sliceTransformMatrix );
-                reconstructor->SetFixedSlice(j, slice, sliceTransformMatrix );
+                reconstructor->SetFixedSlice( j, slice, sliceTransformMatrix );
             }
 
-             //Construct ITK Matrix corresponding to VTK Local Matrix
+            // Construct ITK Matrix corresponding to VTK Local Matrix
             reconstructor->SetTransform( acq->GetLocalTransform()->GetMatrix() );
             reconstructor->start();
             reconstructor->wait();
@@ -67,10 +60,10 @@ QWidget * GPUVolumeReconstructionAPITestPluginInterface::CreateFloatingWidget()
             vtkSmartPointer<ImageObject> reconstructedImage = vtkSmartPointer<ImageObject>::New();
             if( reconstructedImage->SetItkImage( reconstructor->GetReconstructedImage() ) )
             {
-                QString volName("ReconstructedVolume");
+                QString volName( "ReconstructedVolume" );
                 volName.append( QString::number( i ) );
-                reconstructedImage->SetName(volName);
-                ibisAPI->AddObject(reconstructedImage, acq->GetParent()->GetParent() );
+                reconstructedImage->SetName( volName );
+                ibisAPI->AddObject( reconstructedImage, acq->GetParent()->GetParent() );
                 ibisAPI->SetCurrentObject( reconstructedImage );
             }
             else

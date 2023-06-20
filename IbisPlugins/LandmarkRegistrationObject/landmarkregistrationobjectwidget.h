@@ -11,11 +11,12 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef LANDMARKREGISTRATIONOBJECTWIDGET_H
 #define LANDMARKREGISTRATIONOBJECTWIDGET_H
 
-#include <QWidget>
 #include <QStandardItemModel>
+#include <QWidget>
 #include "landmarkregistrationobject.h"
 
-namespace Ui {
+namespace Ui
+{
 class LandmarkRegistrationObjectWidget;
 }
 
@@ -24,29 +25,28 @@ class LandmarkRegistrationObject;
 class LandmarkRegistrationObjectWidget : public QWidget
 {
     Q_OBJECT
-    
+
 public:
-    explicit LandmarkRegistrationObjectWidget(QWidget *parent = 0, const char * name = 0, Qt::WindowFlags f = 0);
+    explicit LandmarkRegistrationObjectWidget( QWidget * parent = 0, const char * name = 0, Qt::WindowFlags f = 0 );
     ~LandmarkRegistrationObjectWidget();
 
-    void SetLandmarkRegistrationObject(LandmarkRegistrationObject *obj);
+    void SetLandmarkRegistrationObject( LandmarkRegistrationObject * obj );
 
 public slots:
     void UpdateUI();
     void PointDataChanged( QStandardItem * );
 
 protected:
-    LandmarkRegistrationObject *m_registrationObject;
+    LandmarkRegistrationObject * m_registrationObject;
 
 private slots:
     virtual void on_tagTreeView_clicked( QModelIndex idx );
     virtual void on_tagSizeSpinBox_valueChanged( int tagSize );
 
 private:
+    QStandardItemModel * m_model;
 
-    QStandardItemModel *m_model;
-
-    Ui::LandmarkRegistrationObjectWidget *ui;
+    Ui::LandmarkRegistrationObjectWidget * ui;
 };
 
-#endif // LANDMARKREGISTRATIONOBJECTWIDGET_H
+#endif  // LANDMARKREGISTRATIONOBJECTWIDGET_H

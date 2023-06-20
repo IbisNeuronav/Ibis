@@ -10,35 +10,29 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 // Thanks to Simon Drouin for writing this class
 
+#include <vtkRenderer.h>
+#include <QMap>
+#include <QTime>
+#include <QTimer>
 #include "frameratetesterplugininterface.h"
 #include "frameratetesterwidget.h"
 #include "ibisapi.h"
 #include "view.h"
-#include <QTimer>
-#include <QTime>
-#include <QMap>
-#include <vtkRenderer.h>
 
 FrameRateTesterPluginInterface::FrameRateTesterPluginInterface()
 {
-    m_numberOfFrames = 200;
-    m_timer = 0;
+    m_numberOfFrames     = 200;
+    m_timer              = 0;
     m_lastNumberOfFrames = 0;
-    m_lastPeriod = 0.0;
-    m_currentViewID = THREED_VIEW_ID;
-    m_time = new QTime;
-    m_accumulatedFrames = 0;
+    m_lastPeriod         = 0.0;
+    m_currentViewID      = THREED_VIEW_ID;
+    m_time               = new QTime;
+    m_accumulatedFrames  = 0;
 }
 
-FrameRateTesterPluginInterface::~FrameRateTesterPluginInterface()
-{
-    delete m_time;
-}
+FrameRateTesterPluginInterface::~FrameRateTesterPluginInterface() { delete m_time; }
 
-bool FrameRateTesterPluginInterface::CanRun()
-{
-    return true;
-}
+bool FrameRateTesterPluginInterface::CanRun() { return true; }
 
 QWidget * FrameRateTesterPluginInterface::CreateTab()
 {
@@ -48,10 +42,7 @@ QWidget * FrameRateTesterPluginInterface::CreateTab()
     return widget;
 }
 
-bool FrameRateTesterPluginInterface::WidgetAboutToClose()
-{
-    return true;
-}
+bool FrameRateTesterPluginInterface::WidgetAboutToClose() { return true; }
 
 void FrameRateTesterPluginInterface::SetRunning( bool run )
 {
@@ -60,16 +51,16 @@ void FrameRateTesterPluginInterface::SetRunning( bool run )
     {
         // init frame rate vars
         m_lastNumberOfFrames = 0;
-        m_lastPeriod = 0.0;
-        m_accumulatedFrames = 0;
+        m_lastPeriod         = 0.0;
+        m_accumulatedFrames  = 0;
 
         // Make sure other views are not rendering
         SetRenderingEnabled( false );
 
         // Start a timer
         m_timer = new QTimer;
-        connect( m_timer, SIGNAL(timeout()), this, SLOT(OnTimerTriggered()) );
-        m_timer->start(0);
+        connect( m_timer, SIGNAL( timeout() ), this, SLOT( OnTimerTriggered() ) );
+        m_timer->start( 0 );
     }
     else
     {
@@ -84,20 +75,13 @@ void FrameRateTesterPluginInterface::SetRunning( bool run )
     emit PluginModified();
 }
 
-bool FrameRateTesterPluginInterface::IsRunning()
-{
-    return m_timer != 0;
-}
+bool FrameRateTesterPluginInterface::IsRunning() { return m_timer != 0; }
 
-void FrameRateTesterPluginInterface::SetNumberOfFrames( int nb )
-{
-    m_numberOfFrames = nb;
-}
+void FrameRateTesterPluginInterface::SetNumberOfFrames( int nb ) { m_numberOfFrames = nb; }
 
 double FrameRateTesterPluginInterface::GetLastFrameRate()
 {
-    if( m_lastPeriod > 0.0 )
-        return m_lastNumberOfFrames / m_lastPeriod;
+    if( m_lastPeriod > 0.0 ) return m_lastNumberOfFrames / m_lastPeriod;
     return 0.0;
 }
 
@@ -109,14 +93,13 @@ void FrameRateTesterPluginInterface::SetCurrentViewId( int id )
 
 void FrameRateTesterPluginInterface::OnTimerTriggered()
 {
-    if( m_lastNumberOfFrames == 0 )
-        m_time->restart();
+    if( m_lastNumberOfFrames == 0 ) m_time->restart();
 
     // Render
     GetIbisAPI()->GetViewByID( m_currentViewID )->NotifyNeedRender();
 
     // Increment stats
-    m_lastPeriod = ((double)m_time->elapsed()) * 0.001;
+    m_lastPeriod = ( (double)m_time->elapsed() ) * 0.001;
     m_lastNumberOfFrames++;
     m_accumulatedFrames++;
     if( m_accumulatedFrames > 20 )
@@ -125,16 +108,14 @@ void FrameRateTesterPluginInterface::OnTimerTriggered()
         emit PeriodicSignal();
     }
 
-    if( m_lastNumberOfFrames == m_numberOfFrames )
-        SetRunning( false );
+    if( m_lastNumberOfFrames == m_numberOfFrames ) SetRunning( false );
 }
 
 void FrameRateTesterPluginInterface::SetRenderingEnabled( bool enabled )
 {
-    QMap<View*, int> allViews = GetIbisAPI()->GetAllViews();
+    QMap<View *, int> allViews = GetIbisAPI()->GetAllViews();
     foreach( int id, allViews.values() )
     {
-        if( id != m_currentViewID )
-            GetIbisAPI()->GetViewByID( id )->SetRenderingEnabled( enabled );
+        if( id != m_currentViewID ) GetIbisAPI()->GetViewByID( id )->SetRenderingEnabled( enabled );
     }
 }

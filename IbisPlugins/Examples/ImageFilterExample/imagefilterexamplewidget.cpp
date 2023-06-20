@@ -10,31 +10,26 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 // Thanks to Simon Drouin for writing this class
 
-#include "imagefilterexampleplugininterface.h"
-#include "imagefilterexamplewidget.h"
-#include "ui_imagefilterexamplewidget.h"
-#include "ibisapi.h"
-#include "sceneobject.h"
-#include "imageobject.h"
 #include <vtkTransform.h>
 #include <QComboBox>
 #include <QMessageBox>
 #include <thread>
+#include "ibisapi.h"
+#include "imagefilterexampleplugininterface.h"
+#include "imagefilterexamplewidget.h"
+#include "imageobject.h"
+#include "sceneobject.h"
+#include "ui_imagefilterexamplewidget.h"
 
-ImageFilterExampleWidget::ImageFilterExampleWidget(QWidget *parent) :
-    QWidget(parent),
-    ui(new Ui::ImageFilterExampleWidget),
-    m_pluginInterface(0)
+ImageFilterExampleWidget::ImageFilterExampleWidget( QWidget * parent )
+    : QWidget( parent ), ui( new Ui::ImageFilterExampleWidget ), m_pluginInterface( 0 )
 {
-    ui->setupUi(this);
+    ui->setupUi( this );
     setWindowTitle( "Image Filter Example" );
     UpdateUi();
 }
 
-ImageFilterExampleWidget::~ImageFilterExampleWidget()
-{
-    delete ui;
-}
+ImageFilterExampleWidget::~ImageFilterExampleWidget() { delete ui; }
 
 void ImageFilterExampleWidget::SetPluginInterface( ImageFilterExamplePluginInterface * interf )
 {
@@ -45,19 +40,21 @@ void ImageFilterExampleWidget::SetPluginInterface( ImageFilterExamplePluginInter
 void ImageFilterExampleWidget::on_startButton_clicked()
 {
     // Make sure all params have been specified
-    int transformObjectId = ui->transformObjectComboBox->itemData( ui->transformObjectComboBox->currentIndex() ).toInt();
+    int transformObjectId =
+        ui->transformObjectComboBox->itemData( ui->transformObjectComboBox->currentIndex() ).toInt();
     int sourceImageObjectId = ui->sourceImageComboBox->itemData( ui->sourceImageComboBox->currentIndex() ).toInt();
     int targetImageObjectId = ui->targetImageComboBox->itemData( ui->targetImageComboBox->currentIndex() ).toInt();
 
     if( transformObjectId == -1 || sourceImageObjectId == -1 || targetImageObjectId == -1 )
     {
-        QMessageBox::information( this, "Image Filter Example", "Need to specify source, target and affected transform before processing" );
+        QMessageBox::information( this, "Image Filter Example",
+                                  "Need to specify source, target and affected transform before processing" );
         return;
     }
 
     // Get input images
-    IbisAPI *ibisAPI = m_pluginInterface->GetIbisAPI();
-    Q_ASSERT(ibisAPI);
+    IbisAPI * ibisAPI = m_pluginInterface->GetIbisAPI();
+    Q_ASSERT( ibisAPI );
     ImageObject * sourceImageObject = ImageObject::SafeDownCast( ibisAPI->GetObjectByID( sourceImageObjectId ) );
     Q_ASSERT_X( sourceImageObject, "ImageFilterExampleWidget::on_startButton_clicked()", "Invalid source object" );
     ImageObject * targetImageObject = ImageObject::SafeDownCast( ibisAPI->GetObjectByID( targetImageObjectId ) );
@@ -79,7 +76,7 @@ void ImageFilterExampleWidget::on_startButton_clicked()
     {
         ui->progressBar->setValue( i );
         QCoreApplication::processEvents();
-        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+        std::this_thread::sleep_for( std::chrono::milliseconds( 50 ) );
     }
 
     ui->startButton->setEnabled( true );
@@ -87,7 +84,7 @@ void ImageFilterExampleWidget::on_startButton_clicked()
     ui->progressBar->setEnabled( false );
 
     SceneObject * transformObject = ibisAPI->GetObjectByID( transformObjectId );
-    vtkTransform * transform = vtkTransform::SafeDownCast( transformObject->GetLocalTransform() );
+    vtkTransform * transform      = vtkTransform::SafeDownCast( transformObject->GetLocalTransform() );
     Q_ASSERT_X( transform, "ImageFilterExampleWidget::on_startButton_clicked()", "Invalid transform" );
 
     transformObject->StartModifyingTransform();
@@ -100,7 +97,6 @@ void ImageFilterExampleWidget::on_startButton_clicked()
     //====================================================================================
 
     transformObject->FinishModifyingTransform();
-
 }
 
 void ImageFilterExampleWidget::UpdateUi()
@@ -108,12 +104,11 @@ void ImageFilterExampleWidget::UpdateUi()
     ui->transformObjectComboBox->clear();
     ui->sourceImageComboBox->clear();
     ui->targetImageComboBox->clear();
-    if( !m_pluginInterface )
-        return;
-    IbisAPI *ibisAPI = m_pluginInterface->GetIbisAPI();
+    if( !m_pluginInterface ) return;
+    IbisAPI * ibisAPI = m_pluginInterface->GetIbisAPI();
     if( ibisAPI )
     {
-        const QList< SceneObject* > &allObjects = ibisAPI->GetAllObjects();
+        const QList<SceneObject *> & allObjects = ibisAPI->GetAllObjects();
         for( int i = 0; i < allObjects.size(); ++i )
         {
             SceneObject * current = allObjects[i];
@@ -123,7 +118,7 @@ void ImageFilterExampleWidget::UpdateUi()
                 if( localTransform && current->CanEditTransformManually() )
                     ui->transformObjectComboBox->addItem( current->GetName(), QVariant( current->GetObjectID() ) );
 
-                if( current->IsA("ImageObject") )
+                if( current->IsA( "ImageObject" ) )
                 {
                     ui->sourceImageComboBox->addItem( current->GetName(), QVariant( current->GetObjectID() ) );
                     ui->targetImageComboBox->addItem( current->GetName(), QVariant( current->GetObjectID() ) );
@@ -133,11 +128,11 @@ void ImageFilterExampleWidget::UpdateUi()
 
         if( ui->sourceImageComboBox->count() == 0 )
         {
-            ui->sourceImageComboBox->addItem( "None", QVariant(-1) );
+            ui->sourceImageComboBox->addItem( "None", QVariant( -1 ) );
         }
         if( ui->targetImageComboBox->count() == 0 )
         {
-            ui->targetImageComboBox->addItem( "None", QVariant(-1) );
+            ui->targetImageComboBox->addItem( "None", QVariant( -1 ) );
         }
     }
 }

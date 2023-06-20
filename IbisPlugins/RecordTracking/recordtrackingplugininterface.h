@@ -19,30 +19,27 @@ class RecordTrackingWidget;
 
 class RecordTrackingPluginInterface : public ToolPluginInterface
 {
-
     Q_OBJECT
-    Q_INTERFACES(IbisPlugin)
-    Q_PLUGIN_METADATA(IID "Ibis.RecordTrackingPluginInterface" )
+    Q_INTERFACES( IbisPlugin )
+    Q_PLUGIN_METADATA( IID "Ibis.RecordTrackingPluginInterface" )
 
 public:
-
     RecordTrackingPluginInterface();
     ~RecordTrackingPluginInterface();
-    virtual QString GetPluginName() override { return QString("RecordTracking"); }
+    virtual QString GetPluginName() override { return QString( "RecordTracking" ); }
     virtual bool WidgetAboutToClose() override;
     bool CanRun() override;
-    QString GetMenuEntryString() override { return QString("Record Tracking Information"); }
+    QString GetMenuEntryString() override { return QString( "Record Tracking Information" ); }
 
     QWidget * CreateTab() override;
 
 protected slots:
 
-    void OnTrackedToolAdded(int);
-    void OnTrackedToolRemoved(int);
+    void OnTrackedToolAdded( int );
+    void OnTrackedToolRemoved( int );
 
 private:
     RecordTrackingWidget * m_widget;
-
 };
 
 #endif

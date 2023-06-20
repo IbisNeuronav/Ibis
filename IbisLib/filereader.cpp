@@ -162,11 +162,11 @@ bool FileReader::IsMINC1( QString fileName )
     FILE * fp = fopen( fileName.toUtf8().data(), "rb" );
     if( fp )
     {
-        char first4[ 4 ];
+        char first4[4];
         size_t count = fread( first4, 4, 1, fp );
         fclose( fp );
 
-        if( count == 1 && first4[ 0 ] == 'C' && first4[ 1 ] == 'D' && first4[ 2 ] == 'F' && first4[ 3 ] == '\001' )
+        if( count == 1 && first4[0] == 'C' && first4[1] == 'D' && first4[2] == 'F' && first4[3] == '\001' )
         {
             return true;
         }
@@ -263,7 +263,7 @@ void FileReader::SetFileNames( QStringList & filenames )
     for( int i = 0; i < filenames.size(); ++i )
     {
         OpenFileParams::SingleFileParam p;
-        p.fileName = filenames[ i ];
+        p.fileName = filenames[i];
         m_params->filesParams.push_back( p );
     }
 }
@@ -272,9 +272,8 @@ void FileReader::GetReadObjects( QList<SceneObject *> & objects )
 {
     for( int i = 0; i < m_params->filesParams.size(); ++i )
     {
-        if( m_params->filesParams[ i ].loadedObject ) objects.push_back( m_params->filesParams[ i ].loadedObject );
-        if( m_params->filesParams[ i ].secondaryObject )
-            objects.push_back( m_params->filesParams[ i ].secondaryObject );
+        if( m_params->filesParams[i].loadedObject ) objects.push_back( m_params->filesParams[i].loadedObject );
+        if( m_params->filesParams[i].secondaryObject ) objects.push_back( m_params->filesParams[i].secondaryObject );
     }
 }
 
@@ -285,12 +284,12 @@ void FileReader::run()
     m_warnings.clear();
     for( int i = 0; i < m_params->filesParams.size(); ++i )
     {
-        OpenFileParams::SingleFileParam & param = m_params->filesParams[ i ];
+        OpenFileParams::SingleFileParam & param = m_params->filesParams[i];
         m_currentFileIndex                      = i;
         QList<SceneObject *> readObjects;
         OpenFile( readObjects, param.fileName, param.objectName, param.isLabel );
-        if( readObjects.size() > 0 ) param.loadedObject = readObjects[ 0 ];
-        if( readObjects.size() > 1 ) param.secondaryObject = readObjects[ 1 ];
+        if( readObjects.size() > 0 ) param.loadedObject = readObjects[0];
+        if( readObjects.size() > 1 ) param.secondaryObject = readObjects[1];
     }
 
     // Push all read objects to main thread to be able to create connections without having to worry about type of
@@ -298,7 +297,7 @@ void FileReader::run()
     QThread * mainThread = QApplication::instance()->thread();
     for( int i = 0; i < m_params->filesParams.size(); ++i )
     {
-        OpenFileParams::SingleFileParam & param = m_params->filesParams[ i ];
+        OpenFileParams::SingleFileParam & param = m_params->filesParams[i];
         if( param.loadedObject ) param.loadedObject->moveToThread( mainThread );
         if( param.secondaryObject ) param.secondaryObject->moveToThread( mainThread );
     }
@@ -311,7 +310,7 @@ QString FileReader::GetCurrentlyReadFile()
     QString filename;
     if( m_currentFileIndex < m_params->filesParams.size() )
     {
-        QFileInfo info( m_params->filesParams[ m_currentFileIndex ].fileName );
+        QFileInfo info( m_params->filesParams[m_currentFileIndex].fileName );
         filename = info.fileName();
     }
     return filename;
@@ -736,7 +735,7 @@ bool FileReader::OpenTagFile( QList<SceneObject *> & readObjects, QString filena
         displayName = dataObjectName;
     else
     {
-        if( reader->GetVolumeNames().size() > 0 ) displayName = QString( reader->GetVolumeNames()[ 0 ].c_str() );
+        if( reader->GetVolumeNames().size() > 0 ) displayName = QString( reader->GetVolumeNames()[0].c_str() );
         if( displayName.isEmpty() ) displayName = info.baseName();
     }
     PointsObject * pointsObject = PointsObject::New();
@@ -745,8 +744,8 @@ bool FileReader::OpenTagFile( QList<SceneObject *> & readObjects, QString filena
     pointsObject->SetFullFileName( info.absoluteFilePath() );
     for( i = 0; i < n; i++ )
     {
-        pointsObject->AddPoint( QString( reader->GetPointNames()[ i ].c_str() ), pts->GetPoint( i ) );
-        pointsObject->SetPointTimeStamp( i, reader->GetTimeStamps()[ i ].c_str() );
+        pointsObject->AddPoint( QString( reader->GetPointNames()[i].c_str() ), pts->GetPoint( i ) );
+        pointsObject->SetPointTimeStamp( i, reader->GetTimeStamps()[i].c_str() );
     }
     pointsObject->SetSelectedPoint( 0 );
     readObjects.push_back( pointsObject );
@@ -755,15 +754,15 @@ bool FileReader::OpenTagFile( QList<SceneObject *> & readObjects, QString filena
     // it will be added to the same parent
     if( reader->GetNumberOfVolumes() > 1 )
     {
-        displayName = QString( reader->GetVolumeNames()[ 1 ].c_str() );
+        displayName = QString( reader->GetVolumeNames()[1].c_str() );
         if( displayName.isEmpty() ) displayName = info.baseName() + "*";
         PointsObject * pointsObject1 = PointsObject::New();
         pointsObject1->SetName( displayName );
         vtkPoints * pts1 = reader->GetVolume( 1 );
         for( i = 0; i < n; i++ )
         {
-            pointsObject1->AddPoint( QString( reader->GetPointNames()[ i ].c_str() ), pts1->GetPoint( i ) );
-            pointsObject1->SetPointTimeStamp( i, reader->GetTimeStamps()[ i ].c_str() );
+            pointsObject1->AddPoint( QString( reader->GetPointNames()[i].c_str() ), pts1->GetPoint( i ) );
+            pointsObject1->SetPointTimeStamp( i, reader->GetTimeStamps()[i].c_str() );
         }
         pointsObject1->SetSelectedPoint( 0 );
         readObjects.push_back( pointsObject1 );
@@ -791,28 +790,28 @@ bool FileReader::GetPointsDataFromTagFile( QString filename, PointsObject * pts1
     int i, n = pts->GetNumberOfPoints();
     QFileInfo info( filename );
     QString displayName;
-    if( reader->GetVolumeNames().size() > 0 ) displayName = QString( reader->GetVolumeNames()[ 0 ].c_str() );
+    if( reader->GetVolumeNames().size() > 0 ) displayName = QString( reader->GetVolumeNames()[0].c_str() );
     if( displayName.isEmpty() ) displayName = info.baseName();
     pts1->SetName( displayName );
     pts1->SetDataFileName( info.fileName() );
     pts1->SetFullFileName( info.absoluteFilePath() );
     for( i = 0; i < n; i++ )
     {
-        pts1->AddPoint( QString( reader->GetPointNames()[ i ].c_str() ), pts->GetPoint( i ) );
-        pts1->SetPointTimeStamp( i, reader->GetTimeStamps()[ i ].c_str() );
+        pts1->AddPoint( QString( reader->GetPointNames()[i].c_str() ), pts->GetPoint( i ) );
+        pts1->SetPointTimeStamp( i, reader->GetTimeStamps()[i].c_str() );
     }
     // is there a second set of points?
     // it will be added to the same parent
     if( reader->GetNumberOfVolumes() > 1 )
     {
-        displayName = QString( reader->GetVolumeNames()[ 1 ].c_str() );
+        displayName = QString( reader->GetVolumeNames()[1].c_str() );
         if( displayName.isEmpty() ) displayName = info.baseName() + "*";
         pts2->SetName( displayName );
         vtkPoints * pts1 = reader->GetVolume( 1 );
         for( i = 0; i < n; i++ )
         {
-            pts2->AddPoint( QString( reader->GetPointNames()[ i ].c_str() ), pts1->GetPoint( i ) );
-            pts2->SetPointTimeStamp( i, reader->GetTimeStamps()[ i ].c_str() );
+            pts2->AddPoint( QString( reader->GetPointNames()[i].c_str() ), pts1->GetPoint( i ) );
+            pts2->SetPointTimeStamp( i, reader->GetTimeStamps()[i].c_str() );
         }
     }
     reader->Delete();

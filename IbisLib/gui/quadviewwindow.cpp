@@ -38,7 +38,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 ObjectSerializationMacro( QuadViewWindow );
 
-const QString QuadViewWindow::ViewNames[ 4 ] = { "Transverse", "ThreeD", "Coronal", "Sagittal" };
+const QString QuadViewWindow::ViewNames[4] = {"Transverse", "ThreeD", "Coronal", "Sagittal"};
 
 QuadViewWindow::QuadViewWindow( QWidget * parent, Qt::WindowFlags fl ) : QWidget( parent, fl )
 {
@@ -139,18 +139,18 @@ QAbstractButton * QuadViewWindow::CreateToolButton( QWidget * parent, QString na
 
 void QuadViewWindow::MakeOneWidget( int index, const char * name )
 {
-    m_vtkWindowFrames[ index ] = new QFrame( this );
-    m_vtkWindowFrames[ index ]->setFrameShape( QFrame::NoFrame );
+    m_vtkWindowFrames[index] = new QFrame( this );
+    m_vtkWindowFrames[index]->setFrameShape( QFrame::NoFrame );
 
     vtkNew<vtkGenericOpenGLRenderWindow> w;
-    m_vtkWidgets[ index ] = new QVTKRenderWidget( m_vtkWindowFrames[ index ] );
-    m_vtkWidgets[ index ]->setRenderWindow( w );
-    m_vtkWidgets[ index ]->setObjectName( name );
-    m_vtkWidgets[ index ]->setSizePolicy( QSizePolicy::Expanding, QSizePolicy::Expanding );
-    m_vtkWidgets[ index ]->installEventFilter( this );
-    m_frameLayouts[ index ] = new QVBoxLayout( m_vtkWindowFrames[ index ] );
-    m_frameLayouts[ index ]->addWidget( m_vtkWidgets[ index ] );
-    m_frameLayouts[ index ]->setContentsMargins( 1, 1, 1, 1 );
+    m_vtkWidgets[index] = new QVTKRenderWidget( m_vtkWindowFrames[index] );
+    m_vtkWidgets[index]->setRenderWindow( w );
+    m_vtkWidgets[index]->setObjectName( name );
+    m_vtkWidgets[index]->setSizePolicy( QSizePolicy::Expanding, QSizePolicy::Expanding );
+    m_vtkWidgets[index]->installEventFilter( this );
+    m_frameLayouts[index] = new QVBoxLayout( m_vtkWindowFrames[index] );
+    m_frameLayouts[index]->addWidget( m_vtkWidgets[index] );
+    m_frameLayouts[index]->setContentsMargins( 1, 1, 1, 1 );
 
     int row, col;
     switch( index )
@@ -174,7 +174,7 @@ void QuadViewWindow::MakeOneWidget( int index, const char * name )
             break;
     }
 
-    m_viewWindowsLayout->addWidget( m_vtkWindowFrames[ index ], row, col );
+    m_viewWindowsLayout->addWidget( m_vtkWindowFrames[index], row, col );
 }
 
 QuadViewWindow::~QuadViewWindow() {}
@@ -183,24 +183,24 @@ void QuadViewWindow::SetSceneManager( SceneManager * man )
 {
     Q_ASSERT( man );
     View * view;
-    view = man->CreateView( TRANSVERSE_VIEW_TYPE, ViewNames[ 0 ], TRANSVERSE_VIEW_ID );
-    view->SetQtRenderWidget( m_vtkWidgets[ 0 ] );
-    view->SetInteractor( m_vtkWidgets[ 0 ]->GetInteractor() );
+    view = man->CreateView( TRANSVERSE_VIEW_TYPE, ViewNames[0], TRANSVERSE_VIEW_ID );
+    view->SetQtRenderWidget( m_vtkWidgets[0] );
+    view->SetInteractor( m_vtkWidgets[0]->GetInteractor() );
     man->SetMainTransverseViewID( TRANSVERSE_VIEW_ID );
 
-    view = man->CreateView( THREED_VIEW_TYPE, ViewNames[ 1 ], THREED_VIEW_ID );
-    view->SetQtRenderWidget( m_vtkWidgets[ 1 ] );
-    view->SetInteractor( m_vtkWidgets[ 1 ]->GetInteractor() );
+    view = man->CreateView( THREED_VIEW_TYPE, ViewNames[1], THREED_VIEW_ID );
+    view->SetQtRenderWidget( m_vtkWidgets[1] );
+    view->SetInteractor( m_vtkWidgets[1]->GetInteractor() );
     man->SetMain3DViewID( THREED_VIEW_ID );
 
-    view = man->CreateView( CORONAL_VIEW_TYPE, ViewNames[ 2 ], CORONAL_VIEW_ID );
-    view->SetQtRenderWidget( m_vtkWidgets[ 2 ] );
-    view->SetInteractor( m_vtkWidgets[ 2 ]->GetInteractor() );
+    view = man->CreateView( CORONAL_VIEW_TYPE, ViewNames[2], CORONAL_VIEW_ID );
+    view->SetQtRenderWidget( m_vtkWidgets[2] );
+    view->SetInteractor( m_vtkWidgets[2]->GetInteractor() );
     man->SetMainCoronalViewID( CORONAL_VIEW_ID );
 
-    view = man->CreateView( SAGITTAL_VIEW_TYPE, ViewNames[ 3 ], SAGITTAL_VIEW_ID );
-    view->SetQtRenderWidget( m_vtkWidgets[ 3 ] );
-    view->SetInteractor( m_vtkWidgets[ 3 ]->GetInteractor() );
+    view = man->CreateView( SAGITTAL_VIEW_TYPE, ViewNames[3], SAGITTAL_VIEW_ID );
+    view->SetQtRenderWidget( m_vtkWidgets[3] );
+    view->SetInteractor( m_vtkWidgets[3]->GetInteractor() );
     man->SetMainSagittalViewID( SAGITTAL_VIEW_ID );
 
     m_sceneManager = man;
@@ -232,7 +232,7 @@ void QuadViewWindow::Detach3DView( QWidget * /*parent*/ )
     m_detachedWidget     = new QWidget();
     QVBoxLayout * layout = new QVBoxLayout( m_detachedWidget );
     layout->setMargin( 0 );
-    layout->addWidget( m_vtkWidgets[ 1 ] );
+    layout->addWidget( m_vtkWidgets[1] );
 
     int nbScreens = QApplication::desktop()->screenCount();
     if( nbScreens > 1 )
@@ -247,7 +247,7 @@ void QuadViewWindow::Detach3DView( QWidget * /*parent*/ )
 
 void QuadViewWindow::Attach3DView()
 {
-    m_frameLayouts[ 1 ]->addWidget( m_vtkWidgets[ 1 ] );
+    m_frameLayouts[1]->addWidget( m_vtkWidgets[1] );
     delete m_detachedWidget;
     m_detachedWidget = nullptr;
 }
@@ -264,8 +264,8 @@ void QuadViewWindow::ExpandViewButtonClicked()
     {
         for( int i = 0; i < 4; i++ )
         {
-            m_vtkWindowFrames[ i ]->show();
-            m_vtkWidgets[ i ]->update();
+            m_vtkWindowFrames[i]->show();
+            m_vtkWidgets[i]->update();
         }
         m_viewExpanded = false;
     }
@@ -275,7 +275,7 @@ void QuadViewWindow::ExpandViewButtonClicked()
         {
             if( i != m_currentViewWindow )
             {
-                m_vtkWindowFrames[ i ]->hide();
+                m_vtkWindowFrames[i]->hide();
             }
         }
         m_viewExpanded = true;
@@ -301,10 +301,10 @@ void QuadViewWindow::ViewTopButtonClicked() { m_sceneManager->SetStandardView( S
 
 void QuadViewWindow::OnCursorMoved()
 {
-    double cursorPos[ 3 ];
+    double cursorPos[3];
     m_sceneManager->GetCursorPosition( cursorPos );
     QString text;
-    text.sprintf( "Cursor: ( %.2f, %.2f, %.2f )\t", cursorPos[ 0 ], cursorPos[ 1 ], cursorPos[ 2 ] );
+    text.sprintf( "Cursor: ( %.2f, %.2f, %.2f )\t", cursorPos[0], cursorPos[1], cursorPos[2] );
     m_cursorPosLabel->setText( text );
 }
 
@@ -329,7 +329,7 @@ bool QuadViewWindow::eventFilter( QObject * obj, QEvent * event )
         int which = -1;
         for( int i = 0; i < 4; ++i )
         {
-            if( m_vtkWidgets[ i ] == obj )
+            if( m_vtkWidgets[i] == obj )
             {
                 which = i;
                 break;
@@ -355,11 +355,11 @@ void QuadViewWindow::SetCurrentViewWindow( int index )
     {
         if( i == m_currentViewWindow )
         {
-            m_vtkWindowFrames[ i ]->setStyleSheet( "background-color:red" );
+            m_vtkWindowFrames[i]->setStyleSheet( "background-color:red" );
         }
         else
         {
-            m_vtkWindowFrames[ i ]->setStyleSheet( "" );
+            m_vtkWindowFrames[i]->setStyleSheet( "" );
         }
     }
 }

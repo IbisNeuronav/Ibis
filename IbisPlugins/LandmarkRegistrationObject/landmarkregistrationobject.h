@@ -11,10 +11,10 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef LANDMARKREGISTRATIONOBJECT_H
 #define LANDMARKREGISTRATIONOBJECT_H
 
-#include <QVector>
-#include "sceneobject.h"
-#include "pointsobject.h"
 #include <vtkSmartPointer.h>
+#include <QVector>
+#include "pointsobject.h"
+#include "sceneobject.h"
 
 class LandmarkTransform;
 class vtkPoints;
@@ -25,46 +25,46 @@ class LandmarkRegistrationObject : public SceneObject
 
 public:
     static LandmarkRegistrationObject * New() { return new LandmarkRegistrationObject; }
-    vtkTypeMacro(LandmarkRegistrationObject,SceneObject);
+    vtkTypeMacro( LandmarkRegistrationObject, SceneObject );
 
     LandmarkRegistrationObject();
     virtual ~LandmarkRegistrationObject();
 
-    virtual void CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets );
+    virtual void CreateSettingsWidgets( QWidget * parent, QVector<QWidget *> * widgets );
     virtual void Export();
-    virtual bool IsExportable()  { return true; }
+    virtual bool IsExportable() { return true; }
     virtual void Serialize( Serializer * ser );
     virtual void PostSceneRead();
 
-    bool ReadTagFile( );
+    bool ReadTagFile();
 
     void SetSourcePoints( vtkSmartPointer<PointsObject> pts );
     void SetTargetPoints( vtkSmartPointer<PointsObject> pts );
     vtkSmartPointer<PointsObject> GetSourcePoints();
     vtkSmartPointer<PointsObject> GetTargetPoints();
-    QStringList GetPointNames( );
-    int  GetNumberOfPoints();
-    int  GetNumberOfActivePoints();
+    QStringList GetPointNames();
+    int GetNumberOfPoints();
+    int GetNumberOfActivePoints();
     vtkSmartPointer<LandmarkTransform> GetLandmarkTransform() { return m_registrationTransform; }
     void UpdateLandmarkTransform();
     void RegisterObject( bool on );
     bool IsRegistered() { return m_isRegistered; }
-    int  GetTargetObjectID() { return m_targetObjectID; }
+    int GetTargetObjectID() { return m_targetObjectID; }
     void SetTargetObjectID( int id );
-    int  GetPointEnabledStatus( int index );
-    void SetPointEnabledStatus (int index, int stat );
+    int GetPointEnabledStatus( int index );
+    void SetPointEnabledStatus( int index, int stat );
     void DeletePoint( int index );
     void SelectPoint( int index );
     void SetPointLabel( int index, const QString & label );
     void SetTargetPointCoordinates( int index, double coords[3] );
-    void SetTargetPointTimeStamp( int index, const QString &stamp );
+    void SetTargetPointTimeStamp( int index, const QString & stamp );
     void SetTagSize( int tagSize );
 
 signals:
     void UpdateSettings();
 
 public slots:
-    void PointAdded( );
+    void PointAdded();
     void PointRemoved( int );
     void Update();
     void OnSourcePointsRemoved();
@@ -74,7 +74,6 @@ protected slots:
     void CurrentObjectChanged();
 
 protected:
-
     // SceneObject protected overloads
     virtual void ObjectAddedToScene();
     virtual void ObjectAboutToBeRemovedFromScene() override;
@@ -82,7 +81,7 @@ protected:
     virtual void InternalPostSceneRead();
     virtual void Hide();
     virtual void Show();
-    virtual void SetHiddenChildren(SceneObject * parent, bool hide);
+    virtual void SetHiddenChildren( SceneObject * parent, bool hide );
 
     void WriteTagFile( const QString & filename, bool saveEnabledOnly = false );
     void WriteXFMFile( const QString & filename );
@@ -104,11 +103,11 @@ protected:
     bool m_registerRequested;  // this is used only for serialization
 
 private:
-    int m_sourcePointsID; // needed for saving/loading scene
+    int m_sourcePointsID;  // needed for saving/loading scene
     int m_targetPointsID;
     bool m_isRegistered;
 };
 
 ObjectSerializationHeaderMacro( LandmarkRegistrationObject );
 
-#endif // LANDMARKREGISTRATIONOBJECT_H
+#endif  // LANDMARKREGISTRATIONOBJECT_H

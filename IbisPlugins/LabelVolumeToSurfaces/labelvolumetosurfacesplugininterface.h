@@ -18,13 +18,11 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 class LabelVolumeToSurfacesPluginInterface : public GeneratorPluginInterface
 {
-
     Q_OBJECT
-    Q_INTERFACES(IbisPlugin)
-    Q_PLUGIN_METADATA(IID "Ibis.LabelVolumeToSurfacesPluginInterface" )
+    Q_INTERFACES( IbisPlugin )
+    Q_PLUGIN_METADATA( IID "Ibis.LabelVolumeToSurfacesPluginInterface" )
 
 public:
-
     LabelVolumeToSurfacesPluginInterface();
     virtual ~LabelVolumeToSurfacesPluginInterface();
 
@@ -32,10 +30,9 @@ public:
     QString GetPluginName() override { return "LabelVolumeToSurfaces"; }
 
     // ObjectPluginInterface
-    QString GetMenuEntryString() override { return QString("Extract surfaces from label volume"); }
+    QString GetMenuEntryString() override { return QString( "Extract surfaces from label volume" ); }
     bool CanRun() override;
     void Run() override;
-
 };
 
 #endif

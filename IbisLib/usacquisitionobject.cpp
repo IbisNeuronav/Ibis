@@ -62,7 +62,7 @@ USAcquisitionObject::USAcquisitionObject()
 {
     m_usProbeObjectId = SceneManager::InvalidId;
 
-    m_videoBuffer = new TrackedVideoBuffer( m_defaultImageSize[ 0 ], m_defaultImageSize[ 1 ] );
+    m_videoBuffer = new TrackedVideoBuffer( m_defaultImageSize[0], m_defaultImageSize[1] );
 
     m_isRecording   = false;
     m_baseDirectory = QDir::homePath() + "/" + IBIS_CONFIGURATION_SUBDIRECTORY + "/" + ACQ_BASE_DIR;
@@ -123,8 +123,8 @@ USAcquisitionObject::USAcquisitionObject()
     m_staticSlicesProperties     = vtkSmartPointer<vtkImageProperty>::New();
     m_staticSlicesLutIndex       = 0;  // default to greyscale
     m_staticSlicesDataNeedUpdate = true;
-    m_defaultImageSize[ 0 ]      = 640;
-    m_defaultImageSize[ 1 ]      = 480;
+    m_defaultImageSize[0]        = 640;
+    m_defaultImageSize[1]        = 480;
     m_componentsNumber           = 0;
     m_useCalibratedTransform     = false;
 }
@@ -175,7 +175,7 @@ void USAcquisitionObject::Setup( View * view )
 
         SetupAllStaticSlices( view, elem );
 
-        m_perViews[ view ] = elem;
+        m_perViews[view] = elem;
     }
 }
 
@@ -268,12 +268,11 @@ void USAcquisitionObject::UpdatePipeline()
 
         for( unsigned i = 0; i < perView.staticSlices.size(); ++i )  // don't touch the static for now
         {
-            vtkImageActor * staticActor = perView.staticSlices[ i ];
+            vtkImageActor * staticActor = perView.staticSlices[i];
             if( m_isMaskOn )
-                staticActor->GetMapper()->SetInputConnection(
-                    m_staticSlicesData[ i ].imageStencil->GetOutputPort() );  //
+                staticActor->GetMapper()->SetInputConnection( m_staticSlicesData[i].imageStencil->GetOutputPort() );  //
             else
-                staticActor->GetMapper()->SetInputConnection( m_staticSlicesData[ i ].mapToColors->GetOutputPort() );
+                staticActor->GetMapper()->SetInputConnection( m_staticSlicesData[i].mapToColors->GetOutputPort() );
         }
         ++it;
     }
@@ -316,7 +315,7 @@ void USAcquisitionObject::Record()
     if( probe->IsOk() )
     {
         int * dims = probe->GetVideoOutput()->GetDimensions();
-        this->SetFrameAndMaskSize( dims[ 0 ], dims[ 1 ] );
+        this->SetFrameAndMaskSize( dims[0], dims[1] );
         m_videoBuffer->AddFrame( probe->GetVideoOutput(), probe->GetUncalibratedWorldTransform()->GetMatrix(),
                                  probe->GetLastTimestamp() );
     }
@@ -338,11 +337,11 @@ bool USAcquisitionObject::AddFrame( vtkImageData * image, vtkMatrix4x4 * mat, do
     int * dims = image->GetDimensions();
     if( m_videoBuffer->GetNumberOfFrames() )
     {
-        if( ( dims[ 0 ] != m_defaultImageSize[ 0 ] ) || ( dims[ 1 ] != m_defaultImageSize[ 1 ] ) ) return false;
+        if( ( dims[0] != m_defaultImageSize[0] ) || ( dims[1] != m_defaultImageSize[1] ) ) return false;
     }
     else
     {
-        this->SetFrameAndMaskSize( dims[ 0 ], dims[ 1 ] );
+        this->SetFrameAndMaskSize( dims[0], dims[1] );
     }
 
     // Add the frame
@@ -472,7 +471,7 @@ void USAcquisitionObject::SetupAllStaticSlices( View * view, PerViewElements & p
 
     for( unsigned i = 0; i < m_staticSlicesData.size(); ++i )
     {
-        PerStaticSlice & pss = m_staticSlicesData[ i ];
+        PerStaticSlice & pss = m_staticSlicesData[i];
 
         vtkImageActor * imageActor = vtkImageActor::New();
         if( m_isMaskOn )
@@ -574,7 +573,7 @@ void USAcquisitionObject::ClearStaticSlicesData()
 {
     for( unsigned i = 0; i < m_staticSlicesData.size(); ++i )
     {
-        PerStaticSlice & pss = m_staticSlicesData[ i ];
+        PerStaticSlice & pss = m_staticSlicesData[i];
         pss.mapToColors->Delete();
         pss.imageStencil->Delete();
         pss.transform->Delete();
@@ -735,7 +734,7 @@ bool USAcquisitionObject::LoadRGBFrames( QStringList & allMINCFiles )
 
 void USAcquisitionObject::AdjustFrame( vtkImageData * frame, vtkMatrix4x4 * inputMatrix, vtkMatrix4x4 * outputMatrix )
 {
-    double start[ 3 ], step[ 3 ];
+    double start[3], step[3];
     frame->GetOrigin( start );
     frame->GetSpacing( step );
     vtkSmartPointer<vtkTransform> localTransform = vtkSmartPointer<vtkTransform>::New();
@@ -1074,7 +1073,7 @@ void USAcquisitionObject::ExportTrackedVideoBuffer( QString destDir, bool masked
         QStringList allFiles = tmp.entryList( QStringList( "*.*" ), QDir::Files, QDir::Name );
         if( !allFiles.isEmpty() )
         {
-            for( int i = 0; i < allFiles.size(); i++ ) tmp.remove( allFiles[ i ] );
+            for( int i = 0; i < allFiles.size(); i++ ) tmp.remove( allFiles[i] );
         }
         if( !tmp.rmdir( subDirName ) )
         {
@@ -1256,7 +1255,7 @@ bool USAcquisitionObject::Import()
             m_calibrationTransform->Identity();
             QFileInfo fi( filenames.at( 0 ) );
             QStringList acqSuffix = fi.fileName().split( "." );
-            QString acqName       = tr( "Acquisition_" ) + acqSuffix[ 0 ];
+            QString acqName       = tr( "Acquisition_" ) + acqSuffix[0];
             this->SetName( acqName );
             this->SetFullFileName( fi.absoluteFilePath() );
             QString calibrationTransformFileName( fi.absolutePath() );
@@ -1282,8 +1281,8 @@ bool USAcquisitionObject::Import()
 
 void USAcquisitionObject::SetFrameAndMaskSize( int width, int height )
 {
-    m_defaultImageSize[ 0 ] = width;
-    m_defaultImageSize[ 1 ] = height;
+    m_defaultImageSize[0] = width;
+    m_defaultImageSize[1] = height;
     m_mask->SetMaskSize( width, height );
 }
 
@@ -1300,7 +1299,7 @@ double USAcquisitionObject::GetSliceImageOpacity() { return m_sliceProperties->G
 void USAcquisitionObject::SetSliceLutIndex( int index )
 {
     m_sliceLutIndex       = index;
-    double range[ 2 ]     = { 0.0, 255.0 };
+    double range[2]       = {0.0, 255.0};
     QString slicesLutName = Application::GetLookupTableManager()->GetTemplateLookupTableName( m_sliceLutIndex );
     Application::GetLookupTableManager()->CreateLookupTable( slicesLutName, range, m_lut );
     emit ObjectModified();
@@ -1358,7 +1357,7 @@ double USAcquisitionObject::GetStaticSlicesOpacity() { return m_staticSlicesProp
 void USAcquisitionObject::SetStaticSlicesLutIndex( int index )
 {
     m_staticSlicesLutIndex = index;
-    double range[ 2 ]      = { 0.0, 255.0 };
+    double range[2]        = {0.0, 255.0};
     QString staticSlicesLutName =
         Application::GetLookupTableManager()->GetTemplateLookupTableName( m_staticSlicesLutIndex );
     vtkPiecewiseFunctionLookupTable * staticLut = vtkPiecewiseFunctionLookupTable::New();
@@ -1366,7 +1365,7 @@ void USAcquisitionObject::SetStaticSlicesLutIndex( int index )
     Application::GetLookupTableManager()->CreateLookupTable( staticSlicesLutName, range, staticLut );
     for( unsigned i = 0; i < m_staticSlicesData.size(); ++i )
     {
-        m_staticSlicesData[ i ].mapToColors->SetLookupTable( staticLut );
+        m_staticSlicesData[i].mapToColors->SetLookupTable( staticLut );
     }
     staticLut->Delete();
     emit ObjectModified();

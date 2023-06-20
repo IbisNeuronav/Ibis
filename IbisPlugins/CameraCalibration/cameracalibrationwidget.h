@@ -17,7 +17,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 namespace Ui
 {
-    class CameraCalibrationWidget;
+class CameraCalibrationWidget;
 }
 
 class TrackedVideoSource;
@@ -31,11 +31,9 @@ class CameraCalibrationPluginInterface;
 
 class CameraCalibrationWidget : public QWidget
 {
-
     Q_OBJECT
 
 public:
-
     explicit CameraCalibrationWidget( QWidget * parent = 0 );
     ~CameraCalibrationWidget();
 
@@ -47,21 +45,20 @@ protected slots:
 
 private slots:
 
-    void on_computeCenterCheckBox_toggled(bool checked);
-    void on_computeDistortionCheckBox_toggled(bool checked);
+    void on_computeCenterCheckBox_toggled( bool checked );
+    void on_computeDistortionCheckBox_toggled( bool checked );
 
-    void on_intrinsicRadioButton_toggled(bool checked);
-    void on_extrinsicRadioButton_toggled(bool checked);
-    void on_bothRadioButton_toggled(bool checked);
+    void on_intrinsicRadioButton_toggled( bool checked );
+    void on_extrinsicRadioButton_toggled( bool checked );
+    void on_bothRadioButton_toggled( bool checked );
 
-    void on_accumulateCheckBox_toggled(bool checked);
+    void on_accumulateCheckBox_toggled( bool checked );
     void on_captureViewButton_clicked();
     void on_clearCalibrationViewsButton_clicked();
 
-    void on_optimizeGridDetectCheckBox_toggled(bool checked);
+    void on_optimizeGridDetectCheckBox_toggled( bool checked );
 
 private:
-
     vtkRenderWindow * GetRenderWindow();
     vtkRenderWindowInteractor * GetInteractor();
     void CreateGrid();
@@ -77,12 +74,11 @@ private:
 
     // grid point position
     bool m_imagePointsOn;
-    std::vector< vtkActor * > m_markerActors;
+    std::vector<vtkActor *> m_markerActors;
 
     CameraCalibrationPluginInterface * m_pluginInterface;
 
     QElapsedTimer * m_accumulationTime;
-
 };
 
 #endif

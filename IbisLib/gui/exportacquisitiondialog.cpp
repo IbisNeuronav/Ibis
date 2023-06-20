@@ -67,7 +67,7 @@ void ExportAcquisitionDialog::UpdateUi()
     ui->relativeToComboBox->addItem( "None", QVariant( SceneManager::InvalidId ) );
     for( int i = 0; i < objects.size(); ++i )
     {
-        ui->relativeToComboBox->addItem( objects[ i ]->GetName(), QVariant( objects[ i ]->GetObjectID() ) );
+        ui->relativeToComboBox->addItem( objects[i]->GetName(), QVariant( objects[i]->GetObjectID() ) );
     }
     ui->relativeToComboBox->blockSignals( false );
 }

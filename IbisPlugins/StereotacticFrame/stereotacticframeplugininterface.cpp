@@ -10,58 +10,46 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 // Thanks to Simon Drouin for writing this class
 
+#include <float.h>
+#include <vtkAxesActor.h>
+#include <vtkCellArray.h>
+#include <vtkEventQtSlotConnect.h>
+#include <vtkLandmarkTransform.h>
+#include <vtkMatrix4x4.h>
+#include <vtkPoints.h>
+#include <vtkPolyData.h>
+#include <vtkRenderer.h>
+#include <vtkTransform.h>
+#include <QtPlugin>
+#include "SVL.h"
+#include "ibisapi.h"
+#include "imageobject.h"
+#include "polydataobject.h"
 #include "stereotacticframeplugininterface.h"
 #include "stereotacticframewidget.h"
-#include <QtPlugin>
-#include "vtkNShapeCalibrationWidget.h"
-#include <vtkLandmarkTransform.h>
-#include <vtkPoints.h>
-#include <vtkCellArray.h>
-#include <vtkPolyData.h>
-#include <vtkEventQtSlotConnect.h>
-#include <vtkAxesActor.h>
-#include <vtkRenderer.h>
-#include "ibisapi.h"
 #include "view.h"
-#include "polydataobject.h"
-#include "imageobject.h"
-#include "SVL.h"
-#include <vtkMatrix4x4.h>
-#include <vtkTransform.h>
-#include <float.h>
+#include "vtkNShapeCalibrationWidget.h"
 
-const Vec3 FrameLocators[4][4] = { { Vec3( 10.0, 140.0, -90.0 ),
-                                     Vec3( 10.0, 10.0, -90.0 ),
-                                     Vec3( 140.0, 140.0, -90.0 ),
-                                     Vec3( 140.0, 10.0, -90.0 ) },
-                                   { Vec3( 197.0, 140.0, -65.0 ),
-                                     Vec3( 197.0, 10.0, -65.0 ),
-                                     Vec3( 197.0, 140.0, 65.0 ),
-                                     Vec3( 197.0, 10.0, 65.0 ) },
-                                   { Vec3( 10.0, 140.0, 90.0 ),
-                                     Vec3( 10.0, 10.0, 90.0 ),
-                                     Vec3( 140.0, 140.0, 90.0 ),
-                                     Vec3( 140.0, 10.0, 90.0 ) },
-                                   { Vec3( -47.0, 140.0, -65.0 ),
-                                     Vec3( -47.0, 10.0, -65.0 ),
-                                     Vec3( -47.0, 140.0, 65.0 ),
-                                     Vec3( -47.0, 10.0, 65.0 ) } };
+const Vec3 FrameLocators[4][4] = {
+    {Vec3( 10.0, 140.0, -90.0 ), Vec3( 10.0, 10.0, -90.0 ), Vec3( 140.0, 140.0, -90.0 ), Vec3( 140.0, 10.0, -90.0 )},
+    {Vec3( 197.0, 140.0, -65.0 ), Vec3( 197.0, 10.0, -65.0 ), Vec3( 197.0, 140.0, 65.0 ), Vec3( 197.0, 10.0, 65.0 )},
+    {Vec3( 10.0, 140.0, 90.0 ), Vec3( 10.0, 10.0, 90.0 ), Vec3( 140.0, 140.0, 90.0 ), Vec3( 140.0, 10.0, 90.0 )},
+    {Vec3( -47.0, 140.0, -65.0 ), Vec3( -47.0, 10.0, -65.0 ), Vec3( -47.0, 140.0, 65.0 ), Vec3( -47.0, 10.0, 65.0 )}};
 
 StereotacticFramePluginInterface::StereotacticFramePluginInterface()
 {
     m_manipulatorsOn = true;
-    m_3DFrameOn = true;
+    m_3DFrameOn      = true;
 
-    m_frameTransform = vtkSmartPointer<vtkTransform>::New();
+    m_frameTransform      = vtkSmartPointer<vtkTransform>::New();
     m_adjustmentTransform = vtkSmartPointer<vtkTransform>::New();
-    m_landmarkTransform = vtkLandmarkTransform::New();
+    m_landmarkTransform   = vtkLandmarkTransform::New();
     m_landmarkTransform->SetModeToRigidBody();
     m_frameTransform->Concatenate( m_landmarkTransform );
     m_frameTransform->Concatenate( m_adjustmentTransform );
 
     m_frameRepresentation = 0;
-    for( int i = 0; i < 4; i++ )
-        m_manipulators[i] = 0;
+    for( int i = 0; i < 4; i++ ) m_manipulators[i] = 0;
 
     m_manipulatorsCallbacks = 0;
 }
@@ -70,14 +58,10 @@ StereotacticFramePluginInterface::~StereotacticFramePluginInterface()
 {
     m_landmarkTransform->Delete();
     for( int i = 0; i < 4; i++ )
-        if( m_manipulators[i] )
-            m_manipulators[i]->Delete();
+        if( m_manipulators[i] ) m_manipulators[i]->Delete();
 }
 
-bool StereotacticFramePluginInterface::CanRun()
-{
-    return true;
-}
+bool StereotacticFramePluginInterface::CanRun() { return true; }
 
 QWidget * StereotacticFramePluginInterface::CreateTab()
 {
@@ -86,22 +70,20 @@ QWidget * StereotacticFramePluginInterface::CreateTab()
     StereotacticFrameWidget * widget = new StereotacticFrameWidget;
     widget->SetPluginInterface( this );
 
-    connect( GetIbisAPI(), SIGNAL(ReferenceTransformChanged()), this, SLOT( OnReferenceTransformChanged() ));
-    connect( GetIbisAPI(), SIGNAL(CursorPositionChanged()), this, SLOT(OnCursorMoved()) );
+    connect( GetIbisAPI(), SIGNAL( ReferenceTransformChanged() ), this, SLOT( OnReferenceTransformChanged() ) );
+    connect( GetIbisAPI(), SIGNAL( CursorPositionChanged() ), this, SLOT( OnCursorMoved() ) );
 
     return widget;
 }
 
 bool StereotacticFramePluginInterface::WidgetAboutToClose()
 {
-    if( m_manipulatorsOn )
-        DisableManipulators();
+    if( m_manipulatorsOn ) DisableManipulators();
 
-    if( m_3DFrameOn )
-        Disable3DFrame();
+    if( m_3DFrameOn ) Disable3DFrame();
 
-    disconnect( GetIbisAPI(), SIGNAL(ReferenceTransformChanged()), this, SLOT( OnReferenceTransformChanged() ));
-    disconnect( GetIbisAPI(), SIGNAL(CursorPositionChanged()), this, SLOT(OnCursorMoved()) );
+    disconnect( GetIbisAPI(), SIGNAL( ReferenceTransformChanged() ), this, SLOT( OnReferenceTransformChanged() ) );
+    disconnect( GetIbisAPI(), SIGNAL( CursorPositionChanged() ), this, SLOT( OnCursorMoved() ) );
 
     return true;
 }
@@ -110,32 +92,34 @@ void StereotacticFramePluginInterface::Initialize()
 {
     ComputeInitialTransform();
 
-    if( m_3DFrameOn )
-        Enable3DFrame();
+    if( m_3DFrameOn ) Enable3DFrame();
 
-    if( m_manipulatorsOn )
-        EnableManipulators();
+    if( m_manipulatorsOn ) EnableManipulators();
 }
 
 void StereotacticFramePluginInterface::EnableManipulators()
 {
     m_manipulatorsCallbacks = vtkEventQtSlotConnect::New();
 
-    View * v = GetIbisAPI()->GetMainTransverseView( );
-    Q_ASSERT_X( v, "StereotacticFramePluginInterface::CreateTab()", "No transverse view defined. It is needed by the StereotacticFrame plugin" );
+    View * v = GetIbisAPI()->GetMainTransverseView();
+    Q_ASSERT_X( v, "StereotacticFramePluginInterface::CreateTab()",
+                "No transverse view defined. It is needed by the StereotacticFrame plugin" );
 
     for( int i = 0; i < 4; ++i )
     {
         m_manipulators[i] = vtkNShapeCalibrationWidget::New();
-        m_manipulators[i]->SetPoint1( 0.0, 0.0, 0.0 );   // default position, doesn't really matter
+        m_manipulators[i]->SetPoint1( 0.0, 0.0, 0.0 );  // default position, doesn't really matter
         m_manipulators[i]->SetPoint2( 200.0, 0.0, 0.0 );
         m_manipulators[i]->SetHandlesSize( 2.5 );
         m_manipulators[i]->SetInteractor( v->GetInteractor() );
         m_manipulators[i]->SetDefaultRenderer( v->GetOverlayRenderer() );
         m_manipulators[i]->SetPriority( 1.0 );
-        m_manipulatorsCallbacks->Connect( m_manipulators[i], vtkCommand::InteractionEvent, this, SLOT(OnManipulatorsModified()) );
-        m_manipulatorsCallbacks->Connect( m_manipulators[i], vtkCommand::StartInteractionEvent, this, SLOT(OnManipulatorsModified()) );
-        m_manipulatorsCallbacks->Connect( m_manipulators[i], vtkCommand::EndInteractionEvent, this, SLOT(OnManipulatorsModified()) );
+        m_manipulatorsCallbacks->Connect( m_manipulators[i], vtkCommand::InteractionEvent, this,
+                                          SLOT( OnManipulatorsModified() ) );
+        m_manipulatorsCallbacks->Connect( m_manipulators[i], vtkCommand::StartInteractionEvent, this,
+                                          SLOT( OnManipulatorsModified() ) );
+        m_manipulatorsCallbacks->Connect( m_manipulators[i], vtkCommand::EndInteractionEvent, this,
+                                          SLOT( OnManipulatorsModified() ) );
     }
 
     for( int i = 0; i < 4; ++i )
@@ -157,8 +141,9 @@ void StereotacticFramePluginInterface::DisableManipulators()
         m_manipulatorsCallbacks = 0;
     }
 
-    View * v = GetIbisAPI()->GetMainTransverseView( );
-    Q_ASSERT_X( v, "StereotacticFramePluginInterface::WidgetAboutToClose()", "No transverse view defined. It is needed by the StereotacticFrame plugin" );
+    View * v = GetIbisAPI()->GetMainTransverseView();
+    Q_ASSERT_X( v, "StereotacticFramePluginInterface::WidgetAboutToClose()",
+                "No transverse view defined. It is needed by the StereotacticFrame plugin" );
     for( int i = 0; i < 4; i++ )
     {
         m_manipulators[i]->SetInteractor( 0 );
@@ -171,8 +156,7 @@ void StereotacticFramePluginInterface::DisableManipulators()
 
 void StereotacticFramePluginInterface::SetShowManipulators( bool on )
 {
-    if( m_manipulatorsOn == on )
-        return;
+    if( m_manipulatorsOn == on ) return;
 
     m_manipulatorsOn = on;
     if( m_manipulatorsOn )
@@ -183,8 +167,7 @@ void StereotacticFramePluginInterface::SetShowManipulators( bool on )
 
 void StereotacticFramePluginInterface::SetShow3DFrame( bool on )
 {
-    if( m_3DFrameOn == on )
-        return;
+    if( m_3DFrameOn == on ) return;
 
     m_3DFrameOn = on;
     if( m_3DFrameOn )
@@ -215,7 +198,8 @@ void StereotacticFramePluginInterface::SetCursorFromFramePosition( double pos[3]
 {
     // convert framepos to homogenous 4x1 vector
     double framePos[4];
-    for (int i=0; i<3; i++) {
+    for( int i = 0; i < 3; i++ )
+    {
         framePos[i] = pos[i];
     }
     framePos[3] = 1.0;
@@ -226,20 +210,16 @@ void StereotacticFramePluginInterface::SetCursorFromFramePosition( double pos[3]
     m_frameTransform->GetMatrix( mat );
     mat->MultiplyPoint( framePos, transformedPos );
 
-    GetIbisAPI()->SetCursorPosition(transformedPos);
+    GetIbisAPI()->SetCursorPosition( transformedPos );
 }
 
 void StereotacticFramePluginInterface::OnCursorMoved()
 {
-    if( m_manipulatorsOn )
-       UpdateManipulators();
+    if( m_manipulatorsOn ) UpdateManipulators();
     emit CursorMoved();
 }
 
-void StereotacticFramePluginInterface::OnManipulatorsModified()
-{
-    UpdateLandmarkTransform();
-}
+void StereotacticFramePluginInterface::OnManipulatorsModified() { UpdateLandmarkTransform(); }
 
 void StereotacticFramePluginInterface::OnReferenceTransformChanged()
 {
@@ -253,10 +233,10 @@ void StereotacticFramePluginInterface::OnReferenceTransformChanged()
 
 Mat4 vtkMatrix4x4ToMat4( vtkMatrix4x4 * mat )
 {
-    return Mat4( mat->Element[0][0], mat->Element[1][0], mat->Element[2][0], mat->Element[3][0],
-                 mat->Element[0][1], mat->Element[1][1], mat->Element[2][1], mat->Element[3][1],
-                 mat->Element[0][2], mat->Element[1][2], mat->Element[2][2], mat->Element[3][2],
-                 mat->Element[0][3], mat->Element[1][3], mat->Element[2][3], mat->Element[3][3] );
+    return Mat4( mat->Element[0][0], mat->Element[1][0], mat->Element[2][0], mat->Element[3][0], mat->Element[0][1],
+                 mat->Element[1][1], mat->Element[2][1], mat->Element[3][1], mat->Element[0][2], mat->Element[1][2],
+                 mat->Element[2][2], mat->Element[3][2], mat->Element[0][3], mat->Element[1][3], mat->Element[2][3],
+                 mat->Element[3][3] );
 }
 
 void StereotacticFramePluginInterface::UpdateManipulators()
@@ -274,20 +254,20 @@ void StereotacticFramePluginInterface::UpdateManipulators()
         // Get the corners of the N in image coordinates
         Mat4 worldToFrame = vtkMatrix4x4ToMat4( m_frameTransform->GetMatrix() );
         Vec4 markerPoints[3];
-        for( int i = 0; i < 3; ++i  )
+        for( int i = 0; i < 3; ++i )
         {
             Vec4 n0( GetNPointPos( nIndex, i ), 1.0 );
             n0 *= worldToFrame;
             Vec4 n1( GetNPointPos( nIndex, i + 1 ), 1.0 );
             n1 *= worldToFrame;
-            Vec4 diff = n1 - n0;
-            double d = dot( planePoint - n0, planeNormal ) / dot( diff, planeNormal );
+            Vec4 diff       = n1 - n0;
+            double d        = dot( planePoint - n0, planeNormal ) / dot( diff, planeNormal );
             markerPoints[i] = d * diff + n0;
         }
 
-        m_manipulators[ nIndex ]->SetPoint1( markerPoints[0].Ref() );
-        m_manipulators[ nIndex ]->SetPoint2( markerPoints[2].Ref() );
-        m_manipulators[ nIndex ]->SetMiddlePoint( markerPoints[1].Ref() );
+        m_manipulators[nIndex]->SetPoint1( markerPoints[0].Ref() );
+        m_manipulators[nIndex]->SetPoint2( markerPoints[2].Ref() );
+        m_manipulators[nIndex]->SetMiddlePoint( markerPoints[1].Ref() );
     }
 }
 
@@ -305,7 +285,7 @@ void StereotacticFramePluginInterface::Enable3DFrame()
         }
 
     vtkSmartPointer<vtkCellArray> lines = vtkSmartPointer<vtkCellArray>::New();
-    for( int i = 0; i < 4; ++i )  // each of the N shapes
+    for( int i = 0; i < 4; ++i )      // each of the N shapes
         for( int j = 1; j < 4; ++j )  // each segment in the N shape
         {
             vtkIdType lineIndex[2];
@@ -337,15 +317,12 @@ void StereotacticFramePluginInterface::Disable3DFrame()
 
 const Vec3 & StereotacticFramePluginInterface::GetNPointPos( int nIndex, int pointInNIndex )
 {
-    Q_ASSERT_X( nIndex < 4 && pointInNIndex < 4, "StereotacticFramePluginInterface::GetNPointPos()", "Indexes out of range." );
-    return FrameLocators[ nIndex ][ pointInNIndex ];
+    Q_ASSERT_X( nIndex < 4 && pointInNIndex < 4, "StereotacticFramePluginInterface::GetNPointPos()",
+                "Indexes out of range." );
+    return FrameLocators[nIndex][pointInNIndex];
 }
 
-
-double alignmentMat[16] = { 0.0, 0.0, 1.0, 0.0,
-                            -1.0, 0.0, 0.0, 0.0,
-                            0.0, 1.0, 0.0, 0.0,
-                            0.0, 0.0, 0.0, 1.0 };
+double alignmentMat[16] = {0.0, 0.0, 1.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0};
 
 void StereotacticFramePluginInterface::ComputeInitialTransform()
 {
@@ -355,14 +332,13 @@ void StereotacticFramePluginInterface::ComputeInitialTransform()
 
     // Now, we compute a translation that centers bounding boxes of image and frame
     ImageObject * ref = GetIbisAPI()->GetReferenceDataObject();
-    if( !ref )
-        return;
-    double imageCenter[3] = { 0.0, 0.0, 0.0 };
+    if( !ref ) return;
+    double imageCenter[3] = {0.0, 0.0, 0.0};
     ref->GetCenter( imageCenter );
     Vec3 imCenter( imageCenter );
 
     // compute frame bound
-    double frameBound[6] = { DBL_MAX, -DBL_MAX, DBL_MAX, -DBL_MAX, DBL_MAX, -DBL_MAX };
+    double frameBound[6] = {DBL_MAX, -DBL_MAX, DBL_MAX, -DBL_MAX, DBL_MAX, -DBL_MAX};
     for( int i = 0; i < 4; ++i )
     {
         for( int j = 0; j < 4; ++j )
@@ -370,18 +346,12 @@ void StereotacticFramePluginInterface::ComputeInitialTransform()
             Vec4 point = Vec4( GetNPointPos( i, j ), 1.0 );
             double tPoint[4];
             alignmentTransform->MultiplyPoint( point.Ref(), tPoint );
-            if( tPoint[0] < frameBound[0] )
-                frameBound[0] = tPoint[0];
-            if( tPoint[0] > frameBound[1] )
-                frameBound[1] = tPoint[0];
-            if( tPoint[1] < frameBound[2] )
-                frameBound[2] = tPoint[1];
-            if( tPoint[1] > frameBound[3] )
-                frameBound[3] = tPoint[1];
-            if( tPoint[2] < frameBound[4] )
-                frameBound[4] = tPoint[2];
-            if( tPoint[2] > frameBound[5] )
-                frameBound[5] = tPoint[2];
+            if( tPoint[0] < frameBound[0] ) frameBound[0] = tPoint[0];
+            if( tPoint[0] > frameBound[1] ) frameBound[1] = tPoint[0];
+            if( tPoint[1] < frameBound[2] ) frameBound[2] = tPoint[1];
+            if( tPoint[1] > frameBound[3] ) frameBound[3] = tPoint[1];
+            if( tPoint[2] < frameBound[4] ) frameBound[4] = tPoint[2];
+            if( tPoint[2] > frameBound[5] ) frameBound[5] = tPoint[2];
         }
     }
     Vec3 frameCenter;
@@ -409,14 +379,14 @@ void StereotacticFramePluginInterface::UpdateLandmarkTransform()
     {
         // position in image space
         double imagePos[3];
-        m_manipulators[ nIndex ]->GetMiddlePoint( imagePos );
+        m_manipulators[nIndex]->GetMiddlePoint( imagePos );
         imageSpacePoints->InsertNextPoint( imagePos );
 
         // position in frame space
-        double ratio = m_manipulators[ nIndex ]->GetMiddlePoint();
-        Vec4 p2 = Vec4( GetNPointPos( nIndex, 2 ), 1.0 );
-        Vec4 p1 = Vec4( GetNPointPos( nIndex, 1 ), 1.0 );
-        Vec4 pFrame = p1 + ( p2 - p1 ) * ratio;
+        double ratio = m_manipulators[nIndex]->GetMiddlePoint();
+        Vec4 p2      = Vec4( GetNPointPos( nIndex, 2 ), 1.0 );
+        Vec4 p1      = Vec4( GetNPointPos( nIndex, 1 ), 1.0 );
+        Vec4 pFrame  = p1 + ( p2 - p1 ) * ratio;
 
         double framePoint[4];
         m_adjustmentTransform->MultiplyPoint( pFrame.Ref(), framePoint );
@@ -426,5 +396,5 @@ void StereotacticFramePluginInterface::UpdateLandmarkTransform()
     m_landmarkTransform->SetSourceLandmarks( frameSpacePoints );
     m_landmarkTransform->SetTargetLandmarks( imageSpacePoints );
     m_landmarkTransform->Modified();
-    m_frameTransform->Modified(); // this should cause a redisplay of the 3D view since frame object will be modified
+    m_frameTransform->Modified();  // this should cause a redisplay of the 3D view since frame object will be modified
 }

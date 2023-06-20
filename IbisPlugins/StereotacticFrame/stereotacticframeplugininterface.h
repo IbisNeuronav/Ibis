@@ -13,8 +13,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef __StereotacticFramePluginInterface_h_
 #define __StereotacticFramePluginInterface_h_
 
-#include "toolplugininterface.h"
 #include <vtkSmartPointer.h>
+#include "toolplugininterface.h"
 
 class StereotacticFrameWidget;
 class vtkNShapeCalibrationWidget;
@@ -26,18 +26,16 @@ class Vec3;
 
 class StereotacticFramePluginInterface : public ToolPluginInterface
 {
-
     Q_OBJECT
-    Q_INTERFACES(IbisPlugin)
-    Q_PLUGIN_METADATA(IID "Ibis.StereotacticFramePluginInterface" )
+    Q_INTERFACES( IbisPlugin )
+    Q_PLUGIN_METADATA( IID "Ibis.StereotacticFramePluginInterface" )
 
 public:
-
     StereotacticFramePluginInterface();
     virtual ~StereotacticFramePluginInterface();
-    virtual QString GetPluginName() override { return QString("StereotacticFrame"); }
+    virtual QString GetPluginName() override { return QString( "StereotacticFrame" ); }
     virtual bool CanRun() override;
-    virtual QString GetMenuEntryString() override { return QString("Stereotactic Frame"); }
+    virtual QString GetMenuEntryString() override { return QString( "Stereotactic Frame" ); }
 
     virtual QWidget * CreateTab() override;
     virtual bool WidgetAboutToClose() override;
@@ -61,7 +59,6 @@ signals:
     void CursorMoved();
 
 protected:
-
     void Initialize();
     void EnableManipulators();
     void DisableManipulators();
@@ -82,7 +79,6 @@ protected:
     // 4 points of each of the 4 N of the frame. (x,y,z) for each.
     const Vec3 & GetNPointPos( int nIndex, int pointIndex );
     void ComputeInitialTransform();
-
 };
 
 #endif
