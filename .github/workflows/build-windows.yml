@@ -21,7 +21,7 @@ jobs:
         run: cmake IbisSuperBuild -G "Visual Studio 16 2019" -A x64 -B ${{github.workspace}}/b -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_CONFIGURATION_TYPES=${{env.BUILD_TYPE}} -DQt5_DIR=D:/Qt/5.15.2/msvc2019_64/lib/cmake/Qt5
 
       - name: Build
-        run: cmake --build ${{github.workspace}}/b --config ${{env.BUILD_TYPE}} -j2
+        run: cmake --build ${{github.workspace}}/b --config ${{env.BUILD_TYPE}}
 
       - name: Save build artifact
         uses: actions/upload-artifact@master
