@@ -9,10 +9,15 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
 // Author: Houssem-Eddine Gueziri
+#include <Windows.h>
+#include <cstdio>
 
 #include "screwnavigationwidget.h"
 #include "ui_screwnavigationwidget.h"
 #include "screwtablewidget.h"
+
+#define INSTRUMENT_LENGTH 100
+#define SCREW_TRAJECTORY_LENGTH 300
 
 ScrewNavigationWidget::ScrewNavigationWidget(std::vector<Screw *> plannedScrews, QWidget *parent) :
     QWidget(parent),
@@ -28,42 +33,84 @@ ScrewNavigationWidget::ScrewNavigationWidget(std::vector<Screw *> plannedScrews,
 {
     ui->setupUi(this);
 
-    vtkRenderWindowInteractor * axialInteractor = ui->axialImageWindow->GetInteractor();
+    /* Setup axial view
+     * Use 2 renderers:
+     *  m_axialRenderer for image reslice (layer 0)
+     *  m_axialInstrumentRenderer for instrument, screw trajectory, ruler and planned screws (layer 1)
+     */
+
+    // Set interactor for image renderer
+    vtkRenderWindowInteractor * axialInteractor = ui->axialImageWindow->interactor();
     vtkSmartPointer<vtkInteractorStyleImage2> axialStyle = vtkSmartPointer<vtkInteractorStyleImage2>::New();
     axialInteractor->SetInteractorStyle( axialStyle );
 
-    m_axialRenderer = vtkSmartPointer<vtkRenderer>::New();
-    ui->axialImageWindow->GetRenderWindow()->AddRenderer( m_axialRenderer );
+    // Create 2 layers
+    ui->axialImageWindow->renderWindow()->SetNumberOfLayers(2);
 
+    // Add image renderer
+    m_axialRenderer = vtkSmartPointer<vtkRenderer>::New();
+    m_axialRenderer->SetLayer(0);
+    ui->axialImageWindow->renderWindow()->AddRenderer( m_axialRenderer );
+
+    // Add instruments renderer
+    m_axialInstrumentRenderer = vtkSmartPointer<vtkRenderer>::New();
+    m_axialInstrumentRenderer->SetLayer(1);
+    m_axialInstrumentRenderer->InteractiveOff();
+    ui->axialImageWindow->renderWindow()->AddRenderer( m_axialInstrumentRenderer );
+
+    // Assign same camera to image and instruments
+    m_axialInstrumentRenderer->SetActiveCamera(m_axialRenderer->GetActiveCamera());
+
+    // Add image actor that contains resliced image
     m_axialActor = vtkSmartPointer<vtkImageActor>::New();
     m_axialActor->InterpolateOff();
     m_axialActor->VisibilityOff();
-    m_axialRenderer->AddActor( m_axialActor );
+    m_axialRenderer->AddViewProp( m_axialActor );
 
+    // Create reslice
     m_axialReslice = vtkSmartPointer<vtkImageResliceToColors>::New();
-    m_axialReslice->SetInterpolationModeToLinear( );
+    m_axialReslice->SetInterpolationModeToLinear();
     m_axialReslice->SetOutputDimensionality(2);
-
-    m_axialScrewReslice = vtkSmartPointer<vtkImageResliceToColors>::New();
-    m_axialScrewReslice->SetInterpolationModeToLinear( );
-    m_axialScrewReslice->SetOutputDimensionality(2);
 
     m_axialActor->GetMapper()->SetInputConnection( m_axialReslice->GetOutputPort() );
     m_axialActor->GetProperty()->SetLayerNumber( 0 );
 
-    // Sagittal view
-    vtkRenderWindowInteractor * sagittalInteractor = ui->sagittalImageWindow->GetInteractor();
+    /* Setup sagittal view
+     * Use 2 renderers:
+     *  m_sagittalRenderer for image reslice (layer 0)
+     *  m_sagittalInstrumentRenderer for instrument, screw trajectory, ruler and planned screws (layer 1)
+     */
+
+    // Set interactor for image renderer
+    vtkRenderWindowInteractor * sagittalInteractor = ui->sagittalImageWindow->interactor();
     vtkSmartPointer<vtkInteractorStyleImage2> sagittalStyle = vtkSmartPointer<vtkInteractorStyleImage2>::New();
     sagittalInteractor->SetInteractorStyle( sagittalStyle );
 
-    m_sagittalRenderer = vtkSmartPointer<vtkRenderer>::New();
-    ui->sagittalImageWindow->GetRenderWindow()->AddRenderer( m_sagittalRenderer );
 
+    // Create 2 layers
+    ui->sagittalImageWindow->renderWindow()->SetNumberOfLayers(2);
+
+    // Add image renderer
+    m_sagittalRenderer = vtkSmartPointer<vtkRenderer>::New();
+    m_sagittalRenderer->SetLayer(0);
+    ui->sagittalImageWindow->renderWindow()->AddRenderer( m_sagittalRenderer );
+
+    // Add instruments renderer
+    m_sagittalInstrumentRenderer = vtkSmartPointer<vtkRenderer>::New();
+    m_sagittalInstrumentRenderer->SetLayer(1);
+    m_sagittalInstrumentRenderer->InteractiveOff();
+    ui->sagittalImageWindow->renderWindow()->AddRenderer( m_sagittalInstrumentRenderer );
+
+    // Assign same camera to image and instruments
+    m_sagittalInstrumentRenderer->SetActiveCamera(m_sagittalRenderer->GetActiveCamera());
+
+    // Add image actor that contains resliced image
     m_sagittalActor = vtkSmartPointer<vtkImageActor>::New();
     m_sagittalActor->InterpolateOff();
     m_sagittalActor->VisibilityOff();
-    m_sagittalRenderer->AddActor( m_sagittalActor );
+    m_sagittalRenderer->AddViewProp( m_sagittalActor );
 
+    // Create reslice
     m_sagittalReslice = vtkSmartPointer<vtkImageResliceToColors>::New();
     m_sagittalReslice->SetInterpolationModeToLinear( );
     m_sagittalReslice->SetOutputDimensionality(2);
@@ -73,6 +120,7 @@ ScrewNavigationWidget::ScrewNavigationWidget(std::vector<Screw *> plannedScrews,
 
     m_screwPlanImageDataId = IbisAPI::InvalidId;
 
+    // Initialize plane position
     for (int i = 0; i < 3; ++i)
     {
         m_currentAxialPosition[i] = 0;
@@ -81,11 +129,17 @@ ScrewNavigationWidget::ScrewNavigationWidget(std::vector<Screw *> plannedScrews,
         m_currentSagittalOrientation[i] = 0;
     }
 
+    m_showScrew = ui->displayScrewCheckBox->isChecked();
+    m_showRuler = ui->displayRulerCheckBox->isChecked();
+    m_rulerLength = ui->rulerSpinBox->value();
+
+    // Load planned screws, if any
     this->SetPlannedScrews(plannedScrews);
 
+    // Update displays
     this->UpdatePointerDirection();
-    this->InitializeScrewDrawing();
-    this->InitializeRulerDrawing();
+    this->UpdateInstrumentDrawing(m_axialInstrumentRenderer);
+    this->UpdateInstrumentDrawing(m_sagittalInstrumentRenderer);
     this->InitializeAnnotationDrawing();
 }
 
@@ -104,10 +158,13 @@ ScrewNavigationWidget::~ScrewNavigationWidget()
     }
     m_axialActor->VisibilityOff();
     m_sagittalActor->VisibilityOff();
-    m_screwActor->VisibilityOff();
-    m_rulerActor->VisibilityOff();
+    m_axialRenderer->RemoveAllViewProps();
+    m_axialInstrumentRenderer->RemoveAllViewProps();
+    m_sagittalRenderer->RemoveAllViewProps();
+    m_sagittalInstrumentRenderer->RemoveAllViewProps();
     m_pluginInterface = 0;
     delete ui;
+
 }
 
 void ScrewNavigationWidget::SetPluginInterface( PedicleScrewNavigationPluginInterface * inter )
@@ -173,13 +230,13 @@ vtkRenderer * ScrewNavigationWidget::GetSagittalRenderer()
 
 void ScrewNavigationWidget::UpdatePointerDirection()
 {
-    if(m_pluginInterface)
+    if(m_pluginInterface && m_isNavigating)
     {
         IbisAPI * ibisApi = m_pluginInterface->GetIbisAPI();
 
         std::vector<double> ptip, pbase;
 
-        // Read config file of the pointer in ./ibis/PedicleScrewNavigationData/<ToolName>
+        // Read config file of the pointer in .ibis/PedicleScrewNavigationData/<ToolName>
         QString foldername(QDir(ibisApi->GetConfigDirectory()).filePath("PedicleScrewNavigationData"));
         QString filename(QDir(foldername).filePath(ibisApi->GetNavigationPointerObject()->GetName()));
         QFile file(filename);
@@ -225,6 +282,8 @@ void ScrewNavigationWidget::UpdatePointerDirection()
                 }
                 else
                 {
+                    // If file format doesn't match
+                    std::cerr << "Something wrong happend while reading file " << file.errorString().toUtf8().constData() << std::endl;
                     m_pointerDirection[0] = 0.0;
                     m_pointerDirection[1] = 0.0;
                     m_pointerDirection[2] = 1.0;
@@ -235,7 +294,7 @@ void ScrewNavigationWidget::UpdatePointerDirection()
             else
             {
                 // If cannot open config file
-                std::cerr << file.errorString().toUtf8().constData() << std::endl;;
+                std::cerr << "Cannot open file " << file.errorString().toUtf8().constData() << std::endl;
                 m_pointerDirection[0] = 0.0;
                 m_pointerDirection[1] = 0.0;
                 m_pointerDirection[2] = 1.0;
@@ -245,6 +304,7 @@ void ScrewNavigationWidget::UpdatePointerDirection()
         else
         {
             // If config file does not exist
+            std::cerr << "File " << file.errorString().toUtf8().constData() << " doesn't exist." << std::endl;
             m_pointerDirection[0] = 0.0;
             m_pointerDirection[1] = 0.0;
             m_pointerDirection[2] = 1.0;
@@ -269,30 +329,22 @@ void ScrewNavigationWidget::UpdateScrewComboBox()
 
         ui->screwSizeComboBox->clear();
         QList<ScrewTableWidget::ScrewProperties> screwList = ScrewTableWidget::GetTable(ibisApi->GetConfigDirectory());
-        QString length, diameter;
         for (int i = 0; i < screwList.size(); ++i)
         {
-            length.sprintf("%.1f", screwList.at(i).first);
-            diameter.sprintf("%.1f", screwList.at(i).second);
-            ui->screwSizeComboBox->addItem(length + tr(" mm X ") + diameter + tr(" mm"),
-                                           this->GetScrewName(screwList.at(i).first, screwList.at(i).second));
+            ui->screwSizeComboBox->addItem(Screw::GetName(screwList.at(i).first, screwList.at(i).second).c_str(),
+                                           Screw::GetScrewID(screwList.at(i).first, screwList.at(i).second).c_str());
         }
 
         if (ui->screwSizeComboBox->count() == 0)
         {
-            length.sprintf("%.1f", m_screwLength);
-            diameter.sprintf("%.1f", m_screwDiameter);
-            ui->screwSizeComboBox->addItem(length + tr(" mm X ") + diameter + tr(" mm"),
-                                           this->GetScrewName(m_screwLength, m_screwDiameter));
+            ui->screwSizeComboBox->addItem(Screw::GetName(m_screwLength, m_screwDiameter).c_str(),
+                                           Screw::GetScrewID(m_screwLength, m_screwDiameter).c_str());
         }
     }
     else
     {
-        QString length, diameter;
-        length.sprintf("%.1f", m_screwLength);
-        diameter.sprintf("%.1f", m_screwDiameter);
-        ui->screwSizeComboBox->addItem(length + tr(" mm X ") + diameter + tr(" mm"),
-                                       this->GetScrewName(m_screwLength, m_screwDiameter));
+        ui->screwSizeComboBox->addItem(Screw::GetName(m_screwLength, m_screwDiameter).c_str(),
+                                       Screw::GetScrewID(m_screwLength, m_screwDiameter).c_str());
     }
 }
 
@@ -360,14 +412,16 @@ void ScrewNavigationWidget::Navigate()
             {
                 m_isNavigating = true;
 
+                this->UpdatePointerDirection();
+
                 this->SetDefaultView( m_axialRenderer);
                 this->SetDefaultView( m_sagittalRenderer);
+                this->SetDefaultView( m_axialInstrumentRenderer );
+                this->SetDefaultView( m_sagittalInstrumentRenderer );
 
                 connect( ibisApi, SIGNAL(IbisClockTick()), this, SLOT(OnPointerPositionUpdated()) );
                 m_axialActor->VisibilityOn();
                 m_sagittalActor->VisibilityOn();
-                m_screwActor->VisibilityOn();
-                m_rulerActor->VisibilityOn();
             }
         }
     }
@@ -392,7 +446,6 @@ void ScrewNavigationWidget::GetPlannedScrews(std::vector<Screw *> &screws)
     for (int i = 0; i < m_PlannedScrewList.size(); ++i)
     {
         Screw *sc = new Screw(m_PlannedScrewList[i]);
-        sc->Update();
         screws.push_back(sc);
     }
 }
@@ -412,8 +465,8 @@ void ScrewNavigationWidget::SetPlannedScrews(std::vector<Screw *> screws)
 
         if(m_pluginInterface)
         {
-            m_axialRenderer->AddViewProp(screws[i]->GetAxialActor());
-            m_sagittalRenderer->AddViewProp(screws[i]->GetSagittalActor());
+            m_axialInstrumentRenderer->AddViewProp(screws[i]->GetAxialActor());
+            m_sagittalInstrumentRenderer->AddViewProp(screws[i]->GetSagittalActor());
         }
     }
 }
@@ -628,15 +681,15 @@ void ScrewNavigationWidget::UpdatePlannedScrews()
                 if( m_PlannedScrewList[i]->IsCoordinateWorldTransform() )
                 {
                     inverseImageTransform->TransformPoint(pointerPos, pointerPos);
-                    inverseImageTransform->MultiplyPoint(pointerOrientation, pointerOrientation);
+                    inverseImageTransform->TransformPoint(pointerOrientation, pointerOrientation);
                 }
 
                 vtkMath::Normalize(pointerOrientation);
                 pointerOrientation[0] = std::acos( pointerOrientation[0] ) * 180.0 / vtkMath::Pi();
                 pointerOrientation[1] = std::acos( pointerOrientation[1] ) * 180.0 / vtkMath::Pi();
                 pointerOrientation[2] = std::acos( pointerOrientation[2] ) * 180.0 / vtkMath::Pi();
-
-                this->GetAxialPositionAndOrientation(currentObject, pointerTransform, m_currentAxialPosition, m_currentAxialOrientation );
+                
+                this->GetAxialPositionAndOrientation(currentObject, pointerTransform, m_currentAxialPosition, m_currentAxialOrientation);
 
                 double diffOrientation[3], diffPos[3];
                 vtkMath::Subtract( m_currentAxialOrientation, pointerOrientation, diffOrientation ); // TODO: remove
@@ -663,18 +716,18 @@ void ScrewNavigationWidget::UpdatePlannedScrews()
                     axialTransform->Update();
                     m_PlannedScrewList[i]->GetAxialActor()->SetUserTransform(axialTransform);
                     if(ui->displayPlanningCheckBox->isChecked())
-                        m_PlannedScrewList[i]->GetAxialActor()->SetVisibility(1);
+                        m_PlannedScrewList[i]->GetAxialActor()->VisibilityOn();
                 }
                 else
                 {
-                    m_PlannedScrewList[i]->GetAxialActor()->SetVisibility(0);
+                    m_PlannedScrewList[i]->GetAxialActor()->VisibilityOff();
                 }
 
                 // move sagittal planning trajectory
                 double sagPointerPos[3] = { -pointerPos[2], pointerPos[1], pointerPos[0] };
                 double sagPointerOrientation[3] = { pointerOrientation[0] + 90, pointerOrientation[1] + 90, pointerOrientation[2] + 90 };
 
-                this->GetSagittalPositionAndOrientation(currentObject, pointerTransform, m_currentSagittalPosition, m_currentSagittalOrientation );
+                this->GetSagittalPositionAndOrientation(currentObject, pointerTransform, m_currentSagittalPosition, m_currentSagittalOrientation);
 
                 vtkMath::Subtract( m_currentSagittalOrientation, sagPointerOrientation, diffOrientation ); // TODO: remove
                 vtkMath::Subtract( m_currentSagittalPosition, sagPointerPos, diffPos );
@@ -700,11 +753,11 @@ void ScrewNavigationWidget::UpdatePlannedScrews()
                     sagittalTransform->Update();
                     m_PlannedScrewList[i]->GetSagittalActor()->SetUserTransform(sagittalTransform);
                     if(ui->displayPlanningCheckBox->isChecked())
-                        m_PlannedScrewList[i]->GetSagittalActor()->SetVisibility(1);
+                        m_PlannedScrewList[i]->GetSagittalActor()->VisibilityOn();
                 }
                 else
                 {
-                    m_PlannedScrewList[i]->GetSagittalActor()->SetVisibility(0);
+                    m_PlannedScrewList[i]->GetSagittalActor()->VisibilityOff();
                 }
             }
 
@@ -737,7 +790,7 @@ void ScrewNavigationWidget::AddPlannedScrew( double position[3], double orientat
     vtkSmartPointer<vtkPolyData> trajectory = vtkPolyData::New();
     vtkSmartPointer<vtkCylinderSource> trajectorySource = vtkSmartPointer<vtkCylinderSource>::New();
     trajectorySource->SetRadius(0.5);
-    double trajectoryLength = 300;
+    double trajectoryLength = SCREW_TRAJECTORY_LENGTH;
     trajectorySource->SetHeight(trajectoryLength);
     trajectorySource->SetCenter(0, trajectoryLength/2.0, 0);
     trajectorySource->SetResolution(30);
@@ -827,18 +880,18 @@ void ScrewNavigationWidget::AddPlannedScrew( double position[3], double orientat
     QString screwNameType;
     if(useWorld)
     {
-        // set color to red for navigated (world) screws
+        // set color to red for (navigated) world screws
         color[0] = 1.0; color[1] = 0.0; color[2] = 0.0;
         screwNameType = " (W)";
     }
     else
     {
-        // set color to yellow for imported (local) screws
+        // set color to yellow for (imported) local screws
         color[0] = 1.0; color[1] = 1.0; color[2] = 0.0;
         screwNameType = " (L)";
     }
 
-    QString screwName = tr("Screw ") + QString::number(ui->screwListWidget->count()+1) + tr(": ") + this->GetScrewName(screwLength, screwDiameter) + screwNameType;
+    QString screwName = tr("Screw ") + QString::number(ui->screwListWidget->count()+1) + tr(": ") + tr(Screw::GetName(screwLength, screwDiameter).c_str()) + screwNameType;
 
     if( m_pluginInterface )
     {
@@ -860,7 +913,6 @@ void ScrewNavigationWidget::AddPlannedScrew( double position[3], double orientat
 
     // Create a polydata representing screw cross-section
     Screw *sp = new Screw();
-    sp->SetName( screwName.toUtf8().constData() );
     sp->SetPointerPosition(position);
     sp->SetPointerOrientation(orientation);
     sp->SetUseWorldTransformCoordinate(useWorld);
@@ -869,7 +921,6 @@ void ScrewNavigationWidget::AddPlannedScrew( double position[3], double orientat
 
     vtkSmartPointer<vtkPolyData> screwPolyData = vtkSmartPointer<vtkPolyData>::New();
     Screw::GetScrewPolyData(screwLength, screwDiameter, screwTipSize, screwPolyData);
-    sp->SetScrewPolyData(screwPolyData);
 
     vtkSmartPointer<vtkPolyDataMapper> sagittalPlannedScrewMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
     sagittalPlannedScrewMapper->SetInputData(screwPolyData);
@@ -884,11 +935,14 @@ void ScrewNavigationWidget::AddPlannedScrew( double position[3], double orientat
     sagittalPlannedScrewActor->GetProperty()->SetPointSize(1);
     sagittalPlannedScrewActor->VisibilityOn();
 
-    m_sagittalRenderer->AddViewProp(sagittalPlannedScrewActor);
+    m_sagittalInstrumentRenderer->AddViewProp(sagittalPlannedScrewActor);
     sp->SetSagittalActor(sagittalPlannedScrewActor);
 
+    vtkSmartPointer<vtkPolyDataMapper> axialPlannedScrewMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+    axialPlannedScrewMapper->SetInputData(screwPolyData);
+
     vtkSmartPointer<vtkActor> axialPlannedScrewActor = vtkSmartPointer<vtkActor>::New();
-    axialPlannedScrewActor->SetMapper(sagittalPlannedScrewMapper);
+    axialPlannedScrewActor->SetMapper(axialPlannedScrewMapper);
     axialPlannedScrewActor->GetProperty()->SetLineWidth(3);
     axialPlannedScrewActor->GetProperty()->SetColor(color);
     axialPlannedScrewActor->GetProperty()->SetOpacity(0.6);
@@ -897,7 +951,7 @@ void ScrewNavigationWidget::AddPlannedScrew( double position[3], double orientat
     axialPlannedScrewActor->GetProperty()->SetPointSize(1);
     axialPlannedScrewActor->VisibilityOn();
 
-    m_axialRenderer->AddViewProp(axialPlannedScrewActor);
+    m_axialInstrumentRenderer->AddViewProp(axialPlannedScrewActor);
     sp->SetAxialActor(axialPlannedScrewActor);
 
     m_PlannedScrewList.push_back(sp);
@@ -927,22 +981,26 @@ bool ScrewNavigationWidget::GetPointerDirection(double (&direction)[3])
         direction[1] = worldPointerTip[1] - worldPointerBase[1];
         direction[2] = worldPointerTip[2] - worldPointerBase[2];
         vtkMath::Normalize(direction);
+
+        //QString message = tr("m_pointerDirection : [") + QString::number(m_pointerDirection[0]) + 
+        //    tr(", ") + QString::number(m_pointerDirection[1]) + 
+        //    tr(", ") + QString::number(m_pointerDirection[2]) + tr("]\n");
+
+        //message += tr("worldPointerTip : [") + QString::number(worldPointerTip[0]) +
+        //    tr(", ") + QString::number(worldPointerTip[1]) +
+        //    tr(", ") + QString::number(worldPointerTip[2]) + tr("]\n");
+
+        //message += tr("worldPointerBase : [") + QString::number(worldPointerBase[0]) +
+        //    tr(", ") + QString::number(worldPointerBase[1]) +
+        //    tr(", ") + QString::number(worldPointerBase[2]) + tr("]\n");
+
+        //m_pluginInterface->GetIbisAPI()->Warning(tr("Pointer orientation"), message);
+
         return true;
     }
 
     return false;
 
-}
-
-void ScrewNavigationWidget::RecenterResliceAxes(vtkMatrix4x4 * matrix)
-{
-    // move the center point that we are slicing through
-    double point[4] = {0.0, 0.0, 0.0, 1.0};
-    double center[4];
-    matrix->MultiplyPoint(point, center);
-    matrix->SetElement(0, 3, center[0]);
-    matrix->SetElement(1, 3, center[1]);
-    matrix->SetElement(2, 3, center[2]);
 }
 
 void ScrewNavigationWidget::SetDefaultView( vtkSmartPointer<vtkRenderer> renderer )
@@ -957,12 +1015,14 @@ void ScrewNavigationWidget::SetDefaultView( vtkSmartPointer<vtkRenderer> rendere
     cam->SetFocalPoint( 0.0, -m_screwLength * 0.5, prevFocal[2] );
 }
 
-void ScrewNavigationWidget::InitializeScrewDrawing()
+void ScrewNavigationWidget::UpdateInstrumentDrawing( vtkSmartPointer<vtkRenderer> renderer )
 {
+    renderer->RemoveAllViewProps();
+
     // Create instrument line
     vtkSmartPointer<vtkLineSource> instrumentSource = vtkSmartPointer<vtkLineSource>::New();
     instrumentSource->SetPoint1(0.0, 0.0, 0.0);
-    instrumentSource->SetPoint2(0.0, 2 * m_screwLength, 0.0);
+    instrumentSource->SetPoint2(0.0, INSTRUMENT_LENGTH, 0.0);
 
     vtkSmartPointer<vtkPolyDataMapper> instrumentLineMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
     instrumentLineMapper->SetInputConnection(instrumentSource->GetOutputPort(0));
@@ -972,35 +1032,42 @@ void ScrewNavigationWidget::InitializeScrewDrawing()
     instrumentActor->GetProperty()->SetLineWidth(3.0);
     instrumentActor->GetProperty()->SetColor(1, 0, 0);
     instrumentActor->VisibilityOn();
-    m_axialRenderer->AddViewProp(instrumentActor);
-    m_sagittalRenderer->AddViewProp(instrumentActor);
+    renderer->AddViewProp(instrumentActor);
 
     // Create screw
-    m_screwActor = vtkSmartPointer<vtkActor>::New();
-    m_screwActor->GetProperty()->SetLineWidth(3.0);
-    m_screwActor->GetProperty()->SetColor(1, 0, 0);
-    m_screwActor->VisibilityOff();
+    vtkSmartPointer<vtkActor> screwActor = vtkSmartPointer<vtkActor>::New();
+    screwActor->GetProperty()->SetLineWidth(3.0);
+    screwActor->GetProperty()->SetColor(1, 0, 0);
+    screwActor->SetVisibility(m_showScrew);
 
-    this->UpdateScrewDrawing();
+    vtkSmartPointer<vtkPolyData> polyData = vtkSmartPointer<vtkPolyData>::New();
+    Screw::GetScrewPolyData(m_screwLength, m_screwDiameter, m_screwTipSize, polyData);
 
-    m_axialRenderer->AddViewProp(m_screwActor);
-    m_sagittalRenderer->AddViewProp(m_screwActor);
+    vtkSmartPointer<vtkPolyDataMapper> lineMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
+    lineMapper->SetInputData(polyData);
+    screwActor->SetMapper(lineMapper);
 
-}
+    renderer->AddViewProp(screwActor);
 
-void ScrewNavigationWidget::InitializeRulerDrawing()
-{
-    m_rulerLength = ui->rulerSpinBox->value();
+    // Create ruler
+    vtkSmartPointer<vtkActor> rulerActor = vtkSmartPointer<vtkActor>::New();
+    rulerActor->GetProperty()->SetLineWidth(0.5);
+    rulerActor->GetProperty()->SetColor(1, 1, 0);
+    rulerActor->GetProperty()->SetOpacity(0.5);
+    rulerActor->SetVisibility(m_showRuler);
 
-    m_rulerActor = vtkSmartPointer<vtkActor>::New();
-    m_rulerActor->GetProperty()->SetLineWidth(0.5);
-    m_rulerActor->GetProperty()->SetColor(1, 1, 0);
-    m_rulerActor->GetProperty()->SetOpacity(0.5);
-    m_rulerActor->VisibilityOff();
-    m_axialRenderer->AddViewProp(m_rulerActor);
-    m_sagittalRenderer->AddViewProp(m_rulerActor);
+    renderer->AddViewProp(rulerActor);
 
-    this->UpdateRulerDrawing();
+    this->UpdateRulerDrawing(rulerActor);
+
+    for (int i = 0; i < m_PlannedScrewList.size(); ++i)
+    {
+        if(m_pluginInterface)
+        {
+            m_axialInstrumentRenderer->AddViewProp(m_PlannedScrewList[i]->GetAxialActor());
+            m_sagittalInstrumentRenderer->AddViewProp(m_PlannedScrewList[i]->GetSagittalActor());
+        }
+    }
 
 }
 
@@ -1042,31 +1109,7 @@ void ScrewNavigationWidget::InitializeAnnotationDrawing()
 
 }
 
-void ScrewNavigationWidget::UpdateScrewDrawing()
-{
-    vtkSmartPointer<vtkPolyData> polyData;
-    if (m_screwActor->GetMapper())
-    {
-        polyData = vtkPolyData::SafeDownCast(m_screwActor->GetMapper()->GetInput());
-        polyData->DeleteCells();
-    }
-    else
-    {
-        polyData = vtkSmartPointer<vtkPolyData>::New();
-    }
-
-    Screw::GetScrewPolyData(m_screwLength, m_screwDiameter, m_screwTipSize, polyData);
-
-    vtkSmartPointer<vtkPolyDataMapper> lineMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
-    lineMapper->SetInputData(polyData);
-
-    if (m_screwActor)
-    {
-        m_screwActor->SetMapper(lineMapper);
-    }
-}
-
-void ScrewNavigationWidget::UpdateRulerDrawing()
+void ScrewNavigationWidget::UpdateRulerDrawing(vtkSmartPointer<vtkActor> rulerActor)
 {
     vtkSmartPointer<vtkAppendPolyData> appendFilter = vtkSmartPointer<vtkAppendPolyData>::New();
 
@@ -1098,35 +1141,15 @@ void ScrewNavigationWidget::UpdateRulerDrawing()
     cleanFilter->SetInputConnection(appendFilter->GetOutputPort());
     cleanFilter->Update();
 
-    vtkSmartPointer<vtkPolyData> polyData;
-    if (m_rulerActor->GetMapper())
-    {
-        polyData = vtkPolyData::SafeDownCast(m_rulerActor->GetMapper()->GetInput());
-        polyData->DeleteCells();
-    }
-    else
-    {
-        polyData = vtkSmartPointer<vtkPolyData>::New();
-    }
+    vtkSmartPointer<vtkPolyData> polyData = vtkSmartPointer<vtkPolyData>::New();
 
     polyData->SetPoints(cleanFilter->GetOutput()->GetPoints());
     polyData->SetLines(cleanFilter->GetOutput()->GetLines());
 
     vtkSmartPointer<vtkPolyDataMapper> rulerMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
     rulerMapper->SetInputData(polyData);
+    rulerActor->SetMapper(rulerMapper);
 
-    if (m_rulerActor)
-    {
-        m_rulerActor->SetMapper(rulerMapper);
-    }
-}
-
-QString ScrewNavigationWidget::GetScrewName(double screwLength, double screwDiameter)
-{
-    QString length, diameter;
-    length.sprintf("%.1f", screwLength);
-    diameter.sprintf("%.1f", screwDiameter);
-    return length + tr("x") + diameter;
 }
 
 void ScrewNavigationWidget::OnScrewSizeComboBoxModified( int index )
@@ -1147,26 +1170,29 @@ void ScrewNavigationWidget::OnScrewSizeComboBoxModified( int index )
         m_screwLength = 50.0;
         m_screwDiameter = 5.5;
     }
-    this->UpdateScrewDrawing();
+
+    this->UpdateInstrumentDrawing(m_axialInstrumentRenderer);
+    this->UpdateInstrumentDrawing(m_sagittalInstrumentRenderer);
 }
 
 void ScrewNavigationWidget::on_rulerSpinBox_valueChanged( int value)
 {
     m_rulerLength = value;
-    this->UpdateRulerDrawing();
+    this->UpdateInstrumentDrawing(m_axialInstrumentRenderer);
+    this->UpdateInstrumentDrawing(m_sagittalInstrumentRenderer);
 }
 
 void ScrewNavigationWidget::OnScrewListItemChanged(QListWidgetItem * item)
 {
     if(item->checkState() == Qt::Checked)
     {
-        m_PlannedScrewList[ ui->screwListWidget->row(item) ]->GetAxialActor()->SetVisibility(true);
-        m_PlannedScrewList[ ui->screwListWidget->row(item) ]->GetSagittalActor()->SetVisibility(true);
+        m_PlannedScrewList[ ui->screwListWidget->row(item) ]->GetAxialActor()->VisibilityOn();
+        m_PlannedScrewList[ ui->screwListWidget->row(item) ]->GetSagittalActor()->VisibilityOn();
     }
     else
     {
-        m_PlannedScrewList[ ui->screwListWidget->row(item) ]->GetAxialActor()->SetVisibility(false);
-        m_PlannedScrewList[ ui->screwListWidget->row(item) ]->GetSagittalActor()->SetVisibility(false);
+        m_PlannedScrewList[ ui->screwListWidget->row(item) ]->GetAxialActor()->VisibilityOff();
+        m_PlannedScrewList[ ui->screwListWidget->row(item) ]->GetSagittalActor()->VisibilityOff();
     }
 }
 
@@ -1233,15 +1259,27 @@ void ScrewNavigationWidget::NavigationPointerChangedSlot()
     this->UpdatePointerDirection();
 }
 
+void ScrewNavigationWidget::on_resetDefaultViewButton_clicked()
+{
+    this->SetDefaultView( m_axialRenderer);
+    this->SetDefaultView( m_sagittalRenderer);
+    this->SetDefaultView( m_axialInstrumentRenderer );
+    this->SetDefaultView( m_sagittalInstrumentRenderer );
+}
+
 void ScrewNavigationWidget::on_displayScrewCheckBox_toggled(bool checked)
 {
-    m_screwActor->SetVisibility((int) checked);
+    m_showScrew = checked;
+    this->UpdateInstrumentDrawing(m_axialInstrumentRenderer);
+    this->UpdateInstrumentDrawing(m_sagittalInstrumentRenderer);
 }
 
 void ScrewNavigationWidget::on_displayRulerCheckBox_toggled(bool checked)
 {
-    m_rulerActor->SetVisibility((int) checked);
     ui->rulerSpinBox->setEnabled(checked);
+    m_showRuler = checked;
+    this->UpdateInstrumentDrawing(m_axialInstrumentRenderer);
+    this->UpdateInstrumentDrawing(m_sagittalInstrumentRenderer);
 }
 
 void ScrewNavigationWidget::on_displayPlanningCheckBox_toggled(bool checked)
@@ -1277,8 +1315,14 @@ void ScrewNavigationWidget::on_saveScrewPositionButton_clicked()
 {
     double pointerOrientation[3] = {0.0, 0.0, 0.0};
     if( !this->GetPointerDirection(pointerOrientation) )
+    {
+        m_pluginInterface->GetIbisAPI()->Warning(tr("Pointer orientation"), tr("Warning! pointer orientation set to default, which may not match tool orientation."));
         pointerOrientation[1] = -1;
+    }
 
+    //QString message = tr("[") + QString::number(pointerOrientation[0]) + tr(", ") + QString::number(pointerOrientation[1]) + tr(", ") +
+    //    QString::number(pointerOrientation[2]) + tr("]");
+    //m_pluginInterface->GetIbisAPI()->Warning(tr("Pointer orientation"), message);
     double pointerPosition[3] = { 0.0, 0.0, 0.0 };
     if( m_pluginInterface )
     {

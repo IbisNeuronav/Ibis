@@ -135,7 +135,7 @@ void VertebraRegistrationWidget::UpdateUi()
     ui->ultrasoundResolutionComboBox->addItem(tr("0.5 x 0.5 x 0.5"), 0.5);
     ui->ultrasoundResolutionComboBox->addItem(tr("1 x 1 x 1"), 1.0);
     ui->ultrasoundResolutionComboBox->addItem(tr("1.5 x 1.5 x 1.5"), 1.5);
-    ui->ultrasoundResolutionComboBox->setCurrentIndex(1);
+    ui->ultrasoundResolutionComboBox->setCurrentIndex(0);
 
     ui->ultrasoundSearchRadiusComboBox->addItem(tr("0"), 0);
     ui->ultrasoundSearchRadiusComboBox->addItem(tr("1"), 1);
@@ -994,7 +994,7 @@ void VertebraRegistrationWidget::on_optPopulationSizeComboBox_currentIndexChange
     m_optPopulationSize = ui->optPopulationSizeComboBox->itemData(value).toInt();
 }
 
-void VertebraRegistrationWidget::on_initialSigmaComboBox_currentIndexChanged( int value )
+void VertebraRegistrationWidget::on_optInitialSigmaComboBox_currentIndexChanged( int value )
 {
     m_optInitialSigma = ui->optInitialSigmaComboBox->itemData(value).toDouble();
 }

@@ -20,7 +20,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QFileDialog>
 
 // VTK includes
-#include <QVTKRenderWidget.h>
+#include <QVTKOpenGLNativeWidget.h>
 #include <vtkImageData.h>
 #include <vtkImageSlice.h>
 #include <vtkImageSliceMapper.h>
@@ -122,18 +122,11 @@ private:
     bool GetPointerDirection(double (&dir)[3]);
 
     void SetDefaultView( vtkSmartPointer<vtkRenderer> );
-    void InitializeScrewDrawing();
-    void InitializeRulerDrawing();
+    void UpdateInstrumentDrawing( vtkSmartPointer<vtkRenderer> );
     void InitializeAnnotationDrawing();
 
     void UpdatePointerDirection();
-    void UpdateScrewDrawing();
-    void UpdateRulerDrawing();
-    void RecenterResliceAxes(vtkMatrix4x4 *);
-
-    QString GetScrewName(double, double);
-
-//    void UpdatePlanningImage();
+    void UpdateRulerDrawing(vtkSmartPointer<vtkActor>);
 
     void InitializeUi();
 
@@ -152,10 +145,15 @@ private:
     bool m_isSagittalViewFlipped;
     bool m_isAxialViewFlipped;
 
+    bool m_showScrew;
+    bool m_showRuler;
+
     vtkSmartPointer<vtkActor> m_screwActor;
     vtkSmartPointer<vtkActor> m_rulerActor;
 
     vtkSmartPointer<vtkLineSource> m_axialScrewSource;
+    vtkSmartPointer<vtkRenderer> m_axialInstrumentRenderer;
+    vtkSmartPointer<vtkRenderer> m_sagittalInstrumentRenderer;
 
     vtkSmartPointer<vtkImageResliceToColors> m_axialReslice;
     vtkSmartPointer<vtkImageResliceToColors> m_axialScrewReslice;
@@ -169,16 +167,7 @@ private:
     vtkSmartPointer<vtkImageData> m_sagittalImage;
 
     double m_pointerDirection[3];
-    std::vector<vtkActor *> m_AxialPlannedScrewActorList;
-    std::vector<vtkActor *> m_SagittalPlannedScrewActorList;
-    std::vector<vtkPolyData *> m_PlannedScrewPolyDataList;
-    std::vector<vtkPolyData *> m_PlannedScrewCrossSectionPolyDataList;
-
     std::vector<Screw *> m_PlannedScrewList;
-
-    vtkSmartPointer<vtkTransform> m_prevTransformTest;
-    double m_savePos[3];
-    double saveDirection[3];
 
     double m_currentAxialPosition[3];       // stores the cursor position in axial plane
     double m_currentSagittalPosition[3];    // stores the cursor position in sagittal plane
@@ -203,6 +192,8 @@ private slots:
     void OnObjectRemovedSlot( int );
     void UpdateScrewComboBox();
     void NavigationPointerChangedSlot();
+
+    void on_resetDefaultViewButton_clicked();
 
     void on_flipAxialViewCheckBox_toggled(bool);
     void on_flipSagittalViewCheckBox_toggled(bool);

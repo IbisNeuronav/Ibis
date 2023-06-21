@@ -41,12 +41,10 @@ public:
     void SetUseWorldTransformCoordinate(bool useWorld) { m_useWorldTransformCoordinate = useWorld; }
 
     std::string GetName() { return m_name; }
-    void SetName(std::string name) { m_name = name; }
+    static std::string GetName(double, double);
+    static std::string GetScrewID(double, double);
 
     // getters
-    vtkLineSource * GetAxialLeftLineSource() { return m_axialLeftLineSource; }
-    vtkLineSource * GetAxialRightLineSource() { return m_axialRightLineSource; }
-
     vtkSmartPointer<vtkActor> GetAxialActor() { return m_axialActor; }
     vtkSmartPointer<vtkActor> GetSagittalActor() { return m_sagittalActor; }
 
@@ -55,11 +53,6 @@ public:
     double GetScrewTipSize() { return m_tipSize; }
 
     // setters
-    void SetAxialLeftLineSource(vtkLineSource * line) { m_axialLeftLineSource = line; }
-    void SetAxialRightLineSource(vtkLineSource * line) { m_axialRightLineSource = line; }
-
-    void SetScrewPolyData(vtkPolyData * polyData) { m_sagittalScrewPolyData = polyData; }
-
     void SetAxialActor(vtkSmartPointer<vtkActor> actor) { m_axialActor = actor; }
     void SetSagittalActor(vtkSmartPointer<vtkActor> actor) { m_sagittalActor = actor; }
 
@@ -67,13 +60,11 @@ public:
     static void GetScrewPolyData(double length, double diameter, double tipSize, vtkSmartPointer<vtkPolyData> &polyData);
     void GetScrewPolyData(vtkSmartPointer<vtkPolyData> polyData);
 
-    void Update();
-
     void PrintSelf();
 
 private:
 
-    void UpdateInternal();
+    void UpdateName();
 
 private:
 
@@ -94,11 +85,6 @@ private:
 
     vtkSmartPointer<vtkActor> m_axialActor;
     vtkSmartPointer<vtkActor> m_sagittalActor;
-
-    vtkLineSource * m_axialLeftLineSource;
-    vtkLineSource * m_axialRightLineSource;
-
-    vtkPolyData * m_sagittalScrewPolyData;
 
 };
 
