@@ -445,8 +445,6 @@ bool FileReader::OpenFile( QList<SceneObject*> & readObjects, QString filename, 
     return false;
 }
 
-
-#include "itkImage.h"
 #include "itkImageFileReader.h"
 #include "itkVTKImageExport.h"
 #include "vtkImageImport.h"

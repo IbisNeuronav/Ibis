@@ -228,8 +228,6 @@ bool GlslShader::SetVariable( const char * name, float val1, float val2, float v
     return false;
 }
 
-#include "vtkMatrix4x4.h"
-
 bool GlslShader::SetVariable( const char * name, vtkMatrix4x4 * mat )
 {
     int location = glGetUniformLocation( m_glslProg, name );
