@@ -28,7 +28,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <vtkWindowedSincPolyDataFilter.h>
 #include <vtkImageData.h>
 #include "polydataobject.h"
-#include "ibisapi.h"
 
 static double labelColors[256][3] = {{0,0,0},
                                         {1,0,0},
