@@ -20,11 +20,13 @@ set( PluginHdrMoc
 set( PluginUi vertebraregistrationwidget.ui screwnavigationwidget.ui screwtablewidget.ui )
 
 IF (NOT IBIS_PLUGINS_BUILD_GPU_RigidRegistration)
-   message( SEND_ERROR "Cannot find the GPU_RigidRegistration plugin. PedicleScrewNavigation Plugin depends on GPU_RigidRegistration.\n" )
+   message( WARNING "PedicleScrewNavigation Plugin depends on GPU_RigidRegistration, enabling it.\n" )
+   set( IBIS_PLUGINS_BUILD_GPU_RigidRegistration ON )
 ENDIF()
 
 IF (NOT IBIS_PLUGINS_BUILD_GPU_VolumeReconstruction)
-   message( SEND_ERROR "Cannot find the GPU_VolumeReconstruction plugin. PedicleScrewNavigation Plugin depends on GPU_VolumeReconstruction.\n" )
+   message( WARNING "PedicleScrewNavigation Plugin depends on GPU_VolumeReconstruction. enabling it.\n" )
+   set( IBIS_PLUGINS_BUILD_GPU_VolumeReconstruction ON )
 ENDIF()
 
 add_subdirectory( itkWeightRegistration )
