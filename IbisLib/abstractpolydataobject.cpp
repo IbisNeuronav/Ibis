@@ -49,15 +49,15 @@ AbstractPolyDataObject::AbstractPolyDataObject()
     // Cross section in 2d views
     for( int i = 0; i < 3; ++i )
     {
-        m_cuttingPlane[ i ] = vtkSmartPointer<vtkPlane>::New();
-        m_cuttingPlane[ i ]->SetTransform( m_referenceToPolyTransform );
-        m_cutter[ i ] = vtkSmartPointer<vtkCutter>::New();
-        m_cutter[ i ]->SetInputConnection( m_colorSwitch->GetOutputPort() );
-        m_cutter[ i ]->SetCutFunction( m_cuttingPlane[ i ] );
+        m_cuttingPlane[i] = vtkSmartPointer<vtkPlane>::New();
+        m_cuttingPlane[i]->SetTransform( m_referenceToPolyTransform );
+        m_cutter[i] = vtkSmartPointer<vtkCutter>::New();
+        m_cutter[i]->SetInputConnection( m_colorSwitch->GetOutputPort() );
+        m_cutter[i]->SetCutFunction( m_cuttingPlane[i] );
     }
-    m_cuttingPlane[ 0 ]->SetNormal( 1.0, 0.0, 0.0 );
-    m_cuttingPlane[ 1 ]->SetNormal( 0.0, 1.0, 0.0 );
-    m_cuttingPlane[ 2 ]->SetNormal( 0.0, 0.0, 1.0 );
+    m_cuttingPlane[0]->SetNormal( 1.0, 0.0, 0.0 );
+    m_cuttingPlane[1]->SetNormal( 0.0, 1.0, 0.0 );
+    m_cuttingPlane[2]->SetNormal( 0.0, 0.0, 1.0 );
 
     this->PolyData            = 0;
     this->renderingMode       = VTK_SURFACE;
@@ -96,14 +96,14 @@ void AbstractPolyDataObject::SetPolyData( vtkPolyData * poly )
 
 void AbstractPolyDataObject::Serialize( Serializer * ser )
 {
-    double opacity                    = this->GetOpacity();
-    double * objectColor              = this->GetColor();
-    int clippingPlaneOrientation[ 3 ] = { 1, 1, 1 };
+    double opacity                  = this->GetOpacity();
+    double * objectColor            = this->GetColor();
+    int clippingPlaneOrientation[3] = {1, 1, 1};
     if( !ser->IsReader() )
     {
-        clippingPlaneOrientation[ 0 ] = GetClippingPlanesOrientation( 0 ) ? 1 : 0;
-        clippingPlaneOrientation[ 1 ] = GetClippingPlanesOrientation( 1 ) ? 1 : 0;
-        clippingPlaneOrientation[ 2 ] = GetClippingPlanesOrientation( 2 ) ? 1 : 0;
+        clippingPlaneOrientation[0] = GetClippingPlanesOrientation( 0 ) ? 1 : 0;
+        clippingPlaneOrientation[1] = GetClippingPlanesOrientation( 1 ) ? 1 : 0;
+        clippingPlaneOrientation[2] = GetClippingPlanesOrientation( 2 ) ? 1 : 0;
     }
     SceneObject::Serialize( ser );
     ::Serialize( ser, "RenderingMode", this->renderingMode );
@@ -121,9 +121,9 @@ void AbstractPolyDataObject::Serialize( Serializer * ser )
         // PolyDataObjectSettingsDialog::UpdateSettings(), then PolyDataObjectSettingsDialog::UpdateUI() from this call
         // to AbstractPolyDataObject::GetColor() and this->Property->GetColor(), which is recomputing the color in
         // vtkProperty::ComputeCompositeColor() from DiffusedColor.
-        SetClippingPlanesOrientation( 0, clippingPlaneOrientation[ 0 ] == 1 ? true : false );
-        SetClippingPlanesOrientation( 1, clippingPlaneOrientation[ 1 ] == 1 ? true : false );
-        SetClippingPlanesOrientation( 2, clippingPlaneOrientation[ 2 ] == 1 ? true : false );
+        SetClippingPlanesOrientation( 0, clippingPlaneOrientation[0] == 1 ? true : false );
+        SetClippingPlanesOrientation( 1, clippingPlaneOrientation[1] == 1 ? true : false );
+        SetClippingPlanesOrientation( 2, clippingPlaneOrientation[2] == 1 ? true : false );
         this->SetOpacity( opacity );
         this->SetCrossSectionVisible( this->CrossSectionVisible );
     }
@@ -149,7 +149,7 @@ void AbstractPolyDataObject::Setup( View * view )
     vtkSmartPointer<vtkActor> actor = vtkSmartPointer<vtkActor>::New();
     actor->SetMapper( mapper );
     actor->SetUserTransform( this->GetWorldTransform() );
-    this->polydataObjectInstances[ view ] = actor;
+    this->polydataObjectInstances[view] = actor;
 
     if( view->GetType() == THREED_VIEW_TYPE )
     {
@@ -162,7 +162,7 @@ void AbstractPolyDataObject::Setup( View * view )
     {
         actor->SetProperty( m_2dProperty );
         int plane = (int)( view->GetType() );
-        mapper->SetInputConnection( m_cutter[ plane ]->GetOutputPort() );
+        mapper->SetInputConnection( m_cutter[plane]->GetOutputPort() );
         actor->SetVisibility( ( IsHidden() && GetCrossSectionVisible() ) ? 1 : 0 );
         view->GetOverlayRenderer()->AddActor( actor );
     }
@@ -250,8 +250,8 @@ void AbstractPolyDataObject::SetClippingPlanesOrientation( int plane, bool posit
 {
     Q_ASSERT( plane >= 0 && plane < 3 );
     vtkDoubleArray * normals = vtkDoubleArray::SafeDownCast( m_clippingPlanes->GetNormals() );
-    double tuple[ 3 ]        = { 0.0, 0.0, 0.0 };
-    tuple[ plane ]           = positive ? -1.0 : 1.0;
+    double tuple[3]          = {0.0, 0.0, 0.0};
+    tuple[plane]             = positive ? -1.0 : 1.0;
     normals->SetTuple( plane, tuple );
     m_clippingPlanes->Modified();
     emit ObjectModified();
@@ -262,7 +262,7 @@ bool AbstractPolyDataObject::GetClippingPlanesOrientation( int plane )
     Q_ASSERT( plane >= 0 && plane < 3 );
     vtkDoubleArray * normals = vtkDoubleArray::SafeDownCast( m_clippingPlanes->GetNormals() );
     double * tuple           = normals->GetTuple3( plane );
-    return tuple[ plane ] > 0.0 ? false : true;
+    return tuple[plane] > 0.0 ? false : true;
 }
 
 void AbstractPolyDataObject::OnStartCursorInteraction() { m_interacting = true; }
@@ -336,23 +336,23 @@ void AbstractPolyDataObject::InternalPostSceneRead()
 
 void AbstractPolyDataObject::UpdateClippingPlanes()
 {
-    double pos[ 3 ] = { 0.0, 0.0, 0.0 };
+    double pos[3] = {0.0, 0.0, 0.0};
     GetManager()->GetCursorPosition( pos );
     vtkPoints * origins = m_clippingPlanes->GetPoints();
-    origins->SetPoint( 0, pos[ 0 ], 0.0, 0.0 );
-    origins->SetPoint( 1, 0.0, pos[ 1 ], 0.0 );
-    origins->SetPoint( 2, 0.0, 0.0, pos[ 2 ] );
+    origins->SetPoint( 0, pos[0], 0.0, 0.0 );
+    origins->SetPoint( 1, 0.0, pos[1], 0.0 );
+    origins->SetPoint( 2, 0.0, 0.0, pos[2] );
     m_clippingPlanes->Modified();
     emit ObjectModified();
 }
 
 void AbstractPolyDataObject::UpdateCuttingPlane()
 {
-    double cursorPos[ 3 ] = { 0.0, 0.0, 0.0 };
+    double cursorPos[3] = {0.0, 0.0, 0.0};
     GetManager()->GetCursorPosition( cursorPos );
-    m_cuttingPlane[ 0 ]->SetOrigin( cursorPos[ 0 ], 0.0, 0.0 );
-    m_cuttingPlane[ 1 ]->SetOrigin( 0.0, cursorPos[ 1 ], 0.0 );
-    m_cuttingPlane[ 2 ]->SetOrigin( 0.0, 0.0, cursorPos[ 2 ] );
+    m_cuttingPlane[0]->SetOrigin( cursorPos[0], 0.0, 0.0 );
+    m_cuttingPlane[1]->SetOrigin( 0.0, cursorPos[1], 0.0 );
+    m_cuttingPlane[2]->SetOrigin( 0.0, 0.0, cursorPos[2] );
     emit ObjectModified();
 }
 

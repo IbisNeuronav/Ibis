@@ -239,7 +239,7 @@ void MainWindow::CreatePluginsUi()
     Application::GetInstance().GetAllToolPlugins( allTools );
     for( int i = 0; i < allTools.size(); ++i )
     {
-        ToolPluginInterface * toolPlugin = allTools[ i ];
+        ToolPluginInterface * toolPlugin = allTools[i];
         if( toolPlugin->CanRun() )
         {
             QString menuEntry = toolPlugin->GetMenuEntryString();
@@ -248,7 +248,7 @@ void MainWindow::CreatePluginsUi()
             action->setCheckable( true );
             connect( action, SIGNAL( toggled( bool ) ), this, SLOT( ToolPluginsMenuActionToggled( bool ) ) );
             m_pluginMenu->addAction( action );
-            m_pluginActions[ toolPlugin ] = action;
+            m_pluginActions[toolPlugin] = action;
             if( toolPlugin->GetSettings().active ) action->toggle();
         }
     }
@@ -262,7 +262,7 @@ void MainWindow::CreateNewObjectPluginsUi( QMenu * menu )
     Application::GetInstance().GetAllObjectPlugins( allObjectPlugins );
     for( int i = 0; i < allObjectPlugins.size(); ++i )
     {
-        ObjectPluginInterface * objectPlugin = allObjectPlugins[ i ];
+        ObjectPluginInterface * objectPlugin = allObjectPlugins[i];
         QString menuEntry                    = objectPlugin->GetMenuEntryString();
         QAction * action                     = new QAction( menuEntry, this );
         action->setData( QVariant( objectPlugin->GetPluginName() ) );
@@ -438,15 +438,15 @@ void MainWindow::ModifyFileMenu()
     QList<QAction *> a = fileMenu->actions();
     for( int i = 0; i < a.count(); i++ )
     {
-        if( a[ i ]->text() == "E&xport" )
+        if( a[i]->text() == "E&xport" )
         {
             if( obj && ( obj->IsExportable() ) )
             {  // enable export
-                a[ i ]->setEnabled( true );
+                a[i]->setEnabled( true );
             }
             else  // disable export
             {
-                a[ i ]->setEnabled( false );
+                a[i]->setEnabled( false );
             }
         }
     }
@@ -461,7 +461,7 @@ void MainWindow::ModifyNewObjectFileMenu()
     Application::GetInstance().GetAllObjectPlugins( allObjectPlugins );
     for( int i = 0; i < allObjectPlugins.size(); ++i )
     {
-        ObjectPluginInterface * objectPlugin = allObjectPlugins[ i ];
+        ObjectPluginInterface * objectPlugin = allObjectPlugins[i];
         if( objectPlugin->CanBeActivated() )
         {
             QString menuEntry = objectPlugin->GetMenuEntryString();
@@ -583,7 +583,7 @@ void MainWindow::ObjectListWidgetChanged( QWidget * newWidget )
 
 void MainWindow::ToggleToolPlugin( ToolPluginInterface * toolPlugin, bool isOn )
 {
-    QAction * action = m_pluginActions[ toolPlugin ];
+    QAction * action = m_pluginActions[toolPlugin];
     if( action->isChecked() != isOn ) action->toggle();
 }
 
@@ -600,7 +600,7 @@ void MainWindow::ToolPluginsMenuActionToggled( bool isOn )
         if( pluginWidget )
         {
             pluginWidget->setAttribute( Qt::WA_DeleteOnClose );
-            m_pluginTabs[ action ] = pluginWidget;
+            m_pluginTabs[action] = pluginWidget;
             m_rightPanel->addTab( pluginWidget, toolPlugin->GetMenuEntryString() );
             if( m_pluginTabs.size() == 1 )
             {
@@ -618,7 +618,7 @@ void MainWindow::ToolPluginsMenuActionToggled( bool isOn )
                                               Qt::WindowCloseButtonHint | Qt::CustomizeWindowHint );
                 pluginWidget->setWindowTitle( toolPlugin->GetMenuEntryString() );
                 connect( pluginWidget, SIGNAL( destroyed() ), this, SLOT( FloatingPluginWidgetClosed() ) );
-                m_pluginWidgets[ action ]        = pluginWidget;
+                m_pluginWidgets[action]          = pluginWidget;
                 toolPlugin->GetSettings().active = true;
                 if( toolPlugin->GetSettings().winSize != QSize( -1, -1 ) )
                 {
@@ -740,8 +740,8 @@ void MainWindow::GeneratePluginsMenuActionTriggered()
 void MainWindow::MainSplitterMoved( int /*pos*/, int /*index*/ )
 {
     QList<int> sizes = m_mainSplitter->sizes();
-    m_leftPanelSize  = sizes[ 0 ];
-    if( m_pluginTabs.size() ) m_rightPanelSize = sizes[ 2 ];
+    m_leftPanelSize  = sizes[0];
+    if( m_pluginTabs.size() ) m_rightPanelSize = sizes[2];
 }
 
 void MainWindow::UpdateMainSplitter()

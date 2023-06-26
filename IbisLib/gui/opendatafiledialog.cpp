@@ -41,7 +41,7 @@ void OpenDataFileDialog::BrowsePushButtonClicked()
     for( int i = 0; i < inputFiles.size(); ++i )
     {
         OpenFileParams::SingleFileParam param;
-        param.fileName = inputFiles[ i ];
+        param.fileName = inputFiles[i];
         m_fileParams->filesParams.push_back( param );
     }
 
@@ -65,7 +65,7 @@ void OpenDataFileDialog::Update()
     QString tmp;
     for( int i = 0; i < m_fileParams->filesParams.size(); ++i )
     {
-        QString filename = m_fileParams->filesParams[ i ].fileName;
+        QString filename = m_fileParams->filesParams[i].fileName;
         tmp += filename + " ";
     }
     ui->openFileLineEdit->setText( tmp );
@@ -79,10 +79,10 @@ void OpenDataFileDialog::Update()
     int index = 1;
     for( int i = 0; i < allObjects.size(); ++i )
     {
-        if( allObjects[ i ]->CanAppendChildren() && allObjects[ i ]->IsListable() )
+        if( allObjects[i]->CanAppendChildren() && allObjects[i]->IsListable() )
         {
-            ui->parentComboBox->addItem( allObjects[ i ]->GetName(), QVariant( allObjects[ i ]->GetObjectID() ) );
-            if( allObjects[ i ] == m_fileParams->defaultParent ) ui->parentComboBox->setCurrentIndex( index );
+            ui->parentComboBox->addItem( allObjects[i]->GetName(), QVariant( allObjects[i]->GetObjectID() ) );
+            if( allObjects[i] == m_fileParams->defaultParent ) ui->parentComboBox->setCurrentIndex( index );
             ++index;
         }
     }
@@ -97,7 +97,7 @@ void OpenDataFileDialog::on_buttonOk_clicked()
 {
     for( int i = 0; i < m_fileParams->filesParams.size(); ++i )
     {
-        m_fileParams->filesParams[ i ].isLabel = m_isLabel;
+        m_fileParams->filesParams[i].isLabel = m_isLabel;
     }
     accept();
 }

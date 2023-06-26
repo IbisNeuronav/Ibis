@@ -23,7 +23,7 @@ class LookupTableManager
 public:
     LookupTableManager();
 
-    void CreateLookupTable( const QString tableName, double range[ 2 ],
+    void CreateLookupTable( const QString tableName, double range[2],
                             vtkSmartPointer<vtkPiecewiseFunctionLookupTable> lut );
     int GetNumberOfTemplateLookupTables() const;
     const QString GetTemplateLookupTableName( int index );

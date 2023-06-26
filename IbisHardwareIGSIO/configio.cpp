@@ -55,61 +55,61 @@ ConfigIO::ConfigIO( QString configDir ) { ReadConfig( configDir ); }
 std::string ConfigIO::GetServerName( int index )
 {
     Q_ASSERT( index >= 0 && index < m_servers.size() );
-    return m_servers[ index ].m_serverName;
+    return m_servers[index].m_serverName;
 }
 
 std::string ConfigIO::GetServerIPAddress( int index )
 {
     Q_ASSERT( index >= 0 && index < m_servers.size() );
-    return m_servers[ index ].m_ipAddress;
+    return m_servers[index].m_ipAddress;
 }
 
 int ConfigIO::GetServerPort( int index )
 {
     Q_ASSERT( index >= 0 && index < m_servers.size() );
-    return m_servers[ index ].m_port;
+    return m_servers[index].m_port;
 }
 
 bool ConfigIO::GetStartAuto( int index )
 {
     Q_ASSERT( index >= 0 && index < m_servers.size() );
-    return m_servers[ index ].m_startAuto;
+    return m_servers[index].m_startAuto;
 }
 
 bool ConfigIO::GetConnectAuto( int index )
 {
     Q_ASSERT( index >= 0 && index < m_servers.size() );
-    return m_servers[ index ].m_connectAuto;
+    return m_servers[index].m_connectAuto;
 }
 
 QString ConfigIO::GetPlusConfigFile( int index )
 {
     Q_ASSERT( index >= 0 && index < m_servers.size() );
-    return m_servers[ index ].m_plusConfigFile;
+    return m_servers[index].m_plusConfigFile;
 }
 
 QString ConfigIO::GetToolName( int index )
 {
     Q_ASSERT( index >= 0 && index < m_tools.size() );
-    return m_tools[ index ].ToolName;
+    return m_tools[index].ToolName;
 }
 
 QString ConfigIO::GetToolType( int index )
 {
     Q_ASSERT( index >= 0 && index < m_tools.size() );
-    return m_tools[ index ].ToolType;
+    return m_tools[index].ToolType;
 }
 
 QString ConfigIO::GetToolModelFile( int index )
 {
     Q_ASSERT( index >= 0 && index < m_tools.size() );
-    return m_tools[ index ].ToolModelFile;
+    return m_tools[index].ToolModelFile;
 }
 
 QString ConfigIO::GetToolParamFile( int index )
 {
     Q_ASSERT( index >= 0 && index < m_tools.size() );
-    return m_tools[ index ].ToolParamFile;
+    return m_tools[index].ToolParamFile;
 }
 
 DeviceToolMap ConfigIO::GetAssociations()
@@ -117,8 +117,8 @@ DeviceToolMap ConfigIO::GetAssociations()
     DeviceToolMap res;
     for( int i = 0; i < m_associations.size(); ++i )
     {
-        res[ m_associations[ i ].deviceName ] =
-            QPair<QString, QString>( m_associations[ i ].toolName, m_associations[ i ].toolPart );
+        res[m_associations[i].deviceName] =
+            QPair<QString, QString>( m_associations[i].toolName, m_associations[i].toolPart );
     }
     return res;
 }

@@ -59,11 +59,11 @@ void PointPropertiesWidget::UpdateUI()
         QList<QTreeWidgetItem *> items;
         for( int i = 0; i < m_points->GetNumberOfPoints(); ++i )
         {
-            double pt[ 3 ];
+            double pt[3];
             m_points->GetPointCoordinates( i, pt );
             QStringList cols;
             cols.append( m_points->GetPointLabel( i ) );
-            cols.append( QString( "(%1, %2, %3)" ).arg( pt[ 0 ] ).arg( pt[ 1 ] ).arg( pt[ 2 ] ) );
+            cols.append( QString( "(%1, %2, %3)" ).arg( pt[0] ).arg( pt[1] ).arg( pt[2] ) );
             QTreeWidgetItem * it = new QTreeWidgetItem( (QTreeWidget *)0, cols );
             it->setFlags( Qt::ItemIsSelectable | Qt::ItemIsEditable | Qt::ItemIsEnabled );
             items.append( it );
@@ -71,7 +71,7 @@ void PointPropertiesWidget::UpdateUI()
         ui->pointsTreeWidget->insertTopLevelItems( 0, items );
         int selectedIndex = m_points->GetSelectedPointIndex();
         if( selectedIndex != PointsObject::InvalidPointIndex )
-            ui->pointsTreeWidget->setCurrentItem( items[ selectedIndex ] );
+            ui->pointsTreeWidget->setCurrentItem( items[selectedIndex] );
 
         SceneManager * manager = m_points->GetManager();
         Q_ASSERT( manager );

@@ -16,7 +16,7 @@ void IbisPreferences::LoadSettings( QSettings & settings )
     QStringList names = settings.allKeys();
     for( int i = 0; i < names.count(); i++ )
     {
-        m_customPaths.insert( names[ i ], settings.value( names[ i ] ).toString() );
+        m_customPaths.insert( names[i], settings.value( names[i] ).toString() );
     }
     settings.endGroup();
 }

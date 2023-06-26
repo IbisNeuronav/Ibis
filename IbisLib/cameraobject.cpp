@@ -51,20 +51,20 @@ ObjectSerializationMacro( CameraIntrinsicParams );
 
 CameraIntrinsicParams::CameraIntrinsicParams()
 {
-    m_center[ 0 ]       = 0.5;
-    m_center[ 1 ]       = 0.5;
-    m_focal[ 0 ]        = 1.85;
-    m_focal[ 1 ]        = 1.85;
+    m_center[0]         = 0.5;
+    m_center[1]         = 0.5;
+    m_focal[0]          = 1.85;
+    m_focal[1]          = 1.85;
     m_distorsionK1      = 0.0;
     m_reprojectionError = 0.0;
 }
 
 CameraIntrinsicParams & CameraIntrinsicParams::operator=( const CameraIntrinsicParams & other )
 {
-    m_center[ 0 ]       = other.m_center[ 0 ];
-    m_center[ 1 ]       = other.m_center[ 1 ];
-    m_focal[ 0 ]        = other.m_focal[ 0 ];
-    m_focal[ 1 ]        = other.m_focal[ 1 ];
+    m_center[0]         = other.m_center[0];
+    m_center[1]         = other.m_center[1];
+    m_focal[0]          = other.m_focal[0];
+    m_focal[1]          = other.m_focal[1];
     m_distorsionK1      = other.m_distorsionK1;
     m_reprojectionError = other.m_reprojectionError;
     return *this;
@@ -94,26 +94,26 @@ void CameraIntrinsicParams::SetVerticalAngleDegrees( double angle )
 double CameraIntrinsicParams::GetVerticalAngleRad() const
 {
     // vertical focal distance (m_focal[1]) is represented as a percentage of image height
-    return 2 * atan( .5 / m_focal[ 1 ] );
+    return 2 * atan( .5 / m_focal[1] );
 }
 
 void CameraIntrinsicParams::SetVerticalAngleRad( double angle )
 {
     // simtodo : can't have same focal for horizontal and vertical. Or at least make it obvious in the interface
     double focal = 0.5 / tan( 0.5 * angle );
-    m_focal[ 0 ] = focal;
-    m_focal[ 1 ] = focal;
+    m_focal[0]   = focal;
+    m_focal[1]   = focal;
 }
 
 //---------------------------------------------------------------------------------------
 // CameraObject class implementation
 //---------------------------------------------------------------------------------------
 
-static int DefaultImageSize[ 2 ] = { 640, 480 };
+static int DefaultImageSize[2] = {640, 480};
 
 CameraObject::CameraObject()
 {
-    m_videoBuffer = new TrackedVideoBuffer( DefaultImageSize[ 0 ], DefaultImageSize[ 1 ] );
+    m_videoBuffer = new TrackedVideoBuffer( DefaultImageSize[0], DefaultImageSize[1] );
     SetInputTransform( m_videoBuffer->GetOutputTransform() );
 
     m_videoInputSwitch = vtkSmartPointer<vtkPassThrough>::New();
@@ -139,15 +139,15 @@ CameraObject::CameraObject()
     m_useGradientTargetTransparencyModulation = true;
     m_showTargetTransparencyMask              = false;
     m_trackTargetTransparencyCenter           = false;
-    m_transparencyCenter[ 0 ]                 = 0.5;
-    m_transparencyCenter[ 1 ]                 = 0.5;
-    m_transparencyRadius[ 0 ]                 = 0.03;
-    m_transparencyRadius[ 1 ]                 = 0.3;
+    m_transparencyCenter[0]                   = 0.5;
+    m_transparencyCenter[1]                   = 0.5;
+    m_transparencyRadius[0]                   = 0.03;
+    m_transparencyRadius[1]                   = 0.3;
     m_mouseMovingTransparency                 = false;
     CreateCameraRepresentation();
 
-    m_cachedImageSize[ 0 ] = DefaultImageSize[ 0 ];
-    m_cachedImageSize[ 1 ] = DefaultImageSize[ 1 ];
+    m_cachedImageSize[0] = DefaultImageSize[0];
+    m_cachedImageSize[1] = DefaultImageSize[1];
 
     // make sure every ParamModified signal also generates a Modified signal
     connect( this, SIGNAL( ParamsModified() ), this, SLOT( ParamsModifiedSlot() ) );
@@ -271,9 +271,9 @@ void CameraObject::SetVideoInputData( vtkImageData * image )
 
 vtkImageData * CameraObject::GetVideoOutput() { return vtkImageData::SafeDownCast( m_videoInputSwitch->GetOutput() ); }
 
-int CameraObject::GetImageWidth() { return GetVideoOutput()->GetDimensions()[ 0 ]; }
+int CameraObject::GetImageWidth() { return GetVideoOutput()->GetDimensions()[0]; }
 
-int CameraObject::GetImageHeight() { return GetVideoOutput()->GetDimensions()[ 1 ]; }
+int CameraObject::GetImageHeight() { return GetVideoOutput()->GetDimensions()[1]; }
 
 void CameraObject::AddClient()
 {
@@ -323,19 +323,19 @@ void CameraObject::Setup( View * view )
 
         perView.cameraImageMapper = vtkIbisImagePlaneMapper::New();
         perView.cameraImageMapper->SetGlobalOpacity( m_globalOpacity );
-        perView.cameraImageMapper->SetImageCenter( m_intrinsicParams.m_center[ 0 ] * GetImageWidth(),
-                                                   m_intrinsicParams.m_center[ 1 ] * GetImageHeight() );
+        perView.cameraImageMapper->SetImageCenter( m_intrinsicParams.m_center[0] * GetImageWidth(),
+                                                   m_intrinsicParams.m_center[1] * GetImageHeight() );
         perView.cameraImageMapper->SetLensDistortion( m_intrinsicParams.m_distorsionK1 );
         perView.cameraImageMapper->SetUseTransparency( m_useTransparency );
         perView.cameraImageMapper->SetUseGradient( m_useGradientTargetTransparencyModulation );
         perView.cameraImageMapper->SetShowMask( m_showTargetTransparencyMask );
-        perView.cameraImageMapper->SetTransparencyPosition( m_transparencyCenter[ 0 ], m_transparencyCenter[ 1 ] );
-        perView.cameraImageMapper->SetTransparencyRadius( m_transparencyRadius[ 0 ], m_transparencyRadius[ 1 ] );
+        perView.cameraImageMapper->SetTransparencyPosition( m_transparencyCenter[0], m_transparencyCenter[1] );
+        perView.cameraImageMapper->SetTransparencyRadius( m_transparencyRadius[0], m_transparencyRadius[1] );
         perView.cameraImageActor->SetMapper( perView.cameraImageMapper );
         perView.cameraImageMapper->SetInputConnection( m_videoInputSwitch->GetOutputPort() );
         view->GetRenderer()->AddViewProp( perView.cameraImageActor );
 
-        this->m_perViewElements[ view ] = perView;
+        this->m_perViewElements[view] = perView;
 
         if( IsHidden() ) Hide();
 
@@ -491,28 +491,28 @@ void CameraObject::SetGlobalOpacity( double opacity )
 
 void CameraObject::SetFocalPix( double fx, double fy )
 {
-    m_intrinsicParams.m_focal[ 0 ] = fx / GetImageWidth();
-    m_intrinsicParams.m_focal[ 1 ] = fy / GetImageHeight();
+    m_intrinsicParams.m_focal[0] = fx / GetImageWidth();
+    m_intrinsicParams.m_focal[1] = fy / GetImageHeight();
     UpdateGeometricRepresentation();
 }
 
 void CameraObject::GetFocalPix( double & x, double & y )
 {
-    x = m_intrinsicParams.m_focal[ 0 ] * GetImageWidth();
-    y = m_intrinsicParams.m_focal[ 1 ] * GetImageHeight();
+    x = m_intrinsicParams.m_focal[0] * GetImageWidth();
+    y = m_intrinsicParams.m_focal[1] * GetImageHeight();
 }
 
 void CameraObject::SetImageCenterPix( double x, double y )
 {
-    m_intrinsicParams.m_center[ 0 ] = x / GetImageWidth();
-    m_intrinsicParams.m_center[ 1 ] = y / GetImageHeight();
+    m_intrinsicParams.m_center[0] = x / GetImageWidth();
+    m_intrinsicParams.m_center[1] = y / GetImageHeight();
     UpdateGeometricRepresentation();
 }
 
 void CameraObject::GetImageCenterPix( double & x, double & y )
 {
-    x = m_intrinsicParams.m_center[ 0 ] * GetImageWidth();
-    y = m_intrinsicParams.m_center[ 1 ] * GetImageHeight();
+    x = m_intrinsicParams.m_center[0] * GetImageWidth();
+    y = m_intrinsicParams.m_center[1] * GetImageHeight();
 }
 
 void CameraObject::SetLensDistortion( double dist )
@@ -542,8 +542,8 @@ void CameraObject::SetTransparencyCenterTracked( bool t )
 
 void CameraObject::SetTransparencyCenter( double x, double y )
 {
-    m_transparencyCenter[ 0 ]       = x;
-    m_transparencyCenter[ 1 ]       = y;
+    m_transparencyCenter[0]         = x;
+    m_transparencyCenter[1]         = y;
     PerViewElementCont::iterator it = m_perViewElements.begin();
     while( it != m_perViewElements.end() )
     {
@@ -621,8 +621,8 @@ void CameraObject::SetBrightness( double b )
 
 void CameraObject::SetTransparencyRadius( double min, double max )
 {
-    m_transparencyRadius[ 0 ]       = min;
-    m_transparencyRadius[ 1 ]       = max;
+    m_transparencyRadius[0]         = min;
+    m_transparencyRadius[1]         = max;
     PerViewElementCont::iterator it = m_perViewElements.begin();
     while( it != m_perViewElements.end() )
     {
@@ -663,8 +663,8 @@ void CameraObject::InternalSetTrackCamera()
             // Move anotations to overlay renderer
             for( unsigned i = 0; i < elem.anotations.size(); ++i )
             {
-                v->GetRenderer()->RemoveViewProp( elem.anotations[ i ] );
-                v->GetOverlayRenderer()->AddViewProp( elem.anotations[ i ] );
+                v->GetRenderer()->RemoveViewProp( elem.anotations[i] );
+                v->GetOverlayRenderer()->AddViewProp( elem.anotations[i] );
             }
 
             // Set this camera to control the view
@@ -714,8 +714,8 @@ void CameraObject::TakeSnapshot()
     newCam->SetHidden( true );
     newCam->SetIntrinsicParams( m_intrinsicParams );
     newCam->SetImageDistance( m_imageDistance );
-    newCam->SetTransparencyCenter( m_transparencyCenter[ 0 ], m_transparencyCenter[ 1 ] );
-    newCam->SetTransparencyRadius( m_transparencyRadius[ 0 ], m_transparencyRadius[ 1 ] );
+    newCam->SetTransparencyCenter( m_transparencyCenter[0], m_transparencyCenter[1] );
+    newCam->SetTransparencyRadius( m_transparencyRadius[0], m_transparencyRadius[1] );
     newCam->SetCalibrationMatrix( GetCalibrationMatrix() );
     newCam->AddFrame( GetVideoOutput(), GetUncalibratedTransform()->GetMatrix() );
     newCam->SetCanEditTransformManually( false );
@@ -736,8 +736,8 @@ void CameraObject::ToggleRecording()
         m_recordingCamera->SetName( FindNextSnapshotName() );
         m_recordingCamera->SetIntrinsicParams( m_intrinsicParams );
         m_recordingCamera->SetImageDistance( m_imageDistance );
-        m_recordingCamera->SetTransparencyCenter( m_transparencyCenter[ 0 ], m_transparencyCenter[ 1 ] );
-        m_recordingCamera->SetTransparencyRadius( m_transparencyRadius[ 0 ], m_transparencyRadius[ 1 ] );
+        m_recordingCamera->SetTransparencyCenter( m_transparencyCenter[0], m_transparencyCenter[1] );
+        m_recordingCamera->SetTransparencyRadius( m_transparencyRadius[0], m_transparencyRadius[1] );
         m_recordingCamera->SetCalibrationMatrix( GetCalibrationMatrix() );
     }
     else
@@ -787,8 +787,8 @@ void CameraObject::ReleaseControl( View * triggeredView )
 
         for( unsigned i = 0; i < elem.anotations.size(); ++i )
         {
-            v->GetOverlayRenderer()->RemoveViewProp( elem.anotations[ i ] );
-            v->GetRenderer()->AddViewProp( elem.anotations[ i ] );
+            v->GetOverlayRenderer()->RemoveViewProp( elem.anotations[i] );
+            v->GetRenderer()->AddViewProp( elem.anotations[i] );
         }
 
         // Recover backup camera
@@ -804,26 +804,26 @@ void CameraObject::ReleaseControl( View * triggeredView )
 
 void CameraObject::WorldToImage( double * worldPos, double & xIm, double & yIm )
 {
-    double p4[ 4 ];
-    p4[ 0 ] = worldPos[ 0 ];
-    p4[ 1 ] = worldPos[ 1 ];
-    p4[ 2 ] = worldPos[ 2 ];
-    p4[ 3 ] = 1.0;
+    double p4[4];
+    p4[0] = worldPos[0];
+    p4[1] = worldPos[1];
+    p4[2] = worldPos[2];
+    p4[3] = 1.0;
 
     vtkMatrix4x4 * mat = vtkMatrix4x4::New();
     mat->DeepCopy( m_opticalCenterTransform->GetMatrix() );
     mat->Invert();
-    double pCam[ 4 ] = { 0.0, 0.0, 0.0, 1.0 };
+    double pCam[4] = {0.0, 0.0, 0.0, 1.0};
     mat->MultiplyPoint( p4, pCam );
     mat->Delete();
 
-    double centerPix[ 2 ] = { 0.0, 0.0 };
-    GetImageCenterPix( centerPix[ 0 ], centerPix[ 1 ] );
-    double focalPix[ 2 ] = { 0.0, 0.0 };
-    GetFocalPix( focalPix[ 0 ], focalPix[ 1 ] );
+    double centerPix[2] = {0.0, 0.0};
+    GetImageCenterPix( centerPix[0], centerPix[1] );
+    double focalPix[2] = {0.0, 0.0};
+    GetFocalPix( focalPix[0], focalPix[1] );
 
-    xIm = centerPix[ 0 ] + pCam[ 0 ] / pCam[ 2 ] * focalPix[ 0 ];
-    yIm = centerPix[ 1 ] + pCam[ 1 ] / pCam[ 2 ] * focalPix[ 1 ];
+    xIm = centerPix[0] + pCam[0] / pCam[2] * focalPix[0];
+    yIm = centerPix[1] + pCam[1] / pCam[2] * focalPix[1];
     xIm = GetImageWidth() - xIm - 1.0;
     yIm = GetImageHeight() - yIm - 1.0;
 }
@@ -831,26 +831,26 @@ void CameraObject::WorldToImage( double * worldPos, double & xIm, double & yIm )
 void CameraObject::WindowToImage( int x, int y, View * v, double & xIm, double & yIm )
 {
     int * winSize     = v->GetWindowSize();
-    double imScale    = static_cast<double>( m_cachedImageSize[ 1 ] ) / winSize[ 1 ];
+    double imScale    = static_cast<double>( m_cachedImageSize[1] ) / winSize[1];
     yIm               = y * imScale;
-    double winImWidth = winSize[ 1 ] * m_cachedImageSize[ 0 ] / m_cachedImageSize[ 1 ];
-    double offset     = ( winSize[ 0 ] - winImWidth ) * 0.5;
+    double winImWidth = winSize[1] * m_cachedImageSize[0] / m_cachedImageSize[1];
+    double offset     = ( winSize[0] - winImWidth ) * 0.5;
     xIm               = ( x - offset ) * imScale;
 }
 
 #include "simplepropcreator.h"
 static double zMin = 0.01;
 
-void CameraObject::DrawLine( double x1, double y1, double x2, double y2, double color[ 4 ] )
+void CameraObject::DrawLine( double x1, double y1, double x2, double y2, double color[4] )
 {
-    double start[ 3 ];
-    start[ 0 ] = x1;
-    start[ 1 ] = y1;
-    start[ 2 ] = zMin;
-    double end[ 3 ];
-    end[ 0 ] = x2;
-    end[ 1 ] = y2;
-    end[ 2 ] = zMin;
+    double start[3];
+    start[0] = x1;
+    start[1] = y1;
+    start[2] = zMin;
+    double end[3];
+    end[0] = x2;
+    end[1] = y2;
+    end[2] = zMin;
 
     PerViewElementCont::iterator it = m_perViewElements.begin();
     while( it != m_perViewElements.end() )
@@ -868,23 +868,23 @@ void CameraObject::DrawLine( double x1, double y1, double x2, double y2, double 
     }
 }
 
-void CameraObject::DrawPath( std::vector<Vec2> & points, double color[ 4 ] )
+void CameraObject::DrawPath( std::vector<Vec2> & points, double color[4] )
 {
     std::vector<Vec3> p3d;
     p3d.reserve( points.size() );
-    for( unsigned i = 0; i < points.size(); ++i ) p3d.push_back( Vec3( points[ i ], zMin ) );
+    for( unsigned i = 0; i < points.size(); ++i ) p3d.push_back( Vec3( points[i], zMin ) );
 
     InternalDrawPath( p3d, color );
 }
 
-void CameraObject::DrawWorldPath( std::vector<Vec3> & points, double color[ 4 ] )
+void CameraObject::DrawWorldPath( std::vector<Vec3> & points, double color[4] )
 {
     std::vector<Vec3> p3d;
     p3d.reserve( points.size() );
     for( unsigned i = 0; i < points.size(); ++i )
     {
         double x, y;
-        WorldToImage( points[ i ].Ref(), x, y );
+        WorldToImage( points[i].Ref(), x, y );
         p3d.push_back( Vec3( x, y, zMin ) );
     }
 
@@ -899,7 +899,7 @@ void CameraObject::ListenForIbisClockTick( bool listen )
         disconnect( &Application::GetInstance(), SIGNAL( IbisClockTick() ), this, SLOT( VideoUpdatedSlot() ) );
 }
 
-void CameraObject::InternalDrawPath( std::vector<Vec3> & p3d, double color[ 4 ] )
+void CameraObject::InternalDrawPath( std::vector<Vec3> & p3d, double color[4] )
 {
     PerViewElementCont::iterator it = m_perViewElements.begin();
     while( it != m_perViewElements.end() )
@@ -917,7 +917,7 @@ void CameraObject::InternalDrawPath( std::vector<Vec3> & p3d, double color[ 4 ] 
     }
 }
 
-void CameraObject::DrawRect( double x, double y, double width, double height, double color[ 4 ] )
+void CameraObject::DrawRect( double x, double y, double width, double height, double color[4] )
 {
     DrawLine( x, y, x + width, y, color );
     DrawLine( x + width, y, x + width, y + height, color );
@@ -925,11 +925,11 @@ void CameraObject::DrawRect( double x, double y, double width, double height, do
     DrawLine( x, y + height, x, y, color );
 }
 
-void CameraObject::DrawTarget( double x, double y, double /*radius*/, double color[ 4 ] )
+void CameraObject::DrawTarget( double x, double y, double /*radius*/, double color[4] )
 {
-    double center[ 3 ]              = { 0.0, 0.0, 0.0 };
-    center[ 0 ]                     = x;
-    center[ 1 ]                     = y;
+    double center[3]                = {0.0, 0.0, 0.0};
+    center[0]                       = x;
+    center[1]                       = y;
     PerViewElementCont::iterator it = m_perViewElements.begin();
     while( it != m_perViewElements.end() )
     {
@@ -970,7 +970,7 @@ void CameraObject::VideoUpdatedSlot()
     }
 
     // Update representation if image size changed
-    if( GetImageWidth() != m_cachedImageSize[ 0 ] || GetImageHeight() != m_cachedImageSize[ 1 ] )
+    if( GetImageWidth() != m_cachedImageSize[0] || GetImageHeight() != m_cachedImageSize[1] )
         UpdateGeometricRepresentation();
 
     // Get the position of the transparency center from projection of the tracked pointer
@@ -1025,17 +1025,17 @@ void CameraObject::UpdateGeometricRepresentation()
     while( it != m_perViewElements.end() )
     {
         PerViewElements & elem = ( *it ).second;
-        elem.cameraImageMapper->SetImageCenter( m_intrinsicParams.m_center[ 0 ] * GetImageWidth(),
-                                                m_intrinsicParams.m_center[ 1 ] * GetImageHeight() );
+        elem.cameraImageMapper->SetImageCenter( m_intrinsicParams.m_center[0] * GetImageWidth(),
+                                                m_intrinsicParams.m_center[1] * GetImageHeight() );
         elem.cameraImageMapper->SetLensDistortion( m_intrinsicParams.m_distorsionK1 );
-        elem.cameraImageMapper->SetTransparencyPosition( m_transparencyCenter[ 0 ], m_transparencyCenter[ 1 ] );
-        elem.cameraImageMapper->SetTransparencyRadius( m_transparencyRadius[ 0 ], m_transparencyRadius[ 1 ] );
+        elem.cameraImageMapper->SetTransparencyPosition( m_transparencyCenter[0], m_transparencyCenter[1] );
+        elem.cameraImageMapper->SetTransparencyRadius( m_transparencyRadius[0], m_transparencyRadius[1] );
         ++it;
     }
     m_camera->SetViewAngle( m_intrinsicParams.GetVerticalAngleDegrees() );
 
-    double offsetY      = m_imageDistance * 0.5 / m_intrinsicParams.m_focal[ 1 ];
-    double offsetX      = m_imageDistance * 0.5 / m_intrinsicParams.m_focal[ 0 ];
+    double offsetY      = m_imageDistance * 0.5 / m_intrinsicParams.m_focal[1];
+    double offsetX      = m_imageDistance * 0.5 / m_intrinsicParams.m_focal[0];
     double scaleFactorX = 2.0 * offsetX / static_cast<double>( width );
     double scaleFactorY = 2.0 * offsetY / static_cast<double>( height );
 
@@ -1050,8 +1050,8 @@ void CameraObject::UpdateGeometricRepresentation()
     m_imageTransform->Translate( -offsetX, -offsetY, -m_imageDistance );
     m_imageTransform->Scale( scaleFactorX, scaleFactorY, 1.0 );
 
-    m_cachedImageSize[ 0 ] = width;
-    m_cachedImageSize[ 1 ] = height;
+    m_cachedImageSize[0] = width;
+    m_cachedImageSize[1] = height;
 
     emit ParamsModified();
 }
@@ -1099,10 +1099,9 @@ void CameraObject::CreateCameraRepresentation()
     pts->InsertNextPoint( 100.0, 100.0, -m_imageDistance );
     pts->InsertNextPoint( -100.0, 100.0, -m_imageDistance );
 
-    static vtkIdType linesIndex[ 8 ][ 2 ] = { { 0, 1 }, { 0, 2 }, { 0, 3 }, { 0, 4 },
-                                              { 1, 2 }, { 2, 3 }, { 3, 4 }, { 4, 1 } };
-    vtkSmartPointer<vtkCellArray> lines   = vtkSmartPointer<vtkCellArray>::New();
-    for( int i = 0; i < 8; ++i ) lines->InsertNextCell( 2, linesIndex[ i ] );
+    static vtkIdType linesIndex[8][2]   = {{0, 1}, {0, 2}, {0, 3}, {0, 4}, {1, 2}, {2, 3}, {3, 4}, {4, 1}};
+    vtkSmartPointer<vtkCellArray> lines = vtkSmartPointer<vtkCellArray>::New();
+    for( int i = 0; i < 8; ++i ) lines->InsertNextCell( 2, linesIndex[i] );
 
     m_cameraPolyData = vtkSmartPointer<vtkPolyData>::New();
     m_cameraPolyData->SetPoints( pts );
@@ -1120,7 +1119,7 @@ QString CameraObject::FindNextSnapshotName()
         bool found      = false;
         for( int i = 0; i < camObjects.size(); ++i )
         {
-            if( camObjects[ i ]->GetName() == newName )
+            if( camObjects[i]->GetName() == newName )
             {
                 found = true;
                 break;
@@ -1135,7 +1134,7 @@ void CameraObject::ClearDrawingOneView( View * v, PerViewElements & elem )
 {
     for( unsigned i = 0; i < elem.anotations.size(); ++i )
     {
-        vtkProp3D * anotProp = elem.anotations[ i ];
+        vtkProp3D * anotProp = elem.anotations[i];
         GetCurrentRenderer( v )->RemoveViewProp( anotProp );
         anotProp->Delete();
     }

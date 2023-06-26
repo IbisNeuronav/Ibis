@@ -57,18 +57,18 @@ const int SceneManager::InvalidId = -1;
 
 SceneManager::SceneManager()
 {
-    m_viewFollowsReferenceObject     = true;
-    this->ViewBackgroundColor[ 0 ]   = 0;
-    this->ViewBackgroundColor[ 1 ]   = 0;
-    this->ViewBackgroundColor[ 2 ]   = 0;
-    this->View3DBackgroundColor[ 0 ] = 0;
-    this->View3DBackgroundColor[ 1 ] = 0;
-    this->View3DBackgroundColor[ 2 ] = 0;
-    this->CameraViewAngle3D          = 30.0;
-    this->SupportedSceneSaveVersion  = IBIS_SCENE_SAVE_VERSION;
-    this->NavigationPointerID        = SceneManager::InvalidId;
-    this->IsNavigating               = false;
-    this->LoadingScene               = false;
+    m_viewFollowsReferenceObject    = true;
+    this->ViewBackgroundColor[0]    = 0;
+    this->ViewBackgroundColor[1]    = 0;
+    this->ViewBackgroundColor[2]    = 0;
+    this->View3DBackgroundColor[0]  = 0;
+    this->View3DBackgroundColor[1]  = 0;
+    this->View3DBackgroundColor[2]  = 0;
+    this->CameraViewAngle3D         = 30.0;
+    this->SupportedSceneSaveVersion = IBIS_SCENE_SAVE_VERSION;
+    this->NavigationPointerID       = SceneManager::InvalidId;
+    this->IsNavigating              = false;
+    this->LoadingScene              = false;
 
     this->Init();
 }
@@ -86,7 +86,8 @@ void SceneManager::Destroy()
 
     this->RemoveObject( m_sceneRoot );
 
-    foreach( View * v, Views.keys() ) v->Delete();
+    foreach( View * v, Views.keys() )
+        v->Delete();
 
     Views.clear();
 
@@ -163,7 +164,7 @@ void SceneManager::Init()
     Application::GetInstance().GetAllGlobalObjectInstances( globalObjects );
     for( int i = 0; i < globalObjects.size(); ++i )
     {
-        AddObject( globalObjects[ i ], m_sceneRoot );
+        AddObject( globalObjects[i], m_sceneRoot );
     }
 
     this->SetCurrentObject( this->GetSceneRoot() );
@@ -492,8 +493,7 @@ void SceneManager::PostSceneRead( int n )
     // Have to set up NextObjectId
     for( int i = 0; i < this->AllObjects.size(); ++i )
     {
-        if( this->AllObjects[ i ]->GetObjectID() > m_nextObjectID )
-            m_nextObjectID = this->AllObjects[ i ]->GetObjectID();
+        if( this->AllObjects[i]->GetObjectID() > m_nextObjectID ) m_nextObjectID = this->AllObjects[i]->GetObjectID();
         if( !this->UpdateProgress( n + i + 1 ) ) return;
     }
     m_nextObjectID++;
@@ -548,7 +548,8 @@ View * SceneManager::CreateView( int type, QString name, int id )
     int finalID = id;
     if( id == SceneManager::InvalidId || idUsed )
     {
-        foreach( int tmpID, Views.values() ) maxID = std::max( tmpID, maxID );
+        foreach( int tmpID, Views.values() )
+            maxID = std::max( tmpID, maxID );
         finalID = maxID + 1;
     }
     // verify name uniqueness
@@ -575,7 +576,7 @@ View * SceneManager::CreateView( int type, QString name, int id )
 
     // Reset cameras for the colin27 in talairach space. This should be more or less good
     // for any kind of brain data.
-    double bounds[ 6 ] = { -90.0, 91.0, -126.0, 91.0, -72.0, 109.0 };
+    double bounds[6] = {-90.0, 91.0, -126.0, 91.0, -72.0, 109.0};
     res->ResetCamera( bounds );
 
     this->Views.insert( res, finalID );
@@ -605,9 +606,9 @@ View * SceneManager::GetViewFromInteractor( vtkRenderWindowInteractor * interact
 
 void SceneManager::SetViewBackgroundColor( double * color )
 {
-    this->ViewBackgroundColor[ 0 ] = color[ 0 ];
-    this->ViewBackgroundColor[ 1 ] = color[ 1 ];
-    this->ViewBackgroundColor[ 2 ] = color[ 2 ];
+    this->ViewBackgroundColor[0] = color[0];
+    this->ViewBackgroundColor[1] = color[1];
+    this->ViewBackgroundColor[2] = color[2];
     foreach( View * view, Views.keys() )
     {
         view->SetBackgroundColor( color );
@@ -616,9 +617,9 @@ void SceneManager::SetViewBackgroundColor( double * color )
 
 void SceneManager::SetView3DBackgroundColor( double * color )
 {
-    this->View3DBackgroundColor[ 0 ] = color[ 0 ];
-    this->View3DBackgroundColor[ 1 ] = color[ 1 ];
-    this->View3DBackgroundColor[ 2 ] = color[ 2 ];
+    this->View3DBackgroundColor[0] = color[0];
+    this->View3DBackgroundColor[1] = color[1];
+    this->View3DBackgroundColor[2] = color[2];
     if( this->GetMain3DView() ) this->GetMain3DView()->SetBackgroundColor( color );
 }
 
@@ -801,9 +802,9 @@ void SceneManager::RemoveObject( SceneObject * object )
         bool refSet = false;
         while( i < imObjects.size() && !refSet )
         {
-            if( imObjects[ i ] != object )
+            if( imObjects[i] != object )
             {
-                this->SetReferenceDataObject( imObjects[ i ] );
+                this->SetReferenceDataObject( imObjects[i] );
                 refSet = true;
             }
             i++;
@@ -858,7 +859,7 @@ void SceneManager::GetAllImageObjects( QList<ImageObject *> & objects )
 {
     for( int i = 0; i < this->AllObjects.size(); ++i )
     {
-        ImageObject * obj = ImageObject::SafeDownCast( this->AllObjects[ i ] );
+        ImageObject * obj = ImageObject::SafeDownCast( this->AllObjects[i] );
         if( obj ) objects.push_back( obj );
     }
 }
@@ -867,7 +868,7 @@ void SceneManager::GetAllPolydataObjects( QList<PolyDataObject *> & objects )
 {
     for( int i = 0; i < this->AllObjects.size(); ++i )
     {
-        PolyDataObject * obj = PolyDataObject::SafeDownCast( this->AllObjects[ i ] );
+        PolyDataObject * obj = PolyDataObject::SafeDownCast( this->AllObjects[i] );
         if( obj ) objects.push_back( obj );
     }
 }
@@ -876,7 +877,7 @@ void SceneManager::GetAllPointsObjects( QList<PointsObject *> & objects )
 {
     for( int i = 0; i < this->AllObjects.size(); ++i )
     {
-        PointsObject * obj = PointsObject::SafeDownCast( this->AllObjects[ i ] );
+        PointsObject * obj = PointsObject::SafeDownCast( this->AllObjects[i] );
         if( obj ) objects.push_back( obj );
     }
 }
@@ -885,7 +886,7 @@ void SceneManager::GetAllCameraObjects( QList<CameraObject *> & all )
 {
     for( int i = 0; i < this->AllObjects.size(); ++i )
     {
-        CameraObject * obj = CameraObject::SafeDownCast( this->AllObjects[ i ] );
+        CameraObject * obj = CameraObject::SafeDownCast( this->AllObjects[i] );
         if( obj ) all.push_back( obj );
     }
 }
@@ -894,7 +895,7 @@ void SceneManager::GetAllUSAcquisitionObjects( QList<USAcquisitionObject *> & al
 {
     for( int i = 0; i < this->AllObjects.size(); ++i )
     {
-        USAcquisitionObject * obj = USAcquisitionObject::SafeDownCast( this->AllObjects[ i ] );
+        USAcquisitionObject * obj = USAcquisitionObject::SafeDownCast( this->AllObjects[i] );
         if( obj ) all.push_back( obj );
     }
 }
@@ -903,7 +904,7 @@ void SceneManager::GetAllUsProbeObjects( QList<UsProbeObject *> & all )
 {
     for( int i = 0; i < this->AllObjects.size(); ++i )
     {
-        UsProbeObject * obj = UsProbeObject::SafeDownCast( this->AllObjects[ i ] );
+        UsProbeObject * obj = UsProbeObject::SafeDownCast( this->AllObjects[i] );
         if( obj ) all.push_back( obj );
     }
 }
@@ -912,7 +913,7 @@ void SceneManager::GetAllPointerObjects( QList<PointerObject *> & all )
 {
     for( int i = 0; i < this->AllObjects.size(); ++i )
     {
-        PointerObject * obj = PointerObject::SafeDownCast( this->AllObjects[ i ] );
+        PointerObject * obj = PointerObject::SafeDownCast( this->AllObjects[i] );
         if( obj ) all.push_back( obj );
     }
 }
@@ -921,7 +922,7 @@ void SceneManager::GetAllTrackedObjects( QList<TrackedSceneObject *> & all )
 {
     for( int i = 0; i < this->AllObjects.size(); ++i )
     {
-        TrackedSceneObject * obj = TrackedSceneObject::SafeDownCast( this->AllObjects[ i ] );
+        TrackedSceneObject * obj = TrackedSceneObject::SafeDownCast( this->AllObjects[i] );
         if( obj && obj->IsDrivenByHardware() ) all.push_back( obj );
     }
 }
@@ -930,7 +931,7 @@ void SceneManager::GetAllObjectsOfType( const char * typeName, QList<SceneObject
 {
     for( int i = 0; i < this->AllObjects.size(); ++i )
     {
-        if( this->AllObjects[ i ]->IsA( typeName ) ) all.push_back( this->AllObjects[ i ] );
+        if( this->AllObjects[i]->IsA( typeName ) ) all.push_back( this->AllObjects[i] );
     }
 }
 
@@ -939,7 +940,7 @@ SceneObject * SceneManager::GetObjectByID( int id )
     if( id == SceneManager::InvalidId ) return nullptr;
     for( int i = 0; i < this->AllObjects.size(); ++i )
     {
-        if( this->AllObjects[ i ]->GetObjectID() == id ) return this->AllObjects[ i ];
+        if( this->AllObjects[i]->GetObjectID() == id ) return this->AllObjects[i];
     }
     return nullptr;
 }
@@ -994,18 +995,18 @@ ImageObject * SceneManager::GetReferenceDataObject() { return m_referenceDataObj
 
 bool SceneManager::CanBeReference( SceneObject * obj ) { return obj->IsA( "ImageObject" ); }
 
-void SceneManager::GetReferenceBounds( double bounds[ 6 ] )
+void SceneManager::GetReferenceBounds( double bounds[6] )
 {
     if( m_referenceDataObject )
         m_referenceDataObject->GetImage()->GetBounds( bounds );
     else
     {
-        bounds[ 0 ] = 0.0;
-        bounds[ 1 ] = 1.0;
-        bounds[ 2 ] = 0.0;
-        bounds[ 3 ] = 1.0;
-        bounds[ 4 ] = 0.0;
-        bounds[ 5 ] = 1.0;
+        bounds[0] = 0.0;
+        bounds[1] = 1.0;
+        bounds[2] = 0.0;
+        bounds[3] = 1.0;
+        bounds[4] = 0.0;
+        bounds[5] = 1.0;
     }
 }
 
@@ -1029,7 +1030,7 @@ void SceneManager::ResetAllCameras()
     }
 }
 
-void SceneManager::ResetAllCameras( double bounds[ 6 ] )
+void SceneManager::ResetAllCameras( double bounds[6] )
 {
     foreach( View * view, Views.keys() )
     {
@@ -1212,7 +1213,8 @@ vtkRenderer * SceneManager::GetViewRenderer( int viewID )
 
 void SceneManager::SetRenderingEnabled( bool r )
 {
-    foreach( View * view, Views.keys() ) view->SetRenderingEnabled( r );
+    foreach( View * view, Views.keys() )
+        view->SetRenderingEnabled( r );
 }
 
 double SceneManager::Get3DCameraViewAngle() { return this->CameraViewAngle3D; }
@@ -1223,9 +1225,9 @@ void SceneManager::Set3DCameraViewAngle( double angle )
     if( this->GetMain3DView() ) this->GetMain3DView()->SetViewAngle( angle );
 }
 
-void SceneManager::GetCursorPosition( double pos[ 3 ] ) { this->MainCutPlanes->GetPlanesPosition( pos ); }
+void SceneManager::GetCursorPosition( double pos[3] ) { this->MainCutPlanes->GetPlanesPosition( pos ); }
 
-bool SceneManager::IsInPlane( VIEWTYPES planeType, double pos[ 3 ] )
+bool SceneManager::IsInPlane( VIEWTYPES planeType, double pos[3] )
 {
     return this->MainCutPlanes->IsInPlane( planeType, pos );
 }
@@ -1242,7 +1244,7 @@ void SceneManager::OnCutPlanesPositionChanged() { emit CursorPositionChanged(); 
 
 void SceneManager::OnEndCutPlaneInteraction() { emit EndCursorInteraction(); }
 
-void SceneManager::WorldToReference( double worldPoint[ 3 ], double referencePoint[ 3 ] )
+void SceneManager::WorldToReference( double worldPoint[3], double referencePoint[3] )
 {
     // Apply inverse of reference object world transform to worldPoint
     ImageObject * ref = GetReferenceDataObject();
@@ -1253,13 +1255,13 @@ void SceneManager::WorldToReference( double worldPoint[ 3 ], double referencePoi
     }
     else
     {
-        referencePoint[ 0 ] = worldPoint[ 0 ];
-        referencePoint[ 1 ] = worldPoint[ 1 ];
-        referencePoint[ 2 ] = worldPoint[ 2 ];
+        referencePoint[0] = worldPoint[0];
+        referencePoint[1] = worldPoint[1];
+        referencePoint[2] = worldPoint[2];
     }
 }
 
-void SceneManager::ReferenceToWorld( double referencePoint[ 3 ], double worldPoint[ 3 ] )
+void SceneManager::ReferenceToWorld( double referencePoint[3], double worldPoint[3] )
 {
     // Apply reference object world transform to referencePoint
     // Apply inverse of reference object world transform to worldPoint
@@ -1271,9 +1273,9 @@ void SceneManager::ReferenceToWorld( double referencePoint[ 3 ], double worldPoi
     }
     else
     {
-        worldPoint[ 0 ] = referencePoint[ 0 ];
-        worldPoint[ 1 ] = referencePoint[ 1 ];
-        worldPoint[ 2 ] = referencePoint[ 2 ];
+        worldPoint[0] = referencePoint[0];
+        worldPoint[1] = referencePoint[1];
+        worldPoint[2] = referencePoint[2];
     }
 }
 
@@ -1282,10 +1284,10 @@ void SceneManager::GetReferenceOrientation( vtkMatrix4x4 * mat )
     ImageObject * im = GetReferenceDataObject();
     if( im )
     {
-        double orient[ 4 ];
+        double orient[4];
         im->GetWorldTransform()->GetOrientationWXYZ( orient );
         vtkTransform * t = vtkTransform::New();
-        t->RotateWXYZ( orient[ 0 ], orient[ 1 ], orient[ 2 ], orient[ 3 ] );
+        t->RotateWXYZ( orient[0], orient[1], orient[2], orient[3] );
         mat->DeepCopy( t->GetMatrix() );
         t->Delete();
     }
@@ -1298,7 +1300,7 @@ int SceneManager::GetNumberOfUserObjects()
     int count = 0;
     for( int i = 0; i < AllObjects.size(); ++i )
     {
-        if( AllObjects[ i ]->IsUserObject() )
+        if( AllObjects[i]->IsUserObject() )
         {
             ++count;
         }
@@ -1310,9 +1312,9 @@ void SceneManager::GetAllUserObjects( QList<SceneObject *> & list )
 {
     for( int i = 0; i < AllObjects.size(); ++i )
     {
-        if( AllObjects[ i ]->IsUserObject() )
+        if( AllObjects[i]->IsUserObject() )
         {
-            list.push_back( AllObjects[ i ] );
+            list.push_back( AllObjects[i] );
         }
     }
 }
@@ -1396,7 +1398,7 @@ void SceneManager::ObjectReader( Serializer * ser, bool interactive )
             params.defaultParent = parentObject;
             if( labelImage )
             {
-                params.filesParams[ 0 ].isLabel = true;
+                params.filesParams[0].isLabel = true;
             }
             fileReader->SetParams( &params );
             fileReader->start();
@@ -1419,7 +1421,7 @@ void SceneManager::ObjectReader( Serializer * ser, bool interactive )
                     QString message;
                     for( int i = 0; i < warnings.size(); ++i )
                     {
-                        message += warnings[ i ];
+                        message += warnings[i];
                         message += QString( "\n" );
                     }
                     QMessageBox::warning( nullptr, "Error", message );
@@ -1505,7 +1507,7 @@ void SceneManager::ObjectReader( Serializer * ser, bool interactive )
                     Application::GetInstance().GetAllGlobalObjectInstances( globObj );
                     for( int go = 0; go < globObj.size(); ++go )
                     {
-                        if( globObj[ go ]->GetClassName() == className ) globObj[ go ]->Serialize( ser );
+                        if( globObj[go]->GetClassName() == className ) globObj[go]->Serialize( ser );
                     }
                 }
             }
@@ -1519,7 +1521,7 @@ void SceneManager::ObjectReader( Serializer * ser, bool interactive )
     Application::GetInstance().GetAllToolPlugins( allTools );
     for( int t = 0; t < allTools.size(); ++t )
     {
-        ToolPluginInterface * toolModule = allTools[ t ];
+        ToolPluginInterface * toolModule = allTools[t];
         if( ser->BeginSection( toolModule->GetPluginName().toUtf8().data() ) )
         {
             toolModule->Serialize( ser );
@@ -1610,7 +1612,7 @@ void SceneManager::ObjectWriter( Serializer * ser )
     Application::GetInstance().GetAllToolPlugins( allTools );
     for( int t = 0; t < allTools.size(); ++t )
     {
-        ToolPluginInterface * toolModule = allTools[ t ];
+        ToolPluginInterface * toolModule = allTools[t];
         ser->BeginSection( toolModule->GetPluginName().toUtf8().data() );
         toolModule->Serialize( ser );
         ser->EndSection();
@@ -1624,7 +1626,7 @@ void SceneManager::NotifyPluginsSceneAboutToLoad()
     Application::GetInstance().GetAllPlugins( allPlugins );
     for( int i = 0; i < allPlugins.size(); ++i )
     {
-        allPlugins[ i ]->SceneAboutToLoad();
+        allPlugins[i]->SceneAboutToLoad();
     }
 }
 
@@ -1634,7 +1636,7 @@ void SceneManager::NotifyPluginsSceneFinishedLoading()
     Application::GetInstance().GetAllPlugins( allPlugins );
     for( int i = 0; i < allPlugins.size(); ++i )
     {
-        allPlugins[ i ]->SceneFinishedLoading();
+        allPlugins[i]->SceneFinishedLoading();
     }
 }
 
@@ -1645,7 +1647,7 @@ void SceneManager::NotifyPluginsSceneAboutToSave()
     Application::GetInstance().GetAllToolPlugins( allTools );
     for( int i = 0; i < allTools.size(); ++i )
     {
-        ToolPluginInterface * toolModule = allTools[ i ];
+        ToolPluginInterface * toolModule = allTools[i];
         toolModule->SceneAboutToSave();
     }
 }
@@ -1657,7 +1659,7 @@ void SceneManager::NotifyPluginsSceneFinishedSaving()
     Application::GetInstance().GetAllToolPlugins( allTools );
     for( int i = 0; i < allTools.size(); ++i )
     {
-        ToolPluginInterface * toolModule = allTools[ i ];
+        ToolPluginInterface * toolModule = allTools[i];
         toolModule->SceneFinishedSaving();
     }
 }
@@ -1708,7 +1710,7 @@ void SceneManager::ValidatePointerObject()
     {
         QList<PointerObject *> allPointers;
         GetAllPointerObjects( allPointers );
-        if( allPointers.size() > 0 ) pointerId = allPointers[ 0 ]->GetObjectID();
+        if( allPointers.size() > 0 ) pointerId = allPointers[0]->GetObjectID();
     }
     if( pointerId != this->NavigationPointerID ) SetNavigationPointerID( pointerId );
 }

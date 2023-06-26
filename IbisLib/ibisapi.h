@@ -69,7 +69,7 @@ public:
     {
         for( int i = 0; i < inFiles.size(); ++i )
         {
-            AddInputFile( inFiles[ i ] );
+            AddInputFile( inFiles[i] );
         }
     }
     QList<SingleFileParam> filesParams;
@@ -278,9 +278,9 @@ public:
      * @{
      * Get/set cursor position.
      */
-    void GetCursorPosition( double pos[ 3 ] );
+    void GetCursorPosition( double pos[3] );
     void SetCursorPosition( double * pos );
-    void GetCursorWorldPosition( double pos[ 3 ] );
+    void GetCursorWorldPosition( double pos[3] );
     void SetCursorWorldPosition( double * );
     /** @}*/
 

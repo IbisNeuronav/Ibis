@@ -26,13 +26,13 @@ void VtkOpenCvBridge::RvecTvecToMatrix4x4( const cv::Mat & tVec, const cv::Mat &
         for( int col = 0; col < 3; ++col ) mat->SetElement( row, col, camRotation.at<double>( col, row ) );
 
     // Translation inverse
-    double translation[ 4 ];
-    for( int elem = 0; elem < 3; ++elem ) translation[ elem ] = tVec.at<double>( elem, 0 );
-    translation[ 3 ] = 1.0;
-    double poseTranslation[ 4 ];
+    double translation[4];
+    for( int elem = 0; elem < 3; ++elem ) translation[elem] = tVec.at<double>( elem, 0 );
+    translation[3] = 1.0;
+    double poseTranslation[4];
     mat->MultiplyPoint( translation, poseTranslation );
 
-    for( int elem = 0; elem < 3; ++elem ) mat->SetElement( elem, 3, -1.0 * poseTranslation[ elem ] );
+    for( int elem = 0; elem < 3; ++elem ) mat->SetElement( elem, 3, -1.0 * poseTranslation[elem] );
 
     // Rotate calibration by 180 deg around x. Seems to be a difference of formulation between us and opencv
     vtkMatrix4x4 * rotMatrix = vtkMatrix4x4::New();

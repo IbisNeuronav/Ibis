@@ -270,14 +270,14 @@ void IbisHardwareIGSIO::OnDeviceNew( vtkObject *, unsigned long, void *, void * 
     // Assign image data of new device to the video input of the scene object
     if( toolPart == "ImageAndTransform" || toolPart == "Image" )
     {
-        AssignDeviceImageToTool( device, m_tools[ toolIndex ] );
-        m_tools[ toolIndex ]->imageDevice = device;
+        AssignDeviceImageToTool( device, m_tools[toolIndex] );
+        m_tools[toolIndex]->imageDevice = device;
     }
 
     // Specify the device should be used to recover transform on every update
     if( toolPart == "ImageAndTransform" || toolPart == "Transform" )
     {
-        m_tools[ toolIndex ]->transformDevice = device;
+        m_tools[toolIndex]->transformDevice = device;
     }
 }
 
@@ -292,11 +292,11 @@ void IbisHardwareIGSIO::OnDeviceRemoved( vtkObject *, unsigned long, void *, voi
 
     if( toolPart == "ImageAndTransform" )
     {
-        m_tools[ toolIndex ]->imageDevice = nullptr;
+        m_tools[toolIndex]->imageDevice = nullptr;
     }
     else if( toolPart == "Transform" )
     {
-        m_tools[ toolIndex ]->transformDevice = nullptr;
+        m_tools[toolIndex]->transformDevice = nullptr;
     }
 }
 
@@ -391,7 +391,7 @@ void IbisHardwareIGSIO::ShutDownLocalServers()
 {
     for( int i = 0; i < m_plusLaunchers.size(); ++i )
     {
-        m_plusLaunchers[ i ]->StopServer();
+        m_plusLaunchers[i]->StopServer();
     }
     m_plusLaunchers.clear();
 }
@@ -445,7 +445,7 @@ TrackerToolState IbisHardwareIGSIO::ComputeToolStatus( igtlioDevicePointer dev, 
 int IbisHardwareIGSIO::FindToolByName( QString name )
 {
     for( int i = 0; i < m_tools.size(); ++i )
-        if( m_tools[ i ]->sceneObject->GetName() == name ) return i;
+        if( m_tools[i]->sceneObject->GetName() == name ) return i;
     return -1;
 }
 
@@ -459,7 +459,7 @@ void IbisHardwareIGSIO::AssignDeviceImageToTool( igtlioDevicePointer device, Too
         {
             imageContent = imageDev->GetContent().image;
             // OpenIGTLink specifications has origin as center of image
-            double origin[ 3 ] = { 0., 0., 0. };
+            double origin[3] = {0., 0., 0.};
             imageContent->SetOrigin( origin );
         }
     }
@@ -579,7 +579,7 @@ void IbisHardwareIGSIO::WriteToolConfig()
             return;
         }
         QString generalConfigFileName = m_ibisPlusConfigFilesDirectory + filename;
-        InternalWriteToolConfig( generalConfigFileName, m_tools[ i ] );
+        InternalWriteToolConfig( generalConfigFileName, m_tools[i] );
     }
 }
 

@@ -21,7 +21,7 @@ bool CommandLineArguments::ParseArguments( QStringList & args )
 {
     for( int i = 1; i < args.size(); ++i )
     {
-        QString arg = args[ i ];
+        QString arg = args[i];
         if( arg == "-l" )
             m_loadPrevConfig = true;
         else if( arg == "-d" )
@@ -31,7 +31,7 @@ bool CommandLineArguments::ParseArguments( QStringList & args )
             m_loadConfigFile = true;
             if( args.size() > i + 1 )
             {
-                QString nextArg = args[ i + 1 ];
+                QString nextArg = args[i + 1];
                 if( nextArg.startsWith( '-' ) )
                 {
                     std::cerr << "Error: expecting config filename after -f option" << std::endl;

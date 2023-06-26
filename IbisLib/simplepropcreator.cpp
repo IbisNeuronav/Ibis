@@ -21,15 +21,15 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include "vtkCircleWithCrossSource.h"
 
-vtkProp3D * SimplePropCreator::CreateLine( double start[ 3 ], double end[ 3 ], double color[ 4 ] )
+vtkProp3D * SimplePropCreator::CreateLine( double start[3], double end[3], double color[4] )
 {
     vtkPoints * pts = vtkPoints::New();
     pts->InsertNextPoint( start );
     pts->InsertNextPoint( end );
 
-    static vtkIdType lineIndex[ 1 ][ 2 ] = { { 0, 1 } };
-    vtkCellArray * line                  = vtkCellArray::New();
-    line->InsertNextCell( 2, lineIndex[ 0 ] );
+    static vtkIdType lineIndex[1][2] = {{0, 1}};
+    vtkCellArray * line              = vtkCellArray::New();
+    line->InsertNextCell( 2, lineIndex[0] );
 
     vtkPolyData * poly = vtkPolyData::New();
     poly->SetPoints( pts );
@@ -48,12 +48,12 @@ vtkProp3D * SimplePropCreator::CreateLine( double start[ 3 ], double end[ 3 ], d
     return prop;
 }
 
-vtkProp3D * SimplePropCreator::CreatePath( std::vector<Vec3> & points, double color[ 4 ] )
+vtkProp3D * SimplePropCreator::CreatePath( std::vector<Vec3> & points, double color[4] )
 {
     vtkPoints * pts = vtkPoints::New();
     if( points.size() > 1 )
     {
-        for( int i = 0; i < points.size(); ++i ) pts->InsertNextPoint( points[ i ].Ref() );
+        for( int i = 0; i < points.size(); ++i ) pts->InsertNextPoint( points[i].Ref() );
     }
 
     vtkCellArray * line = vtkCellArray::New();
@@ -84,7 +84,7 @@ vtkProp3D * SimplePropCreator::CreatePath( std::vector<Vec3> & points, double co
     return prop;
 }
 
-vtkProp3D * SimplePropCreator::CreateSphere( double center[ 3 ], double radius, double color[ 4 ] )
+vtkProp3D * SimplePropCreator::CreateSphere( double center[3], double radius, double color[4] )
 {
     vtkSphereSource * source = vtkSphereSource::New();
     source->SetCenter( center );
@@ -103,7 +103,7 @@ vtkProp3D * SimplePropCreator::CreateSphere( double center[ 3 ], double radius, 
     return prop;
 }
 
-vtkProp3D * SimplePropCreator::CreateTarget( double center[ 3 ], double radius, double color[ 4 ] )
+vtkProp3D * SimplePropCreator::CreateTarget( double center[3], double radius, double color[4] )
 {
     vtkNew<vtkCircleWithCrossSource> source;
     source->SetRadius( radius );

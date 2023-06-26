@@ -105,7 +105,7 @@ void SceneObject::Serialize( Serializer * ser )
 void SceneObject::PostSceneRead()
 {
     this->InternalPostSceneRead();
-    for( int i = 0; i < Children.size(); ++i ) Children[ i ]->PostSceneRead();
+    for( int i = 0; i < Children.size(); ++i ) Children[i]->PostSceneRead();
     emit FinishedReading();
 }
 
@@ -183,7 +183,7 @@ void SceneObject::WorldTransformChanged()
     this->InternalWorldTransformChanged();
 
     emit WorldTransformChangedSignal();
-    for( int i = 0; i < GetNumberOfChildren(); ++i ) this->Children[ i ]->WorldTransformChanged();
+    for( int i = 0; i < GetNumberOfChildren(); ++i ) this->Children[i]->WorldTransformChanged();
     emit ObjectModified();
 }
 
@@ -291,7 +291,7 @@ SceneObject * SceneObject::GetChild( int index )
 {
     if( index < (int)this->Children.size() )
     {
-        return this->Children[ index ];
+        return this->Children[index];
     }
     return 0;
 }
@@ -453,8 +453,7 @@ QWidget * SceneObject::CreateSettingsDialog( QWidget * parent )
         if( widgets.count() > 1 || ( widgets.count() == 1 && !this->IsManagedByTracker() ) )
         {
             QTabWidget * topWidget = new QTabWidget( parent );
-            for( int i = 0; i < widgets.count(); i++ )
-                topWidget->insertTab( i, widgets[ i ], widgets[ i ]->objectName() );
+            for( int i = 0; i < widgets.count(); i++ ) topWidget->insertTab( i, widgets[i], widgets[i]->objectName() );
             if( !this->IsManagedByTracker() )
                 topWidget->insertTab( widgets.count(), this->CreateTransformEditWidget( parent ), "Transform" );
             return topWidget;
@@ -473,7 +472,7 @@ QWidget * SceneObject::CreateTransformEditWidget( QWidget * parent )
     return transformEditWidget;
 }
 
-void SceneObject::WorldToLocal( double worldPoint[ 3 ], double localPoint[ 3 ] )
+void SceneObject::WorldToLocal( double worldPoint[3], double localPoint[3] )
 {
     if( this->Parent )
     {
@@ -482,13 +481,13 @@ void SceneObject::WorldToLocal( double worldPoint[ 3 ], double localPoint[ 3 ] )
     }
     else
     {
-        localPoint[ 0 ] = worldPoint[ 0 ];
-        localPoint[ 1 ] = worldPoint[ 1 ];
-        localPoint[ 2 ] = worldPoint[ 2 ];
+        localPoint[0] = worldPoint[0];
+        localPoint[1] = worldPoint[1];
+        localPoint[2] = worldPoint[2];
     }
 }
 
-void SceneObject::LocalToWorld( double localPoint[ 3 ], double worldPoint[ 3 ] )
+void SceneObject::LocalToWorld( double localPoint[3], double worldPoint[3] )
 {
     if( this->Parent )
     {
@@ -497,8 +496,8 @@ void SceneObject::LocalToWorld( double localPoint[ 3 ], double worldPoint[ 3 ] )
     }
     else
     {
-        worldPoint[ 0 ] = localPoint[ 0 ];
-        worldPoint[ 1 ] = localPoint[ 1 ];
-        worldPoint[ 2 ] = localPoint[ 2 ];
+        worldPoint[0] = localPoint[0];
+        worldPoint[1] = localPoint[1];
+        worldPoint[2] = localPoint[2];
     }
 }

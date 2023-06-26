@@ -8,22 +8,19 @@ class ApplyTransformToObjectWidget;
 
 class ApplyTransformToObjectPluginInterface : public ToolPluginInterface
 {
-
     Q_OBJECT
-    Q_INTERFACES(IbisPlugin)
-    Q_PLUGIN_METADATA(IID "Ibis.ApplyTransformToObjectPluginInterface" )
+    Q_INTERFACES( IbisPlugin )
+    Q_PLUGIN_METADATA( IID "Ibis.ApplyTransformToObjectPluginInterface" )
 
 public:
-
     vtkTypeMacro( ApplyTransformToObjectPluginInterface, ToolPluginInterface );
 
     ApplyTransformToObjectPluginInterface();
     ~ApplyTransformToObjectPluginInterface();
-    virtual QString GetPluginName() override { return QString("ApplyTransformToObject"); }
+    virtual QString GetPluginName() override { return QString( "ApplyTransformToObject" ); }
     bool CanRun() override { return true; }
-    QString GetMenuEntryString() override { return QString("Apply Transform to Object"); }
+    QString GetMenuEntryString() override { return QString( "Apply Transform to Object" ); }
     QWidget * CreateFloatingWidget() override;
-
 
 protected:
     ApplyTransformToObjectWidget * m_interfaceWidget;

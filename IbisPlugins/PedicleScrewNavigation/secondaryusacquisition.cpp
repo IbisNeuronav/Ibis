@@ -2,8 +2,8 @@
 
 #include "secondaryusacquisition.h"
 
-SecondaryUSAcquisition::SecondaryUSAcquisition(PedicleScrewNavigationPluginInterface * interf) :
-    m_numberOfAcquisitions(0)
+SecondaryUSAcquisition::SecondaryUSAcquisition( PedicleScrewNavigationPluginInterface * interf )
+    : m_numberOfAcquisitions( 0 )
 {
     m_pluginInterface = interf;
     m_layouts.clear();
@@ -11,65 +11,56 @@ SecondaryUSAcquisition::SecondaryUSAcquisition(PedicleScrewNavigationPluginInter
     m_comboboxes.clear();
 }
 
-SecondaryUSAcquisition::~SecondaryUSAcquisition()
-{
-}
+SecondaryUSAcquisition::~SecondaryUSAcquisition() {}
 
-void SecondaryUSAcquisition::setGlobalLayout(QBoxLayout * layout)
-{
-    m_globalLayout = layout;
-}
+void SecondaryUSAcquisition::setGlobalLayout( QBoxLayout * layout ) { m_globalLayout = layout; }
 
 void SecondaryUSAcquisition::addNewEntry()
 {
     QHBoxLayout * layout = new QHBoxLayout;
-    QLabel * label = new QLabel;
-    label->setText(tr("Socondary US #") + QString::number(m_numberOfAcquisitions + 1));
-    label->setStyleSheet("QLabel { font-style: regular }");
+    QLabel * label       = new QLabel;
+    label->setText( tr( "Socondary US #" ) + QString::number( m_numberOfAcquisitions + 1 ) );
+    label->setStyleSheet( "QLabel { font-style: regular }" );
 
     QComboBox * combobox = new QComboBox;
-    combobox->setStyleSheet("QComboBox { font-style: regular }");
-    this->fillComboBox(combobox);
-    
-    layout->addWidget(label);
-    layout->addWidget(combobox);
+    combobox->setStyleSheet( "QComboBox { font-style: regular }" );
+    this->fillComboBox( combobox );
 
-    m_labels.append(label);
-    m_layouts.append(layout);
-    m_comboboxes.append(combobox);
+    layout->addWidget( label );
+    layout->addWidget( combobox );
+
+    m_labels.append( label );
+    m_layouts.append( layout );
+    m_comboboxes.append( combobox );
 
     m_numberOfAcquisitions++;
 
     if( m_globalLayout )
     {
-        m_globalLayout->addLayout(layout);
+        m_globalLayout->addLayout( layout );
     }
 }
 
-void SecondaryUSAcquisition::removeLastEntry()
-{
-    this->removeEntryAt(m_numberOfAcquisitions - 1);
-}
+void SecondaryUSAcquisition::removeLastEntry() { this->removeEntryAt( m_numberOfAcquisitions - 1 ); }
 
-void SecondaryUSAcquisition::removeEntryAt(int index)
+void SecondaryUSAcquisition::removeEntryAt( int index )
 {
-    if( index < 0 ) 
-        return;
+    if( index < 0 ) return;
 
-    QHBoxLayout * layout = m_layouts.at(index);
-    QLabel * label = m_labels.at(index);
-    QComboBox * combobox = m_comboboxes.at(index);
+    QHBoxLayout * layout = m_layouts.at( index );
+    QLabel * label       = m_labels.at( index );
+    QComboBox * combobox = m_comboboxes.at( index );
     combobox->clear();
 
-    m_labels.removeAt(index);
-    m_comboboxes.removeAt(index);
-    m_layouts.removeAt(index);
+    m_labels.removeAt( index );
+    m_comboboxes.removeAt( index );
+    m_layouts.removeAt( index );
 
-    layout->removeWidget(label);
-    layout->removeWidget(combobox);
+    layout->removeWidget( label );
+    layout->removeWidget( combobox );
     if( m_globalLayout )
     {
-        //m_globalLayout->removeItem(layout);
+        // m_globalLayout->removeItem(layout);
         m_globalLayout->update();
     }
 
@@ -80,102 +71,97 @@ void SecondaryUSAcquisition::removeEntryAt(int index)
     m_numberOfAcquisitions--;
 }
 
-void SecondaryUSAcquisition::fillComboBox(QComboBox * combobox)
+void SecondaryUSAcquisition::fillComboBox( QComboBox * combobox )
 {
     if( m_pluginInterface )
     {
         IbisAPI * ibisApi = m_pluginInterface->GetIbisAPI();
         if( ibisApi )
         {
-            QList< USAcquisitionObject * > list;
-            ibisApi->GetAllUSAcquisitionObjects(list);
+            QList<USAcquisitionObject *> list;
+            ibisApi->GetAllUSAcquisitionObjects( list );
             for( USAcquisitionObject * sceneObject : list )
             {
                 if( combobox->count() == 0 )
                 {
-                    combobox->addItem(sceneObject->GetName(), QVariant(sceneObject->GetObjectID()));
+                    combobox->addItem( sceneObject->GetName(), QVariant( sceneObject->GetObjectID() ) );
                 }
                 else if( combobox->count() == 1 )
                 {
-                    int currentItemId = combobox->itemData(combobox->currentIndex()).toInt();
+                    int currentItemId = combobox->itemData( combobox->currentIndex() ).toInt();
                     if( currentItemId == IbisAPI::InvalidId )
                     {
                         combobox->clear();
                     }
-                    combobox->addItem(sceneObject->GetName(), QVariant(sceneObject->GetObjectID()));
+                    combobox->addItem( sceneObject->GetName(), QVariant( sceneObject->GetObjectID() ) );
                 }
                 else
                 {
-                    combobox->addItem(sceneObject->GetName(), QVariant(sceneObject->GetObjectID()));
-                }   
+                    combobox->addItem( sceneObject->GetName(), QVariant( sceneObject->GetObjectID() ) );
+                }
             }
         }
-        
+
         if( combobox->count() == 0 )
         {
-            combobox->addItem(tr("None"), QVariant(IbisAPI::InvalidId));
+            combobox->addItem( tr( "None" ), QVariant( IbisAPI::InvalidId ) );
         }
     }
 }
 
-void SecondaryUSAcquisition::addUSAcquisition(int objectId)
+void SecondaryUSAcquisition::addUSAcquisition( int objectId )
 {
-    if( !m_pluginInterface )
-        return;
-    
-    IbisAPI * ibisApi = m_pluginInterface->GetIbisAPI();
-    if( !ibisApi )
-        return;
+    if( !m_pluginInterface ) return;
 
-    SceneObject * sceneObject = ibisApi->GetObjectByID(objectId);
+    IbisAPI * ibisApi = m_pluginInterface->GetIbisAPI();
+    if( !ibisApi ) return;
+
+    SceneObject * sceneObject = ibisApi->GetObjectByID( objectId );
     for( QComboBox * cb : m_comboboxes )
     {
         if( cb->count() == 0 )
         {
-            cb->addItem(sceneObject->GetName(), QVariant(objectId));
+            cb->addItem( sceneObject->GetName(), QVariant( objectId ) );
         }
         else if( cb->count() == 1 )
         {
-            int currentItemId = cb->itemData(cb->currentIndex()).toInt();
+            int currentItemId = cb->itemData( cb->currentIndex() ).toInt();
             if( currentItemId == IbisAPI::InvalidId )
             {
                 cb->clear();
             }
-            cb->addItem(sceneObject->GetName(), QVariant(objectId));
+            cb->addItem( sceneObject->GetName(), QVariant( objectId ) );
         }
         else
         {
-            cb->addItem(sceneObject->GetName(), QVariant(objectId));
+            cb->addItem( sceneObject->GetName(), QVariant( objectId ) );
         }
     }
 }
 
-void SecondaryUSAcquisition::getValidUSAcquisitions(QList< USAcquisitionObject * > & list)
+void SecondaryUSAcquisition::getValidUSAcquisitions( QList<USAcquisitionObject *> & list )
 {
     list.clear();
 
-    if( !m_pluginInterface )
-        return;
+    if( !m_pluginInterface ) return;
 
     IbisAPI * ibisApi = m_pluginInterface->GetIbisAPI();
-    if( !ibisApi )
-        return;
+    if( !ibisApi ) return;
 
     for( QComboBox * cb : m_comboboxes )
     {
-        int index = cb->itemData(cb->currentIndex()).toInt();
-        USAcquisitionObject * sceneObject = USAcquisitionObject::SafeDownCast( ibisApi->GetObjectByID(index) );
+        int index                         = cb->itemData( cb->currentIndex() ).toInt();
+        USAcquisitionObject * sceneObject = USAcquisitionObject::SafeDownCast( ibisApi->GetObjectByID( index ) );
         if( sceneObject )
         {
             bool exists = false;
             for( USAcquisitionObject * so : list )
             {
-                if( so->GetObjectID() == sceneObject->GetObjectID() )
-                    exists = true;
+                if( so->GetObjectID() == sceneObject->GetObjectID() ) exists = true;
             }
             if( !exists )
             {
-                list.append(sceneObject);
+                list.append( sceneObject );
             }
         }
     }

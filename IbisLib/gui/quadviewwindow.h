@@ -161,11 +161,11 @@ protected:
 
     QGridLayout * m_viewWindowsLayout;
 
-    static const QString ViewNames[ 4 ];
+    static const QString ViewNames[4];
 
-    QVTKRenderWidget * m_vtkWidgets[ 4 ];
-    QFrame * m_vtkWindowFrames[ 4 ];
-    QVBoxLayout * m_frameLayouts[ 4 ];
+    QVTKRenderWidget * m_vtkWidgets[4];
+    QFrame * m_vtkWindowFrames[4];
+    QVBoxLayout * m_frameLayouts[4];
 
     QWidget * m_detachedWidget;
 

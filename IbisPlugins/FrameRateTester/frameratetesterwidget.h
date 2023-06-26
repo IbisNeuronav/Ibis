@@ -20,18 +20,15 @@ class FrameRateTesterPluginInterface;
 
 namespace Ui
 {
-    class FrameRateTesterWidget;
+class FrameRateTesterWidget;
 }
-
 
 class FrameRateTesterWidget : public QWidget
 {
-
     Q_OBJECT
 
 public:
-
-    explicit FrameRateTesterWidget(QWidget *parent = 0);
+    explicit FrameRateTesterWidget( QWidget * parent = 0 );
     ~FrameRateTesterWidget();
 
     void SetPluginInterface( FrameRateTesterPluginInterface * pi );
@@ -41,15 +38,13 @@ private slots:
     void UpdateUi();
     void UpdateStats();
 
-    void on_currentViewComboBox_currentIndexChanged(int index);
-    void on_periodSpinBox_valueChanged(int arg1);
-    void on_runButton_toggled(bool checked);
+    void on_currentViewComboBox_currentIndexChanged( int index );
+    void on_periodSpinBox_valueChanged( int arg1 );
+    void on_runButton_toggled( bool checked );
 
 private:
-
     FrameRateTesterPluginInterface * m_pluginInterface;
     Ui::FrameRateTesterWidget * ui;
-
 };
 
 #endif

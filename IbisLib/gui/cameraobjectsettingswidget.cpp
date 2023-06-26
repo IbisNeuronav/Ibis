@@ -115,15 +115,15 @@ void CameraObjectSettingsWidget::UpdateUI()
     ui->fySpinBox->blockSignals( false );
 
     // Image center
-    double center[ 2 ] = { 0.0, 0.0 };
-    m_camera->GetImageCenterPix( center[ 0 ], center[ 1 ] );
+    double center[2] = {0.0, 0.0};
+    m_camera->GetImageCenterPix( center[0], center[1] );
 
     ui->xImageCenterSpinBox->blockSignals( true );
-    ui->xImageCenterSpinBox->setValue( center[ 0 ] );
+    ui->xImageCenterSpinBox->setValue( center[0] );
     ui->xImageCenterSpinBox->blockSignals( false );
 
     ui->yImageCenterSpinBox->blockSignals( true );
-    ui->yImageCenterSpinBox->setValue( center[ 1 ] );
+    ui->yImageCenterSpinBox->setValue( center[1] );
     ui->yImageCenterSpinBox->blockSignals( false );
 
     ui->distortionSpinBox->blockSignals( true );
@@ -141,26 +141,26 @@ void CameraObjectSettingsWidget::UpdateUI()
     ui->lensDisplacementSpinBox->blockSignals( false );
 
     // Update translation and rotation of calibration matrix
-    double trans[ 3 ] = { 0.0, 0.0, 0.0 };
-    double rot[ 3 ]   = { 0.0, 0.0, 0.0 };
+    double trans[3] = {0.0, 0.0, 0.0};
+    double rot[3]   = {0.0, 0.0, 0.0};
     vtkMatrix4x4Operators::MatrixToTransRot( m_camera->GetCalibrationMatrix(), trans, rot );
     ui->xtransSpinBox->blockSignals( true );
-    ui->xtransSpinBox->setValue( trans[ 0 ] );
+    ui->xtransSpinBox->setValue( trans[0] );
     ui->xtransSpinBox->blockSignals( false );
     ui->ytransSpinBox->blockSignals( true );
-    ui->ytransSpinBox->setValue( trans[ 1 ] );
+    ui->ytransSpinBox->setValue( trans[1] );
     ui->ytransSpinBox->blockSignals( false );
     ui->ztransSpinBox->blockSignals( true );
-    ui->ztransSpinBox->setValue( trans[ 2 ] );
+    ui->ztransSpinBox->setValue( trans[2] );
     ui->ztransSpinBox->blockSignals( false );
     ui->xrotSpinBox->blockSignals( true );
-    ui->xrotSpinBox->setValue( rot[ 0 ] );
+    ui->xrotSpinBox->setValue( rot[0] );
     ui->xrotSpinBox->blockSignals( false );
     ui->yrotSpinBox->blockSignals( true );
-    ui->yrotSpinBox->setValue( rot[ 1 ] );
+    ui->yrotSpinBox->setValue( rot[1] );
     ui->yrotSpinBox->blockSignals( false );
     ui->zrotSpinBox->blockSignals( true );
-    ui->zrotSpinBox->setValue( rot[ 2 ] );
+    ui->zrotSpinBox->setValue( rot[2] );
     ui->zrotSpinBox->blockSignals( false );
 
     ui->targetTransparencyGroupBox->blockSignals( true );
@@ -194,11 +194,11 @@ void CameraObjectSettingsWidget::UpdateUI()
     UpdateTransparencyCenterUI();
 
     ui->minTransparencyRadiusSlider->blockSignals( true );
-    ui->minTransparencyRadiusSlider->setValue( (int)( m_camera->GetTransparencyRadius()[ 0 ] * 100.0 ) );
+    ui->minTransparencyRadiusSlider->setValue( (int)( m_camera->GetTransparencyRadius()[0] * 100.0 ) );
     ui->minTransparencyRadiusSlider->blockSignals( false );
 
     ui->maxTransparencyRadiusSlider->blockSignals( true );
-    ui->maxTransparencyRadiusSlider->setValue( (int)( m_camera->GetTransparencyRadius()[ 1 ] * 100.0 ) );
+    ui->maxTransparencyRadiusSlider->setValue( (int)( m_camera->GetTransparencyRadius()[1] * 100.0 ) );
     ui->maxTransparencyRadiusSlider->blockSignals( false );
 }
 
@@ -206,12 +206,12 @@ void CameraObjectSettingsWidget::UpdateTransparencyCenterUI()
 {
     ui->xTransparencyCenterSlider->blockSignals( true );
     ui->xTransparencyCenterSlider->setEnabled( !m_camera->IsTransparencyCenterTracked() );
-    ui->xTransparencyCenterSlider->setValue( (int)( m_camera->GetTransparencyCenter()[ 0 ] * 100.0 ) );
+    ui->xTransparencyCenterSlider->setValue( (int)( m_camera->GetTransparencyCenter()[0] * 100.0 ) );
     ui->xTransparencyCenterSlider->blockSignals( false );
 
     ui->yTransparencyCenterSlider->blockSignals( true );
     ui->yTransparencyCenterSlider->setEnabled( !m_camera->IsTransparencyCenterTracked() );
-    ui->yTransparencyCenterSlider->setValue( (int)( m_camera->GetTransparencyCenter()[ 1 ] * 100.0 ) );
+    ui->yTransparencyCenterSlider->setValue( (int)( m_camera->GetTransparencyCenter()[1] * 100.0 ) );
     ui->yTransparencyCenterSlider->blockSignals( false );
 }
 
@@ -430,14 +430,14 @@ void CameraObjectSettingsWidget::on_zrotSpinBox_valueChanged( double ) { UpdateE
 
 void CameraObjectSettingsWidget::UpdateExtrinsicTransform()
 {
-    double trans[ 3 ];
-    trans[ 0 ] = ui->xtransSpinBox->value();
-    trans[ 1 ] = ui->ytransSpinBox->value();
-    trans[ 2 ] = ui->ztransSpinBox->value();
-    double rot[ 3 ];
-    rot[ 0 ]                 = ui->xrotSpinBox->value();
-    rot[ 1 ]                 = ui->yrotSpinBox->value();
-    rot[ 2 ]                 = ui->zrotSpinBox->value();
+    double trans[3];
+    trans[0] = ui->xtransSpinBox->value();
+    trans[1] = ui->ytransSpinBox->value();
+    trans[2] = ui->ztransSpinBox->value();
+    double rot[3];
+    rot[0]                   = ui->xrotSpinBox->value();
+    rot[1]                   = ui->yrotSpinBox->value();
+    rot[2]                   = ui->zrotSpinBox->value();
     vtkMatrix4x4 * calMatrix = vtkMatrix4x4::New();
     vtkMatrix4x4Operators::TransRotToMatrix( trans, rot, calMatrix );
     m_camera->SetCalibrationMatrix( calMatrix );

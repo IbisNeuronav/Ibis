@@ -38,7 +38,7 @@ void AboutPluginsWidget::UpdateUI()
         items.append( it );
     }
     ui->pluginListWidget->insertTopLevelItems( 0, items );
-    if( allPlugins.size() > 0 ) ui->pluginListWidget->setCurrentItem( items[ 0 ] );
+    if( allPlugins.size() > 0 ) ui->pluginListWidget->setCurrentItem( items[0] );
     ui->pluginListWidget->resizeColumnToContents( 0 );
 }
 

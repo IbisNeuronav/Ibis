@@ -218,9 +218,9 @@ public:
     ///@}
 
     /** Convert world coordinates to local coordinates */
-    void WorldToLocal( double worldPoint[ 3 ], double localPoint[ 3 ] );
+    void WorldToLocal( double worldPoint[3], double localPoint[3] );
     /** Convert local coordinates to world coordinates */
-    void LocalToWorld( double localPoint[ 3 ], double worldPoint[ 3 ] );
+    void LocalToWorld( double localPoint[3], double worldPoint[3] );
 
     /** Check if the object  was user created */
     bool IsUserObject();
@@ -247,7 +247,7 @@ public:
     vtkGetObjectMacro( Manager, SceneManager );
 
     /** Try to pick a 3D position only on that particular SceneObject */
-    virtual bool Pick( View * v, int x, int y, double pickedPos[ 3 ] ) { return false; }
+    virtual bool Pick( View * v, int x, int y, double pickedPos[3] ) { return false; }
 
     ///@{
     /** Set/Get the RenderLayer */

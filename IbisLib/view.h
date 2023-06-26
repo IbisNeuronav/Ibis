@@ -38,7 +38,7 @@ class vtkObjectCallback;
 #define ShiftModifier ( unsigned( 2 ) )
 #define AltModifier ( unsigned( 4 ) )
 
-extern const char DefaultViewNames[ 4 ][ 20 ];
+extern const char DefaultViewNames[4][20];
 
 class View;
 
@@ -162,7 +162,7 @@ public:
     void ProcessInteractionEvents( vtkObject * caller, unsigned long event, void * calldata );
 
     /** Get window coordinates (xWin, yWin) of a world point (world[3]). */
-    void WorldToWindow( double world[ 3 ], double & xWin, double & yWin );
+    void WorldToWindow( double world[3], double & xWin, double & yWin );
 
 public slots:
 
@@ -177,7 +177,7 @@ public slots:
     /** Reset the active camera in the renderer of this view. */
     void ResetCamera();
     /** Reset the active camera in the renderer of this view using predefined bounds. */
-    void ResetCamera( double bounds[ 6 ] );
+    void ResetCamera( double bounds[6] );
     /** Zoom the active camera in the renderer of this view. */
     void ZoomCamera( double factor );
     /** Get active camera view angle. */

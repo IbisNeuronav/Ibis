@@ -76,39 +76,39 @@ void PointColorWidget::UpdateUI()
     if( m_points )
     {
         double * color = m_points->GetDisabledColor();
-        QColor disabled( (int)( color[ 0 ] * 255 ), (int)( color[ 1 ] * 255 ), (int)( color[ 2 ] * 255 ) );
+        QColor disabled( (int)( color[0] * 255 ), (int)( color[1] * 255 ), (int)( color[2] * 255 ) );
         QString styleColor = QString( "background-color: rgb(%1,%2,%3);" )
-                                 .arg( (int)( color[ 0 ] * 255 ) )
-                                 .arg( (int)( color[ 1 ] * 255 ) )
-                                 .arg( (int)( color[ 2 ] * 255 ) );
+                                 .arg( (int)( color[0] * 255 ) )
+                                 .arg( (int)( color[1] * 255 ) )
+                                 .arg( (int)( color[2] * 255 ) );
         QString style = QString( "border-width: 2px; border-style: solid; border-radius: 7;" );
         styleColor += style;
         ui->disabledColorSwatch->setStyleSheet( styleColor );
         color = m_points->GetSelectedColor();
-        QColor selected( (int)( color[ 0 ] * 255 ), (int)( color[ 1 ] * 255 ), (int)( color[ 2 ] * 255 ) );
+        QColor selected( (int)( color[0] * 255 ), (int)( color[1] * 255 ), (int)( color[2] * 255 ) );
         styleColor = QString( "background-color: rgb(%1,%2,%3);" )
-                         .arg( (int)( color[ 0 ] * 255 ) )
-                         .arg( (int)( color[ 1 ] * 255 ) )
-                         .arg( (int)( color[ 2 ] * 255 ) );
+                         .arg( (int)( color[0] * 255 ) )
+                         .arg( (int)( color[1] * 255 ) )
+                         .arg( (int)( color[2] * 255 ) );
         style = QString( "border-width: 2px; border-style: solid; border-radius: 7;" );
         styleColor += style;
         ui->selectedColorSwatch->setStyleSheet( styleColor );
         color = m_points->GetEnabledColor();
-        QColor enabled( (int)( color[ 0 ] * 255 ), (int)( color[ 1 ] * 255 ), (int)( color[ 2 ] * 255 ) );
+        QColor enabled( (int)( color[0] * 255 ), (int)( color[1] * 255 ), (int)( color[2] * 255 ) );
         styleColor = QString( "background-color: rgb(%1,%2,%3);" )
-                         .arg( (int)( color[ 0 ] * 255 ) )
-                         .arg( (int)( color[ 1 ] * 255 ) )
-                         .arg( (int)( color[ 2 ] * 255 ) );
+                         .arg( (int)( color[0] * 255 ) )
+                         .arg( (int)( color[1] * 255 ) )
+                         .arg( (int)( color[2] * 255 ) );
         style = QString( "border-width: 2px; border-style: solid; border-radius: 7;" );
         styleColor += style;
         ui->enabledColorSwatch->setStyleSheet( styleColor );
 
         color = m_points->GetLineToPointerColor();
-        QColor lineColor( (int)( color[ 0 ] * 255 ), (int)( color[ 1 ] * 255 ), (int)( color[ 2 ] * 255 ) );
+        QColor lineColor( (int)( color[0] * 255 ), (int)( color[1] * 255 ), (int)( color[2] * 255 ) );
         styleColor = QString( "background-color: rgb(%1,%2,%3);" )
-                         .arg( (int)( color[ 0 ] * 255 ) )
-                         .arg( (int)( color[ 1 ] * 255 ) )
-                         .arg( (int)( color[ 2 ] * 255 ) );
+                         .arg( (int)( color[0] * 255 ) )
+                         .arg( (int)( color[1] * 255 ) )
+                         .arg( (int)( color[2] * 255 ) );
         style = QString( "border-width: 2px; border-style: solid; border-radius: 7;" );
         styleColor += style;
         ui->lineColorSwatch->setStyleSheet( styleColor );
@@ -130,7 +130,7 @@ void PointColorWidget::UpdateOpacityUI()
 void PointColorWidget::DisabledColorSetButtonClicked()
 {
     double * oldColor = m_points->GetDisabledColor();
-    QColor initial( (int)( oldColor[ 0 ] * 255 ), (int)( oldColor[ 1 ] * 255 ), (int)( oldColor[ 2 ] * 255 ) );
+    QColor initial( (int)( oldColor[0] * 255 ), (int)( oldColor[1] * 255 ), (int)( oldColor[2] * 255 ) );
     QColor newColor =
         QColorDialog::getColor( initial, nullptr, tr( "Choose Color" ), QColorDialog::DontUseNativeDialog );
     QString styleColor = QString( "background-color: rgb(%1,%2,%3);" )
@@ -140,17 +140,17 @@ void PointColorWidget::DisabledColorSetButtonClicked()
     QString style = QString( "border-width: 2px; border-style: solid; border-radius: 7;" );
     styleColor += style;
     ui->disabledColorSwatch->setStyleSheet( styleColor );
-    double newColorfloat[ 3 ] = { 1, 1, 1 };
-    newColorfloat[ 0 ]        = double( newColor.red() ) / 255.0;
-    newColorfloat[ 1 ]        = double( newColor.green() ) / 255.0;
-    newColorfloat[ 2 ]        = double( newColor.blue() ) / 255.0;
+    double newColorfloat[3] = {1, 1, 1};
+    newColorfloat[0]        = double( newColor.red() ) / 255.0;
+    newColorfloat[1]        = double( newColor.green() ) / 255.0;
+    newColorfloat[2]        = double( newColor.blue() ) / 255.0;
     m_points->SetDisabledColor( newColorfloat );
 }
 
 void PointColorWidget::EnabledColorSetButtonClicked()
 {
     double * oldColor = m_points->GetEnabledColor();
-    QColor initial( (int)( oldColor[ 0 ] * 255 ), (int)( oldColor[ 1 ] * 255 ), (int)( oldColor[ 2 ] * 255 ) );
+    QColor initial( (int)( oldColor[0] * 255 ), (int)( oldColor[1] * 255 ), (int)( oldColor[2] * 255 ) );
     QColor newColor =
         QColorDialog::getColor( initial, nullptr, tr( "Choose Color" ), QColorDialog::DontUseNativeDialog );
     QString styleColor = QString( "background-color: rgb(%1,%2,%3);" )
@@ -160,17 +160,17 @@ void PointColorWidget::EnabledColorSetButtonClicked()
     QString style = QString( "border-width: 2px; border-style: solid; border-radius: 7;" );
     styleColor += style;
     ui->enabledColorSwatch->setStyleSheet( styleColor );
-    double newColorfloat[ 3 ] = { 1, 1, 1 };
-    newColorfloat[ 0 ]        = double( newColor.red() ) / 255.0;
-    newColorfloat[ 1 ]        = double( newColor.green() ) / 255.0;
-    newColorfloat[ 2 ]        = double( newColor.blue() ) / 255.0;
+    double newColorfloat[3] = {1, 1, 1};
+    newColorfloat[0]        = double( newColor.red() ) / 255.0;
+    newColorfloat[1]        = double( newColor.green() ) / 255.0;
+    newColorfloat[2]        = double( newColor.blue() ) / 255.0;
     m_points->SetEnabledColor( newColorfloat );
 }
 
 void PointColorWidget::SelectedColorSetButtonClicked()
 {
     double * oldColor = m_points->GetSelectedColor();
-    QColor initial( (int)( oldColor[ 0 ] * 255 ), (int)( oldColor[ 1 ] * 255 ), (int)( oldColor[ 2 ] * 255 ) );
+    QColor initial( (int)( oldColor[0] * 255 ), (int)( oldColor[1] * 255 ), (int)( oldColor[2] * 255 ) );
     QColor newColor =
         QColorDialog::getColor( initial, nullptr, tr( "Choose Color" ), QColorDialog::DontUseNativeDialog );
     QString styleColor = QString( "background-color: rgb(%1,%2,%3);" )
@@ -180,17 +180,17 @@ void PointColorWidget::SelectedColorSetButtonClicked()
     QString style = QString( "border-width: 2px; border-style: solid; border-radius: 7;" );
     styleColor += style;
     ui->selectedColorSwatch->setStyleSheet( styleColor );
-    double newColorfloat[ 3 ] = { 1, 1, 1 };
-    newColorfloat[ 0 ]        = double( newColor.red() ) / 255.0;
-    newColorfloat[ 1 ]        = double( newColor.green() ) / 255.0;
-    newColorfloat[ 2 ]        = double( newColor.blue() ) / 255.0;
+    double newColorfloat[3] = {1, 1, 1};
+    newColorfloat[0]        = double( newColor.red() ) / 255.0;
+    newColorfloat[1]        = double( newColor.green() ) / 255.0;
+    newColorfloat[2]        = double( newColor.blue() ) / 255.0;
     m_points->SetSelectedColor( newColorfloat );
 }
 
 void PointColorWidget::LineColorSetButtonClicked()
 {
     double * oldColor = m_points->GetLineToPointerColor();
-    QColor initial( (int)( oldColor[ 0 ] * 255 ), (int)( oldColor[ 1 ] * 255 ), (int)( oldColor[ 2 ] * 255 ) );
+    QColor initial( (int)( oldColor[0] * 255 ), (int)( oldColor[1] * 255 ), (int)( oldColor[2] * 255 ) );
     QColor newColor =
         QColorDialog::getColor( initial, nullptr, tr( "Choose Color" ), QColorDialog::DontUseNativeDialog );
     QString styleColor = QString( "background-color: rgb(%1,%2,%3);" )
@@ -200,9 +200,9 @@ void PointColorWidget::LineColorSetButtonClicked()
     QString style = QString( "border-width: 2px; border-style: solid; border-radius: 7;" );
     styleColor += style;
     ui->lineColorSwatch->setStyleSheet( styleColor );
-    double newColorfloat[ 3 ] = { 1, 1, 1 };
-    newColorfloat[ 0 ]        = double( newColor.red() ) / 255.0;
-    newColorfloat[ 1 ]        = double( newColor.green() ) / 255.0;
-    newColorfloat[ 2 ]        = double( newColor.blue() ) / 255.0;
+    double newColorfloat[3] = {1, 1, 1};
+    newColorfloat[0]        = double( newColor.red() ) / 255.0;
+    newColorfloat[1]        = double( newColor.green() ) / 255.0;
+    newColorfloat[2]        = double( newColor.blue() ) / 255.0;
     m_points->SetLineToPointerColor( newColorfloat );
 }

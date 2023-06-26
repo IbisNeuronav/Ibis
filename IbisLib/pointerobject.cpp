@@ -46,12 +46,12 @@ PointerObject::PointerObject()
     m_calibrationArray = vtkDoubleArray::New();
     m_calibrationArray->SetNumberOfComponents( 16 );
 
-    m_pointerAxis[ 0 ]  = 0.0;
-    m_pointerAxis[ 1 ]  = 0.0;
-    m_pointerAxis[ 2 ]  = 1.0;
-    m_pointerUpDir[ 0 ] = 0.0;
-    m_pointerUpDir[ 0 ] = 1.0;
-    m_pointerUpDir[ 0 ] = 0.0;
+    m_pointerAxis[0]  = 0.0;
+    m_pointerAxis[1]  = 0.0;
+    m_pointerAxis[2]  = 1.0;
+    m_pointerUpDir[0] = 0.0;
+    m_pointerUpDir[0] = 1.0;
+    m_pointerUpDir[0] = 0.0;
 
     m_tipLength = 5.0;
 
@@ -91,9 +91,9 @@ void PointerObject::Setup( View * view )
         tipActor->SetUserTransform( this->GetWorldTransform() );
 
         // remember what we put in that view
-        PerViewElements * perView            = new PerViewElements;
-        perView->tipActor                    = tipActor;
-        this->pointerObjectInstances[ view ] = perView;
+        PerViewElements * perView          = new PerViewElements;
+        perView->tipActor                  = tipActor;
+        this->pointerObjectInstances[view] = perView;
         connect( this, SIGNAL( ObjectModified() ), view, SLOT( NotifyNeedRender() ) );
     }
 }
@@ -137,9 +137,9 @@ void PointerObject::ObjectRemovedFromScene()
 
 double * PointerObject::GetTipPosition() { return this->GetWorldTransform()->GetPosition(); }
 
-void PointerObject::GetMainAxisPosition( double pos[ 3 ] )
+void PointerObject::GetMainAxisPosition( double pos[3] )
 {
-    double localPos[ 3 ] = { 0.0, 0.0, 140.0 };  // simtodo : this is hardcoded for fs613 : implement way to set this
+    double localPos[3] = {0.0, 0.0, 140.0};  // simtodo : this is hardcoded for fs613 : implement way to set this
     GetWorldTransform()->TransformPoint( localPos, pos );
 }
 
@@ -165,7 +165,7 @@ void vtkTrackerToolCalibrationFunction( void * userData )
     double z = self->m_minimizer->GetParameterValue( "z" );
     double nx, ny, nz, sx, sy, sz, sxx, syy, szz;
 
-    double matrix[ 4 ][ 4 ];
+    double matrix[4][4];
 
     sx = sy = sz = 0.0;
     sxx = syy = szz = 0.0;
@@ -174,9 +174,9 @@ void vtkTrackerToolCalibrationFunction( void * userData )
     {
         self->m_calibrationArray->GetTuple( i, *matrix );
 
-        nx = matrix[ 0 ][ 0 ] * x + matrix[ 0 ][ 1 ] * y + matrix[ 0 ][ 2 ] * z + matrix[ 0 ][ 3 ];
-        ny = matrix[ 1 ][ 0 ] * x + matrix[ 1 ][ 1 ] * y + matrix[ 1 ][ 2 ] * z + matrix[ 1 ][ 3 ];
-        nz = matrix[ 2 ][ 0 ] * x + matrix[ 2 ][ 1 ] * y + matrix[ 2 ][ 2 ] * z + matrix[ 2 ][ 3 ];
+        nx = matrix[0][0] * x + matrix[0][1] * y + matrix[0][2] * z + matrix[0][3];
+        ny = matrix[1][0] * x + matrix[1][1] * y + matrix[1][2] * z + matrix[1][3];
+        nz = matrix[2][0] * x + matrix[2][1] * y + matrix[2][2] * z + matrix[2][3];
 
         sx += nx;
         sy += ny;

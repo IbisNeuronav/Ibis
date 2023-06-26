@@ -71,11 +71,11 @@ void ApplicationSettings::LoadSettings( QSettings & settings )
     ViewBackgroundColor.setGreen( settings.value( "ViewBackgroundColor_g", 50 ).toInt() );
     ViewBackgroundColor.setBlue( settings.value( "ViewBackgroundColor_b", 50 ).toInt() );
     // then 3D view, if not found in settings, set the same as 2D.
-    double bgColor[ 3 ];
-    ViewBackgroundColor.getRgbF( &bgColor[ 0 ], &bgColor[ 1 ], &bgColor[ 2 ] );
-    View3DBackgroundColor.setRed( settings.value( "View3DBackgroundColor_r", int( bgColor[ 0 ] * 255 ) ).toInt() );
-    View3DBackgroundColor.setGreen( settings.value( "View3DBackgroundColor_g", int( bgColor[ 1 ] * 255 ) ).toInt() );
-    View3DBackgroundColor.setBlue( settings.value( "View3DBackgroundColor_b", int( bgColor[ 2 ] * 255 ) ).toInt() );
+    double bgColor[3];
+    ViewBackgroundColor.getRgbF( &bgColor[0], &bgColor[1], &bgColor[2] );
+    View3DBackgroundColor.setRed( settings.value( "View3DBackgroundColor_r", int( bgColor[0] * 255 ) ).toInt() );
+    View3DBackgroundColor.setGreen( settings.value( "View3DBackgroundColor_g", int( bgColor[1] * 255 ) ).toInt() );
+    View3DBackgroundColor.setBlue( settings.value( "View3DBackgroundColor_b", int( bgColor[2] * 255 ) ).toInt() );
 
     CutPlanesCursorColor.setRed( settings.value( "CutPlanesCursorColor_r", 50 ).toInt() );
     CutPlanesCursorColor.setGreen( settings.value( "CutPlanesCursorColor_g", 50 ).toInt() );
@@ -196,7 +196,8 @@ Application::~Application()
     if( !m_viewerOnly )
     {
         // Stop everybody to make sure the order of deletion of objects doesn't matter
-        foreach( HardwareModule * module, m_hardwareModules ) module->ShutDown();
+        foreach( HardwareModule * module, m_hardwareModules )
+            module->ShutDown();
         m_updateManager->Stop();
     }
 
@@ -212,23 +213,23 @@ Application::~Application()
     this->GetAllPlugins( allPlugins );
     for( int i = 0; i < allPlugins.size(); ++i )
     {
-        allPlugins[ i ]->Delete();  // this is called because otherwise plugins destructors are never called, Qt bug.
-                                    // The code has to be revised once Qt is fixed.
+        allPlugins[i]->Delete();  // this is called because otherwise plugins destructors are never called, Qt bug.
+                                  // The code has to be revised once Qt is fixed.
     }
     delete m_preferences;
 }
 
 void Application::ApplyApplicationSettings()
 {
-    double bgColor[ 3 ];
-    m_settings.ViewBackgroundColor.getRgbF( &bgColor[ 0 ], &bgColor[ 1 ], &bgColor[ 2 ] );
+    double bgColor[3];
+    m_settings.ViewBackgroundColor.getRgbF( &bgColor[0], &bgColor[1], &bgColor[2] );
     m_sceneManager->SetViewBackgroundColor( bgColor );
-    m_settings.View3DBackgroundColor.getRgbF( &bgColor[ 0 ], &bgColor[ 1 ], &bgColor[ 2 ] );
+    m_settings.View3DBackgroundColor.getRgbF( &bgColor[0], &bgColor[1], &bgColor[2] );
     m_sceneManager->SetView3DBackgroundColor( bgColor );
     m_sceneManager->Set3DCameraViewAngle( m_settings.CameraViewAngle3D );
 
-    double cursorColor[ 3 ];
-    m_settings.CutPlanesCursorColor.getRgbF( &cursorColor[ 0 ], &cursorColor[ 1 ], &cursorColor[ 2 ] );
+    double cursorColor[3];
+    m_settings.CutPlanesCursorColor.getRgbF( &cursorColor[0], &cursorColor[1], &cursorColor[2] );
     WorldObject * world = WorldObject::SafeDownCast( m_sceneManager->GetSceneRoot() );
     world->SetCursorColor( cursorColor );
 
@@ -247,22 +248,22 @@ void Application::ApplyApplicationSettings()
 
 void Application::UpdateApplicationSettings()
 {
-    double * backgroundColor         = m_sceneManager->GetViewBackgroundColor();
-    m_settings.ViewBackgroundColor   = QColor( int( backgroundColor[ 0 ] * 255 ), int( backgroundColor[ 1 ] * 255 ),
-                                               int( backgroundColor[ 2 ] * 255 ) );
-    backgroundColor                  = m_sceneManager->GetView3DBackgroundColor();
-    m_settings.View3DBackgroundColor = QColor( int( backgroundColor[ 0 ] * 255 ), int( backgroundColor[ 1 ] * 255 ),
-                                               int( backgroundColor[ 2 ] * 255 ) );
-    WorldObject * world              = WorldObject::SafeDownCast( m_sceneManager->GetSceneRoot() );
-    m_settings.CutPlanesCursorColor  = world->GetCursorColor();
-    m_settings.InteractorStyle3D     = m_sceneManager->Get3DInteractorStyle();
-    m_settings.CameraViewAngle3D     = m_sceneManager->Get3DCameraViewAngle();
-    m_settings.ShowCursor            = m_sceneManager->GetCursorVisible();
-    m_settings.ShowAxes              = !m_sceneManager->GetAxesObject()->IsHidden();
-    m_settings.ViewFollowsReference  = m_sceneManager->Is3DViewFollowingReferenceVolume();
-    m_settings.ShowXPlane            = m_sceneManager->IsPlaneVisible( 0 );
-    m_settings.ShowYPlane            = m_sceneManager->IsPlaneVisible( 1 );
-    m_settings.ShowZPlane            = m_sceneManager->IsPlaneVisible( 2 );
+    double * backgroundColor = m_sceneManager->GetViewBackgroundColor();
+    m_settings.ViewBackgroundColor =
+        QColor( int( backgroundColor[0] * 255 ), int( backgroundColor[1] * 255 ), int( backgroundColor[2] * 255 ) );
+    backgroundColor = m_sceneManager->GetView3DBackgroundColor();
+    m_settings.View3DBackgroundColor =
+        QColor( int( backgroundColor[0] * 255 ), int( backgroundColor[1] * 255 ), int( backgroundColor[2] * 255 ) );
+    WorldObject * world                               = WorldObject::SafeDownCast( m_sceneManager->GetSceneRoot() );
+    m_settings.CutPlanesCursorColor                   = world->GetCursorColor();
+    m_settings.InteractorStyle3D                      = m_sceneManager->Get3DInteractorStyle();
+    m_settings.CameraViewAngle3D                      = m_sceneManager->Get3DCameraViewAngle();
+    m_settings.ShowCursor                             = m_sceneManager->GetCursorVisible();
+    m_settings.ShowAxes                               = !m_sceneManager->GetAxesObject()->IsHidden();
+    m_settings.ViewFollowsReference                   = m_sceneManager->Is3DViewFollowingReferenceVolume();
+    m_settings.ShowXPlane                             = m_sceneManager->IsPlaneVisible( 0 );
+    m_settings.ShowYPlane                             = m_sceneManager->IsPlaneVisible( 1 );
+    m_settings.ShowZPlane                             = m_sceneManager->IsPlaneVisible( 2 );
     m_settings.TripleCutPlaneDisplayInterpolationType = m_sceneManager->GetDisplayInterpolationType();
     m_settings.TripleCutPlaneResliceInterpolationType = m_sceneManager->GetResliceInterpolationType();
 }
@@ -284,7 +285,7 @@ void Application::SaveSettings()
     this->GetAllPlugins( allPlugins );
     for( int i = 0; i < allPlugins.size(); ++i )
     {
-        allPlugins[ i ]->BaseSaveSettings( settings );
+        allPlugins[i]->BaseSaveSettings( settings );
     }
     settings.endGroup();
 }
@@ -331,14 +332,14 @@ void Application::AddGlobalEventHandler( GlobalEventHandler * h ) { m_globalEven
 void Application::RemoveGlobalEventHandler( GlobalEventHandler * h )
 {
     for( int i = 0; i < m_globalEventHandlers.size(); ++i )
-        if( m_globalEventHandlers[ i ] == h ) m_globalEventHandlers.removeAt( i );
+        if( m_globalEventHandlers[i] == h ) m_globalEventHandlers.removeAt( i );
 }
 
 bool Application::GlobalKeyEvent( QKeyEvent * e )
 {
     for( int i = 0; i < m_globalEventHandlers.size(); ++i )
     {
-        if( m_globalEventHandlers[ i ]->HandleKeyboardEvent( e ) ) return true;
+        if( m_globalEventHandlers[i]->HandleKeyboardEvent( e ) ) return true;
     }
     return false;
 }
@@ -349,7 +350,8 @@ void Application::InitHardware()
     m_updateManager->Stop();
 
     // Init hardware
-    foreach( HardwareModule * module, m_hardwareModules ) module->Init();
+    foreach( HardwareModule * module, m_hardwareModules )
+        module->Init();
 
     if( m_hardwareModules.size() > 0 )
     {
@@ -372,12 +374,14 @@ void Application::AddHardwareSettingsMenuEntries( QMenu * menu )
 
 void Application::AddToolObjectsToScene()
 {
-    foreach( HardwareModule * module, m_hardwareModules ) module->AddToolObjectsToScene();
+    foreach( HardwareModule * module, m_hardwareModules )
+        module->AddToolObjectsToScene();
 }
 
 void Application::RemoveToolObjectsFromScene()
 {
-    foreach( HardwareModule * module, m_hardwareModules ) module->RemoveToolObjectsFromScene();
+    foreach( HardwareModule * module, m_hardwareModules )
+        module->RemoveToolObjectsFromScene();
 }
 
 QString Application::GetFullVersionString()
@@ -435,7 +439,7 @@ void Application::OpenFiles( OpenFileParams * params, bool addToScene )
     m_fileReader->SetIbisAPI( m_ibisAPI );
     for( int i = 0; i < params->filesParams.size(); ++i )
     {
-        OpenFileParams::SingleFileParam & cur = params->filesParams[ i ];
+        OpenFileParams::SingleFileParam & cur = params->filesParams[i];
         QFileInfo fi( cur.fileName );
         if( !( fi.isReadable() ) )
         {
@@ -489,7 +493,7 @@ void Application::OpenFiles( OpenFileParams * params, bool addToScene )
             QString message;
             for( int i = 0; i < warnings.size(); ++i )
             {
-                message += warnings[ i ];
+                message += warnings[i];
                 message += QString( "\n" );
             }
             QMessageBox::warning( nullptr, "Error", message );
@@ -501,7 +505,7 @@ void Application::OpenFiles( OpenFileParams * params, bool addToScene )
         {
             for( int i = 0; i < params->filesParams.size(); ++i )
             {
-                OpenFileParams::SingleFileParam & cur = params->filesParams[ i ];
+                OpenFileParams::SingleFileParam & cur = params->filesParams[i];
                 SceneObject * parent                  = cur.parent;
                 if( !parent ) parent = params->defaultParent;
                 if( !parent && !m_viewerOnly ) parent = Application::GetSceneManager()->GetSceneRoot();
@@ -529,7 +533,7 @@ void Application::OpenFiles( OpenFileParams * params, bool addToScene )
 
         if( params->filesParams.size() )
         {
-            QFileInfo info( params->filesParams[ 0 ].fileName );
+            QFileInfo info( params->filesParams[0].fileName );
             QString newDirVisited                                      = info.dir().absolutePath();
             Application::GetInstance().GetSettings()->WorkingDirectory = newDirVisited;
         }
@@ -771,7 +775,8 @@ void Application::OpenFilesProgress()
 
 void Application::TickIbisClock()
 {
-    foreach( HardwareModule * module, m_hardwareModules ) module->Update();
+    foreach( HardwareModule * module, m_hardwareModules )
+        module->Update();
     emit IbisClockTick();
 }
 

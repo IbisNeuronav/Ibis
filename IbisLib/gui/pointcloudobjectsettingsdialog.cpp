@@ -80,9 +80,9 @@ void PointCloudObjectSettingsDialog::UpdateUI()
     // Update color ui
     double * color     = m_object->GetProperty()->GetColor();
     QString styleColor = QString( "background-color: rgb(%1,%2,%3);" )
-                             .arg( (int)( color[ 0 ] * 255 ) )
-                             .arg( (int)( color[ 1 ] * 255 ) )
-                             .arg( (int)( color[ 2 ] * 255 ) );
+                             .arg( (int)( color[0] * 255 ) )
+                             .arg( (int)( color[1] * 255 ) )
+                             .arg( (int)( color[2] * 255 ) );
     QString style = QString( "border-width: 2px; border-style: solid; border-radius: 7; border-color: black;" );
     styleColor += style;
     this->changeColorButton->setStyleSheet( styleColor );
@@ -104,15 +104,15 @@ void PointCloudObjectSettingsDialog::UpdateOpacityUI()
 void PointCloudObjectSettingsDialog::ColorSwatchClicked()
 {
     double * oldColor = m_object->GetProperty()->GetColor();
-    QColor initial( (int)( oldColor[ 0 ] * 255 ), (int)( oldColor[ 1 ] * 255 ), (int)( oldColor[ 2 ] * 255 ) );
+    QColor initial( (int)( oldColor[0] * 255 ), (int)( oldColor[1] * 255 ), (int)( oldColor[2] * 255 ) );
     QColor newColor =
         QColorDialog::getColor( initial, nullptr, tr( "Choose Color" ), QColorDialog::DontUseNativeDialog );
     if( newColor.isValid() )
     {
-        double newColorfloat[ 3 ] = { 1, 1, 1 };
-        newColorfloat[ 0 ]        = double( newColor.red() ) / 255.0;
-        newColorfloat[ 1 ]        = double( newColor.green() ) / 255.0;
-        newColorfloat[ 2 ]        = double( newColor.blue() ) / 255.0;
+        double newColorfloat[3] = {1, 1, 1};
+        newColorfloat[0]        = double( newColor.red() ) / 255.0;
+        newColorfloat[1]        = double( newColor.green() ) / 255.0;
+        newColorfloat[2]        = double( newColor.blue() ) / 255.0;
         m_object->SetColor( newColorfloat );
 
         UpdateUI();

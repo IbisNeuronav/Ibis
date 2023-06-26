@@ -221,7 +221,7 @@ public:
         QString text;
         for( int i = 0; i < nbElements; i++ )
         {
-            text += QString::number( value[ i ] ) + " ";
+            text += QString::number( value[i] ) + " ";
         }
         elem.setAttribute( "value", text );
         m_currentNode.appendChild( elem );
@@ -234,7 +234,7 @@ public:
         QString text;
         for( int i = 0; i < nbElements; i++ )
         {
-            text += QString::number( value[ i ], 'e', 16 ) + " ";
+            text += QString::number( value[i], 'e', 16 ) + " ";
         }
         elem.setAttribute( "value", text );
         m_currentNode.appendChild( elem );
@@ -382,7 +382,7 @@ public:
                 int i                       = 0;
                 while( it != itEnd && i < nbElements )
                 {
-                    value[ i ] = ( *it ).toInt();
+                    value[i] = ( *it ).toInt();
                     ++it;
                     ++i;
                 }
@@ -406,7 +406,7 @@ public:
                 int i                       = 0;
                 while( it != itEnd && i < nbElements )
                 {
-                    value[ i ] = ( *it ).toDouble();
+                    value[i] = ( *it ).toDouble();
                     ++it;
                     ++i;
                 }
@@ -478,7 +478,7 @@ bool Serialize( Serializer * serial, const char * attrName, std::vector<T *> & v
         if( serial->IsReader() )
         {
             value.resize( numberOfElements );
-            for( int i = 0; i < numberOfElements; ++i ) value[ i ] = new T;
+            for( int i = 0; i < numberOfElements; ++i ) value[i] = new T;
         }
 
         typename std::vector<T *>::iterator it = value.begin();
@@ -638,7 +638,7 @@ bool Serialize( Serializer * serial, const char * attrName, std::map<K, V> & val
                 ++it;
             }
             Serialize( serial, elemName.toUtf8().data(), nextValue );
-            if( serial->IsReader() ) value[ nextValue.first ] = nextValue.second;
+            if( serial->IsReader() ) value[nextValue.first] = nextValue.second;
         }
 
         serial->EndSection();

@@ -47,7 +47,7 @@ public:
     virtual void CreateSettingsWidgets( QWidget * parent, QVector<QWidget *> * widgets ) override;
 
     double * GetTipPosition();
-    void GetMainAxisPosition( double pos[ 3 ] );
+    void GetMainAxisPosition( double pos[3] );
 
     // Tip calibration
     void StartTipCalibration();
@@ -93,8 +93,8 @@ protected:
 
     vtkSmartPointer<PointsObject> CurrentPointerPickedPointsObject;
 
-    double m_pointerAxis[ 3 ];
-    double m_pointerUpDir[ 3 ];
+    double m_pointerAxis[3];
+    double m_pointerUpDir[3];
     double m_tipLength;
 
     int m_calibrating;

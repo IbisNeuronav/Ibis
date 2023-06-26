@@ -15,8 +15,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "ui_worldobjectsettingswidget.h"
 #include "worldobject.h"
 
-const char * UpdateFrequencyStrings[ 4 ] = { "7.5", "15", "30", "60" };
-const double UpdateFrequencies[ 4 ]      = { 7.5, 15.0, 30.0, 60.0 };
+const char * UpdateFrequencyStrings[4] = {"7.5", "15", "30", "60"};
+const double UpdateFrequencies[4]      = {7.5, 15.0, 30.0, 60.0};
 
 WorldObjectSettingsWidget::WorldObjectSettingsWidget( QWidget * parent )
     : QWidget( parent ), ui( new Ui::WorldObjectSettingsWidget ), m_worldObject( 0 )
@@ -150,7 +150,7 @@ void WorldObjectSettingsWidget::UpdateUi()
         ui->updateMaxFrequencySlider->blockSignals( true );
         ui->updateMaxFrequencySlider->setValue( updateFrequencyIndex );
         ui->updateMaxFrequencySlider->blockSignals( false );
-        ui->fpsLineEdit->setText( UpdateFrequencyStrings[ updateFrequencyIndex ] );
+        ui->fpsLineEdit->setText( UpdateFrequencyStrings[updateFrequencyIndex] );
     }
 }
 
@@ -158,14 +158,14 @@ int WorldObjectSettingsWidget::GetUpdateFrequencyIndex( double fps )
 {
     for( int i = 0; i < 4; ++i )
     {
-        if( UpdateFrequencies[ i ] == fps ) return i;
+        if( UpdateFrequencies[i] == fps ) return i;
     }
     return 0;
 }
 
 void WorldObjectSettingsWidget::on_updateMaxFrequencySlider_valueChanged( int value )
 {
-    m_worldObject->SetUpdateFrequency( UpdateFrequencies[ value ] );
+    m_worldObject->SetUpdateFrequency( UpdateFrequencies[value] );
     UpdateUi();
 }
 

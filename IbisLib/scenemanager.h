@@ -163,19 +163,19 @@ public:
      *  @brief Transform between reference object space and world space coordinate systems
      * */
     ///@{
-    void WorldToReference( double worldPoint[ 3 ], double referencePoint[ 3 ] );
-    void ReferenceToWorld( double referencePoint[ 3 ], double worldPoint[ 3 ] );
+    void WorldToReference( double worldPoint[3], double referencePoint[3] );
+    void ReferenceToWorld( double referencePoint[3], double worldPoint[3] );
     void GetReferenceOrientation( vtkMatrix4x4 * mat );
     ///@}
 
     /** Manipulate the global cursor. The cursor is a general concept that
      * can be used by any module as a 3D reference point. Amongst other things,
      * its position is used to place the Triple Cut planes. */
-    void GetCursorPosition( double pos[ 3 ] );
+    void GetCursorPosition( double pos[3] );
 
     /** Determine whether the pos is in one of the 3 planes identified by planeType. Point is
      * in the plane if it is closer than .5 * voxel size of the reference volume. */
-    bool IsInPlane( VIEWTYPES planeType, double pos[ 3 ] );
+    bool IsInPlane( VIEWTYPES planeType, double pos[3] );
 
     /** @name  Generic Label
      *  @brief The label is used to display some additional information on the toolbar
@@ -252,7 +252,7 @@ public:
     ImageObject * GetReferenceDataObject();
     void SetReferenceDataObject( SceneObject * );
     bool CanBeReference( SceneObject * );
-    void GetReferenceBounds( double bounds[ 6 ] );
+    void GetReferenceBounds( double bounds[6] );
     vtkTransform * GetReferenceTransform() { return m_referenceTransform; }
     vtkTransform * GetInverseReferenceTransform() { return m_invReferenceTransform; }
     ///@}
@@ -308,7 +308,7 @@ public:
      *  @brief Utility functions to reset the cameras in all views. */
     ///@{
     void ResetAllCameras();
-    void ResetAllCameras( double bounds[ 6 ] );
+    void ResetAllCameras( double bounds[6] );
     void ZoomAllCameras( double factor );
     ///@}
 
@@ -478,8 +478,8 @@ protected:
     int MainSagittalViewID;
     int MainTransverseViewID;
     bool m_viewFollowsReferenceObject;
-    double ViewBackgroundColor[ 3 ];
-    double View3DBackgroundColor[ 3 ];
+    double ViewBackgroundColor[3];
+    double View3DBackgroundColor[3];
     double CameraViewAngle3D;
     ///@}
 

@@ -136,7 +136,7 @@ public:
     ///@{
     int GetSliceThickness() { return m_sliceThickness; }
     void SetSliceThickness( int );
-    int GetSliceMixMode( int imageIndex ) { return m_sliceMixMode[ imageIndex ]; }
+    int GetSliceMixMode( int imageIndex ) { return m_sliceMixMode[imageIndex]; }
     void SetSliceMixMode( int imageIndex, int mode );
     ///@}
 
@@ -151,16 +151,16 @@ public:
     int GetNumberOfBlendingModes();
     QString GetBlendingModeName( int blendingModeIndex );
     void SetBlendingModeIndex( int imageIndex, int blendingModeIndex );
-    int GetBlendingModeIndex( int imageIndex ) { return m_blendingModeIndices[ imageIndex ]; }
+    int GetBlendingModeIndex( int imageIndex ) { return m_blendingModeIndices[imageIndex]; }
     ///@}
 
     /** Get Planes position in local coordinates. */
-    void GetPlanesPosition( double pos[ 3 ] );
+    void GetPlanesPosition( double pos[3] );
 
     /** Determine whether the pos is in one of the 3 planes identified by planeType. Point is
      * in the plane if it is closer than .5 * voxel size of the reference volume.
      */
-    bool IsInPlane( VIEWTYPES planeType, double pos[ 3 ] );
+    bool IsInPlane( VIEWTYPES planeType, double pos[3] );
 
 public slots:
 
@@ -202,8 +202,8 @@ protected:
     std::vector<int> m_sliceMixMode;  // per-image
     std::vector<int> m_blendingModeIndices;
 
-    vtkSmartPointer<vtkMultiImagePlaneWidget> Planes[ 3 ];
-    int ViewPlanes[ 3 ];
+    vtkSmartPointer<vtkMultiImagePlaneWidget> Planes[3];
+    int ViewPlanes[3];
     bool CursorVisible;
     int m_resliceInterpolationType;
     int m_displayInterpolationType;
@@ -213,7 +213,7 @@ protected:
     vtkSmartPointer<vtkEventQtSlotConnect> PlaneEndInteractionSlotConnect;
 
     // used only to set planes position in PostRead()
-    double m_planePosition[ 3 ];
+    double m_planePosition[3];
 
 private:
     void UpdateAllPlanesVisibility();

@@ -84,7 +84,7 @@ public:
     /** Set PolyData color. */
     void SetColor( double r, double g, double b );
     /** Set PolyData color. */
-    void SetColor( double color[ 3 ] ) { SetColor( color[ 0 ], color[ 1 ], color[ 2 ] ); }
+    void SetColor( double color[3] ) { SetColor( color[0], color[1], color[2] ); }
     /** Get PolyData color. */
     double * GetColor();
     /** Set line width. */
@@ -145,8 +145,8 @@ protected:
     int ScalarsVisible;  // Whether scalars in the PolyData are used to color the object or not.
 
     // Cross section in 2d views
-    vtkSmartPointer<vtkCutter> m_cutter[ 3 ];
-    vtkSmartPointer<vtkPlane> m_cuttingPlane[ 3 ];
+    vtkSmartPointer<vtkCutter> m_cutter[3];
+    vtkSmartPointer<vtkPlane> m_cuttingPlane[3];
     bool CrossSectionVisible;
 
     // Clipping an octant from surface

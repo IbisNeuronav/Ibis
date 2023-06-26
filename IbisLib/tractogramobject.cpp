@@ -50,8 +50,8 @@ TractogramObject::TractogramObject()
     this->tube_enabled  = false;
     this->renderingMode = VTK_WIREFRAME;
 
-    this->SetScalarsVisible(true);
-    this->SetVertexColorMode(2);
+    this->SetScalarsVisible( true );
+    this->SetVertexColorMode( 2 );
 }
 
 TractogramObject::~TractogramObject() {}
@@ -141,7 +141,7 @@ void TractogramObject::Setup( View * view )
     vtkSmartPointer<vtkActor> actor = vtkSmartPointer<vtkActor>::New();
     actor->SetMapper( mapper );
     actor->SetUserTransform( this->GetWorldTransform() );
-    this->polydataObjectInstances[ view ] = actor;
+    this->polydataObjectInstances[view] = actor;
 
     if( view->GetType() == THREED_VIEW_TYPE )
     {
@@ -154,7 +154,7 @@ void TractogramObject::Setup( View * view )
     {
         actor->SetProperty( m_2dProperty );
         int plane = (int)( view->GetType() );
-        mapper->SetInputConnection( m_cutter[ plane ]->GetOutputPort() );
+        mapper->SetInputConnection( m_cutter[plane]->GetOutputPort() );
         actor->SetVisibility( ( IsHidden() && GetCrossSectionVisible() ) ? 1 : 0 );
         view->GetOverlayRenderer()->AddActor( actor );
     }

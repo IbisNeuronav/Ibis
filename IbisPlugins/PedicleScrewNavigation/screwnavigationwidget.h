@@ -14,52 +14,52 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #define __SCREWNAVIGATIONWIDGET_H__
 
 // Qt includes
-#include <QWidget>
 #include <QDir>
-#include <QLabel>
 #include <QFileDialog>
+#include <QLabel>
+#include <QWidget>
 
 // VTK includes
 #include <QVTKOpenGLNativeWidget.h>
+#include <vtkCamera.h>
+#include <vtkImageActor.h>
 #include <vtkImageData.h>
+#include <vtkImageFlip.h>
+#include <vtkImageProperty.h>
+#include <vtkImageResliceToColors.h>
 #include <vtkImageSlice.h>
 #include <vtkImageSliceMapper.h>
-#include <vtkCamera.h>
-#include <vtkRenderWindowInteractor.h>
 #include <vtkInteractorStyleImage2.h>
 #include <vtkRenderWindow.h>
+#include <vtkRenderWindowInteractor.h>
 #include <vtkRenderer.h>
 #include <vtkTransform.h>
-#include <vtkImageActor.h>
-#include <vtkImageResliceToColors.h>
-#include <vtkImageProperty.h>
-#include <vtkImageFlip.h>
 
 // VTK (drawing)
-#include <vtkSmartPointer.h>
-#include <vtkPolyDataMapper.h>
-#include <vtkProperty.h>
 #include <vtkAlgorithm.h>
 #include <vtkAlgorithmOutput.h>
 #include <vtkAppendPolyData.h>
 #include <vtkCleanPolyData.h>
-#include <vtkCylinderSource.h>
 #include <vtkConeSource.h>
-#include <vtkSphereSource.h>
-#include <vtkLineSource.h>
-#include <vtkTextProperty.h>
 #include <vtkCutter.h>
+#include <vtkCylinderSource.h>
+#include <vtkLineSource.h>
 #include <vtkPlane.h>
+#include <vtkPolyDataMapper.h>
+#include <vtkProperty.h>
+#include <vtkSmartPointer.h>
+#include <vtkSphereSource.h>
+#include <vtkTextProperty.h>
 #include <vtkTransformPolyDataFilter.h>
 
 // IBIS includes
-#include "pediclescrewnavigationplugininterface.h"
-#include "sceneobject.h"
-#include "pointerobject.h"
-#include "ibisapi.h"
 #include "application.h"
+#include "ibisapi.h"
 #include "imageobject.h"
+#include "pediclescrewnavigationplugininterface.h"
+#include "pointerobject.h"
 #include "polydataobject.h"
+#include "sceneobject.h"
 
 // Plugin includes
 #include "screwproperties.h"
@@ -84,55 +84,55 @@ class QListWidgetItem;
 
 class Screw;
 
-namespace Ui {
-    class ScrewNavigationWidget;
+namespace Ui
+{
+class ScrewNavigationWidget;
 }
 
 class ScrewNavigationWidget : public QWidget
 {
-
     Q_OBJECT
 
 public:
-
-    explicit ScrewNavigationWidget(std::vector<Screw *> plannedScrews=std::vector<Screw *>(), QWidget *parent=0);
+    explicit ScrewNavigationWidget( std::vector<Screw *> plannedScrews = std::vector<Screw *>(), QWidget * parent = 0 );
     ~ScrewNavigationWidget();
 
     void SetPluginInterface( PedicleScrewNavigationPluginInterface * );
     void Navigate();
     void StopNavigation();
 
-    void GetPlannedScrews(std::vector<Screw *> &screws);
-    void SetPlannedScrews(std::vector<Screw *> screws);
+    void GetPlannedScrews( std::vector<Screw *> & screws );
+    void SetPlannedScrews( std::vector<Screw *> screws );
 
     vtkRenderer * GetAxialRenderer();
     vtkRenderer * GetSagittalRenderer();
 
 private:
+    void GetAxialPositionAndOrientation( ImageObject *, vtkTransform *, double ( &pos )[3],
+                                         double ( &orientation )[3] );
+    void MoveAxialPlane( vtkSmartPointer<vtkImageResliceToColors> reslice, double pos[3], double orientation[3] );
 
-    void GetAxialPositionAndOrientation(ImageObject *, vtkTransform *, double (&pos)[3], double (&orientation)[3]);
-    void MoveAxialPlane(vtkSmartPointer<vtkImageResliceToColors> reslice, double pos[3], double orientation[3]);
-
-    void GetSagittalPositionAndOrientation(ImageObject *, vtkTransform *, double (&pos)[3], double (&orientation)[3]);
-    void MoveSagittalPlane(double pos[3], double orientation[3]);
+    void GetSagittalPositionAndOrientation( ImageObject *, vtkTransform *, double ( &pos )[3],
+                                            double ( &orientation )[3] );
+    void MoveSagittalPlane( double pos[3], double orientation[3] );
 
     void UpdatePlannedScrews();
-    void AddPlannedScrew(Screw *);
-    void AddPlannedScrew( double position[3], double orientation[3], double screwLength, double screwDiameter, double screwTipSize, bool useWorld=false );
-    bool GetPointerDirection(double (&dir)[3]);
+    void AddPlannedScrew( Screw * );
+    void AddPlannedScrew( double position[3], double orientation[3], double screwLength, double screwDiameter,
+                          double screwTipSize, bool useWorld = false );
+    bool GetPointerDirection( double ( &dir )[3] );
 
     void SetDefaultView( vtkSmartPointer<vtkRenderer> );
     void UpdateInstrumentDrawing( vtkSmartPointer<vtkRenderer> );
     void InitializeAnnotationDrawing();
 
     void UpdatePointerDirection();
-    void UpdateRulerDrawing(vtkSmartPointer<vtkActor>);
+    void UpdateRulerDrawing( vtkSmartPointer<vtkActor> );
 
     void InitializeUi();
 
 private:
-
-    Ui::ScrewNavigationWidget *ui;
+    Ui::ScrewNavigationWidget * ui;
     PedicleScrewNavigationPluginInterface * m_pluginInterface;
 
     int m_screwPlanImageDataId;
@@ -169,24 +169,24 @@ private:
     double m_pointerDirection[3];
     std::vector<Screw *> m_PlannedScrewList;
 
-    double m_currentAxialPosition[3];       // stores the cursor position in axial plane
-    double m_currentSagittalPosition[3];    // stores the cursor position in sagittal plane
-    double m_currentAxialOrientation[3];    // stores the cursor orientation in axial plane
-    double m_currentSagittalOrientation[3]; // stores the cursor orientation in sagittal plane
+    double m_currentAxialPosition[3];        // stores the cursor position in axial plane
+    double m_currentSagittalPosition[3];     // stores the cursor position in sagittal plane
+    double m_currentAxialOrientation[3];     // stores the cursor orientation in axial plane
+    double m_currentSagittalOrientation[3];  // stores the cursor orientation in sagittal plane
 
 public slots:
     void UpdateInputs();
     void OnPointerPositionUpdated();
-    void OnScrewSizeComboBoxModified(int);
-    void OnScrewListItemChanged(QListWidgetItem *);
-    void on_displayScrewCheckBox_toggled(bool);
-    void on_displayRulerCheckBox_toggled(bool);
-    void on_displayPlanningCheckBox_toggled(bool);
+    void OnScrewSizeComboBoxModified( int );
+    void OnScrewListItemChanged( QListWidgetItem * );
+    void on_displayScrewCheckBox_toggled( bool );
+    void on_displayRulerCheckBox_toggled( bool );
+    void on_displayPlanningCheckBox_toggled( bool );
     void on_openScrewTableButton_clicked();
     void on_saveScrewPositionButton_clicked();
 
 private slots:
-    void on_rulerSpinBox_valueChanged(int);
+    void on_rulerSpinBox_valueChanged( int );
 
     void OnObjectAddedSlot( int );
     void OnObjectRemovedSlot( int );
@@ -195,8 +195,8 @@ private slots:
 
     void on_resetDefaultViewButton_clicked();
 
-    void on_flipAxialViewCheckBox_toggled(bool);
-    void on_flipSagittalViewCheckBox_toggled(bool);
+    void on_flipAxialViewCheckBox_toggled( bool );
+    void on_flipSagittalViewCheckBox_toggled( bool );
 
     void on_importPlanButton_clicked();
     void on_exportPlanButton_clicked();
@@ -206,4 +206,4 @@ signals:
     void CloseNavigationWidget();
 };
 
-#endif // __SCREWNAVIGATIONWIDGET_H__
+#endif  // __SCREWNAVIGATIONWIDGET_H__

@@ -60,12 +60,12 @@ void ImageObjectSettingsDialog::SetImageObject( ImageObject * obj )
 
             // Setup Histogram widget
             histogramWidget->SetHistogram( m_imageObject->GetHistogramComputer() );
-            double imageRange[ 2 ];
+            double imageRange[2];
             m_imageObject->GetImageScalarRange( imageRange );
-            histogramWidget->SetImageRange( imageRange[ 0 ], imageRange[ 1 ] );
+            histogramWidget->SetImageRange( imageRange[0], imageRange[1] );
             double * range = m_imageObject->GetLutRange();
-            double min     = ( range[ 0 ] - imageRange[ 0 ] ) / ( imageRange[ 1 ] - imageRange[ 0 ] );
-            double max     = ( range[ 1 ] - imageRange[ 0 ] ) / ( imageRange[ 1 ] - imageRange[ 0 ] );
+            double min     = ( range[0] - imageRange[0] ) / ( imageRange[1] - imageRange[0] );
+            double max     = ( range[1] - imageRange[0] ) / ( imageRange[1] - imageRange[0] );
             histogramWidget->setMinSliderValue( min );
             histogramWidget->setMaxSliderValue( max );
         }
@@ -110,12 +110,12 @@ void ImageObjectSettingsDialog::RangeSlidersValuesChanged( double min, double ma
 {
     Q_ASSERT( m_imageObject );
 
-    double imageRange[ 2 ];
+    double imageRange[2];
     m_imageObject->GetImageScalarRange( imageRange );
 
-    double newRange[ 2 ];
-    newRange[ 0 ] = min * ( imageRange[ 1 ] - imageRange[ 0 ] ) + imageRange[ 0 ];
-    newRange[ 1 ] = max * ( imageRange[ 1 ] - imageRange[ 0 ] ) + imageRange[ 0 ];
+    double newRange[2];
+    newRange[0] = min * ( imageRange[1] - imageRange[0] ) + imageRange[0];
+    newRange[1] = max * ( imageRange[1] - imageRange[0] ) + imageRange[0];
     m_imageObject->SetLutRange( newRange );
     this->UpdateUI();
 }
