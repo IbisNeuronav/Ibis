@@ -13,6 +13,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include <QList>
 #include <QMap>
+#include <QVariant>
+#include <QComboBox>
 
 #include "ibisapi.h"
 
