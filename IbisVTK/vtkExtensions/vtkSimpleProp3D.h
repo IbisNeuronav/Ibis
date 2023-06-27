@@ -53,7 +53,7 @@ public:
     // Get the bounds - either all six at once
     // (xmin, xmax, ymin, ymax, zmin, zmax) or one at a time.
     double * GetBounds() override;
-    void GetBounds( double bounds[ 6 ] ) { this->vtkProp3D::GetBounds( bounds ); };
+    void GetBounds( double bounds[6] ) { this->vtkProp3D::GetBounds( bounds ); };
     double GetMinXBound();
     double GetMaxXBound();
     double GetMinYBound();

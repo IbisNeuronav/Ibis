@@ -1,8 +1,9 @@
-#include <vtkMatrix4x4.h>
 #include "gpu_volumereconstruction.h"
-#include "ibisitkvtkconverter.h"
 
 #include <vtkImageData.h>
+#include <vtkMatrix4x4.h>
+
+#include "ibisitkvtkconverter.h"
 
 GPU_VolumeReconstruction::GPU_VolumeReconstruction()
 {

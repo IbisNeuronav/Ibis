@@ -94,9 +94,9 @@ void vtkImagePlaneActor::PreRenderSetup()
     // if the display extent has not been set, then compute one
     //    int * wExtent = input->GetWholeExtent();
     int * wExtent = input->GetExtent();  // VTK6
-    int xSize     = wExtent[ 1 ] - wExtent[ 0 ] + 1;
-    int ySize     = wExtent[ 3 ] - wExtent[ 2 ] + 1;
-    int zSize     = wExtent[ 5 ] - wExtent[ 4 ] + 1;
+    int xSize     = wExtent[1] - wExtent[0] + 1;
+    int ySize     = wExtent[3] - wExtent[2] + 1;
+    int zSize     = wExtent[5] - wExtent[4] + 1;
     if( zSize != 1 )
     {
         vtkErrorMacro( << "vtkImagePlaneActor::PreRenderSetup: input image has z size > 1. Only 2D images are valid" );
@@ -108,14 +108,14 @@ void vtkImagePlaneActor::PreRenderSetup()
 
     this->ImagePad->SetOutputWholeExtent( 0, newXSize - 1, 0, newYSize - 1, 0, 0 );
 
-    if( this->DisplayExtent[ 0 ] == -1 )
+    if( this->DisplayExtent[0] == -1 )
     {
-        this->DisplayExtent[ 0 ] = wExtent[ 0 ];
-        this->DisplayExtent[ 1 ] = wExtent[ 1 ];
-        this->DisplayExtent[ 2 ] = wExtent[ 2 ];
-        this->DisplayExtent[ 3 ] = wExtent[ 3 ];
-        this->DisplayExtent[ 4 ] = wExtent[ 4 ];
-        this->DisplayExtent[ 5 ] = wExtent[ 4 ];
+        this->DisplayExtent[0] = wExtent[0];
+        this->DisplayExtent[1] = wExtent[1];
+        this->DisplayExtent[2] = wExtent[2];
+        this->DisplayExtent[3] = wExtent[3];
+        this->DisplayExtent[4] = wExtent[4];
+        this->DisplayExtent[5] = wExtent[4];
     }
 
     SetImageExtent( this->DisplayExtent );
@@ -135,12 +135,12 @@ int vtkImagePlaneActor::FindPowerOfTwo( int input )
 
 vtkImagePlaneActor::vtkImagePlaneActor()
 {
-    this->DisplayExtent[ 0 ] = -1;
-    this->DisplayExtent[ 1 ] = -1;
-    this->DisplayExtent[ 2 ] = -1;
-    this->DisplayExtent[ 3 ] = -1;
-    this->DisplayExtent[ 4 ] = -1;
-    this->DisplayExtent[ 5 ] = -1;
+    this->DisplayExtent[0] = -1;
+    this->DisplayExtent[1] = -1;
+    this->DisplayExtent[2] = -1;
+    this->DisplayExtent[3] = -1;
+    this->DisplayExtent[4] = -1;
+    this->DisplayExtent[5] = -1;
 
     //----------------------------------------------------------------
     // create plane on which video texture will be mapped

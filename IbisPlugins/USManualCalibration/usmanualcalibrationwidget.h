@@ -14,6 +14,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #define __USManualCalibrationWidget_h_
 
 #include <QWidget>
+
 #include "usprobeobject.h"
 
 namespace Ui

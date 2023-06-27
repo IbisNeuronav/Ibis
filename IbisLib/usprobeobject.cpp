@@ -347,7 +347,7 @@ QString UsProbeObject::GetLUTName( int index )
 void UsProbeObject::SetCurrentLUTIndex( int index )
 {
     m_lutIndex            = index;
-    double range[2]       = {0.0, 255.0};
+    double range[2]       = { 0.0, 255.0 };
     QString slicesLutName = Application::GetLookupTableManager()->GetTemplateLookupTableName( m_lutIndex );
     vtkSmartPointer<vtkPiecewiseFunctionLookupTable> lut = vtkSmartPointer<vtkPiecewiseFunctionLookupTable>::New();
     lut->SetIntensityFactor( 1.0 );

@@ -13,6 +13,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include <vtkObject.h>
 #include <vtkSmartPointer.h>
+
 #include <QString>
 #include <sstream>
 #include <vector>

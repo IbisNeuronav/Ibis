@@ -13,15 +13,14 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef __GPU_WeightRigidRegistration_h_
 #define __GPU_WeightRigidRegistration_h_
 
+#include <itkCMAEvolutionStrategyOptimizer.h>
+#include <itkEuler3DTransform.h>
 #include <vtkMatrix4x4.h>
 #include <vtkSmartPointer.h>
 #include <vtkTransform.h>
+
 #include "imageobject.h"
-
-#include <itkEuler3DTransform.h>
 #include "itkGPU3DRigidSimilarityWeightMetric.h"
-
-#include <itkCMAEvolutionStrategyOptimizer.h>
 
 class GPU_WeightRigidRegistration
 {

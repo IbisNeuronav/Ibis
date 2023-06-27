@@ -10,8 +10,10 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 // Thanks to Dante De Nigris for writing this class
 
-#include <QtPlugin>
 #include "gpu_rigidregistrationplugininterface.h"
+
+#include <QtPlugin>
+
 #include "gpu_rigidregistrationwidget.h"
 
 GPU_RigidRegistrationPluginInterface::GPU_RigidRegistrationPluginInterface() {}

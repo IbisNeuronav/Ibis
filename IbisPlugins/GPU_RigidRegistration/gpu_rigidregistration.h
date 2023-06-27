@@ -13,19 +13,18 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef __GPU_RigidRegistration_h_
 #define __GPU_RigidRegistration_h_
 
-#include <vtkMatrix4x4.h>
-#include <vtkTransform.h>
-#include "imageobject.h"
-
-#include <itkEuler3DTransform.h>
-#include "itkGPU3DRigidSimilarityMetric.h"
-
 #include <itkAmoebaOptimizer.h>
 #include <itkCMAEvolutionStrategyOptimizer.h>
-#include <itkSPSAOptimizer.h>
-
+#include <itkEuler3DTransform.h>
 #include <itkImageMaskSpatialObject.h>
+#include <itkSPSAOptimizer.h>
+#include <vtkMatrix4x4.h>
+#include <vtkTransform.h>
+
 #include <sstream>
+
+#include "imageobject.h"
+#include "itkGPU3DRigidSimilarityMetric.h"
 
 class GPU_RigidRegistration
 {

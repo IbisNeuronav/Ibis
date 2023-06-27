@@ -10,6 +10,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 // Thanks to Simon Drouin for writing this class
 
+#include "cameracalibrationwidget.h"
+
 #include <vtkCamera.h>
 #include <vtkImageActor.h>
 #include <vtkImageData.h>
@@ -21,10 +23,11 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <vtkRenderWindow.h>
 #include <vtkRenderer.h>
 #include <vtkTransform.h>
+
 #include <QElapsedTimer>
 #include <QTimer>
+
 #include "cameracalibrationplugininterface.h"
-#include "cameracalibrationwidget.h"
 #include "cameracalibrator.h"
 #include "cameraobject.h"
 #include "ui_cameracalibrationwidget.h"
@@ -148,7 +151,7 @@ void CameraCalibrationWidget::CreateGrid()
     vtkCircleWithCrossSource * source = vtkCircleWithCrossSource::New();
     source->SetRadius( 5 );
     source->SetResolution( 5 );
-    double basePos[2] = {50, 50};
+    double basePos[2] = { 50, 50 };
     int patternWidth  = m_pluginInterface->GetCalibrationGridWidth();
     int patternHeight = m_pluginInterface->GetCalibrationGridHeight();
     double offset     = m_pluginInterface->GetCalibrationGridCellSize();
@@ -315,8 +318,8 @@ void CameraCalibrationWidget::UpdateUi()
         calibResults += QString( "Vertical angle: %1\n" ).arg( params.GetVerticalAngleDegrees() );
         calibResults += QString( "\n===== Extrinsic results =====\n\n" );
         vtkMatrix4x4 * calibrationMat = currentCamera->GetCalibrationMatrix();
-        double translation[3]         = {0.0, 0.0, 0.0};
-        double rotation[3]            = {0.0, 0.0, 0.0};
+        double translation[3]         = { 0.0, 0.0, 0.0 };
+        double rotation[3]            = { 0.0, 0.0, 0.0 };
         vtkMatrix4x4Operators::MatrixToTransRot( calibrationMat, translation, rotation );
         calibResults += QString( "Translation: ( %1, %2, %3 )\n" )
                             .arg( translation[0] )

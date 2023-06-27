@@ -9,10 +9,11 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
 
+#include "gpu_weightrigidregistration.h"
+
 #include <itkTimeProbesCollectorBase.h>
 #include <vnl/algo/vnl_real_eigensystem.h>
 #include <vnl/algo/vnl_symmetric_eigensystem.h>
-#include "gpu_weightrigidregistration.h"
 
 class CommandIterationUpdateWeightOpenCL : public itk::Command
 {

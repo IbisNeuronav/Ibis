@@ -4,7 +4,9 @@
 #include <itkEuler3DTransform.h>
 #include <vtkObject.h>
 #include <vtkSmartPointer.h>
+
 #include <QThread>
+
 #include "imageobject.h"
 #include "itkGPUVolumeReconstruction.h"
 

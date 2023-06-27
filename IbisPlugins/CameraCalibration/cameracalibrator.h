@@ -15,7 +15,9 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include <opencv2/calib3d/calib3d_c.h>
 #include <opencv2/highgui/highgui_c.h>
+
 #include <opencv2/opencv.hpp>
+
 #include "cameraobject.h"
 
 class vtkImageData;

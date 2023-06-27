@@ -53,7 +53,7 @@ protected:
     std::vector<std::string> VolumeNames;
     std::vector<std::string> TimeStamps;
     vtkMatrix4x4 * SavedTransform;
-    char ReferenceDataFile[ 128 ];
+    char ReferenceDataFile[128];
 
     void ClearOutput();
 

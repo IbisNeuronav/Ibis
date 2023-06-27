@@ -16,15 +16,14 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <itkCovariantVector.h>
 #include <itkHistogram.h>
 #include <itkImage.h>
+#include <itkImageRegionIteratorWithIndex.h>
 #include <itkListSample.h>
 #include <itkMatrixOffsetTransformBase.h>
+#include <itkNormalizeImageFilter.h>
 #include <itkObject.h>
 #include <itkOpenCLUtil.h>
-#include <itkSampleToHistogramFilter.h>
-
-#include <itkImageRegionIteratorWithIndex.h>
-#include <itkNormalizeImageFilter.h>
 #include <itkRescaleIntensityImageFilter.h>
+#include <itkSampleToHistogramFilter.h>
 
 namespace itk
 {

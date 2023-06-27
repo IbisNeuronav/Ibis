@@ -576,7 +576,7 @@ View * SceneManager::CreateView( int type, QString name, int id )
 
     // Reset cameras for the colin27 in talairach space. This should be more or less good
     // for any kind of brain data.
-    double bounds[6] = {-90.0, 91.0, -126.0, 91.0, -72.0, 109.0};
+    double bounds[6] = { -90.0, 91.0, -126.0, 91.0, -72.0, 109.0 };
     res->ResetCamera( bounds );
 
     this->Views.insert( res, finalID );

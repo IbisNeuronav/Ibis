@@ -48,7 +48,7 @@ public:
     // Return bounding box (array of six doubles) of data expressed as
     // (xmin,xmax, ymin,ymax, zmin,zmax).
     virtual double * GetBounds() override;
-    virtual void GetBounds( double bounds[ 6 ] ) override { this->vtkAbstractMapper3D::GetBounds( bounds ); };
+    virtual void GetBounds( double bounds[6] ) override { this->vtkAbstractMapper3D::GetBounds( bounds ); };
 
     void SetGlobalOpacity( double opacity );
     void SetImageCenter( double x, double y );
@@ -75,13 +75,13 @@ protected:
     unsigned TextureId;
     GlslShader * Shader;
     double GlobalOpacity;
-    double ImageCenter[ 2 ];
+    double ImageCenter[2];
     double LensDistortion;
     bool UseTransparency;
     bool UseGradient;
     bool ShowMask;
-    double TransparencyPosition[ 2 ];
-    double TransparencyRadius[ 2 ];  // min - max
+    double TransparencyPosition[2];
+    double TransparencyRadius[2];  // min - max
     double Saturation;
     double Brightness;
 

@@ -10,15 +10,18 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 // Thanks to Simon Drouin for writing this class
 
+#include "cameracalibrationplugininterface.h"
+
 #include <vtkImageData.h>
 #include <vtkRenderer.h>
 #include <vtkTransform.h>
+
 #include <QProgressDialog>
 #include <QSettings>
 #include <QTime>
 #include <QtPlugin>
 #include <vector>
-#include "cameracalibrationplugininterface.h"
+
 #include "cameracalibrationsidepanelwidget.h"
 #include "cameracalibrationwidget.h"
 #include "cameracalibrator.h"
@@ -473,8 +476,8 @@ void CameraCalibrationPluginInterface::BuildCalibrationGridRepresentation()
     colors->SetNumberOfComponents( 3 );
     colors->SetName( "Colors" );
     vtkCellArray * quads   = vtkCellArray::New();
-    unsigned char white[3] = {255, 255, 255};
-    unsigned char black[3] = {0, 0, 0};
+    unsigned char white[3] = { 255, 255, 255 };
+    unsigned char black[3] = { 0, 0, 0 };
     for( int row = 0; row <= m_calibrationGridHeight; ++row )
     {
         for( int col = 0; col <= m_calibrationGridWidth; ++col )

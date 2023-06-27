@@ -10,6 +10,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 // Thanks to Simon Drouin for writing this class
 
+#include "usmanualcalibrationwidget.h"
+
 #include <vtkCamera.h>
 #include <vtkEventQtSlotConnect.h>
 #include <vtkImageActor.h>
@@ -18,11 +20,12 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <vtkRenderWindow.h>
 #include <vtkRenderer.h>
 #include <vtkTransform.h>
+
 #include <QTimer>
+
 #include "ibisapi.h"
 #include "ui_usmanualcalibrationwidget.h"
 #include "usmanualcalibrationplugininterface.h"
-#include "usmanualcalibrationwidget.h"
 #include "vtkNShapeCalibrationWidget.h"
 
 USManualCalibrationWidget::USManualCalibrationWidget( QWidget * parent )

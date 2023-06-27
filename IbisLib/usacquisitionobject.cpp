@@ -1299,7 +1299,7 @@ double USAcquisitionObject::GetSliceImageOpacity() { return m_sliceProperties->G
 void USAcquisitionObject::SetSliceLutIndex( int index )
 {
     m_sliceLutIndex       = index;
-    double range[2]       = {0.0, 255.0};
+    double range[2]       = { 0.0, 255.0 };
     QString slicesLutName = Application::GetLookupTableManager()->GetTemplateLookupTableName( m_sliceLutIndex );
     Application::GetLookupTableManager()->CreateLookupTable( slicesLutName, range, m_lut );
     emit ObjectModified();
@@ -1357,7 +1357,7 @@ double USAcquisitionObject::GetStaticSlicesOpacity() { return m_staticSlicesProp
 void USAcquisitionObject::SetStaticSlicesLutIndex( int index )
 {
     m_staticSlicesLutIndex = index;
-    double range[2]        = {0.0, 255.0};
+    double range[2]        = { 0.0, 255.0 };
     QString staticSlicesLutName =
         Application::GetLookupTableManager()->GetTemplateLookupTableName( m_staticSlicesLutIndex );
     vtkPiecewiseFunctionLookupTable * staticLut = vtkPiecewiseFunctionLookupTable::New();

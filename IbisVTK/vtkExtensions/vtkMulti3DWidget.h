@@ -58,8 +58,8 @@ public:
     // bounds with the PlaceWidget(bounds) method. Note: PlaceWidget(bounds)
     // is required by all subclasses; the other methods are provided as
     // convenience methods.
-    virtual void PlaceWidget( double bounds[ 6 ] ) = 0;
-    virtual void PlaceWidget()                     = 0;
+    virtual void PlaceWidget( double bounds[6] ) = 0;
+    virtual void PlaceWidget()                   = 0;
     virtual void PlaceWidget( double xmin, double xmax, double ymin, double ymax, double zmin, double zmax );
 
     // Description:
@@ -129,8 +129,8 @@ protected:
     // Description:
     // Helper method for subclasses. index is the index of the renderer for which we
     // want to perform the operation.
-    void ComputeDisplayToWorld( unsigned int index, double x, double y, double z, double worldPt[ 4 ] );
-    void ComputeWorldToDisplay( unsigned int index, double x, double y, double z, double displayPt[ 3 ] );
+    void ComputeDisplayToWorld( unsigned int index, double x, double y, double z, double worldPt[4] );
+    void ComputeWorldToDisplay( unsigned int index, double x, double y, double z, double displayPt[3] );
 
     // Description:
     // Add/Remove all observers to/from all interactors
@@ -195,10 +195,10 @@ protected:
     // has the widget ever been placed
     double PlaceFactor;
     int Placed;
-    void AdjustBounds( double bounds[ 6 ], double newBounds[ 6 ], double center[ 3 ] );
+    void AdjustBounds( double bounds[6], double newBounds[6], double center[3] );
 
     // control the size of handles (if there are any)
-    double InitialBounds[ 6 ];
+    double InitialBounds[6];
     double InitialLength;
     double HandleSize;
     double SizeHandles( double factor );
@@ -206,7 +206,7 @@ protected:
 
     // used to track the depth of the last pick; also interacts with handle sizing
     int ValidPick;
-    double LastPickPosition[ 3 ];
+    double LastPickPosition[3];
 
     // The renderers used to interact with the scene
     typedef std::vector<vtkRenderer *> RendererVec;

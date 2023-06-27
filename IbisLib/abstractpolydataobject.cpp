@@ -98,7 +98,7 @@ void AbstractPolyDataObject::Serialize( Serializer * ser )
 {
     double opacity                  = this->GetOpacity();
     double * objectColor            = this->GetColor();
-    int clippingPlaneOrientation[3] = {1, 1, 1};
+    int clippingPlaneOrientation[3] = { 1, 1, 1 };
     if( !ser->IsReader() )
     {
         clippingPlaneOrientation[0] = GetClippingPlanesOrientation( 0 ) ? 1 : 0;
@@ -250,7 +250,7 @@ void AbstractPolyDataObject::SetClippingPlanesOrientation( int plane, bool posit
 {
     Q_ASSERT( plane >= 0 && plane < 3 );
     vtkDoubleArray * normals = vtkDoubleArray::SafeDownCast( m_clippingPlanes->GetNormals() );
-    double tuple[3]          = {0.0, 0.0, 0.0};
+    double tuple[3]          = { 0.0, 0.0, 0.0 };
     tuple[plane]             = positive ? -1.0 : 1.0;
     normals->SetTuple( plane, tuple );
     m_clippingPlanes->Modified();
@@ -336,7 +336,7 @@ void AbstractPolyDataObject::InternalPostSceneRead()
 
 void AbstractPolyDataObject::UpdateClippingPlanes()
 {
-    double pos[3] = {0.0, 0.0, 0.0};
+    double pos[3] = { 0.0, 0.0, 0.0 };
     GetManager()->GetCursorPosition( pos );
     vtkPoints * origins = m_clippingPlanes->GetPoints();
     origins->SetPoint( 0, pos[0], 0.0, 0.0 );
@@ -348,7 +348,7 @@ void AbstractPolyDataObject::UpdateClippingPlanes()
 
 void AbstractPolyDataObject::UpdateCuttingPlane()
 {
-    double cursorPos[3] = {0.0, 0.0, 0.0};
+    double cursorPos[3] = { 0.0, 0.0, 0.0 };
     GetManager()->GetCursorPosition( cursorPos );
     m_cuttingPlane[0]->SetOrigin( cursorPos[0], 0.0, 0.0 );
     m_cuttingPlane[1]->SetOrigin( 0.0, cursorPos[1], 0.0 );

@@ -1,18 +1,15 @@
 // Thanks to Houssem Gueziri for writing this class
 
-#include "ibisapi.h"
-#include "scenemanager.h"
-#include "sequenceioplugininterface.h"
 #include "sequenceiowidget.h"
-#include "ui_sequenceiowidget.h"
-#include "usacquisitionobject.h"
 
-#include <chrono>
-#include <cstdio>
-#include <fstream>
-#include <iomanip>
-#include <sstream>
-#include <typeinfo>
+#include <itkMetaDataDictionary.h>
+#include <itkMetaDataObject.h>
+#include <itkSmartPointer.h>
+#include <vtkDataArray.h>
+#include <vtkImageData.h>
+#include <vtkImageReslice.h>
+#include <vtkPassThrough.h>
+#include <vtkSmartPointer.h>
 
 #include <QApplication>
 #include <QCheckBox>
@@ -23,15 +20,18 @@
 #include <QProgressDialog>
 #include <QSpacerItem>
 #include <QWidgetItem>
+#include <chrono>
+#include <cstdio>
+#include <fstream>
+#include <iomanip>
+#include <sstream>
+#include <typeinfo>
 
-#include <itkMetaDataDictionary.h>
-#include <itkMetaDataObject.h>
-#include <itkSmartPointer.h>
-#include <vtkDataArray.h>
-#include <vtkImageData.h>
-#include <vtkImageReslice.h>
-#include <vtkPassThrough.h>
-#include <vtkSmartPointer.h>
+#include "ibisapi.h"
+#include "scenemanager.h"
+#include "sequenceioplugininterface.h"
+#include "ui_sequenceiowidget.h"
+#include "usacquisitionobject.h"
 
 SequenceIOWidget::SequenceIOWidget( QWidget * parent )
     : QWidget( parent ),

@@ -140,7 +140,7 @@ void PointColorWidget::DisabledColorSetButtonClicked()
     QString style = QString( "border-width: 2px; border-style: solid; border-radius: 7;" );
     styleColor += style;
     ui->disabledColorSwatch->setStyleSheet( styleColor );
-    double newColorfloat[3] = {1, 1, 1};
+    double newColorfloat[3] = { 1, 1, 1 };
     newColorfloat[0]        = double( newColor.red() ) / 255.0;
     newColorfloat[1]        = double( newColor.green() ) / 255.0;
     newColorfloat[2]        = double( newColor.blue() ) / 255.0;
@@ -160,7 +160,7 @@ void PointColorWidget::EnabledColorSetButtonClicked()
     QString style = QString( "border-width: 2px; border-style: solid; border-radius: 7;" );
     styleColor += style;
     ui->enabledColorSwatch->setStyleSheet( styleColor );
-    double newColorfloat[3] = {1, 1, 1};
+    double newColorfloat[3] = { 1, 1, 1 };
     newColorfloat[0]        = double( newColor.red() ) / 255.0;
     newColorfloat[1]        = double( newColor.green() ) / 255.0;
     newColorfloat[2]        = double( newColor.blue() ) / 255.0;
@@ -180,7 +180,7 @@ void PointColorWidget::SelectedColorSetButtonClicked()
     QString style = QString( "border-width: 2px; border-style: solid; border-radius: 7;" );
     styleColor += style;
     ui->selectedColorSwatch->setStyleSheet( styleColor );
-    double newColorfloat[3] = {1, 1, 1};
+    double newColorfloat[3] = { 1, 1, 1 };
     newColorfloat[0]        = double( newColor.red() ) / 255.0;
     newColorfloat[1]        = double( newColor.green() ) / 255.0;
     newColorfloat[2]        = double( newColor.blue() ) / 255.0;
@@ -200,7 +200,7 @@ void PointColorWidget::LineColorSetButtonClicked()
     QString style = QString( "border-width: 2px; border-style: solid; border-radius: 7;" );
     styleColor += style;
     ui->lineColorSwatch->setStyleSheet( styleColor );
-    double newColorfloat[3] = {1, 1, 1};
+    double newColorfloat[3] = { 1, 1, 1 };
     newColorfloat[0]        = double( newColor.red() ) / 255.0;
     newColorfloat[1]        = double( newColor.green() ) / 255.0;
     newColorfloat[2]        = double( newColor.blue() ) / 255.0;

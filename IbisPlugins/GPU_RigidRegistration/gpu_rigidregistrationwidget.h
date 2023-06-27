@@ -14,15 +14,16 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include <vtkMatrix4x4.h>
 #include <vtkTransform.h>
+
 #include <QMessageBox>
 #include <QWidget>
 #include <QtGui>
+
+#include "gpu_rigidregistration.h"
 #include "imageobject.h"
 #include "qdebugstream.h"
 #include "sceneobject.h"
 #include "ui_gpu_rigidregistrationwidget.h"
-
-#include "gpu_rigidregistration.h"
 
 class GPU_RigidRegistrationPluginInterface;
 class GPU_RigidRegistration;

@@ -10,8 +10,10 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 // Thanks to Simon Drouin for writing this class
 
-#include <QtPlugin>
 #include "imagefilterexampleplugininterface.h"
+
+#include <QtPlugin>
+
 #include "imagefilterexamplewidget.h"
 
 ImageFilterExamplePluginInterface::ImageFilterExamplePluginInterface() {}

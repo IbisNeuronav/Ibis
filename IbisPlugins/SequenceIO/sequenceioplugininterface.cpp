@@ -1,8 +1,10 @@
 // Thanks to Houssem Gueziri for writing this class
 
-#include <QtPlugin>
-#include "ibisapi.h"
 #include "sequenceioplugininterface.h"
+
+#include <QtPlugin>
+
+#include "ibisapi.h"
 #include "sequenceiowidget.h"
 
 SequenceIOPluginInterface::SequenceIOPluginInterface() : m_widget( nullptr ) {}

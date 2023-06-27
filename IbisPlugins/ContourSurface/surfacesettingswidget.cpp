@@ -8,9 +8,11 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
-#include <QtGui>
-#include "generatedsurface.h"
 #include "surfacesettingswidget.h"
+
+#include <QtGui>
+
+#include "generatedsurface.h"
 #include "ui_surfacesettingswidget.h"
 #include "vtkPiecewiseFunctionLookupTable.h"
 

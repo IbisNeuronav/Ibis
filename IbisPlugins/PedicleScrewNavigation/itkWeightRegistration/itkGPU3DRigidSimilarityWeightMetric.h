@@ -15,6 +15,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include <itkEuler3DTransform.h>
 #include <itkSingleValuedCostFunction.h>
+
 #include "itkGPUOrientationMatchingMatrixTransformationSparseMask.h"
 #include "itkGPUWeightMatchingMatrixTransformationSparseMask.h"
 

@@ -12,14 +12,14 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #ifndef __GPU_VolumeReconstructionWidget_h_
 #define __GPU_VolumeReconstructionWidget_h_
+#include <vtkSmartPointer.h>
+
 #include <QWidget>
 #include <QtGui>
 
 #include "gpu_volumereconstruction.h"
-#include "ui_gpu_volumereconstructionwidget.h"
-
-#include <vtkSmartPointer.h>
 #include "ibisitkvtkconverter.h"
+#include "ui_gpu_volumereconstructionwidget.h"
 
 class GPU_VolumeReconstructionPluginInterface;
 

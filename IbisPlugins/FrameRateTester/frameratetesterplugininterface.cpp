@@ -10,11 +10,14 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 // Thanks to Simon Drouin for writing this class
 
+#include "frameratetesterplugininterface.h"
+
 #include <vtkRenderer.h>
+
 #include <QMap>
 #include <QTime>
 #include <QTimer>
-#include "frameratetesterplugininterface.h"
+
 #include "frameratetesterwidget.h"
 #include "ibisapi.h"
 #include "view.h"

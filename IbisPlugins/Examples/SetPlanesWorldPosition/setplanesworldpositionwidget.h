@@ -2,6 +2,7 @@
 #define SETPLANESWORLDPOSITIONWIDGET_H
 
 #include <QWidget>
+
 #include "setplanesworldpositionplugininterface.h"
 
 namespace Ui

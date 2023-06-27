@@ -145,7 +145,7 @@ void vtkQtColorTransferFunctionWidget::mouseDoubleClickEvent( QMouseEvent * even
         {
             double value   = widgetPosToSliderValue( event->x() );
             double * color = m_colorTransferFunction->GetColor( value );
-            m_colorTransferFunction->AddRGBPoint( value, color[ 0 ], color[ 1 ], color[ 2 ] );
+            m_colorTransferFunction->AddRGBPoint( value, color[0], color[1], color[2] );
         }
     }
 }
@@ -279,11 +279,11 @@ double vtkQtColorTransferFunctionWidget::getMinSliderValue()
     if( m_colorTransferFunction )
     {
         int nbNodes = m_colorTransferFunction->GetSize();
-        double nodeValues[ 6 ];
+        double nodeValues[6];
         if( nbNodes > 0 )
         {
             m_colorTransferFunction->GetNodeValue( 0, nodeValues );
-            minSliderValue = nodeValues[ 0 ];
+            minSliderValue = nodeValues[0];
         }
     }
 
@@ -297,11 +297,11 @@ double vtkQtColorTransferFunctionWidget::getMaxSliderValue()
     if( m_colorTransferFunction )
     {
         int nbNodes = m_colorTransferFunction->GetSize();
-        double nodeValues[ 6 ];
+        double nodeValues[6];
         if( nbNodes > 1 )
         {
             m_colorTransferFunction->GetNodeValue( nbNodes - 1, nodeValues );
-            maxSliderValue = nodeValues[ 0 ];
+            maxSliderValue = nodeValues[0];
         }
     }
 
@@ -332,21 +332,21 @@ void vtkQtColorTransferFunctionWidget::setMaxSliderValue( double val )
 
 void vtkQtColorTransferFunctionWidget::setColorSliderValue( int index, double val )
 {
-    double nodeValues[ 6 ];
+    double nodeValues[6];
     m_colorTransferFunction->GetNodeValue( index, nodeValues );
     if( index > 0 )
     {
-        double prevNodeValues[ 6 ];
+        double prevNodeValues[6];
         m_colorTransferFunction->GetNodeValue( index - 1, prevNodeValues );
-        if( val < prevNodeValues[ 0 ] + PixelSize() ) val = prevNodeValues[ 0 ] + PixelSize();
+        if( val < prevNodeValues[0] + PixelSize() ) val = prevNodeValues[0] + PixelSize();
     }
     if( index < m_colorTransferFunction->GetSize() - 1 )
     {
-        double nextNodeValues[ 6 ];
+        double nextNodeValues[6];
         m_colorTransferFunction->GetNodeValue( index + 1, nextNodeValues );
-        if( val > nextNodeValues[ 0 ] - PixelSize() ) val = nextNodeValues[ 0 ] - PixelSize();
+        if( val > nextNodeValues[0] - PixelSize() ) val = nextNodeValues[0] - PixelSize();
     }
-    nodeValues[ 0 ] = val;
+    nodeValues[0] = val;
     m_colorTransferFunction->SetNodeValue( index, nodeValues );
 }
 
@@ -357,11 +357,11 @@ void vtkQtColorTransferFunctionWidget::UpdateColorFunctionRange( double prevMin,
     {
         // first pass: compute new values. Has to be done in 2 passes because SetNodeValue does is sorting points
         int nbPoints       = m_colorTransferFunction->GetSize();
-        double * newValues = new double[ nbPoints * 6 ];
+        double * newValues = new double[nbPoints * 6];
         for( int i = 0; i < nbPoints; ++i )
         {
-            m_colorTransferFunction->GetNodeValue( i, &( newValues[ i * 6 ] ) );
-            newValues[ i * 6 ] = min + ( newValues[ i * 6 ] - prevMin ) / ( prevMax - prevMin ) * ( max - min );
+            m_colorTransferFunction->GetNodeValue( i, &( newValues[i * 6] ) );
+            newValues[i * 6] = min + ( newValues[i * 6] - prevMin ) / ( prevMax - prevMin ) * ( max - min );
         }
 
         // second pass, rebuild function
@@ -369,8 +369,8 @@ void vtkQtColorTransferFunctionWidget::UpdateColorFunctionRange( double prevMin,
         for( int i = 0; i < nbPoints; ++i )
         {
             int index = i * 6;
-            m_colorTransferFunction->AddRGBPoint( newValues[ index ], newValues[ index + 1 ], newValues[ index + 2 ],
-                                                  newValues[ index + 3 ] );
+            m_colorTransferFunction->AddRGBPoint( newValues[index], newValues[index + 1], newValues[index + 2],
+                                                  newValues[index + 3] );
         }
         delete[] newValues;
     }
@@ -443,9 +443,9 @@ int vtkQtColorTransferFunctionWidget::MinDistanceColor( int mousePosition )
     int minIndex    = 0;
     for( int i = 0; i < nbPoints; ++i )
     {
-        double nodeValues[ 6 ];
+        double nodeValues[6];
         m_colorTransferFunction->GetNodeValue( i, nodeValues );
-        int pos = sliderValueToWidgetPos( nodeValues[ 0 ] );
+        int pos = sliderValueToWidgetPos( nodeValues[0] );
         if( abs( pos - mousePosition ) < minDistance )
         {
             minDistance = abs( pos - mousePosition );
@@ -484,34 +484,34 @@ bool vtkQtColorTransferFunctionWidget::IsInRangeCursorZone( int x, int y )
 double vtkQtColorTransferFunctionWidget::GetColorNodeValue( int nodeIndex )
 {
     Q_ASSERT( nodeIndex < m_colorTransferFunction->GetSize() );
-    double nodeValues[ 6 ];
+    double nodeValues[6];
     m_colorTransferFunction->GetNodeValue( nodeIndex, nodeValues );
-    return nodeValues[ 0 ];
+    return nodeValues[0];
 }
 
 int vtkQtColorTransferFunctionWidget::GetColorNodePixPosition( int nodeIndex )
 {
     Q_ASSERT( nodeIndex < m_colorTransferFunction->GetSize() );
-    double nodeValues[ 6 ];
+    double nodeValues[6];
     m_colorTransferFunction->GetNodeValue( nodeIndex, nodeValues );
-    return sliderValueToWidgetPos( nodeValues[ 0 ] );
+    return sliderValueToWidgetPos( nodeValues[0] );
 }
 
 QColor vtkQtColorTransferFunctionWidget::GetColorNodeColor( int nodeIndex )
 {
     Q_ASSERT( nodeIndex < m_colorTransferFunction->GetSize() );
-    double nodeValues[ 6 ];
+    double nodeValues[6];
     m_colorTransferFunction->GetNodeValue( nodeIndex, nodeValues );
-    return QColor( (int)( nodeValues[ 1 ] * 255 ), (int)( nodeValues[ 2 ] * 255 ), (int)( nodeValues[ 3 ] * 255 ) );
+    return QColor( (int)( nodeValues[1] * 255 ), (int)( nodeValues[2] * 255 ), (int)( nodeValues[3] * 255 ) );
 }
 
 void vtkQtColorTransferFunctionWidget::SetColorNodeColor( int nodeIndex, QColor & color )
 {
     Q_ASSERT( nodeIndex < m_colorTransferFunction->GetSize() );
-    double nodeValues[ 6 ];
+    double nodeValues[6];
     m_colorTransferFunction->GetNodeValue( nodeIndex, nodeValues );
-    nodeValues[ 1 ] = color.redF();
-    nodeValues[ 2 ] = color.greenF();
-    nodeValues[ 3 ] = color.blueF();
+    nodeValues[1] = color.redF();
+    nodeValues[2] = color.greenF();
+    nodeValues[3] = color.blueF();
     m_colorTransferFunction->SetNodeValue( nodeIndex, nodeValues );
 }

@@ -8,27 +8,27 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
-#include "application.h"
 #include "landmarkregistrationobjectsettingswidget.h"
-#include "landmarkregistrationobjectwidget.h"
-#include "landmarktransform.h"
-#include "pointerobject.h"
-#include "scenemanager.h"
-#include "ui_landmarkregistrationobjectsettingswidget.h"
 
 #include <vtkPoints.h>
 #include <vtkSmartPointer.h>
 
 #include <QAction>
+#include <QContextMenuEvent>
+#include <QDateTime>
 #include <QFileDialog>
+#include <QMenu>
 #include <QMessageBox>
+#include <QPalette>
 #include <QString>
 #include <QStringList>
 
-#include <QContextMenuEvent>
-#include <QDateTime>
-#include <QMenu>
-#include <QPalette>
+#include "application.h"
+#include "landmarkregistrationobjectwidget.h"
+#include "landmarktransform.h"
+#include "pointerobject.h"
+#include "scenemanager.h"
+#include "ui_landmarkregistrationobjectsettingswidget.h"
 
 LandmarkRegistrationObjectSettingsWidget::LandmarkRegistrationObjectSettingsWidget( QWidget * parent )
     : QWidget( parent ), ui( new Ui::LandmarkRegistrationObjectSettingsWidget )

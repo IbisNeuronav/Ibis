@@ -10,9 +10,11 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 // Thanks to Houssem Gueziri for writing this class
 
-#include <QtPlugin>
-#include "ibisapi.h"
 #include "recordtrackingplugininterface.h"
+
+#include <QtPlugin>
+
+#include "ibisapi.h"
 #include "recordtrackingwidget.h"
 
 RecordTrackingPluginInterface::RecordTrackingPluginInterface() : m_widget( nullptr ) {}

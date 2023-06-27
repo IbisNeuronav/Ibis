@@ -118,8 +118,8 @@ void TransformEditWidget::UpdateUi()
         {
             if( m_sceneObject->CanEditTransformManually() ) EnableSpinBoxes( true );
 
-            double t[3] = {0.0, 0.0, 0.0};
-            double r[3] = {0.0, 0.0, 0.0};
+            double t[3] = { 0.0, 0.0, 0.0 };
+            double r[3] = { 0.0, 0.0, 0.0 };
             vtkMatrix4x4Operators::MatrixToTransRot( localTransform->GetMatrix(), t, r );
             ui->translateXSpinBox->setValue( t[0] );
             ui->translateYSpinBox->setValue( t[1] );

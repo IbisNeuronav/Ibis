@@ -62,11 +62,11 @@ vtkNShapeCalibrationWidget::vtkNShapeCalibrationWidget()
     this->HandleGeometry->SetCircumferentialResolution( 32 );
     this->HandleMapper = vtkPolyDataMapper::New();
     this->HandleMapper->SetInputConnection( this->HandleGeometry->GetOutputPort() );
-    this->Handle = new vtkActor *[ 3 ];
+    this->Handle = new vtkActor *[3];
     for( i = 0; i < 3; i++ )
     {
-        this->Handle[ i ] = vtkActor::New();
-        this->Handle[ i ]->SetMapper( this->HandleMapper );
+        this->Handle[i] = vtkActor::New();
+        this->Handle[i]->SetMapper( this->HandleMapper );
     }
 
     this->HandleContourGeometry = vtkCircleWithCrossSource::New();
@@ -74,23 +74,23 @@ vtkNShapeCalibrationWidget::vtkNShapeCalibrationWidget()
     this->HandleContourGeometry->SetResolution( 3 );
     this->HandleContourMapper = vtkPolyDataMapper::New();
     this->HandleContourMapper->SetInputConnection( this->HandleContourGeometry->GetOutputPort() );
-    this->HandleContour = new vtkActor *[ 3 ];
+    this->HandleContour = new vtkActor *[3];
     for( i = 0; i < 3; i++ )
     {
-        this->HandleContour[ i ] = vtkActor::New();
-        this->HandleContour[ i ]->SetMapper( this->HandleContourMapper );
+        this->HandleContour[i] = vtkActor::New();
+        this->HandleContour[i]->SetMapper( this->HandleContourMapper );
     }
 
     MiddleHandlePosition = 0.5;
 
     // Define the point coordinates
-    double bounds[ 6 ];
-    bounds[ 0 ]       = -0.5;
-    bounds[ 1 ]       = 0.5;
-    bounds[ 2 ]       = -0.5;
-    bounds[ 3 ]       = 0.5;
-    bounds[ 4 ]       = -0.5;
-    bounds[ 5 ]       = 0.5;
+    double bounds[6];
+    bounds[0]         = -0.5;
+    bounds[1]         = 0.5;
+    bounds[2]         = -0.5;
+    bounds[3]         = 0.5;
+    bounds[4]         = -0.5;
+    bounds[5]         = 0.5;
     this->PlaceFactor = 1.0;  // overload parent's value
     this->PlaceWidget( bounds );
     this->ClampToBounds = 0;
@@ -100,7 +100,7 @@ vtkNShapeCalibrationWidget::vtkNShapeCalibrationWidget()
     this->HandlePicker->SetTolerance( 0.001 );
     for( i = 2; i >= 0; i-- )
     {
-        this->HandlePicker->AddPickList( this->Handle[ i ] );
+        this->HandlePicker->AddPickList( this->Handle[i] );
     }
     this->HandlePicker->PickFromListOn();
 
@@ -126,7 +126,7 @@ vtkNShapeCalibrationWidget::~vtkNShapeCalibrationWidget()
     int i;
     for( i = 0; i < 3; i++ )
     {
-        this->Handle[ i ]->Delete();
+        this->Handle[i]->Delete();
     }
     delete[] this->Handle;
 
@@ -134,7 +134,7 @@ vtkNShapeCalibrationWidget::~vtkNShapeCalibrationWidget()
     this->HandleContourMapper->Delete();
     for( i = 0; i < 3; i++ )
     {
-        this->HandleContour[ i ]->Delete();
+        this->HandleContour[i]->Delete();
     }
     delete[] this->HandleContour;
 
@@ -166,8 +166,8 @@ void vtkNShapeCalibrationWidget::SetEnabled( int enabling )
 
         if( !this->CurrentRenderer )
         {
-            this->CurrentRenderer = this->Interactor->FindPokedRenderer(
-                this->Interactor->GetLastEventPosition()[ 0 ], this->Interactor->GetLastEventPosition()[ 1 ] );
+            this->CurrentRenderer = this->Interactor->FindPokedRenderer( this->Interactor->GetLastEventPosition()[0],
+                                                                         this->Interactor->GetLastEventPosition()[1] );
             if( this->CurrentRenderer == NULL )
             {
                 return;
@@ -193,9 +193,9 @@ void vtkNShapeCalibrationWidget::SetEnabled( int enabling )
         // turn on the handles
         for( int j = 0; j < 3; j++ )
         {
-            this->CurrentRenderer->AddActor( this->Handle[ j ] );
-            this->CurrentRenderer->AddActor( this->HandleContour[ j ] );
-            this->Handle[ j ]->SetProperty( this->HandleProperty );
+            this->CurrentRenderer->AddActor( this->Handle[j] );
+            this->CurrentRenderer->AddActor( this->HandleContour[j] );
+            this->Handle[j]->SetProperty( this->HandleProperty );
         }
 
         this->BuildRepresentation();
@@ -223,8 +223,8 @@ void vtkNShapeCalibrationWidget::SetEnabled( int enabling )
         // turn off the handles
         for( int i = 0; i < 3; i++ )
         {
-            this->CurrentRenderer->RemoveActor( this->Handle[ i ] );
-            this->CurrentRenderer->RemoveActor( this->HandleContour[ i ] );
+            this->CurrentRenderer->RemoveActor( this->Handle[i] );
+            this->CurrentRenderer->RemoveActor( this->HandleContour[i] );
         }
 
         this->CurrentHandle = NULL;
@@ -326,8 +326,8 @@ void vtkNShapeCalibrationWidget::PrintSelf( ostream & os, vtkIndent indent )
     double * pt1 = this->LineSource->GetPoint1();
     double * pt2 = this->LineSource->GetPoint2();
 
-    os << indent << "Point 1: (" << pt1[ 0 ] << ", " << pt1[ 1 ] << ", " << pt1[ 2 ] << ")\n";
-    os << indent << "Point 2: (" << pt2[ 0 ] << ", " << pt2[ 1 ] << ", " << pt2[ 2 ] << ")\n";
+    os << indent << "Point 1: (" << pt1[0] << ", " << pt1[1] << ", " << pt1[2] << ")\n";
+    os << indent << "Point 2: (" << pt2[0] << ", " << pt2[1] << ", " << pt2[2] << ")\n";
 }
 
 void vtkNShapeCalibrationWidget::BuildRepresentation()
@@ -335,24 +335,24 @@ void vtkNShapeCalibrationWidget::BuildRepresentation()
     double * pt1 = this->LineSource->GetPoint1();
     double * pt2 = this->LineSource->GetPoint2();
 
-    this->Handle[ 0 ]->SetPosition( pt1 );
-    this->Handle[ 1 ]->SetPosition( pt2 );
-    this->HandleContour[ 0 ]->SetPosition( pt1 );
-    this->HandleContour[ 1 ]->SetPosition( pt2 );
+    this->Handle[0]->SetPosition( pt1 );
+    this->Handle[1]->SetPosition( pt2 );
+    this->HandleContour[0]->SetPosition( pt1 );
+    this->HandleContour[1]->SetPosition( pt2 );
 
-    double diff[ 3 ];
-    diff[ 0 ] = pt2[ 0 ] - pt1[ 0 ];
-    diff[ 1 ] = pt2[ 1 ] - pt1[ 1 ];
-    diff[ 2 ] = pt2[ 2 ] - pt1[ 2 ];
-    diff[ 0 ] *= MiddleHandlePosition;
-    diff[ 1 ] *= MiddleHandlePosition;
-    diff[ 2 ] *= MiddleHandlePosition;
-    double middlePosition[ 3 ];
-    middlePosition[ 0 ] = pt1[ 0 ] + diff[ 0 ];
-    middlePosition[ 1 ] = pt1[ 1 ] + diff[ 1 ];
-    middlePosition[ 2 ] = pt1[ 2 ] + diff[ 2 ];
-    this->Handle[ 2 ]->SetPosition( middlePosition );
-    this->HandleContour[ 2 ]->SetPosition( middlePosition );
+    double diff[3];
+    diff[0] = pt2[0] - pt1[0];
+    diff[1] = pt2[1] - pt1[1];
+    diff[2] = pt2[2] - pt1[2];
+    diff[0] *= MiddleHandlePosition;
+    diff[1] *= MiddleHandlePosition;
+    diff[2] *= MiddleHandlePosition;
+    double middlePosition[3];
+    middlePosition[0] = pt1[0] + diff[0];
+    middlePosition[1] = pt1[1] + diff[1];
+    middlePosition[2] = pt1[2] + diff[2];
+    this->Handle[2]->SetPosition( middlePosition );
+    this->HandleContour[2]->SetPosition( middlePosition );
 }
 
 void vtkNShapeCalibrationWidget::SizeHandles() {}
@@ -374,9 +374,9 @@ int vtkNShapeCalibrationWidget::HighlightHandle( vtkProp * prop )
         this->ValidPick = 1;
         this->HandlePicker->GetPickPosition( this->LastPickPosition );
         this->CurrentHandle->SetProperty( this->SelectedHandleProperty );
-        if( this->CurrentHandle == this->Handle[ 0 ] )
+        if( this->CurrentHandle == this->Handle[0] )
             return 0;
-        else if( this->CurrentHandle == this->Handle[ 1 ] )
+        else if( this->CurrentHandle == this->Handle[1] )
             return 1;
         else
             return 2;
@@ -393,15 +393,15 @@ void vtkNShapeCalibrationWidget::HighlightHandles( int highlight )
     {
         this->ValidPick = 1;
         this->HandlePicker->GetPickPosition( this->LastPickPosition );
-        this->Handle[ 0 ]->SetProperty( this->SelectedHandleProperty );
-        this->Handle[ 1 ]->SetProperty( this->SelectedHandleProperty );
-        this->Handle[ 2 ]->SetProperty( this->SelectedHandleProperty );
+        this->Handle[0]->SetProperty( this->SelectedHandleProperty );
+        this->Handle[1]->SetProperty( this->SelectedHandleProperty );
+        this->Handle[2]->SetProperty( this->SelectedHandleProperty );
     }
     else
     {
-        this->Handle[ 0 ]->SetProperty( this->HandleProperty );
-        this->Handle[ 1 ]->SetProperty( this->HandleProperty );
-        this->Handle[ 2 ]->SetProperty( this->HandleProperty );
+        this->Handle[0]->SetProperty( this->HandleProperty );
+        this->Handle[1]->SetProperty( this->HandleProperty );
+        this->Handle[2]->SetProperty( this->HandleProperty );
     }
 }
 
@@ -421,8 +421,8 @@ void vtkNShapeCalibrationWidget::HighlightLine( int highlight )
 
 void vtkNShapeCalibrationWidget::OnLeftButtonDown()
 {
-    int X = this->Interactor->GetEventPosition()[ 0 ];
-    int Y = this->Interactor->GetEventPosition()[ 1 ];
+    int X = this->Interactor->GetEventPosition()[0];
+    int Y = this->Interactor->GetEventPosition()[1];
 
     // Okay, make sure that the pick is in the current renderer
     vtkRenderer * ren = this->Interactor->FindPokedRenderer( X, Y );
@@ -451,11 +451,11 @@ void vtkNShapeCalibrationWidget::OnLeftButtonDown()
             this->InvokeEvent( vtkCommand::StartInteractionEvent, NULL );
             this->State = vtkNShapeCalibrationWidget::MovingLine;
             this->HighlightLine( 1 );
-            double x[ 3 ];
+            double x[3];
             this->LinePicker->GetPickPosition( x );
-            this->LastPosition[ 0 ] = x[ 0 ];
-            this->LastPosition[ 1 ] = x[ 1 ];
-            this->LastPosition[ 2 ] = x[ 2 ];
+            this->LastPosition[0] = x[0];
+            this->LastPosition[1] = x[1];
+            this->LastPosition[2] = x[2];
         }
         else
         {
@@ -489,8 +489,8 @@ void vtkNShapeCalibrationWidget::OnLeftButtonUp()
 
 void vtkNShapeCalibrationWidget::OnRightButtonDown()
 {
-    int X = this->Interactor->GetEventPosition()[ 0 ];
-    int Y = this->Interactor->GetEventPosition()[ 1 ];
+    int X = this->Interactor->GetEventPosition()[0];
+    int Y = this->Interactor->GetEventPosition()[1];
 
     // Okay, make sure that the pick is in the current renderer
     vtkRenderer * ren = this->Interactor->FindPokedRenderer( X, Y );
@@ -511,11 +511,11 @@ void vtkNShapeCalibrationWidget::OnRightButtonDown()
         this->State = vtkNShapeCalibrationWidget::ScalingHandles;
         this->HighlightHandles( 1 );
         this->HighlightLine( 1 );
-        double x[ 3 ];
+        double x[3];
         this->LinePicker->GetPickPosition( x );
-        this->LastPosition[ 0 ] = x[ 0 ];
-        this->LastPosition[ 1 ] = x[ 1 ];
-        this->LastPosition[ 2 ] = x[ 2 ];
+        this->LastPosition[0] = x[0];
+        this->LastPosition[1] = x[1];
+        this->LastPosition[2] = x[2];
     }
     else
     {
@@ -547,8 +547,8 @@ void vtkNShapeCalibrationWidget::OnRightButtonUp()
 
 void vtkNShapeCalibrationWidget::OnMiddleButtonDown()
 {
-    int X = this->Interactor->GetEventPosition()[ 0 ];
-    int Y = this->Interactor->GetEventPosition()[ 1 ];
+    int X = this->Interactor->GetEventPosition()[0];
+    int Y = this->Interactor->GetEventPosition()[1];
 
     // Okay, make sure that the pick is in the current renderer
     vtkRenderer * ren = this->Interactor->FindPokedRenderer( X, Y );
@@ -626,35 +626,35 @@ void vtkNShapeCalibrationWidget::OnMouseMove()
     }
 
     // Compute the two points defining the motion vector
-    int X     = this->Interactor->GetEventPosition()[ 0 ];
-    int Y     = this->Interactor->GetEventPosition()[ 1 ];
-    int lastX = this->Interactor->GetLastEventPosition()[ 0 ];
-    int lastY = this->Interactor->GetLastEventPosition()[ 1 ];
+    int X     = this->Interactor->GetEventPosition()[0];
+    int Y     = this->Interactor->GetEventPosition()[1];
+    int lastX = this->Interactor->GetLastEventPosition()[0];
+    int lastY = this->Interactor->GetLastEventPosition()[1];
 
-    double focalPoint[ 4 ];
-    double pickPoint[ 4 ];
-    double prevPickPoint[ 4 ];
+    double focalPoint[4];
+    double pickPoint[4];
+    double prevPickPoint[4];
     double z;
 
-    this->ComputeWorldToDisplay( this->LastPickPosition[ 0 ], this->LastPickPosition[ 1 ], this->LastPickPosition[ 2 ],
+    this->ComputeWorldToDisplay( this->LastPickPosition[0], this->LastPickPosition[1], this->LastPickPosition[2],
                                  focalPoint );
-    z = focalPoint[ 2 ];
+    z = focalPoint[2];
     this->ComputeDisplayToWorld( double( lastX ), double( lastY ), z, prevPickPoint );
     this->ComputeDisplayToWorld( double( X ), double( Y ), z, pickPoint );
 
     // Process the motion
     if( this->State == vtkNShapeCalibrationWidget::MovingHandle )
     {
-        if( this->CurrentHandle == this->Handle[ 0 ] )
-            this->SetPoint1( pickPoint[ 0 ], pickPoint[ 1 ], pickPoint[ 2 ] );
-        else if( this->CurrentHandle == this->Handle[ 1 ] )
-            this->SetPoint2( pickPoint[ 0 ], pickPoint[ 1 ], pickPoint[ 2 ] );
+        if( this->CurrentHandle == this->Handle[0] )
+            this->SetPoint1( pickPoint[0], pickPoint[1], pickPoint[2] );
+        else if( this->CurrentHandle == this->Handle[1] )
+            this->SetPoint2( pickPoint[0], pickPoint[1], pickPoint[2] );
         else
-            this->SetMiddlePoint( pickPoint[ 0 ], pickPoint[ 1 ], pickPoint[ 2 ] );
+            this->SetMiddlePoint( pickPoint[0], pickPoint[1], pickPoint[2] );
     }
     else if( this->State == vtkNShapeCalibrationWidget::MovingLine )
     {
-        this->SetLinePosition( pickPoint[ 0 ], pickPoint[ 1 ], pickPoint[ 2 ] );
+        this->SetLinePosition( pickPoint[0], pickPoint[1], pickPoint[2] );
     }
     else if( this->State == vtkNShapeCalibrationWidget::Scaling )
     {
@@ -675,23 +675,23 @@ void vtkNShapeCalibrationWidget::OnMouseMove()
 void vtkNShapeCalibrationWidget::Scale( double * p1, double * p2, int vtkNotUsed( X ), int Y )
 {
     // Get the motion vector
-    double v[ 3 ];
-    v[ 0 ] = p2[ 0 ] - p1[ 0 ];
-    v[ 1 ] = p2[ 1 ] - p1[ 1 ];
-    v[ 2 ] = p2[ 2 ] - p1[ 2 ];
+    double v[3];
+    v[0] = p2[0] - p1[0];
+    v[1] = p2[1] - p1[1];
+    v[2] = p2[2] - p1[2];
 
     // int res = this->LineSource->GetResolution();
     double * pt1 = this->LineSource->GetPoint1();
     double * pt2 = this->LineSource->GetPoint2();
 
-    double center[ 3 ];
-    center[ 0 ] = ( pt1[ 0 ] + pt2[ 0 ] ) / 2.0;
-    center[ 1 ] = ( pt1[ 1 ] + pt2[ 1 ] ) / 2.0;
-    center[ 2 ] = ( pt1[ 2 ] + pt2[ 2 ] ) / 2.0;
+    double center[3];
+    center[0] = ( pt1[0] + pt2[0] ) / 2.0;
+    center[1] = ( pt1[1] + pt2[1] ) / 2.0;
+    center[2] = ( pt1[2] + pt2[2] ) / 2.0;
 
     // Compute the scale factor
     double sf = vtkMath::Norm( v ) / sqrt( vtkMath::Distance2BetweenPoints( pt1, pt2 ) );
-    if( Y > this->Interactor->GetLastEventPosition()[ 1 ] )
+    if( Y > this->Interactor->GetLastEventPosition()[1] )
     {
         sf = 1.0 + sf;
     }
@@ -701,11 +701,11 @@ void vtkNShapeCalibrationWidget::Scale( double * p1, double * p2, int vtkNotUsed
     }
 
     // Move the end points
-    double point1[ 3 ], point2[ 3 ];
+    double point1[3], point2[3];
     for( int i = 0; i < 3; i++ )
     {
-        point1[ i ] = sf * ( pt1[ i ] - center[ i ] ) + center[ i ];
-        point2[ i ] = sf * ( pt2[ i ] - center[ i ] ) + center[ i ];
+        point1[i] = sf * ( pt1[i] - center[i] ) + center[i];
+        point2[i] = sf * ( pt2[i] - center[i] ) + center[i];
     }
 
     this->LineSource->SetPoint1( point1 );
@@ -742,37 +742,37 @@ void vtkNShapeCalibrationWidget::CreateDefaultProperties()
     this->SelectedLineProperty->SetLineWidth( 1.0 );
 }
 
-void vtkNShapeCalibrationWidget::PlaceWidget( double bds[ 6 ] )
+void vtkNShapeCalibrationWidget::PlaceWidget( double bds[6] )
 {
     int i;
-    double bounds[ 6 ], center[ 3 ];
+    double bounds[6], center[3];
 
     this->AdjustBounds( bds, bounds, center );
 
     if( this->Align == vtkNShapeCalibrationWidget::YAxis )
     {
-        this->LineSource->SetPoint1( center[ 0 ], bounds[ 2 ], center[ 2 ] );
-        this->LineSource->SetPoint2( center[ 0 ], bounds[ 3 ], center[ 2 ] );
+        this->LineSource->SetPoint1( center[0], bounds[2], center[2] );
+        this->LineSource->SetPoint2( center[0], bounds[3], center[2] );
     }
     else if( this->Align == vtkNShapeCalibrationWidget::ZAxis )
     {
-        this->LineSource->SetPoint1( center[ 0 ], center[ 1 ], bounds[ 4 ] );
-        this->LineSource->SetPoint2( center[ 0 ], center[ 1 ], bounds[ 5 ] );
+        this->LineSource->SetPoint1( center[0], center[1], bounds[4] );
+        this->LineSource->SetPoint2( center[0], center[1], bounds[5] );
     }
     else if( this->Align == vtkNShapeCalibrationWidget::XAxis )  // default or x-aligned
     {
-        this->LineSource->SetPoint1( bounds[ 0 ], center[ 1 ], center[ 2 ] );
-        this->LineSource->SetPoint2( bounds[ 1 ], center[ 1 ], center[ 2 ] );
+        this->LineSource->SetPoint1( bounds[0], center[1], center[2] );
+        this->LineSource->SetPoint2( bounds[1], center[1], center[2] );
     }
     this->LineSource->Update();
 
     for( i = 0; i < 6; i++ )
     {
-        this->InitialBounds[ i ] = bounds[ i ];
+        this->InitialBounds[i] = bounds[i];
     }
-    this->InitialLength = sqrt( ( bounds[ 1 ] - bounds[ 0 ] ) * ( bounds[ 1 ] - bounds[ 0 ] ) +
-                                ( bounds[ 3 ] - bounds[ 2 ] ) * ( bounds[ 3 ] - bounds[ 2 ] ) +
-                                ( bounds[ 5 ] - bounds[ 4 ] ) * ( bounds[ 5 ] - bounds[ 4 ] ) );
+    this->InitialLength = sqrt( ( bounds[1] - bounds[0] ) * ( bounds[1] - bounds[0] ) +
+                                ( bounds[3] - bounds[2] ) * ( bounds[3] - bounds[2] ) +
+                                ( bounds[5] - bounds[4] ) * ( bounds[5] - bounds[4] ) );
 
     // Position the handles at the end of the lines
     this->BuildRepresentation();
@@ -780,10 +780,10 @@ void vtkNShapeCalibrationWidget::PlaceWidget( double bds[ 6 ] )
 
 void vtkNShapeCalibrationWidget::SetPoint1( double x, double y, double z )
 {
-    double xyz[ 3 ];
-    xyz[ 0 ] = x;
-    xyz[ 1 ] = y;
-    xyz[ 2 ] = z;
+    double xyz[3];
+    xyz[0] = x;
+    xyz[1] = y;
+    xyz[2] = z;
 
     if( this->ClampToBounds )
     {
@@ -795,10 +795,10 @@ void vtkNShapeCalibrationWidget::SetPoint1( double x, double y, double z )
 
 void vtkNShapeCalibrationWidget::SetPoint2( double x, double y, double z )
 {
-    double xyz[ 3 ];
-    xyz[ 0 ] = x;
-    xyz[ 1 ] = y;
-    xyz[ 2 ] = z;
+    double xyz[3];
+    xyz[0] = x;
+    xyz[1] = y;
+    xyz[2] = z;
 
     if( this->ClampToBounds )
     {
@@ -812,14 +812,14 @@ void vtkNShapeCalibrationWidget::SetMiddlePoint( double x, double y, double z )
 {
     double * pt1 = this->GetPoint1();
     double * pt2 = this->GetPoint2();
-    double v[ 3 ];
-    v[ 0 ] = pt2[ 0 ] - pt1[ 0 ];
-    v[ 1 ] = pt2[ 1 ] - pt1[ 1 ];
-    v[ 2 ] = pt2[ 2 ] - pt1[ 2 ];
-    double w[ 3 ];
-    w[ 0 ] = x - pt1[ 0 ];
-    w[ 1 ] = y - pt1[ 1 ];
-    w[ 2 ] = z - pt1[ 2 ];
+    double v[3];
+    v[0] = pt2[0] - pt1[0];
+    v[1] = pt2[1] - pt1[1];
+    v[2] = pt2[2] - pt1[2];
+    double w[3];
+    w[0] = x - pt1[0];
+    w[1] = y - pt1[1];
+    w[2] = z - pt1[2];
 
     double c1 = vtkMath::Dot( w, v );
     double c2 = vtkMath::Dot( v, v );
@@ -833,13 +833,13 @@ void vtkNShapeCalibrationWidget::SetMiddlePoint( double x, double y, double z )
     this->BuildRepresentation();
 }
 
-void vtkNShapeCalibrationWidget::GetMiddlePoint( double xyz[ 3 ] )
+void vtkNShapeCalibrationWidget::GetMiddlePoint( double xyz[3] )
 {
     double * pt1 = this->GetPoint1();
     double * pt2 = this->GetPoint2();
-    xyz[ 0 ]     = pt1[ 0 ] + this->MiddleHandlePosition * ( pt2[ 0 ] - pt1[ 0 ] );
-    xyz[ 1 ]     = pt1[ 1 ] + this->MiddleHandlePosition * ( pt2[ 1 ] - pt1[ 1 ] );
-    xyz[ 2 ]     = pt1[ 2 ] + this->MiddleHandlePosition * ( pt2[ 2 ] - pt1[ 2 ] );
+    xyz[0]       = pt1[0] + this->MiddleHandlePosition * ( pt2[0] - pt1[0] );
+    xyz[1]       = pt1[1] + this->MiddleHandlePosition * ( pt2[1] - pt1[1] );
+    xyz[2]       = pt1[2] + this->MiddleHandlePosition * ( pt2[2] - pt1[2] );
 }
 
 double vtkNShapeCalibrationWidget::GetMiddlePoint() { return this->MiddleHandlePosition; }
@@ -862,20 +862,20 @@ void vtkNShapeCalibrationWidget::ScaleHandles( double f )
 
 void vtkNShapeCalibrationWidget::SetLinePosition( double x, double y, double z )
 {
-    double p1[ 3 ], p2[ 3 ], v[ 3 ];
+    double p1[3], p2[3], v[3];
 
     // vector of motion
-    v[ 0 ] = x - this->LastPosition[ 0 ];
-    v[ 1 ] = y - this->LastPosition[ 1 ];
-    v[ 2 ] = z - this->LastPosition[ 2 ];
+    v[0] = x - this->LastPosition[0];
+    v[1] = y - this->LastPosition[1];
+    v[2] = z - this->LastPosition[2];
 
     // update position
     this->GetPoint1( p1 );
     this->GetPoint2( p2 );
     for( int i = 0; i < 3; i++ )
     {
-        p1[ i ] += v[ i ];
-        p2[ i ] += v[ i ];
+        p1[i] += v[i];
+        p2[i] += v[i];
     }
 
     // See whether we can move
@@ -888,31 +888,31 @@ void vtkNShapeCalibrationWidget::SetLinePosition( double x, double y, double z )
     this->SetPoint2( p2 );
 
     // remember last position
-    this->LastPosition[ 0 ] = x;
-    this->LastPosition[ 1 ] = y;
-    this->LastPosition[ 2 ] = z;
+    this->LastPosition[0] = x;
+    this->LastPosition[1] = y;
+    this->LastPosition[2] = z;
 }
 
-void vtkNShapeCalibrationWidget::ClampPosition( double x[ 3 ] )
+void vtkNShapeCalibrationWidget::ClampPosition( double x[3] )
 {
     for( int i = 0; i < 3; i++ )
     {
-        if( x[ i ] < this->InitialBounds[ 2 * i ] )
+        if( x[i] < this->InitialBounds[2 * i] )
         {
-            x[ i ] = this->InitialBounds[ 2 * i ];
+            x[i] = this->InitialBounds[2 * i];
         }
-        if( x[ i ] > this->InitialBounds[ 2 * i + 1 ] )
+        if( x[i] > this->InitialBounds[2 * i + 1] )
         {
-            x[ i ] = this->InitialBounds[ 2 * i + 1 ];
+            x[i] = this->InitialBounds[2 * i + 1];
         }
     }
 }
 
-int vtkNShapeCalibrationWidget::InBounds( double x[ 3 ] )
+int vtkNShapeCalibrationWidget::InBounds( double x[3] )
 {
     for( int i = 0; i < 3; i++ )
     {
-        if( x[ i ] < this->InitialBounds[ 2 * i ] || x[ i ] > this->InitialBounds[ 2 * i + 1 ] )
+        if( x[i] < this->InitialBounds[2 * i] || x[i] > this->InitialBounds[2 * i + 1] )
         {
             return 0;
         }

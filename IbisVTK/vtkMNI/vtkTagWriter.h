@@ -46,8 +46,8 @@ protected:
     char * FileName;
     typedef std::vector<vtkPoints *> PointsVec;
     PointsVec Volumes;
-    char TransformToSave[ 256 ];
-    char ReferenceDataFile[ 128 ];
+    char TransformToSave[256];
+    char ReferenceDataFile[128];
     std::vector<std::string> VolumeNames;
     std::vector<std::string> PointNames;
     std::vector<std::string> TimeStamps;

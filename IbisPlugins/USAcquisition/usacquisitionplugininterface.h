@@ -12,6 +12,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #define USACQUISITIONPLUGININTERFACE_H
 
 #include <QWidget>
+
 #include "serializer.h"
 #include "toolplugininterface.h"
 

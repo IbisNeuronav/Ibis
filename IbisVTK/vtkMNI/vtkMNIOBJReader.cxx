@@ -257,7 +257,7 @@ void vtkMNIOBJReader::ReadPolygons( FILE * in, vtkPolyData * output )
     ReadPoints( in, output );
 
     // Read normals
-    double norms[ 3 ];
+    double norms[3];
     vtkDoubleArray * normals = vtkDoubleArray::New();
     normals->SetNumberOfComponents( 3 );
     normals->SetNumberOfTuples( NbPoints );
@@ -313,7 +313,7 @@ void vtkMNIOBJReader::ReadColors( FILE * in, vtkPolyData * output )
     int colorperpoint;
     fscanf( in, "%d", &colorperpoint );
 
-    float rgba[ 4 ];
+    float rgba[4];
     if( colorperpoint == 0 )  // 1 color for all points
     {
         fscanf( in, " %f ", rgba );
@@ -322,7 +322,7 @@ void vtkMNIOBJReader::ReadColors( FILE * in, vtkPolyData * output )
         fscanf( in, " %f ", rgba + 3 );
 
         // set the color in Property
-        this->Property->SetColor( rgba[ 0 ], rgba[ 1 ], rgba[ 2 ] );
+        this->Property->SetColor( rgba[0], rgba[1], rgba[2] );
     }
     else if( colorperpoint == 1 )  // 1 color per item (line segment, triangle, etc. )
     {
@@ -346,9 +346,9 @@ void vtkMNIOBJReader::ReadColors( FILE * in, vtkPolyData * output )
             fscanf( in, " %f ", rgba + 3 );
             // transorm float values into approximate unsigned char values
             if( UseAlpha )
-                charColors->SetTuple4( k, rgba[ 0 ] * 255, rgba[ 1 ] * 255, rgba[ 2 ] * 255, rgba[ 3 ] * 255 );
+                charColors->SetTuple4( k, rgba[0] * 255, rgba[1] * 255, rgba[2] * 255, rgba[3] * 255 );
             else
-                charColors->SetTuple3( k, rgba[ 0 ] * 255, rgba[ 1 ] * 255, rgba[ 2 ] * 255 );
+                charColors->SetTuple3( k, rgba[0] * 255, rgba[1] * 255, rgba[2] * 255 );
         }
         output->GetPointData()->SetScalars( charColors );
         charColors->Delete();

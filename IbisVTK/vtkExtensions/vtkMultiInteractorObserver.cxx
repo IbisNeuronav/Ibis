@@ -95,7 +95,7 @@ vtkRenderWindowInteractor * vtkMultiInteractorObserver::GetInteractor( unsigned 
 {
     if( this->Interactors.size() > index )
     {
-        return Interactors[ index ];
+        return Interactors[index];
     }
     return 0;
 }

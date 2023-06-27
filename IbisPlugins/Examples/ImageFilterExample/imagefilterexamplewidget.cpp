@@ -10,13 +10,16 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 // Thanks to Simon Drouin for writing this class
 
+#include "imagefilterexamplewidget.h"
+
 #include <vtkTransform.h>
+
 #include <QComboBox>
 #include <QMessageBox>
 #include <thread>
+
 #include "ibisapi.h"
 #include "imagefilterexampleplugininterface.h"
-#include "imagefilterexamplewidget.h"
 #include "imageobject.h"
 #include "sceneobject.h"
 #include "ui_imagefilterexamplewidget.h"

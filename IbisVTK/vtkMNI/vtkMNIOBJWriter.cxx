@@ -130,11 +130,11 @@ void vtkMNIOBJWriter::WritePolygons( std::ostream & out )
     out << std::endl;
 
     vtkDoubleArray * normals = vtkDoubleArray::SafeDownCast( this->GetOutput()->GetPointData()->GetNormals() );
-    double norm[ 3 ];
+    double norm[3];
     for( int j = 0; j < NbPoints; j++ )
     {
         normals->GetTuple( j, norm );
-        out << norm[ 0 ] << " " << norm[ 1 ] << " " << norm[ 2 ] << std::endl;
+        out << norm[0] << " " << norm[1] << " " << norm[2] << std::endl;
     }
 
     out << std::endl;
@@ -153,7 +153,7 @@ void vtkMNIOBJWriter::WritePolygons( std::ostream & out )
 void vtkMNIOBJWriter::WritePoints( std::ostream & out )
 {
     // fill point coordinates in points
-    double thePoint[ 3 ];
+    double thePoint[3];
     vtkPoints * points = this->GetOutput()->GetPoints();
     NbPoints           = points->GetNumberOfPoints();
 
@@ -162,7 +162,7 @@ void vtkMNIOBJWriter::WritePoints( std::ostream & out )
     for( int i = 0; i < NbPoints; i++ )
     {
         points->GetPoint( i, thePoint );
-        out << thePoint[ 0 ] << " " << thePoint[ 1 ] << " " << thePoint[ 2 ] << std::endl;
+        out << thePoint[0] << " " << thePoint[1] << " " << thePoint[2] << std::endl;
     }
 }
 
@@ -175,9 +175,9 @@ void vtkMNIOBJWriter::WriteColors( std::ostream & out )
     {
         out << "0 ";
 
-        double rgba[ 4 ];
+        double rgba[4];
         this->Property->GetColor( rgba );
-        out << rgba[ 0 ] << " " << rgba[ 1 ] << " " << rgba[ 2 ] << " 1" << std::endl;
+        out << rgba[0] << " " << rgba[1] << " " << rgba[2] << " 1" << std::endl;
     }
     else if( charColors->GetNumberOfComponents() == 4 )  // if there are colors, then write them out
     {
@@ -190,8 +190,7 @@ void vtkMNIOBJWriter::WriteColors( std::ostream & out )
         for( int k = 0; k < NbPoints; k++ )
         {
             rgba = charColors->GetTuple4( k );
-            out << rgba[ 0 ] / 255 << " " << rgba[ 1 ] / 255 << " " << rgba[ 2 ] / 255 << " " << rgba[ 3 ] / 255
-                << std::endl;
+            out << rgba[0] / 255 << " " << rgba[1] / 255 << " " << rgba[2] / 255 << " " << rgba[3] / 255 << std::endl;
         }
     }
 }
@@ -231,7 +230,7 @@ void vtkMNIOBJWriter::WriteItems( std::ostream & out )
 
         for( int p = 0; p < numPoints; p++ )
         {
-            out << pointList[ p ] << " ";
+            out << pointList[p] << " ";
             ++eightCount;
 
             if( eightCount % 8 == 0 )

@@ -27,7 +27,7 @@ vtkProp3D * SimplePropCreator::CreateLine( double start[3], double end[3], doubl
     pts->InsertNextPoint( start );
     pts->InsertNextPoint( end );
 
-    static vtkIdType lineIndex[1][2] = {{0, 1}};
+    static vtkIdType lineIndex[1][2] = { { 0, 1 } };
     vtkCellArray * line              = vtkCellArray::New();
     line->InsertNextCell( 2, lineIndex[0] );
 

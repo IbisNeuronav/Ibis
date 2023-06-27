@@ -11,10 +11,10 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef __GuiUtilities_h_
 #define __GuiUtilities_h_
 
+#include <QComboBox>
 #include <QList>
 #include <QMap>
 #include <QVariant>
-#include <QComboBox>
 
 #include "ibisapi.h"
 

@@ -8,18 +8,21 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
+#include "landmarkregistrationobject.h"
+
 #include <vtkLandmarkTransform.h>
 #include <vtkPoints.h>
 #include <vtkTransform.h>
+
 #include <QDir>
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QString>
 #include <QStringList>
+
 #include "application.h"
 #include "ibisconfig.h"
 #include "imageobject.h"
-#include "landmarkregistrationobject.h"
 #include "landmarkregistrationobjectplugininterface.h"
 #include "landmarkregistrationobjectsettingswidget.h"
 #include "landmarktransform.h"
@@ -468,7 +471,7 @@ void LandmarkRegistrationObject::PointAdded()
     // we may have to add a target point
     if( m_targetPoints->GetNumberOfPoints() < m_sourcePoints->GetNumberOfPoints() )
     {
-        double coords[3] = {0.0, 0.0, 0.0};
+        double coords[3] = { 0.0, 0.0, 0.0 };
         m_targetPoints->AddPoint( QString::number( m_targetPoints->GetNumberOfPoints() + 1 ), coords );
         m_activeTargetPoints->InsertNextPoint(
             m_targetPoints->GetPointCoordinates( m_targetPoints->GetNumberOfPoints() - 1 ) );
@@ -528,7 +531,7 @@ void LandmarkRegistrationObject::UpdateActivePoints()
 
 void LandmarkRegistrationObject::UpdateTargetPoints()
 {
-    double coords[3] = {0.0, 0.0, 0.0};
+    double coords[3] = { 0.0, 0.0, 0.0 };
     m_targetPoints->SetListable( false );
     int numSrcPts = m_sourcePoints->GetNumberOfPoints();
     int numTrgPts = m_targetPoints->GetNumberOfPoints();

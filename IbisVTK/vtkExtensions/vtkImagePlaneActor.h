@@ -39,15 +39,9 @@ public:
     static vtkImagePlaneActor * New();
 
     void SetImageExtent( int ext0, int ext1, int ext2, int ext3, int ext4, int ext5 );
-    void SetImageExtent( int ext[ 6 ] )
-    {
-        SetImageExtent( ext[ 0 ], ext[ 1 ], ext[ 2 ], ext[ 3 ], ext[ 4 ], ext[ 5 ] );
-    }
+    void SetImageExtent( int ext[6] ) { SetImageExtent( ext[0], ext[1], ext[2], ext[3], ext[4], ext[5] ); }
     void SetWholeExtent( int ext0, int ext1, int ext2, int ext3, int ext4, int ext5 );
-    void SetWholeExtent( int ext[ 6 ] )
-    {
-        SetWholeExtent( ext[ 0 ], ext[ 1 ], ext[ 2 ], ext[ 3 ], ext[ 4 ], ext[ 5 ] );
-    }
+    void SetWholeExtent( int ext[6] ) { SetWholeExtent( ext[0], ext[1], ext[2], ext[3], ext[4], ext[5] ); }
 
     void SetUseLookupTable( int useIt );
     void SetLookupTable( vtkScalarsToColors * table );
@@ -72,7 +66,7 @@ protected:
     vtkDataSetMapper * Mapper;
     vtkTexture * Texture;
     vtkImageConstantPad * ImagePad;
-    int DisplayExtent[ 6 ];
+    int DisplayExtent[6];
 
 private:
     vtkImagePlaneActor( const vtkImagePlaneActor & );  // Not implemented.

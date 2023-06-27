@@ -8,10 +8,13 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
-#include <vtkSmartPointer.h>
-#include <QPalette>
-#include "landmarkregistrationobject.h"
 #include "landmarkregistrationobjectwidget.h"
+
+#include <vtkSmartPointer.h>
+
+#include <QPalette>
+
+#include "landmarkregistrationobject.h"
 #include "landmarktransform.h"
 #include "pointsobject.h"
 #include "ui_landmarkregistrationobjectwidget.h"

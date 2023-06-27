@@ -10,16 +10,19 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 // Thanks to Simon Drouin for writing this class
 
+#include "cameracalibrator.h"
+
 #include <vtkAmoebaMinimizer.h>
 #include <vtkImageData.h>
 #include <vtkMatrix4x4.h>
 #include <vtkPNGReader.h>
 #include <vtkPNGWriter.h>
+
 #include <QFileInfo>
 #include <QProgressDialog>
 #include <QtGlobal>
+
 #include "cameracalibrationplugininterface.h"
-#include "cameracalibrator.h"
 #include "cameraobject.h"
 #include "ibisapi.h"
 #include "vtkMatrix4x4Operators.h"
@@ -395,11 +398,11 @@ void CameraCalibrator::ComputeMeanAndStdDevOfGridCorners( cv::Point3f & meanTL, 
                                                           cv::Point3f & meanBL, cv::Point3f & meanBR, double & val )
 {
     // Get current param values
-    double t[3] = {0.0, 0.0, 0.0};
+    double t[3] = { 0.0, 0.0, 0.0 };
     t[0]        = m_minimizer->GetParameterValue( "x" );
     t[1]        = m_minimizer->GetParameterValue( "y" );
     t[2]        = m_minimizer->GetParameterValue( "z" );
-    double r[3] = {0.0, 0.0, 0.0};
+    double r[3] = { 0.0, 0.0, 0.0 };
     r[0]        = m_minimizer->GetParameterValue( "rx" );
     r[1]        = m_minimizer->GetParameterValue( "ry" );
     r[2]        = m_minimizer->GetParameterValue( "rz" );
@@ -411,14 +414,14 @@ void CameraCalibrator::ComputeMeanAndStdDevOfGridCorners( cv::Point3f & meanTL, 
     double xGridMax = ( GetGridHeight() - 1 ) * GetGridCellSize();
     double yGridMax = ( GetGridWidth() - 1 ) * GetGridCellSize();
 
-    double stl[3]  = {0.0, 0.0, 0.0};
-    double sstl[3] = {0.0, 0.0, 0.0};
-    double str[3]  = {0.0, 0.0, 0.0};
-    double sstr[3] = {0.0, 0.0, 0.0};
-    double sbl[3]  = {0.0, 0.0, 0.0};
-    double ssbl[3] = {0.0, 0.0, 0.0};
-    double sbr[3]  = {0.0, 0.0, 0.0};
-    double ssbr[3] = {0.0, 0.0, 0.0};
+    double stl[3]  = { 0.0, 0.0, 0.0 };
+    double sstl[3] = { 0.0, 0.0, 0.0 };
+    double str[3]  = { 0.0, 0.0, 0.0 };
+    double sstr[3] = { 0.0, 0.0, 0.0 };
+    double sbl[3]  = { 0.0, 0.0, 0.0 };
+    double ssbl[3] = { 0.0, 0.0, 0.0 };
+    double sbr[3]  = { 0.0, 0.0, 0.0 };
+    double ssbr[3] = { 0.0, 0.0, 0.0 };
 
     vtkMatrix4x4 * gridToWorld = vtkMatrix4x4::New();
     int n                      = 0;
@@ -433,20 +436,20 @@ void CameraCalibrator::ComputeMeanAndStdDevOfGridCorners( cv::Point3f & meanTL, 
             vtkMatrix4x4::Multiply4x4( gridToWorld, m_gridToCamMatrices[i], gridToWorld );
 
             // transform 3 grid corners world
-            double topLeft[4]      = {0.0, 0.0, 0.0, 1.0};
-            double topLeftWorld[4] = {0.0, 0.0, 0.0, 1.0};
+            double topLeft[4]      = { 0.0, 0.0, 0.0, 1.0 };
+            double topLeftWorld[4] = { 0.0, 0.0, 0.0, 1.0 };
             gridToWorld->MultiplyPoint( topLeft, topLeftWorld );
 
-            double topRight[4]      = {0.0, yGridMax, 0.0, 1.0};
-            double topRightWorld[4] = {0.0, 0.0, 0.0, 1.0};
+            double topRight[4]      = { 0.0, yGridMax, 0.0, 1.0 };
+            double topRightWorld[4] = { 0.0, 0.0, 0.0, 1.0 };
             gridToWorld->MultiplyPoint( topRight, topRightWorld );
 
-            double bottomLeft[4]      = {xGridMax, 0.0, 0.0, 1.0};
-            double bottomLeftWorld[4] = {0.0, 0.0, 0.0, 1.0};
+            double bottomLeft[4]      = { xGridMax, 0.0, 0.0, 1.0 };
+            double bottomLeftWorld[4] = { 0.0, 0.0, 0.0, 1.0 };
             gridToWorld->MultiplyPoint( bottomLeft, bottomLeftWorld );
 
-            double bottomRight[4]      = {xGridMax, yGridMax, 0.0, 1.0};
-            double bottomrightWorld[4] = {0.0, 0.0, 0.0, 1.0};
+            double bottomRight[4]      = { xGridMax, yGridMax, 0.0, 1.0 };
+            double bottomrightWorld[4] = { 0.0, 0.0, 0.0, 1.0 };
             gridToWorld->MultiplyPoint( bottomRight, bottomrightWorld );
 
             for( int j = 0; j < 3; ++j )

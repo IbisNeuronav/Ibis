@@ -1,7 +1,9 @@
 
+#include "applytransformtoobjectplugininterface.h"
+
 #include <QString>
 #include <QtPlugin>
-#include "applytransformtoobjectplugininterface.h"
+
 #include "applytransformtoobjectwidget.h"
 
 ApplyTransformToObjectPluginInterface::ApplyTransformToObjectPluginInterface() {}

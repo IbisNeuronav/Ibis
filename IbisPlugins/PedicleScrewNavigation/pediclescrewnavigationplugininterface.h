@@ -15,6 +15,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include <QObject>
 #include <QWidget>
+
 #include "serializer.h"
 #include "toolplugininterface.h"
 
