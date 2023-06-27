@@ -9,49 +9,48 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
 // Thanks to Simon Drouin for writing this class
+#include <vtkColorTransferFunction.h>
+#include <vtkImageData.h>
+#include <vtkQtColorTransferFunctionWidget.h>
+
 #include <QMouseEvent>
 #include <QPainter>
 #include <QPen>
-#include <cmath>
 #include <algorithm>
-
-#include <vtkQtColorTransferFunctionWidget.h>
-#include <vtkColorTransferFunction.h>
-#include <vtkImageData.h>
+#include <cmath>
 
 const int vtkQtColorTransferFunctionWidget::m_hotspotRadius = 10;
 
-vtkQtColorTransferFunctionWidget::vtkQtColorTransferFunctionWidget( QWidget * parent ) :
-		QWidget(parent),
-		m_cursorWidth( 10 ),
-        m_cursorHeight( 8 ),
-        m_useColorCursor( false ),
-        m_currentCursor( -1 ),
-        m_sliderMoving(false),
-        m_xMin( 0.0 ),
-        m_xMax( 1.0 ),
-        m_colorTransferFunction( 0 )
+vtkQtColorTransferFunctionWidget::vtkQtColorTransferFunctionWidget( QWidget * parent )
+    : QWidget( parent ),
+      m_cursorWidth( 10 ),
+      m_cursorHeight( 8 ),
+      m_useColorCursor( false ),
+      m_currentCursor( -1 ),
+      m_sliderMoving( false ),
+      m_xMin( 0.0 ),
+      m_xMax( 1.0 ),
+      m_colorTransferFunction( 0 )
 {
     setMouseTracking( true );  // need to track mouse to highlight closest cursor.
 }
 
 vtkQtColorTransferFunctionWidget::~vtkQtColorTransferFunctionWidget()
 {
-    if( m_colorTransferFunction )
-        m_colorTransferFunction->UnRegister(0);
+    if( m_colorTransferFunction ) m_colorTransferFunction->UnRegister( 0 );
 }
 
 void vtkQtColorTransferFunctionWidget::enterEvent( QEvent * event )
 {
-    Q_UNUSED(event)
-    setCursor(Qt::CrossCursor);
+    Q_UNUSED( event )
+    setCursor( Qt::CrossCursor );
     UpdateCurrentCursorInformation( this->cursor().pos().x(), this->cursor().pos().y() );
     update();
 }
 
 void vtkQtColorTransferFunctionWidget::leaveEvent( QEvent * event )
 {
-    Q_UNUSED(event)
+    Q_UNUSED( event )
     unsetCursor();
     m_currentCursor = -1;
     update();
@@ -70,7 +69,7 @@ void vtkQtColorTransferFunctionWidget::mouseMoveEvent( QMouseEvent * event )
 
 void vtkQtColorTransferFunctionWidget::mousePressEvent( QMouseEvent * event )
 {
-	if( event->button() != Qt::LeftButton )
+    if( event->button() != Qt::LeftButton )
     {
         event->ignore();
         return;
@@ -87,9 +86,9 @@ void vtkQtColorTransferFunctionWidget::mousePressEvent( QMouseEvent * event )
     event->accept();
 }
 
-void vtkQtColorTransferFunctionWidget::mouseReleaseEvent(QMouseEvent *event)
+void vtkQtColorTransferFunctionWidget::mouseReleaseEvent( QMouseEvent * event )
 {
-    if (event->button() != Qt::LeftButton)
+    if( event->button() != Qt::LeftButton )
     {
         event->ignore();
         return;
@@ -113,59 +112,62 @@ void vtkQtColorTransferFunctionWidget::mouseReleaseEvent(QMouseEvent *event)
 
 #include <QColorDialog>
 
-void vtkQtColorTransferFunctionWidget::mouseDoubleClickEvent(QMouseEvent *event)
+void vtkQtColorTransferFunctionWidget::mouseDoubleClickEvent( QMouseEvent * event )
 {
     // In Color cursor zone, choose a new color for a point
     if( IsInColorCursorZone( event->x(), event->y() ) )
     {
-        int index = MinDistanceColor( event->x() );
+        int index  = MinDistanceColor( event->x() );
         int pixPos = GetColorNodePixPosition( index );
         if( abs( pixPos - event->x() ) <= m_hotspotRadius )
         {
+            // clang-format off
             QColor currentColor = GetColorNodeColor( index );
-            QColor newColor = QColorDialog::getColor( currentColor, nullptr, tr("Choose Color"),  QColorDialog::DontUseNativeDialog );
+            QColor newColor     = QColorDialog::getColor( currentColor, nullptr, tr( "Choose Color" ),
+                                                          QColorDialog::DontUseNativeDialog );
             if( newColor.isValid() )
             {
                 SetColorNodeColor( index, newColor );
             }
+            // clang-format on
         }
     }
     // Anywhere else, remove point if close to one and add one if not
     else
     {
-        int index = MinDistanceColor( event->x() );
+        int index  = MinDistanceColor( event->x() );
         int pixPos = GetColorNodePixPosition( index );
         if( abs( pixPos - event->x() ) <= m_hotspotRadius )
         {
-            m_colorTransferFunction->RemovePoint( GetColorNodeValue(index ) );
+            m_colorTransferFunction->RemovePoint( GetColorNodeValue( index ) );
         }
         else
         {
-            double value = widgetPosToSliderValue( event->x());
+            double value   = widgetPosToSliderValue( event->x() );
             double * color = m_colorTransferFunction->GetColor( value );
-            m_colorTransferFunction->AddRGBPoint( value, color[0], color[1], color[2] );
+            m_colorTransferFunction->AddRGBPoint( value, color[ 0 ], color[ 1 ], color[ 2 ] );
         }
     }
 }
 
 void vtkQtColorTransferFunctionWidget::paintEvent( QPaintEvent * event )
 {
-    Q_UNUSED(event)
+    Q_UNUSED( event )
 
-    QPainter painter(this);
-	painter.setRenderHint( QPainter::HighQualityAntialiasing );
+    QPainter painter( this );
+    painter.setRenderHint( QPainter::HighQualityAntialiasing );
     painter.setPen( Qt::NoPen );
 
     // Draw gradient
-    QLinearGradient linearGrad( QPointF( 0, 0 ), QPointF( width(), 0) );
+    QLinearGradient linearGrad( QPointF( 0, 0 ), QPointF( width(), 0 ) );
     if( m_colorTransferFunction )
     {
         int nbPoints = m_colorTransferFunction->GetSize();
         for( int i = 0; i < nbPoints; ++i )
         {
             QColor currentColor = GetColorNodeColor( i );
-            double nodePos = GetColorNodeValue( i );
-            double realNodePos = ( nodePos - m_xMin ) / ( m_xMax - m_xMin );
+            double nodePos      = GetColorNodeValue( i );
+            double realNodePos  = ( nodePos - m_xMin ) / ( m_xMax - m_xMin );
             linearGrad.setColorAt( realNodePos, currentColor );
             DrawColorCursor( painter, nodePos, currentColor );
         }
@@ -173,29 +175,29 @@ void vtkQtColorTransferFunctionWidget::paintEvent( QPaintEvent * event )
     else
     {
         linearGrad.setColorAt( m_xMin, QColor( 0, 0, 0 ) );
-        linearGrad.setColorAt( m_xMax, QColor( 255, 255, 255) );
+        linearGrad.setColorAt( m_xMax, QColor( 255, 255, 255 ) );
     }
     int scalarBarHeight = height() - 2 * m_cursorHeight;
     painter.setPen( palette().color( QPalette::Dark ) );
-    painter.setBrush( QBrush(linearGrad) );
+    painter.setBrush( QBrush( linearGrad ) );
     painter.drawRect( 0, m_cursorHeight, width() - 1, scalarBarHeight );
 
-    QColor inColor = palette().color( QPalette::WindowText );
+    QColor inColor  = palette().color( QPalette::WindowText );
     QColor outColor = palette().color( QPalette::Window );
     QColor highlightColor( 255, 0, 0 );
 
-    QColor widgetIn = inColor;
+    QColor widgetIn  = inColor;
     QColor widgetOut = outColor;
 
     // Draw min slider
     if( m_currentCursor == 0 )
     {
-        widgetIn = highlightColor;
+        widgetIn  = highlightColor;
         widgetOut = highlightColor;
     }
     else
     {
-        widgetIn = inColor;
+        widgetIn  = inColor;
         widgetOut = outColor;
     }
     DrawCursor( painter, getMinSliderValue(), widgetIn, widgetOut );
@@ -203,12 +205,12 @@ void vtkQtColorTransferFunctionWidget::paintEvent( QPaintEvent * event )
     // Draw max slider
     if( m_currentCursor == 1 )
     {
-        widgetIn = highlightColor;
+        widgetIn  = highlightColor;
         widgetOut = highlightColor;
     }
     else
     {
-        widgetIn = inColor;
+        widgetIn  = inColor;
         widgetOut = outColor;
     }
     DrawCursor( painter, getMaxSliderValue(), widgetIn, widgetOut );
@@ -223,7 +225,6 @@ void vtkQtColorTransferFunctionWidget::MouseMove( int x, int y )
         cursorWindowPos = 0;
     else
         cursorWindowPos = x;
-
 
     if( m_useColorCursor )
     {
@@ -244,14 +245,14 @@ void vtkQtColorTransferFunctionWidget::DrawCursor( QPainter & painter, double va
     painter.setPen( out );
     int cursorPosition = sliderValueToWidgetPos( value );
     painter.setBrush( palette().windowText() );
-    float bottom = (float)( height() - 1);
-    float top = (float)( height() - m_cursorHeight - 1 );
-    float left = (float)(cursorPosition - m_cursorWidth * .5 );
-    float right = (float)(cursorPosition + m_cursorWidth * .5 );
+    float bottom = (float)( height() - 1 );
+    float top    = (float)( height() - m_cursorHeight - 1 );
+    float left   = (float)( cursorPosition - m_cursorWidth * .5 );
+    float right  = (float)( cursorPosition + m_cursorWidth * .5 );
     QPolygonF triangle;
     triangle.push_back( QPointF( left, bottom ) );
     triangle.push_back( QPointF( right, bottom ) );
-    triangle.push_back( QPointF( float(cursorPosition), top ) );
+    triangle.push_back( QPointF( float( cursorPosition ), top ) );
     painter.drawPolygon( triangle );
 }
 
@@ -260,13 +261,13 @@ void vtkQtColorTransferFunctionWidget::DrawColorCursor( QPainter & painter, doub
     painter.setBrush( c );
     painter.setPen( c );
     int cursorPosition = sliderValueToWidgetPos( value );
-    float bottom = (float)( m_cursorHeight );
-    float top = (float)( 0 );
-    float left = (float)(cursorPosition - m_cursorWidth * .5 );
-    float right = (float)(cursorPosition + m_cursorWidth * .5 );
+    float bottom       = (float)( m_cursorHeight );
+    float top          = (float)( 0 );
+    float left         = (float)( cursorPosition - m_cursorWidth * .5 );
+    float right        = (float)( cursorPosition + m_cursorWidth * .5 );
     QPolygonF triangle;
     triangle.push_back( QPointF( left, top ) );
-    triangle.push_back( QPointF( float(cursorPosition), bottom ) );
+    triangle.push_back( QPointF( float( cursorPosition ), bottom ) );
     triangle.push_back( QPointF( right, top ) );
     painter.drawPolygon( triangle );
 }
@@ -278,11 +279,11 @@ double vtkQtColorTransferFunctionWidget::getMinSliderValue()
     if( m_colorTransferFunction )
     {
         int nbNodes = m_colorTransferFunction->GetSize();
-        double nodeValues[6];
+        double nodeValues[ 6 ];
         if( nbNodes > 0 )
         {
             m_colorTransferFunction->GetNodeValue( 0, nodeValues );
-            minSliderValue = nodeValues[0];
+            minSliderValue = nodeValues[ 0 ];
         }
     }
 
@@ -296,11 +297,11 @@ double vtkQtColorTransferFunctionWidget::getMaxSliderValue()
     if( m_colorTransferFunction )
     {
         int nbNodes = m_colorTransferFunction->GetSize();
-        double nodeValues[6];
+        double nodeValues[ 6 ];
         if( nbNodes > 1 )
         {
             m_colorTransferFunction->GetNodeValue( nbNodes - 1, nodeValues );
-            maxSliderValue = nodeValues[0];
+            maxSliderValue = nodeValues[ 0 ];
         }
     }
 
@@ -309,23 +310,21 @@ double vtkQtColorTransferFunctionWidget::getMaxSliderValue()
 
 void vtkQtColorTransferFunctionWidget::setMinSliderValue( double val )
 {
-    double prevMin = getMinSliderValue();
+    double prevMin        = getMinSliderValue();
     double minSliderValue = val;
     double maxSliderValue = getMaxSliderValue();
-    if( minSliderValue > maxSliderValue - PixelSize() )
-        minSliderValue = maxSliderValue - PixelSize();
+    if( minSliderValue > maxSliderValue - PixelSize() ) minSliderValue = maxSliderValue - PixelSize();
     UpdateColorFunctionRange( prevMin, maxSliderValue, minSliderValue, maxSliderValue );
     emit slidersValueChanged( minSliderValue, maxSliderValue );
-	update();
+    update();
 }
 
 void vtkQtColorTransferFunctionWidget::setMaxSliderValue( double val )
 {
     double prevMaxSliderVal = getMaxSliderValue();
-    double maxSliderValue = val;
-    double minSliderValue = getMinSliderValue();
-    if( maxSliderValue < minSliderValue + PixelSize() )
-        maxSliderValue = minSliderValue + PixelSize();
+    double maxSliderValue   = val;
+    double minSliderValue   = getMinSliderValue();
+    if( maxSliderValue < minSliderValue + PixelSize() ) maxSliderValue = minSliderValue + PixelSize();
     UpdateColorFunctionRange( minSliderValue, prevMaxSliderVal, minSliderValue, maxSliderValue );
     emit slidersValueChanged( minSliderValue, maxSliderValue );
     update();
@@ -333,37 +332,36 @@ void vtkQtColorTransferFunctionWidget::setMaxSliderValue( double val )
 
 void vtkQtColorTransferFunctionWidget::setColorSliderValue( int index, double val )
 {
-    double nodeValues[6];
+    double nodeValues[ 6 ];
     m_colorTransferFunction->GetNodeValue( index, nodeValues );
     if( index > 0 )
     {
-        double prevNodeValues[6];
+        double prevNodeValues[ 6 ];
         m_colorTransferFunction->GetNodeValue( index - 1, prevNodeValues );
-        if( val < prevNodeValues[0] + PixelSize() )
-            val = prevNodeValues[0] + PixelSize();
+        if( val < prevNodeValues[ 0 ] + PixelSize() ) val = prevNodeValues[ 0 ] + PixelSize();
     }
     if( index < m_colorTransferFunction->GetSize() - 1 )
     {
-        double nextNodeValues[6];
+        double nextNodeValues[ 6 ];
         m_colorTransferFunction->GetNodeValue( index + 1, nextNodeValues );
-        if( val > nextNodeValues[0] - PixelSize() )
-            val = nextNodeValues[0] - PixelSize();
+        if( val > nextNodeValues[ 0 ] - PixelSize() ) val = nextNodeValues[ 0 ] - PixelSize();
     }
-    nodeValues[0] = val;
+    nodeValues[ 0 ] = val;
     m_colorTransferFunction->SetNodeValue( index, nodeValues );
 }
 
-void vtkQtColorTransferFunctionWidget::UpdateColorFunctionRange( double prevMin, double prevMax, double min, double max )
+void vtkQtColorTransferFunctionWidget::UpdateColorFunctionRange( double prevMin, double prevMax, double min,
+                                                                 double max )
 {
     if( m_colorTransferFunction )
     {
         // first pass: compute new values. Has to be done in 2 passes because SetNodeValue does is sorting points
-        int nbPoints = m_colorTransferFunction->GetSize();
+        int nbPoints       = m_colorTransferFunction->GetSize();
         double * newValues = new double[ nbPoints * 6 ];
         for( int i = 0; i < nbPoints; ++i )
         {
-            m_colorTransferFunction->GetNodeValue( i, &(newValues[ i * 6 ]) );
-            newValues[ i * 6 ] = min + ( newValues[i * 6] - prevMin ) / ( prevMax - prevMin ) * ( max - min );
+            m_colorTransferFunction->GetNodeValue( i, &( newValues[ i * 6 ] ) );
+            newValues[ i * 6 ] = min + ( newValues[ i * 6 ] - prevMin ) / ( prevMax - prevMin ) * ( max - min );
         }
 
         // second pass, rebuild function
@@ -371,9 +369,10 @@ void vtkQtColorTransferFunctionWidget::UpdateColorFunctionRange( double prevMin,
         for( int i = 0; i < nbPoints; ++i )
         {
             int index = i * 6;
-            m_colorTransferFunction->AddRGBPoint( newValues[index], newValues[index + 1], newValues[index + 2], newValues[ index + 3 ] );
+            m_colorTransferFunction->AddRGBPoint( newValues[ index ], newValues[ index + 1 ], newValues[ index + 2 ],
+                                                  newValues[ index + 3 ] );
         }
-        delete [] newValues;
+        delete[] newValues;
     }
 }
 
@@ -394,10 +393,8 @@ void vtkQtColorTransferFunctionWidget::setColorSliderValue( int index, int val )
 
 void vtkQtColorTransferFunctionWidget::SetColorTransferFunction( vtkColorTransferFunction * func )
 {
-    if( func == m_colorTransferFunction )
-        return;
-    if( m_colorTransferFunction )
-        m_colorTransferFunction->UnRegister(0);
+    if( func == m_colorTransferFunction ) return;
+    if( m_colorTransferFunction ) m_colorTransferFunction->UnRegister( 0 );
     m_colorTransferFunction = func;
     if( m_colorTransferFunction )
     {
@@ -415,8 +412,8 @@ void vtkQtColorTransferFunctionWidget::SetXRange( double min, double max )
 
 double vtkQtColorTransferFunctionWidget::widgetPosToSliderValue( int widgetPos )
 {
-    double sliderValue = m_xMin + (double)widgetPos / width() * (m_xMax - m_xMin);
-	return sliderValue;
+    double sliderValue = m_xMin + (double)widgetPos / width() * ( m_xMax - m_xMin );
+    return sliderValue;
 }
 
 int vtkQtColorTransferFunctionWidget::sliderValueToWidgetPos( double sliderValue )
@@ -425,19 +422,15 @@ int vtkQtColorTransferFunctionWidget::sliderValueToWidgetPos( double sliderValue
 }
 
 // returns the size of a screen pixel in the slider coordinate system
-double vtkQtColorTransferFunctionWidget::PixelSize()
-{
-    return ((double)width()) / ( m_xMax - m_xMin );
-}
+double vtkQtColorTransferFunctionWidget::PixelSize() { return ( (double)width() ) / ( m_xMax - m_xMin ); }
 
 int vtkQtColorTransferFunctionWidget::MinDistanceCursor( int mousePosition )
 {
     double mouseValue = widgetPosToSliderValue( mousePosition );
-    double minDist = std::abs( getMinSliderValue() - mouseValue );
-    double maxDist = std::abs( getMaxSliderValue() - mouseValue );
+    double minDist    = std::abs( getMinSliderValue() - mouseValue );
+    double maxDist    = std::abs( getMaxSliderValue() - mouseValue );
 
-    if( minDist < maxDist )
-        return 0;
+    if( minDist < maxDist ) return 0;
     return 1;
 }
 
@@ -445,18 +438,18 @@ int vtkQtColorTransferFunctionWidget::MinDistanceCursor( int mousePosition )
 
 int vtkQtColorTransferFunctionWidget::MinDistanceColor( int mousePosition )
 {
-    int nbPoints = m_colorTransferFunction->GetSize();
+    int nbPoints    = m_colorTransferFunction->GetSize();
     int minDistance = std::numeric_limits<int>::max();
-    int minIndex = 0;
+    int minIndex    = 0;
     for( int i = 0; i < nbPoints; ++i )
     {
-        double nodeValues[6];
+        double nodeValues[ 6 ];
         m_colorTransferFunction->GetNodeValue( i, nodeValues );
-        int pos = sliderValueToWidgetPos( nodeValues[0] );
+        int pos = sliderValueToWidgetPos( nodeValues[ 0 ] );
         if( abs( pos - mousePosition ) < minDistance )
         {
             minDistance = abs( pos - mousePosition );
-            minIndex = i;
+            minIndex    = i;
         }
     }
     return minIndex;
@@ -467,60 +460,58 @@ void vtkQtColorTransferFunctionWidget::UpdateCurrentCursorInformation( int x, in
     if( IsInColorCursorZone( x, y ) )
     {
         m_useColorCursor = true;
-        m_currentCursor = MinDistanceColor( x );
+        m_currentCursor  = MinDistanceColor( x );
     }
     else
     {
         m_useColorCursor = false;
-        m_currentCursor = MinDistanceCursor( x );
+        m_currentCursor  = MinDistanceCursor( x );
     }
 }
 
 bool vtkQtColorTransferFunctionWidget::IsInColorCursorZone( int x, int y )
 {
-    if( y < m_cursorHeight )
-        return true;
+    if( y < m_cursorHeight ) return true;
     return false;
 }
 
 bool vtkQtColorTransferFunctionWidget::IsInRangeCursorZone( int x, int y )
 {
-    if( y > height() - m_cursorHeight )
-        return true;
+    if( y > height() - m_cursorHeight ) return true;
     return false;
 }
 
 double vtkQtColorTransferFunctionWidget::GetColorNodeValue( int nodeIndex )
 {
     Q_ASSERT( nodeIndex < m_colorTransferFunction->GetSize() );
-    double nodeValues[6];
+    double nodeValues[ 6 ];
     m_colorTransferFunction->GetNodeValue( nodeIndex, nodeValues );
-    return nodeValues[0];
+    return nodeValues[ 0 ];
 }
 
 int vtkQtColorTransferFunctionWidget::GetColorNodePixPosition( int nodeIndex )
 {
     Q_ASSERT( nodeIndex < m_colorTransferFunction->GetSize() );
-    double nodeValues[6];
+    double nodeValues[ 6 ];
     m_colorTransferFunction->GetNodeValue( nodeIndex, nodeValues );
-    return sliderValueToWidgetPos( nodeValues[0] );
+    return sliderValueToWidgetPos( nodeValues[ 0 ] );
 }
 
 QColor vtkQtColorTransferFunctionWidget::GetColorNodeColor( int nodeIndex )
 {
     Q_ASSERT( nodeIndex < m_colorTransferFunction->GetSize() );
-    double nodeValues[6];
+    double nodeValues[ 6 ];
     m_colorTransferFunction->GetNodeValue( nodeIndex, nodeValues );
-    return QColor( (int)(nodeValues[1] * 255), (int)(nodeValues[2] * 255), (int)(nodeValues[3] * 255 ) );
+    return QColor( (int)( nodeValues[ 1 ] * 255 ), (int)( nodeValues[ 2 ] * 255 ), (int)( nodeValues[ 3 ] * 255 ) );
 }
 
 void vtkQtColorTransferFunctionWidget::SetColorNodeColor( int nodeIndex, QColor & color )
 {
     Q_ASSERT( nodeIndex < m_colorTransferFunction->GetSize() );
-    double nodeValues[6];
+    double nodeValues[ 6 ];
     m_colorTransferFunction->GetNodeValue( nodeIndex, nodeValues );
-    nodeValues[1] = color.redF();
-    nodeValues[2] = color.greenF();
-    nodeValues[3] = color.blueF();
+    nodeValues[ 1 ] = color.redF();
+    nodeValues[ 2 ] = color.greenF();
+    nodeValues[ 3 ] = color.blueF();
     m_colorTransferFunction->SetNodeValue( nodeIndex, nodeValues );
 }

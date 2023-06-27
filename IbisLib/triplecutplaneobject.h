@@ -12,13 +12,15 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef TRIPLECUTPLANEOBJECT_H
 #define TRIPLECUTPLANEOBJECT_H
 
-#include <vector>
-#include "ibistypes.h"
-#include "serializer.h"
-#include "sceneobject.h"
 #include <vtkSmartPointer.h>
+
 #include <QColor>
 #include <QObject>
+#include <vector>
+
+#include "ibistypes.h"
+#include "sceneobject.h"
+#include "serializer.h"
 
 class ImageObject;
 class QWidget;
@@ -39,16 +41,14 @@ class vtkEventQtSlotConnect;
 
 class TripleCutPlaneObject : public SceneObject
 {
-
-Q_OBJECT
+    Q_OBJECT
 
 public:
+    static TripleCutPlaneObject * New() { return new TripleCutPlaneObject; }
+    vtkTypeMacro( TripleCutPlaneObject, SceneObject );
 
-	static TripleCutPlaneObject * New() { return new TripleCutPlaneObject; }
-    vtkTypeMacro(TripleCutPlaneObject,SceneObject);
-
-	TripleCutPlaneObject();
-	virtual ~TripleCutPlaneObject();
+    TripleCutPlaneObject();
+    virtual ~TripleCutPlaneObject();
 
     /** @name SceneObject reimplementation
      *  @brief Saving/loading and setting up the objects in the scene
@@ -73,7 +73,7 @@ public:
     /** Main dialog. */
     virtual QWidget * CreateSettingsDialog( QWidget * parent ) override;
     /** Additional dialogs added as tabs. */
-    virtual void CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets) override {}
+    virtual void CreateSettingsWidgets( QWidget * parent, QVector<QWidget *> * widgets ) override {}
     ///@}
 
     /** @name  Images
@@ -85,22 +85,21 @@ public:
     /** Get an ImageObject knowing its index. */
     ImageObject * GetImage( int index );
     /** Add an ImageObject knowing its ID. */
-    void AddImage( int imageID);
+    void AddImage( int imageID );
     /** Remove an ImageObject knowing its ID. */
-    void RemoveImage(int imageID );
+    void RemoveImage( int imageID );
     /** Prepare to display. */
     void PreDisplaySetup() override;
     /** Set all three planes in the initial position, i.e. cutting in the middle. */
     void ResetPlanes();
     ///@}
 
-
     /** @name  Planes
      *  @brief Manage planes visibility.
      */
     ///@{
     /** Show/hide plane knowing its index. */
-	void SetViewPlane( int planeIndex, int isOn );
+    void SetViewPlane( int planeIndex, int isOn );
     /** Check plane visibility. */
     int GetViewPlane( int planeIndex );
     /** Show/hide all three planes. */
@@ -137,7 +136,7 @@ public:
     ///@{
     int GetSliceThickness() { return m_sliceThickness; }
     void SetSliceThickness( int );
-    int GetSliceMixMode( int imageIndex ) { return m_sliceMixMode[ imageIndex ]; }
+    int GetSliceMixMode( int imageIndex ) { return m_sliceMixMode[imageIndex]; }
     void SetSliceMixMode( int imageIndex, int mode );
     ///@}
 
@@ -152,7 +151,7 @@ public:
     int GetNumberOfBlendingModes();
     QString GetBlendingModeName( int blendingModeIndex );
     void SetBlendingModeIndex( int imageIndex, int blendingModeIndex );
-    int GetBlendingModeIndex( int imageIndex ) { return m_blendingModeIndices[ imageIndex ]; }
+    int GetBlendingModeIndex( int imageIndex ) { return m_blendingModeIndices[imageIndex]; }
     ///@}
 
     /** Get Planes position in local coordinates. */
@@ -179,29 +178,28 @@ public slots:
     void SetImageHidden( int imageID );
 
 signals:
-    void StartPlaneMoved(int);
-    void PlaneMoved(int);
-    void EndPlaneMove(int);
+    void StartPlaneMoved( int );
+    void PlaneMoved( int );
+    void EndPlaneMove( int );
 
 protected:
-
     virtual void ObjectAddedToScene() override;
     virtual void ObjectRemovedFromScene() override;
     View * Get3DView();
-	void Setup3DRepresentation( View * view );
-	void Release3DRepresentation( View * view );
-	void Setup2DRepresentation( int viewType, View * view );
-	void Release2DRepresentation( int viewType, View * view );
-	void CreatePlane( int viewType );
+    void Setup3DRepresentation( View * view );
+    void Release3DRepresentation( View * view );
+    void Setup2DRepresentation( int viewType, View * view );
+    void Release2DRepresentation( int viewType, View * view );
+    void CreatePlane( int viewType );
 
     int GetPlaneIndex( vtkObject * caller );
     void UpdateOtherPlanesPosition( int planeIndex );
 
     typedef std::vector<int> ImageContainer;
-	ImageContainer Images;
+    ImageContainer Images;
 
     int m_sliceThickness;
-    std::vector<int> m_sliceMixMode; // per-image
+    std::vector<int> m_sliceMixMode;  // per-image
     std::vector<int> m_blendingModeIndices;
 
     vtkSmartPointer<vtkMultiImagePlaneWidget> Planes[3];
@@ -210,19 +208,18 @@ protected:
     int m_resliceInterpolationType;
     int m_displayInterpolationType;
 
-	// callbacks
+    // callbacks
     vtkSmartPointer<vtkEventQtSlotConnect> PlaneInteractionSlotConnect;
     vtkSmartPointer<vtkEventQtSlotConnect> PlaneEndInteractionSlotConnect;
 
-    //used only to set planes position in PostRead()
+    // used only to set planes position in PostRead()
     double m_planePosition[3];
 
 private:
     void UpdateAllPlanesVisibility();
-    void UpdatePlanesVisibility( View *view );
-
+    void UpdatePlanesVisibility( View * view );
 };
 
 ObjectSerializationHeaderMacro( TripleCutPlaneObject );
 
-#endif // TRIPLECUTPLANEOBJECT_H
+#endif  // TRIPLECUTPLANEOBJECT_H

@@ -22,67 +22,63 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #define __vtkMultiTextureMapToPlane_h
 
 #include <vtkDataSetAlgorithm.h>
+
 #include <vector>
 
 class vtkMultiTextureMapToPlane : public vtkDataSetAlgorithm
 {
-
 public:
+    vtkTypeMacro( vtkMultiTextureMapToPlane, vtkDataSetAlgorithm );
+    void PrintSelf( ostream & os, vtkIndent indent ) override;
 
-  vtkTypeMacro(vtkMultiTextureMapToPlane,vtkDataSetAlgorithm);
-  void PrintSelf(ostream& os, vtkIndent indent) override;
+    // Description:
+    // Construct
+    static vtkMultiTextureMapToPlane * New();
 
-  // Description:
-  // Construct
-  static vtkMultiTextureMapToPlane  *New();
+    // Description:
+    // Specify a point defining the origin of the plane. Used in conjunction with
+    // the Point1 and Point2 ivars to specify a map plane.
+    vtkSetVector3Macro( Origin, double );
+    vtkGetVectorMacro( Origin, double, 3 );
 
-  // Description:
-  // Specify a point defining the origin of the plane. Used in conjunction with
-  // the Point1 and Point2 ivars to specify a map plane.
-  vtkSetVector3Macro(Origin,double);
-  vtkGetVectorMacro(Origin,double,3);
+    // Description:
+    // Specify a point defining the first axis of the plane.
+    vtkSetVector3Macro( Point1, double );
+    vtkGetVectorMacro( Point1, double, 3 );
 
-  // Description:
-  // Specify a point defining the first axis of the plane.
-  vtkSetVector3Macro(Point1,double);
-  vtkGetVectorMacro(Point1,double,3);
+    // Description:
+    // Specify a point defining the second axis of the plane.
+    vtkSetVector3Macro( Point2, double );
+    vtkGetVectorMacro( Point2, double, 3 );
 
-  // Description:
-  // Specify a point defining the second axis of the plane.
-  vtkSetVector3Macro(Point2,double);
-  vtkGetVectorMacro(Point2,double,3);
-
-  // Description:
-  // Manage different texture coord sets
-  void AddTCoordSet( const char * name, double min, double max );
-  void ClearTCoordSets();
+    // Description:
+    // Manage different texture coord sets
+    void AddTCoordSet( const char * name, double min, double max );
+    void ClearTCoordSets();
 
 protected:
+    vtkMultiTextureMapToPlane();
+    ~vtkMultiTextureMapToPlane(){};
 
-  vtkMultiTextureMapToPlane();
-  ~vtkMultiTextureMapToPlane() {};
+    int RequestData( vtkInformation *, vtkInformationVector **, vtkInformationVector * ) override;
 
-  int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *) override;
+    // Plane specification
+    double Origin[ 3 ];
+    double Point1[ 3 ];
+    double Point2[ 3 ];
 
-  // Plane specification
-  double Origin[3];
-  double Point1[3];
-  double Point2[3];
+    struct RangeInfo
+    {
+        double xOffset;
+        double yOffset;
+        std::string name;
+    };
 
-  struct RangeInfo
-  {
-      double xOffset;
-      double yOffset;
-      std::string name;
-  };
-
-  std::vector< RangeInfo > Ranges;
-
+    std::vector<RangeInfo> Ranges;
 
 private:
-
-  vtkMultiTextureMapToPlane(const vtkMultiTextureMapToPlane&);  // Not implemented.
-  void operator=(const vtkMultiTextureMapToPlane&);  // Not implemented.
+    vtkMultiTextureMapToPlane( const vtkMultiTextureMapToPlane & );  // Not implemented.
+    void operator=( const vtkMultiTextureMapToPlane & );             // Not implemented.
 };
 
 #endif

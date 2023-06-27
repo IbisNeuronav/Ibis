@@ -13,13 +13,13 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef MATRIXDIALOG_H
 #define MATRIXDIALOG_H
 
-#include <QVariant>
 #include <QDialog>
 #include <QObject>
+#include <QVariant>
 
-class QVBoxLayout; 
-class QHBoxLayout; 
-class QGridLayout; 
+class QVBoxLayout;
+class QHBoxLayout;
+class QGridLayout;
 class QLineEdit;
 class QPushButton;
 class QFile;
@@ -28,19 +28,18 @@ class vtkHomogeneousTransform;
 class vtkEventQtSlotConnect;
 
 class vtkQtMatrixDialog : public QDialog
-{ 
+{
     Q_OBJECT
 
 public:
-
     vtkQtMatrixDialog( bool readOnly, QWidget * parent = 0 );
     ~vtkQtMatrixDialog();
 
     void SetMatrix( vtkMatrix4x4 * mat );
-    void SetDirectory(const QString &dir);
+    void SetDirectory( const QString & dir );
     void UpdateUI();
 
-    QLineEdit   * m_matEdit[4][4];
+    QLineEdit * m_matEdit[ 4 ][ 4 ];
     QPushButton * m_invertButton;
     QPushButton * m_identityButton;
     QPushButton * m_revertButton;
@@ -51,10 +50,10 @@ public:
 
 signals:
 
-    void MatrixModified( vtkMatrix4x4* );
+    void MatrixModified( vtkMatrix4x4 * );
 
 public slots:
-    
+
     void InvertButtonClicked();
     void IdentityButtonClicked();
     void RevertButtonClicked();
@@ -63,24 +62,22 @@ public slots:
     void SaveButtonClicked();
     void CopyButtonClicked();
     void PasteButtonClicked();
-    void SetMatrixElements( );
+    void SetMatrixElements();
     void LineEditChanged();
 
 protected:
-
     bool m_readOnly;
     vtkMatrix4x4 * m_matrix;
     vtkMatrix4x4 * m_copy_matrix;
     QString m_directory;
-    
+
     vtkEventQtSlotConnect * m_eventSlotConnect;  // used to connect vtkEvents to Slots of this class
-    
+
     QVBoxLayout * MatrixDialogLayout;
     QGridLayout * gridBox;
     QHBoxLayout * Layout3;
 
-    bool  LoadFromXFMFile(QFile *f, vtkMatrix4x4 * mat);
+    bool LoadFromXFMFile( QFile * f, vtkMatrix4x4 * mat );
 };
-
 
 #endif

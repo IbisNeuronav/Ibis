@@ -11,18 +11,18 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef __Application_h_
 #define __Application_h_
 
-#include <QString>
-#include <QSize>
-#include <QPoint>
 #include <QColor>
 #include <QDockWidget>
 #include <QObject>
-#include "serializer.h"
+#include <QPoint>
+#include <QSize>
+#include <QString>
 #include <vector>
-#include "ibistypes.h"
+
 #include "globaleventhandler.h"
-#include "serializer.h"
 #include "ibisitkvtkconverter.h"
+#include "ibistypes.h"
+#include "serializer.h"
 
 // forward declarations
 class QSettings;
@@ -110,11 +110,9 @@ struct ApplicationSettings
 //===============================================================================
 class Application : public QObject
 {
-
     Q_OBJECT
 
 public:
-
     ~Application();
 
     static void CreateInstance( bool viewerOnly );
@@ -134,7 +132,10 @@ public:
     void RemoveBottomWidget( QWidget * w );
 
     /** Popup a dialog. */
-    void ShowFloatingDock( QWidget * w, QFlags<QDockWidget::DockWidgetFeature> features=QDockWidget::AllDockWidgetFeatures );
+    void ShowFloatingDock( QWidget * w,
+                           QFlags<QDockWidget::DockWidgetFeature> features = QDockWidget::DockWidgetClosable |
+                                                                             QDockWidget::DockWidgetMovable |
+                                                                             QDockWidget::DockWidgetFloatable );
 
     /** Set up clock connection. */
     void OnStartMainLoop();
@@ -163,7 +164,7 @@ public:
     /** Check if the application is in a viewer mode - no tracking. */
     bool IsViewerOnly() { return m_viewerOnly; }
 
-     /** @name  Version
+    /** @name  Version
      *   @brief Information on application and git version.
      *
      * */
@@ -183,53 +184,52 @@ public:
     static LookupTableManager * GetLookupTableManager();
 
     /** @name  Application Settings
-    *   @brief Application Settings are loaded at the start of the application and
-    *  saved automatically at each run.
-    *
-    * @sa ApplicationSettings
-    *
-    * */
-   ///@{
+     *   @brief Application Settings are loaded at the start of the application and
+     *  saved automatically at each run.
+     *
+     * @sa ApplicationSettings
+     *
+     * */
+    ///@{
     ApplicationSettings * GetSettings();
     void UpdateApplicationSettings();
     void ApplyApplicationSettings();
     ///@}
 
     /** @name  Update
-    *   @brief Set/Get update frequency.
-    *
-    * */
-   ///@{
+     *   @brief Set/Get update frequency.
+     *
+     * */
+    ///@{
     void SetUpdateFrequency( double fps );
     double GetUpdateFrequency() { return GetSettings()->UpdateFrequency; }
     ///@}
 
     /** @name  Plugins
-    *   @brief Plugin  and global objects management.
-    *
-    * */
-   ///@{
+     *   @brief Plugin  and global objects management.
+     *
+     * */
+    ///@{
     void LoadPlugins();
     void SerializePlugins( Serializer * ser );
     IbisPlugin * GetPluginByName( QString name );
     void ActivatePluginByName( const char * name, bool active );
-    ObjectPluginInterface *GetObjectPluginByName( QString className );
+    ObjectPluginInterface * GetObjectPluginByName( QString className );
     ToolPluginInterface * GetToolPluginByName( QString name );
     GeneratorPluginInterface * GetGeneratorPluginByName( QString name );
     SceneObject * GetGlobalObjectInstance( const QString & className );
-    void GetAllGlobalObjectInstances( QList<SceneObject*> & allInstances );
-    void GetAllPlugins( QList<IbisPlugin*> & allPlugins );
-    void GetAllToolPlugins( QList<ToolPluginInterface*> & allTools );
-    void GetAllObjectPlugins( QList<ObjectPluginInterface*> & allObjects );
-    void GetAllGeneratorPlugins( QList<GeneratorPluginInterface*> & allObjects );
+    void GetAllGlobalObjectInstances( QList<SceneObject *> & allInstances );
+    void GetAllPlugins( QList<IbisPlugin *> & allPlugins );
+    void GetAllToolPlugins( QList<ToolPluginInterface *> & allTools );
+    void GetAllObjectPlugins( QList<ObjectPluginInterface *> & allObjects );
+    void GetAllGeneratorPlugins( QList<GeneratorPluginInterface *> & allObjects );
     ///@}
 
-
     /** @name  Files
-    *   @brief Manage loading and importing files.
-    *
-    * */
-   ///@{
+     *   @brief Manage loading and importing files.
+     *
+     * */
+    ///@{
     /** Set initial data files to load when the application starts up, typically specified on the command line. */
     void SetInitialDataFiles( const QStringList & files ) { m_initialDataFiles = files; }
     /** Get names of data files loaded on application start, typically specified on the command line. */
@@ -242,7 +242,7 @@ public:
      * Tag file *.tag;
      * VTK file: *.vtk *.vtp;
      * FIB file *.fib.
-    */
+     */
     void OpenFiles( OpenFileParams * params, bool addToScene = true );
     /** Open a transform file, supported format *xfm, and possibly set as a local transform of obj */
     bool OpenTransformFile( const char * filename, SceneObject * obj = 0 );
@@ -255,17 +255,17 @@ public:
     ///@}
 
     /** Getting points from a  tag file. */
-    bool GetPointsFromTagFile(QString fileName, PointsObject *pts1, PointsObject *pts2 );
+    bool GetPointsFromTagFile( QString fileName, PointsObject * pts1, PointsObject * pts2 );
 
     /** @name  US Acquisitions
-    *   @brief Manage loading acquired frames.
-    *
-    * */
+     *   @brief Manage loading acquired frames.
+     *
+     * */
     ///@{
     /** Get the number of components per pixel in the image. For grayscale
      * number of components will be 1 otherwise it will be greater than one.
      * Used to check what type of frames should be loaded.
-    */
+     */
     int GetNumberOfComponents( QString filename );
     /** Load gray scale frames. */
     bool GetGrayFrame( QString filename, IbisItkUnsignedChar3ImageType::Pointer itkImage );
@@ -274,28 +274,31 @@ public:
     ///@}
 
     /** @name  Dialogs
-    *   @brief Opening files, getting directories, displaying warnings and progress.
-    *
-    * */
+     *   @brief Opening files, getting directories, displaying warnings and progress.
+     *
+     * */
     ///@{
-    QString GetFileNameOpen( const QString & caption = QString(), const QString & dir = QString(), const QString & filter = QString() );
-    QString GetFileNameSave( const QString & caption = QString(), const QString & dir = QString(), const QString & filter = QString() );
+    QString GetFileNameOpen( const QString & caption = QString(), const QString & dir = QString(),
+                             const QString & filter = QString() );
+    QString GetFileNameSave( const QString & caption = QString(), const QString & dir = QString(),
+                             const QString & filter = QString() );
     QString GetExistingDirectory( const QString & caption = QString(), const QString & dir = QString() );
-    bool GetOpenFileSequence( QStringList & filenames, QString extension, const QString & caption, const QString & dir, const QString & filter );
+    bool GetOpenFileSequence( QStringList & filenames, QString extension, const QString & caption, const QString & dir,
+                              const QString & filter );
     int LaunchModalDialog( QDialog * d );
-    void Warning( const QString &title, const QString & text );
+    void Warning( const QString & title, const QString & text );
 
     QProgressDialog * StartProgress( int max, const QString & caption = QString() );
-    void StopProgress( QProgressDialog * progressDialog);
+    void StopProgress( QProgressDialog * progressDialog );
     ///@}
 
     /** Show dialog informing user that MINC1 files will be automatically converted to MINC2 if possible. */
-    void ShowMinc1Warning( bool cando);
+    void ShowMinc1Warning( bool cando );
 
     /** @name  Scenes
-    *   @brief Loading and saving.
-    *
-    * */
+     *   @brief Loading and saving.
+     *
+     * */
     ///@{
     /** Load saved scene. */
     void LoadScene( QString fileName );
@@ -304,19 +307,19 @@ public:
     ///@}
 
     /** @name  Preferences
-    *   @brief Preferences are used to save paths to tools used in Ibis.
-    *
-    * @sa IbisPreferences
-    * */
+     *   @brief Preferences are used to save paths to tools used in Ibis.
+     *
+     * @sa IbisPreferences
+     * */
     ///@{
     /** Get preferences in use */
-    IbisPreferences *GetIbisPreferences() { return m_preferences; }
+    IbisPreferences * GetIbisPreferences() { return m_preferences; }
     /** Show dialog allowing to set the preferences. */
     void Preferences();
     ///@}
 
 public slots:
-    void UpdateProgress( QProgressDialog*, int current );
+    void UpdateProgress( QProgressDialog *, int current );
     void SaveSettings();
 
 private slots:
@@ -332,10 +335,9 @@ signals:
     void IbisClockTick();
 
 private:
-
     void Init( bool viewerOnly );
     Application();
-    static Application  * m_uniqueInstance;
+    static Application * m_uniqueInstance;
 
     // Update manager is the only one to call TickIbisClock which will
     // update the hardware module and tell the whole world (emit IbisClockTick())
@@ -349,16 +351,16 @@ private:
     QProgressDialog * m_fileOpenProgressDialog;
     QTimer * m_progressDialogUpdateTimer;
 
-    MainWindow                  * m_mainWindow;
-    SceneManager                * m_sceneManager;
-    IbisAPI                     * m_ibisAPI;
-    UpdateManager               * m_updateManager;
-    QList<HardwareModule*>        m_hardwareModules;
-    LookupTableManager          * m_lookupTableManager;
-    QList<GlobalEventHandler*>    m_globalEventHandlers;
+    MainWindow * m_mainWindow;
+    SceneManager * m_sceneManager;
+    IbisAPI * m_ibisAPI;
+    UpdateManager * m_updateManager;
+    QList<HardwareModule *> m_hardwareModules;
+    LookupTableManager * m_lookupTableManager;
+    QList<GlobalEventHandler *> m_globalEventHandlers;
 
     ApplicationSettings m_settings;
-    IbisPreferences *m_preferences;
+    IbisPreferences * m_preferences;
 
     // Data file to load when the application starts up (typically specified on the command line)
     QStringList m_initialDataFiles;
@@ -367,8 +369,6 @@ private:
 
     static const QString m_appName;
     static const QString m_appOrganisation;
-
 };
-
 
 #endif

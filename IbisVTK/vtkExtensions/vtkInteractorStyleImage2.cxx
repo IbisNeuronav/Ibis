@@ -14,18 +14,13 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <vtkObjectFactory.h>
 #include <vtkRenderWindowInteractor.h>
 
-vtkStandardNewMacro(vtkInteractorStyleImage2);
+vtkStandardNewMacro( vtkInteractorStyleImage2 );
 
-vtkInteractorStyleImage2::vtkInteractorStyleImage2()
-{
-}
+vtkInteractorStyleImage2::vtkInteractorStyleImage2() {}
 
-vtkInteractorStyleImage2::~vtkInteractorStyleImage2()
-{
+vtkInteractorStyleImage2::~vtkInteractorStyleImage2() {}
 
-}
-
-void vtkInteractorStyleImage2::PrintSelf(ostream& os, vtkIndent indent)
+void vtkInteractorStyleImage2::PrintSelf( ostream & os, vtkIndent indent )
 {
     this->Superclass::PrintSelf( os, indent );
 }
@@ -33,7 +28,7 @@ void vtkInteractorStyleImage2::PrintSelf(ostream& os, vtkIndent indent)
 // Reimplemented to prevent rotation
 void vtkInteractorStyleImage2::OnLeftButtonDown()
 {
-    if( !this->Interactor->GetControlKey())
+    if( !this->Interactor->GetControlKey() )
     {
         this->Superclass::OnLeftButtonDown();
     }

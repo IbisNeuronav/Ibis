@@ -11,10 +11,11 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef __AboutPluginsWidget_h_
 #define __AboutPluginsWidget_h_
 
-#include <QWidget>
 #include <QObject>
+#include <QWidget>
 
-namespace Ui {
+namespace Ui
+{
 class AboutPluginsWidget;
 }
 
@@ -25,18 +26,16 @@ class AboutPluginsWidget : public QWidget
     Q_OBJECT
 
 public:
-
-    explicit AboutPluginsWidget(QWidget *parent = 0);
+    explicit AboutPluginsWidget( QWidget * parent = 0 );
     ~AboutPluginsWidget();
 
 private slots:
 
     void UpdateUI();
-    void on_pluginListWidget_currentItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous);
+    void on_pluginListWidget_currentItemChanged( QTreeWidgetItem * current, QTreeWidgetItem * previous );
 
 private:
-
-    Ui::AboutPluginsWidget *ui;
+    Ui::AboutPluginsWidget * ui;
 };
 
 #endif

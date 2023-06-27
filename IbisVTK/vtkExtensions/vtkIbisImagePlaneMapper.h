@@ -31,27 +31,24 @@ class GlslShader;
 
 class vtkIbisImagePlaneMapper : public vtkSimpleMapper3D
 {
-
 public:
-
-    vtkTypeMacro(vtkIbisImagePlaneMapper,vtkSimpleMapper3D);
-    static vtkIbisImagePlaneMapper* New();
+    vtkTypeMacro( vtkIbisImagePlaneMapper, vtkSimpleMapper3D );
+    static vtkIbisImagePlaneMapper * New();
 
     // Description:
     // WARNING: INTERNAL METHOD - NOT INTENDED FOR GENERAL USE
     // DO NOT USE THIS METHOD OUTSIDE OF THE RENDERING PROCESS
     // Do the actual rendering
     virtual int HasTranslucentPolygonalGeometry() override { return 1; }
-    virtual int RenderTranslucentPolygonalGeometry( vtkRenderer *ren, vtkSimpleProp3D * prop ) override;
-    void ReleaseGraphicsResources(vtkWindow *) override;
+    virtual int RenderTranslucentPolygonalGeometry( vtkRenderer * ren, vtkSimpleProp3D * prop ) override;
+    void ReleaseGraphicsResources( vtkWindow * ) override;
     virtual unsigned long int GetRedrawMTime() override;
 
     // Description:
     // Return bounding box (array of six doubles) of data expressed as
     // (xmin,xmax, ymin,ymax, zmin,zmax).
-    virtual double *GetBounds() override;
-    virtual void GetBounds(double bounds[6]) override
-      { this->vtkAbstractMapper3D::GetBounds(bounds); };
+    virtual double * GetBounds() override;
+    virtual void GetBounds( double bounds[ 6 ] ) override { this->vtkAbstractMapper3D::GetBounds( bounds ); };
 
     void SetGlobalOpacity( double opacity );
     void SetImageCenter( double x, double y );
@@ -65,37 +62,32 @@ public:
     void SetBrightness( double b );
 
 protected:
-
     vtkIbisImagePlaneMapper();
     ~vtkIbisImagePlaneMapper();
 
-    virtual int FillInputPortInformation(int, vtkInformation*) override;
+    virtual int FillInputPortInformation( int, vtkInformation * ) override;
     void UpdateTexture();
     bool UpdateShader();
     vtkImageData * GetInput();
 
     vtkImageData * LastInput;
-    vtkTimeStamp   LastInputTimeStamp;
-    unsigned       TextureId;
-    GlslShader   * Shader;
+    vtkTimeStamp LastInputTimeStamp;
+    unsigned TextureId;
+    GlslShader * Shader;
     double GlobalOpacity;
-    double ImageCenter[2];
+    double ImageCenter[ 2 ];
     double LensDistortion;
     bool UseTransparency;
     bool UseGradient;
     bool ShowMask;
-    double TransparencyPosition[2];
-    double TransparencyRadius[2];  // min - max
+    double TransparencyPosition[ 2 ];
+    double TransparencyRadius[ 2 ];  // min - max
     double Saturation;
     double Brightness;
 
 private:
-
-    vtkIbisImagePlaneMapper(const vtkIbisImagePlaneMapper&);  // Not implemented.
-    void operator=(const vtkIbisImagePlaneMapper&);  // Not implemented.
+    vtkIbisImagePlaneMapper( const vtkIbisImagePlaneMapper & );  // Not implemented.
+    void operator=( const vtkIbisImagePlaneMapper & );           // Not implemented.
 };
 
-
 #endif
-
-

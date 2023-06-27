@@ -15,23 +15,20 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include "toolplugininterface.h"
 
-
 class GPUVolumeReconstructionAPITestPluginInterface : public ToolPluginInterface
 {
-
     Q_OBJECT
-    Q_INTERFACES(IbisPlugin)
-    Q_PLUGIN_METADATA(IID "Ibis._GPUVolumeReconstructionAPITestPluginInterface" )
+    Q_INTERFACES( IbisPlugin )
+    Q_PLUGIN_METADATA( IID "Ibis._GPUVolumeReconstructionAPITestPluginInterface" )
 
 public:
-
     vtkTypeMacro( GPUVolumeReconstructionAPITestPluginInterface, ToolPluginInterface );
 
     GPUVolumeReconstructionAPITestPluginInterface();
     ~GPUVolumeReconstructionAPITestPluginInterface();
-    virtual QString GetPluginName() override { return QString("GPUVolumeReconstructionAPITest"); }
+    virtual QString GetPluginName() override { return QString( "GPUVolumeReconstructionAPITest" ); }
     bool CanRun() override;
-    QString GetMenuEntryString() override { return QString("No GUI US Volume Reconstruction"); }
+    QString GetMenuEntryString() override { return QString( "No GUI US Volume Reconstruction" ); }
     QWidget * CreateFloatingWidget() override;
 };
 

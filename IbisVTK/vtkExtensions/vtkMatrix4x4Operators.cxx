@@ -11,8 +11,9 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 // Thanks to Simon Drouin for writing this class
 
 #include "vtkMatrix4x4Operators.h"
-#include <vtkMatrix4x4.h>
+
 #include <vtkMath.h>
+#include <vtkMatrix4x4.h>
 
 void vtkMatrix4x4Operators::AddMatrix( vtkMatrix4x4 * dst, vtkMatrix4x4 * src )
 {
@@ -42,35 +43,37 @@ void vtkMatrix4x4Operators::MatrixMultScalar( vtkMatrix4x4 * src, vtkMatrix4x4 *
     }
 }
 
-void vtkMatrix4x4Operators::MultiplyVector( vtkMatrix4x4 * mat, double in[3], double out[3] )
+void vtkMatrix4x4Operators::MultiplyVector( vtkMatrix4x4 * mat, double in[ 3 ], double out[ 3 ] )
 {
-    double x = mat->GetElement( 0, 0 )*in[0] + mat->GetElement( 0, 1 )*in[1] + mat->GetElement( 0, 2 )*in[2];
-    double y = mat->GetElement( 1, 0 )*in[0] + mat->GetElement( 1, 1 )*in[1] + mat->GetElement( 1, 2 )*in[2];
-    double z = mat->GetElement( 2, 0 )*in[0] + mat->GetElement( 2, 1 )*in[1] + mat->GetElement( 2, 2 )*in[2];
+    double x =
+        mat->GetElement( 0, 0 ) * in[ 0 ] + mat->GetElement( 0, 1 ) * in[ 1 ] + mat->GetElement( 0, 2 ) * in[ 2 ];
+    double y =
+        mat->GetElement( 1, 0 ) * in[ 0 ] + mat->GetElement( 1, 1 ) * in[ 1 ] + mat->GetElement( 1, 2 ) * in[ 2 ];
+    double z =
+        mat->GetElement( 2, 0 ) * in[ 0 ] + mat->GetElement( 2, 1 ) * in[ 1 ] + mat->GetElement( 2, 2 ) * in[ 2 ];
 
-    out[0] = x;
-    out[1] = y;
-    out[2] = z;
+    out[ 0 ] = x;
+    out[ 1 ] = y;
+    out[ 2 ] = z;
 }
 
-void vtkMatrix4x4Operators::MeanMatrix( std::vector< vtkMatrix4x4 * > & allMatrices, vtkMatrix4x4 * dst )
+void vtkMatrix4x4Operators::MeanMatrix( std::vector<vtkMatrix4x4 *> & allMatrices, vtkMatrix4x4 * dst )
 {
     dst->Zero();
-    for( int i = 0; i < allMatrices.size(); ++i )
-        AddMatrix( dst, allMatrices[i] );
-    MatrixMultScalar( dst, 1.0 / double( allMatrices.size()) );
+    for( int i = 0; i < allMatrices.size(); ++i ) AddMatrix( dst, allMatrices[ i ] );
+    MatrixMultScalar( dst, 1.0 / double( allMatrices.size() ) );
 }
 
-void vtkMatrix4x4Operators::MatrixToTransRot( vtkMatrix4x4 * mat, double t[3], double r[3] )
+void vtkMatrix4x4Operators::MatrixToTransRot( vtkMatrix4x4 * mat, double t[ 3 ], double r[ 3 ] )
 {
     double m21 = mat->GetElement( 2, 1 );
     double m22 = mat->GetElement( 2, 2 );
     double m20 = mat->GetElement( 2, 0 );
     double m00 = mat->GetElement( 0, 0 );
     double m10 = mat->GetElement( 1, 0 );
-    r[0] = vtkMath::DegreesFromRadians( atan2( m21, m22 ) );
-    r[1] = vtkMath::DegreesFromRadians( atan2( -m20, sqrt( m21 * m21 + m22 * m22 ) ) );
-    r[2] = vtkMath::DegreesFromRadians( atan2( m10, m00 ) );
+    r[ 0 ]     = vtkMath::DegreesFromRadians( atan2( m21, m22 ) );
+    r[ 1 ]     = vtkMath::DegreesFromRadians( atan2( -m20, sqrt( m21 * m21 + m22 * m22 ) ) );
+    r[ 2 ]     = vtkMath::DegreesFromRadians( atan2( m10, m00 ) );
 
     // Get the inverse of the rotation
     vtkMatrix4x4 * invRot = vtkMatrix4x4::New();
@@ -87,25 +90,25 @@ void vtkMatrix4x4Operators::MatrixToTransRot( vtkMatrix4x4 * mat, double t[3], d
     trans->SetElement( 1, 3, mat->GetElement( 1, 3 ) );
     trans->SetElement( 2, 3, mat->GetElement( 2, 3 ) );
     vtkMatrix4x4::Multiply4x4( invRot, trans, trans );
-    t[0] = trans->GetElement( 0, 3 );
-    t[1] = trans->GetElement( 1, 3 );
-    t[2] = trans->GetElement( 2, 3 );
+    t[ 0 ] = trans->GetElement( 0, 3 );
+    t[ 1 ] = trans->GetElement( 1, 3 );
+    t[ 2 ] = trans->GetElement( 2, 3 );
 
     invRot->Delete();
     trans->Delete();
 }
 
 // M = Rz * Ry * Rx * T
-void vtkMatrix4x4Operators::TransRotToMatrix( double t[3], double r[3], vtkMatrix4x4 * mat )
+void vtkMatrix4x4Operators::TransRotToMatrix( double t[ 3 ], double r[ 3 ], vtkMatrix4x4 * mat )
 {
     // Apply rotations
     mat->Identity();
-    double sinX = sin( vtkMath::RadiansFromDegrees( r[0] ) );
-    double cosX = cos( vtkMath::RadiansFromDegrees( r[0] ) );
-    double sinY = sin( vtkMath::RadiansFromDegrees( r[1] ) );
-    double cosY = cos( vtkMath::RadiansFromDegrees( r[1] ) );
-    double sinZ = sin( vtkMath::RadiansFromDegrees( r[2] ) );
-    double cosZ = cos( vtkMath::RadiansFromDegrees( r[2] ) );
+    double sinX = sin( vtkMath::RadiansFromDegrees( r[ 0 ] ) );
+    double cosX = cos( vtkMath::RadiansFromDegrees( r[ 0 ] ) );
+    double sinY = sin( vtkMath::RadiansFromDegrees( r[ 1 ] ) );
+    double cosY = cos( vtkMath::RadiansFromDegrees( r[ 1 ] ) );
+    double sinZ = sin( vtkMath::RadiansFromDegrees( r[ 2 ] ) );
+    double cosZ = cos( vtkMath::RadiansFromDegrees( r[ 2 ] ) );
     mat->SetElement( 0, 0, cosZ * cosY );
     mat->SetElement( 0, 1, cosZ * sinY * sinX - sinZ * cosX );
     mat->SetElement( 0, 2, cosZ * sinY * cosX + sinZ * sinX );
@@ -119,9 +122,9 @@ void vtkMatrix4x4Operators::TransRotToMatrix( double t[3], double r[3], vtkMatri
     // Apply translation
     vtkMatrix4x4 * trans = vtkMatrix4x4::New();
     trans->Identity();
-    trans->SetElement( 0, 3, t[0] );
-    trans->SetElement( 1, 3, t[1] );
-    trans->SetElement( 2, 3, t[2] );
+    trans->SetElement( 0, 3, t[ 0 ] );
+    trans->SetElement( 1, 3, t[ 1 ] );
+    trans->SetElement( 2, 3, t[ 2 ] );
     vtkMatrix4x4::Multiply4x4( mat, trans, mat );
     trans->Delete();
 }

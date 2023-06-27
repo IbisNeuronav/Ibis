@@ -11,14 +11,16 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef __CameraObject_h_
 #define __CameraObject_h_
 
-#include "trackedsceneobject.h"
-#include "hardwaremodule.h"
-#include "view.h"
-#include <map>
-#include <QVector>
-#include <QObject>
-#include "SVL.h"
 #include <vtkSmartPointer.h>
+
+#include <QObject>
+#include <QVector>
+#include <map>
+
+#include "SVL.h"
+#include "hardwaremodule.h"
+#include "trackedsceneobject.h"
+#include "view.h"
 
 class TrackedVideoBuffer;
 class vtkCamera;
@@ -53,14 +55,11 @@ public:
 
 ObjectSerializationHeaderMacro( CameraIntrinsicParams );
 
-
 class CameraObject : public TrackedSceneObject, ViewController
 {
-
     Q_OBJECT
 
 public:
-
     static CameraObject * New() { return new CameraObject; }
     vtkTypeMacro( CameraObject, TrackedSceneObject );
 
@@ -70,8 +69,8 @@ public:
     virtual void Serialize( Serializer * ser ) override;
     virtual void SerializeTracked( Serializer * ser ) override;
     virtual void Export() override;
-    bool Import( QString & directory, QProgressDialog * progressDlg=nullptr );
-    virtual bool IsExportable()  override { return true; }
+    bool Import( QString & directory, QProgressDialog * progressDlg = nullptr );
+    virtual bool IsExportable() override { return true; }
 
     // Replacing direct interface to tracked video source
     void SetVideoInputConnection( vtkAlgorithmOutput * port );
@@ -84,7 +83,7 @@ public:
 
     virtual void Setup( View * view ) override;
     virtual void Release( View * view ) override;
-    virtual void CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets) override;
+    virtual void CreateSettingsWidgets( QWidget * parent, QVector<QWidget *> * widgets ) override;
 
     // Mouse interaction with AR view
     virtual bool OnLeftButtonPressed( View * v, int x, int y, unsigned modifiers ) override;
@@ -150,8 +149,8 @@ public:
 
     // Drawing overlay on the image
     void DrawLine( double x1, double y1, double x2, double y2, double color[4] );
-    void DrawPath( std::vector< Vec2 > & points, double color[4] );
-    void DrawWorldPath( std::vector< Vec3 > & points, double color[4] );
+    void DrawPath( std::vector<Vec2> & points, double color[4] );
+    void DrawWorldPath( std::vector<Vec3> & points, double color[4] );
     void DrawRect( double x, double y, double width, double height, double color[4] );
     void DrawTarget( double x, double y, double radius, double color[4] );
     void ClearDrawing();
@@ -167,9 +166,8 @@ protected slots:
     void VideoUpdatedSlot();
 
 protected:
-
     void ListenForIbisClockTick( bool listen );
-    void InternalDrawPath( std::vector< Vec3 > & p3d, double color[4] );
+    void InternalDrawPath( std::vector<Vec3> & p3d, double color[4] );
 
     // Base classes overrides
     virtual void Hide() override;
@@ -196,10 +194,10 @@ protected:
         vtkAxesActor * cameraAxesActor;
         vtkAxesActor * cameraTrackerAxesActor;
         vtkCamera * cameraBackup;
-        std::vector< vtkProp3D * > anotations;
+        std::vector<vtkProp3D *> anotations;
     };
 
-    typedef std::map<View*,PerViewElements> PerViewElementCont;
+    typedef std::map<View *, PerViewElements> PerViewElementCont;
     PerViewElementCont m_perViewElements;
 
     void ClearDrawingOneView( View * v, PerViewElements & elem );
@@ -234,7 +232,6 @@ protected:
 
     bool m_trackingCamera;
     int m_cachedImageSize[2];  // used to determine when image size is changed
-
 };
 
 ObjectSerializationHeaderMacro( CameraObject );

@@ -9,37 +9,39 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
 #include "cameraobject.h"
-#include "cameraobjectsettingswidget.h"
-#include <vtkCamera.h>
-#include <vtkImageActor.h>
-#include <vtkPlanes.h>
+
 #include <vtkAxesActor.h>
-#include <vtkRenderer.h>
-#include <vtkTransform.h>
-#include <vtkMath.h>
-#include <vtkPolyDataMapper.h>
-#include <vtkPoints.h>
-#include <vtkPolyData.h>
+#include <vtkCamera.h>
 #include <vtkCellArray.h>
-#include <vtkMatrix4x4.h>
 #include <vtkEventQtSlotConnect.h>
+#include <vtkImageActor.h>
 #include <vtkImageData.h>
-#include <vtkSimpleProp3D.h>
-#include <vtkXFMWriter.h>
-#include <vtkXFMReader.h>
+#include <vtkMath.h>
+#include <vtkMatrix4x4.h>
 #include <vtkPassThrough.h>
 #include <vtkPicker.h>
-#include "vtkIbisImagePlaneMapper.h"
-#include "application.h"
-#include "hardwaremodule.h"
-#include "scenemanager.h"
-#include "pointerobject.h"
-#include "trackedvideobuffer.h"
+#include <vtkPlanes.h>
+#include <vtkPoints.h>
+#include <vtkPolyData.h>
+#include <vtkPolyDataMapper.h>
+#include <vtkRenderer.h>
+#include <vtkSimpleProp3D.h>
+#include <vtkTransform.h>
+#include <vtkXFMReader.h>
+#include <vtkXFMWriter.h>
+
 #include <QMessageBox>
 #include <QProgressDialog>
 
-ObjectSerializationMacro( CameraObject );
+#include "application.h"
+#include "cameraobjectsettingswidget.h"
+#include "hardwaremodule.h"
+#include "pointerobject.h"
+#include "scenemanager.h"
+#include "trackedvideobuffer.h"
+#include "vtkIbisImagePlaneMapper.h"
 
+ObjectSerializationMacro( CameraObject );
 
 //---------------------------------------------------------------------------------------
 // CameraIntrinsicParams class implementation
@@ -49,21 +51,21 @@ ObjectSerializationMacro( CameraIntrinsicParams );
 
 CameraIntrinsicParams::CameraIntrinsicParams()
 {
-    m_center[0] = 0.5;
-    m_center[1] = 0.5;
-    m_focal[0] = 1.85;
-    m_focal[1] = 1.85;
-    m_distorsionK1 = 0.0;
+    m_center[0]         = 0.5;
+    m_center[1]         = 0.5;
+    m_focal[0]          = 1.85;
+    m_focal[1]          = 1.85;
+    m_distorsionK1      = 0.0;
     m_reprojectionError = 0.0;
 }
 
 CameraIntrinsicParams & CameraIntrinsicParams::operator=( const CameraIntrinsicParams & other )
 {
-    m_center[0] = other.m_center[0];
-    m_center[1] = other.m_center[1];
-    m_focal[0] = other.m_focal[0];
-    m_focal[1] = other.m_focal[1];
-    m_distorsionK1 = other.m_distorsionK1;
+    m_center[0]         = other.m_center[0];
+    m_center[1]         = other.m_center[1];
+    m_focal[0]          = other.m_focal[0];
+    m_focal[1]          = other.m_focal[1];
+    m_distorsionK1      = other.m_distorsionK1;
     m_reprojectionError = other.m_reprojectionError;
     return *this;
 }
@@ -99,15 +101,15 @@ void CameraIntrinsicParams::SetVerticalAngleRad( double angle )
 {
     // simtodo : can't have same focal for horizontal and vertical. Or at least make it obvious in the interface
     double focal = 0.5 / tan( 0.5 * angle );
-    m_focal[0] = focal;
-    m_focal[1] = focal;
+    m_focal[0]   = focal;
+    m_focal[1]   = focal;
 }
 
 //---------------------------------------------------------------------------------------
 // CameraObject class implementation
 //---------------------------------------------------------------------------------------
 
-static int DefaultImageSize[2] = { 640, 480 };
+static int DefaultImageSize[2] = {640, 480};
 
 CameraObject::CameraObject()
 {
@@ -115,45 +117,43 @@ CameraObject::CameraObject()
     SetInputTransform( m_videoBuffer->GetOutputTransform() );
 
     m_videoInputSwitch = vtkSmartPointer<vtkPassThrough>::New();
-    m_videoInputSwitch->SetInputConnection( m_videoBuffer->GetVideoOutputPort() ); // by default, get input from internal buffer
+    m_videoInputSwitch->SetInputConnection(
+        m_videoBuffer->GetVideoOutputPort() );  // by default, get input from internal buffer
 
     m_lensDisplacementTransform = vtkSmartPointer<vtkTransform>::New();
-    m_opticalCenterTransform = vtkSmartPointer<vtkTransform>::New();
+    m_opticalCenterTransform    = vtkSmartPointer<vtkTransform>::New();
     m_opticalCenterTransform->Concatenate( this->GetWorldTransform() );
     m_opticalCenterTransform->Concatenate( m_lensDisplacementTransform );
     m_imageTransform = vtkSmartPointer<vtkTransform>::New();
     m_imageTransform->SetInput( m_opticalCenterTransform );
 
-    m_trackingCamera = false;
-    m_intrinsicEditable = false;
-    m_extrinsicEditable = false;
-    m_camera = vtkSmartPointer<vtkCamera>::New();
-    m_imageDistance = 100.0;
-    m_globalOpacity = 0.7;
-    m_saturation = 1.0;
-    m_brightness = 1.0;
-    m_useTransparency = false;
+    m_trackingCamera                          = false;
+    m_intrinsicEditable                       = false;
+    m_extrinsicEditable                       = false;
+    m_camera                                  = vtkSmartPointer<vtkCamera>::New();
+    m_imageDistance                           = 100.0;
+    m_globalOpacity                           = 0.7;
+    m_saturation                              = 1.0;
+    m_brightness                              = 1.0;
+    m_useTransparency                         = false;
     m_useGradientTargetTransparencyModulation = true;
-    m_showTargetTransparencyMask = false;
-    m_trackTargetTransparencyCenter = false;
-    m_transparencyCenter[0] = 0.5;
-    m_transparencyCenter[1] = 0.5;
-    m_transparencyRadius[0] = 0.03;
-    m_transparencyRadius[1] = 0.3;
-    m_mouseMovingTransparency = false;
+    m_showTargetTransparencyMask              = false;
+    m_trackTargetTransparencyCenter           = false;
+    m_transparencyCenter[0]                   = 0.5;
+    m_transparencyCenter[1]                   = 0.5;
+    m_transparencyRadius[0]                   = 0.03;
+    m_transparencyRadius[1]                   = 0.3;
+    m_mouseMovingTransparency                 = false;
     CreateCameraRepresentation();
 
-    m_cachedImageSize[ 0 ] = DefaultImageSize[0];
-    m_cachedImageSize[ 1 ] = DefaultImageSize[1];
+    m_cachedImageSize[0] = DefaultImageSize[0];
+    m_cachedImageSize[1] = DefaultImageSize[1];
 
     // make sure every ParamModified signal also generates a Modified signal
-    connect( this, SIGNAL(ParamsModified()), this, SLOT(ParamsModifiedSlot()) );
+    connect( this, SIGNAL( ParamsModified() ), this, SLOT( ParamsModifiedSlot() ) );
 }
 
-CameraObject::~CameraObject()
-{
-    delete m_videoBuffer;
-}
+CameraObject::~CameraObject() { delete m_videoBuffer; }
 
 #include <QDir>
 
@@ -166,7 +166,7 @@ void CameraObject::Serialize( Serializer * ser )
     QString dataDirName = GetSceneDataDirectoryForThisObject( ser->GetSerializationDirectory() );
     m_videoBuffer->Serialize( ser, dataDirName );
 
-    if (ser->IsReader())
+    if( ser->IsReader() )
     {
         SetIntrinsicParams( m_intrinsicParams );
         emit ParamsModified();
@@ -181,23 +181,22 @@ void CameraObject::SerializeTracked( Serializer * ser )
 
 void CameraObject::Export()
 {
-    QString dirName = Application::GetInstance().GetExistingDirectory( tr("Export Camera"), QDir::homePath() );
+    QString dirName = Application::GetInstance().GetExistingDirectory( tr( "Export Camera" ), QDir::homePath() );
     QFileInfo info( dirName );
 
-    if( !info.isWritable() )
-        return;
+    if( !info.isWritable() ) return;
 
     QProgressDialog * progressDlg = Application::GetInstance().StartProgress( 100, "Exporting Camera..." );
 
     m_videoBuffer->Export( dirName, progressDlg );
 
     // Write calibration matrix
-    QString calMatrixFilename = QString("%1/calibMat.xfm").arg( dirName );
+    QString calMatrixFilename = QString( "%1/calibMat.xfm" ).arg( dirName );
     TrackedVideoBuffer::WriteMatrix( GetCalibrationMatrix(), calMatrixFilename );
 
     // Write intrinsic params
     SerializerWriter writer;
-    QString intrinsicParamsFilename = QString("%1/intrinsic_params.xml").arg( dirName );
+    QString intrinsicParamsFilename = QString( "%1/intrinsic_params.xml" ).arg( dirName );
     writer.SetFilename( intrinsicParamsFilename.toUtf8().data() );
     writer.Start();
     ::Serialize( &writer, "IntrinsicParams", m_intrinsicParams );
@@ -206,54 +205,58 @@ void CameraObject::Export()
     Application::GetInstance().StopProgress( progressDlg );
 }
 
- bool CameraObject::Import( QString & directory, QProgressDialog * progressDlg )
- {
-     bool success = true;
+bool CameraObject::Import( QString & directory, QProgressDialog * progressDlg )
+{
+    bool success = true;
 
-     // check that dir exists and is readable
-     QFileInfo dirInfo( directory );
-     Q_ASSERT( dirInfo.exists() );
-     Q_ASSERT( dirInfo.isReadable() );
+    // check that dir exists and is readable
+    QFileInfo dirInfo( directory );
+    Q_ASSERT( dirInfo.exists() );
+    Q_ASSERT( dirInfo.isReadable() );
 
-     QString objectName = dirInfo.baseName();
-     this->SetName( objectName );
+    QString objectName = dirInfo.baseName();
+    this->SetName( objectName );
 
-     // read intrinsic params
-     CameraIntrinsicParams params;
-     SerializerReader reader;
-     QString intrinsicParamsFilename = QString("%1/intrinsic_params.xml").arg( directory );
-     QFileInfo intrinsicParamsInfo( intrinsicParamsFilename );
-     if( !intrinsicParamsInfo.exists() || !intrinsicParamsInfo.isReadable() )
-         Application::GetInstance().Warning( "Camera import", "Intrinsic calibration params (intrinsic_params.xml) is missing or unreadable. Intrinsic camera params will be the default ones." );
-     else
-     {
+    // read intrinsic params
+    CameraIntrinsicParams params;
+    SerializerReader reader;
+    QString intrinsicParamsFilename = QString( "%1/intrinsic_params.xml" ).arg( directory );
+    QFileInfo intrinsicParamsInfo( intrinsicParamsFilename );
+    if( !intrinsicParamsInfo.exists() || !intrinsicParamsInfo.isReadable() )
+        Application::GetInstance().Warning( "Camera import",
+                                            "Intrinsic calibration params (intrinsic_params.xml) is missing or "
+                                            "unreadable. Intrinsic camera params will be the default ones." );
+    else
+    {
         reader.SetFilename( intrinsicParamsFilename.toUtf8().data() );
         reader.Start();
         ::Serialize( &reader, "IntrinsicParams", params );
         reader.Finish();
-     }
-     SetIntrinsicParams( params );
+    }
+    SetIntrinsicParams( params );
 
-     // Read calibration matrix
-     QString calMatrixFilename = QString("%1/calibMat.xfm").arg( directory );
-     QFileInfo calMatrixInfo( calMatrixFilename );
-     vtkMatrix4x4 * calMatrix = vtkMatrix4x4::New();
-     if( !calMatrixInfo.exists() || !calMatrixInfo.isReadable() )
-         Application::GetInstance().Warning( "Camera import", "Calibration matrix file (calibMat.xfm) is missing or unreadable. Calibration matrix will be identity." );
-     else
+    // Read calibration matrix
+    QString calMatrixFilename = QString( "%1/calibMat.xfm" ).arg( directory );
+    QFileInfo calMatrixInfo( calMatrixFilename );
+    vtkMatrix4x4 * calMatrix = vtkMatrix4x4::New();
+    if( !calMatrixInfo.exists() || !calMatrixInfo.isReadable() )
+        Application::GetInstance().Warning(
+            "Camera import",
+            "Calibration matrix file (calibMat.xfm) is missing or unreadable. Calibration matrix will be identity." );
+    else
         TrackedVideoBuffer::ReadMatrix( calMatrixFilename, calMatrix );
-     SetCalibrationMatrix( calMatrix );
-     calMatrix->Delete();
+    SetCalibrationMatrix( calMatrix );
+    calMatrix->Delete();
 
-     m_videoBuffer->Import( directory, progressDlg );
-     SetCurrentFrame( 0 );
-     m_videoInputSwitch->Update();  // Without this update, image is not displayed, but it shouldn't be needed
+    m_videoBuffer->Import( directory, progressDlg );
+    SetCurrentFrame( 0 );
+    m_videoInputSwitch->Update();  // Without this update, image is not displayed, but it shouldn't be needed
 
-     // Update representation in view
-     UpdateGeometricRepresentation();
+    // Update representation in view
+    UpdateGeometricRepresentation();
 
-     return success;
- }
+    return success;
+}
 
 void CameraObject::SetVideoInputConnection( vtkAlgorithmOutput * port )
 {
@@ -266,31 +269,20 @@ void CameraObject::SetVideoInputData( vtkImageData * image )
     emit ObjectModified();
 }
 
-vtkImageData * CameraObject::GetVideoOutput()
-{   
-    return vtkImageData::SafeDownCast( m_videoInputSwitch->GetOutput() );
-}
+vtkImageData * CameraObject::GetVideoOutput() { return vtkImageData::SafeDownCast( m_videoInputSwitch->GetOutput() ); }
 
-int CameraObject::GetImageWidth()
-{
-    return GetVideoOutput()->GetDimensions()[0];
-}
+int CameraObject::GetImageWidth() { return GetVideoOutput()->GetDimensions()[0]; }
 
-int CameraObject::GetImageHeight()
-{
-    return GetVideoOutput()->GetDimensions()[1];
-}
+int CameraObject::GetImageHeight() { return GetVideoOutput()->GetDimensions()[1]; }
 
 void CameraObject::AddClient()
 {
-    if( IsDrivenByHardware() )
-        GetHardwareModule()->AddTrackedVideoClient( this );
+    if( IsDrivenByHardware() ) GetHardwareModule()->AddTrackedVideoClient( this );
 }
 
 void CameraObject::RemoveClient()
 {
-    if( IsDrivenByHardware() )
-        GetHardwareModule()->RemoveTrackedVideoClient( this );
+    if( IsDrivenByHardware() ) GetHardwareModule()->RemoveTrackedVideoClient( this );
 }
 
 void CameraObject::Setup( View * view )
@@ -331,7 +323,8 @@ void CameraObject::Setup( View * view )
 
         perView.cameraImageMapper = vtkIbisImagePlaneMapper::New();
         perView.cameraImageMapper->SetGlobalOpacity( m_globalOpacity );
-        perView.cameraImageMapper->SetImageCenter( m_intrinsicParams.m_center[0] * GetImageWidth(), m_intrinsicParams.m_center[1] * GetImageHeight() );
+        perView.cameraImageMapper->SetImageCenter( m_intrinsicParams.m_center[0] * GetImageWidth(),
+                                                   m_intrinsicParams.m_center[1] * GetImageHeight() );
         perView.cameraImageMapper->SetLensDistortion( m_intrinsicParams.m_distorsionK1 );
         perView.cameraImageMapper->SetUseTransparency( m_useTransparency );
         perView.cameraImageMapper->SetUseGradient( m_useGradientTargetTransparencyModulation );
@@ -342,23 +335,22 @@ void CameraObject::Setup( View * view )
         perView.cameraImageMapper->SetInputConnection( m_videoInputSwitch->GetOutputPort() );
         view->GetRenderer()->AddViewProp( perView.cameraImageActor );
 
-        this->m_perViewElements[ view ] = perView;
+        this->m_perViewElements[view] = perView;
 
-        if( IsHidden() )
-            Hide();
+        if( IsHidden() ) Hide();
 
-        connect( this, SIGNAL(ObjectModified()), view, SLOT(NotifyNeedRender()) );
+        connect( this, SIGNAL( ObjectModified() ), view, SLOT( NotifyNeedRender() ) );
     }
 }
 
 void CameraObject::Release( View * view )
 {
     if( view->GetType() == THREED_VIEW_TYPE )
-    {     
+    {
         PerViewElementCont::iterator it = m_perViewElements.find( view );
         if( it != m_perViewElements.end() )
         {
-            PerViewElements & perView = (*it).second;
+            PerViewElements & perView = ( *it ).second;
             view->GetRenderer()->RemoveViewProp( perView.cameraActor );
             perView.cameraActor->Delete();
             view->GetRenderer()->RemoveViewProp( perView.cameraAxesActor );
@@ -373,27 +365,27 @@ void CameraObject::Release( View * view )
             }
             ClearDrawingOneView( view, perView );
             m_perViewElements.erase( it );
-            disconnect( this, SIGNAL(ObjectModified()), view, SLOT(NotifyNeedRender()) );
+            disconnect( this, SIGNAL( ObjectModified() ), view, SLOT( NotifyNeedRender() ) );
 
             RemoveClient();
-            view->RemoveInteractionObject(this);
+            view->RemoveInteractionObject( this );
         }
     }
 }
 
-void CameraObject::CreateSettingsWidgets( QWidget * /*parent*/, QVector <QWidget*> *widgets )
+void CameraObject::CreateSettingsWidgets( QWidget * /*parent*/, QVector<QWidget *> * widgets )
 {
     CameraObjectSettingsWidget * dlg = new CameraObjectSettingsWidget;
-    dlg->setAttribute(Qt::WA_DeleteOnClose);
-    dlg->SetCamera(this);
-    dlg->setObjectName("Properties");
-    widgets->append(dlg);
+    dlg->setAttribute( Qt::WA_DeleteOnClose );
+    dlg->SetCamera( this );
+    dlg->setObjectName( "Properties" );
+    widgets->append( dlg );
 }
-
 
 bool CameraObject::OnLeftButtonPressed( View * v, int x, int y, unsigned )
 {
-    if( GetTrackCamera() && IsUsingTransparency() && v->GetType() == THREED_VIEW_TYPE && !m_trackTargetTransparencyCenter )
+    if( GetTrackCamera() && IsUsingTransparency() && v->GetType() == THREED_VIEW_TYPE &&
+        !m_trackTargetTransparencyCenter )
     {
         double xIm, yIm;
         WindowToImage( x, y, v, xIm, yIm );
@@ -431,7 +423,7 @@ void CameraObject::Hide()
     // turn off live video acquisition
     RemoveClient();
 
-    for( const auto &item : m_perViewElements )
+    for( const auto & item : m_perViewElements )
     {
         const PerViewElements & elem = item.second;
         elem.cameraActor->VisibilityOff();
@@ -451,7 +443,7 @@ void CameraObject::Show()
     PerViewElementCont::iterator it = m_perViewElements.begin();
     while( it != m_perViewElements.end() )
     {
-        PerViewElements & elem = (*it).second;
+        PerViewElements & elem = ( *it ).second;
 
         elem.cameraActor->VisibilityOn();
         elem.cameraImageActor->VisibilityOn();
@@ -486,11 +478,11 @@ void CameraObject::SetImageDistance( double distance )
 void CameraObject::SetGlobalOpacity( double opacity )
 {
     Q_ASSERT( opacity >= 0.0 && opacity <= 1.0 );
-    m_globalOpacity = opacity;
+    m_globalOpacity                 = opacity;
     PerViewElementCont::iterator it = m_perViewElements.begin();
     while( it != m_perViewElements.end() )
     {
-        PerViewElements & elem = (*it).second;
+        PerViewElements & elem = ( *it ).second;
         elem.cameraImageMapper->SetGlobalOpacity( opacity );
         ++it;
     }
@@ -529,10 +521,7 @@ void CameraObject::SetLensDistortion( double dist )
     InternalSetIntrinsicParams();
 }
 
-double CameraObject::GetLensDisplacement()
-{
-    return m_lensDisplacementTransform->GetMatrix()->GetElement( 2, 3 );
-}
+double CameraObject::GetLensDisplacement() { return m_lensDisplacementTransform->GetMatrix()->GetElement( 2, 3 ); }
 
 void CameraObject::SetLensDisplacement( double d )
 {
@@ -553,25 +542,25 @@ void CameraObject::SetTransparencyCenterTracked( bool t )
 
 void CameraObject::SetTransparencyCenter( double x, double y )
 {
-    m_transparencyCenter[0] = x;
-    m_transparencyCenter[1] = y;
+    m_transparencyCenter[0]         = x;
+    m_transparencyCenter[1]         = y;
     PerViewElementCont::iterator it = m_perViewElements.begin();
     while( it != m_perViewElements.end() )
     {
-        PerViewElements & elem = (*it).second;
+        PerViewElements & elem = ( *it ).second;
         elem.cameraImageMapper->SetTransparencyPosition( x, y );
         ++it;
     }
-    emit ObjectModified(); // This can be set dynamically by the system so no ParamsModified
+    emit ObjectModified();  // This can be set dynamically by the system so no ParamsModified
 }
 
 void CameraObject::SetUseTransparency( bool use )
 {
-    m_useTransparency = use;
+    m_useTransparency               = use;
     PerViewElementCont::iterator it = m_perViewElements.begin();
     while( it != m_perViewElements.end() )
     {
-        PerViewElements & elem = (*it).second;
+        PerViewElements & elem = ( *it ).second;
         elem.cameraImageMapper->SetUseTransparency( m_useTransparency );
         ++it;
     }
@@ -581,10 +570,10 @@ void CameraObject::SetUseTransparency( bool use )
 void CameraObject::SetUseGradient( bool use )
 {
     m_useGradientTargetTransparencyModulation = use;
-    PerViewElementCont::iterator it = m_perViewElements.begin();
+    PerViewElementCont::iterator it           = m_perViewElements.begin();
     while( it != m_perViewElements.end() )
     {
-        PerViewElements & elem = (*it).second;
+        PerViewElements & elem = ( *it ).second;
         elem.cameraImageMapper->SetUseGradient( m_useGradientTargetTransparencyModulation );
         ++it;
     }
@@ -593,11 +582,11 @@ void CameraObject::SetUseGradient( bool use )
 
 void CameraObject::SetShowMask( bool show )
 {
-    m_showTargetTransparencyMask = show;
+    m_showTargetTransparencyMask    = show;
     PerViewElementCont::iterator it = m_perViewElements.begin();
     while( it != m_perViewElements.end() )
     {
-        PerViewElements & elem = (*it).second;
+        PerViewElements & elem = ( *it ).second;
         elem.cameraImageMapper->SetShowMask( m_showTargetTransparencyMask );
         ++it;
     }
@@ -606,11 +595,11 @@ void CameraObject::SetShowMask( bool show )
 
 void CameraObject::SetSaturation( double s )
 {
-    m_saturation = s;
+    m_saturation                    = s;
     PerViewElementCont::iterator it = m_perViewElements.begin();
     while( it != m_perViewElements.end() )
     {
-        PerViewElements & elem = (*it).second;
+        PerViewElements & elem = ( *it ).second;
         elem.cameraImageMapper->SetSaturation( s );
         ++it;
     }
@@ -619,11 +608,11 @@ void CameraObject::SetSaturation( double s )
 
 void CameraObject::SetBrightness( double b )
 {
-    m_brightness = b;
+    m_brightness                    = b;
     PerViewElementCont::iterator it = m_perViewElements.begin();
     while( it != m_perViewElements.end() )
     {
-        PerViewElements & elem = (*it).second;
+        PerViewElements & elem = ( *it ).second;
         elem.cameraImageMapper->SetBrightness( b );
         ++it;
     }
@@ -632,12 +621,12 @@ void CameraObject::SetBrightness( double b )
 
 void CameraObject::SetTransparencyRadius( double min, double max )
 {
-    m_transparencyRadius[0] = min;
-    m_transparencyRadius[1] = max;
+    m_transparencyRadius[0]         = min;
+    m_transparencyRadius[1]         = max;
     PerViewElementCont::iterator it = m_perViewElements.begin();
     while( it != m_perViewElements.end() )
     {
-        PerViewElements & elem = (*it).second;
+        PerViewElements & elem = ( *it ).second;
         elem.cameraImageMapper->SetTransparencyRadius( min, max );
         ++it;
     }
@@ -646,8 +635,7 @@ void CameraObject::SetTransparencyRadius( double min, double max )
 
 void CameraObject::SetTrackCamera( bool t )
 {
-    if( t == m_trackingCamera )
-        return;
+    if( t == m_trackingCamera ) return;
     m_trackingCamera = t;
     InternalSetTrackCamera();
     emit ParamsModified();
@@ -660,8 +648,8 @@ void CameraObject::InternalSetTrackCamera()
         PerViewElementCont::iterator it = m_perViewElements.begin();
         while( it != m_perViewElements.end() )
         {
-            View * v = (*it).first;
-            PerViewElements & elem = (*it).second;
+            View * v               = ( *it ).first;
+            PerViewElements & elem = ( *it ).second;
 
             // Tell the view we are taking control
             v->TakeControl( this );
@@ -697,29 +685,23 @@ void CameraObject::InternalSetTrackCamera()
     }
 }
 
-bool CameraObject::GetTrackCamera()
-{
-    return m_trackingCamera;
-}
+bool CameraObject::GetTrackCamera() { return m_trackingCamera; }
 
 bool CameraObject::IsTransformFrozen()
 {
-    if( IsDrivenByHardware() )
-        return m_hardwareModule->IsTransformFrozen( this );
+    if( IsDrivenByHardware() ) return m_hardwareModule->IsTransformFrozen( this );
     return false;
 }
 
 void CameraObject::FreezeTransform()
 {
-    if( IsDrivenByHardware() )
-        m_hardwareModule->FreezeTransform( this, 10 );
+    if( IsDrivenByHardware() ) m_hardwareModule->FreezeTransform( this, 10 );
     emit ParamsModified();
 }
 
 void CameraObject::UnFreezeTransform()
 {
-    if( IsDrivenByHardware() )
-        m_hardwareModule->UnFreezeTransform( this );
+    if( IsDrivenByHardware() ) m_hardwareModule->UnFreezeTransform( this );
     emit ParamsModified();
 }
 
@@ -766,22 +748,15 @@ void CameraObject::ToggleRecording()
     }
 }
 
-bool CameraObject::IsRecording()
-{
-    return m_recordingCamera != nullptr;
-}
+bool CameraObject::IsRecording() { return m_recordingCamera != nullptr; }
 
-int CameraObject::GetNumberOfFrames()
-{
-    return m_videoBuffer->GetNumberOfFrames();
-}
+int CameraObject::GetNumberOfFrames() { return m_videoBuffer->GetNumberOfFrames(); }
 
 void CameraObject::AddFrame( vtkImageData * image, vtkMatrix4x4 * uncalMat )
 {
     m_videoBuffer->AddFrame( image, uncalMat );
     m_videoInputSwitch->Update();  // Without this update, image is not displayed, but it shouldn't be needed
-    if( m_videoBuffer->GetNumberOfFrames() == 1 )
-        UpdateGeometricRepresentation();
+    if( m_videoBuffer->GetNumberOfFrames() == 1 ) UpdateGeometricRepresentation();
 }
 
 void CameraObject::SetCurrentFrame( int frame )
@@ -791,22 +766,18 @@ void CameraObject::SetCurrentFrame( int frame )
     emit ParamsModified();
 }
 
-int CameraObject::GetCurrentFrame()
-{
-    return m_videoBuffer->GetCurrentFrame();
-}
+int CameraObject::GetCurrentFrame() { return m_videoBuffer->GetCurrentFrame(); }
 
 void CameraObject::ReleaseControl( View * triggeredView )
 {
-    m_trackingCamera = false;
+    m_trackingCamera                = false;
     PerViewElementCont::iterator it = m_perViewElements.begin();
     while( it != m_perViewElements.end() )
     {
-        View * v = (*it).first;
-        PerViewElements & elem = (*it).second;
+        View * v               = ( *it ).first;
+        PerViewElements & elem = ( *it ).second;
 
-        if( triggeredView != v )
-            v->ReleaseControl( this );
+        if( triggeredView != v ) v->ReleaseControl( this );
 
         // Move back image from overlay renderer to main renderer
         v->GetOverlayRenderer()->RemoveActor( elem.cameraImageActor );
@@ -842,13 +813,13 @@ void CameraObject::WorldToImage( double * worldPos, double & xIm, double & yIm )
     vtkMatrix4x4 * mat = vtkMatrix4x4::New();
     mat->DeepCopy( m_opticalCenterTransform->GetMatrix() );
     mat->Invert();
-    double pCam[4] = { 0.0, 0.0, 0.0, 1.0 };
+    double pCam[4] = {0.0, 0.0, 0.0, 1.0};
     mat->MultiplyPoint( p4, pCam );
     mat->Delete();
 
-    double centerPix[2] = { 0.0, 0.0 };
+    double centerPix[2] = {0.0, 0.0};
     GetImageCenterPix( centerPix[0], centerPix[1] );
-    double focalPix[2] = { 0.0, 0.0 };
+    double focalPix[2] = {0.0, 0.0};
     GetFocalPix( focalPix[0], focalPix[1] );
 
     xIm = centerPix[0] + pCam[0] / pCam[2] * focalPix[0];
@@ -859,12 +830,12 @@ void CameraObject::WorldToImage( double * worldPos, double & xIm, double & yIm )
 
 void CameraObject::WindowToImage( int x, int y, View * v, double & xIm, double & yIm )
 {
-    int * winSize = v->GetWindowSize();
-    double imScale = static_cast<double>(m_cachedImageSize[1]) / winSize[1];
-    yIm = y * imScale;
+    int * winSize     = v->GetWindowSize();
+    double imScale    = static_cast<double>( m_cachedImageSize[1] ) / winSize[1];
+    yIm               = y * imScale;
     double winImWidth = winSize[1] * m_cachedImageSize[0] / m_cachedImageSize[1];
-    double offset = (winSize[0] - winImWidth) * 0.5;
-    xIm = (x - offset) * imScale;
+    double offset     = ( winSize[0] - winImWidth ) * 0.5;
+    xIm               = ( x - offset ) * imScale;
 }
 
 #include "simplepropcreator.h"
@@ -884,32 +855,31 @@ void CameraObject::DrawLine( double x1, double y1, double x2, double y2, double 
     PerViewElementCont::iterator it = m_perViewElements.begin();
     while( it != m_perViewElements.end() )
     {
-        View * v = (*it).first;
+        View * v = ( *it ).first;
         if( v->GetType() == THREED_VIEW_TYPE )
         {
             vtkProp3D * line = SimplePropCreator::CreateLine( start, end, color );
             line->SetUserTransform( m_imageTransform );
-            GetCurrentRenderer(v)->AddViewProp( line );
-            PerViewElements & elem = (*it).second;
+            GetCurrentRenderer( v )->AddViewProp( line );
+            PerViewElements & elem = ( *it ).second;
             elem.anotations.push_back( line );
         }
         ++it;
     }
 }
 
-void CameraObject::DrawPath( std::vector< Vec2 > & points, double color[4] )
+void CameraObject::DrawPath( std::vector<Vec2> & points, double color[4] )
 {
-    std::vector< Vec3 > p3d;
+    std::vector<Vec3> p3d;
     p3d.reserve( points.size() );
-    for( unsigned i = 0; i < points.size(); ++i )
-        p3d.push_back( Vec3( points[i], zMin ) );
+    for( unsigned i = 0; i < points.size(); ++i ) p3d.push_back( Vec3( points[i], zMin ) );
 
     InternalDrawPath( p3d, color );
 }
 
-void CameraObject::DrawWorldPath( std::vector< Vec3 > & points, double color[4] )
+void CameraObject::DrawWorldPath( std::vector<Vec3> & points, double color[4] )
 {
-    std::vector< Vec3 > p3d;
+    std::vector<Vec3> p3d;
     p3d.reserve( points.size() );
     for( unsigned i = 0; i < points.size(); ++i )
     {
@@ -924,23 +894,23 @@ void CameraObject::DrawWorldPath( std::vector< Vec3 > & points, double color[4] 
 void CameraObject::ListenForIbisClockTick( bool listen )
 {
     if( listen )
-        connect( &Application::GetInstance(), SIGNAL(IbisClockTick()), this, SLOT(VideoUpdatedSlot()) );
+        connect( &Application::GetInstance(), SIGNAL( IbisClockTick() ), this, SLOT( VideoUpdatedSlot() ) );
     else
-        disconnect( &Application::GetInstance(), SIGNAL(IbisClockTick()), this, SLOT(VideoUpdatedSlot()) );
+        disconnect( &Application::GetInstance(), SIGNAL( IbisClockTick() ), this, SLOT( VideoUpdatedSlot() ) );
 }
 
-void CameraObject::InternalDrawPath( std::vector< Vec3 > & p3d, double color[4] )
+void CameraObject::InternalDrawPath( std::vector<Vec3> & p3d, double color[4] )
 {
     PerViewElementCont::iterator it = m_perViewElements.begin();
     while( it != m_perViewElements.end() )
     {
-        View * v = (*it).first;
+        View * v = ( *it ).first;
         if( v->GetType() == THREED_VIEW_TYPE )
         {
             vtkProp3D * line = SimplePropCreator::CreatePath( p3d, color );
             line->SetUserTransform( m_imageTransform );
-            GetCurrentRenderer(v)->AddViewProp( line );
-            PerViewElements & elem = (*it).second;
+            GetCurrentRenderer( v )->AddViewProp( line );
+            PerViewElements & elem = ( *it ).second;
             elem.anotations.push_back( line );
         }
         ++it;
@@ -957,19 +927,19 @@ void CameraObject::DrawRect( double x, double y, double width, double height, do
 
 void CameraObject::DrawTarget( double x, double y, double /*radius*/, double color[4] )
 {
-    double center[3] = { 0.0, 0.0, 0.0 };
-    center[0] = x;
-    center[1] = y;
+    double center[3]                = {0.0, 0.0, 0.0};
+    center[0]                       = x;
+    center[1]                       = y;
     PerViewElementCont::iterator it = m_perViewElements.begin();
     while( it != m_perViewElements.end() )
     {
-        View * v = (*it).first;
+        View * v = ( *it ).first;
         if( v->GetType() == THREED_VIEW_TYPE )
         {
             vtkProp3D * p1 = SimplePropCreator::CreateTarget( center, 10.0, color );
             p1->SetUserTransform( m_imageTransform );
-            GetCurrentRenderer(v)->AddViewProp( p1 );
-            PerViewElements & elem = (*it).second;
+            GetCurrentRenderer( v )->AddViewProp( p1 );
+            PerViewElements & elem = ( *it ).second;
             elem.anotations.push_back( p1 );
         }
         ++it;
@@ -981,19 +951,16 @@ void CameraObject::ClearDrawing()
     PerViewElementCont::iterator it = m_perViewElements.begin();
     while( it != m_perViewElements.end() )
     {
-        View * v = (*it).first;
+        View * v = ( *it ).first;
         if( v->GetType() == THREED_VIEW_TYPE )
         {
-            ClearDrawingOneView( v, (*it).second );
+            ClearDrawingOneView( v, ( *it ).second );
         }
         ++it;
     }
 }
 
-void CameraObject::ParamsModifiedSlot()
-{
-    emit ObjectModified();
-}
+void CameraObject::ParamsModifiedSlot() { emit ObjectModified(); }
 
 void CameraObject::VideoUpdatedSlot()
 {
@@ -1032,40 +999,34 @@ void CameraObject::VideoUpdatedSlot()
 void CameraObject::InternalPostSceneRead()
 {
     UpdateGeometricRepresentation();
-    if( GetTrackCamera() )
-        InternalSetTrackCamera();
+    if( GetTrackCamera() ) InternalSetTrackCamera();
 }
 
 void CameraObject::ObjectAddedToScene()
 {
-    if( IsDrivenByHardware() || m_trackTargetTransparencyCenter )
-        ListenForIbisClockTick( true );
+    if( IsDrivenByHardware() || m_trackTargetTransparencyCenter ) ListenForIbisClockTick( true );
 }
 
 void CameraObject::ObjectAboutToBeRemovedFromScene()
 {
-    if( IsDrivenByHardware() || m_trackTargetTransparencyCenter )
-        ListenForIbisClockTick( false );
-    if( GetTrackCamera() )
-        SetTrackCamera( false );
+    if( IsDrivenByHardware() || m_trackTargetTransparencyCenter ) ListenForIbisClockTick( false );
+    if( GetTrackCamera() ) SetTrackCamera( false );
 }
 
-void CameraObject::InternalSetIntrinsicParams()
-{
-    UpdateGeometricRepresentation();
-}
+void CameraObject::InternalSetIntrinsicParams() { UpdateGeometricRepresentation(); }
 
 void CameraObject::UpdateGeometricRepresentation()
 {
     // Determine image size
-    int width = GetImageWidth();
+    int width  = GetImageWidth();
     int height = GetImageHeight();
 
     PerViewElementCont::iterator it = m_perViewElements.begin();
     while( it != m_perViewElements.end() )
     {
-        PerViewElements & elem = (*it).second;
-        elem.cameraImageMapper->SetImageCenter( m_intrinsicParams.m_center[0] * GetImageWidth(), m_intrinsicParams.m_center[1] * GetImageHeight() );
+        PerViewElements & elem = ( *it ).second;
+        elem.cameraImageMapper->SetImageCenter( m_intrinsicParams.m_center[0] * GetImageWidth(),
+                                                m_intrinsicParams.m_center[1] * GetImageHeight() );
         elem.cameraImageMapper->SetLensDistortion( m_intrinsicParams.m_distorsionK1 );
         elem.cameraImageMapper->SetTransparencyPosition( m_transparencyCenter[0], m_transparencyCenter[1] );
         elem.cameraImageMapper->SetTransparencyRadius( m_transparencyRadius[0], m_transparencyRadius[1] );
@@ -1073,10 +1034,10 @@ void CameraObject::UpdateGeometricRepresentation()
     }
     m_camera->SetViewAngle( m_intrinsicParams.GetVerticalAngleDegrees() );
 
-    double offsetY = m_imageDistance * 0.5 / m_intrinsicParams.m_focal[1];
-    double offsetX = m_imageDistance * 0.5 / m_intrinsicParams.m_focal[0];
-    double scaleFactorX = 2.0 * offsetX / static_cast<double>(width);
-    double scaleFactorY = 2.0 * offsetY / static_cast<double>(height);
+    double offsetY      = m_imageDistance * 0.5 / m_intrinsicParams.m_focal[1];
+    double offsetX      = m_imageDistance * 0.5 / m_intrinsicParams.m_focal[0];
+    double scaleFactorX = 2.0 * offsetX / static_cast<double>( width );
+    double scaleFactorY = 2.0 * offsetY / static_cast<double>( height );
 
     vtkPoints * pts = m_cameraPolyData->GetPoints();
     pts->SetPoint( 1, -offsetX, -offsetY, -m_imageDistance );
@@ -1089,8 +1050,8 @@ void CameraObject::UpdateGeometricRepresentation()
     m_imageTransform->Translate( -offsetX, -offsetY, -m_imageDistance );
     m_imageTransform->Scale( scaleFactorX, scaleFactorY, 1.0 );
 
-    m_cachedImageSize[ 0 ] = width;
-    m_cachedImageSize[ 1 ] = height;
+    m_cachedImageSize[0] = width;
+    m_cachedImageSize[1] = height;
 
     emit ParamsModified();
 }
@@ -1138,10 +1099,9 @@ void CameraObject::CreateCameraRepresentation()
     pts->InsertNextPoint( 100.0, 100.0, -m_imageDistance );
     pts->InsertNextPoint( -100.0, 100.0, -m_imageDistance );
 
-    static vtkIdType linesIndex[8][2]= { {0,1}, {0,2}, {0,3}, {0,4}, {1,2}, {2,3}, {3,4}, {4,1} };
+    static vtkIdType linesIndex[8][2]   = {{0, 1}, {0, 2}, {0, 3}, {0, 4}, {1, 2}, {2, 3}, {3, 4}, {4, 1}};
     vtkSmartPointer<vtkCellArray> lines = vtkSmartPointer<vtkCellArray>::New();
-    for( int i = 0; i < 8; ++i )
-        lines->InsertNextCell( 2, linesIndex[i] );
+    for( int i = 0; i < 8; ++i ) lines->InsertNextCell( 2, linesIndex[i] );
 
     m_cameraPolyData = vtkSmartPointer<vtkPolyData>::New();
     m_cameraPolyData->SetPoints( pts );
@@ -1150,13 +1110,13 @@ void CameraObject::CreateCameraRepresentation()
 
 QString CameraObject::FindNextSnapshotName()
 {
-    QList<CameraObject*> camObjects;
+    QList<CameraObject *> camObjects;
     Application::GetInstance().GetSceneManager()->GetAllCameraObjects( camObjects );
     int index = 0;
     while( 1 )
     {
-        QString newName = QString("Cam snap %1").arg( index );
-        bool found = false;
+        QString newName = QString( "Cam snap %1" ).arg( index );
+        bool found      = false;
         for( int i = 0; i < camObjects.size(); ++i )
         {
             if( camObjects[i]->GetName() == newName )
@@ -1165,8 +1125,7 @@ QString CameraObject::FindNextSnapshotName()
                 break;
             }
         }
-        if( !found )
-            return newName;
+        if( !found ) return newName;
         ++index;
     }
 }

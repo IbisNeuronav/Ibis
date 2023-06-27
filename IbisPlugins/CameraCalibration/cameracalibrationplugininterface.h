@@ -13,9 +13,9 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef __CameraCalibrationPluginInterface_h_
 #define __CameraCalibrationPluginInterface_h_
 
-#include "toolplugininterface.h"
-#include "opencv2/opencv.hpp"
 #include "SVL.h"
+#include "opencv2/opencv.hpp"
+#include "toolplugininterface.h"
 
 class CameraCalibrationWidget;
 class CameraManualCalibrationWidget;
@@ -30,19 +30,17 @@ class vtkProp3D;
 
 class CameraCalibrationPluginInterface : public ToolPluginInterface
 {
-
     Q_OBJECT
-    Q_INTERFACES(IbisPlugin)
-    Q_PLUGIN_METADATA(IID "Ibis.CameraCalibrationPluginInterface" )
+    Q_INTERFACES( IbisPlugin )
+    Q_PLUGIN_METADATA( IID "Ibis.CameraCalibrationPluginInterface" )
 
 public:
-
     CameraCalibrationPluginInterface();
     ~CameraCalibrationPluginInterface();
-    virtual QString GetPluginName() override { return QString("CameraCalibration"); }
+    virtual QString GetPluginName() override { return QString( "CameraCalibration" ); }
     virtual QString GetPluginDescription() override;
     bool CanRun() override;
-    QString GetMenuEntryString() override { return QString("Camera Calibration"); }
+    QString GetMenuEntryString() override { return QString( "Camera Calibration" ); }
 
     // Tab widget
     virtual QWidget * CreateTab() override;
@@ -59,7 +57,7 @@ public:
     CameraCalibrator * GetCameraCalibrator() { return m_cameraCalibrator; }
 
     // Manage the camera to calibrate
-    void GetAllValidCamerasFromScene( QList<CameraObject*> & all );
+    void GetAllValidCamerasFromScene( QList<CameraObject *> & all );
     int GetCurrentCameraObjectId() { return m_currentCameraObjectId; }
     void SetCurrentCameraObjectId( int id );
     bool HasValidCamera();
@@ -121,13 +119,12 @@ signals:
     void CameraCalibrationWidgetClosedSignal();
 
 protected:
-
     void ValidateCurrentCamera();
     void InitializeCameraCalibrator();
     void BuildCalibrationGridRepresentation();
     void ClearCameraViews();
 
-    int m_calibrationGridWidth;     // number of cells (squares) in the grid
+    int m_calibrationGridWidth;  // number of cells (squares) in the grid
     int m_calibrationGridHeight;
     double m_calibrationGridCellSize;  // size of each cell (square) in mm
     PolyDataObject * m_calibrationGridObject;
@@ -135,8 +132,8 @@ protected:
     // Popup Calibration widget
     CameraCalibrationWidget * m_cameraCalibrationWidget;
 
-    std::vector< int > m_cameraViewsObjectIds;
-    std::vector< int > m_cameraCalibratedViewsObjectIds;
+    std::vector<int> m_cameraViewsObjectIds;
+    std::vector<int> m_cameraCalibratedViewsObjectIds;
     CameraCalibrator * m_cameraCalibrator;
     int m_currentCameraObjectId;
 

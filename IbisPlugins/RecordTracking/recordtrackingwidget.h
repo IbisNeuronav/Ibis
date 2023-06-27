@@ -13,43 +13,39 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef __RecordTrackingWidget_h_
 #define __RecordTrackingWidget_h_
 
-#include <QWidget>
 #include <QElapsedTimer>
+#include <QWidget>
 
-#include <fstream>
-#include "trackedsceneobject.h"
 #include <vtkTransform.h>
-#include <vector>
+#include <fstream>
 #include <iostream>
+#include <vector>
+#include "trackedsceneobject.h"
 
 class RecordTrackingPluginInterface;
 
 namespace Ui
 {
-    class RecordTrackingWidget;
+class RecordTrackingWidget;
 }
-
 
 class RecordTrackingWidget : public QWidget
 {
-
     Q_OBJECT
 
 public:
-
-    explicit RecordTrackingWidget(QWidget *parent = nullptr);
+    explicit RecordTrackingWidget( QWidget * parent = nullptr );
     ~RecordTrackingWidget();
 
-    void AddTrackedTool(int);
-    void RemoveTrackedTool(int);
+    void AddTrackedTool( int );
+    void RemoveTrackedTool( int );
 
     void SetPluginInterface( RecordTrackingPluginInterface * interf );
 
 private:
-    std::string GetStringFromTransform(vtkTransform *);
+    std::string GetStringFromTransform( vtkTransform * );
 
 private:
-
     void UpdateUi();
 
     Ui::RecordTrackingWidget * ui;
@@ -66,13 +62,11 @@ private:
     QElapsedTimer m_elapsedTimer;
     qint64 m_cummulativeTime;
 
-
 private slots:
 
     void on_startButton_clicked();
     void on_saveButton_clicked();
     void OnToolsPositionUpdated();
-
 };
 
 #endif

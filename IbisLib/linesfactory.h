@@ -19,9 +19,7 @@ class vtkUnsignedCharArray;
 
 class LinesFactory
 {
-
 public:
-
     LinesFactory();
     ~LinesFactory();
 
@@ -38,7 +36,6 @@ public:
     void Clear();
 
 protected:
-
     bool m_startSegment;
     vtkSmartPointer<vtkPolyData> m_poly;
     vtkSmartPointer<vtkPoints> m_pts;
@@ -46,6 +43,5 @@ protected:
     vtkSmartPointer<vtkUnsignedCharArray> m_scalars;
     unsigned char m_color[4];
 };
-
 
 #endif

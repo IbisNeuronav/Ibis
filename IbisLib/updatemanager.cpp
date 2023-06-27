@@ -9,15 +9,17 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
 #include "updatemanager.h"
-#include "application.h"
-#include <QTimer>
+
 #include <QTime>
+#include <QTimer>
+
+#include "application.h"
 
 UpdateManager::UpdateManager()
 {
     m_timer = new QTimer( NULL );
-    connect( m_timer, SIGNAL(timeout()), this, SLOT(TimerCallback()) );
-    m_timerPeriod = 66;  // 66 ms => 15 fps
+    connect( m_timer, SIGNAL( timeout() ), this, SLOT( TimerCallback() ) );
+    m_timerPeriod    = 66;  // 66 ms => 15 fps
     m_lastUpdateTime = new QTime;
 }
 
@@ -27,10 +29,7 @@ UpdateManager::~UpdateManager()
     delete m_lastUpdateTime;
 }
 
-void UpdateManager::SetUpdatePeriod( int msecPeriod )
-{
-    m_timerPeriod = msecPeriod;
-}
+void UpdateManager::SetUpdatePeriod( int msecPeriod ) { m_timerPeriod = msecPeriod; }
 
 void UpdateManager::Start()
 {
@@ -41,15 +40,9 @@ void UpdateManager::Start()
     m_lastUpdateTime->start();
 }
 
-bool UpdateManager::IsRunning()
-{
-    return m_timer->isActive();
-}
+bool UpdateManager::IsRunning() { return m_timer->isActive(); }
 
-void UpdateManager::Stop()
-{
-    m_timer->stop();
-}
+void UpdateManager::Stop() { m_timer->stop(); }
 
 void UpdateManager::TimerCallback()
 {

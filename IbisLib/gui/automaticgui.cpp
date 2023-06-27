@@ -9,15 +9,16 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
 #include "automaticgui.h"
-#include <QVBoxLayout>
+
+#include <vtkGenericParam.h>
+
+#include <QComboBox>
 #include <QHBoxLayout>
 #include <QLabel>
-#include <QComboBox>
-#include <vtkGenericParam.h>
+#include <QVBoxLayout>
 #include <string>
 
-AutomaticGui::AutomaticGui( vtkGenericParamInterface * params, QWidget * parent )
-        : m_paramInterface(params)
+AutomaticGui::AutomaticGui( vtkGenericParamInterface * params, QWidget * parent ) : m_paramInterface( params )
 {
     QVBoxLayout * layout = new QVBoxLayout( this );
 
@@ -37,16 +38,14 @@ AutomaticGui::AutomaticGui( vtkGenericParamInterface * params, QWidget * parent 
     layout->setContentsMargins( 0, 0, 0, 0 );
 }
 
-ComboParamGui::ComboParamGui( vtkComboParam * param, QWidget * parent )
-    : ParamGui( parent )
-    , m_param( param )
+ComboParamGui::ComboParamGui( vtkComboParam * param, QWidget * parent ) : ParamGui( parent ), m_param( param )
 {
     QHBoxLayout * layout = new QHBoxLayout();
     parent->layout()->addItem( layout );
     QLabel * label = new QLabel( parent );
     label->setText( m_param->GetParamName() );
     m_comboBox = new QComboBox( parent );
-    std::vector< std::string > validChoices;
+    std::vector<std::string> validChoices;
     m_param->GetValidChoices( validChoices );
     for( unsigned i = 0; i < validChoices.size(); ++i )
     {
@@ -54,7 +53,7 @@ ComboParamGui::ComboParamGui( vtkComboParam * param, QWidget * parent )
     }
     layout->addWidget( label );
     layout->addWidget( m_comboBox );
-    connect( m_comboBox, SIGNAL(activated(int)), this, SLOT(OnComboBoxActivated(int)) );
+    connect( m_comboBox, SIGNAL( activated( int ) ), this, SLOT( OnComboBoxActivated( int ) ) );
     Update();
 }
 

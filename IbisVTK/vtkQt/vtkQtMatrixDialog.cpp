@@ -11,30 +11,31 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 // Thanks to Simon Drouin for writing this class
 
 #include "vtkQtMatrixDialog.h"
-#include <QLineEdit>
-#include <QPushButton>
-#include <QLayout>
-#include <QVariant>
-#include <QToolTip>
-#include <QWhatsThis>
+
+#include <vtkEventQtSlotConnect.h>
+#include <vtkMatrix4x4.h>
+#include <vtkObject.h>
+
+#include <QApplication>
+#include <QClipboard>
 #include <QDir>
 #include <QFile>
 #include <QFileDialog>
-#include <QString>
-#include <QApplication>
-#include <QMimeData>
-#include <QClipboard>
+#include <QLayout>
+#include <QLineEdit>
 #include <QMessageBox>
-#include <vtkObject.h>
-#include <vtkMatrix4x4.h>
-#include <vtkEventQtSlotConnect.h>
+#include <QMimeData>
+#include <QPushButton>
+#include <QString>
+#include <QToolTip>
+#include <QVariant>
+#include <QWhatsThis>
+
 #include "vtkXFMReader.h"
 #include "vtkXFMWriter.h"
 
-vtkQtMatrixDialog::vtkQtMatrixDialog( bool readOnly, QWidget* parent )
-    : QDialog( parent, Qt::WindowStaysOnTopHint )
-    , m_readOnly( readOnly )
-    , m_matrix( 0 )
+vtkQtMatrixDialog::vtkQtMatrixDialog( bool readOnly, QWidget * parent )
+    : QDialog( parent, Qt::WindowStaysOnTopHint ), m_readOnly( readOnly ), m_matrix( 0 )
 {
     resize( 511, 210 );
 
@@ -43,11 +44,11 @@ vtkQtMatrixDialog::vtkQtMatrixDialog( bool readOnly, QWidget* parent )
 
     m_eventSlotConnect = vtkEventQtSlotConnect::New();
 
-    MatrixDialogLayout = new QVBoxLayout( this ); 
+    MatrixDialogLayout = new QVBoxLayout( this );
     MatrixDialogLayout->setSpacing( 6 );
     MatrixDialogLayout->setMargin( 11 );
 
-    gridBox = new QGridLayout; 
+    gridBox = new QGridLayout;
     gridBox->setSpacing( 12 );
     gridBox->setMargin( 2 );
 
@@ -56,71 +57,71 @@ vtkQtMatrixDialog::vtkQtMatrixDialog( bool readOnly, QWidget* parent )
     {
         for( int j = 0; j < 4; j++ )
         {
-            m_matEdit[i][j] = new QLineEdit( this );
-            m_matEdit[i][j]->setReadOnly( readOnly );
-            m_matEdit[i][j]->setAlignment( Qt::AlignRight );
-            m_matEdit[i][j]->setMaxLength( 12 );
-            connect( m_matEdit[i][j], SIGNAL(returnPressed()), this, SLOT(LineEditChanged()) );
-            gridBox->addWidget( m_matEdit[i][j], i, j );
+            m_matEdit[ i ][ j ] = new QLineEdit( this );
+            m_matEdit[ i ][ j ]->setReadOnly( readOnly );
+            m_matEdit[ i ][ j ]->setAlignment( Qt::AlignRight );
+            m_matEdit[ i ][ j ]->setMaxLength( 12 );
+            connect( m_matEdit[ i ][ j ], SIGNAL( returnPressed() ), this, SLOT( LineEditChanged() ) );
+            gridBox->addWidget( m_matEdit[ i ][ j ], i, j );
         }
     }
 
     MatrixDialogLayout->addLayout( gridBox );
-    
+
     // create the box that contains the ok and cancel buttons
     QSpacerItem * spacer = new QSpacerItem( 20, 20, QSizePolicy::Minimum, QSizePolicy::Expanding );
     MatrixDialogLayout->addItem( spacer );
 
-    Layout3 = new QHBoxLayout; 
+    Layout3 = new QHBoxLayout;
     Layout3->setSpacing( 6 );
     Layout3->setMargin( 0 );
-    
+
     m_identityButton = new QPushButton( this );
-	m_identityButton->setObjectName("m_identityButton" );
+    m_identityButton->setObjectName( "m_identityButton" );
     m_identityButton->setText( tr( "Identity" ) );
     m_identityButton->setMinimumSize( QSize( 70, 30 ) );
     m_identityButton->setMaximumSize( QSize( 70, 30 ) );
-    m_identityButton->setEnabled(!readOnly);
+    m_identityButton->setEnabled( !readOnly );
     m_identityButton->setAutoDefault( false );
     Layout3->addWidget( m_identityButton );
-    
+
     m_invertButton = new QPushButton( this );
-	m_invertButton->setObjectName("m_invertButton");
+    m_invertButton->setObjectName( "m_invertButton" );
     m_invertButton->setText( tr( "Invert" ) );
     m_invertButton->setMinimumSize( QSize( 70, 30 ) );
     m_invertButton->setMaximumSize( QSize( 70, 30 ) );
-    m_invertButton->setEnabled(!readOnly);
+    m_invertButton->setEnabled( !readOnly );
     m_invertButton->setAutoDefault( false );
     Layout3->addWidget( m_invertButton );
-    
+
     m_loadButton = new QPushButton( this );
-	m_loadButton->setObjectName("m_loadButton");
+    m_loadButton->setObjectName( "m_loadButton" );
     m_loadButton->setText( tr( "Load" ) );
     m_loadButton->setMinimumSize( QSize( 70, 30 ) );
     m_loadButton->setMaximumSize( QSize( 70, 30 ) );
-    m_loadButton->setEnabled(!readOnly);
+    m_loadButton->setEnabled( !readOnly );
     m_loadButton->setAutoDefault( false );
     Layout3->addWidget( m_loadButton );
-    
+
     m_saveButton = new QPushButton( this );
-    m_saveButton->setObjectName("m_saveButton");
+    m_saveButton->setObjectName( "m_saveButton" );
     m_saveButton->setText( tr( "Save" ) );
     m_saveButton->setMinimumSize( QSize( 70, 30 ) );
     m_saveButton->setMaximumSize( QSize( 70, 30 ) );
     m_saveButton->setAutoDefault( false );
     Layout3->addWidget( m_saveButton );
-    
+
     m_revertButton = new QPushButton( this );
-	m_revertButton->setObjectName("m_revertButton");
+    m_revertButton->setObjectName( "m_revertButton" );
     m_revertButton->setText( tr( "Restore" ) );
     m_revertButton->setMinimumSize( QSize( 70, 30 ) );
     m_revertButton->setMaximumSize( QSize( 70, 30 ) );
-    m_revertButton->setEnabled(!readOnly);
+    m_revertButton->setEnabled( !readOnly );
     m_revertButton->setAutoDefault( false );
     Layout3->addWidget( m_revertButton );
-        
+
     m_copyButton = new QPushButton( this );
-    m_copyButton->setObjectName("m_copyButton");
+    m_copyButton->setObjectName( "m_copyButton" );
     m_copyButton->setText( tr( "Copy" ) );
     m_copyButton->setMinimumSize( QSize( 70, 30 ) );
     m_copyButton->setMaximumSize( QSize( 70, 30 ) );
@@ -128,16 +129,15 @@ vtkQtMatrixDialog::vtkQtMatrixDialog( bool readOnly, QWidget* parent )
     Layout3->addWidget( m_copyButton );
 
     m_pasteButton = new QPushButton( this );
-    m_pasteButton->setObjectName("m_pasteButton");
+    m_pasteButton->setObjectName( "m_pasteButton" );
     m_pasteButton->setText( tr( "Paste" ) );
     m_pasteButton->setMinimumSize( QSize( 70, 30 ) );
     m_pasteButton->setMaximumSize( QSize( 70, 30 ) );
-    m_pasteButton->setEnabled(!readOnly);
+    m_pasteButton->setEnabled( !readOnly );
     m_pasteButton->setAutoDefault( false );
     Layout3->addWidget( m_pasteButton );
 
-
-    MatrixDialogLayout->addLayout( Layout3);
+    MatrixDialogLayout->addLayout( Layout3 );
 
     // signals and slots connections
     connect( m_invertButton, SIGNAL( clicked() ), this, SLOT( InvertButtonClicked() ) );
@@ -155,19 +155,18 @@ vtkQtMatrixDialog::~vtkQtMatrixDialog()
 {
     m_eventSlotConnect->Delete();
 
-    if( m_matrix )
-        m_matrix->UnRegister( 0 );
+    if( m_matrix ) m_matrix->UnRegister( 0 );
 
     m_copy_matrix->Delete();
 }
 
-void vtkQtMatrixDialog::SetMatrixElements( )
+void vtkQtMatrixDialog::SetMatrixElements()
 {
     for( int i = 0; i < 4; i++ )
     {
         for( int j = 0; j < 4; j++ )
         {
-            m_matrix->SetElement( i, j, m_matEdit[i][j]->text().toDouble() );
+            m_matrix->SetElement( i, j, m_matEdit[ i ][ j ]->text().toDouble() );
         }
     }
     m_matrix->Modified();
@@ -184,7 +183,6 @@ void vtkQtMatrixDialog::InvertButtonClicked()
     }
 }
 
-
 void vtkQtMatrixDialog::IdentityButtonClicked()
 {
     if( m_matrix )
@@ -194,7 +192,6 @@ void vtkQtMatrixDialog::IdentityButtonClicked()
         emit MatrixModified( m_matrix );
     }
 }
-
 
 void vtkQtMatrixDialog::RevertButtonClicked()
 {
@@ -207,12 +204,7 @@ void vtkQtMatrixDialog::RevertButtonClicked()
     UpdateUI();
 }
 
-
-void vtkQtMatrixDialog::MatrixChanged()
-{
-    UpdateUI();
-}
-
+void vtkQtMatrixDialog::MatrixChanged() { UpdateUI(); }
 
 void vtkQtMatrixDialog::SetMatrix( vtkMatrix4x4 * mat )
 {
@@ -227,7 +219,8 @@ void vtkQtMatrixDialog::SetMatrix( vtkMatrix4x4 * mat )
     {
         m_copy_matrix->Identity();
         m_matrix->Register( NULL );
-        m_eventSlotConnect->Connect( m_matrix, vtkCommand::ModifiedEvent, this, SLOT(MatrixChanged()), 0, 0.0, Qt::QueuedConnection );
+        m_eventSlotConnect->Connect( m_matrix, vtkCommand::ModifiedEvent, this, SLOT( MatrixChanged() ), 0, 0.0,
+                                     Qt::QueuedConnection );
     }
     UpdateUI();
 }
@@ -240,7 +233,7 @@ void vtkQtMatrixDialog::UpdateUI()
         {
             for( int j = 0; j < 4; j++ )
             {
-                m_matEdit[i][j]->setText( QString::number( m_matrix->Element[i][j], 'g', 6 ) );
+                m_matEdit[ i ][ j ]->setText( QString::number( m_matrix->Element[ i ][ j ], 'g', 6 ) );
             }
         }
     }
@@ -250,7 +243,7 @@ void vtkQtMatrixDialog::UpdateUI()
         {
             for( int j = 0; j < 4; j++ )
             {
-                m_matEdit[i][j]->setText( "----" );
+                m_matEdit[ i ][ j ]->setText( "----" );
             }
         }
     }
@@ -260,20 +253,20 @@ void vtkQtMatrixDialog::LoadButtonClicked()
 {
     // Get filename from user
 
-    QString filename = QFileDialog::getOpenFileName( this, tr("Open XFM file"), m_directory, tr("*.xfm"), nullptr, QFileDialog::DontUseNativeDialog );
+    QString filename = QFileDialog::getOpenFileName( this, tr( "Open XFM file" ), m_directory, tr( "*.xfm" ), nullptr,
+                                                     QFileDialog::DontUseNativeDialog );
     if( !filename.isEmpty() )
     {
         QFile OpenFile( filename );
-        vtkMatrix4x4 * mat = vtkMatrix4x4::New();
-        vtkXFMReader *reader = vtkXFMReader::New();
+        vtkMatrix4x4 * mat    = vtkMatrix4x4::New();
+        vtkXFMReader * reader = vtkXFMReader::New();
         if( reader->CanReadFile( filename.toUtf8() ) )
         {
-            reader->SetFileName(filename.toUtf8() );
-            reader->SetMatrix(mat);
+            reader->SetFileName( filename.toUtf8() );
+            reader->SetMatrix( mat );
             reader->Update();
             reader->Delete();
-            if( m_matrix )
-                m_matrix->DeepCopy( mat );
+            if( m_matrix ) m_matrix->DeepCopy( mat );
             mat->Delete();
             UpdateUI();
             emit MatrixModified( m_matrix );
@@ -288,13 +281,14 @@ void vtkQtMatrixDialog::LoadButtonClicked()
         QFileInfo info( OpenFile.fileName() );
         m_directory = info.absolutePath();
     }
- }
+}
 
 void vtkQtMatrixDialog::SaveButtonClicked()
 {
     Q_ASSERT( m_matrix );
 
-    QString filename = QFileDialog::getSaveFileName( this, tr("Save XFM file"), m_directory, tr("*.xfm"), nullptr, QFileDialog::DontUseNativeDialog );
+    QString filename = QFileDialog::getSaveFileName( this, tr( "Save XFM file" ), m_directory, tr( "*.xfm" ), nullptr,
+                                                     QFileDialog::DontUseNativeDialog );
     if( !filename.isEmpty() )
     {
         vtkXFMWriter * writer = vtkXFMWriter::New();
@@ -309,29 +303,29 @@ void vtkQtMatrixDialog::SaveButtonClicked()
 
 void vtkQtMatrixDialog::CopyButtonClicked()
 {
-    QClipboard *clipboard = QApplication::clipboard();
+    QClipboard * clipboard = QApplication::clipboard();
     QString all_matrix_elements;
     for( int i = 0; i < 4; i++ )
     {
         for( int j = 0; j < 4; j++ )
         {
-            all_matrix_elements.append( m_matEdit[i][j]->text() );
-            all_matrix_elements.append(' ');
+            all_matrix_elements.append( m_matEdit[ i ][ j ]->text() );
+            all_matrix_elements.append( ' ' );
         }
     }
-    all_matrix_elements.remove( all_matrix_elements.size()-1, 1);
+    all_matrix_elements.remove( all_matrix_elements.size() - 1, 1 );
     clipboard->setText( all_matrix_elements );
 }
 
 void vtkQtMatrixDialog::PasteButtonClicked()
 {
-    QClipboard *clipboard = QApplication::clipboard();
-    const QMimeData *mimeData = clipboard->mimeData();
+    QClipboard * clipboard     = QApplication::clipboard();
+    const QMimeData * mimeData = clipboard->mimeData();
 
     m_copy_matrix->DeepCopy( m_matrix );
-    if (mimeData->hasText())
+    if( mimeData->hasText() )
     {
-        QString text(mimeData->text());
+        QString text( mimeData->text() );
         QStringList list = mimeData->text().split( ' ' );
         if( list.size() == 16 )
         {
@@ -340,7 +334,7 @@ void vtkQtMatrixDialog::PasteButtonClicked()
             {
                 for( int j = 0; j < 4; j++ )
                 {
-                    m_matEdit[i][j]->setText( list.at( l++ ) );
+                    m_matEdit[ i ][ j ]->setText( list.at( l++ ) );
                 }
             }
             this->SetMatrixElements();
@@ -356,7 +350,7 @@ void vtkQtMatrixDialog::PasteButtonClicked()
     }
 }
 
-void vtkQtMatrixDialog::SetDirectory(const QString &dir)
+void vtkQtMatrixDialog::SetDirectory( const QString & dir )
 {
     m_directory = dir;
     if( !QFile::exists( m_directory ) )

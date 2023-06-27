@@ -1,10 +1,10 @@
 #ifndef IBISPREFERENCES_H
 #define IBISPREFERENCES_H
 
-#include <QWidget>
 #include <QMap>
-#include <QSettings>
 #include <QObject>
+#include <QSettings>
+#include <QWidget>
 
 /**
  * @class   IbisPreferences
@@ -22,37 +22,37 @@ class IbisPreferences : public QObject
 {
     Q_OBJECT
 public:
-    explicit IbisPreferences(QObject *parent = nullptr);
+    explicit IbisPreferences( QObject * parent = nullptr );
 
     /** Load saved preferences. */
     void LoadSettings( QSettings & settings );
     /** Save current preferences. */
     void SaveSettings( QSettings & settings );
     /** Map a selected path to a preference name. */
-    void RegisterPath( const QString  & name, const QString & path );
+    void RegisterPath( const QString & name, const QString & path );
     /** Remove mapped path. */
-    void UnRegisterPath(const QString &pathName );
+    void UnRegisterPath( const QString & pathName );
     /** Find a path using its name. */
-    const QString GetPath(const QString &pathName );
+    const QString GetPath( const QString & pathName );
     /** Check if the path is in the preferences. */
-    bool IsPathRegistered( const QString &pathName );
+    bool IsPathRegistered( const QString & pathName );
 
     /** Show the settings dialog. */
     void ShowPreferenceDialog();
     /** Get all mapped paths. */
-    QMap< QString, QString > GetCustomPaths( ) { return m_customPaths; }
+    QMap<QString, QString> GetCustomPaths() { return m_customPaths; }
     /** Set mapped paths. */
-    void SetCustomPaths( QMap< QString, QString > &map ) { m_customPaths = map; }
+    void SetCustomPaths( QMap<QString, QString> & map ) { m_customPaths = map; }
 
 protected:
-    typedef QMap< QString, QString > CustomPathsMap;
+    typedef QMap<QString, QString> CustomPathsMap;
     CustomPathsMap m_customPaths;
 
 private slots:
     void OnPreferenceWidgetClosed();
 
 private:
-    PreferenceWidget *m_prefWidget;
+    PreferenceWidget * m_prefWidget;
 };
 
-#endif // IBISPREFERENCES_H
+#endif  // IBISPREFERENCES_H

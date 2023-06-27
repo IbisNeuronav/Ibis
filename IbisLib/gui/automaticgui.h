@@ -11,8 +11,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef __GuiGenerator_h_
 #define __GuiGenerator_h_
 
-#include <QWidget>
 #include <QObject>
+#include <QWidget>
 
 class QComboBox;
 class vtkGenericParamInterface;
@@ -25,6 +25,7 @@ class ParamGui : public QObject
 {
 public:
     ParamGui( QObject * parent ) : QObject( parent ) {}
+
 protected:
     virtual void Update() {}
 };
@@ -36,18 +37,19 @@ public:
     ComboParamGui( vtkComboParam * param, QWidget * parent = 0 );
 private slots:
     void OnComboBoxActivated( int );
+
 protected:
     virtual void Update();
     QComboBox * m_comboBox;
     vtkComboParam * m_param;
 };
 
-
 class AutomaticGui : public QWidget
 {
     Q_OBJECT
 public:
     AutomaticGui( vtkGenericParamInterface * params, QWidget * parent = 0 );
+
 protected:
     vtkGenericParamInterface * m_paramInterface;
 };

@@ -9,14 +9,16 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
 #include "simplepropcreator.h"
-#include <vtkPoints.h>
+
+#include <vtkActor.h>
 #include <vtkCellArray.h>
+#include <vtkNew.h>
+#include <vtkPoints.h>
 #include <vtkPolyData.h>
 #include <vtkPolyDataMapper.h>
-#include <vtkActor.h>
 #include <vtkProperty.h>
 #include <vtkSphereSource.h>
-#include <vtkNew.h>
+
 #include "vtkCircleWithCrossSource.h"
 
 vtkProp3D * SimplePropCreator::CreateLine( double start[3], double end[3], double color[4] )
@@ -25,8 +27,8 @@ vtkProp3D * SimplePropCreator::CreateLine( double start[3], double end[3], doubl
     pts->InsertNextPoint( start );
     pts->InsertNextPoint( end );
 
-    static vtkIdType lineIndex[1][2]= { {0,1} };
-    vtkCellArray * line = vtkCellArray::New();
+    static vtkIdType lineIndex[1][2] = {{0, 1}};
+    vtkCellArray * line              = vtkCellArray::New();
     line->InsertNextCell( 2, lineIndex[0] );
 
     vtkPolyData * poly = vtkPolyData::New();
@@ -46,13 +48,12 @@ vtkProp3D * SimplePropCreator::CreateLine( double start[3], double end[3], doubl
     return prop;
 }
 
-vtkProp3D * SimplePropCreator::CreatePath( std::vector< Vec3 > & points, double color[4] )
+vtkProp3D * SimplePropCreator::CreatePath( std::vector<Vec3> & points, double color[4] )
 {
     vtkPoints * pts = vtkPoints::New();
     if( points.size() > 1 )
     {
-        for( int i = 0; i < points.size(); ++i )
-            pts->InsertNextPoint( points[i].Ref() );
+        for( int i = 0; i < points.size(); ++i ) pts->InsertNextPoint( points[i].Ref() );
     }
 
     vtkCellArray * line = vtkCellArray::New();

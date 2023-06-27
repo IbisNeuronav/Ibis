@@ -6,7 +6,8 @@
 
 class SceneObject;
 
-namespace Ui {
+namespace Ui
+{
 class ApplyTransformToObjectWidget;
 }
 
@@ -17,24 +18,24 @@ class ApplyTransformToObjectWidget : public QWidget
     Q_OBJECT
 
 public:
-    explicit ApplyTransformToObjectWidget(QWidget *parent = 0);
+    explicit ApplyTransformToObjectWidget( QWidget * parent = 0 );
     ~ApplyTransformToObjectWidget();
-    void SetInterface( ApplyTransformToObjectPluginInterface *intface );
+    void SetInterface( ApplyTransformToObjectPluginInterface * intface );
 
 private slots:
 
     void on_transformPushButton_clicked();
-    void on_sceneObjectsComboBox_currentIndexChanged(int index);
+    void on_sceneObjectsComboBox_currentIndexChanged( int index );
     void EditMatrixDialogClosed();
     void UpdateUI();
 
 private:
     vtkQtMatrixDialog * m_matrixDialog;
-    SceneObject *m_selectedObject;
+    SceneObject * m_selectedObject;
 
-    ApplyTransformToObjectPluginInterface *m_pluginInterface;
+    ApplyTransformToObjectPluginInterface * m_pluginInterface;
 
-    Ui::ApplyTransformToObjectWidget *ui;
+    Ui::ApplyTransformToObjectWidget * ui;
 };
 
-#endif // APPLYTRANSFORMTOOBJECTWIDGET_H
+#endif  // APPLYTRANSFORMTOOBJECTWIDGET_H

@@ -11,15 +11,16 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef TAG_IMAGEOBJECT_H
 #define TAG_IMAGEOBJECT_H
 
-#include "sceneobject.h"
 #include <vtkMatrix4x4.h>
 #include <vtkSmartPointer.h>
-#include "serializer.h"
-#include <map>
-#include <QVector>
+
 #include <QObject>
+#include <QVector>
+#include <map>
 
 #include "ibisitkvtkconverter.h"
+#include "sceneobject.h"
+#include "serializer.h"
 
 class vtkRenderer;
 class vtkRenderWindowInteractor;
@@ -40,7 +41,8 @@ class vtkImageData;
  * @class   ImageObject
  * @brief   ImageObject is derived from SceneObject
  *
- * ImageObject is used to represents a geometric structure that is a topological and geometrical regular array of points.
+ * ImageObject is used to represents a geometric structure that is a topological and geometrical regular array of
+ points.
  *
  * In IBIS we use ImageObject to show data from the following file types:
  *
@@ -48,7 +50,8 @@ class vtkImageData;
  * Nifti file *.nii\n
  * VTK file: *.vtk *.vtp\n
  *
- * Images loaded in IBIS are initially represented in grayscale. Colors can be set using a predefind LUT (Look Up Table).
+ * Images loaded in IBIS are initially represented in grayscale. Colors can be set using a predefind LUT (Look Up
+ Table).
  * All lookup tables are defined in LookupTableManager.
  *
  * Image data is kept in the class as: vtkImageData *Image\n
@@ -61,26 +64,24 @@ class vtkImageData;
 
 class ImageObject : public SceneObject
 {
-    
-Q_OBJECT
+    Q_OBJECT
 
 public:
-        
     static ImageObject * New() { return new ImageObject; }
-    vtkTypeMacro(ImageObject,SceneObject);
+    vtkTypeMacro( ImageObject, SceneObject );
 
     ImageObject();
     virtual ~ImageObject();
-    
+
     virtual void Serialize( Serializer * ser ) override;
     virtual void Export() override;
-    virtual bool IsExportable()  override { return true; }
+    virtual bool IsExportable() override { return true; }
     /** Save image data as a MINC2 file (*.mnc). */
-    void SaveImageData(QString &name);
+    void SaveImageData( QString & name );
     /** Check if this is a label image. */
     bool IsLabelImage();
     /** Return image data, VTK format. */
-    vtkImageData* GetImage( );
+    vtkImageData * GetImage();
     /** Set ITK image, all except labels. */
     bool SetItkImage( IbisItkFloat3ImageType::Pointer image );
     /** Set ITK image for labels. */
@@ -92,9 +93,9 @@ public:
     /** Set image data, VTK format.
      *  @param image input data
      *  @param tr initial transform
-    */
-    void SetImage( vtkImageData * image, vtkTransform * tr=0 );
-    
+     */
+    void SetImage( vtkImageData * image, vtkTransform * tr = 0 );
+
     /** Manage object actions after adding to the scene. */
     virtual void ObjectAddedToScene() override;
     /** Setup object in a specific view */
@@ -102,7 +103,7 @@ public:
     /** Release object from a specific view */
     virtual void Release( View * view ) override;
     /** Create widgets specific to the object, they are added as tabs to the basic settings dialog. */
-    virtual void CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets) override;
+    virtual void CreateSettingsWidgets( QWidget * parent, QVector<QWidget *> * widgets ) override;
 
     /** Set bounding box visibility in 3D view. */
     void SetViewOutline( int isOn );
@@ -110,9 +111,9 @@ public:
     int GetViewOutline();
 
     /** Choose from the set of lookup table templates available from the LookupTableManager. */
-    int ChooseColorTable(int index);
+    int ChooseColorTable( int index );
     /** Get the index of currently used LUT. */
-    int GetLutIndex() {return lutIndex;}
+    int GetLutIndex() { return lutIndex; }
     /** Get currently used LUT. */
     vtkScalarsToColors * GetLut();
     /** Get LUT range. */
@@ -120,7 +121,7 @@ public:
     /** Set LUT range. */
     void SetLutRange( double r[2] );
     /** Get scalar range from Image. */
-    void GetImageScalarRange(double *range);
+    void GetImageScalarRange( double * range );
     /** Get number of scalar components from Image. */
     int GetNumberOfScalarComponents();
     /** Get image bounds from Image. */
@@ -135,7 +136,7 @@ public:
     double GetIntensityFactor();
 
     /** Show the information found in the MINC file in a popup widget. */
-    virtual void ShowMincInfo( );
+    virtual void ShowMincInfo();
 
     vtkImageAccumulate * GetHistogramComputer();
 
@@ -166,7 +167,6 @@ protected slots:
     void OnVolumeClippingBoxModified( vtkObject * caller );
 
 protected:
-    
     virtual void Hide() override;
     virtual void Show() override;
     void SetupInCutPlanes();
@@ -175,24 +175,24 @@ protected:
     void Setup2DRepresentation( int i, View * view );
     void Release2DRepresentation( int i, View * view );
 
-    void SetInternalImage(vtkImageData *);
+    void SetInternalImage( vtkImageData * );
 
-	// Lookup table management
-    void SetLut(vtkSmartPointer<vtkScalarsToColors> lut);
+    // Lookup table management
+    void SetLut( vtkSmartPointer<vtkScalarsToColors> lut );
 
     // Setup histogram properties after new image is set.
-    void SetupHistogramComputer( );
+    void SetupHistogramComputer();
 
-    IbisItkVtkConverter *ItktovtkConverter;
+    IbisItkVtkConverter * ItktovtkConverter;
     IbisItkFloat3ImageType::Pointer ItkImage;
     IbisItkUnsignedChar3ImageType::Pointer ItkLabelImage;
 
-    vtkImageData* Image;
+    vtkImageData * Image;
     vtkSmartPointer<vtkScalarsToColors> Lut;
     vtkSmartPointer<vtkOutlineFilter> OutlineFilter;
     static const int NumberOfBinsInHistogram;
     vtkSmartPointer<vtkImageAccumulate> HistogramComputer;
-    
+
     int viewOutline;
     int outlineWasVisible;
     int lutIndex;
@@ -214,7 +214,7 @@ protected:
     bool m_showVolumeClippingBox;
     double m_volumeRenderingBounds[6];
     vtkSmartPointer<vtkEventQtSlotConnect> m_volumeClippingBoxWatcher;
-    
+
     struct PerViewElements
     {
         PerViewElements();
@@ -223,8 +223,8 @@ protected:
         vtkSmartPointer<vtkVolume> volume;
         vtkSmartPointer<vtkBoxWidget2> volumeClippingWidget;
     };
-    
-    typedef std::map<View*,PerViewElements*> ImageObjectViewAssociation;
+
+    typedef std::map<View *, PerViewElements *> ImageObjectViewAssociation;
     ImageObjectViewAssociation imageObjectInstances;
 
     bool SanityCheck( IbisItkFloat3ImageType::Pointer image );
@@ -233,5 +233,4 @@ protected:
 
 ObjectSerializationHeaderMacro( ImageObject );
 
-#endif //TAG_IMAGEOBJECT_H
-
+#endif  // TAG_IMAGEOBJECT_H

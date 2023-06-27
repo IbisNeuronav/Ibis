@@ -9,23 +9,25 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
 #include "transformeditwidget.h"
-#include "ui_transformeditwidget.h"
-#include <vtkTransform.h>
+
 #include <vtkEventQtSlotConnect.h>
 #include <vtkQtMatrixDialog.h>
-#include "vtkMatrix4x4Operators.h"
-#include "sceneobject.h"
-#include "application.h"
+#include <vtkTransform.h>
 
-TransformEditWidget::TransformEditWidget(QWidget *parent) :
-    QWidget(parent),
-    ui(new Ui::TransformEditWidget),
-    m_sceneObject(nullptr),
-    m_selfUpdating(false),
-    m_matrixDialog(nullptr),
-    m_worldMatrixDialog(nullptr)
+#include "application.h"
+#include "sceneobject.h"
+#include "ui_transformeditwidget.h"
+#include "vtkMatrix4x4Operators.h"
+
+TransformEditWidget::TransformEditWidget( QWidget * parent )
+    : QWidget( parent ),
+      ui( new Ui::TransformEditWidget ),
+      m_sceneObject( nullptr ),
+      m_selfUpdating( false ),
+      m_matrixDialog( nullptr ),
+      m_worldMatrixDialog( nullptr )
 {
-    ui->setupUi(this);
+    ui->setupUi( this );
     m_transformModifiedConnection = vtkEventQtSlotConnect::New();
 }
 
@@ -48,8 +50,7 @@ TransformEditWidget::~TransformEditWidget()
 
 void TransformEditWidget::SetSceneObject( SceneObject * obj )
 {
-    if( m_sceneObject == obj )
-        return;
+    if( m_sceneObject == obj ) return;
     if( m_sceneObject )
     {
         m_transformModifiedConnection->Disconnect( m_sceneObject->GetLocalTransform() );
@@ -57,7 +58,8 @@ void TransformEditWidget::SetSceneObject( SceneObject * obj )
     m_sceneObject = obj;
     if( m_sceneObject )
     {
-        m_transformModifiedConnection->Connect( m_sceneObject->GetLocalTransform(), vtkCommand::ModifiedEvent, this, SLOT(UpdateUi()) );
+        m_transformModifiedConnection->Connect( m_sceneObject->GetLocalTransform(), vtkCommand::ModifiedEvent, this,
+                                                SLOT( UpdateUi() ) );
     }
 
     UpdateUi();
@@ -69,10 +71,10 @@ void TransformEditWidget::UpdateTransform()
     if( m_sceneObject )
     {
         m_selfUpdating = true;
-        //m_sceneObject->StartModifyingTransform();
+        // m_sceneObject->StartModifyingTransform();
 
         vtkTransform * localTransform = m_sceneObject->GetLocalTransform();
-        vtkMatrix4x4 *mat = vtkMatrix4x4::New();
+        vtkMatrix4x4 * mat            = vtkMatrix4x4::New();
         mat->DeepCopy( localTransform->GetMatrix() );
         double rot[3];
         rot[0] = ui->rotateXSpinBox->value();
@@ -87,7 +89,7 @@ void TransformEditWidget::UpdateTransform()
         localTransform->Modified();
         mat->Delete();
 
-        //m_sceneObject->FinishModifyingTransform();
+        // m_sceneObject->FinishModifyingTransform();
         m_selfUpdating = false;
     }
 }
@@ -97,8 +99,8 @@ void TransformEditWidget::UpdateUi()
 {
     if( m_sceneObject && !m_selfUpdating )
     {
-        BlockSpinboxSignals(true);
-        EnableSpinBoxes(false);
+        BlockSpinboxSignals( true );
+        EnableSpinBoxes( false );
 
         vtkTransform * localTransform = m_sceneObject->GetLocalTransform();
         if( !localTransform )
@@ -114,11 +116,10 @@ void TransformEditWidget::UpdateUi()
         }
         else
         {
-            if( m_sceneObject->CanEditTransformManually() )
-                EnableSpinBoxes( true );
+            if( m_sceneObject->CanEditTransformManually() ) EnableSpinBoxes( true );
 
-            double t[3] = { 0.0, 0.0, 0.0 };
-            double r[3] = { 0.0, 0.0, 0.0 };
+            double t[3] = {0.0, 0.0, 0.0};
+            double r[3] = {0.0, 0.0, 0.0};
             vtkMatrix4x4Operators::MatrixToTransRot( localTransform->GetMatrix(), t, r );
             ui->translateXSpinBox->setValue( t[0] );
             ui->translateYSpinBox->setValue( t[1] );
@@ -127,11 +128,11 @@ void TransformEditWidget::UpdateUi()
             ui->rotateYSpinBox->setValue( r[1] );
             ui->rotateZSpinBox->setValue( r[2] );
         }
-        BlockSpinboxSignals(false);
+        BlockSpinboxSignals( false );
     }
     else if( !m_selfUpdating )
     {
-        EnableSpinBoxes(false);
+        EnableSpinBoxes( false );
     }
 }
 
@@ -147,14 +148,15 @@ void TransformEditWidget::EditMatrixButtonToggled( bool isOn )
     }
     else
     {
-        Q_ASSERT_X( m_sceneObject, "TransformEditWidget::EditMatrixButtonToggled", "Can't call this function without setting SceneObject." );
+        Q_ASSERT_X( m_sceneObject, "TransformEditWidget::EditMatrixButtonToggled",
+                    "Can't call this function without setting SceneObject." );
 
         vtkTransform * t = m_sceneObject->GetLocalTransform();
         if( t )
         {
-            vtkMatrix4x4 *mat = vtkMatrix4x4::New();
+            vtkMatrix4x4 * mat = vtkMatrix4x4::New();
             mat->DeepCopy( t->GetMatrix() );
-            bool readOnly = !m_sceneObject->CanEditTransformManually();
+            bool readOnly       = !m_sceneObject->CanEditTransformManually();
             QString dialogTitle = m_sceneObject->GetName();
             dialogTitle += ": Local Matrix";
             m_matrixDialog = new vtkQtMatrixDialog( readOnly, 0 );
@@ -162,16 +164,18 @@ void TransformEditWidget::EditMatrixButtonToggled( bool isOn )
             m_matrixDialog->setAttribute( Qt::WA_DeleteOnClose );
             m_matrixDialog->SetMatrix( mat );
             Application::GetInstance().ShowFloatingDock( m_matrixDialog );
-            connect( m_matrixDialog, SIGNAL(MatrixModified( vtkMatrix4x4* )), this, SLOT(TransformModified( vtkMatrix4x4* )) );
-            connect( m_matrixDialog, SIGNAL(destroyed()), this, SLOT(EditMatrixDialogClosed()) );
+            connect( m_matrixDialog, SIGNAL( MatrixModified( vtkMatrix4x4 * ) ), this,
+                     SLOT( TransformModified( vtkMatrix4x4 * ) ) );
+            connect( m_matrixDialog, SIGNAL( destroyed() ), this, SLOT( EditMatrixDialogClosed() ) );
             mat->Delete();
         }
     }
 }
 
-void TransformEditWidget::TransformModified( vtkMatrix4x4 *mat )
+void TransformEditWidget::TransformModified( vtkMatrix4x4 * mat )
 {
-    Q_ASSERT_X( m_sceneObject, "TransformEditWidget::TransformModified", "Can't call this function without setting SceneObject." );
+    Q_ASSERT_X( m_sceneObject, "TransformEditWidget::TransformModified",
+                "Can't call this function without setting SceneObject." );
 
     vtkTransform * localTransform = m_sceneObject->GetLocalTransform();
     localTransform->SetMatrix( mat );
@@ -197,7 +201,8 @@ void TransformEditWidget::WorldMatrixButtonToggled( bool isOn )
     }
     else
     {
-        Q_ASSERT_X( m_sceneObject, "TransformEditWidget::WorldMatrixButtonToggled", "Can't call this function without setting SceneObject." );
+        Q_ASSERT_X( m_sceneObject, "TransformEditWidget::WorldMatrixButtonToggled",
+                    "Can't call this function without setting SceneObject." );
 
         QString dialogTitle = m_sceneObject->GetName();
         dialogTitle += ": World Matrix";
@@ -207,7 +212,7 @@ void TransformEditWidget::WorldMatrixButtonToggled( bool isOn )
         m_worldMatrixDialog->setAttribute( Qt::WA_DeleteOnClose );
         m_worldMatrixDialog->SetMatrix( m_sceneObject->GetWorldTransform()->GetMatrix() );
         Application::GetInstance().ShowFloatingDock( m_worldMatrixDialog );
-        connect( m_worldMatrixDialog, SIGNAL(destroyed()), this, SLOT(WorldMatrixDialogClosed()) );
+        connect( m_worldMatrixDialog, SIGNAL( destroyed() ), this, SLOT( WorldMatrixDialogClosed() ) );
     }
 }
 
@@ -221,7 +226,7 @@ void TransformEditWidget::SetIdentityButtonClicked()
 {
     if( m_sceneObject )
     {
-        vtkTransform * transform = vtkTransform::SafeDownCast (m_sceneObject->GetLocalTransform() );
+        vtkTransform * transform = vtkTransform::SafeDownCast( m_sceneObject->GetLocalTransform() );
         if( transform )
         {
             transform->Identity();

@@ -11,13 +11,15 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef TAG_SCENEOBJECT_H
 #define TAG_SCENEOBJECT_H
 
-#include "vtkObject.h"
-#include "viewinteractor.h"
+#include <vtkSmartPointer.h>
+
+#include <QObject>
 #include <QString>
 #include <QVector>
-#include <QObject>
+
 #include "serializer.h"
-#include <vtkSmartPointer.h>
+#include "viewinteractor.h"
+#include "vtkObject.h"
 
 class vtkRenderWindowInteractor;
 class vtkRenderer;
@@ -39,18 +41,16 @@ class vtkEventQtSlotConnect;
 
 class SceneObject : public QObject, public vtkObject, public ViewInteractor
 {
-    
-Q_OBJECT
+    Q_OBJECT
 
 public:
-        
     static SceneObject * New() { return new SceneObject; }
 
-    vtkTypeMacro(SceneObject,vtkObject);
-    
+    vtkTypeMacro( SceneObject, vtkObject );
+
     SceneObject();
     virtual ~SceneObject();
-  
+
     /**
      * Read/write properties of the object in xml format.
      * Every object has to override this function.
@@ -97,7 +97,7 @@ public:
     /** Return file name including the path */
     QString GetFullFileName() { return this->FullFileName; }
     /** Set file name including the path */
-    void SetFullFileName( QString FullFileName ) {this->FullFileName = FullFileName;}
+    void SetFullFileName( QString FullFileName ) { this->FullFileName = FullFileName; }
     ///@}
 
     /** @name Object Transforms
@@ -105,11 +105,11 @@ public:
      */
     ///@{
     /** Set local transform */
-    void SetLocalTransform(vtkTransform *localTransform );
+    void SetLocalTransform( vtkTransform * localTransform );
     /** Get local transform */
-    vtkTransform *GetLocalTransform( );
+    vtkTransform * GetLocalTransform();
     /** Get world transform */
-    vtkTransform *GetWorldTransform( );
+    vtkTransform * GetWorldTransform();
     /** Find out if local transform can be set manually */
     bool CanEditTransformManually() { return AllowManualTransformEdit; }
     /** Allow/disallow manual transform change */
@@ -120,7 +120,6 @@ public:
     /** Inform the system that transform modifications are finished. */
     void FinishModifyingTransform();
     ///@}
-
 
     /** @name Object and Views
      * @brief  Setting and releasing object in views
@@ -136,7 +135,6 @@ public:
     virtual void ReleaseAllViews();
     ///@}
 
-
     /** @name Create Settings Dialogs
      * @brief Setting dialog allows changing objects patameters (color, opacity, etc.).
      */
@@ -144,7 +142,7 @@ public:
     /** Create basic settings dialog */
     virtual QWidget * CreateSettingsDialog( QWidget * parent );
     /** Create widgets specific to the object, they are added as tabs to the basic settings dialog. */
-    virtual void CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets) {}
+    virtual void CreateSettingsWidgets( QWidget * parent, QVector<QWidget *> * widgets ) {}
     /** Create tab widget that will show object transforms */
     QWidget * CreateTransformEditWidget( QWidget * parent );
     ///@}
@@ -156,7 +154,7 @@ public:
     /** Hide/show the object and all its children */
     virtual void SetHiddenWithChildren( bool hide );
     /** Hide/show all object's children, leave the object in view */
-    virtual void SetHiddenChildren(SceneObject * parent, bool hide);
+    virtual void SetHiddenChildren( SceneObject * parent, bool hide );
     /** Check if the object is hidden */
     bool IsHidden() { return this->ObjectHidden; }
     /** Hide/show the object, children remain in view */
@@ -220,13 +218,12 @@ public:
     ///@}
 
     /** Convert world coordinates to local coordinates */
-    void WorldToLocal(double worldPoint[3], double localPoint[3] );
+    void WorldToLocal( double worldPoint[3], double localPoint[3] );
     /** Convert local coordinates to world coordinates */
-    void LocalToWorld(double localPoint[3], double worldPoint[3] );
+    void LocalToWorld( double localPoint[3], double worldPoint[3] );
 
     /** Check if the object  was user created */
     bool IsUserObject();
-
 
     /** Check if it is a system object */
     bool IsManagedBySystem() { return ObjectManagedBySystem; }
@@ -276,9 +273,8 @@ public slots:
 
     virtual void MarkModified();
     void NotifyTransformChanged();
-    
-protected:
 
+protected:
     virtual void ObjectAddedToScene() {}
     virtual void ObjectAboutToBeRemovedFromScene() {}
     virtual void ObjectRemovedFromScene() {}
@@ -290,7 +286,7 @@ protected:
     virtual void WorldTransformChanged();
     /** let subclass react to the change in transform */
     virtual void InternalWorldTransformChanged() {}
-    
+
     /** @name Object and Object Files
      */
     /** Name of the object to display on the list. */
@@ -300,13 +296,13 @@ protected:
     /** Name of the data file including full path. */
     QString FullFileName;
 
-
     /** @name Transforms
      */
     ///@{
     /** Update WorldTransform after modifying LocalTransform. */
     virtual void UpdateWorldTransform();
-    /** When IsModifyingTransform flag is set true, changes to Local Transform accumulate, but WorldTransform remais unchainged. */
+    /** When IsModifyingTransform flag is set true, changes to Local Transform accumulate, but WorldTransform remais
+     * unchainged. */
     bool IsModifyingTransform;
     /** TransformModified flag is set true when LocalTransform has changed. */
     bool TransformModified;
@@ -314,18 +310,18 @@ protected:
 
     /** Connect to VTK Events. */
     vtkSmartPointer<vtkEventQtSlotConnect> m_vtkConnections;
-    
+
     /** The views vector is used to remember which actors were instanciated
     for every view so we can remove them or add new objects as children */
     ///@{
-    typedef std::vector< View* > ViewContainer;
+    typedef std::vector<View *> ViewContainer;
     ViewContainer Views;
     ///@}
 
     /** @name Scene Hierarchy Management
      */
     ///@{
-    typedef QList< SceneObject* > SceneObjectVec;
+    typedef QList<SceneObject *> SceneObjectVec;
     /** Vector of children of the object. */
     SceneObjectVec Children;
     /** Parent of the object. */
@@ -360,7 +356,6 @@ protected:
     int RenderLayer;
 
 private:
-
     void AddToScene( SceneManager * man, int objectId );
     void RemoveFromScene();
     friend class SceneManager;
@@ -371,9 +366,9 @@ private:
     //	WorldTransform(Tw) is a concatenation of all transforms affecting the object: Tw = Tp * Tl
     //  Tp is parent transform.
     vtkSmartPointer<vtkTransform> WorldTransform;
-    vtkTransform  * LocalTransform;
+    vtkTransform * LocalTransform;
 };
 
 ObjectSerializationHeaderMacro( SceneObject );
 
-#endif //TAG_SCENEOBJECT_H
+#endif  // TAG_SCENEOBJECT_H

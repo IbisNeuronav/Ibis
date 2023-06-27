@@ -11,10 +11,11 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef __TripleCutPlaneObjectMixerWidget_h_
 #define __TripleCutPlaneObjectMixerWidget_h_
 
-#include <QWidget>
 #include <QObject>
+#include <QWidget>
 
-namespace Ui {
+namespace Ui
+{
 class TripleCutPlaneObjectMixerWidget;
 }
 
@@ -25,24 +26,22 @@ class TripleCutPlaneObjectMixerWidget : public QWidget
     Q_OBJECT
 
 public:
-
-    explicit TripleCutPlaneObjectMixerWidget(QWidget *parent = 0);
+    explicit TripleCutPlaneObjectMixerWidget( QWidget * parent = 0 );
     ~TripleCutPlaneObjectMixerWidget();
 
     void SetTripleCutPlaneObject( TripleCutPlaneObject * obj, int imageIndex );
 
 private slots:
 
-    void on_colorTableComboBox_currentIndexChanged(int index);
-    void on_blendModeComboBox_currentIndexChanged(int index);
-    void on_sliceMixComboBox_currentIndexChanged(int index);
-    void on_imageIntensitySlider_valueChanged(int value);
+    void on_colorTableComboBox_currentIndexChanged( int index );
+    void on_blendModeComboBox_currentIndexChanged( int index );
+    void on_sliceMixComboBox_currentIndexChanged( int index );
+    void on_imageIntensitySlider_valueChanged( int value );
 
     void UpdateUi();
 
 private:
-
-    Ui::TripleCutPlaneObjectMixerWidget *ui;
+    Ui::TripleCutPlaneObjectMixerWidget * ui;
     TripleCutPlaneObject * m_cutPlaneObject;
     int m_imageIndex;
 };

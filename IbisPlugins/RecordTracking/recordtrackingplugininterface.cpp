@@ -10,60 +10,52 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 // Thanks to Houssem Gueziri for writing this class
 
+#include <QtPlugin>
+#include "ibisapi.h"
 #include "recordtrackingplugininterface.h"
 #include "recordtrackingwidget.h"
-#include "ibisapi.h"
-#include <QtPlugin>
 
-RecordTrackingPluginInterface::RecordTrackingPluginInterface() : m_widget(nullptr)
-{
-}
+RecordTrackingPluginInterface::RecordTrackingPluginInterface() : m_widget( nullptr ) {}
 
-RecordTrackingPluginInterface::~RecordTrackingPluginInterface()
-{
-}
+RecordTrackingPluginInterface::~RecordTrackingPluginInterface() {}
 
-bool RecordTrackingPluginInterface::CanRun()
-{
-    return true;
-}
+bool RecordTrackingPluginInterface::CanRun() { return true; }
 
 QWidget * RecordTrackingPluginInterface::CreateTab()
 {
     m_widget = new RecordTrackingWidget;
     m_widget->SetPluginInterface( this );
 
-    IbisAPI *ibisApi = this->GetIbisAPI();
-    connect( ibisApi, SIGNAL( ObjectAdded(int) ), this, SLOT( OnTrackedToolAdded(int) ) );
-    connect( ibisApi, SIGNAL( ObjectRemoved(int) ), this, SLOT( OnTrackedToolRemoved(int) ) );
+    IbisAPI * ibisApi = this->GetIbisAPI();
+    connect( ibisApi, SIGNAL( ObjectAdded( int ) ), this, SLOT( OnTrackedToolAdded( int ) ) );
+    connect( ibisApi, SIGNAL( ObjectRemoved( int ) ), this, SLOT( OnTrackedToolRemoved( int ) ) );
 
     return m_widget;
 }
 
-
 bool RecordTrackingPluginInterface::WidgetAboutToClose()
 {
-    IbisAPI *ibisApi = this->GetIbisAPI();
-    disconnect( ibisApi, SIGNAL( ObjectAdded(int) ), this, SLOT( OnTrackedToolAdded(int) ) );
-    disconnect( ibisApi, SIGNAL( ObjectRemoved(int) ), this, SLOT( OnTrackedToolRemoved(int) ) );
+    IbisAPI * ibisApi = this->GetIbisAPI();
+    disconnect( ibisApi, SIGNAL( ObjectAdded( int ) ), this, SLOT( OnTrackedToolAdded( int ) ) );
+    disconnect( ibisApi, SIGNAL( ObjectRemoved( int ) ), this, SLOT( OnTrackedToolRemoved( int ) ) );
     return true;
 }
 
-void RecordTrackingPluginInterface::OnTrackedToolAdded(int id)
+void RecordTrackingPluginInterface::OnTrackedToolAdded( int id )
 {
-    if ((id != IbisAPI::InvalidId) && (m_widget))
+    if( ( id != IbisAPI::InvalidId ) && ( m_widget ) )
     {
-        m_widget->AddTrackedTool(id);
+        m_widget->AddTrackedTool( id );
     }
 }
 
-void RecordTrackingPluginInterface::OnTrackedToolRemoved(int id)
+void RecordTrackingPluginInterface::OnTrackedToolRemoved( int id )
 {
-    if (id != IbisAPI::InvalidId)
+    if( id != IbisAPI::InvalidId )
     {
-        if (m_widget)
+        if( m_widget )
         {
-            m_widget->RemoveTrackedTool(id);
+            m_widget->RemoveTrackedTool( id );
         }
     }
 }

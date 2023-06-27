@@ -11,17 +11,16 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef IBISMATH_H
 #define IBISMATH_H
 
-#include "SVL.h"
 #include <vector>
+
+#include "SVL.h"
 
 class vtkMatrix4x4;
 
 class IbisMath
 {
-
 public:
-
-    static constexpr const double pi = 3.14159265358979323846;
+    static constexpr const double pi  = 3.14159265358979323846;
     static constexpr const double pi2 = 0.5 * IbisMath::pi;
     static constexpr const double pi4 = 0.25 * IbisMath::pi;
 
@@ -41,8 +40,7 @@ public:
 
     // VTK mat4 utilities
     static vtkMatrix4x4 * DuplicateMat4( vtkMatrix4x4 * in );
-    static void ClearMat4Array( std::vector< vtkMatrix4x4 * > & allMats );
-
+    static void ClearMat4Array( std::vector<vtkMatrix4x4 *> & allMats );
 };
 
 #endif

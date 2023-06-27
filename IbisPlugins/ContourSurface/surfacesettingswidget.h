@@ -13,8 +13,9 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include <QWidget>
 
-namespace Ui {
-    class SurfaceSettingsWidget;
+namespace Ui
+{
+class SurfaceSettingsWidget;
 }
 
 class GeneratedSurface;
@@ -24,7 +25,7 @@ class SurfaceSettingsWidget : public QWidget
     Q_OBJECT
 
 public:
-    explicit SurfaceSettingsWidget(QWidget *parent = 0);
+    explicit SurfaceSettingsWidget( QWidget * parent = 0 );
     virtual ~SurfaceSettingsWidget();
 
     void SetGeneratedSurface( GeneratedSurface * surface );
@@ -34,11 +35,10 @@ public slots:
 
 private slots:
     virtual void ApplyButtonClicked();
-    virtual void RangeSlidersValuesChanged(double,double);
+    virtual void RangeSlidersValuesChanged( double, double );
     virtual void MidSliderValueChanged( double val );
     virtual void SetupHistogramWidget();
-    virtual void PolygonReductionSpinBoxValueChanged(int red);
-
+    virtual void PolygonReductionSpinBoxValueChanged( int red );
 
 protected:
     GeneratedSurface * m_surface;
@@ -49,7 +49,7 @@ protected:
     int m_reductionPercent;
 
 private:
-    Ui::SurfaceSettingsWidget *ui;
+    Ui::SurfaceSettingsWidget * ui;
 };
 
-#endif // SURFACESETTINGSWIDGET_H
+#endif  // SURFACESETTINGSWIDGET_H

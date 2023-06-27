@@ -11,7 +11,11 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef TAG_STRINGTOOLS_H
 #define TAG_STRINGTOOLS_H
 
-void Tokenize( const std::string & str, std::vector<std::string> & tokens, const std::string & delimiters = " \r" );
-void TokenizeRemovingQuotes( const std::string & str, std::vector<std::string> & tokens, const std::string & delimiters = " \r" );
+#include <string>
+#include <vector>
 
-#endif //TAG_STRINGTOOLS_H
+void Tokenize( const std::string & str, std::vector<std::string> & tokens, const std::string & delimiters = " \r" );
+void TokenizeRemovingQuotes( const std::string & str, std::vector<std::string> & tokens,
+                             const std::string & delimiters = " \r" );
+
+#endif  // TAG_STRINGTOOLS_H

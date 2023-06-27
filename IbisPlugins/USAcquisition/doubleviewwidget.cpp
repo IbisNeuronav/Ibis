@@ -9,50 +9,50 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
 #include "doubleviewwidget.h"
-#include "ui_doubleviewwidget.h"
-#include "usacquisitionplugininterface.h"
+#include "guiutilities.h"
+#include "hardwaremodule.h"
 #include "ibisapi.h"
 #include "imageobject.h"
+#include "ui_doubleviewwidget.h"
 #include "usacquisitionobject.h"
+#include "usacquisitionplugininterface.h"
 #include "usprobeobject.h"
-#include "hardwaremodule.h"
-#include "guiutilities.h"
 
-#include <vtkRenderWindowInteractor.h>
-#include <vtkRenderWindow.h>
-#include <vtkRenderer.h>
-#include <vtkTransform.h>
-#include <vtkImageActor.h>
-#include <vtkImageMapper3D.h>
-#include <vtkImageResliceToColors.h>
-#include <vtkImageBlend.h>
-#include <vtkImageMask.h>
-#include <vtkImageData.h>
-#include <vtkImageStack.h>
-#include <vtkImageProperty.h>
-#include <vtkImageSliceMapper.h>
-#include <vtkImageSlice.h>
-#include <vtkLineSource.h>
-#include <vtkPolyDataMapper.h>
-#include <vtkProperty.h>
 #include <vtkAlgorithm.h>
 #include <vtkAlgorithmOutput.h>
 #include <vtkCamera.h>
+#include <vtkImageActor.h>
+#include <vtkImageBlend.h>
+#include <vtkImageData.h>
+#include <vtkImageMapper3D.h>
+#include <vtkImageMask.h>
+#include <vtkImageProperty.h>
+#include <vtkImageResliceToColors.h>
+#include <vtkImageSlice.h>
+#include <vtkImageSliceMapper.h>
+#include <vtkImageStack.h>
+#include <vtkLineSource.h>
+#include <vtkPolyDataMapper.h>
+#include <vtkProperty.h>
+#include <vtkRenderWindow.h>
+#include <vtkRenderWindowInteractor.h>
+#include <vtkRenderer.h>
+#include <vtkTransform.h>
 
 #include "vtkInteractorStyleImage2.h"
 
-DoubleViewWidget::DoubleViewWidget( QWidget * parent, Qt::WindowFlags f ) :
-    QWidget(parent,f),
-    ui(new Ui::DoubleViewWidget),
-    m_usLine1Actor(nullptr),
-    m_usLine2Actor(nullptr),
-    m_mriLine1Actor(nullptr),
-    m_mriLine2Actor(nullptr)
+DoubleViewWidget::DoubleViewWidget( QWidget * parent, Qt::WindowFlags f )
+    : QWidget( parent, f ),
+      ui( new Ui::DoubleViewWidget ),
+      m_usLine1Actor( nullptr ),
+      m_usLine2Actor( nullptr ),
+      m_mriLine1Actor( nullptr ),
+      m_mriLine2Actor( nullptr )
 {
-    ui->setupUi(this);
+    ui->setupUi( this );
 
     // Create the 2 view windows
-    vtkRenderWindowInteractor * usInteractor = ui->usImageWindow->GetInteractor();
+    vtkRenderWindowInteractor * usInteractor        = ui->usImageWindow->GetInteractor();
     vtkSmartPointer<vtkInteractorStyleImage2> style = vtkSmartPointer<vtkInteractorStyleImage2>::New();
     usInteractor->SetInteractorStyle( style );
 
@@ -61,20 +61,20 @@ DoubleViewWidget::DoubleViewWidget( QWidget * parent, Qt::WindowFlags f ) :
 
     m_usActor = vtkSmartPointer<vtkImageActor>::New();
     m_usActor->InterpolateOff();
-    m_usActor->VisibilityOff();   // invisible until there is a valid input
+    m_usActor->VisibilityOff();  // invisible until there is a valid input
     m_usRenderer->AddActor( m_usActor );
 
     m_reslice = vtkSmartPointer<vtkImageResliceToColors>::New();  // set up the reslice
-    m_reslice->SetInterpolationModeToLinear( );
-    m_reslice->SetOutputExtent(0, ui->usImageWindow->width()-1, 0, ui->usImageWindow->height()-1, 0, 1);
+    m_reslice->SetInterpolationModeToLinear();
+    m_reslice->SetOutputExtent( 0, ui->usImageWindow->width() - 1, 0, ui->usImageWindow->height() - 1, 0, 1 );
     m_reslice->SetOutputSpacing( 1.0, 1.0, 1.0 );
     m_reslice->SetOutputOrigin( 0.0, 0.0, 0.0 );
     m_reslice->SetOutputFormatToRGB();
 
     // put one more for the second MRI
     m_reslice2 = vtkSmartPointer<vtkImageResliceToColors>::New();  // set up the reslice2
-    m_reslice2->SetInterpolationModeToLinear( );
-    m_reslice2->SetOutputExtent(0, ui->usImageWindow->width()-1, 0, ui->usImageWindow->height()-1, 0, 1);
+    m_reslice2->SetInterpolationModeToLinear();
+    m_reslice2->SetOutputExtent( 0, ui->usImageWindow->width() - 1, 0, ui->usImageWindow->height() - 1, 0, 1 );
     m_reslice2->SetOutputSpacing( 1.0, 1.0, 1.0 );
     m_reslice2->SetOutputOrigin( 0.0, 0.0, 0.0 );
     m_reslice2->SetOutputFormatToLuminance();
@@ -89,9 +89,9 @@ DoubleViewWidget::DoubleViewWidget( QWidget * parent, Qt::WindowFlags f ) :
     m_vol2Slice->GetMapper()->SetInputConnection( m_reslice2->GetOutputPort() );
     m_vol2Slice->GetProperty()->SetLayerNumber( 1 );
     m_vol2Slice->VisibilityOff();
-    m_usSlice = vtkSmartPointer<vtkImageSlice>::New();
+    m_usSlice                                             = vtkSmartPointer<vtkImageSlice>::New();
     vtkSmartPointer<vtkImageSliceMapper> imageSliceMapper = vtkSmartPointer<vtkImageSliceMapper>::New();
-    m_usSlice->SetMapper(imageSliceMapper);
+    m_usSlice->SetMapper( imageSliceMapper );
     m_usSlice->GetProperty()->SetLayerNumber( 2 );
     m_usSlice->VisibilityOff();
     m_mriActor = vtkSmartPointer<vtkImageStack>::New();
@@ -103,46 +103,44 @@ DoubleViewWidget::DoubleViewWidget( QWidget * parent, Qt::WindowFlags f ) :
     ui->mriImageWindow->renderWindow()->AddRenderer( m_mriRenderer );
     m_mriRenderer->AddActor( m_mriActor );
 
-    vtkRenderWindowInteractor * mriInteractor = ui->mriImageWindow->GetInteractor();
+    vtkRenderWindowInteractor * mriInteractor        = ui->mriImageWindow->GetInteractor();
     vtkSmartPointer<vtkInteractorStyleImage2> style2 = vtkSmartPointer<vtkInteractorStyleImage2>::New();
     mriInteractor->SetInteractorStyle( style2 );
 
     this->MakeCrossLinesToShowProbeIsOutOfView();
 }
 
-DoubleViewWidget::~DoubleViewWidget()
-{
-    delete ui;
-}
+DoubleViewWidget::~DoubleViewWidget() { delete ui; }
 
 void DoubleViewWidget::SetPluginInterface( USAcquisitionPluginInterface * interf )
 {
     m_pluginInterface = interf;
 
     // watch changes in objects that are used by the window (volume, acquisition and probe)
-    connect( m_pluginInterface, SIGNAL(ObjectsChanged()), this, SLOT(UpdateInputs()) );
-    connect( m_pluginInterface, SIGNAL(ImageChanged()), this, SLOT(UpdateViews()) );
+    connect( m_pluginInterface, SIGNAL( ObjectsChanged() ), this, SLOT( UpdateInputs() ) );
+    connect( m_pluginInterface, SIGNAL( ImageChanged() ), this, SLOT( UpdateViews() ) );
 
-    this->UpdatePipelineConnections();   // make sure vtk pipeline is connected in a way that reflects current state
-    this->UpdateInputs();                // make sure input volume and US image are valid
+    this->UpdatePipelineConnections();  // make sure vtk pipeline is connected in a way that reflects current state
+    this->UpdateInputs();               // make sure input volume and US image are valid
 }
 
 void DoubleViewWidget::UpdateUi()
 {
     Q_ASSERT( m_pluginInterface );
 
-    USAcquisitionObject * acq = m_pluginInterface->GetCurrentAcquisition();
-    bool hasAcquisition =  acq != nullptr;
+    USAcquisitionObject * acq  = m_pluginInterface->GetCurrentAcquisition();
+    bool hasAcquisition        = acq != nullptr;
     bool isNotEmptyAcquisition = hasAcquisition && acq->GetNumberOfSlices() > 0;
-    bool isRecording = hasAcquisition ? acq->IsRecording() : false;
+    bool isRecording           = hasAcquisition ? acq->IsRecording() : false;
 
     if( isRecording )
-        ui->m_recordButton->setText("Stop");
+        ui->m_recordButton->setText( "Stop" );
     else
-        ui->m_recordButton->setText("Record");
+        ui->m_recordButton->setText( "Record" );
 
     bool canCaptureTrackedVideo = m_pluginInterface->CanCaptureTrackedVideo();
-    Q_ASSERT( !( m_pluginInterface->IsLive() && !canCaptureTrackedVideo ) );  // can't be live without the ability to capture video
+    Q_ASSERT( !( m_pluginInterface->IsLive() &&
+                 !canCaptureTrackedVideo ) );  // can't be live without the ability to capture video
 
     // Enable disable controls based on state
     if( m_pluginInterface->IsLive() )
@@ -175,8 +173,8 @@ void DoubleViewWidget::UpdateUi()
         ui->m_liveCheckBox->blockSignals( false );
         ui->acquisitionsComboBox->setEnabled( true );
         ui->imageObjectsComboBox_1->setEnabled( true );
-        ui->currentFrameSpinBox->setEnabled( isNotEmptyAcquisition);
-        ui->m_frameSlider->setEnabled( isNotEmptyAcquisition);
+        ui->currentFrameSpinBox->setEnabled( isNotEmptyAcquisition );
+        ui->m_frameSlider->setEnabled( isNotEmptyAcquisition );
         ui->m_recordButton->setEnabled( false );
         ui->m_exportButton->setEnabled( isNotEmptyAcquisition );
         ui->m_rewindButton->setEnabled( isNotEmptyAcquisition );
@@ -203,7 +201,8 @@ void DoubleViewWidget::UpdateUi()
     bool blendingVolumes = m_pluginInterface->IsBlendingVolumes();  // add correspondance in interface.cpp
     // add control statement for enable secondary MRI
     bool blendingVolumesControl = blending && blendingVolumes;
-    ui->imageObjectsComboBox_2->setEnabled( blendingVolumesControl ); // second MRI selection window activated when both checks
+    ui->imageObjectsComboBox_2->setEnabled(
+        blendingVolumesControl );  // second MRI selection window activated when both checks
     ui->checkBoxImage2->setEnabled( blending );
     ui->checkBoxImage2->blockSignals( true );
     ui->checkBoxImage2->setChecked( blendingVolumes );
@@ -216,11 +215,10 @@ void DoubleViewWidget::UpdateUi()
     ui->opacityStepLineEdit_2->setEnabled( blendingVolumesControl );
     ui->opacityStepLineEdit_2->setText( QString::number( blendingVolumePercent ) );
 
-
     // Update masking controls
-    bool masking = m_pluginInterface->IsMasking();
+    bool masking         = m_pluginInterface->IsMasking();
     bool maskingControls = masking && !blending;
-    int maskingPercent = (int)round( m_pluginInterface->GetMaskingPercent() * 100.0 );
+    int maskingPercent   = (int)round( m_pluginInterface->GetMaskingPercent() * 100.0 );
     ui->maskCheckBox->blockSignals( true );
     ui->maskCheckBox->setEnabled( !blending );
     ui->maskCheckBox->setChecked( masking );
@@ -233,17 +231,20 @@ void DoubleViewWidget::UpdateUi()
     ui->maskAlphaLineEdit->setText( QString::number( maskingPercent ) );
 
     // Update acquisition combo
-    QList<USAcquisitionObject*> acquisitions;
+    QList<USAcquisitionObject *> acquisitions;
     m_pluginInterface->GetIbisAPI()->GetAllUSAcquisitionObjects( acquisitions );
-    GuiUtilities::UpdateSceneObjectComboBox( ui->acquisitionsComboBox, acquisitions, m_pluginInterface->GetCurrentAcquisitionObjectId());
+    GuiUtilities::UpdateSceneObjectComboBox( ui->acquisitionsComboBox, acquisitions,
+                                             m_pluginInterface->GetCurrentAcquisitionObjectId() );
 
     // Update volume combo
-    QList<ImageObject*> images;
+    QList<ImageObject *> images;
     m_pluginInterface->GetIbisAPI()->GetAllImageObjects( images );
-    GuiUtilities::UpdateSceneObjectComboBox( ui->imageObjectsComboBox_1, images, m_pluginInterface->GetCurrentVolumeObjectId());
+    GuiUtilities::UpdateSceneObjectComboBox( ui->imageObjectsComboBox_1, images,
+                                             m_pluginInterface->GetCurrentVolumeObjectId() );
 
     // Update added volume combo
-    GuiUtilities::UpdateSceneObjectComboBox( ui->imageObjectsComboBox_2, images, m_pluginInterface->GetAddedVolumeObjectId());
+    GuiUtilities::UpdateSceneObjectComboBox( ui->imageObjectsComboBox_2, images,
+                                             m_pluginInterface->GetAddedVolumeObjectId() );
 
     // Render graphic windows
     this->UpdateViews();
@@ -257,8 +258,8 @@ void DoubleViewWidget::UpdateCurrentFrameUi()
     Q_ASSERT( m_pluginInterface );
 
     USAcquisitionObject * acq = m_pluginInterface->GetCurrentAcquisition();
-    int currentSlice = ( acq && acq->GetNumberOfSlices() > 0) ? acq->GetCurrentSlice() : 0;
-    int numberOfSlices = acq ? acq->GetNumberOfSlices() : 0;
+    int currentSlice          = ( acq && acq->GetNumberOfSlices() > 0 ) ? acq->GetCurrentSlice() : 0;
+    int numberOfSlices        = acq ? acq->GetNumberOfSlices() : 0;
 
     // current frame spin box
     ui->currentFrameSpinBox->blockSignals( true );
@@ -288,7 +289,7 @@ void DoubleViewWidget::UpdateInputs()
     ImageObject * im = m_pluginInterface->GetCurrentVolume();
     if( im )
     {
-        m_reslice->SetInputData(im->GetImage() );
+        m_reslice->SetInputData( im->GetImage() );
         m_reslice->SetLookupTable( im->GetLut() );
         m_mriActor->VisibilityOn();
     }
@@ -306,32 +307,32 @@ void DoubleViewWidget::UpdateInputs()
     }
     else
     {
-        m_reslice2->SetInputData(nullptr );
+        m_reslice2->SetInputData( nullptr );
     }
 
     // validate us acquisition
     USAcquisitionObject * acq = m_pluginInterface->GetCurrentAcquisition();
     if( acq )
     {
-        m_imageMask->SetMaskInputData( acq->GetMask() ); // ok so this about using mask function?
-        acq->disconnect( this, SLOT(UpdateViews()) );
+        m_imageMask->SetMaskInputData( acq->GetMask() );  // ok so this about using mask function?
+        acq->disconnect( this, SLOT( UpdateViews() ) );
     }
 
     // Validate live video source
-    vtkTransform * usTransform = nullptr; // probe transform concatenated with calibration transform
+    vtkTransform * usTransform = nullptr;  // probe transform concatenated with calibration transform
 
-     // choose which source to use for display: live or acquisition
+    // choose which source to use for display: live or acquisition
     UsProbeObject * probe = m_pluginInterface->GetCurrentUsProbe();
-    if (probe)
+    if( probe )
     {
-        m_reslice->SetOutputExtent(0, probe->GetVideoImageWidth(), 0, probe->GetVideoImageHeight(), 0, 1);
-        probe->disconnect(this, SLOT(UpdateViews()));
+        m_reslice->SetOutputExtent( 0, probe->GetVideoImageWidth(), 0, probe->GetVideoImageHeight(), 0, 1 );
+        probe->disconnect( this, SLOT( UpdateViews() ) );
     }
 
     if( m_pluginInterface->IsLive() )
     {
         Q_ASSERT( probe );
-        connect( probe, SIGNAL(ObjectModified()), this, SLOT(UpdateViews()) );
+        connect( probe, SIGNAL( ObjectModified() ), this, SLOT( UpdateViews() ) );
         usTransform = probe->GetWorldTransform();
         m_usActor->VisibilityOn();
         m_usActor->GetMapper()->SetInputConnection( probe->GetVideoOutputPort() );
@@ -341,7 +342,7 @@ void DoubleViewWidget::UpdateInputs()
     {
         connect( acq, SIGNAL( ObjectModified() ), SLOT( UpdateViews() ) );
         usTransform = acq->GetTransform();
-        m_usActor->SetVisibility( acq->GetNumberOfSlices()>0 ? 1 : 0 );
+        m_usActor->SetVisibility( acq->GetNumberOfSlices() > 0 ? 1 : 0 );
         m_usActor->GetMapper()->SetInputConnection( acq->GetUnmaskedOutputPort() );
         m_usSlice->GetMapper()->SetInputConnection( acq->GetUnmaskedOutputPort() );
     }
@@ -349,11 +350,11 @@ void DoubleViewWidget::UpdateInputs()
     // Compute slicing transform
     vtkSmartPointer<vtkTransform> concat = vtkSmartPointer<vtkTransform>::New();
     concat->Identity();
-    if (im)
+    if( im )
     {
         vtkSmartPointer<vtkMatrix4x4> mat = vtkMatrix4x4::New();
-        im->GetWorldTransform()->GetInverse(mat);
-        concat->SetMatrix(mat);
+        im->GetWorldTransform()->GetInverse( mat );
+        concat->SetMatrix( mat );
     }
     if( usTransform )
     {
@@ -364,13 +365,13 @@ void DoubleViewWidget::UpdateInputs()
     // Compute slice transform for the second MRI
     vtkSmartPointer<vtkTransform> concat2 = vtkSmartPointer<vtkTransform>::New();
     concat2->Identity();
-    if (im2)
+    if( im2 )
     {
         vtkSmartPointer<vtkMatrix4x4> mat = vtkMatrix4x4::New();
-        im2->GetWorldTransform()->GetInverse(mat);
-        concat2->SetMatrix(mat);
+        im2->GetWorldTransform()->GetInverse( mat );
+        concat2->SetMatrix( mat );
     }
-    if( usTransform)
+    if( usTransform )
     {
         concat2->Concatenate( usTransform );
     }
@@ -405,7 +406,6 @@ void DoubleViewWidget::UpdatePipelineConnections()
     else
         m_usSlice->VisibilityOff();
     m_usSlice->GetProperty()->SetOpacity( m_pluginInterface->GetBlendingPercent() );
-
 }
 
 void DoubleViewWidget::UpdateStatus()
@@ -418,31 +418,30 @@ void DoubleViewWidget::UpdateStatus()
         if( probe )
         {
             TrackerToolState state = probe->GetState();
-            if( state != Ok )
-                visibility = true;
+            if( state != Ok ) visibility = true;
         }
         else
             visibility = true;
-        m_usLine1Actor->SetVisibility(visibility);
-        m_usLine2Actor->SetVisibility(visibility);
-        m_mriLine1Actor->SetVisibility(visibility);
-        m_mriLine2Actor->SetVisibility(visibility);
+        m_usLine1Actor->SetVisibility( visibility );
+        m_usLine2Actor->SetVisibility( visibility );
+        m_mriLine1Actor->SetVisibility( visibility );
+        m_mriLine2Actor->SetVisibility( visibility );
     }
     else
     {
-        m_usLine1Actor->SetVisibility(false);
-        m_usLine2Actor->SetVisibility(false);
-        m_mriLine1Actor->SetVisibility(false);
-        m_mriLine2Actor->SetVisibility(false);
+        m_usLine1Actor->SetVisibility( false );
+        m_usLine2Actor->SetVisibility( false );
+        m_mriLine1Actor->SetVisibility( false );
+        m_mriLine2Actor->SetVisibility( false );
     }
 }
 
 void DoubleViewWidget::MakeCrossLinesToShowProbeIsOutOfView()
 {
-    double wradius = (double)ui->usImageWindow->width() / 2.0;
-    double hradius = (double)ui->usImageWindow->height() / 2.0;
-    double *usfocal = m_usRenderer->GetActiveCamera()->GetFocalPoint();
-    
+    double wradius   = (double)ui->usImageWindow->width() / 2.0;
+    double hradius   = (double)ui->usImageWindow->height() / 2.0;
+    double * usfocal = m_usRenderer->GetActiveCamera()->GetFocalPoint();
+
     double p1[3], p2[3];
     p1[0] = usfocal[0] - wradius;
     p1[1] = usfocal[1] - hradius;
@@ -452,28 +451,29 @@ void DoubleViewWidget::MakeCrossLinesToShowProbeIsOutOfView()
     p2[1] = usfocal[1] + hradius;
     p2[2] = 0;
 
-    if (!m_usLine1Actor)
+    if( !m_usLine1Actor )
     {
         vtkSmartPointer<vtkLineSource> line1 = vtkSmartPointer<vtkLineSource>::New();
-        line1->SetPoint1(p1);
-        line1->SetPoint2(p2);
+        line1->SetPoint1( p1 );
+        line1->SetPoint2( p2 );
 
         vtkSmartPointer<vtkPolyDataMapper> mapper1 = vtkSmartPointer<vtkPolyDataMapper>::New();
-        mapper1->SetInputConnection(line1->GetOutputPort(0));
+        mapper1->SetInputConnection( line1->GetOutputPort( 0 ) );
 
         m_usLine1Actor = vtkSmartPointer<vtkActor>::New();
-        m_usLine1Actor->SetMapper(mapper1);
-        m_usLine1Actor->GetProperty()->SetLineWidth(4.0);
-        m_usLine1Actor->GetProperty()->SetColor(1, 0, 0);
-        m_usLine1Actor->SetVisibility(0);
-        m_usRenderer->AddViewProp(m_usLine1Actor);
+        m_usLine1Actor->SetMapper( mapper1 );
+        m_usLine1Actor->GetProperty()->SetLineWidth( 4.0 );
+        m_usLine1Actor->GetProperty()->SetColor( 1, 0, 0 );
+        m_usLine1Actor->SetVisibility( 0 );
+        m_usRenderer->AddViewProp( m_usLine1Actor );
     }
     else
     {
-        vtkSmartPointer<vtkAlgorithm> algorithm = m_usLine1Actor->GetMapper()->GetInputConnection(0,0)->GetProducer();
-        vtkSmartPointer<vtkLineSource> line1 = dynamic_cast<vtkLineSource*>(algorithm.GetPointer());
-        line1->SetPoint1(p1);
-        line1->SetPoint2(p2);
+        vtkSmartPointer<vtkAlgorithm> algorithm =
+            m_usLine1Actor->GetMapper()->GetInputConnection( 0, 0 )->GetProducer();
+        vtkSmartPointer<vtkLineSource> line1 = dynamic_cast<vtkLineSource *>( algorithm.GetPointer() );
+        line1->SetPoint1( p1 );
+        line1->SetPoint2( p2 );
         line1->Update();
     }
 
@@ -485,34 +485,35 @@ void DoubleViewWidget::MakeCrossLinesToShowProbeIsOutOfView()
     p4[1] = usfocal[1] - hradius;
     p4[2] = 0.0;
 
-    if (!m_usLine2Actor)
+    if( !m_usLine2Actor )
     {
         vtkSmartPointer<vtkLineSource> line2 = vtkSmartPointer<vtkLineSource>::New();
-        line2->SetPoint1(p3);
-        line2->SetPoint2(p4);
+        line2->SetPoint1( p3 );
+        line2->SetPoint2( p4 );
 
         vtkSmartPointer<vtkPolyDataMapper> mapper2 = vtkSmartPointer<vtkPolyDataMapper>::New();
-        mapper2->SetInputConnection(line2->GetOutputPort(0));
+        mapper2->SetInputConnection( line2->GetOutputPort( 0 ) );
 
         m_usLine2Actor = vtkSmartPointer<vtkActor>::New();
-        m_usLine2Actor->SetMapper(mapper2);
-        m_usLine2Actor->GetProperty()->SetLineWidth(4.0);
-        m_usLine2Actor->GetProperty()->SetColor(1, 0, 0);
-        m_usLine2Actor->SetVisibility(0);
-        m_usRenderer->AddViewProp(m_usLine2Actor);
+        m_usLine2Actor->SetMapper( mapper2 );
+        m_usLine2Actor->GetProperty()->SetLineWidth( 4.0 );
+        m_usLine2Actor->GetProperty()->SetColor( 1, 0, 0 );
+        m_usLine2Actor->SetVisibility( 0 );
+        m_usRenderer->AddViewProp( m_usLine2Actor );
     }
     else
     {
-        vtkSmartPointer<vtkAlgorithm> algorithm = m_usLine2Actor->GetMapper()->GetInputConnection(0, 0)->GetProducer();
-        vtkSmartPointer<vtkLineSource> line2 = dynamic_cast<vtkLineSource*>(algorithm.GetPointer());
-        line2->SetPoint1(p3);
-        line2->SetPoint2(p4);
+        vtkSmartPointer<vtkAlgorithm> algorithm =
+            m_usLine2Actor->GetMapper()->GetInputConnection( 0, 0 )->GetProducer();
+        vtkSmartPointer<vtkLineSource> line2 = dynamic_cast<vtkLineSource *>( algorithm.GetPointer() );
+        line2->SetPoint1( p3 );
+        line2->SetPoint2( p4 );
         line2->Update();
     }
 
-    wradius = (double)ui->mriImageWindow->width() / 2.0;
-    hradius = (double)ui->mriImageWindow->height() / 2.0;
-    double *mrifocal = m_mriRenderer->GetActiveCamera()->GetFocalPoint();
+    wradius           = (double)ui->mriImageWindow->width() / 2.0;
+    hradius           = (double)ui->mriImageWindow->height() / 2.0;
+    double * mrifocal = m_mriRenderer->GetActiveCamera()->GetFocalPoint();
 
     p1[0] = mrifocal[0] - wradius;
     p1[1] = mrifocal[1] - hradius;
@@ -521,28 +522,29 @@ void DoubleViewWidget::MakeCrossLinesToShowProbeIsOutOfView()
     p2[1] = mrifocal[1] + hradius;
     p2[2] = 0;
 
-    if (!m_mriLine1Actor)
+    if( !m_mriLine1Actor )
     {
         vtkSmartPointer<vtkLineSource> line3 = vtkSmartPointer<vtkLineSource>::New();
-        line3->SetPoint1(p1);
-        line3->SetPoint2(p2);
+        line3->SetPoint1( p1 );
+        line3->SetPoint2( p2 );
 
         vtkSmartPointer<vtkPolyDataMapper> mapper3 = vtkSmartPointer<vtkPolyDataMapper>::New();
-        mapper3->SetInputConnection(line3->GetOutputPort(0));
+        mapper3->SetInputConnection( line3->GetOutputPort( 0 ) );
 
         m_mriLine1Actor = vtkSmartPointer<vtkActor>::New();
-        m_mriLine1Actor->SetMapper(mapper3);
-        m_mriLine1Actor->GetProperty()->SetLineWidth(4.0);
-        m_mriLine1Actor->GetProperty()->SetColor(1, 0, 0);
-        m_mriLine1Actor->SetVisibility(0);
-        m_mriRenderer->AddViewProp(m_mriLine1Actor);
+        m_mriLine1Actor->SetMapper( mapper3 );
+        m_mriLine1Actor->GetProperty()->SetLineWidth( 4.0 );
+        m_mriLine1Actor->GetProperty()->SetColor( 1, 0, 0 );
+        m_mriLine1Actor->SetVisibility( 0 );
+        m_mriRenderer->AddViewProp( m_mriLine1Actor );
     }
     else
     {
-        vtkSmartPointer<vtkAlgorithm> algorithm = m_mriLine1Actor->GetMapper()->GetInputConnection(0, 0)->GetProducer();
-        vtkSmartPointer<vtkLineSource> line3 = dynamic_cast<vtkLineSource*>(algorithm.GetPointer());
-        line3->SetPoint1(p1);
-        line3->SetPoint2(p2);
+        vtkSmartPointer<vtkAlgorithm> algorithm =
+            m_mriLine1Actor->GetMapper()->GetInputConnection( 0, 0 )->GetProducer();
+        vtkSmartPointer<vtkLineSource> line3 = dynamic_cast<vtkLineSource *>( algorithm.GetPointer() );
+        line3->SetPoint1( p1 );
+        line3->SetPoint2( p2 );
         line3->Update();
     }
 
@@ -553,31 +555,31 @@ void DoubleViewWidget::MakeCrossLinesToShowProbeIsOutOfView()
     p4[1] = mrifocal[1] - hradius;
     p4[2] = 0.0;
 
-    if (!m_mriLine2Actor)
+    if( !m_mriLine2Actor )
     {
         vtkSmartPointer<vtkLineSource> line4 = vtkSmartPointer<vtkLineSource>::New();
-        line4->SetPoint1(p3);
-        line4->SetPoint2(p4);
+        line4->SetPoint1( p3 );
+        line4->SetPoint2( p4 );
 
         vtkSmartPointer<vtkPolyDataMapper> mapper4 = vtkSmartPointer<vtkPolyDataMapper>::New();
-        mapper4->SetInputConnection(line4->GetOutputPort(0));
+        mapper4->SetInputConnection( line4->GetOutputPort( 0 ) );
 
         m_mriLine2Actor = vtkSmartPointer<vtkActor>::New();
-        m_mriLine2Actor->SetMapper(mapper4);
-        m_mriLine2Actor->GetProperty()->SetLineWidth(4.0);
-        m_mriLine2Actor->GetProperty()->SetColor(1, 0, 0);
-        m_mriLine2Actor->SetVisibility(0);
-        m_mriRenderer->AddViewProp(m_mriLine2Actor);
+        m_mriLine2Actor->SetMapper( mapper4 );
+        m_mriLine2Actor->GetProperty()->SetLineWidth( 4.0 );
+        m_mriLine2Actor->GetProperty()->SetColor( 1, 0, 0 );
+        m_mriLine2Actor->SetVisibility( 0 );
+        m_mriRenderer->AddViewProp( m_mriLine2Actor );
     }
     else
     {
-        vtkSmartPointer<vtkAlgorithm> algorithm = m_mriLine2Actor->GetMapper()->GetInputConnection(0, 0)->GetProducer();
-        vtkSmartPointer<vtkLineSource> line4 = dynamic_cast<vtkLineSource*>(algorithm.GetPointer());
-        line4->SetPoint1(p3);
-        line4->SetPoint2(p4);
+        vtkSmartPointer<vtkAlgorithm> algorithm =
+            m_mriLine2Actor->GetMapper()->GetInputConnection( 0, 0 )->GetProducer();
+        vtkSmartPointer<vtkLineSource> line4 = dynamic_cast<vtkLineSource *>( algorithm.GetPointer() );
+        line4->SetPoint1( p3 );
+        line4->SetPoint2( p4 );
         line4->Update();
     }
-
 }
 
 void DoubleViewWidget::on_blendCheckBox_toggled( bool checked )
@@ -587,7 +589,7 @@ void DoubleViewWidget::on_blendCheckBox_toggled( bool checked )
     UpdateUi();
 }
 
-void DoubleViewWidget::on_checkBoxImage2_toggled(bool checked)
+void DoubleViewWidget::on_checkBoxImage2_toggled( bool checked )
 {
     m_pluginInterface->SetBlendingVolumes( checked );
     UpdatePipelineConnections();
@@ -628,16 +630,16 @@ void DoubleViewWidget::on_maskAlphaSlider_valueChanged( int value )
 void DoubleViewWidget::SetDefaultView( vtkSmartPointer<vtkImageSlice> actor, vtkSmartPointer<vtkRenderer> renderer )
 {
     actor->Update();
-    double *bounds = actor->GetBounds();
-    double diffx = bounds[1] - bounds[0] + 1;
-    double scalex = diffx / 2.0;
-    double diffy = bounds[3] - bounds[2] + 1;
-    double scaley = diffy / 2.0;
+    double * bounds = actor->GetBounds();
+    double diffx    = bounds[1] - bounds[0] + 1;
+    double scalex   = diffx / 2.0;
+    double diffy    = bounds[3] - bounds[2] + 1;
+    double scaley   = diffy / 2.0;
     vtkCamera * cam = renderer->GetActiveCamera();
     renderer->ResetCamera();
     cam->ParallelProjectionOn();
-    cam->SetParallelScale(scaley);
-    double * prevPos = cam->GetPosition();
+    cam->SetParallelScale( scaley );
+    double * prevPos   = cam->GetPosition();
     double * prevFocal = cam->GetFocalPoint();
     cam->SetPosition( scalex, scaley, prevPos[2] );
     cam->SetFocalPoint( scalex, scaley, prevFocal[2] );
@@ -688,28 +690,28 @@ void DoubleViewWidget::on_m_rewindButton_clicked()
     acq->SetCurrentFrame( 0 );
 }
 
-void DoubleViewWidget::on_currentFrameSpinBox_valueChanged(int frameNo )
+void DoubleViewWidget::on_currentFrameSpinBox_valueChanged( int frameNo )
 {
     USAcquisitionObject * acq = m_pluginInterface->GetCurrentAcquisition();
     Q_ASSERT( acq );
     acq->SetCurrentFrame( frameNo );
 }
 
-void DoubleViewWidget::on_m_frameSlider_valueChanged(int frameNo )
+void DoubleViewWidget::on_m_frameSlider_valueChanged( int frameNo )
 {
     USAcquisitionObject * acq = m_pluginInterface->GetCurrentAcquisition();
     Q_ASSERT( acq );
     acq->SetCurrentFrame( frameNo );
 }
 
-void DoubleViewWidget::on_m_liveCheckBox_toggled(bool checked)
+void DoubleViewWidget::on_m_liveCheckBox_toggled( bool checked )
 {
     m_pluginInterface->SetLive( checked );
     UpdateInputs();
 }
 
 void DoubleViewWidget::on_m_recordButton_clicked()
-{   
+{
     USAcquisitionObject * acq = m_pluginInterface->GetCurrentAcquisition();
 
     if( acq && acq->IsRecording() )

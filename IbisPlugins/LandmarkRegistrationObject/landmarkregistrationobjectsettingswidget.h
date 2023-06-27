@@ -11,29 +11,29 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef LANDMARKREGISTRATIONOBJECTSETTINGSWIDGET_H
 #define LANDMARKREGISTRATIONOBJECTSETTINGSWIDGET_H
 
-#include <QWidget>
 #include <QObject>
 #include <QStandardItemModel>
 #include <QString>
+#include <QWidget>
 #include "landmarkregistrationobject.h"
 
 class Application;
 
-namespace Ui {
+namespace Ui
+{
 class LandmarkRegistrationObjectSettingsWidget;
 }
 
 class LandmarkRegistrationObjectSettingsWidget : public QWidget
 {
     Q_OBJECT
-    
-public:
 
-    explicit LandmarkRegistrationObjectSettingsWidget( QWidget *parent = 0 );
+public:
+    explicit LandmarkRegistrationObjectSettingsWidget( QWidget * parent = 0 );
     ~LandmarkRegistrationObjectSettingsWidget();
 
-    void SetLandmarkRegistrationObject( LandmarkRegistrationObject* obj );
-    bool ReadTagFile( );
+    void SetLandmarkRegistrationObject( LandmarkRegistrationObject * obj );
+    bool ReadTagFile();
     void SetApplication( Application * app );
 
 public slots:
@@ -43,7 +43,7 @@ public slots:
 
 private slots:
 
-    void on_registerPushButton_toggled(bool checked);
+    void on_registerPushButton_toggled( bool checked );
     virtual void on_capturePushButton_clicked();
     virtual void on_importPushButton_clicked();
     virtual void on_detailsPushButton_clicked();
@@ -54,19 +54,17 @@ private slots:
     virtual void UpdateCaptureButton();
 
 protected:
-
-    LandmarkRegistrationObject *m_registrationObject;
+    LandmarkRegistrationObject * m_registrationObject;
     void contextMenuEvent( QContextMenuEvent * event );
 
 private:
-
     void SetCaptureButtonBackgroundColor( QColor col );
 
-    Application        *m_application;
-    QStandardItemModel *m_model;
-    QColor              m_capture_button_color;
+    Application * m_application;
+    QStandardItemModel * m_model;
+    QColor m_capture_button_color;
 
-    Ui::LandmarkRegistrationObjectSettingsWidget *ui;
+    Ui::LandmarkRegistrationObjectSettingsWidget * ui;
 };
 
-#endif // LANDMARKREGISTRATIONOBJECTSETTINGSWIDGET_H
+#endif  // LANDMARKREGISTRATIONOBJECTSETTINGSWIDGET_H

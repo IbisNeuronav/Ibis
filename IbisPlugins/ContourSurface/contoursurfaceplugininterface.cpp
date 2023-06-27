@@ -8,62 +8,59 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
-#include "contoursurfaceplugininterface.h"
-#include "imageobject.h"
-#include "ibisapi.h"
-#include "sceneobject.h"
-#include "view.h"
-#include "generatedsurface.h"
-#include <QtPlugin>
+#include <QMessageBox>
 #include <QString>
 #include <QtGui>
-#include <QMessageBox>
+#include <QtPlugin>
+#include "contoursurfaceplugininterface.h"
+#include "generatedsurface.h"
+#include "ibisapi.h"
+#include "imageobject.h"
+#include "sceneobject.h"
+#include "view.h"
 
-ContourSurfacePluginInterface::ContourSurfacePluginInterface()
-{
-}
+ContourSurfacePluginInterface::ContourSurfacePluginInterface() {}
 
-ContourSurfacePluginInterface::~ContourSurfacePluginInterface()
-{
-}
+ContourSurfacePluginInterface::~ContourSurfacePluginInterface() {}
 
-SceneObject *ContourSurfacePluginInterface::CreateObject()
+SceneObject * ContourSurfacePluginInterface::CreateObject()
 {
-    IbisAPI *ibisAPI = GetIbisAPI();
-    Q_ASSERT(ibisAPI);
+    IbisAPI * ibisAPI = GetIbisAPI();
+    Q_ASSERT( ibisAPI );
     m_generatedSurface = vtkSmartPointer<GeneratedSurface>::New();
     m_generatedSurface->SetPluginInterface( this );
-    connect( ibisAPI, SIGNAL(ObjectRemoved(int)), this, SLOT(OnObjectRemoved(int)) );
+    connect( ibisAPI, SIGNAL( ObjectRemoved( int ) ), this, SLOT( OnObjectRemoved( int ) ) );
     if( ibisAPI->IsLoadingScene() )
     {
-        ibisAPI->AddObject(m_generatedSurface);
+        ibisAPI->AddObject( m_generatedSurface );
         return m_generatedSurface;
     }
     // If we have a current object we build surface now
-    SceneObject *obj = ibisAPI->GetCurrentObject();
-    if (obj->IsA("ImageObject"))
+    SceneObject * obj = ibisAPI->GetCurrentObject();
+    if( obj->IsA( "ImageObject" ) )
     {
-        ImageObject *image = ImageObject::SafeDownCast(obj);
+        ImageObject * image = ImageObject::SafeDownCast( obj );
         double imageRange[2];
-        image->GetImageScalarRange(imageRange);
-        double contourValue = imageRange[0]+(imageRange[1]-imageRange[0])/5.0; //the best seems to be 20% of max, tested on Colin27
+        image->GetImageScalarRange( imageRange );
+        double contourValue = imageRange[0] + ( imageRange[1] - imageRange[0] ) /
+                                                  5.0;  // the best seems to be 20% of max, tested on Colin27
         m_generatedSurface->SetImageObjectID( image->GetObjectID() );
-        m_generatedSurface->SetContourValue(contourValue);
-        m_generatedSurface->SetGaussianSmoothingFlag(true);
-        if ( m_generatedSurface->GenerateSurface() )
+        m_generatedSurface->SetContourValue( contourValue );
+        m_generatedSurface->SetGaussianSmoothingFlag( true );
+        if( m_generatedSurface->GenerateSurface() )
         {
-            QString surfaceName(image->GetName());
-            int n = surfaceName.lastIndexOf('.');
-            if (n < 0)
-                surfaceName.append("_surface");
+            QString surfaceName( image->GetName() );
+            int n = surfaceName.lastIndexOf( '.' );
+            if( n < 0 )
+                surfaceName.append( "_surface" );
             else
             {
-                surfaceName.replace(n, surfaceName.size()-n, "_surface");
+                surfaceName.replace( n, surfaceName.size() - n, "_surface" );
             }
-            surfaceName.append(QString::number(image->GetNumberOfChildren()));
-            m_generatedSurface->SetName(surfaceName);
-            m_generatedSurface->SetScalarsVisible(0);
-            ibisAPI->AddObject(m_generatedSurface, image);
+            surfaceName.append( QString::number( image->GetNumberOfChildren() ) );
+            m_generatedSurface->SetName( surfaceName );
+            m_generatedSurface->SetScalarsVisible( 0 );
+            ibisAPI->AddObject( m_generatedSurface, image );
             ibisAPI->SetCurrentObject( m_generatedSurface );
         }
         return m_generatedSurface;
@@ -73,16 +70,15 @@ SceneObject *ContourSurfacePluginInterface::CreateObject()
 }
 bool ContourSurfacePluginInterface::CanBeActivated()
 {
-    if( this->GetIbisAPI()->GetCurrentObject()->IsA( "ImageObject" ) )
-        return true;
+    if( this->GetIbisAPI()->GetCurrentObject()->IsA( "ImageObject" ) ) return true;
     return false;
 }
 
-void ContourSurfacePluginInterface::OnObjectRemoved(int objID)
+void ContourSurfacePluginInterface::OnObjectRemoved( int objID )
 {
-   if( objID == m_generatedSurface->GetObjectID() )
-   {
-       //refresh 3D view
-       this->GetIbisAPI()->GetMain3DView()->NotifyNeedRender();
+    if( objID == m_generatedSurface->GetObjectID() )
+    {
+        // refresh 3D view
+        this->GetIbisAPI()->GetMain3DView()->NotifyNeedRender();
     }
 }

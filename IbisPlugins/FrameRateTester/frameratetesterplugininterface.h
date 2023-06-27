@@ -15,24 +15,22 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include "toolplugininterface.h"
 
-//class vtkEventQtSlotConnect;
+// class vtkEventQtSlotConnect;
 class QTimer;
 class QTime;
 
 class FrameRateTesterPluginInterface : public ToolPluginInterface
 {
-
     Q_OBJECT
-    Q_INTERFACES(IbisPlugin)
-    Q_PLUGIN_METADATA(IID "Ibis.FrameRateTesterPluginInterface" )
+    Q_INTERFACES( IbisPlugin )
+    Q_PLUGIN_METADATA( IID "Ibis.FrameRateTesterPluginInterface" )
 
 public:
-
     FrameRateTesterPluginInterface();
     virtual ~FrameRateTesterPluginInterface();
-    virtual QString GetPluginName() override { return QString("FrameRateTester"); }
+    virtual QString GetPluginName() override { return QString( "FrameRateTester" ); }
     virtual bool CanRun() override;
-    virtual QString GetMenuEntryString() override { return QString("Test Frame Rate"); }
+    virtual QString GetMenuEntryString() override { return QString( "Test Frame Rate" ); }
 
     virtual QWidget * CreateTab() override;
     virtual bool WidgetAboutToClose() override;
@@ -59,7 +57,6 @@ signals:
     void PeriodicSignal();
 
 protected:
-
     void SetRenderingEnabled( bool enabled );
 
     int m_numberOfFrames;
@@ -72,7 +69,6 @@ protected:
 
     // temp var used when running
     int m_accumulatedFrames;
-
 };
 
 #endif

@@ -9,22 +9,24 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
 #include "linesfactory.h"
-#include <vtkPolyData.h>
+
 #include <vtkCellArray.h>
-#include <vtkUnsignedCharArray.h>
 #include <vtkPointData.h>
+#include <vtkPolyData.h>
+#include <vtkUnsignedCharArray.h>
+
 #include <QtGui>
 
 LinesFactory::LinesFactory()
 {
     m_startSegment = true;
-    m_color[0] = 255;
-    m_color[1] = 255;
-    m_color[2] = 255;
-    m_color[3] = 255;
+    m_color[0]     = 255;
+    m_color[1]     = 255;
+    m_color[2]     = 255;
+    m_color[3]     = 255;
 
-    m_pts = vtkSmartPointer<vtkPoints>::New();
-    m_lines = vtkSmartPointer<vtkCellArray>::New();
+    m_pts     = vtkSmartPointer<vtkPoints>::New();
+    m_lines   = vtkSmartPointer<vtkCellArray>::New();
     m_scalars = vtkSmartPointer<vtkUnsignedCharArray>::New();
     m_scalars->SetNumberOfComponents( 4 );
     m_scalars->SetName( "Colors" );
@@ -35,14 +37,9 @@ LinesFactory::LinesFactory()
     m_poly->GetPointData()->SetScalars( m_scalars );
 }
 
-LinesFactory::~LinesFactory()
-{
-}
+LinesFactory::~LinesFactory() {}
 
-void LinesFactory::StartNewSegment()
-{
-    m_startSegment = true;
-}
+void LinesFactory::StartNewSegment() { m_startSegment = true; }
 
 void LinesFactory::SetColor( unsigned char r, unsigned char g, unsigned char b, unsigned char a )
 {
@@ -52,10 +49,7 @@ void LinesFactory::SetColor( unsigned char r, unsigned char g, unsigned char b, 
     m_color[3] = a;
 }
 
-int LinesFactory::GetNumberOfPoints()
-{
-    return m_pts->GetNumberOfPoints();
-}
+int LinesFactory::GetNumberOfPoints() { return m_pts->GetNumberOfPoints(); }
 
 void LinesFactory::SetPoint( int index, double pt[3] )
 {
@@ -75,7 +69,8 @@ void LinesFactory::AddPoint( double x, double y, double z )
     AddPoint( x, y, z, m_color[0], m_color[1], m_color[2], m_color[3] );
 }
 
-void LinesFactory::AddPoint( double x, double y, double z, unsigned char r, unsigned char g, unsigned char b, unsigned char a )
+void LinesFactory::AddPoint( double x, double y, double z, unsigned char r, unsigned char g, unsigned char b,
+                             unsigned char a )
 {
     m_pts->InsertNextPoint( x, y, z );
     m_scalars->InsertNextTuple4( r, g, b, a );
@@ -97,8 +92,7 @@ void LinesFactory::RemoveLast()
     {
         m_pts->SetNumberOfPoints( nbPoints - 1 );
         m_scalars->SetNumberOfTuples( nbPoints - 1 );
-        if( nbPoints > 1 )
-            m_lines->SetNumberOfCells( m_lines->GetNumberOfCells() - 1 );
+        if( nbPoints > 1 ) m_lines->SetNumberOfCells( m_lines->GetNumberOfCells() - 1 );
     }
     m_poly->Modified();
 }

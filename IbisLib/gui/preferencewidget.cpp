@@ -1,21 +1,21 @@
 #include "preferencewidget.h"
-#include "ui_preferencewidget.h"
+
+#include <QDir>
+#include <QLabel>
+#include <QLayoutItem>
+#include <QLineEdit>
+#include <QMap>
+#include <QMessageBox>
+#include <QVBoxLayout>
+
 #include "ibisapi.h"
 #include "pathform.h"
-#include <QVBoxLayout>
-#include <QMap>
-#include <QLabel>
-#include <QLineEdit>
-#include <QDir>
-#include <QMessageBox>
-#include <QLayoutItem>
+#include "ui_preferencewidget.h"
 
-PreferenceWidget::PreferenceWidget(QWidget *parent) :
-    QWidget(parent),
-    ui(new Ui::PreferenceWidget)
+PreferenceWidget::PreferenceWidget( QWidget * parent ) : QWidget( parent ), ui( new Ui::PreferenceWidget )
 {
-    ui->setupUi(this);
-    m_preferences = nullptr;
+    ui->setupUi( this );
+    m_preferences       = nullptr;
     m_customPathsLayout = nullptr;
 }
 
@@ -25,13 +25,13 @@ PreferenceWidget::~PreferenceWidget()
     delete ui;
 }
 
-void PreferenceWidget::SetPreferences( IbisPreferences *pref )
+void PreferenceWidget::SetPreferences( IbisPreferences * pref )
 {
     m_preferences = pref;
     this->UpdateUI();
 }
 
-void PreferenceWidget::UpdateUI(  )
+void PreferenceWidget::UpdateUI()
 {
     if( m_preferences )
     {
@@ -44,36 +44,33 @@ void PreferenceWidget::UpdateUI(  )
         m_customPathsLayout->setSpacing( 4 );
         m_customPathsLayout->setAlignment( Qt::AlignTop );
         ui->customPathsGroupBox->setLayout( m_customPathsLayout );
-        QMap< QString, QString> paths = m_preferences->GetCustomPaths();
+        QMap<QString, QString> paths = m_preferences->GetCustomPaths();
         if( !paths.isEmpty() )
         {
-            QMap< QString, QString >::iterator it;
+            QMap<QString, QString>::iterator it;
             for( it = paths.begin(); it != paths.end(); ++it )
             {
                 QString validPath( it.value() );
                 QFile validFile( validPath );
-                if( !validFile.exists( ) )
-                    validPath = "";
-                PathForm *nextPath = new PathForm;
+                if( !validFile.exists() ) validPath = "";
+                PathForm * nextPath = new PathForm;
                 nextPath->SetPath( it.key(), validPath );
                 m_customPathsLayout->addWidget( nextPath, 0, Qt::AlignTop );
-                connect( nextPath, SIGNAL( PathChanged(QString, QString) ), this, SLOT( ResetPath(QString, QString) ) );
+                connect( nextPath, SIGNAL( PathChanged( QString, QString ) ), this,
+                         SLOT( ResetPath( QString, QString ) ) );
             }
         }
     }
 }
 
-void PreferenceWidget::ResetPath( QString pathName, QString path )
-{
-    m_preferences->RegisterPath( pathName, path );
-}
+void PreferenceWidget::ResetPath( QString pathName, QString path ) { m_preferences->RegisterPath( pathName, path ); }
 
 void PreferenceWidget::RemoveAllCustomPathsWidgets()
 {
-    QLayoutItem* child;
-    while ( m_customPathsLayout->count() > 0 )
+    QLayoutItem * child;
+    while( m_customPathsLayout->count() > 0 )
     {
-        child = m_customPathsLayout->itemAt(0);
+        child = m_customPathsLayout->itemAt( 0 );
         child->widget()->deleteLater();
         child->widget()->hide();
         child->widget()->setParent( nullptr );
@@ -84,20 +81,20 @@ void PreferenceWidget::closeEvent( QCloseEvent * event )
 {
     if( m_preferences && !m_customPathsLayout->isEmpty() )
     {
-        QMap< QString, QString > paths;
-        QWidget *w;
+        QMap<QString, QString> paths;
+        QWidget * w;
         for( int i = 0; i < m_customPathsLayout->count(); i++ )
         {
             w = m_customPathsLayout->itemAt( i )->widget();
-            Q_ASSERT(w);
-            QLabel *label = w->findChild<QLabel *>( PathForm::LabelWidgetName );
-            Q_ASSERT(label);
+            Q_ASSERT( w );
+            QLabel * label = w->findChild<QLabel *>( PathForm::LabelWidgetName );
+            Q_ASSERT( label );
             QLineEdit * lineEdit = w->findChild<QLineEdit *>( PathForm::PathWidgetName );
-            Q_ASSERT(lineEdit);
+            Q_ASSERT( lineEdit );
             QFile validFile( lineEdit->text() );
-            if( !validFile.exists( ) )
+            if( !validFile.exists() )
             {
-                QString tmp("File/Directory:\n");
+                QString tmp( "File/Directory:\n" );
                 tmp.append( lineEdit->text() );
                 tmp.append( "\ndoes not exist." );
                 QMessageBox msgBox;
@@ -107,13 +104,14 @@ void PreferenceWidget::closeEvent( QCloseEvent * event )
                 msgBox.setDefaultButton( QMessageBox::Ignore );
                 int ret = msgBox.exec();
                 lineEdit->setText( "" );
-                switch (ret) {
-                  case QMessageBox::Ignore:
-                      break;
-                  case QMessageBox::Cancel:
-                  default:
-                      event->ignore();
-                      return;
+                switch( ret )
+                {
+                    case QMessageBox::Ignore:
+                        break;
+                    case QMessageBox::Cancel:
+                    default:
+                        event->ignore();
+                        return;
                 }
             }
             paths.insert( label->text(), lineEdit->text() );

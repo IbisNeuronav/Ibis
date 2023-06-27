@@ -11,11 +11,13 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef __WorldObject_h_
 #define __WorldObject_h_
 
-#include "sceneobject.h"
-#include "ibistypes.h"
+#include <vtkSmartPointer.h>
+
 #include <QColor>
 #include <QObject>
-#include <vtkSmartPointer.h>
+
+#include "ibistypes.h"
+#include "sceneobject.h"
 
 class PolyDataObject;
 
@@ -30,11 +32,9 @@ class PolyDataObject;
  */
 class WorldObject : public SceneObject
 {
-
     Q_OBJECT
 
 public:
-
     static WorldObject * New() { return new WorldObject; }
     vtkTypeMacro( WorldObject, SceneObject );
 
@@ -43,7 +43,7 @@ public:
 
     /** Add axes to visualize the current coordinates system.
      *  Initially axes are created when when SceneManager is instantiated.
-    */
+     */
     void SetAxesObject( vtkSmartPointer<PolyDataObject> obj );
     /** Return current axes object. */
     vtkSmartPointer<PolyDataObject> GetAxesObject() { return m_axesObject; }
@@ -57,7 +57,7 @@ public:
     /** Disable changing name. */
     virtual void SetNameChangeable( bool c ) override {}
     /** Disable hiding. */
-    virtual void SetHidden( bool h ) { }
+    virtual void SetHidden( bool h ) {}
     /** Disable hiding. */
     virtual void SetHidable( bool h ) override {}
     /** Disable deleting. */
@@ -102,21 +102,19 @@ public:
     void Set3DCameraViewAngle( double angle );
 
     /** @name  Update
-    *   @brief Set/Get update frequency.
-    *
-    * */
-   ///@{
+     *   @brief Set/Get update frequency.
+     *
+     * */
+    ///@{
     void SetUpdateFrequency( double fps );
     double GetUpdateFrequency();
     ///@}
 
     virtual QWidget * CreateSettingsDialog( QWidget * parent ) override;
-    virtual void CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets) override {}
+    virtual void CreateSettingsWidgets( QWidget * parent, QVector<QWidget *> * widgets ) override {}
 
 private:
-
     vtkSmartPointer<PolyDataObject> m_axesObject;
-
 };
 
 #endif

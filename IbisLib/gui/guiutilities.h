@@ -13,6 +13,9 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include <QList>
 #include <QMap>
+#include <QVariant>
+#include <QComboBox>
+
 #include "ibisapi.h"
 
 class SceneObject;
@@ -20,50 +23,43 @@ class QComboBox;
 
 class GuiUtilities
 {
-
 public:
-
-    template< class ObjectType >
-    static void UpdateSceneObjectComboBox( QComboBox * cb, QList<ObjectType*> allObjs, int currentObjectId )
+    template <class ObjectType>
+    static void UpdateSceneObjectComboBox( QComboBox * cb, QList<ObjectType *> allObjs, int currentObjectId )
     {
         cb->blockSignals( true );
         cb->clear();
         for( int i = 0; i < allObjs.size(); ++i )
         {
             cb->addItem( allObjs[i]->GetName(), QVariant( allObjs[i]->GetObjectID() ) );
-            if( allObjs[i]->GetObjectID() == currentObjectId )
-                cb->setCurrentIndex( i );
+            if( allObjs[i]->GetObjectID() == currentObjectId ) cb->setCurrentIndex( i );
         }
-        if( allObjs.size() == 0 )
-            cb->addItem( "None", QVariant( IbisAPI::InvalidId ) );
+        if( allObjs.size() == 0 ) cb->addItem( "None", QVariant( IbisAPI::InvalidId ) );
         cb->blockSignals( false );
     }
 
-    template< class ObjectType >
-    static void UpdateObjectComboBox( QComboBox * cb, QMap<ObjectType*, int> allObjs, int currentObjectId )
+    template <class ObjectType>
+    static void UpdateObjectComboBox( QComboBox * cb, QMap<ObjectType *, int> allObjs, int currentObjectId )
     {
         cb->blockSignals( true );
         cb->clear();
         int index = 0;
         foreach( int id, allObjs.values() )
         {
-            cb->addItem( allObjs.key(id)->GetName(), QVariant( id ) );
-            if( id == currentObjectId )
-                cb->setCurrentIndex( index );
+            cb->addItem( allObjs.key( id )->GetName(), QVariant( id ) );
+            if( id == currentObjectId ) cb->setCurrentIndex( index );
             index++;
         }
-        if( allObjs.size() == 0 )
-            cb->addItem( "None", QVariant( IbisAPI::InvalidId ) );
+        if( allObjs.size() == 0 ) cb->addItem( "None", QVariant( IbisAPI::InvalidId ) );
         cb->blockSignals( false );
     }
 
     static int ObjectIdFromObjectComboBox( QComboBox * cb, int index )
     {
-        QVariant v = cb->itemData( index );
-        bool ok = false;
+        QVariant v   = cb->itemData( index );
+        bool ok      = false;
         int objectId = v.toInt( &ok );
-        if( !ok )
-            objectId = IbisAPI::InvalidId;
+        if( !ok ) objectId = IbisAPI::InvalidId;
         return objectId;
     }
 
@@ -71,11 +67,10 @@ public:
     {
         for( int index = 0; index < cb->count(); index++ )
         {
-            QVariant v = cb->itemData( index );
-            bool ok = false;
+            QVariant v   = cb->itemData( index );
+            bool ok      = false;
             int objectId = v.toInt( &ok );
-            if( ok  && objectId == id )
-                return index;
+            if( ok && objectId == id ) return index;
         }
         return IbisAPI::InvalidId;
     }

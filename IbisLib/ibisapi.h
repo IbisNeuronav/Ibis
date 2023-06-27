@@ -11,9 +11,9 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef IBISAPI_H
 #define IBISAPI_H
 
+#include <QDockWidget>
 #include <QList>
 #include <QMap>
-#include <QDockWidget>
 #include <QObject>
 
 class Application;
@@ -41,26 +41,27 @@ class QString;
 
 class OpenFileParams
 {
-
 public:
-
     struct SingleFileParam
     {
-        SingleFileParam() : isReference(false), isLabel(false), loadedObject(0), secondaryObject(0), parent(0) {}
+        SingleFileParam() : isReference( false ), isLabel( false ), loadedObject( 0 ), secondaryObject( 0 ), parent( 0 )
+        {
+        }
         QString fileName;
         QString objectName;
         bool isReference;
         bool isLabel;  // load image as label image instead of floats.
         SceneObject * loadedObject;
-        SceneObject * secondaryObject;  // This is a hack to attach the second point object that can be found in PointsObjects
+        SceneObject *
+            secondaryObject;  // This is a hack to attach the second point object that can be found in PointsObjects
         SceneObject * parent;
     };
-    OpenFileParams() : defaultParent(0) {}
+    OpenFileParams() : defaultParent( 0 ) {}
     ~OpenFileParams() {}
     void AddInputFile( QString filename, QString objectName = QString() )
     {
         SingleFileParam p;
-        p.fileName = filename;
+        p.fileName   = filename;
         p.objectName = objectName;
         filesParams.push_back( p );
     }
@@ -94,11 +95,10 @@ public:
  */
 class IbisAPI : public QObject
 {
-
     Q_OBJECT
 
 public:
-    IbisAPI( Application *app);
+    IbisAPI( Application * app );
     ~IbisAPI();
 
     /**
@@ -124,16 +124,16 @@ public:
     /**
      * Remove all object's children, leaving the object on the scene.
      */
-    void RemoveAllChildrenObjects( SceneObject *obj );
+    void RemoveAllChildrenObjects( SceneObject * obj );
     /**
      * Set object as current and show the object's properties
      * in the left side panel.
      */
-    void SetCurrentObject( SceneObject * cur  );
+    void SetCurrentObject( SceneObject * cur );
     /**
      * Return currently selected object
      */
-    SceneObject * GetCurrentObject( );
+    SceneObject * GetCurrentObject();
     /**
      * Return object with a given Id
      */
@@ -149,71 +149,71 @@ public:
     /**
      * Return the object used as current pointer to navigate the scene
      */
-    PointerObject *GetNavigationPointerObject( );
+    PointerObject * GetNavigationPointerObject();
     /**
      * Return number of objects created by the user
      */
-    int  GetNumberOfUserObjects();
+    int GetNumberOfUserObjects();
     /**
      * Return a list of objects created by the user
      */
-    void GetAllUserObjects(QList<SceneObject*> &);
+    void GetAllUserObjects( QList<SceneObject *> & );
     /**
      * In the scene there is one main object called Reference object. It is used
      * for registration and it defines a bounding box in which other objects are displayed.
      */
-    ImageObject * GetReferenceDataObject( );
+    ImageObject * GetReferenceDataObject();
     /**
      * Return a list of objects of type ImageObject.
      * ImageObject is derived from SceneOBject. It is used to represent volumes.
      */
-    void GetAllImageObjects( QList<ImageObject*> & objects );
+    void GetAllImageObjects( QList<ImageObject *> & objects );
     /**
      * Return a list of objects of type PolyDataObject.
      * PolyDataObject is derived from SceneOBject. It is mostly used to represent surfaces.
      */
-    void GetAllPolyDataObjects( QList<PolyDataObject*> & objects );
+    void GetAllPolyDataObjects( QList<PolyDataObject *> & objects );
     /**
      * Return a list of all objects in the scene.
      */
-    const QList< SceneObject* > & GetAllObjects();
+    const QList<SceneObject *> & GetAllObjects();
     /**
      * Return a list of objects of type USAcquisitionObject.
      * USAcquisitionObject is derived from SceneOBject. It is used to store UltraSound acquisition.
      */
-    void GetAllUSAcquisitionObjects( QList<USAcquisitionObject*> & all );
+    void GetAllUSAcquisitionObjects( QList<USAcquisitionObject *> & all );
     /**
      * Return a list of objects of type UsProbeObject.
      * UsProbeObject is derived from SceneOBject. It represents an UltraSound probe.
      */
-    void GetAllUsProbeObjects( QList<UsProbeObject*> & all );
+    void GetAllUsProbeObjects( QList<UsProbeObject *> & all );
     /**
      * Return a list of objects of type CameraObject.
      * CameraObject is derived from SceneOBject. It represents a camera.
      */
-    void GetAllCameraObjects( QList<CameraObject*> & all );
+    void GetAllCameraObjects( QList<CameraObject *> & all );
     /**
      * Return a list of objects of type PointsObject.
      * PointsObject is derived from SceneOBject. It is used to represent multiple points in the scene.
      */
-    void GetAllPointsObjects( QList<PointsObject*> & objects );
+    void GetAllPointsObjects( QList<PointsObject *> & objects );
     /**
      * Return a list of objects of type PointerObject.
      * PointerObject is derived from SceneOBject. It represents a pointer.
      */
-    void GetAllPointerObjects( QList<PointerObject*> & all );
+    void GetAllPointerObjects( QList<PointerObject *> & all );
     /**
      * Return a list of all objects that are tracked using a tracking system.
      */
-    void GetAllTrackedObjects( QList<TrackedSceneObject*> & all );
+    void GetAllTrackedObjects( QList<TrackedSceneObject *> & all );
     /**
      * Return a list of all objects that are listed in the left side panel, except tracked objects.
      */
-    void GetAllListableNonTrackedObjects( QList<SceneObject*> & all );
+    void GetAllListableNonTrackedObjects( QList<SceneObject *> & all );
     /**
      * Return a list of all objects of a given type.
      */
-    void GetAllObjectsOfType( const char * typeName, QList<SceneObject*> & all );
+    void GetAllObjectsOfType( const char * typeName, QList<SceneObject *> & all );
 
     /**
      * Get a View using its id.
@@ -231,7 +231,7 @@ public:
     /**
      * Get all views in QMap form.
      */
-    QMap<View*, int> GetAllViews( );
+    QMap<View *, int> GetAllViews();
     /**
      * Enable/Disable in all views of the main window
      */
@@ -279,7 +279,7 @@ public:
      * Get/set cursor position.
      */
     void GetCursorPosition( double pos[3] );
-    void SetCursorPosition( double *pos );
+    void SetCursorPosition( double * pos );
     void GetCursorWorldPosition( double pos[3] );
     void SetCursorWorldPosition( double * );
     /** @}*/
@@ -291,14 +291,14 @@ public:
      * Manipulate progress.
      */
     QProgressDialog * StartProgress( int max, const QString & caption = QString() );
-    void StopProgress( QProgressDialog * progressDialog);
-    void UpdateProgress( QProgressDialog*, int current );
+    void StopProgress( QProgressDialog * progressDialog );
+    void UpdateProgress( QProgressDialog *, int current );
     /** @}*/
 
     /**
      * Display warning message
      */
-    void Warning( const QString &title, const QString & text );
+    void Warning( const QString & title, const QString & text );
     /**
      *  Check ibis execution mode,
      *  ibis can be run without tracking, in a viewer mode.
@@ -310,8 +310,10 @@ public:
      */
     QString GetWorkingDirectory();
     QString GetConfigDirectory();
-    QString GetFileNameOpen( const QString & caption = QString(), const QString & dir = QString(), const QString & filter = QString() );
-    QString GetFileNameSave( const QString & caption = QString(), const QString & dir = QString(), const QString & filter = QString() );
+    QString GetFileNameOpen( const QString & caption = QString(), const QString & dir = QString(),
+                             const QString & filter = QString() );
+    QString GetFileNameSave( const QString & caption = QString(), const QString & dir = QString(),
+                             const QString & filter = QString() );
     QString GetExistingDirectory( const QString & caption = QString(), const QString & dir = QString() );
     /** @}*/
     /**
@@ -324,7 +326,7 @@ public:
      * Basic types of plugins in ibis are: tool, object and global object.
      */
     ToolPluginInterface * GetToolPluginByName( QString name );
-    ObjectPluginInterface *GetObjectPluginByName( QString className );
+    ObjectPluginInterface * GetObjectPluginByName( QString className );
     SceneObject * GetGlobalObjectInstance( const QString & className );
     /** @}*/
     /**
@@ -353,17 +355,20 @@ public:
     void SetRightPanelVisibility( bool v );
     void AddBottomWidget( QWidget * w );
     void RemoveBottomWidget( QWidget * w );
-    void ShowFloatingDock( QWidget * w, QFlags<QDockWidget::DockWidgetFeature> features=QDockWidget::AllDockWidgetFeatures );
+    void ShowFloatingDock( QWidget * w,
+                           QFlags<QDockWidget::DockWidgetFeature> features = QDockWidget::DockWidgetClosable |
+                                                                             QDockWidget::DockWidgetMovable |
+                                                                             QDockWidget::DockWidgetFloatable );
     /** @}*/
     /**
      * @{
      * Manage ibis preferences, e.g. path to MINC tools
      */
-    IbisPreferences *GetIbisPreferences();
+    IbisPreferences * GetIbisPreferences();
     void RegisterCustomPath( const QString & pathName, const QString & directoryPath );
     void UnRegisterCustomPath( const QString & pathName );
     const QString GetCustomPath( const QString & pathName );
-    bool IsCustomPathRegistered( const QString &pathName );
+    bool IsCustomPathRegistered( const QString & pathName );
     /** @}*/
 
 public slots:
@@ -386,7 +391,7 @@ signals:
     void IbisClockTick();
 
 private:
-    Application  * m_application;
+    Application * m_application;
     SceneManager * m_sceneManager;
 
     /**
@@ -395,4 +400,4 @@ private:
     void SetApplication( Application * app );
 };
 
-#endif // IBISAPI_H
+#endif  // IBISAPI_H

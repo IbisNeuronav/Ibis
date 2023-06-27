@@ -1,13 +1,14 @@
 #ifndef PATHFORM_H
 #define PATHFORM_H
 
-#include <QWidget>
-#include <QString>
 #include <QObject>
+#include <QString>
+#include <QWidget>
 
 class FileSystemTree;
 
-namespace Ui {
+namespace Ui
+{
 class PathForm;
 }
 
@@ -16,7 +17,7 @@ class PathForm : public QWidget
     Q_OBJECT
 
 public:
-    explicit PathForm(QWidget *parent = 0);
+    explicit PathForm( QWidget * parent = 0 );
     ~PathForm();
 
     static const QString LabelWidgetName;
@@ -33,7 +34,7 @@ private slots:
     void PathLineEditChanged();
 
 private:
-    Ui::PathForm *ui;
+    Ui::PathForm * ui;
 };
 
-#endif // PATHFORM_H
+#endif  // PATHFORM_H

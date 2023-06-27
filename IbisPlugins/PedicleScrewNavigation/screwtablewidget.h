@@ -1,39 +1,37 @@
 #ifndef __SCREWTABLEWIDGET_H__
 #define __SCREWTABLEWIDGET_H__
 
-#include <QWidget>
 #include <QDir>
-#include <QPair>
 #include <QFile>
 #include <QFileInfo>
+#include <QPair>
 #include <QTableWidgetItem>
+#include <QWidget>
 
-namespace Ui {
-    class ScrewTableWidget;
+namespace Ui
+{
+class ScrewTableWidget;
 }
 
 class ScrewTableWidget : public QWidget
 {
-
     Q_OBJECT
 
 public:
-
     typedef QPair<double, double> ScrewProperties;
 
-    explicit ScrewTableWidget(QWidget *parent = 0, QString configDir = "");
+    explicit ScrewTableWidget( QWidget * parent = 0, QString configDir = "" );
     ~ScrewTableWidget();
 
-    static QList<ScrewProperties> GetTable(QString);
+    static QList<ScrewProperties> GetTable( QString );
 
 protected:
     void UpdateTable();
-    static bool ScrewComparator(const ScrewProperties &v1, const ScrewProperties &v2);
+    static bool ScrewComparator( const ScrewProperties & v1, const ScrewProperties & v2 );
 
 private:
-
     QString m_configDir;
-    Ui::ScrewTableWidget *ui;
+    Ui::ScrewTableWidget * ui;
     QList<ScrewProperties> m_screwList;
 
 private slots:
@@ -44,7 +42,6 @@ private slots:
 
 signals:
     void WidgetAboutToClose();
-
 };
 
-#endif // __SCREWTABLEWIDGET_H__
+#endif  // __SCREWTABLEWIDGET_H__

@@ -9,16 +9,16 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
 #include "ibismath.h"
+
 #include <vtkMatrix4x4.h>
+
 #include "vtkMatrix4x4Operators.h"
 
 double IbisMath::Average( std::vector<double> & samples )
 {
     double sum = 0.0;
-    for( int i = 0; i < samples.size(); ++i )
-        sum += samples[i];
-    if( samples.size() > 0 )
-        sum /= samples.size();
+    for( int i = 0; i < samples.size(); ++i ) sum += samples[i];
+    if( samples.size() > 0 ) sum /= samples.size();
     return sum;
 }
 
@@ -30,8 +30,7 @@ double IbisMath::StdDev( std::vector<double> & samples, double average )
         double diff = samples[i] - average;
         sum += diff * diff;
     }
-    if( samples.size() > 0 )
-        sum = sqrt( sum / samples.size() );
+    if( samples.size() > 0 ) sum = sqrt( sum / samples.size() );
     return sum;
 }
 
@@ -63,13 +62,13 @@ Vec3 IbisMath::StdDevVec3( std::vector<Vec3> & allVecs )
         sum += diff * diff;
     }
     sum /= allVecs.size();
-    Vec3 stdDev = Vec3( sqrt(sum[0]), sqrt(sum[1]), sqrt(sum[2]) );
+    Vec3 stdDev = Vec3( sqrt( sum[0] ), sqrt( sum[1] ), sqrt( sum[2] ) );
     return stdDev;
 }
 
 Vec3 IbisMath::Translation( vtkMatrix4x4 * mat )
 {
-    return Vec3( mat->GetElement(0,3), mat->GetElement(1,3), mat->GetElement(2,3) );
+    return Vec3( mat->GetElement( 0, 3 ), mat->GetElement( 1, 3 ), mat->GetElement( 2, 3 ) );
 }
 
 void IbisMath::MultMat4Vec3( vtkMatrix4x4 * mat, const Vec3 & in, Vec3 & out )
@@ -91,9 +90,8 @@ vtkMatrix4x4 * IbisMath::DuplicateMat4( vtkMatrix4x4 * in )
     return out;
 }
 
-void IbisMath::ClearMat4Array( std::vector< vtkMatrix4x4 * > & allMats )
+void IbisMath::ClearMat4Array( std::vector<vtkMatrix4x4 *> & allMats )
 {
-    for( int i = 0; i < allMats.size(); ++i )
-        allMats[i]->Delete();
+    for( int i = 0; i < allMats.size(); ++i ) allMats[i]->Delete();
     allMats.clear();
 }

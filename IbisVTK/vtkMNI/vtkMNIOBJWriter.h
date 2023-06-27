@@ -19,62 +19,60 @@
 // and the output may or may not be junk.
 // .SECTION See Also
 
-
 #ifndef __vtkMNIOBJWriter_h
 #define __vtkMNIOBJWriter_h
 
-//VTK6 #include "vtkPolyDataSource.h"
-#include "vtkPolyDataAlgorithm.h"
-#include <ostream>
+// VTK6 #include "vtkPolyDataSource.h"
 #include <fstream>
+#include <ostream>
+
+#include "vtkPolyDataAlgorithm.h"
 
 class vtkProperty;
 class vtkCellArray;
 class vtkPolyData;
 
-class vtkMNIOBJWriter : public vtkPolyDataAlgorithm //VTK6
+class vtkMNIOBJWriter : public vtkPolyDataAlgorithm  // VTK6
 {
 public:
- static vtkMNIOBJWriter* New();
- vtkMNIOBJWriter(char* fname, bool aLine);
- vtkTypeRevisionMacro(vtkMNIOBJWriter,vtkPolyDataAlgorithm); //VTK6
- void PrintSelf(ostream& os, vtkIndent indent);
- void Write(vtkPolyData *output);
- void Write();//vtkPolyData *output);
- 
- // Description:
- // Specify file name of MNI .obj file.
- vtkSetStringMacro(FileName);
- vtkGetStringMacro(FileName);
+    static vtkMNIOBJWriter * New();
+    vtkMNIOBJWriter( char * fname, bool aLine );
+    vtkTypeRevisionMacro( vtkMNIOBJWriter, vtkPolyDataAlgorithm );  // VTK6
+    void PrintSelf( ostream & os, vtkIndent indent );
+    void Write( vtkPolyData * output );
+    void Write();  // vtkPolyData *output);
 
- void SetIsLine(bool itIs){isALine=itIs;}
- bool GetIsLine(){return isALine;}
+    // Description:
+    // Specify file name of MNI .obj file.
+    vtkSetStringMacro( FileName );
+    vtkGetStringMacro( FileName );
 
- // Description:
- // Return properties of MNI .obj file
- void SetProperty(vtkProperty* prop){Property=prop;};
+    void SetIsLine( bool itIs ) { isALine = itIs; }
+    bool GetIsLine() { return isALine; }
+
+    // Description:
+    // Return properties of MNI .obj file
+    void SetProperty( vtkProperty * prop ) { Property = prop; };
 
 protected:
- void WriteLines(std::ostream& out);
- void WritePolygons(std::ostream& out);
- void WritePoints(std::ostream& out);
- void WriteColors(std::ostream& out);
- void WriteItems( std::ostream& out);
- 
- vtkMNIOBJWriter();
- ~vtkMNIOBJWriter();
- vtkProperty* Property;
+    void WriteLines( std::ostream & out );
+    void WritePolygons( std::ostream & out );
+    void WritePoints( std::ostream & out );
+    void WriteColors( std::ostream & out );
+    void WriteItems( std::ostream & out );
 
- char* FileName; 
- bool isALine; //is not a Polygon
- int NbPoints;
- int NbItems;
+    vtkMNIOBJWriter();
+    ~vtkMNIOBJWriter();
+    vtkProperty * Property;
+
+    char * FileName;
+    bool isALine;  // is not a Polygon
+    int NbPoints;
+    int NbItems;
 
 private:
-
- vtkMNIOBJWriter(const vtkMNIOBJWriter&);  // Not implemented.
- void operator=(const vtkMNIOBJWriter&);  // Not implemented.
+    vtkMNIOBJWriter( const vtkMNIOBJWriter & );  // Not implemented.
+    void operator=( const vtkMNIOBJWriter & );   // Not implemented.
 };
 
 #endif
-

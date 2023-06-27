@@ -11,13 +11,15 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef __View_h_
 #define __View_h_
 
+#include <QVTKRenderWidget.h>
+#include <vtkSmartPointer.h>
+
+#include <QObject>
 #include <list>
 #include <map>
-#include "vtkObject.h"
-#include <QObject>
+
 #include "serializer.h"
-#include <vtkSmartPointer.h>
-#include <QVTKRenderWidget.h>
+#include "vtkObject.h"
 
 class ViewInteractor;
 class vtkInteractorStyle;
@@ -29,11 +31,12 @@ class vtkMatrix4x4;
 class vtkEventQtSlotConnect;
 class SceneManager;
 class SceneObject;
-template< class T > class vtkObjectCallback;
+template <class T>
+class vtkObjectCallback;
 
-#define CtrlModifier (unsigned(1))
-#define ShiftModifier (unsigned(2))
-#define AltModifier (unsigned(4))
+#define CtrlModifier ( unsigned( 1 ) )
+#define ShiftModifier ( unsigned( 2 ) )
+#define AltModifier ( unsigned( 4 ) )
 
 extern const char DefaultViewNames[4][20];
 
@@ -53,7 +56,6 @@ public:
     virtual void ReleaseControl( View * v ) = 0;
 };
 
-
 /**
  * @class   View
  * @brief   View shows objects in the scene
@@ -71,15 +73,12 @@ public:
  */
 class View : public QObject, public vtkObject
 {
-
-Q_OBJECT
+    Q_OBJECT
 
 public:
-
     static View * New() { return new View; }
 
-    vtkTypeMacro(View,vtkObject);
-
+    vtkTypeMacro( View, vtkObject );
 
     View();
     virtual ~View() override;
@@ -93,7 +92,7 @@ public:
     QString GetName() { return this->Name; }
 
     /** Get view type */
-    vtkGetMacro(Type,int);
+    vtkGetMacro( Type, int );
     /** Set view type */
     void SetType( int type );
 
@@ -126,7 +125,7 @@ public:
     ///@}
 
     /** Get Picker */
-    vtkGetObjectMacro(Picker,vtkCellPicker);
+    vtkGetObjectMacro( Picker, vtkCellPicker );
     /** Set Picker */
     void SetPicker( vtkCellPicker * picker );
 
@@ -136,7 +135,7 @@ public:
     void SetInteractorStyle( vtkInteractorStyle * style );
 
     /** Get SceneManager */
-    vtkGetObjectMacro(Manager,SceneManager);
+    vtkGetObjectMacro( Manager, SceneManager );
     /** Set SceneManager */
     void SetManager( SceneManager * manager );
 
@@ -191,7 +190,6 @@ private slots:
     void WindowStartsRendering();
 
 protected:
-
     void DoVTKRender();
     void SetupAllObjects();
     void ReleaseAllObjects();
@@ -216,9 +214,9 @@ protected:
     ViewController * CurrentController;  // this should be 0 if view is not controlled
 
     // Manage mouse and keyboard interaction with sceneobject
-    vtkSmartPointer< vtkObjectCallback<View> > InteractionCallback;
+    vtkSmartPointer<vtkObjectCallback<View> > InteractionCallback;
     double Priority;
-    typedef std::multimap<double,ViewInteractor*> InteractionObjectContainer;
+    typedef std::multimap<double, ViewInteractor *> InteractionObjectContainer;
     InteractionObjectContainer m_interactionObjects;
     bool m_leftButtonDown;
     bool m_middleButtonDown;

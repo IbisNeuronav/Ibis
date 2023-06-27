@@ -9,30 +9,33 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
 #include "usprobeobject.h"
-#include <vtkImageData.h>
+
 #include <vtkImageActor.h>
+#include <vtkImageConstantPad.h>
+#include <vtkImageData.h>
+#include <vtkImageMapToColors.h>
 #include <vtkImageMapper3D.h>
+#include <vtkImageProperty.h>
+#include <vtkImageStencil.h>
+#include <vtkImageToImageStencil.h>
+#include <vtkPassThrough.h>
 #include <vtkRenderer.h>
 #include <vtkTransform.h>
-#include <vtkImageProperty.h>
-#include <vtkImageMapToColors.h>
-#include <vtkImageToImageStencil.h>
-#include <vtkImageStencil.h>
-#include <vtkImageConstantPad.h>
-#include <vtkPassThrough.h>
+
 #include <QDir>
 #include <QWidget>
-#include "scenemanager.h"
+
 #include "application.h"
 #include "hardwaremodule.h"
 #include "imageobject.h"
+#include "lookuptablemanager.h"
+#include "scenemanager.h"
 #include "serializer.h"
 #include "serializerhelper.h"
-#include "view.h"
-#include "usprobeobjectsettingswidget.h"
 #include "usmask.h"
 #include "usmasksettingswidget.h"
-#include "lookuptablemanager.h"
+#include "usprobeobjectsettingswidget.h"
+#include "view.h"
 #include "vtkPiecewiseFunctionLookupTable.h"
 
 ObjectSerializationMacro( UsProbeObject );
@@ -44,21 +47,18 @@ ObjectSerializationMacro( UsProbeObject::CalibrationMatrixInfo );
 
 UsProbeObject::CalibrationMatrixInfo::CalibrationMatrixInfo()
 {
-    name = QString( "None" );
+    name   = QString( "None" );
     matrix = vtkMatrix4x4::New();
 }
 
 UsProbeObject::CalibrationMatrixInfo::CalibrationMatrixInfo( const CalibrationMatrixInfo & other )
 {
-    name = other.name;
+    name   = other.name;
     matrix = vtkMatrix4x4::New();
     matrix->DeepCopy( other.matrix );
 }
 
-UsProbeObject::CalibrationMatrixInfo::~CalibrationMatrixInfo()
-{
-    matrix->Delete();
-}
+UsProbeObject::CalibrationMatrixInfo::~CalibrationMatrixInfo() { matrix->Delete(); }
 
 bool UsProbeObject::CalibrationMatrixInfo::Serialize( Serializer * serializer )
 {
@@ -92,11 +92,11 @@ UsProbeObject::UsProbeObject()
     // Processed image that is rendered
     m_actorInput = vtkSmartPointer<vtkPassThrough>::New();
 
-    m_mask = USMask::New(); // mask in use
-    m_defaultMask = USMask::New(); // default mask saved in ibis config file
-    m_maskOn = false;
+    m_mask        = USMask::New();  // mask in use
+    m_defaultMask = USMask::New();  // default mask saved in ibis config file
+    m_maskOn      = false;
 
-    m_lutIndex = 1;         // default to hot metal
+    m_lutIndex    = 1;  // default to hot metal
     m_mapToColors = vtkSmartPointer<vtkImageMapToColors>::New();
     m_mapToColors->SetOutputFormatToRGBA();
     m_mapToColors->SetInputConnection( m_videoInput->GetOutputPort() );
@@ -108,8 +108,8 @@ UsProbeObject::UsProbeObject()
     m_imageStencilSource->UpdateWholeExtent();
 
     m_constantPad = vtkSmartPointer<vtkImageConstantPad>::New();
-    m_constantPad->SetConstant(255);
-    m_constantPad->SetOutputNumberOfScalarComponents(4);
+    m_constantPad->SetConstant( 255 );
+    m_constantPad->SetOutputNumberOfScalarComponents( 4 );
     m_constantPad->SetInputConnection( m_videoInput->GetOutputPort() );
 
     m_sliceStencil = vtkSmartPointer<vtkImageStencil>::New();
@@ -139,38 +139,35 @@ void UsProbeObject::SerializeTracked( Serializer * ser )
     ::Serialize( ser, "AllCalibrationMatrices", m_calibrationMatrices );
     if( ser->IsReader() )
     {
-        m_defaultMask->SetAsDefault(); // this sets default params
-        m_defaultMask->ResetToDefault(); // this will set mask params to deafult values and build the mask
+        m_defaultMask->SetAsDefault();    // this sets default params
+        m_defaultMask->ResetToDefault();  // this will set mask params to deafult values and build the mask
         *m_mask = *m_defaultMask;
         m_mask->SetAsDefault();
 
-        if( m_currentCalibrationMatrixIndex != -1 )
-            SetCurrentCalibrationMatrixIndex( m_currentCalibrationMatrixIndex );
+        if( m_currentCalibrationMatrixIndex != -1 ) SetCurrentCalibrationMatrixIndex( m_currentCalibrationMatrixIndex );
     }
 }
 
 void UsProbeObject::AddClient()
 {
-    if( IsDrivenByHardware() )
-        GetHardwareModule()->AddTrackedVideoClient( this );
+    if( IsDrivenByHardware() ) GetHardwareModule()->AddTrackedVideoClient( this );
 }
 
 void UsProbeObject::RemoveClient()
 {
-    if( IsDrivenByHardware() )
-        GetHardwareModule()->RemoveTrackedVideoClient( this );
+    if( IsDrivenByHardware() ) GetHardwareModule()->RemoveTrackedVideoClient( this );
 }
 
 void UsProbeObject::ObjectAddedToScene()
 {
     // Check for updates
-    connect( &Application::GetInstance(), SIGNAL(IbisClockTick()), this, SLOT(OnUpdate()) );
-    connect( m_mask, SIGNAL(MaskChanged()), this, SLOT(UpdateMask()) );
+    connect( &Application::GetInstance(), SIGNAL( IbisClockTick() ), this, SLOT( OnUpdate() ) );
+    connect( m_mask, SIGNAL( MaskChanged() ), this, SLOT( UpdateMask() ) );
 }
 
 void UsProbeObject::ObjectRemovedFromScene()
 {
-    disconnect( &Application::GetInstance(), SIGNAL(IbisClockTick()), this, SLOT(OnUpdate()) );
+    disconnect( &Application::GetInstance(), SIGNAL( IbisClockTick() ), this, SLOT( OnUpdate() ) );
 }
 
 void UsProbeObject::Setup( View * view )
@@ -185,12 +182,11 @@ void UsProbeObject::Setup( View * view )
         pv.imageActor->SetVisibility( this->IsHidden() ? 0 : 1 );
         pv.imageActor->GetMapper()->SetInputConnection( m_actorInput->GetOutputPort() );
 
-        if( !this->IsHidden() )
-            AddClient();
+        if( !this->IsHidden() ) AddClient();
 
         view->GetRenderer()->AddActor( pv.imageActor );
 
-        m_perViews[ view ] = pv;
+        m_perViews[view] = pv;
     }
 }
 
@@ -203,12 +199,11 @@ void UsProbeObject::Release( View * view )
         PerViewContainer::iterator it = m_perViews.find( view );
         if( it != m_perViews.end() )
         {
-            PerViewElements perView = (*it).second;
+            PerViewElements perView = ( *it ).second;
             view->GetRenderer()->RemoveViewProp( perView.imageActor );
             perView.imageActor->Delete();
             m_perViews.erase( it );
-            if( !this->IsHidden() )
-                RemoveClient();
+            if( !this->IsHidden() ) RemoveClient();
         }
     }
 }
@@ -218,8 +213,8 @@ void UsProbeObject::Hide()
     PerViewContainer::iterator it = m_perViews.begin();
     while( it != m_perViews.end() )
     {
-        PerViewElements perView = (*it).second;
-        View * view = (*it).first;
+        PerViewElements perView = ( *it ).second;
+        View * view             = ( *it ).first;
         perView.imageActor->VisibilityOff();
         RemoveClient();
         ++it;
@@ -232,8 +227,8 @@ void UsProbeObject::Show()
     PerViewContainer::iterator it = m_perViews.begin();
     while( it != m_perViews.end() )
     {
-        PerViewElements perView = (*it).second;
-        View * view = (*it).first;
+        PerViewElements perView = ( *it ).second;
+        View * view             = ( *it ).first;
         perView.imageActor->VisibilityOn();
         AddClient();
         ++it;
@@ -241,35 +236,17 @@ void UsProbeObject::Show()
     emit ObjectModified();
 }
 
-int UsProbeObject::GetVideoImageWidth()
-{
-    return GetVideoOutput()->GetDimensions()[0];
-}
+int UsProbeObject::GetVideoImageWidth() { return GetVideoOutput()->GetDimensions()[0]; }
 
-int UsProbeObject::GetVideoImageHeight()
-{
-    return GetVideoOutput()->GetDimensions()[1];
-}
+int UsProbeObject::GetVideoImageHeight() { return GetVideoOutput()->GetDimensions()[1]; }
 
-int UsProbeObject::GetVideoImageNumberOfComponents()
-{
-    return GetVideoOutput()->GetNumberOfScalarComponents();
-}
+int UsProbeObject::GetVideoImageNumberOfComponents() { return GetVideoOutput()->GetNumberOfScalarComponents(); }
 
-vtkImageData * UsProbeObject::GetVideoOutput()
-{
-    return vtkImageData::SafeDownCast( m_videoInput->GetOutput() );
-}
+vtkImageData * UsProbeObject::GetVideoOutput() { return vtkImageData::SafeDownCast( m_videoInput->GetOutput() ); }
 
-vtkAlgorithmOutput * UsProbeObject::GetVideoOutputPort()
-{
-    return m_videoInput->GetOutputPort();
-}
+vtkAlgorithmOutput * UsProbeObject::GetVideoOutputPort() { return m_videoInput->GetOutputPort(); }
 
-int UsProbeObject::GetNumberOfCalibrationMatrices()
-{
-    return m_calibrationMatrices.size();
-}
+int UsProbeObject::GetNumberOfCalibrationMatrices() { return m_calibrationMatrices.size(); }
 
 void UsProbeObject::SetCurrentCalibrationMatrixIndex( int index )
 {
@@ -281,36 +258,35 @@ void UsProbeObject::SetCurrentCalibrationMatrixIndex( int index )
 QString UsProbeObject::GetCalibrationMatrixName( int index )
 {
     Q_ASSERT( index >= 0 && index < m_calibrationMatrices.size() );
-    return m_calibrationMatrices[ index ].name;
+    return m_calibrationMatrices[index].name;
 }
 
 void UsProbeObject::SetCurrentCalibrationMatrixName( QString name )
 {
     Q_ASSERT( m_currentCalibrationMatrixIndex >= 0 && m_currentCalibrationMatrixIndex < m_calibrationMatrices.size() );
-    m_calibrationMatrices[ m_currentCalibrationMatrixIndex ].name = name;
+    m_calibrationMatrices[m_currentCalibrationMatrixIndex].name = name;
 }
 
 QString UsProbeObject::GetCurrentCalibrationMatrixName()
 {
-    if( m_currentCalibrationMatrixIndex >= 0 )
-        return m_calibrationMatrices[ m_currentCalibrationMatrixIndex ].name;
-    return QString("NONE");
+    if( m_currentCalibrationMatrixIndex >= 0 ) return m_calibrationMatrices[m_currentCalibrationMatrixIndex].name;
+    return QString( "NONE" );
 }
 
 void UsProbeObject::SetCurrentCalibrationMatrix( vtkMatrix4x4 * mat )
 {
     Q_ASSERT( m_currentCalibrationMatrixIndex >= 0 && m_currentCalibrationMatrixIndex < m_calibrationMatrices.size() );
-    m_calibrationMatrices[ m_currentCalibrationMatrixIndex ].matrix->DeepCopy( mat );
+    m_calibrationMatrices[m_currentCalibrationMatrixIndex].matrix->DeepCopy( mat );
     SetCalibrationMatrix( mat );
 }
 
 vtkMatrix4x4 * UsProbeObject::GetCurrentCalibrationMatrix()
 {
     Q_ASSERT( m_currentCalibrationMatrixIndex >= 0 && m_currentCalibrationMatrixIndex < m_calibrationMatrices.size() );
-    return m_calibrationMatrices[ m_currentCalibrationMatrixIndex ].matrix;
+    return m_calibrationMatrices[m_currentCalibrationMatrixIndex].matrix;
 }
 
-void UsProbeObject:: AddCalibrationMatrix( QString name )
+void UsProbeObject::AddCalibrationMatrix( QString name )
 {
     CalibrationMatrixInfo newEntry;
     int index = m_calibrationMatrices.size();
@@ -330,15 +306,15 @@ void UsProbeObject::SetUseMask( bool useMask )
     m_maskOn = useMask;
     UpdatePipeline();
 }
-    
-void UsProbeObject::CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets )
+
+void UsProbeObject::CreateSettingsWidgets( QWidget * parent, QVector<QWidget *> * widgets )
 {
     UsProbeObjectSettingsWidget * res = new UsProbeObjectSettingsWidget( parent );
     res->setAttribute( Qt::WA_DeleteOnClose, true );
     res->SetUsProbeObject( this );
     res->setObjectName( "Properties" );
     widgets->append( res );
-    USMaskSettingsWidget *res1 = new USMaskSettingsWidget( parent );
+    USMaskSettingsWidget * res1 = new USMaskSettingsWidget( parent );
     res1->setObjectName( "Mask" );
     res1->SetMask( m_mask );
     widgets->append( res1 );
@@ -356,10 +332,7 @@ void UsProbeObject::SetVideoInputData( vtkImageData * image )
     emit ObjectModified();
 }
 
-void UsProbeObject::UpdateVideoInput()
-{
-    m_videoInput->Update();
-}
+void UsProbeObject::UpdateVideoInput() { m_videoInput->Update(); }
 
 int UsProbeObject::GetNumberOfAvailableLUT()
 {
@@ -373,8 +346,8 @@ QString UsProbeObject::GetLUTName( int index )
 
 void UsProbeObject::SetCurrentLUTIndex( int index )
 {
-    m_lutIndex = index;
-    double range[2] = { 0.0, 255.0 };
+    m_lutIndex            = index;
+    double range[2]       = {0.0, 255.0};
     QString slicesLutName = Application::GetLookupTableManager()->GetTemplateLookupTableName( m_lutIndex );
     vtkSmartPointer<vtkPiecewiseFunctionLookupTable> lut = vtkSmartPointer<vtkPiecewiseFunctionLookupTable>::New();
     lut->SetIntensityFactor( 1.0 );
@@ -385,13 +358,14 @@ void UsProbeObject::SetCurrentLUTIndex( int index )
 
 void UsProbeObject::OnUpdate()
 {
-    //std::cout << "image size: ( " << GetVideoImageWidth() << ", " << GetVideoImageHeight() << " ) - num comp: " << GetVideoImageNumberOfComponents() << std::endl;
+    // std::cout << "image size: ( " << GetVideoImageWidth() << ", " << GetVideoImageHeight() << " ) - num comp: " <<
+    // GetVideoImageNumberOfComponents() << std::endl;
 
-    //vtkImageData * videoImage = GetVideoOutput();
-    //double * orig = videoImage->GetOrigin();
-    //std::cout << "origin: ( " << orig[0] << ", " << orig[1] << ", " << orig[2] << " )" << std::endl;
-    //double * spacing = videoImage->GetSpacing();
-    //std::cout << "spacing: ( " << spacing[0] << ", " << spacing[1] << ", " << spacing[2] << " )" << std::endl;
+    // vtkImageData * videoImage = GetVideoOutput();
+    // double * orig = videoImage->GetOrigin();
+    // std::cout << "origin: ( " << orig[0] << ", " << orig[1] << ", " << orig[2] << " )" << std::endl;
+    // double * spacing = videoImage->GetSpacing();
+    // std::cout << "spacing: ( " << spacing[0] << ", " << spacing[1] << ", " << spacing[2] << " )" << std::endl;
     emit ObjectModified();
 }
 
@@ -414,7 +388,7 @@ void UsProbeObject::UpdatePipeline()
         m_sliceStencil->SetInputConnection( m_mapToColors->GetOutputPort() );
         m_actorInput->SetInputConnection( m_sliceStencil->GetOutputPort() );
     }
-    else // !bMode && m_maskOn
+    else  // !bMode && m_maskOn
     {
         m_sliceStencil->SetInputConnection( m_constantPad->GetOutputPort() );
         m_actorInput->SetInputConnection( m_sliceStencil->GetOutputPort() );
@@ -424,20 +398,20 @@ void UsProbeObject::UpdatePipeline()
 void UsProbeObject::TakeSnapshot()
 {
     vtkSmartPointer<vtkTransform> transform = vtkTransform::New();
-    transform->SetMatrix(this->GetWorldTransform()->GetMatrix());
+    transform->SetMatrix( this->GetWorldTransform()->GetMatrix() );
     vtkSmartPointer<vtkImageData> image = vtkImageData::New();
-    image->DeepCopy(this->GetVideoOutput());
-    //if (this->GetUseMask())
+    image->DeepCopy( this->GetVideoOutput() );
+    // if (this->GetUseMask())
 
     QString name;
-    name.sprintf("US Screenshot %03d", m_screenShotIndex);
+    name.sprintf( "US Screenshot %03d", m_screenShotIndex );
 
     ImageObject * newObj = ImageObject::New();
-    newObj->SetName(name);
-    newObj->SetImage(image, transform);
+    newObj->SetName( name );
+    newObj->SetImage( image, transform );
     newObj->ObjectModified();
 
     m_screenShotIndex++;
 
-    Application::GetInstance().GetSceneManager()->AddObject(newObj);
+    Application::GetInstance().GetSceneManager()->AddObject( newObj );
 }

@@ -2,9 +2,7 @@
 
 const int Logger::m_maxNumberOfLogs = 3000;
 
-Logger::Logger(QObject *parent) : QObject(parent)
-{
-}
+Logger::Logger( QObject * parent ) : QObject( parent ) {}
 
 void Logger::AddLog( const QString & log )
 {
@@ -22,12 +20,6 @@ void Logger::ClearLog()
     emit LogCleared();
 }
 
-QString Logger::GetAll() const
-{
-    return m_log.join( "" );
-}
+QString Logger::GetAll() const { return m_log.join( "" ); }
 
-QString Logger::GetLast() const
-{
-    return m_log.back();
-}
+QString Logger::GetLast() const { return m_log.back(); }

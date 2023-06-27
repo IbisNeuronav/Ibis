@@ -12,6 +12,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #define __UpdateManager_h_
 
 #include <vtkObject.h>
+
 #include <QObject>
 
 class QTimer;
@@ -23,33 +24,30 @@ class QTime;
 // Warning: the update period we talk about here has nothing
 // to do with the rate at which the application acquires data
 // internally. The update is just for refreshing the info in the
-// gui. 
+// gui.
 class UpdateManager : public QObject, public vtkObject
 {
-  
-Q_OBJECT
-    
+    Q_OBJECT
+
 public:
-    
     static UpdateManager * New() { return new UpdateManager; }
-        
-    vtkTypeMacro(UpdateManager,vtkObject);
+
+    vtkTypeMacro( UpdateManager, vtkObject );
 
     UpdateManager();
     ~UpdateManager();
-    
+
     void SetUpdatePeriod( int msecPeriod );
-    
+
     void Start();
     bool IsRunning();
     void Stop();
-    
+
 public slots:
-    
+
     void TimerCallback();
-        
+
 private:
-    
     QTimer * m_timer;
     int m_timerPeriod;
     QTime * m_lastUpdateTime;

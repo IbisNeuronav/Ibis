@@ -9,89 +9,94 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
 #include "sceneobject.h"
-#include "view.h"
-#include "serializerhelper.h"
-#include "scenemanager.h"
-#include "transformeditwidget.h"
-#include <vtkTransform.h>
+
+#include <vtkAssembly.h>
+#include <vtkEventQtSlotConnect.h>
 #include <vtkLinearTransform.h>
 #include <vtkMatrix4x4.h>
-#include <vtkAssembly.h>
 #include <vtkRenderer.h>
-#include <vtkEventQtSlotConnect.h>
-#include <QVBoxLayout>
-#include <QTabWidget>
+#include <vtkTransform.h>
+
 #include <QList>
+#include <QTabWidget>
+#include <QVBoxLayout>
+
+#include "scenemanager.h"
+#include "serializerhelper.h"
+#include "transformeditwidget.h"
+#include "view.h"
 
 ObjectSerializationMacro( SceneObject );
 
 SceneObject::SceneObject()
-{ 
-    this->Parent = 0;
-    this->AllowChildren = true;
-    this->AllowChangeParent = true;
-    this->Manager = 0;
-    this->ObjectID = SceneManager::InvalidId;
-    this->ObjectHidden = false;
-    this->AllowHiding = true;
-    this->ObjectDeletable = true;
-    this->NameChangeable = true;
-    this->ObjectListable = true;
-    this->ObjectManagedBySystem = false;
-    this->ObjectManagedByTracker = false;
+{
+    this->Parent                   = 0;
+    this->AllowChildren            = true;
+    this->AllowChangeParent        = true;
+    this->Manager                  = 0;
+    this->ObjectID                 = SceneManager::InvalidId;
+    this->ObjectHidden             = false;
+    this->AllowHiding              = true;
+    this->ObjectDeletable          = true;
+    this->NameChangeable           = true;
+    this->ObjectListable           = true;
+    this->ObjectManagedBySystem    = false;
+    this->ObjectManagedByTracker   = false;
     this->AllowManualTransformEdit = true;
-    this->LocalTransform = vtkTransform::New();  // by default, we have a vtkTransform that can be manipulated manually. Could be changed in certain object types.
-    this->WorldTransform = vtkSmartPointer<vtkTransform>::New();
+    this->LocalTransform = vtkTransform::New();  // by default, we have a vtkTransform that can be manipulated manually.
+                                                 // Could be changed in certain object types.
+    this->WorldTransform       = vtkSmartPointer<vtkTransform>::New();
     this->IsModifyingTransform = false;
-    this->TransformModified = false;
-    this->RenderLayer = 0;
-    this->m_vtkConnections = vtkSmartPointer<vtkEventQtSlotConnect>::New();
-    this->m_vtkConnections->Connect( this->LocalTransform, vtkCommand::ModifiedEvent, this, SLOT(NotifyTransformChanged()), 0, 0.0, Qt::DirectConnection );
-    this->m_vtkConnections->Connect( this->WorldTransform, vtkCommand::ModifiedEvent, this, SLOT(NotifyTransformChanged()), 0, 0.0, Qt::DirectConnection );
+    this->TransformModified    = false;
+    this->RenderLayer          = 0;
+    this->m_vtkConnections     = vtkSmartPointer<vtkEventQtSlotConnect>::New();
+    this->m_vtkConnections->Connect( this->LocalTransform, vtkCommand::ModifiedEvent, this,
+                                     SLOT( NotifyTransformChanged() ), 0, 0.0, Qt::DirectConnection );
+    this->m_vtkConnections->Connect( this->WorldTransform, vtkCommand::ModifiedEvent, this,
+                                     SLOT( NotifyTransformChanged() ), 0, 0.0, Qt::DirectConnection );
 }
 
-SceneObject::~SceneObject() 
+SceneObject::~SceneObject()
 {
-    if (this->LocalTransform)
-        this->LocalTransform->UnRegister( this );
+    if( this->LocalTransform ) this->LocalTransform->UnRegister( this );
 }
 
 void SceneObject::Serialize( Serializer * ser )
 {
     vtkMatrix4x4 * local = this->LocalTransform->GetMatrix();
-    //initialize to default object params set when the object was created
-    bool allowChildren = this->AllowChildren;
-    bool allowChangeParent = this->AllowChangeParent;
-    bool objectManagedBySystem = this->ObjectManagedBySystem;
-    bool objectHidden = this->ObjectHidden;
-    bool allowHiding = this->AllowHiding;
-    bool objectDeletable = this->ObjectDeletable;
-    bool nameChangeable = this->NameChangeable;
-    bool objectListable = this->ObjectListable;
+    // initialize to default object params set when the object was created
+    bool allowChildren            = this->AllowChildren;
+    bool allowChangeParent        = this->AllowChangeParent;
+    bool objectManagedBySystem    = this->ObjectManagedBySystem;
+    bool objectHidden             = this->ObjectHidden;
+    bool allowHiding              = this->AllowHiding;
+    bool objectDeletable          = this->ObjectDeletable;
+    bool nameChangeable           = this->NameChangeable;
+    bool objectListable           = this->ObjectListable;
     bool allowManualTransformEdit = this->AllowManualTransformEdit;
     ::Serialize( ser, "ObjectName", this->Name );
-    ::Serialize( ser, "AllowChildren", allowChildren);
-    ::Serialize( ser, "AllowChangeParent", allowChangeParent);
-    ::Serialize( ser, "ObjectManagedBySystem", objectManagedBySystem);
-    ::Serialize( ser, "ObjectHidden", objectHidden);
-    ::Serialize( ser, "AllowHiding", allowHiding);
-    ::Serialize( ser, "ObjectDeletable", objectDeletable);
-    ::Serialize( ser, "NameChangeable", nameChangeable);
-    ::Serialize( ser, "ObjectListable", objectListable);
-    ::Serialize( ser, "AllowManualTransformEdit", allowManualTransformEdit);
+    ::Serialize( ser, "AllowChildren", allowChildren );
+    ::Serialize( ser, "AllowChangeParent", allowChangeParent );
+    ::Serialize( ser, "ObjectManagedBySystem", objectManagedBySystem );
+    ::Serialize( ser, "ObjectHidden", objectHidden );
+    ::Serialize( ser, "AllowHiding", allowHiding );
+    ::Serialize( ser, "ObjectDeletable", objectDeletable );
+    ::Serialize( ser, "NameChangeable", nameChangeable );
+    ::Serialize( ser, "ObjectListable", objectListable );
+    ::Serialize( ser, "AllowManualTransformEdit", allowManualTransformEdit );
     ::Serialize( ser, "LocalTransform", local );
 
-    if( ser->IsReader())
+    if( ser->IsReader() )
     {
-        this->SetCanAppendChildren(allowChildren);
-        this->SetCanChangeParent(allowChangeParent);
-        this->SetObjectManagedBySystem(objectManagedBySystem);
-        this->SetHidden(objectHidden);
-        this->SetHidable(allowHiding);
-        this->SetObjectDeletable(objectDeletable);
-        this->SetNameChangeable(nameChangeable);
-        this->SetListable(objectListable);
-        this->SetCanEditTransformManually(allowManualTransformEdit);
+        this->SetCanAppendChildren( allowChildren );
+        this->SetCanChangeParent( allowChangeParent );
+        this->SetObjectManagedBySystem( objectManagedBySystem );
+        this->SetHidden( objectHidden );
+        this->SetHidable( allowHiding );
+        this->SetObjectDeletable( objectDeletable );
+        this->SetNameChangeable( nameChangeable );
+        this->SetListable( objectListable );
+        this->SetCanEditTransformManually( allowManualTransformEdit );
         this->GetLocalTransform()->Update();
         this->UpdateWorldTransform();
     }
@@ -100,25 +105,22 @@ void SceneObject::Serialize( Serializer * ser )
 void SceneObject::PostSceneRead()
 {
     this->InternalPostSceneRead();
-    for( int i = 0; i < Children.size(); ++i )
-        Children[i]->PostSceneRead();
+    for( int i = 0; i < Children.size(); ++i ) Children[i]->PostSceneRead();
     emit FinishedReading();
 }
 
-void SceneObject::Export()
-{
-}
+void SceneObject::Export() {}
 
-void SceneObject::SetName( QString name ) 
-{ 
+void SceneObject::SetName( QString name )
+{
     this->Name = name;
     emit NameChanged();
 }
 
-void SceneObject::SetDataFileName( QString name ) 
-{ 
+void SceneObject::SetDataFileName( QString name )
+{
     this->DataFileName = name;
-    if (this->Name.isEmpty())
+    if( this->Name.isEmpty() )
     {
         this->Name = name;
         emit NameChanged();
@@ -127,8 +129,7 @@ void SceneObject::SetDataFileName( QString name )
 
 void SceneObject::SetLocalTransform( vtkTransform * localTransform )
 {
-    if( localTransform == this->LocalTransform )
-        return;
+    if( localTransform == this->LocalTransform ) return;
 
     if( this->LocalTransform )
     {
@@ -140,25 +141,20 @@ void SceneObject::SetLocalTransform( vtkTransform * localTransform )
     if( localTransform )
     {
         this->LocalTransform = localTransform;
-        this->LocalTransform->Register(this);
+        this->LocalTransform->Register( this );
     }
     else
         this->LocalTransform = vtkTransform::New();
 
-    this->m_vtkConnections->Connect( this->LocalTransform, vtkCommand::ModifiedEvent, this, SLOT(NotifyTransformChanged()), 0, 0.0, Qt::DirectConnection );
+    this->m_vtkConnections->Connect( this->LocalTransform, vtkCommand::ModifiedEvent, this,
+                                     SLOT( NotifyTransformChanged() ), 0, 0.0, Qt::DirectConnection );
 
     UpdateWorldTransform();
 }
 
-vtkTransform * SceneObject::GetLocalTransform( )
-{
-    return this->LocalTransform;
-}
+vtkTransform * SceneObject::GetLocalTransform() { return this->LocalTransform; }
 
-vtkTransform * SceneObject::GetWorldTransform( )
-{
-    return this->WorldTransform;
-}
+vtkTransform * SceneObject::GetWorldTransform() { return this->WorldTransform; }
 
 void SceneObject::NotifyTransformChanged()
 {
@@ -175,10 +171,9 @@ void SceneObject::NotifyTransformChanged()
 QString SceneObject::GetSceneDataDirectoryForThisObject( QString baseDir )
 {
     QString dataDirName = baseDir;
-    dataDirName += QString("/%1_%2_data").arg( GetObjectID() ).arg( this->GetClassName() );
+    dataDirName += QString( "/%1_%2_data" ).arg( GetObjectID() ).arg( this->GetClassName() );
     QDir dir;
-    if( !dir.exists( dataDirName ))
-        dir.mkpath( dataDirName );
+    if( !dir.exists( dataDirName ) ) dir.mkpath( dataDirName );
     return dataDirName;
 }
 
@@ -188,15 +183,11 @@ void SceneObject::WorldTransformChanged()
     this->InternalWorldTransformChanged();
 
     emit WorldTransformChangedSignal();
-    for( int i = 0; i < GetNumberOfChildren(); ++i )
-        this->Children[i]->WorldTransformChanged();
+    for( int i = 0; i < GetNumberOfChildren(); ++i ) this->Children[i]->WorldTransformChanged();
     emit ObjectModified();
 }
 
-void SceneObject::StartModifyingTransform()
-{
-    this->IsModifyingTransform = true;
-}
+void SceneObject::StartModifyingTransform() { this->IsModifyingTransform = true; }
 
 void SceneObject::FinishModifyingTransform()
 {
@@ -212,43 +203,41 @@ void SceneObject::FinishModifyingTransform()
 // object has been setup and watch for modifications (do we need that last part?).
 void SceneObject::Setup( View * view )
 {
-	ViewContainer::iterator it = std::find( Views.begin(), Views.end(), view );
-	if( it != Views.end() )
-        return;
+    ViewContainer::iterator it = std::find( Views.begin(), Views.end(), view );
+    if( it != Views.end() ) return;
 
-	view->Register( this );
-	Views.push_back( view );
+    view->Register( this );
+    Views.push_back( view );
 
-    connect( this, SIGNAL( ObjectModified() ), view, SLOT(NotifyNeedRender()) );
+    connect( this, SIGNAL( ObjectModified() ), view, SLOT( NotifyNeedRender() ) );
 }
 
 void SceneObject::Release( View * view )
 {
-	ViewContainer::iterator it = std::find( Views.begin(), Views.end(), view );
-	if( it == Views.end() )
-        return;
+    ViewContainer::iterator it = std::find( Views.begin(), Views.end(), view );
+    if( it == Views.end() ) return;
 
-	this->disconnect( view );
-	view->UnRegister( this );
-	this->Views.erase( it );
+    this->disconnect( view );
+    view->UnRegister( this );
+    this->Views.erase( it );
     view->NotifyNeedRender();
 }
 
 void SceneObject::ReleaseAllViews()
 {
-	while( Views.size() > 0 )
-	{
-		View * v = Views.back();
-		Release( v );
-	}
+    while( Views.size() > 0 )
+    {
+        View * v = Views.back();
+        Release( v );
+    }
 }
-    
-void SceneObject::PreDisplaySetup() 
+
+void SceneObject::PreDisplaySetup()
 {
     SceneObjectVec::iterator it = this->Children.begin();
     for( ; it != this->Children.end(); ++it )
     {
-        (*it)->PreDisplaySetup();
+        ( *it )->PreDisplaySetup();
     }
 }
 
@@ -259,7 +248,7 @@ void SceneObject::AddChild( SceneObject * child )
     {
         this->Children.push_back( child );
         child->Parent = this;
-		child->UpdateWorldTransform();
+        child->UpdateWorldTransform();
     }
 }
 
@@ -276,38 +265,33 @@ void SceneObject::InsertChild( SceneObject * child, int index )
 
 void SceneObject::RemoveChild( SceneObject * child )
 {
-	SceneObjectVec::iterator it = std::find( this->Children.begin(), this->Children.end(), child );
-	if( it != this->Children.end() )
-	{
-		child->Parent = 0;
-		this->Children.erase( it );
-		child->UpdateWorldTransform();
-	}
+    SceneObjectVec::iterator it = std::find( this->Children.begin(), this->Children.end(), child );
+    if( it != this->Children.end() )
+    {
+        child->Parent = 0;
+        this->Children.erase( it );
+        child->UpdateWorldTransform();
+    }
 }
 
 void SceneObject::UpdateWorldTransform()
 {
-	// reset the list of concatenated transforms
-	this->WorldTransform->Identity();
+    // reset the list of concatenated transforms
+    this->WorldTransform->Identity();
 
-	if( Parent )
-        this->WorldTransform->Concatenate( Parent->GetWorldTransform() );
-    if( LocalTransform )
-        this->WorldTransform->Concatenate( LocalTransform );
+    if( Parent ) this->WorldTransform->Concatenate( Parent->GetWorldTransform() );
+    if( LocalTransform ) this->WorldTransform->Concatenate( LocalTransform );
 
     WorldTransformChanged();
 }
 
-int SceneObject::GetNumberOfChildren()
-{
-    return this->Children.size();
-}
+int SceneObject::GetNumberOfChildren() { return this->Children.size(); }
 
 SceneObject * SceneObject::GetChild( int index )
 {
     if( index < (int)this->Children.size() )
     {
-        return this->Children[ index ];
+        return this->Children[index];
     }
     return 0;
 }
@@ -317,19 +301,15 @@ SceneObject * SceneObject::GetChild( const QString & objectName )
     SceneObjectVec::iterator it = this->Children.begin();
     for( ; it != this->Children.end(); ++it )
     {
-        if( (*it)->GetName().compare(objectName) == 0 )
+        if( ( *it )->GetName().compare( objectName ) == 0 )
         {
-            return (*it);
+            return ( *it );
         }
     }
     return 0;
 }
 
-int SceneObject::GetChildIndex( SceneObject * child )
-{
-    return this->Children.indexOf( child );
-}
-
+int SceneObject::GetChildIndex( SceneObject * child ) { return this->Children.indexOf( child ); }
 
 int SceneObject::GetChildListableIndex( SceneObject * child )
 {
@@ -338,8 +318,7 @@ int SceneObject::GetChildListableIndex( SceneObject * child )
     {
         if( GetChild( i )->IsListable() )
         {
-            if( GetChild( i ) == child )
-                return count;
+            if( GetChild( i ) == child ) return count;
             ++count;
         }
     }
@@ -348,36 +327,32 @@ int SceneObject::GetChildListableIndex( SceneObject * child )
 
 int SceneObject::GetObjectIndex()
 {
-    if( this->GetParent() )
-        return this->GetParent()->GetChildIndex( this );
+    if( this->GetParent() ) return this->GetParent()->GetChildIndex( this );
     return 0;  // scene root is unique
 }
 
 int SceneObject::GetObjectListableIndex()
 {
-    if( this->GetParent() )
-        return this->GetParent()->GetChildListableIndex( this );
-    return 0; // scene root is unique
+    if( this->GetParent() ) return this->GetParent()->GetChildListableIndex( this );
+    return 0;  // scene root is unique
 }
 
 void SceneObject::SetListable( bool l )
 {
-    if( !this->IsObjectInScene( ) )
+    if( !this->IsObjectInScene() )
         this->ObjectListable = l;
     else
-        vtkErrorMacro(<< "Can't set listability for an object already in scene." );
+        vtkErrorMacro( << "Can't set listability for an object already in scene." );
 }
 
 bool SceneObject::DescendsFrom( SceneObject * obj )
 {
-    if( obj == this )
-        return true;
+    if( obj == this ) return true;
 
     SceneObject * parent = GetParent();
     while( parent )
     {
-        if( obj == parent )
-            return true;
+        if( obj == parent ) return true;
         parent = parent->GetParent();
     }
     return false;
@@ -396,8 +371,7 @@ int SceneObject::GetNumberOfListableChildren()
     int count = 0;
     for( int i = 0; i < GetNumberOfChildren(); ++i )
     {
-        if( GetChild(i)->IsListable() )
-            ++count;
+        if( GetChild( i )->IsListable() ) ++count;
     }
     return count;
 }
@@ -407,10 +381,9 @@ SceneObject * SceneObject::GetListableChild( int index )
     int count = 0;
     for( int i = 0; i < GetNumberOfChildren(); ++i )
     {
-        if( GetChild(i)->IsListable() )
+        if( GetChild( i )->IsListable() )
         {
-            if( index == count )
-                return GetChild(i);
+            if( index == count ) return GetChild( i );
             ++count;
         }
     }
@@ -419,7 +392,7 @@ SceneObject * SceneObject::GetListableChild( int index )
 
 void SceneObject::AddToScene( SceneManager * man, int objectId )
 {
-    this->Manager = man;
+    this->Manager  = man;
     this->ObjectID = objectId;
     this->ObjectAddedToScene();
 }
@@ -431,10 +404,7 @@ void SceneObject::RemoveFromScene()
     emit RemovingFromScene();
 }
 
-void SceneObject::MarkModified()
-{
-    emit ObjectModified();
-}
+void SceneObject::MarkModified() { emit ObjectModified(); }
 
 void SceneObject::SetHiddenWithChildren( bool hide )
 {
@@ -448,17 +418,15 @@ void SceneObject::SetHiddenWithChildren( bool hide )
         Hide();
     }
     this->SetHiddenChildren( this, this->ObjectHidden );
-    if( this->Manager )
-        this->Manager->SetCurrentObject(0);
+    if( this->Manager ) this->Manager->SetCurrentObject( 0 );
 }
 
 void SceneObject::SetHiddenChildren( SceneObject * parent, bool hide )
 {
     for( int i = 0; i < parent->GetNumberOfChildren(); ++i )
     {
-        SceneObject * child = parent->GetChild(i);
-        if ( child->IsHidable() )
-            child->SetHidden( hide );
+        SceneObject * child = parent->GetChild( i );
+        if( child->IsHidable() ) child->SetHidden( hide );
         this->SetHiddenChildren( child, hide );
     }
 }
@@ -477,22 +445,21 @@ void SceneObject::SetHidden( bool h )
 }
 
 QWidget * SceneObject::CreateSettingsDialog( QWidget * parent )
-{ 
-    QVector <QWidget*> widgets;
+{
+    QVector<QWidget *> widgets;
     this->CreateSettingsWidgets( parent, &widgets );
-    if (!widgets.isEmpty())
+    if( !widgets.isEmpty() )
     {
-        if (widgets.count() > 1 || (widgets.count() == 1 && !this->IsManagedByTracker()))
+        if( widgets.count() > 1 || ( widgets.count() == 1 && !this->IsManagedByTracker() ) )
         {
-            QTabWidget *topWidget = new QTabWidget(parent);
-            for (int i = 0; i < widgets.count(); i++ )
-                topWidget->insertTab(i, widgets[i], widgets[i]->objectName());
-            if (!this->IsManagedByTracker())
-                topWidget->insertTab(widgets.count(), this->CreateTransformEditWidget(parent),"Transform");
+            QTabWidget * topWidget = new QTabWidget( parent );
+            for( int i = 0; i < widgets.count(); i++ ) topWidget->insertTab( i, widgets[i], widgets[i]->objectName() );
+            if( !this->IsManagedByTracker() )
+                topWidget->insertTab( widgets.count(), this->CreateTransformEditWidget( parent ), "Transform" );
             return topWidget;
         }
         else
-            return widgets.at(0);
+            return widgets.at( 0 );
     }
     return CreateTransformEditWidget( parent );
 }
@@ -501,7 +468,7 @@ QWidget * SceneObject::CreateTransformEditWidget( QWidget * parent )
 {
     TransformEditWidget * transformEditWidget = new TransformEditWidget( parent );
     transformEditWidget->SetSceneObject( this );
-    connect( this, SIGNAL(WorldTransformChangedSignal()), transformEditWidget, SLOT(UpdateUi()));
+    connect( this, SIGNAL( WorldTransformChangedSignal() ), transformEditWidget, SLOT( UpdateUi() ) );
     return transformEditWidget;
 }
 

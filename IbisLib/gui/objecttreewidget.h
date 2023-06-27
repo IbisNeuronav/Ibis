@@ -11,12 +11,13 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef __ObjectTreeWidget_h_
 #define __ObjectTreeWidget_h_
 
-#include <QWidget>
 #include <QItemSelection>
 #include <QObject>
+#include <QWidget>
 
-namespace Ui {
-    class ObjectTreeWidget;
+namespace Ui
+{
+class ObjectTreeWidget;
 }
 
 class SceneManager;
@@ -28,38 +29,36 @@ class ObjectTreeWidget : public QWidget
     Q_OBJECT
 
 public:
-
     ObjectTreeWidget( QWidget * parent = 0 );
-    virtual  ~ObjectTreeWidget();
-    
+    virtual ~ObjectTreeWidget();
+
     void SetSceneManager( SceneManager * man );
 
 signals:
 
-	void ObjectSettingsWidgetChanged( QWidget * );
+    void ObjectSettingsWidgetChanged( QWidget * );
 
 private slots:
 
-    virtual void DeleteSelectedObject( );
+    virtual void DeleteSelectedObject();
     virtual void AddTransformButtonClicked();
     virtual void AddTransformAllChildrenButtonClicked();
     virtual void AddParentTransformButtonClicked();
-    virtual void MarkAsReferenceObject( );
-    virtual void ShowMincInfo( );
-    virtual void ExportObject( );
-    virtual void HideWithChildren( );
+    virtual void MarkAsReferenceObject();
+    virtual void ShowMincInfo();
+    virtual void ExportObject();
+    virtual void HideWithChildren();
 
     void SelectionChanged( QItemSelection sel, QItemSelection desel );
     void DataChanged( QModelIndex index1, QModelIndex index2 );
     void CurrentObjectChanged();
     void AddingObject( SceneObject * parent, int index );
-    void SettingsWidgetTabChanged(int);
-    
-protected:
+    void SettingsWidgetTabChanged( int );
 
+protected:
     void UpdateObjectSettingsWidget();
     void contextMenuEvent( QContextMenuEvent * event );
-    
+
     QWidget * m_currentObjectSettingsWidget;
     SceneManager * m_sceneManager;
     ObjectTreeModel * m_treeModel;
@@ -67,7 +66,6 @@ protected:
     QString lastOpenTabLabel;
 
 private:
-
     Ui::ObjectTreeWidget * ui;
 };
 

@@ -8,37 +8,38 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
-#include <sstream>
-#include <math.h>
-#include <vtkOutlineFilter.h>
-#include <vtkPolyDataMapper.h>
-#include <vtkRenderer.h>
-#include <vtkActor.h>
-#include <vtkTransform.h>
+#include "imageobject.h"
 
+#include <math.h>
+#include <vtkActor.h>
+#include <vtkBoxRepresentation.h>
+#include <vtkBoxWidget2.h>
+#include <vtkColorTransferFunction.h>
+#include <vtkEventQtSlotConnect.h>
 #include <vtkGPUVolumeRayCastMapper.h>
-#include <vtkVolume.h>
+#include <vtkImageAccumulate.h>
+#include <vtkImageData.h>
+#include <vtkImageImport.h>
+#include <vtkImageShiftScale.h>
+#include <vtkOutlineFilter.h>
 #include <vtkPiecewiseFunction.h>
 #include <vtkPiecewiseFunctionLookupTable.h>
-#include <vtkColorTransferFunction.h>
-#include <vtkImageImport.h>
-#include <vtkEventQtSlotConnect.h>
-#include <vtkImageShiftScale.h>
-#include <vtkBoxWidget2.h>
+#include <vtkPolyDataMapper.h>
+#include <vtkRenderer.h>
 #include <vtkScalarsToColors.h>
-#include <vtkImageAccumulate.h>
+#include <vtkTransform.h>
+#include <vtkVolume.h>
 #include <vtkVolumeProperty.h>
-#include <vtkImageData.h>
-#include <vtkBoxRepresentation.h>
 
-#include "view.h"
+#include <QMessageBox>
+#include <sstream>
+
 #include "application.h"
 #include "imageobjectsettingsdialog.h"
 #include "imageobjectvolumesettingswidget.h"
-#include "scenemanager.h"
 #include "lookuptablemanager.h"
-#include "imageobject.h"
-#include <QMessageBox>
+#include "scenemanager.h"
+#include "view.h"
 
 ObjectSerializationMacro( ImageObject );
 
@@ -49,28 +50,26 @@ const int ImageObject::NumberOfBinsInHistogram = 256;
 ImageObject::PerViewElements::PerViewElements()
 {
     this->outlineActor = 0;
-    this->volume = 0;
-}   
+    this->volume       = 0;
+}
 
-ImageObject::PerViewElements::~PerViewElements()
-{
-}   
+ImageObject::PerViewElements::~PerViewElements() {}
 
 ImageObject::ImageObject()
 {
-    this->Image = nullptr;
-    this->ItkImage = nullptr;
-    this->ItkLabelImage = nullptr;
-    this->OutlineFilter = vtkSmartPointer<vtkOutlineFilter>::New();
-    this->viewOutline = 0;
+    this->Image             = nullptr;
+    this->ItkImage          = nullptr;
+    this->ItkLabelImage     = nullptr;
+    this->OutlineFilter     = vtkSmartPointer<vtkOutlineFilter>::New();
+    this->viewOutline       = 0;
     this->outlineWasVisible = 0;
-	this->lutIndex = -1;
-    this->lutRange[0] = 0.0;
-    this->lutRange[1] = 0.0;
-    this->intensityFactor = 1.0;
+    this->lutIndex          = -1;
+    this->lutRange[0]       = 0.0;
+    this->lutRange[1]       = 0.0;
+    this->intensityFactor   = 1.0;
     this->HistogramComputer = vtkSmartPointer<vtkImageAccumulate>::New();
 
-    m_showVolumeClippingBox = false;
+    m_showVolumeClippingBox    = false;
     m_volumeRenderingBounds[0] = 0.0;
     m_volumeRenderingBounds[1] = 1.0;
     m_volumeRenderingBounds[2] = 0.0;
@@ -80,7 +79,7 @@ ImageObject::ImageObject()
 
     // setup default volume properties for vtk volume rendering
     m_vtkVolumeRenderingEnabled = false;
-    m_volumeProperty = vtkSmartPointer<vtkVolumeProperty>::New();
+    m_volumeProperty            = vtkSmartPointer<vtkVolumeProperty>::New();
     m_volumeProperty->SetInterpolationTypeToLinear();
     vtkPiecewiseFunction * scalarOpacity = vtkPiecewiseFunction::New();
     scalarOpacity->AddPoint( 0.0, 0.0 );
@@ -100,32 +99,32 @@ ImageObject::ImageObject()
 
     // Watch volume properties to be able to render when properties change
     m_volumePropertyWatcher = vtkSmartPointer<vtkEventQtSlotConnect>::New();
-    m_volumePropertyWatcher->Connect( m_volumeProperty, vtkCommand::ModifiedEvent, this, SLOT(MarkModified()) );
-    m_volumePropertyWatcher->Connect( m_volumeProperty->GetScalarOpacity(), vtkCommand::ModifiedEvent, this, SLOT(MarkModified()) );
-    m_volumePropertyWatcher->Connect( m_volumeProperty->GetGradientOpacity(), vtkCommand::ModifiedEvent, this, SLOT(MarkModified()) );
-    m_volumePropertyWatcher->Connect( m_volumeProperty->GetRGBTransferFunction(), vtkCommand::ModifiedEvent, this, SLOT(MarkModified()) );
+    m_volumePropertyWatcher->Connect( m_volumeProperty, vtkCommand::ModifiedEvent, this, SLOT( MarkModified() ) );
+    m_volumePropertyWatcher->Connect( m_volumeProperty->GetScalarOpacity(), vtkCommand::ModifiedEvent, this,
+                                      SLOT( MarkModified() ) );
+    m_volumePropertyWatcher->Connect( m_volumeProperty->GetGradientOpacity(), vtkCommand::ModifiedEvent, this,
+                                      SLOT( MarkModified() ) );
+    m_volumePropertyWatcher->Connect( m_volumeProperty->GetRGBTransferFunction(), vtkCommand::ModifiedEvent, this,
+                                      SLOT( MarkModified() ) );
 
     // Watch clipping widgets for volume rendering
-    m_volumeClippingBoxWatcher = vtkSmartPointer<vtkEventQtSlotConnect> ::New();
+    m_volumeClippingBoxWatcher = vtkSmartPointer<vtkEventQtSlotConnect>::New();
 
-    m_colorWindow = 1.0;
-    m_colorLevel = 0.5;
+    m_colorWindow        = 1.0;
+    m_colorLevel         = 0.5;
     m_autoSampleDistance = true;
-    m_sampleDistance = 1.0;
+    m_sampleDistance     = 1.0;
 
     this->ItktovtkConverter = IbisItkVtkConverter::New();
 }
 
-ImageObject::~ImageObject()
-{
-    this->ItktovtkConverter->Delete();
-}
+ImageObject::~ImageObject() { this->ItktovtkConverter->Delete(); }
 
 #include "serializerhelper.h"
 
 void ImageObject::Serialize( Serializer * ser )
 {
-    SceneObject::Serialize(ser);
+    SceneObject::Serialize( ser );
     bool labelImage = false;
     if( !ser->IsReader() )
     {
@@ -138,20 +137,20 @@ void ImageObject::Serialize( Serializer * ser )
     ::Serialize( ser, "IntensityFactor", this->intensityFactor );
 
     // Vtk volume rendering
-    bool enableShading = false;
-    double ambiant = .3;
-    double diffuse = .7;
-    double specular = .2;
-    double specularPower = 10.0;
+    bool enableShading         = false;
+    double ambiant             = .3;
+    double diffuse             = .7;
+    double specular            = .2;
+    double specularPower       = 10.0;
     bool enableGradientOpacity = true;
 
     if( !ser->IsReader() )
     {
-        enableShading = m_volumeProperty->GetShade() == 1 ? true : false;
-        ambiant = m_volumeProperty->GetAmbient();
-        diffuse = m_volumeProperty->GetDiffuse();
-        specular = m_volumeProperty->GetSpecular();
-        specularPower = m_volumeProperty->GetSpecularPower();
+        enableShading         = m_volumeProperty->GetShade() == 1 ? true : false;
+        ambiant               = m_volumeProperty->GetAmbient();
+        diffuse               = m_volumeProperty->GetDiffuse();
+        specular              = m_volumeProperty->GetSpecular();
+        specularPower         = m_volumeProperty->GetSpecularPower();
         enableGradientOpacity = m_volumeProperty->GetDisableGradientOpacity() == 1 ? false : true;
     }
     ::Serialize( ser, "VolumeRenderingEnabled", m_vtkVolumeRenderingEnabled );
@@ -183,51 +182,45 @@ void ImageObject::Serialize( Serializer * ser )
 
 void ImageObject::Export()
 {
-    QString objectName(this->Name);
-    objectName.append(".mnc");
-    this->SetDataFileName(objectName);
-    QString fullName(this->GetManager()->GetSceneDirectory());
-    fullName.append("/");
-    fullName.append(objectName);
-    QString saveName = Application::GetInstance().GetFileNameSave( tr("Save Object"), fullName, tr("*.mnc") );
-    if(saveName.isEmpty())
-        return;
-    if (QFile::exists(saveName))
+    QString objectName( this->Name );
+    objectName.append( ".mnc" );
+    this->SetDataFileName( objectName );
+    QString fullName( this->GetManager()->GetSceneDirectory() );
+    fullName.append( "/" );
+    fullName.append( objectName );
+    QString saveName = Application::GetInstance().GetFileNameSave( tr( "Save Object" ), fullName, tr( "*.mnc" ) );
+    if( saveName.isEmpty() ) return;
+    if( QFile::exists( saveName ) )
     {
-        int ret = QMessageBox::warning(0, tr("Save ImageObject: "), saveName,
-                                       QMessageBox::Yes | QMessageBox::Default,
-                                       QMessageBox::No | QMessageBox::Escape);
-        if (ret == QMessageBox::No)
-            return;
+        int ret =
+            QMessageBox::warning( 0, tr( "Save ImageObject: " ), saveName, QMessageBox::Yes | QMessageBox::Default,
+                                  QMessageBox::No | QMessageBox::Escape );
+        if( ret == QMessageBox::No ) return;
     }
 
-    this->SaveImageData(saveName);
+    this->SaveImageData( saveName );
 }
 
-void ImageObject::ObjectAddedToScene()
-{
-    this->SetupInCutPlanes();
-}
+void ImageObject::ObjectAddedToScene() { this->SetupInCutPlanes(); }
 
 bool ImageObject::IsLabelImage()
 {
-    if( this->ItkLabelImage )
-        return true;
+    if( this->ItkLabelImage ) return true;
     return false;
 }
 
 #include "itkMinimumMaximumImageCalculator.h"
 bool ImageObject::SanityCheck( IbisItkFloat3ImageType::Pointer image )
 {
-    using ImageType = IbisItkFloat3ImageType;
-    using ImageCalculatorFilterType = itk::MinimumMaximumImageCalculator <IbisItkFloat3ImageType>;
-    ImageCalculatorFilterType::Pointer imageCalculatorFilter
-          = ImageCalculatorFilterType::New ();
-    imageCalculatorFilter->SetImage(image);
+    using ImageType                 = IbisItkFloat3ImageType;
+    using ImageCalculatorFilterType = itk::MinimumMaximumImageCalculator<IbisItkFloat3ImageType>;
+    ImageCalculatorFilterType::Pointer imageCalculatorFilter = ImageCalculatorFilterType::New();
+    imageCalculatorFilter->SetImage( image );
     imageCalculatorFilter->Compute();
     ImageType::PixelType minPix = imageCalculatorFilter->GetMinimum();
     ImageType::PixelType maxPix = imageCalculatorFilter->GetMaximum();
-    if( std::isnan((float)minPix) || std::isnan((float)maxPix) || std::isinf((float)minPix) || std::isinf((float)maxPix) )
+    if( std::isnan( (float)minPix ) || std::isnan( (float)maxPix ) || std::isinf( (float)minPix ) ||
+        std::isinf( (float)maxPix ) )
     {
         return false;
     }
@@ -236,15 +229,15 @@ bool ImageObject::SanityCheck( IbisItkFloat3ImageType::Pointer image )
 
 bool ImageObject::SanityCheck( IbisItkUnsignedChar3ImageType::Pointer image )
 {
-    using ImageType = IbisItkUnsignedChar3ImageType;
-    using ImageCalculatorFilterType = itk::MinimumMaximumImageCalculator <IbisItkUnsignedChar3ImageType>;
-    ImageCalculatorFilterType::Pointer imageCalculatorFilter
-          = ImageCalculatorFilterType::New ();
-    imageCalculatorFilter->SetImage(image);
+    using ImageType                 = IbisItkUnsignedChar3ImageType;
+    using ImageCalculatorFilterType = itk::MinimumMaximumImageCalculator<IbisItkUnsignedChar3ImageType>;
+    ImageCalculatorFilterType::Pointer imageCalculatorFilter = ImageCalculatorFilterType::New();
+    imageCalculatorFilter->SetImage( image );
     imageCalculatorFilter->Compute();
     ImageType::PixelType minPix = imageCalculatorFilter->GetMinimum();
     ImageType::PixelType maxPix = imageCalculatorFilter->GetMaximum();
-    if( std::isnan((float)minPix) || std::isnan((float)maxPix) || std::isinf((float)minPix) || std::isinf((float)maxPix) )
+    if( std::isnan( (float)minPix ) || std::isnan( (float)maxPix ) || std::isinf( (float)minPix ) ||
+        std::isinf( (float)maxPix ) )
     {
         return false;
     }
@@ -253,8 +246,7 @@ bool ImageObject::SanityCheck( IbisItkUnsignedChar3ImageType::Pointer image )
 
 bool ImageObject::SetItkImage( IbisItkFloat3ImageType::Pointer image )
 {
-    if( !SanityCheck( image ) )
-        return false;
+    if( !SanityCheck( image ) ) return false;
     this->ItkImage = image;
     if( this->ItkImage )
     {
@@ -268,8 +260,7 @@ bool ImageObject::SetItkImage( IbisItkFloat3ImageType::Pointer image )
 
 bool ImageObject::SetItkLabelImage( IbisItkUnsignedChar3ImageType::Pointer image )
 {
-    if( !SanityCheck( image ) )
-        return false;
+    if( !SanityCheck( image ) ) return false;
     this->ItkLabelImage = image;
     if( this->ItkLabelImage )
     {
@@ -281,36 +272,35 @@ bool ImageObject::SetItkLabelImage( IbisItkUnsignedChar3ImageType::Pointer image
     return true;
 }
 
-void ImageObject::SetImage(vtkImageData * image, vtkTransform * transform)
+void ImageObject::SetImage( vtkImageData * image, vtkTransform * transform )
 {
-    if ((this->Image == image) || (!image))
+    if( ( this->Image == image ) || ( !image ) )
     {
         return;
     }
 
     // Convert vtkImageData to ItkImage and SetItkImage to ensure consistency
-    vtkMatrix4x4 *mat = vtkMatrix4x4::New();
-    if (transform)
-        transform->GetMatrix(mat);
+    vtkMatrix4x4 * mat = vtkMatrix4x4::New();
+    if( transform ) transform->GetMatrix( mat );
     IbisItkFloat3ImageType::Pointer itkImage = IbisItkFloat3ImageType::New();
-    this->ItktovtkConverter->ConvertVtkImageToItkImage(itkImage, image, mat);
-    this->SetItkImage(itkImage);
+    this->ItktovtkConverter->ConvertVtkImageToItkImage( itkImage, image, mat );
+    this->SetItkImage( itkImage );
     mat->Delete();
 }
 
-void ImageObject::SetInternalImage(vtkImageData * image)
+void ImageObject::SetInternalImage( vtkImageData * image )
 {
     this->Image = image;
-    if (this->Image)
+    if( this->Image )
     {
-        this->Image->GetBounds(m_volumeRenderingBounds);
+        this->Image->GetBounds( m_volumeRenderingBounds );
     }
 
     double range[2];
-    this->Image->GetScalarRange(range);
-    this->HistogramComputer->SetInputData(this->Image);
+    this->Image->GetScalarRange( range );
+    this->HistogramComputer->SetInputData( this->Image );
     SetupHistogramComputer();
-    this->OutlineFilter->SetInputData(this->Image);
+    this->OutlineFilter->SetInputData( this->Image );
 }
 
 //================================================================================
@@ -323,10 +313,10 @@ void ImageObject::SetInternalImage(vtkImageData * image)
 //================================================================================
 void ImageObject::SetupHistogramComputer()
 {
-    if( !this->Image )
-        return;
+    if( !this->Image ) return;
 
-    Q_ASSERT_X( this->NumberOfBinsInHistogram > 0, "ImageObject::SetupHistogramComputer()", "Number of bins has to be > 0." );
+    Q_ASSERT_X( this->NumberOfBinsInHistogram > 0, "ImageObject::SetupHistogramComputer()",
+                "Number of bins has to be > 0." );
 
     double range[2];
     this->Image->GetScalarRange( range );
@@ -338,18 +328,15 @@ void ImageObject::SetupHistogramComputer()
     this->HistogramComputer->Update();
 }
 
-
 void ImageObject::SetupInCutPlanes()
 {
     Q_ASSERT( GetManager() );
     if( this->Image && this->Image->GetNumberOfScalarComponents() == 1 )
     {
-        if( this->lutIndex < 0 )
-            this->lutIndex = 0;
-        if( this->lutRange[0] == 0.0 && this->lutRange[1] == 0.0 )
-            this->Image->GetScalarRange( this->lutRange );
+        if( this->lutIndex < 0 ) this->lutIndex = 0;
+        if( this->lutRange[0] == 0.0 && this->lutRange[1] == 0.0 ) this->Image->GetScalarRange( this->lutRange );
         this->ChooseColorTable( this->lutIndex );
-	}
+    }
 }
 
 void ImageObject::Setup( View * view )
@@ -359,20 +346,20 @@ void ImageObject::Setup( View * view )
     switch( view->GetType() )
     {
         case SAGITTAL_VIEW_TYPE:
-			this->Setup2DRepresentation( 0, view );
+            this->Setup2DRepresentation( 0, view );
             break;
         case CORONAL_VIEW_TYPE:
-			this->Setup2DRepresentation( 1, view );
+            this->Setup2DRepresentation( 1, view );
             break;
         case TRANSVERSE_VIEW_TYPE:
-			this->Setup2DRepresentation( 2, view );
+            this->Setup2DRepresentation( 2, view );
             break;
         case THREED_VIEW_TYPE:
-			this->Setup3DRepresentation( view );
+            this->Setup3DRepresentation( view );
             break;
     }
 
-    this->SetViewOutline(this->viewOutline);
+    this->SetViewOutline( this->viewOutline );
 }
 
 void ImageObject::Release( View * view )
@@ -398,35 +385,34 @@ void ImageObject::Release( View * view )
     }
 }
 
-void ImageObject::CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets )
+void ImageObject::CreateSettingsWidgets( QWidget * parent, QVector<QWidget *> * widgets )
 {
     ImageObjectSettingsDialog * res = new ImageObjectSettingsDialog( parent );
-    res->setAttribute(Qt::WA_DeleteOnClose);
+    res->setAttribute( Qt::WA_DeleteOnClose );
     res->SetImageObject( this );
-    res->setObjectName("Properties");
-    widgets->append(res);
+    res->setObjectName( "Properties" );
+    widgets->append( res );
 
     ImageObjectVolumeSettingsWidget * volWidget = new ImageObjectVolumeSettingsWidget( parent );
-    volWidget->setAttribute(Qt::WA_DeleteOnClose);
+    volWidget->setAttribute( Qt::WA_DeleteOnClose );
     volWidget->SetImageObject( this );
-    volWidget->setObjectName("Volume");
+    volWidget->setObjectName( "Volume" );
     widgets->append( volWidget );
 }
 
 void ImageObject::SetVtkVolumeRenderingEnabled( bool on )
 {
-    if( m_vtkVolumeRenderingEnabled == on )
-        return;
+    if( m_vtkVolumeRenderingEnabled == on ) return;
 
     m_vtkVolumeRenderingEnabled = on;
 
     ImageObjectViewAssociation::iterator it = this->imageObjectInstances.begin();
     while( it != imageObjectInstances.end() )
     {
-        View * v = (*it).first;
+        View * v = ( *it ).first;
         if( v->GetType() == THREED_VIEW_TYPE )
         {
-            PerViewElements * pv = (*it).second;
+            PerViewElements * pv = ( *it ).second;
             pv->volume->SetVisibility( m_vtkVolumeRenderingEnabled ? 1 : 0 );
         }
         ++it;
@@ -470,10 +456,10 @@ void ImageObject::UpdateVolumeRenderingParamsInMapper()
     ImageObjectViewAssociation::iterator it = this->imageObjectInstances.begin();
     while( it != imageObjectInstances.end() )
     {
-        View * v = (*it).first;
+        View * v = ( *it ).first;
         if( v->GetType() == THREED_VIEW_TYPE )
         {
-            PerViewElements * pv = (*it).second;
+            PerViewElements * pv = ( *it ).second;
 
             pv->volume->SetVisibility( !IsHidden() && m_vtkVolumeRenderingEnabled ? 1 : 0 );
 
@@ -500,7 +486,6 @@ void ImageObject::SetVolumeClippingEnabled( vtkBoxWidget2 * widget, bool enabled
     widget->SetEnabled( enabled ? 1 : 0 );
 }
 
-
 void ImageObject::SetViewOutline( int isOn )
 {
     this->viewOutline = isOn;
@@ -510,10 +495,9 @@ void ImageObject::SetViewOutline( int isOn )
         ImageObjectViewAssociation::iterator it = this->imageObjectInstances.begin();
         for( ; it != this->imageObjectInstances.end(); ++it )
         {
-            if( (*it).second->outlineActor )
+            if( ( *it ).second->outlineActor )
             {
-                if ((*it).first->GetType() == THREED_VIEW_TYPE)
-                    (*it).second->outlineActor->VisibilityOn();
+                if( ( *it ).first->GetType() == THREED_VIEW_TYPE ) ( *it ).second->outlineActor->VisibilityOn();
                 this->outlineWasVisible = 1;
             }
         }
@@ -523,9 +507,9 @@ void ImageObject::SetViewOutline( int isOn )
         ImageObjectViewAssociation::iterator it = this->imageObjectInstances.begin();
         for( ; it != this->imageObjectInstances.end(); ++it )
         {
-            if( (*it).second->outlineActor )
+            if( ( *it ).second->outlineActor )
             {
-                (*it).second->outlineActor->VisibilityOff();
+                ( *it ).second->outlineActor->VisibilityOff();
                 this->outlineWasVisible = 0;
             }
         }
@@ -534,10 +518,7 @@ void ImageObject::SetViewOutline( int isOn )
     emit ObjectModified();
 }
 
-int ImageObject::GetViewOutline()
-{
-    return this->viewOutline;
-}
+int ImageObject::GetViewOutline() { return this->viewOutline; }
 
 void ImageObject::Setup3DRepresentation( View * view )
 {
@@ -581,21 +562,21 @@ void ImageObject::Setup3DRepresentation( View * view )
     volumeClippingWidget->RotationEnabledOff();
     volumeClippingWidget->ScalingEnabledOff();
     volumeClippingWidget->SetInteractor( view->GetInteractor() );
-    volumeClippingWidget->GetRepresentation()->SetPlaceFactor( 1 ); // Default is 0.5
+    volumeClippingWidget->GetRepresentation()->SetPlaceFactor( 1 );  // Default is 0.5
     volumeClippingWidget->GetRepresentation()->PlaceWidget( m_volumeRenderingBounds );
     vtkBoxRepresentation * boxRep = vtkBoxRepresentation::SafeDownCast( volumeClippingWidget->GetRepresentation() );
     boxRep->InsideOutOn();
     boxRep->OutlineCursorWiresOff();
 
-    m_volumeClippingBoxWatcher->Connect( volumeClippingWidget, vtkCommand::InteractionEvent, this, SLOT(OnVolumeClippingBoxModified(vtkObject*)) );
-
+    m_volumeClippingBoxWatcher->Connect( volumeClippingWidget, vtkCommand::InteractionEvent, this,
+                                         SLOT( OnVolumeClippingBoxModified( vtkObject * ) ) );
 
     // Add the actors to the map of instances we keep
-    PerViewElements * elem = new PerViewElements;
-    elem->outlineActor = outActor;
-    elem->volume = volume;
-    elem->volumeClippingWidget = volumeClippingWidget;
-    this->imageObjectInstances[ view ] = elem;
+    PerViewElements * elem           = new PerViewElements;
+    elem->outlineActor               = outActor;
+    elem->volume                     = volume;
+    elem->volumeClippingWidget       = volumeClippingWidget;
+    this->imageObjectInstances[view] = elem;
 
     UpdateVolumeRenderingParamsInMapper();
 }
@@ -606,7 +587,7 @@ void ImageObject::Release3DRepresentation( View * view )
     ImageObjectViewAssociation::iterator itAssociations = this->imageObjectInstances.find( view );
     if( itAssociations != this->imageObjectInstances.end() )
     {
-        PerViewElements * perView = (*itAssociations).second;
+        PerViewElements * perView = ( *itAssociations ).second;
 
         // remove outline
         view->GetRenderer()->RemoveViewProp( perView->outlineActor );
@@ -627,19 +608,19 @@ void ImageObject::Setup2DRepresentation( int viewType, View * view )
     // add an outline to the view to make sure camera includes the whole volume
     vtkSmartPointer<vtkPolyDataMapper> outMapper = vtkSmartPointer<vtkPolyDataMapper>::New();
     this->OutlineFilter->Update();
-    outMapper->SetInputConnection(this->OutlineFilter->GetOutputPort() );
+    outMapper->SetInputConnection( this->OutlineFilter->GetOutputPort() );
     vtkSmartPointer<vtkActor> outActor = vtkSmartPointer<vtkActor>::New();
     outActor->SetMapper( outMapper );
 
-	view->GetRenderer()->AddActor( outActor );
+    view->GetRenderer()->AddActor( outActor );
 
     // make the outline invisible in 2D, don't remove it yet, I may need it later
     outActor->VisibilityOff();
 
     // Add the actor to the map of instances we keep
-    PerViewElements * elem = new PerViewElements;
-    elem->outlineActor = outActor;
-    this->imageObjectInstances[ view ] = elem;
+    PerViewElements * elem           = new PerViewElements;
+    elem->outlineActor               = outActor;
+    this->imageObjectInstances[view] = elem;
 }
 
 void ImageObject::Release2DRepresentation( int viewType, View * view )
@@ -648,19 +629,19 @@ void ImageObject::Release2DRepresentation( int viewType, View * view )
     ImageObjectViewAssociation::iterator itAssociations = this->imageObjectInstances.find( view );
     if( itAssociations != this->imageObjectInstances.end() )
     {
-        PerViewElements * perView = (*itAssociations).second;
+        PerViewElements * perView = ( *itAssociations ).second;
 
         // delete the vtkAssembly we have
-		view->GetRenderer()->RemoveViewProp( perView->outlineActor );
+        view->GetRenderer()->RemoveViewProp( perView->outlineActor );
 
         delete perView;
         this->imageObjectInstances.erase( itAssociations );
     }
 }
 
-void ImageObject::SetLut(vtkSmartPointer<vtkScalarsToColors> lut)
+void ImageObject::SetLut( vtkSmartPointer<vtkScalarsToColors> lut )
 {
-    if (this->Lut != lut)
+    if( this->Lut != lut )
     {
         this->Lut = lut;
     }
@@ -668,7 +649,7 @@ void ImageObject::SetLut(vtkSmartPointer<vtkScalarsToColors> lut)
     emit ObjectModified();
 }
 
-int ImageObject::ChooseColorTable(int index)
+int ImageObject::ChooseColorTable( int index )
 {
     Q_ASSERT( this->GetManager() );
 
@@ -703,10 +684,7 @@ int ImageObject::ChooseColorTable(int index)
     return 1;
 }
 
-double * ImageObject::GetLutRange()
-{
-    return this->lutRange;
-}
+double * ImageObject::GetLutRange() { return this->lutRange; }
 
 void ImageObject::SetLutRange( double r[2] )
 {
@@ -716,10 +694,7 @@ void ImageObject::SetLutRange( double r[2] )
     emit ObjectModified();
 }
 
-void ImageObject::GetImageScalarRange(double *range)
-{
-    this->Image->GetScalarRange( range );
-}
+void ImageObject::GetImageScalarRange( double * range ) { this->Image->GetScalarRange( range ); }
 
 int ImageObject::GetNumberOfScalarComponents()
 {
@@ -729,37 +704,24 @@ int ImageObject::GetNumberOfScalarComponents()
         return 0;
 }
 
-void ImageObject::GetBounds( double bounds[6] )
-{
-    this->Image->GetBounds( bounds );
-}
+void ImageObject::GetBounds( double bounds[6] ) { this->Image->GetBounds( bounds ); }
 
-void ImageObject::GetCenter( double center[3] )
-{
-    this->Image->GetCenter( center );
-}
+void ImageObject::GetCenter( double center[3] ) { this->Image->GetCenter( center ); }
 
-double * ImageObject::GetSpacing()
-{
-    return this->Image->GetSpacing();
-}
+double * ImageObject::GetSpacing() { return this->Image->GetSpacing(); }
 
 void ImageObject::SetIntensityFactor( double factor )
 {
     if( this->intensityFactor != factor )
     {
-        this->intensityFactor = factor;
-        vtkPiecewiseFunctionLookupTable * lut = vtkPiecewiseFunctionLookupTable::SafeDownCast(this->GetLut());
-        if( lut )
-            lut->SetIntensityFactor( factor );
+        this->intensityFactor                 = factor;
+        vtkPiecewiseFunctionLookupTable * lut = vtkPiecewiseFunctionLookupTable::SafeDownCast( this->GetLut() );
+        if( lut ) lut->SetIntensityFactor( factor );
         emit ObjectModified();
     }
 }
 
-double ImageObject::GetIntensityFactor()
-{
-    return this->intensityFactor;
-}
+double ImageObject::GetIntensityFactor() { return this->intensityFactor; }
 
 void ImageObject::OnVolumeClippingBoxModified( vtkObject * caller )
 {
@@ -767,7 +729,7 @@ void ImageObject::OnVolumeClippingBoxModified( vtkObject * caller )
     Q_ASSERT( widget );
     vtkBoxRepresentation * box = vtkBoxRepresentation::SafeDownCast( widget->GetRepresentation() );
     Q_ASSERT( box );
-    double * bounds = box->GetBounds();
+    double * bounds            = box->GetBounds();
     m_volumeRenderingBounds[0] = bounds[0];
     m_volumeRenderingBounds[1] = bounds[1];
     m_volumeRenderingBounds[2] = bounds[2];
@@ -779,13 +741,13 @@ void ImageObject::OnVolumeClippingBoxModified( vtkObject * caller )
 
 void ImageObject::Hide()
 {
-	if (this->viewOutline)
-	{
-		this->SetViewOutline(0);
-		this->outlineWasVisible = 1;
-	}
-	else
-		this->outlineWasVisible = 0;
+    if( this->viewOutline )
+    {
+        this->SetViewOutline( 0 );
+        this->outlineWasVisible = 1;
+    }
+    else
+        this->outlineWasVisible = 0;
 
     emit VisibilityChanged( this->GetObjectID() );
     UpdateVolumeRenderingParamsInMapper();
@@ -794,8 +756,7 @@ void ImageObject::Hide()
 
 void ImageObject::Show()
 {
-	if( !this->viewOutline && this->outlineWasVisible )
-		this->SetViewOutline(1);
+    if( !this->viewOutline && this->outlineWasVisible ) this->SetViewOutline( 1 );
     emit VisibilityChanged( this->GetObjectID() );
     UpdateVolumeRenderingParamsInMapper();
     emit ObjectModified();
@@ -804,28 +765,29 @@ void ImageObject::Show()
 #include "mincinfowidget.h"
 void ImageObject::ShowMincInfo()
 {
-    MincInfoWidget * w = new MincInfoWidget( );
-    w->setAttribute(Qt::WA_DeleteOnClose);
+    MincInfoWidget * w = new MincInfoWidget();
+    w->setAttribute( Qt::WA_DeleteOnClose );
     w->SetImageObject( this );
     w->move( 0, 0 );
     Application::GetInstance().ShowFloatingDock( w );
 }
 
-//generic file writer
-void ImageObject::SaveImageData(QString &name)
+// generic file writer
+void ImageObject::SaveImageData( QString & name )
 {
     if( this->ItkImage )
     {
-        itk::ImageFileWriter< IbisItkFloat3ImageType >::Pointer mincWriter = itk::ImageFileWriter<IbisItkFloat3ImageType>::New();
-        mincWriter->SetFileName(name.toUtf8().data());
+        itk::ImageFileWriter<IbisItkFloat3ImageType>::Pointer mincWriter =
+            itk::ImageFileWriter<IbisItkFloat3ImageType>::New();
+        mincWriter->SetFileName( name.toUtf8().data() );
 
-        mincWriter->SetInput(this->ItkImage);
+        mincWriter->SetInput( this->ItkImage );
 
         try
         {
             mincWriter->Update();
         }
-        catch(itk::ExceptionObject & exp)
+        catch( itk::ExceptionObject & exp )
         {
             std::cerr << "Exception caught!" << std::endl;
             std::cerr << exp << std::endl;
@@ -833,25 +795,10 @@ void ImageObject::SaveImageData(QString &name)
     }
 }
 
-vtkVolumeProperty * ImageObject::GetVolumeProperty()
-{
-    return m_volumeProperty;
-}
+vtkVolumeProperty * ImageObject::GetVolumeProperty() { return m_volumeProperty; }
 
-vtkScalarsToColors * ImageObject::GetLut()
-{
-    return Lut;
-}
+vtkScalarsToColors * ImageObject::GetLut() { return Lut; }
 
-vtkImageData* ImageObject::GetImage( )
-{
-    return Image;
-}
+vtkImageData * ImageObject::GetImage() { return Image; }
 
-vtkImageAccumulate * ImageObject::GetHistogramComputer()
-{
-    return HistogramComputer;
-}
-
-
-
+vtkImageAccumulate * ImageObject::GetHistogramComputer() { return HistogramComputer; }

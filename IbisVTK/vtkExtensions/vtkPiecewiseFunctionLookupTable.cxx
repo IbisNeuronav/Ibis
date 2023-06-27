@@ -11,29 +11,27 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 // Thanks to Simon Drouin for writing this class
 
 #include "vtkPiecewiseFunctionLookupTable.h"
-#include <vtkObjectFactory.h>
+
 #include <vtkColorTransferFunction.h>
+#include <vtkObjectFactory.h>
 #include <vtkPiecewiseFunction.h>
 
-vtkStandardNewMacro(vtkPiecewiseFunctionLookupTable);
-
+vtkStandardNewMacro( vtkPiecewiseFunctionLookupTable );
 
 // Construct with range=(0,1); and hsv ranges set up for rainbow color table
 // (from red to blue).
 vtkPiecewiseFunctionLookupTable::vtkPiecewiseFunctionLookupTable()
 {
-    this->ColorFunction = vtkColorTransferFunction::New();
-    this->AlphaFunction = vtkPiecewiseFunction::New();
+    this->ColorFunction   = vtkColorTransferFunction::New();
+    this->AlphaFunction   = vtkPiecewiseFunction::New();
     this->IntensityFactor = 1.0;
 }
-
 
 vtkPiecewiseFunctionLookupTable::~vtkPiecewiseFunctionLookupTable()
 {
     this->ColorFunction->Delete();
     this->AlphaFunction->Delete();
 }
-
 
 void vtkPiecewiseFunctionLookupTable::SetIntensityFactor( double f )
 {
@@ -48,8 +46,8 @@ void vtkPiecewiseFunctionLookupTable::SetIntensityFactor( double f )
 void vtkPiecewiseFunctionLookupTable::ForceBuild()
 {
     int number = this->NumberOfColors;
-    float step = (float)1.0 / (number - 1);
-    float x = 0.0;
+    float step = (float)1.0 / ( number - 1 );
+    float x    = 0.0;
     float r, g, b, a;
     for( int i = 0; i < number; i++ )
     {
@@ -64,13 +62,11 @@ void vtkPiecewiseFunctionLookupTable::ForceBuild()
     this->BuildTime.Modified();
 }
 
-
 void vtkPiecewiseFunctionLookupTable::AddColorPoint( float value, float r, float g, float b )
 {
     this->ColorFunction->AddRGBPoint( value, r, g, b );
     Modified();
 }
-
 
 void vtkPiecewiseFunctionLookupTable::AddAlphaPoint( float value, float alpha )
 {
@@ -85,12 +81,10 @@ void vtkPiecewiseFunctionLookupTable::RemoveAllPoints()
     Modified();
 }
 
-void vtkPiecewiseFunctionLookupTable::PrintSelf(ostream& os, vtkIndent indent)
+void vtkPiecewiseFunctionLookupTable::PrintSelf( ostream & os, vtkIndent indent )
 {
-    this->Superclass::PrintSelf(os,indent);
+    this->Superclass::PrintSelf( os, indent );
 
     this->ColorFunction->PrintSelf( os, indent );
     this->AlphaFunction->PrintSelf( os, indent );
 }
-
-

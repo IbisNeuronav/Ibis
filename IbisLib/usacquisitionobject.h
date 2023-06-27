@@ -11,19 +11,20 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef __USAcquisitionObject_h_
 #define __USAcquisitionObject_h_
 
+#include <itkImage.h>
 #include <stdio.h>
-#include "serializer.h"
-#include <QVector>
-#include <QWidget>
-#include <QObject>
-#include <QString>
+
 #include <QList>
 #include <QObject>
-#include "sceneobject.h"
-#include "scenemanager.h"
+#include <QString>
+#include <QVector>
+#include <QWidget>
+
 #include "imageobject.h"
+#include "scenemanager.h"
+#include "sceneobject.h"
+#include "serializer.h"
 #include "usprobeobject.h"
-#include <itkImage.h>
 
 class TrackedVideoBuffer;
 class vtkImageData;
@@ -40,28 +41,30 @@ class USMask;
 class vtkImageConstantPad;
 class vtkPassThrough;
 
-#define ACQ_COLOR_RGB           "RGB"
-#define ACQ_COLOR_GRAYSCALE     "Grayscale"
-#define ACQ_BASE_DIR            "acquisitions"
-#define ACQ_ACQUISITION_PREFIX  "acq"
+#define ACQ_COLOR_RGB "RGB"
+#define ACQ_COLOR_GRAYSCALE "Grayscale"
+#define ACQ_BASE_DIR "acquisitions"
+#define ACQ_ACQUISITION_PREFIX "acq"
 
 struct ExportParams
 {
-    ExportParams() : outputDir(""), masked(false), useCalibratedTransform(false), relativeToID(SceneManager::InvalidId) {}
+    ExportParams()
+        : outputDir( "" ), masked( false ), useCalibratedTransform( false ), relativeToID( SceneManager::InvalidId )
+    {
+    }
     QString outputDir;
     bool masked;
-    bool useCalibratedTransform ;
+    bool useCalibratedTransform;
     int relativeToID;
 };
 
 class USAcquisitionObject : public SceneObject
 {
-Q_OBJECT
+    Q_OBJECT
 
 public:
-    
     static USAcquisitionObject * New() { return new USAcquisitionObject; }
-    vtkTypeMacro(USAcquisitionObject,SceneObject);
+    vtkTypeMacro( USAcquisitionObject, SceneObject );
     USAcquisitionObject();
     virtual ~USAcquisitionObject();
 
@@ -69,18 +72,18 @@ public:
 
     virtual void Serialize( Serializer * serializer ) override;
     virtual void Export() override;
-    virtual bool IsExportable()  override { return true; }
+    virtual bool IsExportable() override { return true; }
 
     bool Import();
-    void    SetBaseDirectory(QString dir) {m_baseDirectory = dir;}
-    QString GetBaseDirectory() {return m_baseDirectory;}
-    void    ExportTrackedVideoBuffer(QString destDir = "", bool masked = false , bool useCalibratedTransform = false, int relativeToID = SceneManager::InvalidId );
-    bool    LoadFramesFromMINCFile( Serializer * ser );
+    void SetBaseDirectory( QString dir ) { m_baseDirectory = dir; }
+    QString GetBaseDirectory() { return m_baseDirectory; }
+    void ExportTrackedVideoBuffer( QString destDir = "", bool masked = false, bool useCalibratedTransform = false,
+                                   int relativeToID = SceneManager::InvalidId );
+    bool LoadFramesFromMINCFile( Serializer * ser );
 
-    virtual void CreateSettingsWidgets( QWidget * parent, QVector <QWidget*> *widgets) override;
+    virtual void CreateSettingsWidgets( QWidget * parent, QVector<QWidget *> * widgets ) override;
     virtual void Setup( View * view ) override;
     virtual void Release( View * view ) override;
-
 
     bool IsUsingMask() { return m_isMaskOn; }
     void SetUseMask( bool useMask );
@@ -97,19 +100,21 @@ public:
     void SetFrameAndMaskSize( int width, int height );
 
     // Return frame data
-    void GetFrameData(int index, vtkImageData *img, vtkMatrix4x4 *mat );
+    void GetFrameData( int index, vtkImageData * img, vtkMatrix4x4 * mat );
     double GetFrameTimestamp( int index );
     double GetCurrentFrameTimestamp();
 
     // Return itk image of a given frame
-    void GetItkImage(IbisItkUnsignedChar3ImageType::Pointer itkOutputImage, int frameNo, bool masked, bool useCalibratedTransform = false, int relativeToObjectID = SceneManager::InvalidId );
-    void GetItkRGBImage(IbisRGBImageType::Pointer itkOutputImage, int frameNo, bool masked, bool useCalibratedTransform = false, int relativeToObjectID = SceneManager::InvalidId );
+    void GetItkImage( IbisItkUnsignedChar3ImageType::Pointer itkOutputImage, int frameNo, bool masked,
+                      bool useCalibratedTransform = false, int relativeToObjectID = SceneManager::InvalidId );
+    void GetItkRGBImage( IbisRGBImageType::Pointer itkOutputImage, int frameNo, bool masked,
+                         bool useCalibratedTransform = false, int relativeToObjectID = SceneManager::InvalidId );
 
     // Display of current slice
     int GetSliceWidth();
     int GetSliceHeight();
-    int  GetNumberOfSlices(void);
-    int  GetCurrentSlice();
+    int GetNumberOfSlices( void );
+    int GetCurrentSlice();
     void SetSliceImageOpacity( double opacity );
     double GetSliceImageOpacity();
     int GetSliceLutIndex() { return m_sliceLutIndex; }
@@ -126,14 +131,14 @@ public:
     void SetStaticSlicesLutIndex( int index );
 
     int GetMaxNumberOfSlices();
-    vtkImageData *GetMask();
+    vtkImageData * GetMask();
 
     bool IsRecording() { return m_isRecording; }
 
     void Record();
     void Stop();
     void SetCurrentFrame( int frameIndex );
-    bool AddFrame(vtkImageData *, vtkMatrix4x4 *, double);
+    bool AddFrame( vtkImageData *, vtkMatrix4x4 *, double );
 
     void Clear();
 
@@ -152,13 +157,12 @@ private slots:
     void UpdateMask();
 
 protected:
-
     virtual void Hide() override;
     virtual void Show() override;
     void ObjectAddedToScene() override;
     void UpdatePipeline();
     bool m_isRecording;
-    QString             m_baseDirectory;
+    QString m_baseDirectory;
 
     // Acquisition properties
     QString m_usDepth;
@@ -175,37 +179,37 @@ protected:
     bool LoadFramesFromMINCFile( QStringList & allMINCFiles );
     bool LoadGrayFrames( QStringList & allMINCFiles );
     bool LoadRGBFrames( QStringList & allMINCFiles );
-    void AdjustFrame(vtkImageData *frame, vtkMatrix4x4 *inputMatrix, vtkMatrix4x4 *outputMatrix );
+    void AdjustFrame( vtkImageData * frame, vtkMatrix4x4 * inputMatrix, vtkMatrix4x4 * outputMatrix );
 
     // 3D viewing data
     struct PerViewElements
     {
-        PerViewElements() : imageSlice(0) {}
+        PerViewElements() : imageSlice( 0 ) {}
         vtkImageActor * imageSlice;
-        std::vector<vtkImageActor*> staticSlices;
+        std::vector<vtkImageActor *> staticSlices;
     };
-    typedef std::map<View*,PerViewElements> PerViewContainer;
+    typedef std::map<View *, PerViewElements> PerViewContainer;
     PerViewContainer m_perViews;
 
     // Current slice properties
-    USMask                  * m_mask;
-    vtkSmartPointer<vtkTransform>   m_currentImageTransform;
-    vtkSmartPointer<vtkTransform>   m_sliceTransform;
-    vtkSmartPointer<vtkTransform>   m_calibrationTransform;
-    int                       m_sliceLutIndex;
-    vtkSmartPointer<vtkImageProperty>       m_sliceProperties;
-    bool                      m_isMaskOn;
-    bool                      m_isDopplerOn;
+    USMask * m_mask;
+    vtkSmartPointer<vtkTransform> m_currentImageTransform;
+    vtkSmartPointer<vtkTransform> m_sliceTransform;
+    vtkSmartPointer<vtkTransform> m_calibrationTransform;
+    int m_sliceLutIndex;
+    vtkSmartPointer<vtkImageProperty> m_sliceProperties;
+    bool m_isMaskOn;
+    bool m_isDopplerOn;
     vtkSmartPointer<vtkImageToImageStencil> m_imageStencilSource;
-    vtkSmartPointer<vtkImageStencil>        m_sliceStencil;
-    vtkSmartPointer<vtkImageStencil>        m_sliceStencilDoppler;
-    vtkSmartPointer<vtkImageMapToColors>    m_mapToColors;
+    vtkSmartPointer<vtkImageStencil> m_sliceStencil;
+    vtkSmartPointer<vtkImageStencil> m_sliceStencilDoppler;
+    vtkSmartPointer<vtkImageMapToColors> m_mapToColors;
     vtkSmartPointer<vtkPiecewiseFunctionLookupTable> m_lut;
-    vtkSmartPointer<vtkImageConstantPad>    m_constantPad;
+    vtkSmartPointer<vtkImageConstantPad> m_constantPad;
 
     // Outputs
-    vtkSmartPointer<vtkPassThrough>     m_maskedImageOutput;
-    vtkSmartPointer<vtkPassThrough>     m_unmaskedImageOutput;
+    vtkSmartPointer<vtkPassThrough> m_maskedImageOutput;
+    vtkSmartPointer<vtkPassThrough> m_unmaskedImageOutput;
 
     // Static slices properties
     void SetupAllStaticSlicesInAllViews();
@@ -214,9 +218,9 @@ protected:
     void ReleaseAllStaticSlices( View * view, PerViewElements & perView );
     void HideStaticSlices( PerViewElements & perView );
     void ShowStaticSlices( PerViewElements & perView );
-    bool               m_staticSlicesEnabled;
-    int                m_numberOfStaticSlices;
-    int                m_staticSlicesLutIndex;
+    bool m_staticSlicesEnabled;
+    int m_numberOfStaticSlices;
+    int m_staticSlicesLutIndex;
     vtkSmartPointer<vtkImageProperty> m_staticSlicesProperties;
 
     // Static slices view-independent data
@@ -225,15 +229,15 @@ protected:
     void ClearStaticSlicesData();
     struct PerStaticSlice
     {
-        PerStaticSlice() : mapToColors(0), imageStencil(0), transform(0) {}
+        PerStaticSlice() : mapToColors( 0 ), imageStencil( 0 ), transform( 0 ) {}
         vtkImageMapToColors * mapToColors;
         vtkImageStencil * imageStencil;
         vtkTransform * transform;
     };
-    std::vector< PerStaticSlice > m_staticSlicesData;
+    std::vector<PerStaticSlice> m_staticSlicesData;
     bool m_staticSlicesDataNeedUpdate;
 
-    void Save( );
+    void Save();
 };
 
 ObjectSerializationHeaderMacro( USAcquisitionObject );
