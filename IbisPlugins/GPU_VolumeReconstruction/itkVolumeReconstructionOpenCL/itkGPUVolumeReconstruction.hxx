@@ -349,7 +349,7 @@ void GPUVolumeReconstruction<TImage>::CreateMatrices( void )
         m_VolumeIndexToLocationMatrix[4 * i + 3] = volumeIndexToLocation4x4[i][3];
         for( unsigned int j = 0; j < ImageDimension; j++ )
         {
-            volumeIndexToLocation4x4[i][j] = volumeIndexToLocation3x3[i][j];  // Does this make sense??
+            volumeIndexToLocation4x4[i][j]           = volumeIndexToLocation3x3[i][j];  // Does this make sense??
             m_VolumeIndexToLocationMatrix[4 * i + j] = volumeIndexToLocation3x3[i][j];
         }
     }

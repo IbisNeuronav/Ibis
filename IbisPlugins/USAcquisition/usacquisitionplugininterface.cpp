@@ -8,18 +8,20 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
+#include "usacquisitionplugininterface.h"
+
 #include <QMainWindow>
 #include <QMessageBox>
 #include <QRect>
 #include <QString>
 #include <QtGui>
 #include <QtPlugin>
+
 #include "doubleviewwidget.h"
 #include "ibisapi.h"
 #include "imageobject.h"
 #include "sceneobject.h"
 #include "usacquisitionobject.h"
-#include "usacquisitionplugininterface.h"
 #include "usprobeobject.h"
 
 USAcquisitionPluginInterface::USAcquisitionPluginInterface() : m_allowTrackerlessCapture( false )

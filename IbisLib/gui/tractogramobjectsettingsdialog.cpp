@@ -217,7 +217,7 @@ void TractogramObjectSettingsDialog::ColorSwatchClicked()
     QColor newColor = QColorDialog::getColor( initial );
     if( newColor.isValid() )
     {
-        double newColorfloat[3] = {1, 1, 1};
+        double newColorfloat[3] = { 1, 1, 1 };
         newColorfloat[0]        = double( newColor.red() ) / 255.0;
         newColorfloat[1]        = double( newColor.green() ) / 255.0;
         newColorfloat[2]        = double( newColor.blue() ) / 255.0;

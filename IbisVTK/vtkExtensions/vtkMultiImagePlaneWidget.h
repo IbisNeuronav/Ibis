@@ -133,7 +133,7 @@ public:
 
     // Description:
     // Methods that satisfy the superclass' API.
-    virtual void PlaceWidget( double bounds[ 6 ] ) override;
+    virtual void PlaceWidget( double bounds[6] ) override;
     void PlaceWidget() override;
 
     // Description:
@@ -156,52 +156,52 @@ public:
     // Description:
     // Set/Get the origin of the plane.
     void SetOrigin( double x, double y, double z );
-    void SetOrigin( double xyz[ 3 ] );
+    void SetOrigin( double xyz[3] );
     double * GetOrigin();
-    void GetOrigin( double xyz[ 3 ] );
+    void GetOrigin( double xyz[3] );
 
     // Description:
     // Set/Get the position of the point defining the first axis of the plane.
     void SetPoint1( double x, double y, double z );
-    void SetPoint1( double xyz[ 3 ] );
+    void SetPoint1( double xyz[3] );
     double * GetPoint1();
-    void GetPoint1( double xyz[ 3 ] );
+    void GetPoint1( double xyz[3] );
 
     // Description:
     // Set/Get the position of the point defining the second axis of the plane.
     void SetPoint2( double x, double y, double z );
-    void SetPoint2( double xyz[ 3 ] );
+    void SetPoint2( double xyz[3] );
     double * GetPoint2();
-    void GetPoint2( double xyz[ 3 ] );
+    void GetPoint2( double xyz[3] );
 
     // Description:
     // Get the center of the plane.
     double * GetCenter();
-    void GetCenter( double xyz[ 3 ] );
+    void GetCenter( double xyz[3] );
 
     // Description:
     // Get the normal to the plane.
     double * GetNormal();
-    void GetNormal( double xyz[ 3 ] );
+    void GetNormal( double xyz[3] );
 
     // Description:
     // Get the vector from the plane origin to point1.
-    void GetVector1( double v1[ 3 ] );
+    void GetVector1( double v1[3] );
 
     // Description:
     // Get the vector from the plane origin to point2.
-    void GetVector2( double v2[ 3 ] );
+    void GetVector2( double v2[3] );
 
     // Description:
     // Move the plane along its normal until it hits the point passed and then adjust the cursor to be on the point
-    void SetGlobalPosition( double position[ 3 ] );  // position is global
-    void SetPosition( double position[ 3 ] );        // position is in ref volume space
-    void GetPosition( double position[ 3 ] );
+    void SetGlobalPosition( double position[3] );  // position is global
+    void SetPosition( double position[3] );        // position is in ref volume space
+    void GetPosition( double position[3] );
     void MoveNSlices( int nbSlices );
 
     // Description:
     // Get the distance between the point passed and the plane. Point is in world coords
-    double DistanceToPlane( double position[ 3 ] );
+    double DistanceToPlane( double position[3] );
 
     // Description:
     // Manage cursor
@@ -321,7 +321,7 @@ public:
     // Description:
     // Get the image coordinate position and voxel value.  Currently only
     // supports single component image data.
-    int GetCursorData( double xyzv[ 4 ] );
+    int GetCursorData( double xyzv[4] );
 
     // Description:
     // Set action associated to buttons.
@@ -432,7 +432,7 @@ protected:
     virtual void StopSliceMotion();
     virtual void StartCursor();
     virtual void StopCursor();
-    void SetCursorPosition( double pos[ 3 ] );
+    void SetCursorPosition( double pos[3] );
 
     // controlling ivars
     int Interaction;  // Is the widget responsive to mouse events
@@ -458,7 +458,7 @@ protected:
     // The geometric represenation of the plane and it's outline
     vtkPlaneSource * PlaneSource;
     vtkMultiTextureMapToPlane * TexturePlaneCoords;
-    double Normal[ 3 ];  // plane normal normalized
+    double Normal[3];  // plane normal normalized
     vtkPolyData * PlaneOutlinePolyData;
     ActorVec PlaneOutlineActors;
     PolyDataMapperVec PlaneOutlineMappers;
@@ -543,16 +543,16 @@ protected:
     vtkPolyData * CursorPolyData;
     PolyDataMapperVec CursorMappers;
     ActorVec CursorActors;
-    double CursorPosition[ 2 ];  // (x,y) position of the cursor on the plane. Cursor position is updated using this and
-                                 // plane points and origin
-    double CurrentImageValue;    // Set to VTK_FLOAT_MAX when invalid
+    double CursorPosition[2];  // (x,y) position of the cursor on the plane. Cursor position is updated using this and
+                               // plane points and origin
+    double CurrentImageValue;  // Set to VTK_FLOAT_MAX when invalid
     void GenerateCursor();
     void UpdateCursor( int, int );
     void UpdateCursor();
 
     // Oblique reslice control
-    double RotateAxis[ 3 ];
-    double RadiusVector[ 3 ];
+    double RotateAxis[3];
+    double RadiusVector[3];
     void AdjustState();
 
     // Visible margins to assist user interaction

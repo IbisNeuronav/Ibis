@@ -55,13 +55,13 @@ private:
     void AddPoint( int x, int y );
     void RemovePoint( int index );
     int PointIndexFromPixCoord( int x, int y );
-    void GetPixCoordFromNodeCoord( int index, int point[ 2 ] );
+    void GetPixCoordFromNodeCoord( int index, int point[2] );
     void SetNodeCoordFromPixCoord( int x, int y, int index );
     void NodeCoordFromPixCoord( int x, int y, double & xNode, double & yNode );
 
     static const int m_pointRadius;
-    double m_xRange[ 2 ];
-    double m_yRange[ 2 ];
+    double m_xRange[2];
+    double m_yRange[2];
     int m_movingPointIndex;
     vtkPiecewiseFunction * m_function;
 };

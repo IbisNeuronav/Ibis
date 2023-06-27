@@ -14,6 +14,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #define __StereotacticFramePluginInterface_h_
 
 #include <vtkSmartPointer.h>
+
 #include "toolplugininterface.h"
 
 class StereotacticFrameWidget;

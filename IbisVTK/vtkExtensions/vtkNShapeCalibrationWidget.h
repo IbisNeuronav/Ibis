@@ -55,7 +55,7 @@ public:
     // Methods that satisfy the superclass' API.
     virtual void SetEnabled( int ) override;
     // BTX
-    virtual void PlaceWidget( double bounds[ 6 ] ) override;
+    virtual void PlaceWidget( double bounds[6] ) override;
     // ETX
     void PlaceWidget() override { this->Superclass::PlaceWidget(); }
     void PlaceWidget( double xmin, double xmax, double ymin, double ymax, double zmin, double zmax ) override
@@ -68,20 +68,20 @@ public:
     // BTX
     void SetPoint1( double x, double y, double z );
 
-    void SetPoint1( double x[ 3 ] ) { this->SetPoint1( x[ 0 ], x[ 1 ], x[ 2 ] ); }
+    void SetPoint1( double x[3] ) { this->SetPoint1( x[0], x[1], x[2] ); }
 
     double * GetPoint1() { return this->LineSource->GetPoint1(); }
 
-    void GetPoint1( double xyz[ 3 ] ) { this->LineSource->GetPoint1( xyz ); }
+    void GetPoint1( double xyz[3] ) { this->LineSource->GetPoint1( xyz ); }
 
     // Description:
     // Set position of other end point.
     void SetPoint2( double x, double y, double z );
-    void SetPoint2( double x[ 3 ] ) { this->SetPoint2( x[ 0 ], x[ 1 ], x[ 2 ] ); }
+    void SetPoint2( double x[3] ) { this->SetPoint2( x[0], x[1], x[2] ); }
 
     double * GetPoint2() { return this->LineSource->GetPoint2(); }
 
-    void GetPoint2( double xyz[ 3 ] ) { this->LineSource->GetPoint2( xyz ); }
+    void GetPoint2( double xyz[3] ) { this->LineSource->GetPoint2( xyz ); }
 
     // Description:
     // Set the position of the middle handle by finding the point on
@@ -90,8 +90,8 @@ public:
     // the line doesn't exist, middle position is assigned 0 or 1, depending
     // on the segment end that is the closest to the point passed in parameters.
     void SetMiddlePoint( double x, double y, double z );
-    void SetMiddlePoint( double x[ 3 ] ) { this->SetMiddlePoint( x[ 0 ], x[ 1 ], x[ 2 ] ); }
-    void GetMiddlePoint( double xyz[ 3 ] );
+    void SetMiddlePoint( double x[3] ) { this->SetMiddlePoint( x[0], x[1], x[2] ); }
+    void GetMiddlePoint( double xyz[3] );
     double GetMiddlePoint();
     void SetMiddlePoint( double ratio );
     // ETX
@@ -212,17 +212,17 @@ protected:
     vtkCellPicker * HandlePicker;
     vtkCellPicker * LinePicker;
     vtkActor * CurrentHandle;
-    double LastPosition[ 3 ];
+    double LastPosition[3];
     void SetLinePosition( double x, double y, double z );
-    void SetLinePosition( double x[ 3 ] ) { SetLinePosition( x[ 0 ], x[ 1 ], x[ 2 ] ); }
+    void SetLinePosition( double x[3] ) { SetLinePosition( x[0], x[1], x[2] ); }
 
     // Methods to manipulate the hexahedron.
     void Scale( double * p1, double * p2, int X, int Y );
 
     // Initial bounds
     int ClampToBounds;
-    void ClampPosition( double x[ 3 ] );
-    int InBounds( double x[ 3 ] );
+    void ClampPosition( double x[3] );
+    int InBounds( double x[3] );
 
     // Properties used to control the appearance of selected objects and
     // the manipulator in general.

@@ -10,15 +10,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 // Thanks to Houssem Gueziri for writing this class
 
-#include "ibisapi.h"
-#include "recordtrackingplugininterface.h"
 #include "recordtrackingwidget.h"
-#include "ui_recordtrackingwidget.h"
-
-#include <chrono>
-#include <cstdio>
-#include <iomanip>
-#include <sstream>
 
 #include <QCheckBox>
 #include <QFile>
@@ -27,6 +19,14 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QSpacerItem>
 #include <QTime>
 #include <QWidgetItem>
+#include <chrono>
+#include <cstdio>
+#include <iomanip>
+#include <sstream>
+
+#include "ibisapi.h"
+#include "recordtrackingplugininterface.h"
+#include "ui_recordtrackingwidget.h"
 
 RecordTrackingWidget::RecordTrackingWidget( QWidget * parent )
     : QWidget( parent ),

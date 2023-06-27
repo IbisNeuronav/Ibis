@@ -9,14 +9,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
 #include "doubleviewwidget.h"
-#include "guiutilities.h"
-#include "hardwaremodule.h"
-#include "ibisapi.h"
-#include "imageobject.h"
-#include "ui_doubleviewwidget.h"
-#include "usacquisitionobject.h"
-#include "usacquisitionplugininterface.h"
-#include "usprobeobject.h"
 
 #include <vtkAlgorithm.h>
 #include <vtkAlgorithmOutput.h>
@@ -39,6 +31,14 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <vtkRenderer.h>
 #include <vtkTransform.h>
 
+#include "guiutilities.h"
+#include "hardwaremodule.h"
+#include "ibisapi.h"
+#include "imageobject.h"
+#include "ui_doubleviewwidget.h"
+#include "usacquisitionobject.h"
+#include "usacquisitionplugininterface.h"
+#include "usprobeobject.h"
 #include "vtkInteractorStyleImage2.h"
 
 DoubleViewWidget::DoubleViewWidget( QWidget * parent, Qt::WindowFlags f )

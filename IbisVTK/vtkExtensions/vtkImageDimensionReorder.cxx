@@ -28,13 +28,13 @@ vtkStandardNewMacro( vtkImageDimensionReorder );
 //----------------------------------------------------------------------------
 vtkImageDimensionReorder::vtkImageDimensionReorder()
 {
-    this->InputOrder[ 0 ] = 0;
-    this->InputOrder[ 1 ] = 1;
-    this->InputOrder[ 2 ] = 2;
+    this->InputOrder[0] = 0;
+    this->InputOrder[1] = 1;
+    this->InputOrder[2] = 2;
 
-    this->OutputStep[ 0 ] = 1;
-    this->OutputStep[ 1 ] = 1;
-    this->OutputStep[ 2 ] = 1;
+    this->OutputStep[0] = 1;
+    this->OutputStep[1] = 1;
+    this->OutputStep[2] = 1;
 }
 
 //----------------------------------------------------------------------------
@@ -45,37 +45,37 @@ void vtkImageDimensionReorder::ExecuteInformation()
 
     int numScalar = inData->GetNumberOfScalarComponents();
 
-    int inputExtent[ 6 ];
+    int inputExtent[6];
     //    inData->GetWholeExtent( inputExtent );
     inData->GetExtent( inputExtent );  // VTK6
 
-    double inputSpacing[ 3 ];
+    double inputSpacing[3];
     inData->GetSpacing( inputSpacing );
 
-    int inputDim[ 3 ];
-    int inputStep[ 3 ] = { 1, 1, 1 };
-    inputStep[ 0 ]     = numScalar;
-    inputStep[ 1 ]     = numScalar;
-    inputStep[ 2 ]     = numScalar;
+    int inputDim[3];
+    int inputStep[3] = { 1, 1, 1 };
+    inputStep[0]     = numScalar;
+    inputStep[1]     = numScalar;
+    inputStep[2]     = numScalar;
 
     int i;
     for( i = 0; i < 3; i++ )
     {
-        inputDim[ i ] = inputExtent[ 2 * i + 1 ] - inputExtent[ 2 * i ] + 1;
+        inputDim[i] = inputExtent[2 * i + 1] - inputExtent[2 * i] + 1;
         for( int j = 0; j < i; j++ )
         {
-            inputStep[ i ] *= inputDim[ j ];
+            inputStep[i] *= inputDim[j];
         }
     }
 
-    int outputExtent[ 6 ]     = { 0, 0, 0, 0, 0, 0 };
-    double outputSpacing[ 3 ] = { 1.0, 1.0, 1.0 };
+    int outputExtent[6]     = { 0, 0, 0, 0, 0, 0 };
+    double outputSpacing[3] = { 1.0, 1.0, 1.0 };
     for( i = 0; i < 3; i++ )
     {
-        outputExtent[ 2 * i ]                     = inputExtent[ 2 * this->InputOrder[ i ] ];
-        outputExtent[ 2 * i + 1 ]                 = inputExtent[ 2 * this->InputOrder[ i ] + 1 ];
-        outputSpacing[ i ]                        = inputSpacing[ this->InputOrder[ i ] ];
-        this->OutputStep[ this->InputOrder[ i ] ] = inputStep[ i ];
+        outputExtent[2 * i]                   = inputExtent[2 * this->InputOrder[i]];
+        outputExtent[2 * i + 1]               = inputExtent[2 * this->InputOrder[i] + 1];
+        outputSpacing[i]                      = inputSpacing[this->InputOrder[i]];
+        this->OutputStep[this->InputOrder[i]] = inputStep[i];
     }
 
     //    outData->SetWholeExtent( outputExtent );
@@ -91,36 +91,36 @@ void vtkImageDimensionReorder::ExecuteInformation()
 //----------------------------------------------------------------------------
 // This templated function executes the filter for any type of data.
 template <class type>
-void vtkImageDimensionReorderExecute( vtkImageDimensionReorder * self, type * inptr, type * outptr, int outputStep[ 3 ],
-                                      int outputExtent[ 6 ], int numberOfScalarComponent )
+void vtkImageDimensionReorderExecute( vtkImageDimensionReorder * self, type * inptr, type * outptr, int outputStep[3],
+                                      int outputExtent[6], int numberOfScalarComponent )
 {
-    type * inIt[ 3 ];
-    inIt[ 0 ]          = inptr;
-    inIt[ 1 ]          = inptr;
-    inIt[ 2 ]          = inptr;
+    type * inIt[3];
+    inIt[0]            = inptr;
+    inIt[1]            = inptr;
+    inIt[2]            = inptr;
     type * outIt       = outptr;
-    int numberOfSlices = outputExtent[ 5 ] - outputExtent[ 4 ] + 1;
+    int numberOfSlices = outputExtent[5] - outputExtent[4] + 1;
     double percent     = 0;
 
-    for( int i = outputExtent[ 4 ]; i <= outputExtent[ 5 ]; i++ )
+    for( int i = outputExtent[4]; i <= outputExtent[5]; i++ )
     {
-        inIt[ 1 ] = inIt[ 2 ];
-        for( int j = outputExtent[ 2 ]; j <= outputExtent[ 3 ]; j++ )
+        inIt[1] = inIt[2];
+        for( int j = outputExtent[2]; j <= outputExtent[3]; j++ )
         {
-            inIt[ 0 ] = inIt[ 1 ];
-            for( int k = outputExtent[ 0 ]; k <= outputExtent[ 1 ]; k++ )
+            inIt[0] = inIt[1];
+            for( int k = outputExtent[0]; k <= outputExtent[1]; k++ )
             {
                 for( int l = 0; l < numberOfScalarComponent; l++ )
                 {
-                    outIt[ l ] = inIt[ 0 ][ l ];
+                    outIt[l] = inIt[0][l];
                 }
                 outIt += numberOfScalarComponent;
-                inIt[ 0 ] += outputStep[ 0 ];
+                inIt[0] += outputStep[0];
             }
-            inIt[ 1 ] += outputStep[ 1 ];
+            inIt[1] += outputStep[1];
         }
-        inIt[ 2 ] += outputStep[ 2 ];
-        percent = (double)( i - outputExtent[ 4 ] ) / numberOfSlices * 100.0;
+        inIt[2] += outputStep[2];
+        percent = (double)( i - outputExtent[4] ) / numberOfSlices * 100.0;
         self->UpdateProgress( percent );
     }
 }
@@ -132,7 +132,7 @@ void vtkImageDimensionReorderExecute( vtkImageDimensionReorder * self, type * in
 // the datas data types.
 void vtkImageDimensionReorder::SimpleExecute( vtkImageData * inData, vtkImageData * outData )
 {
-    int outputExtent[ 6 ] = { 0, 0, 0, 0, 0, 0 };
+    int outputExtent[6] = { 0, 0, 0, 0, 0, 0 };
     // VTK6 outData->GetWholeExtent( outputExtent );
     outData->GetExtent( outputExtent );  // VTK6
     int numScalar = inData->GetNumberOfScalarComponents();
@@ -152,6 +152,6 @@ void vtkImageDimensionReorder::PrintSelf( ostream & os, vtkIndent indent )
 {
     this->Superclass::PrintSelf( os, indent );
 
-    os << indent << "Dimension order: " << this->InputOrder[ 0 ] << " " << this->InputOrder[ 1 ] << " "
-       << this->InputOrder[ 2 ] << "\n";
+    os << indent << "Dimension order: " << this->InputOrder[0] << " " << this->InputOrder[1] << " "
+       << this->InputOrder[2] << "\n";
 }

@@ -10,6 +10,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 // Thanks to Simon Drouin for writing this class
 
+#include "stereotacticframeplugininterface.h"
+
 #include <float.h>
 #include <vtkAxesActor.h>
 #include <vtkCellArray.h>
@@ -20,21 +22,23 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <vtkPolyData.h>
 #include <vtkRenderer.h>
 #include <vtkTransform.h>
+
 #include <QtPlugin>
+
 #include "SVL.h"
 #include "ibisapi.h"
 #include "imageobject.h"
 #include "polydataobject.h"
-#include "stereotacticframeplugininterface.h"
 #include "stereotacticframewidget.h"
 #include "view.h"
 #include "vtkNShapeCalibrationWidget.h"
 
 const Vec3 FrameLocators[4][4] = {
-    {Vec3( 10.0, 140.0, -90.0 ), Vec3( 10.0, 10.0, -90.0 ), Vec3( 140.0, 140.0, -90.0 ), Vec3( 140.0, 10.0, -90.0 )},
-    {Vec3( 197.0, 140.0, -65.0 ), Vec3( 197.0, 10.0, -65.0 ), Vec3( 197.0, 140.0, 65.0 ), Vec3( 197.0, 10.0, 65.0 )},
-    {Vec3( 10.0, 140.0, 90.0 ), Vec3( 10.0, 10.0, 90.0 ), Vec3( 140.0, 140.0, 90.0 ), Vec3( 140.0, 10.0, 90.0 )},
-    {Vec3( -47.0, 140.0, -65.0 ), Vec3( -47.0, 10.0, -65.0 ), Vec3( -47.0, 140.0, 65.0 ), Vec3( -47.0, 10.0, 65.0 )}};
+    { Vec3( 10.0, 140.0, -90.0 ), Vec3( 10.0, 10.0, -90.0 ), Vec3( 140.0, 140.0, -90.0 ), Vec3( 140.0, 10.0, -90.0 ) },
+    { Vec3( 197.0, 140.0, -65.0 ), Vec3( 197.0, 10.0, -65.0 ), Vec3( 197.0, 140.0, 65.0 ), Vec3( 197.0, 10.0, 65.0 ) },
+    { Vec3( 10.0, 140.0, 90.0 ), Vec3( 10.0, 10.0, 90.0 ), Vec3( 140.0, 140.0, 90.0 ), Vec3( 140.0, 10.0, 90.0 ) },
+    { Vec3( -47.0, 140.0, -65.0 ), Vec3( -47.0, 10.0, -65.0 ), Vec3( -47.0, 140.0, 65.0 ),
+      Vec3( -47.0, 10.0, 65.0 ) } };
 
 StereotacticFramePluginInterface::StereotacticFramePluginInterface()
 {
@@ -322,7 +326,7 @@ const Vec3 & StereotacticFramePluginInterface::GetNPointPos( int nIndex, int poi
     return FrameLocators[nIndex][pointInNIndex];
 }
 
-double alignmentMat[16] = {0.0, 0.0, 1.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0};
+double alignmentMat[16] = { 0.0, 0.0, 1.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0 };
 
 void StereotacticFramePluginInterface::ComputeInitialTransform()
 {
@@ -333,12 +337,12 @@ void StereotacticFramePluginInterface::ComputeInitialTransform()
     // Now, we compute a translation that centers bounding boxes of image and frame
     ImageObject * ref = GetIbisAPI()->GetReferenceDataObject();
     if( !ref ) return;
-    double imageCenter[3] = {0.0, 0.0, 0.0};
+    double imageCenter[3] = { 0.0, 0.0, 0.0 };
     ref->GetCenter( imageCenter );
     Vec3 imCenter( imageCenter );
 
     // compute frame bound
-    double frameBound[6] = {DBL_MAX, -DBL_MAX, DBL_MAX, -DBL_MAX, DBL_MAX, -DBL_MAX};
+    double frameBound[6] = { DBL_MAX, -DBL_MAX, DBL_MAX, -DBL_MAX, DBL_MAX, -DBL_MAX };
     for( int i = 0; i < 4; ++i )
     {
         for( int j = 0; j < 4; ++j )

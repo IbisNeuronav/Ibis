@@ -8,15 +8,17 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
+#include "landmarkregistrationobjectplugininterface.h"
+
 #include <QMainWindow>
 #include <QMessageBox>
 #include <QRect>
 #include <QString>
 #include <QtGui>
 #include <QtPlugin>
+
 #include "ibisapi.h"
 #include "landmarkregistrationobject.h"
-#include "landmarkregistrationobjectplugininterface.h"
 #include "pointsobject.h"
 
 LandmarkRegistrationObjectPluginInterface::LandmarkRegistrationObjectPluginInterface() {}
@@ -35,15 +37,15 @@ SceneObject * LandmarkRegistrationObjectPluginInterface::CreateObject()
     sourcePoints->SetName( "RegistrationSourcePoints" );
     sourcePoints->SetListable( false );
     sourcePoints->SetCanChangeParent( false );
-    double color[3] = {0.0, 1.0, 0.0};
+    double color[3] = { 0.0, 1.0, 0.0 };
     sourcePoints->SetSelectedColor( color );
     vtkSmartPointer<PointsObject> targetPoints = vtkSmartPointer<PointsObject>::New();
     targetPoints->SetName( "RegistrationTargetPoints" );
     targetPoints->SetListable( false );
     targetPoints->SetCanChangeParent( true );
-    double color1[3] = {1.0, 0.1, 0.1};
+    double color1[3] = { 1.0, 0.1, 0.1 };
     targetPoints->SetSelectedColor( color1 );
-    double color2[3] = {0.3, 0.3, 1.0};
+    double color2[3] = { 0.3, 0.3, 1.0 };
     targetPoints->SetDisabledColor( color2 );
     ibisAPI->AddObject( regObject );
     ibisAPI->AddObject( sourcePoints, regObject );

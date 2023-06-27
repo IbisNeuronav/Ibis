@@ -1,5 +1,7 @@
-#include <iostream>
 #include "screwtablewidget.h"
+
+#include <iostream>
+
 #include "ui_screwtablewidget.h"
 
 ScrewTableWidget::ScrewTableWidget( QWidget * parent, QString configDir )

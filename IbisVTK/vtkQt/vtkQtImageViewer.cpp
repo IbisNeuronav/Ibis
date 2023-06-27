@@ -47,9 +47,9 @@ void vtkQtImageViewer::RenderFirst()
 {
     m_actor->Update();
     int * extent  = m_actor->GetInput()->GetExtent();
-    int diffx     = extent[ 1 ] - extent[ 0 ] + 1;
+    int diffx     = extent[1] - extent[0] + 1;
     double scalex = (double)diffx / 2.0;
-    int diffy     = extent[ 3 ] - extent[ 2 ] + 1;
+    int diffy     = extent[3] - extent[2] + 1;
     double scaley = (double)diffy / 2.0;
 
     vtkCamera * cam = m_renderer->GetActiveCamera();
@@ -57,8 +57,8 @@ void vtkQtImageViewer::RenderFirst()
     cam->SetParallelScale( scaley );
     double * prevPos   = cam->GetPosition();
     double * prevFocal = cam->GetFocalPoint();
-    cam->SetPosition( scalex, scaley, prevPos[ 2 ] );
-    cam->SetFocalPoint( scalex, scaley, prevFocal[ 2 ] );
+    cam->SetPosition( scalex, scaley, prevPos[2] );
+    cam->SetFocalPoint( scalex, scaley, prevFocal[2] );
 
     GetRenderWindow()->Render();
 }

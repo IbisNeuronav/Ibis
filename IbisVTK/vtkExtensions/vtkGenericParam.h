@@ -34,12 +34,12 @@ public:
     const char * GetItemName( int index )
     {
         assert( index < (int)( m_items.size() ) );
-        return m_items[ index ].first.c_str();
+        return m_items[index].first.c_str();
     }
     const char * GetItemValue( int index )
     {
         assert( index < (int)( m_items.size() ) );
-        return m_items[ index ].second.c_str();
+        return m_items[index].second.c_str();
     }
     void AddItem( const char * itemName, const char * itemValue )
     {
@@ -82,7 +82,7 @@ public:
         std::vector<std::string> choices;
         GetValidChoices( choices );
         assert( index < (int)( choices.size() ) );
-        SetCurrentChoice( choices[ index ].c_str() );
+        SetCurrentChoice( choices[index].c_str() );
     }
     int GetCurrentChoiceIndex()
     {
@@ -90,7 +90,7 @@ public:
         std::vector<std::string> validChoices;
         GetValidChoices( validChoices );
         for( unsigned i = 0; i < validChoices.size(); ++i )
-            if( validChoices[ i ] == currentChoice ) return (int)i;
+            if( validChoices[i] == currentChoice ) return (int)i;
         return -1;
     }
     virtual void GetParamValues( vtkGenericParamValues & v ) override
@@ -138,16 +138,16 @@ class vtkGenericParamInterface
 public:
     virtual ~vtkGenericParamInterface()
     {
-        for( unsigned i = 0; i < m_params.size(); ++i ) m_params[ i ]->Delete();
+        for( unsigned i = 0; i < m_params.size(); ++i ) m_params[i]->Delete();
     }
     int GetNumberOfParams() { return m_params.size(); }
-    vtkGenericParam * GetParam( int index ) { return m_params[ index ]; }
+    vtkGenericParam * GetParam( int index ) { return m_params[index]; }
     vtkGenericParam * GetParam( const char * name )
     {
         std::string nameStr( name );
         for( unsigned i = 0; i < m_params.size(); ++i )
         {
-            if( std::string( m_params[ i ]->GetParamName() ) == nameStr ) return m_params[ i ];
+            if( std::string( m_params[i]->GetParamName() ) == nameStr ) return m_params[i];
         }
         return 0;
     }
@@ -164,7 +164,7 @@ public:
     {
         for( unsigned i = 0; i < allValues.size(); ++i )
         {
-            vtkGenericParamValues & vals = allValues[ i ];
+            vtkGenericParamValues & vals = allValues[i];
             vtkGenericParam * p          = GetParam( vals.GetParamName() );
             if( p ) p->SetParamValues( vals );
         }

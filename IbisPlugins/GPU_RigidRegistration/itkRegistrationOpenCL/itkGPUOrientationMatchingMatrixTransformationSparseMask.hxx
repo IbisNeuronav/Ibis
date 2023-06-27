@@ -22,10 +22,10 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <itkOpenCLUtil.h>
 #include <itkTimeProbe.h>
 #include <vnl/vnl_matrix.h>
-#include "itkGPUOrientationMatchingMatrixTransformationSparseMask.h"
 
 #include "GPUDiscreteGaussianGradientImageFilter.h"
 #include "GPUOrientationMatchingMatrixTransformationSparseMaskKernel.h"
+#include "itkGPUOrientationMatchingMatrixTransformationSparseMask.h"
 
 #ifdef __OUTPUT_GRADIENTS__
 #include <itkImageFileWriter.h>
@@ -909,8 +909,8 @@ void GPUOrientationMatchingMatrixTransformationSparseMask<TFixedImage, TMovingIm
                                                    m_cpuMovingGradientImageBuffer, &errid );
     OpenCLCheckError( errid, __FILE__, __LINE__, ITK_LOCATION );
 
-    size_t origin[3] = {0, 0, 0};
-    size_t region[3] = {( size_t )( imgSize[0] ), ( size_t )( imgSize[1] ), ( size_t )( imgSize[2] )};
+    size_t origin[3] = { 0, 0, 0 };
+    size_t region[3] = { ( size_t )( imgSize[0] ), ( size_t )( imgSize[1] ), ( size_t )( imgSize[2] ) };
     errid            = clEnqueueCopyBufferToImage( m_CommandQueue[0], m_MovingImageGradientGPUBuffer,
                                         m_MovingImageGradientGPUImage, 0, origin, region, 0, nullptr, nullptr );
     errid            = clFinish( m_CommandQueue[0] );

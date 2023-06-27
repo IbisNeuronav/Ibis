@@ -10,9 +10,11 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 // Author: Houssem-Eddine Gueziri
 
-#include <QtPlugin>
-#include "application.h"
 #include "pediclescrewnavigationplugininterface.h"
+
+#include <QtPlugin>
+
+#include "application.h"
 #include "vertebraregistrationwidget.h"
 
 PedicleScrewNavigationPluginInterface::PedicleScrewNavigationPluginInterface() : m_interfaceWidget( nullptr ) {}

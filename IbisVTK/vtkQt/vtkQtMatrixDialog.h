@@ -39,7 +39,7 @@ public:
     void SetDirectory( const QString & dir );
     void UpdateUI();
 
-    QLineEdit * m_matEdit[ 4 ][ 4 ];
+    QLineEdit * m_matEdit[4][4];
     QPushButton * m_invertButton;
     QPushButton * m_identityButton;
     QPushButton * m_revertButton;

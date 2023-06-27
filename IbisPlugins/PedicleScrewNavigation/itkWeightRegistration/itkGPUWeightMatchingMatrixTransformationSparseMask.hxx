@@ -14,17 +14,16 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #define __itkGPUWeightMatchingMatrixTransformationSparseMask_hxx
 
 #include <itkGaussianDerivativeOperator.h>
+#include <itkLinearInterpolateImageFunction.h>
 #include <itkMacro.h>
 #include <itkMatrix.h>
 #include <itkOpenCLUtil.h>
 #include <itkTimeProbe.h>
 #include <vnl/vnl_matrix.h>
 #include <vnl/vnl_vector.h>
-#include "itkGPUWeightMatchingMatrixTransformationSparseMask.h"
 
 #include "GPUWeightMatchingMatrixTransformationSparseMaskKernel.h"
-
-#include <itkLinearInterpolateImageFunction.h>
+#include "itkGPUWeightMatchingMatrixTransformationSparseMask.h"
 
 namespace itk
 {
@@ -258,8 +257,8 @@ void GPUWeightMatchingMatrixTransformationSparseMask<TFixedImage, TMovingImage>:
         clCreateImage( m_Context, CL_MEM_READ_ONLY, &( gpu_image_format ), &desc, m_cpuFixedImageBuffer, &errid );
     OpenCLCheckError( errid, __FILE__, __LINE__, ITK_LOCATION );
 
-    size_t origin[3] = {0, 0, 0};
-    size_t region[3] = {( size_t )( imgSize[0] ), ( size_t )( imgSize[1] ), ( size_t )( imgSize[2] )};
+    size_t origin[3] = { 0, 0, 0 };
+    size_t region[3] = { ( size_t )( imgSize[0] ), ( size_t )( imgSize[1] ), ( size_t )( imgSize[2] ) };
     errid = clEnqueueCopyBufferToImage( m_CommandQueue[0], m_FixedImageGPUBuffer, m_FixedImageGPUImage, 0, origin,
                                         region, 0, NULL, NULL );
     errid = clFinish( m_CommandQueue[0] );

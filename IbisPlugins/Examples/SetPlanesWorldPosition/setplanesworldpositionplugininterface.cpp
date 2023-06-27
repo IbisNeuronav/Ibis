@@ -1,7 +1,9 @@
 
+#include "setplanesworldpositionplugininterface.h"
+
 #include <QString>
 #include <QtPlugin>
-#include "setplanesworldpositionplugininterface.h"
+
 #include "setplanesworldpositionwidget.h"
 
 SetPlanesWorldPositionPluginInterface::SetPlanesWorldPositionPluginInterface() {}

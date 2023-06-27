@@ -208,10 +208,10 @@ void vtkQtHistogramWidget::paintEvent( QPaintEvent * event )
     {
         painter.setBrush( palette().brush( QPalette::WindowText ) );
         vtkImageData * hist    = m_histogram->GetOutput();
-        int nbBins             = hist->GetDimensions()[ 0 ];
+        int nbBins             = hist->GetDimensions()[0];
         double binWidth        = width() / (double)nbBins;
         double nextBar         = 0.0;
-        double maxBinHeight    = log10( hist->GetScalarRange()[ 1 ] + 1 );
+        double maxBinHeight    = log10( hist->GetScalarRange()[1] + 1 );
         double maxBinHeightPix = histHeight * .95;
         double binPixRatio     = maxBinHeightPix / maxBinHeight;
         for( int i = 0; i < nbBins; ++i )
@@ -230,11 +230,11 @@ void vtkQtHistogramWidget::paintEvent( QPaintEvent * event )
         int nbPoints = m_colorTransferFunction->GetSize();
         for( int i = 0; i < nbPoints; ++i )
         {
-            double nodeValues[ 6 ];
+            double nodeValues[6];
             m_colorTransferFunction->GetNodeValue( i, nodeValues );
-            double realNodePos = m_minSliderValue + nodeValues[ 0 ] * ( m_maxSliderValue - m_minSliderValue );
-            linearGrad.setColorAt( realNodePos, QColor( (int)( nodeValues[ 1 ] * 255 ), (int)( nodeValues[ 2 ] * 255 ),
-                                                        (int)( nodeValues[ 3 ] * 255 ) ) );
+            double realNodePos = m_minSliderValue + nodeValues[0] * ( m_maxSliderValue - m_minSliderValue );
+            linearGrad.setColorAt( realNodePos, QColor( (int)( nodeValues[1] * 255 ), (int)( nodeValues[2] * 255 ),
+                                                        (int)( nodeValues[3] * 255 ) ) );
         }
     }
     else

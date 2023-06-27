@@ -10,8 +10,9 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 // Author: Houssem-Eddine Gueziri
 
-#include "ui_vertebraregistrationwidget.h"
 #include "vertebraregistrationwidget.h"
+
+#include "ui_vertebraregistrationwidget.h"
 
 VertebraRegistrationWidget::VertebraRegistrationWidget( QWidget * parent )
     : QWidget( parent ),
@@ -964,8 +965,8 @@ void VertebraRegistrationWidget::on_ultrasoundSearchRadiusComboBox_currentIndexC
 void VertebraRegistrationWidget::on_lambdaMetricSlider_valueChanged( int value )
 {
     m_lambdaMetricBalance = (double)value / 10.0;
-    QString glabel        = QString{"Gradient orientation\n( %1 )"}.arg( m_lambdaMetricBalance, 1, 'f', 1 );
-    QString ilabel        = QString{"Intensity\n( %1 )"}.arg( 1 - m_lambdaMetricBalance, 1, 'f', 1 );
+    QString glabel        = QString{ "Gradient orientation\n( %1 )" }.arg( m_lambdaMetricBalance, 1, 'f', 1 );
+    QString ilabel        = QString{ "Intensity\n( %1 )" }.arg( 1 - m_lambdaMetricBalance, 1, 'f', 1 );
     ui->lambdaMetricGradientLabel->setText( glabel );
     ui->lambdaMetricIntensityLabel->setText( ilabel );
 }
@@ -979,20 +980,20 @@ void VertebraRegistrationWidget::on_numberOfPixelsDial_valueChanged( int value )
     }
     else
     {
-        ui->numberOfPixelsLabel->setText( tr( "Number of Pixels\n" ) + QString{"%1"}.arg( value ) );
+        ui->numberOfPixelsLabel->setText( tr( "Number of Pixels\n" ) + QString{ "%1" }.arg( value ) );
     }
 }
 
 void VertebraRegistrationWidget::on_selectivityDial_valueChanged( int value )
 {
     m_optSelectivity = value;
-    ui->selectivityLabel->setText( tr( "Selectivity\n" ) + QString{"%1"}.arg( value ) );
+    ui->selectivityLabel->setText( tr( "Selectivity\n" ) + QString{ "%1" }.arg( value ) );
 }
 
 void VertebraRegistrationWidget::on_percentileDial_valueChanged( int value )
 {
     m_optPercentile = (double)value / 100.0;
-    ui->percentileLabel->setText( tr( "Percentile\n" ) + QString{"%1"}.arg( m_optPercentile, 1, 'f', 1 ) );
+    ui->percentileLabel->setText( tr( "Percentile\n" ) + QString{ "%1" }.arg( m_optPercentile, 1, 'f', 1 ) );
 }
 
 void VertebraRegistrationWidget::on_optPopulationSizeComboBox_currentIndexChanged( int value )

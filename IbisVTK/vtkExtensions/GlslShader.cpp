@@ -65,7 +65,7 @@ bool GlslShader::Init()
     {
         GLint logLength = 0;
         glGetProgramiv( m_glslProg, GL_INFO_LOG_LENGTH, &logLength );
-        GLchar * infoLog = new GLchar[ logLength + 1 ];
+        GLchar * infoLog = new GLchar[logLength + 1];
         glGetProgramInfoLog( m_glslProg, logLength, nullptr, infoLog );
         vtkErrorMacro( << "Error in glsl program linking:" << infoLog );
         m_errorMessage = infoLog;
@@ -88,10 +88,10 @@ bool GlslShader::CreateAndCompileShader( unsigned shaderType, unsigned & shaderI
                                          std::vector<std::string> & memSources )
 {
     // put all the sources in an array of const GLchar*
-    const GLchar ** shaderStringPtr = new const GLchar *[ memSources.size() ];
+    const GLchar ** shaderStringPtr = new const GLchar *[memSources.size()];
     for( unsigned i = 0; i < memSources.size(); ++i )
     {
-        shaderStringPtr[ i ] = memSources[ i ].c_str();
+        shaderStringPtr[i] = memSources[i].c_str();
     }
 
     // Create the shader and set its source
@@ -108,7 +108,7 @@ bool GlslShader::CreateAndCompileShader( unsigned shaderType, unsigned & shaderI
     {
         GLint logLength = 0;
         glGetShaderiv( shaderId, GL_INFO_LOG_LENGTH, &logLength );
-        GLchar * infoLog = new GLchar[ logLength + 1 ];
+        GLchar * infoLog = new GLchar[logLength + 1];
         glGetShaderInfoLog( shaderId, logLength, NULL, infoLog );
         vtkErrorMacro( << "Error in shader complilation." << infoLog );
         m_errorMessage = infoLog;
@@ -217,9 +217,9 @@ bool GlslShader::SetVariable( const char * name, vtkMatrix4x4 * mat )
     int location = glGetUniformLocation( m_glslProg, name );
     if( location != -1 )
     {
-        float local[ 16 ];
+        float local[16];
         for( int i = 0; i < 4; ++i )
-            for( int j = 0; j < 4; ++j ) local[ i * 4 + j ] = mat->Element[ i ][ j ];
+            for( int j = 0; j < 4; ++j ) local[i * 4 + j] = mat->Element[i][j];
         glUniformMatrix4fv( location, 1, GL_TRUE, local );
         return true;
     }

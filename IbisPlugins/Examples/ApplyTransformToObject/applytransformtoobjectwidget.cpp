@@ -1,12 +1,13 @@
 #include "applytransformtoobjectwidget.h"
-#include "ui_applytransformtoobjectwidget.h"
 
 #include <vtkMatrix4x4.h>
 #include <vtkSmartPointer.h>
 #include <vtkTransform.h>
+
 #include "guiutilities.h"
 #include "ibisapi.h"
 #include "sceneobject.h"
+#include "ui_applytransformtoobjectwidget.h"
 #include "vtkQtMatrixDialog.h"
 
 ApplyTransformToObjectWidget::ApplyTransformToObjectWidget( QWidget * parent )

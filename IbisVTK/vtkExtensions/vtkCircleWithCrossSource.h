@@ -55,7 +55,7 @@ protected:
     virtual int RequestData( vtkInformation * request, vtkInformationVector ** inInfo,
                              vtkInformationVector * outInfo ) override;
 
-    double Center[ 3 ];
+    double Center[3];
     double Radius;
     int Resolution;
 

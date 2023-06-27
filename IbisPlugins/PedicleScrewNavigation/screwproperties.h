@@ -2,6 +2,7 @@
 #define __SCREWPROPERTIES_H__
 
 #include <vtkSmartPointer.h>
+
 #include "serializer.h"
 
 class vtkActor;

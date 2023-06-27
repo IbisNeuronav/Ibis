@@ -8,7 +8,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
-#include <iostream>
+#include "generatedsurface.h"
 
 #include <vtkDecimatePro.h>
 #include <vtkImageAccumulate.h>
@@ -21,8 +21,9 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <vtkSmartPointer.h>
 #include <vtkTriangleFilter.h>
 
+#include <iostream>
+
 #include "contoursurfaceplugininterface.h"
-#include "generatedsurface.h"
 #include "ibisapi.h"
 #include "imageobject.h"
 #include "polydataobjectsettingsdialog.h"

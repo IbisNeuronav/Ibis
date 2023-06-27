@@ -18,9 +18,9 @@ using namespace std;
 
 vtkTagWriter::vtkTagWriter()
 {
-    FileName                     = 0;
-    this->TransformToSave[ 0 ]   = 0;
-    this->ReferenceDataFile[ 0 ] = 0;
+    FileName                   = 0;
+    this->TransformToSave[0]   = 0;
+    this->ReferenceDataFile[0] = 0;
 }
 
 vtkTagWriter::~vtkTagWriter()
@@ -61,12 +61,12 @@ void vtkTagWriter::Write()
     unsigned int i;
     for( i = 0; i < this->Volumes.size(); ++i )
     {
-        f << "%Volume: " << this->VolumeNames[ i ].c_str() << endl;
+        f << "%Volume: " << this->VolumeNames[i].c_str() << endl;
     }
     f << endl;
 
-    if( this->ReferenceDataFile[ 0 ] ) f << "%ReferenceDataFile: " << this->ReferenceDataFile << endl;
-    if( this->TransformToSave[ 0 ] ) f << "%Transform: " << this->TransformToSave << endl;
+    if( this->ReferenceDataFile[0] ) f << "%ReferenceDataFile: " << this->ReferenceDataFile << endl;
+    if( this->TransformToSave[0] ) f << "%Transform: " << this->TransformToSave << endl;
     f << endl;
     // Write the points
     f << "Points = ";
@@ -75,10 +75,10 @@ void vtkTagWriter::Write()
         f << endl;
         for( unsigned int j = 0; j < this->Volumes.size(); ++j )
         {
-            if( this->Volumes[ j ]->GetNumberOfPoints() > (vtkIdType)i )
+            if( this->Volumes[j]->GetNumberOfPoints() > (vtkIdType)i )
             {
-                double * point = this->Volumes[ j ]->GetPoint( i );
-                f << point[ 0 ] << " " << point[ 1 ] << " " << point[ 2 ] << " ";
+                double * point = this->Volumes[j]->GetPoint( i );
+                f << point[0] << " " << point[1] << " " << point[2] << " ";
             }
             else
             {
@@ -87,11 +87,11 @@ void vtkTagWriter::Write()
         }
         if( this->PointNames.size() > i )
         {
-            f << "\"" << this->PointNames[ i ].c_str() << "\"";
+            f << "\"" << this->PointNames[i].c_str() << "\"";
         }
         if( this->TimeStamps.size() > i )
         {
-            f << " %TimeStamp " << this->TimeStamps[ i ].c_str();
+            f << " %TimeStamp " << this->TimeStamps[i].c_str();
         }
     }
     f << ";" << endl;
@@ -121,7 +121,7 @@ void vtkTagWriter::SetTransformToSave( const char * ts )
     if( ts && *ts )
         strcpy( this->TransformToSave, ts );
     else
-        this->TransformToSave[ 0 ] = 0;
+        this->TransformToSave[0] = 0;
 }
 
 void vtkTagWriter::SetReferenceDataFile( const char * ts )
@@ -129,7 +129,7 @@ void vtkTagWriter::SetReferenceDataFile( const char * ts )
     if( ts && *ts )
         strcpy( this->ReferenceDataFile, ts );
     else
-        this->ReferenceDataFile[ 0 ] = 0;
+        this->ReferenceDataFile[0] = 0;
 }
 
 void vtkTagWriter::PrintSelf( ostream & os, vtkIndent indent ) {}

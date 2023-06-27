@@ -13,17 +13,14 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef __itkGPUVolumeReconstruction_h
 #define __itkGPUVolumeReconstruction_h
 
+#include <itkEuler3DTransform.h>
 #include <itkImage.h>
+#include <itkImageFileWriter.h>  //ImageFileWriter used for debugging
 #include <itkObject.h>
 #include <itkOpenCLUtil.h>
-
 #include <vnl/vnl_inverse.h>
 #include <vnl/vnl_matrix.h>
 #include <vnl/vnl_matrix_fixed.h>
-
-#include <itkEuler3DTransform.h>
-
-#include <itkImageFileWriter.h>  //ImageFileWriter used for debugging
 namespace itk
 {
 template <class TImage>

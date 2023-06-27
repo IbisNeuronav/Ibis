@@ -47,8 +47,8 @@ protected:
     vtkImageDimensionReorder();
     ~vtkImageDimensionReorder(){};
 
-    int InputOrder[ 3 ];
-    int OutputStep[ 3 ];
+    int InputOrder[3];
+    int OutputStep[3];
 
     void ExecuteInformation();
     void SimpleExecute( vtkImageData * inData, vtkImageData * outData );

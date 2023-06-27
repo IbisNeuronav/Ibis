@@ -63,14 +63,14 @@ vtkMulti3DWidget::~vtkMulti3DWidget()
 
 void vtkMulti3DWidget::PlaceWidget( double xmin, double xmax, double ymin, double ymax, double zmin, double zmax )
 {
-    double bounds[ 6 ];
+    double bounds[6];
 
-    bounds[ 0 ] = xmin;
-    bounds[ 1 ] = xmax;
-    bounds[ 2 ] = ymin;
-    bounds[ 3 ] = ymax;
-    bounds[ 4 ] = zmin;
-    bounds[ 5 ] = zmax;
+    bounds[0] = xmin;
+    bounds[1] = xmax;
+    bounds[2] = ymin;
+    bounds[3] = ymax;
+    bounds[4] = zmin;
+    bounds[5] = zmax;
 
     this->PlaceWidget( bounds );
 }
@@ -149,7 +149,7 @@ vtkRenderer * vtkMulti3DWidget::GetRenderer( int index )
 {
     if( index < this->Renderers.size() && index >= 0 )
     {
-        return this->Renderers[ index ];
+        return this->Renderers[index];
     }
     return 0;
 }
@@ -158,7 +158,7 @@ vtkAssembly * vtkMulti3DWidget::GetAssembly( int index )
 {
     if( index < this->Renderers.size() && index >= 0 )
     {
-        return this->Assemblies[ index ];
+        return this->Assemblies[index];
     }
     return 0;
 }
@@ -193,7 +193,7 @@ vtkAssembly * vtkMulti3DWidget::GetAssembly( vtkRenderer * ren )
     int index = this->GetRendererIndex( ren );
     if( index != -1 )
     {
-        return this->Assemblies[ index ];
+        return this->Assemblies[index];
     }
     return 0;
 }
@@ -224,7 +224,7 @@ void vtkMulti3DWidget::SetInteraction( int interact )
 
 void vtkMulti3DWidget::InternalRemoveInteractor( int index )
 {
-    this->Interactors[ index ]->RemoveObserver( this->Callback );
+    this->Interactors[index]->RemoveObserver( this->Callback );
 }
 
 void vtkMulti3DWidget::AddObservers()
@@ -322,7 +322,7 @@ int vtkMulti3DWidget::FindPokedRenderer( vtkRenderWindowInteractor * interactor,
         vtkRenderer * winRenderer = vtkRenderer::SafeDownCast( rc->GetItemAsObject( winRen ) );
         for( int widgetRen = 0; widgetRen < this->Renderers.size(); ++widgetRen )
         {
-            if( winRenderer == this->Renderers[ widgetRen ] && winRenderer->GetInteractive() &&
+            if( winRenderer == this->Renderers[widgetRen] && winRenderer->GetInteractive() &&
                 winRenderer->IsInViewport( x, y ) )
                 return widgetRen;
         }
@@ -362,7 +362,7 @@ void vtkMulti3DWidget::ProcessEvents( vtkObject * caller, unsigned long event, v
 
             // Try to find the renderer where the event happened
             int * pos                  = interactor->GetEventPosition();
-            this->CurrentRendererIndex = FindPokedRenderer( interactor, pos[ 0 ], pos[ 1 ] );
+            this->CurrentRendererIndex = FindPokedRenderer( interactor, pos[0], pos[1] );
             if( this->CurrentRendererIndex == -1 ) return;
 
             // Dispatch events to subclasses.
@@ -408,18 +408,18 @@ void vtkMulti3DWidget::ProcessEvents( vtkObject * caller, unsigned long event, v
     }
 }
 
-void vtkMulti3DWidget::AdjustBounds( double bounds[ 6 ], double newBounds[ 6 ], double center[ 3 ] )
+void vtkMulti3DWidget::AdjustBounds( double bounds[6], double newBounds[6], double center[3] )
 {
-    center[ 0 ] = ( bounds[ 0 ] + bounds[ 1 ] ) / 2.0;
-    center[ 1 ] = ( bounds[ 2 ] + bounds[ 3 ] ) / 2.0;
-    center[ 2 ] = ( bounds[ 4 ] + bounds[ 5 ] ) / 2.0;
+    center[0] = ( bounds[0] + bounds[1] ) / 2.0;
+    center[1] = ( bounds[2] + bounds[3] ) / 2.0;
+    center[2] = ( bounds[4] + bounds[5] ) / 2.0;
 
-    newBounds[ 0 ] = center[ 0 ] + this->PlaceFactor * ( bounds[ 0 ] - center[ 0 ] );
-    newBounds[ 1 ] = center[ 0 ] + this->PlaceFactor * ( bounds[ 1 ] - center[ 0 ] );
-    newBounds[ 2 ] = center[ 1 ] + this->PlaceFactor * ( bounds[ 2 ] - center[ 1 ] );
-    newBounds[ 3 ] = center[ 1 ] + this->PlaceFactor * ( bounds[ 3 ] - center[ 1 ] );
-    newBounds[ 4 ] = center[ 2 ] + this->PlaceFactor * ( bounds[ 4 ] - center[ 2 ] );
-    newBounds[ 5 ] = center[ 2 ] + this->PlaceFactor * ( bounds[ 5 ] - center[ 2 ] );
+    newBounds[0] = center[0] + this->PlaceFactor * ( bounds[0] - center[0] );
+    newBounds[1] = center[0] + this->PlaceFactor * ( bounds[1] - center[0] );
+    newBounds[2] = center[1] + this->PlaceFactor * ( bounds[2] - center[1] );
+    newBounds[3] = center[1] + this->PlaceFactor * ( bounds[3] - center[1] );
+    newBounds[4] = center[2] + this->PlaceFactor * ( bounds[4] - center[2] );
+    newBounds[5] = center[2] + this->PlaceFactor * ( bounds[5] - center[2] );
 }
 
 int vtkMulti3DWidget::GetRendererIndex( vtkRenderer * ren )
@@ -440,7 +440,7 @@ int vtkMulti3DWidget::GetRendererIndex( vtkRenderer * ren )
 // Description:
 // Transform from display to world coordinates.
 // WorldPt has to be allocated as 4 vector
-void vtkMulti3DWidget::ComputeDisplayToWorld( unsigned int index, double x, double y, double z, double worldPt[ 4 ] )
+void vtkMulti3DWidget::ComputeDisplayToWorld( unsigned int index, double x, double y, double z, double worldPt[4] )
 {
     if( index >= this->Renderers.size() )
     {
@@ -448,27 +448,27 @@ void vtkMulti3DWidget::ComputeDisplayToWorld( unsigned int index, double x, doub
         return;
     }
 
-    if( !this->Renderers[ index ] )
+    if( !this->Renderers[index] )
     {
         return;
     }
 
-    this->Renderers[ index ]->SetDisplayPoint( x, y, z );
-    this->Renderers[ index ]->DisplayToWorld();
-    this->Renderers[ index ]->GetWorldPoint( worldPt );
-    if( worldPt[ 3 ] )
+    this->Renderers[index]->SetDisplayPoint( x, y, z );
+    this->Renderers[index]->DisplayToWorld();
+    this->Renderers[index]->GetWorldPoint( worldPt );
+    if( worldPt[3] )
     {
-        worldPt[ 0 ] /= worldPt[ 3 ];
-        worldPt[ 1 ] /= worldPt[ 3 ];
-        worldPt[ 2 ] /= worldPt[ 3 ];
-        worldPt[ 3 ] = 1.0;
+        worldPt[0] /= worldPt[3];
+        worldPt[1] /= worldPt[3];
+        worldPt[2] /= worldPt[3];
+        worldPt[3] = 1.0;
     }
 }
 
 // Description:
 // Transform from world to display coordinates.
 // displayPt has to be allocated as 3 vector
-void vtkMulti3DWidget::ComputeWorldToDisplay( unsigned int index, double x, double y, double z, double displayPt[ 3 ] )
+void vtkMulti3DWidget::ComputeWorldToDisplay( unsigned int index, double x, double y, double z, double displayPt[3] )
 {
     if( index >= this->Renderers.size() )
     {
@@ -476,14 +476,14 @@ void vtkMulti3DWidget::ComputeWorldToDisplay( unsigned int index, double x, doub
         return;
     }
 
-    if( !this->Renderers[ index ] )
+    if( !this->Renderers[index] )
     {
         return;
     }
 
-    this->Renderers[ index ]->SetWorldPoint( x, y, z, 1.0 );
-    this->Renderers[ index ]->WorldToDisplay();
-    this->Renderers[ index ]->GetDisplayPoint( displayPt );
+    this->Renderers[index]->SetWorldPoint( x, y, z, 1.0 );
+    this->Renderers[index]->WorldToDisplay();
+    this->Renderers[index]->GetDisplayPoint( displayPt );
 }
 
 void vtkMulti3DWidget::PrintSelf( ostream & os, vtkIndent indent ) { this->Superclass::PrintSelf( os, indent ); }

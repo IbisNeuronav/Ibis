@@ -35,7 +35,7 @@ vtkCxxSetObjectMacro( View, Picker, vtkCellPicker );
 
 ObjectSerializationMacro( View );
 
-const char DefaultViewNames[4][20] = {"Sagittal\0", "Coronal\0", "Transverse\0", "ThreeD\0"};
+const char DefaultViewNames[4][20] = { "Sagittal\0", "Coronal\0", "Transverse\0", "ThreeD\0" };
 
 View::View()
 {

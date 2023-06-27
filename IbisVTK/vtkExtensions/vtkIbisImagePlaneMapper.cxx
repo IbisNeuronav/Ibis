@@ -27,22 +27,22 @@ vtkStandardNewMacro( vtkIbisImagePlaneMapper );
 
 vtkIbisImagePlaneMapper::vtkIbisImagePlaneMapper()
 {
-    this->LastInput                 = 0;
-    this->TextureId                 = 0;
-    this->Shader                    = 0;
-    this->GlobalOpacity             = 1.0;
-    this->ImageCenter[ 0 ]          = 319.5;
-    this->ImageCenter[ 1 ]          = 239.5;
-    this->LensDistortion            = 0.0;
-    this->UseTransparency           = true;
-    this->UseGradient               = true;
-    this->ShowMask                  = false;
-    this->TransparencyPosition[ 0 ] = 320.0;
-    this->TransparencyPosition[ 1 ] = 240.0;
-    this->TransparencyRadius[ 0 ]   = 20.0;
-    this->TransparencyRadius[ 1 ]   = 200.0;
-    this->Saturation                = 1.0;
-    this->Brightness                = 1.0;
+    this->LastInput               = 0;
+    this->TextureId               = 0;
+    this->Shader                  = 0;
+    this->GlobalOpacity           = 1.0;
+    this->ImageCenter[0]          = 319.5;
+    this->ImageCenter[1]          = 239.5;
+    this->LensDistortion          = 0.0;
+    this->UseTransparency         = true;
+    this->UseGradient             = true;
+    this->ShowMask                = false;
+    this->TransparencyPosition[0] = 320.0;
+    this->TransparencyPosition[1] = 240.0;
+    this->TransparencyRadius[0]   = 20.0;
+    this->TransparencyRadius[1]   = 200.0;
+    this->Saturation              = 1.0;
+    this->Brightness              = 1.0;
     this->SetNumberOfInputPorts( 1 );
 }
 
@@ -64,7 +64,7 @@ int vtkIbisImagePlaneMapper::RenderTranslucentPolygonalGeometry( vtkRenderer * r
     if( prop )
     {
         vtkMatrix4x4 * matrix = prop->GetMatrix();
-        double mat[ 16 ];
+        double mat[16];
         vtkMatrix4x4::Transpose( *matrix->Element, mat );
         glMatrixMode( GL_MODELVIEW );
         glPushMatrix();
@@ -79,27 +79,27 @@ int vtkIbisImagePlaneMapper::RenderTranslucentPolygonalGeometry( vtkRenderer * r
     double * origin = input->GetOrigin();
     double * step   = input->GetSpacing();
 
-    double minX = origin[ 0 ];
-    double maxX = origin[ 0 ] + ( dim[ 0 ] - 1 ) * step[ 0 ];
-    double minY = origin[ 1 ];
-    double maxY = origin[ 1 ] + ( dim[ 1 ] - 1 ) * step[ 1 ];
+    double minX = origin[0];
+    double maxX = origin[0] + ( dim[0] - 1 ) * step[0];
+    double minY = origin[1];
+    double maxY = origin[1] + ( dim[1] - 1 ) * step[1];
 
-    double offsetX = this->ImageCenter[ 0 ] - ( dim[ 0 ] * 0.5 - 0.5 );
-    double offsetY = this->ImageCenter[ 1 ] - ( dim[ 1 ] * 0.5 - 0.5 );
+    double offsetX = this->ImageCenter[0] - ( dim[0] * 0.5 - 0.5 );
+    double offsetY = this->ImageCenter[1] - ( dim[1] * 0.5 - 0.5 );
 
     this->Shader->UseProgram( true );
     this->Shader->SetVariable( "mainTexture", int( 0 ) );
     this->Shader->SetVariable( "UseTransparency", this->UseTransparency );
     this->Shader->SetVariable( "UseGradient", this->UseGradient );
     this->Shader->SetVariable( "ShowMask", this->ShowMask );
-    float transpPosX = (float)( this->TransparencyPosition[ 0 ] * dim[ 0 ] );
-    float transpPosY = (float)( this->TransparencyPosition[ 1 ] * dim[ 1 ] );
+    float transpPosX = (float)( this->TransparencyPosition[0] * dim[0] );
+    float transpPosY = (float)( this->TransparencyPosition[1] * dim[1] );
     this->Shader->SetVariable( "TransparencyPosition", transpPosX, transpPosY );
-    float transpMin = (float)( this->TransparencyRadius[ 0 ] * dim[ 0 ] );
-    float transpMax = (float)( this->TransparencyRadius[ 1 ] * dim[ 0 ] );
+    float transpMin = (float)( this->TransparencyRadius[0] * dim[0] );
+    float transpMax = (float)( this->TransparencyRadius[1] * dim[0] );
     this->Shader->SetVariable( "TransparencyRadius", transpMin, transpMax );
     this->Shader->SetVariable( "ImageOffset", (float)offsetX, (float)offsetY );
-    this->Shader->SetVariable( "ImageCenter", (float)ImageCenter[ 0 ], (float)ImageCenter[ 1 ] );
+    this->Shader->SetVariable( "ImageCenter", (float)ImageCenter[0], (float)ImageCenter[1] );
     this->Shader->SetVariable( "LensDistortion", (float)this->LensDistortion );
     this->Shader->SetVariable( "GlobalOpacity", (float)( this->GlobalOpacity ) );
     this->Shader->SetVariable( "Saturation", (float)( this->Saturation ) );
@@ -114,11 +114,11 @@ int vtkIbisImagePlaneMapper::RenderTranslucentPolygonalGeometry( vtkRenderer * r
     {
         glTexCoord2d( 0.5, 0.5 );
         glVertex2d( minX, minY );
-        glTexCoord2d( dim[ 0 ] - 0.5, 0.5 );
+        glTexCoord2d( dim[0] - 0.5, 0.5 );
         glVertex2d( maxX, minY );
-        glTexCoord2d( dim[ 0 ] - 0.5, dim[ 1 ] - 0.5 );
+        glTexCoord2d( dim[0] - 0.5, dim[1] - 0.5 );
         glVertex2d( maxX, maxY );
-        glTexCoord2d( 0.5, dim[ 1 ] - 0.5 );
+        glTexCoord2d( 0.5, dim[1] - 0.5 );
         glVertex2d( minX, maxY );
     }
     glEnd();
@@ -177,8 +177,8 @@ void vtkIbisImagePlaneMapper::SetGlobalOpacity( double opacity )
 
 void vtkIbisImagePlaneMapper::SetImageCenter( double x, double y )
 {
-    this->ImageCenter[ 0 ] = x;
-    this->ImageCenter[ 1 ] = y;
+    this->ImageCenter[0] = x;
+    this->ImageCenter[1] = y;
     this->Modified();
 }
 
@@ -208,15 +208,15 @@ void vtkIbisImagePlaneMapper::SetShowMask( bool show )
 
 void vtkIbisImagePlaneMapper::SetTransparencyPosition( double x, double y )
 {
-    this->TransparencyPosition[ 0 ] = x;
-    this->TransparencyPosition[ 1 ] = y;
+    this->TransparencyPosition[0] = x;
+    this->TransparencyPosition[1] = y;
     this->Modified();
 }
 
 void vtkIbisImagePlaneMapper::SetTransparencyRadius( double min, double max )
 {
-    this->TransparencyRadius[ 0 ] = min;
-    this->TransparencyRadius[ 1 ] = max;
+    this->TransparencyRadius[0] = min;
+    this->TransparencyRadius[1] = max;
     this->Modified();
 }
 
@@ -282,14 +282,14 @@ void vtkIbisImagePlaneMapper::UpdateTexture()
     }
 
     // Setup the texture
-    int dim[ 3 ];
+    int dim[3];
     input->GetDimensions( dim );
     glEnable( GL_TEXTURE_RECTANGLE );
     if( this->TextureId == 0 ) glGenTextures( 1, &( this->TextureId ) );
     glBindTexture( GL_TEXTURE_RECTANGLE, this->TextureId );
     glTexParameteri( GL_TEXTURE_RECTANGLE, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
     glTexParameteri( GL_TEXTURE_RECTANGLE, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
-    glTexImage2D( GL_TEXTURE_RECTANGLE, 0, internalFormat, dim[ 0 ], dim[ 1 ], 0, format, GL_UNSIGNED_BYTE,
+    glTexImage2D( GL_TEXTURE_RECTANGLE, 0, internalFormat, dim[0], dim[1], 0, format, GL_UNSIGNED_BYTE,
                   input->GetScalarPointer() );
     glBindTexture( GL_TEXTURE_RECTANGLE, 0 );
     glDisable( GL_TEXTURE_RECTANGLE );

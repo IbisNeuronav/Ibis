@@ -27,11 +27,11 @@ vtkStandardNewMacro( vtkCircleWithCrossSource );
 
 vtkCircleWithCrossSource::vtkCircleWithCrossSource()
 {
-    this->Radius      = 1.0;
-    this->Resolution  = 0;
-    this->Center[ 0 ] = 0.0;
-    this->Center[ 1 ] = 0.0;
-    this->Center[ 2 ] = 0.0;
+    this->Radius     = 1.0;
+    this->Resolution = 0;
+    this->Center[0]  = 0.0;
+    this->Center[1]  = 0.0;
+    this->Center[2]  = 0.0;
     this->SetNumberOfInputPorts( 0 );
 }
 
@@ -53,12 +53,12 @@ int vtkCircleWithCrossSource::RequestData( vtkInformation * vtkNotUsed( request 
     if( this->Resolution > 0 )
     {
         double delta = ( 360.0 / numPts ) * ( vtkMath::Pi() / 180.0 );
-        double newPoint[ 3 ];
+        double newPoint[3];
         for( int i = 0; i < numPts; i++ )
         {
-            newPoint[ 0 ] = Center[ 0 ] + this->Radius * sin( delta * i );
-            newPoint[ 1 ] = Center[ 1 ] + this->Radius * cos( delta * i );
-            newPoint[ 2 ] = Center[ 2 ] + 0.0;
+            newPoint[0] = Center[0] + this->Radius * sin( delta * i );
+            newPoint[1] = Center[1] + this->Radius * cos( delta * i );
+            newPoint[2] = Center[2] + 0.0;
             newPoints->SetPoint( i, newPoint );
         }
     }

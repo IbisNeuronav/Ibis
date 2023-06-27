@@ -38,7 +38,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 ObjectSerializationMacro( QuadViewWindow );
 
-const QString QuadViewWindow::ViewNames[4] = {"Transverse", "ThreeD", "Coronal", "Sagittal"};
+const QString QuadViewWindow::ViewNames[4] = { "Transverse", "ThreeD", "Coronal", "Sagittal" };
 
 QuadViewWindow::QuadViewWindow( QWidget * parent, Qt::WindowFlags fl ) : QWidget( parent, fl )
 {

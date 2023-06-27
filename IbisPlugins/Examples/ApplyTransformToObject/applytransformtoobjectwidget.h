@@ -2,6 +2,7 @@
 #define APPLYTRANSFORMTOOBJECTWIDGET_H
 
 #include <QWidget>
+
 #include "applytransformtoobjectplugininterface.h"
 
 class SceneObject;

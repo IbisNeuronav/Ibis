@@ -47,7 +47,7 @@ void vtkXFMReader::Update()
 
     Matrix->Identity();
     // read the first line of the file to make sure it is a tag file
-    char tempLine[ MAX_LINE_LENGTH ];
+    char tempLine[MAX_LINE_LENGTH];
     int found = 0;
     while( !found && !f.eof() )
     {
@@ -55,7 +55,7 @@ void vtkXFMReader::Update()
         std::string line( tempLine );
         std::vector<std::string> tokens;
         Tokenize( line, tokens );
-        if( tokens.size() == 2 && tokens[ 0 ] == "Linear_Transform" )
+        if( tokens.size() == 2 && tokens[0] == "Linear_Transform" )
         {
             found = 1;
         }
@@ -70,7 +70,7 @@ void vtkXFMReader::Update()
     int lastLine = 0;
     int i        = 0, j;
     int tokenIndex;
-    double elem[ 4 ];
+    double elem[4];
     while( !lastLine && !f.eof() )
     {
         f.getline( tempLine, MAX_LINE_LENGTH );
@@ -88,13 +88,13 @@ void vtkXFMReader::Update()
             tokenIndex = 0;
             for( j = 0; j < 4; j++ )
             {
-                std::istringstream stream( tokens[ tokenIndex ] );
-                stream >> elem[ j ];
+                std::istringstream stream( tokens[tokenIndex] );
+                stream >> elem[j];
                 tokenIndex++;
             }
             for( j = 0; j < 4; j++ )
             {
-                Matrix->SetElement( i, j, elem[ j ] );
+                Matrix->SetElement( i, j, elem[j] );
             }
             i++;
         }

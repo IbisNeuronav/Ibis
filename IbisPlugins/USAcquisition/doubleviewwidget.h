@@ -12,6 +12,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #define DOUBLEVIEWWIDGET_H
 
 #include <vtkSmartPointer.h>
+
 #include <QWidget>
 
 /**

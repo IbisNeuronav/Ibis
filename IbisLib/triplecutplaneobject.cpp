@@ -381,7 +381,7 @@ void TripleCutPlaneObject::SetCursorVisibility( bool v )
 
 void TripleCutPlaneObject::SetCursorColor( const QColor & c )
 {
-    double newColorfloat[3] = {1, 1, 1};
+    double newColorfloat[3] = { 1, 1, 1 };
     newColorfloat[0]        = double( c.red() ) / 255.0;
     newColorfloat[1]        = double( c.green() ) / 255.0;
     newColorfloat[2]        = double( c.blue() ) / 255.0;

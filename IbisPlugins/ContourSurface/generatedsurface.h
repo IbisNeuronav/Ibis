@@ -13,6 +13,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 #include <QString>
 #include <QVector>
+
 #include "polydataobject.h"
 #include "serializer.h"
 

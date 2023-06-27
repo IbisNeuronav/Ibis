@@ -139,7 +139,7 @@ double * PointerObject::GetTipPosition() { return this->GetWorldTransform()->Get
 
 void PointerObject::GetMainAxisPosition( double pos[3] )
 {
-    double localPos[3] = {0.0, 0.0, 140.0};  // simtodo : this is hardcoded for fs613 : implement way to set this
+    double localPos[3] = { 0.0, 0.0, 140.0 };  // simtodo : this is hardcoded for fs613 : implement way to set this
     GetWorldTransform()->TransformPoint( localPos, pos );
 }
 

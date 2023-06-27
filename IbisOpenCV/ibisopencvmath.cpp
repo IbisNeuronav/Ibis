@@ -43,7 +43,7 @@ cv::Point3f IbisMath::MultMat4CvPoint3f( vtkMatrix4x4 * mat, cv::Point3f & in )
     in4[1]         = in.y;
     in4[2]         = in.z;
     in4[3]         = 1.0;
-    double out4[4] = {0.0, 0.0, 0.0, 1.0};
+    double out4[4] = { 0.0, 0.0, 0.0, 1.0 };
     mat->MultiplyPoint( in4, out4 );
     return cv::Point3f( out4[0], out4[1], out4[2] );
 }

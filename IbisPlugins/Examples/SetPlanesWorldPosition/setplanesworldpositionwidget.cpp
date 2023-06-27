@@ -1,5 +1,6 @@
-#include "ibisapi.h"
 #include "setplanesworldpositionwidget.h"
+
+#include "ibisapi.h"
 #include "ui_setplanesworldpositionwidget.h"
 
 SetPlanesWorldPositionWidget::SetPlanesWorldPositionWidget( QWidget * parent )

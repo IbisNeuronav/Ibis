@@ -41,7 +41,7 @@ void TokenizeRemovingQuotes( const std::string & str, std::vector<std::string> &
     std::string::size_type pos = str.find_first_of( delimiters, lastPos );
     while( std::string::npos != pos || std::string::npos != lastPos )
     {
-        if( str[ lastPos ] == '\"' )
+        if( str[lastPos] == '\"' )
         {
             ++lastPos;
             std::string::size_type pos1 = str.find_first_of( '\"', lastPos );

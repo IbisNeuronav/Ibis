@@ -15,8 +15,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "ui_worldobjectsettingswidget.h"
 #include "worldobject.h"
 
-const char * UpdateFrequencyStrings[4] = {"7.5", "15", "30", "60"};
-const double UpdateFrequencies[4]      = {7.5, 15.0, 30.0, 60.0};
+const char * UpdateFrequencyStrings[4] = { "7.5", "15", "30", "60" };
+const double UpdateFrequencies[4]      = { 7.5, 15.0, 30.0, 60.0 };
 
 WorldObjectSettingsWidget::WorldObjectSettingsWidget( QWidget * parent )
     : QWidget( parent ), ui( new Ui::WorldObjectSettingsWidget ), m_worldObject( 0 )

@@ -12,8 +12,10 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #define LandmarkRegistrationObjectPluginInterface_H
 
 #include <vtkSmartPointer.h>
+
 #include <QWidget>
 #include <vector>
+
 #include "objectplugininterface.h"
 
 class LandmarkRegistrationObject;

@@ -13,13 +13,14 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #ifndef __RecordTrackingWidget_h_
 #define __RecordTrackingWidget_h_
 
+#include <vtkTransform.h>
+
 #include <QElapsedTimer>
 #include <QWidget>
-
-#include <vtkTransform.h>
 #include <fstream>
 #include <iostream>
 #include <vector>
+
 #include "trackedsceneobject.h"
 
 class RecordTrackingPluginInterface;

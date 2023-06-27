@@ -10,50 +10,52 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 // Thanks to Simon Drouin for writing this class
 
+#include "usmanualcalibrationplugininterface.h"
+
 #include <QMessageBox>
 #include <QSettings>
 #include <QtPlugin>
+
 #include "ibisapi.h"
 #include "sceneobject.h"
-#include "usmanualcalibrationplugininterface.h"
 #include "usmanualcalibrationwidget.h"
 #include "usprobeobject.h"
 
 const double phantomPoints[2][16][3] = {
     // medium depth
-    {{0, 5, 50},
-     {50, 5, 50},
-     {0, 45, 50},
-     {50, 45, 50},
-     {0, 50, 45},
-     {50, 50, 45},
-     {0, 50, 5},
-     {50, 50, 5},
-     {0, 45, 0},
-     {50, 45, 0},
-     {0, 5, 0},
-     {50, 5, 0},
-     {0, 0, 45},
-     {50, 0, 45},
-     {0, 0, 5},
-     {50, 0, 5}},
+    { { 0, 5, 50 },
+      { 50, 5, 50 },
+      { 0, 45, 50 },
+      { 50, 45, 50 },
+      { 0, 50, 45 },
+      { 50, 50, 45 },
+      { 0, 50, 5 },
+      { 50, 50, 5 },
+      { 0, 45, 0 },
+      { 50, 45, 0 },
+      { 0, 5, 0 },
+      { 50, 5, 0 },
+      { 0, 0, 45 },
+      { 50, 0, 45 },
+      { 0, 0, 5 },
+      { 50, 0, 5 } },
     // shallow depth
-    {{0, 15, 40},
-     {50, 15, 40},
-     {0, 35, 40},
-     {50, 35, 40},
-     {0, 40, 35},
-     {50, 40, 35},
-     {0, 40, 15},
-     {50, 40, 15},
-     {0, 35, 10},
-     {50, 35, 10},
-     {0, 15, 10},
-     {50, 15, 10},
-     {0, 10, 35},
-     {50, 10, 35},
-     {0, 10, 15},
-     {50, 10, 15}}};
+    { { 0, 15, 40 },
+      { 50, 15, 40 },
+      { 0, 35, 40 },
+      { 50, 35, 40 },
+      { 0, 40, 35 },
+      { 50, 40, 35 },
+      { 0, 40, 15 },
+      { 50, 40, 15 },
+      { 0, 35, 10 },
+      { 50, 35, 10 },
+      { 0, 15, 10 },
+      { 50, 15, 10 },
+      { 0, 10, 35 },
+      { 50, 10, 35 },
+      { 0, 10, 15 },
+      { 50, 10, 15 } } };
 
 USManualCalibrationPluginInterface::USManualCalibrationPluginInterface()
 {
@@ -157,7 +159,7 @@ void USManualCalibrationPluginInterface::BuildWiresRepresentation()
     phantomLinesPoints->SetNumberOfPoints( 16 );
     for( int i = 0; i < 16; ++i ) phantomLinesPoints->SetPoint( i, phantomPoints[m_currentPhantomSize][i] );
 
-    vtkIdType pts[4][4]  = {{0, 1, 2, 3}, {4, 5, 6, 7}, {8, 9, 10, 11}, {12, 13, 14, 15}};
+    vtkIdType pts[4][4]  = { { 0, 1, 2, 3 }, { 4, 5, 6, 7 }, { 8, 9, 10, 11 }, { 12, 13, 14, 15 } };
     vtkCellArray * lines = vtkCellArray::New();
     for( int i = 0; i < 4; i++ ) lines->InsertNextCell( 4, pts[i] );
     phantomLinesPoly->SetPoints( phantomLinesPoints );
@@ -224,7 +226,7 @@ void USManualCalibrationPluginInterface::UpdateWiresRepresentation()
     phantomLinesPoints->SetNumberOfPoints( 16 );
     for( int i = 0; i < 16; ++i ) phantomLinesPoints->SetPoint( i, phantomPoints[m_currentPhantomSize][i] );
 
-    vtkIdType pts[4][4] = {{0, 1, 2, 3}, {4, 5, 6, 7}, {8, 9, 10, 11}, {12, 13, 14, 15}};
+    vtkIdType pts[4][4] = { { 0, 1, 2, 3 }, { 4, 5, 6, 7 }, { 8, 9, 10, 11 }, { 12, 13, 14, 15 } };
     for( int i = 0; i < 4; i++ ) lines->InsertNextCell( 4, pts[i] );
 
     phantomLinesPoly->DeleteCells();
@@ -242,8 +244,8 @@ void USManualCalibrationPluginInterface::UpdateWiresRepresentation()
 
 void USManualCalibrationPluginInterface::StartPhantomRegistration()
 {
-    const char * pointNames[4] = {"One", "Two", "Three", "Four"};
-    double pointCoords[4][3]   = {{0, -17.5, 53}, {50, -17.5, 53}, {42, 112.5, 53}, {10, 80, 53}};
+    const char * pointNames[4] = { "One", "Two", "Three", "Four" };
+    double pointCoords[4][3]   = { { 0, -17.5, 53 }, { 50, -17.5, 53 }, { 42, 112.5, 53 }, { 10, 80, 53 } };
 
     if( m_phantomWiresObjectId == IbisAPI::InvalidId ) BuildWiresRepresentation();
     SceneObject * wiresObject = GetIbisAPI()->GetObjectByID( m_phantomWiresObjectId );

@@ -3,15 +3,16 @@
 #ifndef __SequenceIOWidget_h_
 #define __SequenceIOWidget_h_
 
-#include <QRadioButton>
-#include <QWidget>
-
 #include <vtkTransform.h>
 #include <vtkXFMReader.h>
+
+#include <QRadioButton>
+#include <QWidget>
 #include <fstream>
 #include <iostream>
 #include <sstream>
 #include <vector>
+
 #include "ibisitkvtkconverter.h"
 #include "trackedsceneobject.h"
 #include "vtk_zlib.h"

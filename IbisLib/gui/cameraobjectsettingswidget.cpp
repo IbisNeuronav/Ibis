@@ -115,7 +115,7 @@ void CameraObjectSettingsWidget::UpdateUI()
     ui->fySpinBox->blockSignals( false );
 
     // Image center
-    double center[2] = {0.0, 0.0};
+    double center[2] = { 0.0, 0.0 };
     m_camera->GetImageCenterPix( center[0], center[1] );
 
     ui->xImageCenterSpinBox->blockSignals( true );
@@ -141,8 +141,8 @@ void CameraObjectSettingsWidget::UpdateUI()
     ui->lensDisplacementSpinBox->blockSignals( false );
 
     // Update translation and rotation of calibration matrix
-    double trans[3] = {0.0, 0.0, 0.0};
-    double rot[3]   = {0.0, 0.0, 0.0};
+    double trans[3] = { 0.0, 0.0, 0.0 };
+    double rot[3]   = { 0.0, 0.0, 0.0 };
     vtkMatrix4x4Operators::MatrixToTransRot( m_camera->GetCalibrationMatrix(), trans, rot );
     ui->xtransSpinBox->blockSignals( true );
     ui->xtransSpinBox->setValue( trans[0] );

@@ -109,7 +109,7 @@ void CameraIntrinsicParams::SetVerticalAngleRad( double angle )
 // CameraObject class implementation
 //---------------------------------------------------------------------------------------
 
-static int DefaultImageSize[2] = {640, 480};
+static int DefaultImageSize[2] = { 640, 480 };
 
 CameraObject::CameraObject()
 {
@@ -813,13 +813,13 @@ void CameraObject::WorldToImage( double * worldPos, double & xIm, double & yIm )
     vtkMatrix4x4 * mat = vtkMatrix4x4::New();
     mat->DeepCopy( m_opticalCenterTransform->GetMatrix() );
     mat->Invert();
-    double pCam[4] = {0.0, 0.0, 0.0, 1.0};
+    double pCam[4] = { 0.0, 0.0, 0.0, 1.0 };
     mat->MultiplyPoint( p4, pCam );
     mat->Delete();
 
-    double centerPix[2] = {0.0, 0.0};
+    double centerPix[2] = { 0.0, 0.0 };
     GetImageCenterPix( centerPix[0], centerPix[1] );
-    double focalPix[2] = {0.0, 0.0};
+    double focalPix[2] = { 0.0, 0.0 };
     GetFocalPix( focalPix[0], focalPix[1] );
 
     xIm = centerPix[0] + pCam[0] / pCam[2] * focalPix[0];
@@ -927,7 +927,7 @@ void CameraObject::DrawRect( double x, double y, double width, double height, do
 
 void CameraObject::DrawTarget( double x, double y, double /*radius*/, double color[4] )
 {
-    double center[3]                = {0.0, 0.0, 0.0};
+    double center[3]                = { 0.0, 0.0, 0.0 };
     center[0]                       = x;
     center[1]                       = y;
     PerViewElementCont::iterator it = m_perViewElements.begin();
@@ -1099,7 +1099,8 @@ void CameraObject::CreateCameraRepresentation()
     pts->InsertNextPoint( 100.0, 100.0, -m_imageDistance );
     pts->InsertNextPoint( -100.0, 100.0, -m_imageDistance );
 
-    static vtkIdType linesIndex[8][2]   = {{0, 1}, {0, 2}, {0, 3}, {0, 4}, {1, 2}, {2, 3}, {3, 4}, {4, 1}};
+    static vtkIdType linesIndex[8][2]   = { { 0, 1 }, { 0, 2 }, { 0, 3 }, { 0, 4 },
+                                          { 1, 2 }, { 2, 3 }, { 3, 4 }, { 4, 1 } };
     vtkSmartPointer<vtkCellArray> lines = vtkSmartPointer<vtkCellArray>::New();
     for( int i = 0; i < 8; ++i ) lines->InsertNextCell( 2, linesIndex[i] );
 

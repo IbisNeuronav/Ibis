@@ -57,12 +57,12 @@ vtkQtMatrixDialog::vtkQtMatrixDialog( bool readOnly, QWidget * parent )
     {
         for( int j = 0; j < 4; j++ )
         {
-            m_matEdit[ i ][ j ] = new QLineEdit( this );
-            m_matEdit[ i ][ j ]->setReadOnly( readOnly );
-            m_matEdit[ i ][ j ]->setAlignment( Qt::AlignRight );
-            m_matEdit[ i ][ j ]->setMaxLength( 12 );
-            connect( m_matEdit[ i ][ j ], SIGNAL( returnPressed() ), this, SLOT( LineEditChanged() ) );
-            gridBox->addWidget( m_matEdit[ i ][ j ], i, j );
+            m_matEdit[i][j] = new QLineEdit( this );
+            m_matEdit[i][j]->setReadOnly( readOnly );
+            m_matEdit[i][j]->setAlignment( Qt::AlignRight );
+            m_matEdit[i][j]->setMaxLength( 12 );
+            connect( m_matEdit[i][j], SIGNAL( returnPressed() ), this, SLOT( LineEditChanged() ) );
+            gridBox->addWidget( m_matEdit[i][j], i, j );
         }
     }
 
@@ -166,7 +166,7 @@ void vtkQtMatrixDialog::SetMatrixElements()
     {
         for( int j = 0; j < 4; j++ )
         {
-            m_matrix->SetElement( i, j, m_matEdit[ i ][ j ]->text().toDouble() );
+            m_matrix->SetElement( i, j, m_matEdit[i][j]->text().toDouble() );
         }
     }
     m_matrix->Modified();
@@ -233,7 +233,7 @@ void vtkQtMatrixDialog::UpdateUI()
         {
             for( int j = 0; j < 4; j++ )
             {
-                m_matEdit[ i ][ j ]->setText( QString::number( m_matrix->Element[ i ][ j ], 'g', 6 ) );
+                m_matEdit[i][j]->setText( QString::number( m_matrix->Element[i][j], 'g', 6 ) );
             }
         }
     }
@@ -243,7 +243,7 @@ void vtkQtMatrixDialog::UpdateUI()
         {
             for( int j = 0; j < 4; j++ )
             {
-                m_matEdit[ i ][ j ]->setText( "----" );
+                m_matEdit[i][j]->setText( "----" );
             }
         }
     }
@@ -309,7 +309,7 @@ void vtkQtMatrixDialog::CopyButtonClicked()
     {
         for( int j = 0; j < 4; j++ )
         {
-            all_matrix_elements.append( m_matEdit[ i ][ j ]->text() );
+            all_matrix_elements.append( m_matEdit[i][j]->text() );
             all_matrix_elements.append( ' ' );
         }
     }
@@ -334,7 +334,7 @@ void vtkQtMatrixDialog::PasteButtonClicked()
             {
                 for( int j = 0; j < 4; j++ )
                 {
-                    m_matEdit[ i ][ j ]->setText( list.at( l++ ) );
+                    m_matEdit[i][j]->setText( list.at( l++ ) );
                 }
             }
             this->SetMatrixElements();

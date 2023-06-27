@@ -9,13 +9,16 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
 // Thanks to Dante De Nigris for writing this class
+#include "gpu_rigidregistrationwidget.h"
+
 #include <vnl/algo/vnl_real_eigensystem.h>
 #include <vnl/algo/vnl_symmetric_eigensystem.h>
 #include <vtkSmartPointer.h>
+
 #include <QComboBox>
 #include <QMessageBox>
+
 #include "gpu_rigidregistrationplugininterface.h"
-#include "gpu_rigidregistrationwidget.h"
 #include "ibisapi.h"
 
 GPU_RigidRegistrationWidget::GPU_RigidRegistrationWidget( QWidget * parent )

@@ -459,7 +459,7 @@ void IbisHardwareIGSIO::AssignDeviceImageToTool( igtlioDevicePointer device, Too
         {
             imageContent = imageDev->GetContent().image;
             // OpenIGTLink specifications has origin as center of image
-            double origin[3] = {0., 0., 0.};
+            double origin[3] = { 0., 0., 0. };
             imageContent->SetOrigin( origin );
         }
     }

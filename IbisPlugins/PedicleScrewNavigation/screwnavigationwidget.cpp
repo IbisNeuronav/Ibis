@@ -9,10 +9,12 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
 // Author: Houssem-Eddine Gueziri
+#include "screwnavigationwidget.h"
+
 #include <Windows.h>
+
 #include <cstdio>
 
-#include "screwnavigationwidget.h"
 #include "screwtablewidget.h"
 #include "ui_screwnavigationwidget.h"
 
@@ -518,20 +520,20 @@ void ScrewNavigationWidget::GetAxialPositionAndOrientation( ImageObject * curren
     center[1]     = ttip[1];
     center[2]     = ttip[2];
 
-    double pointerTip[4] = {m_pointerDirection[0], m_pointerDirection[1], m_pointerDirection[2], 1.0};
+    double pointerTip[4] = { m_pointerDirection[0], m_pointerDirection[1], m_pointerDirection[2], 1.0 };
     double worldPointerTip[4];
     pointerTransform->MultiplyPoint( pointerTip, worldPointerTip );
     double imagePointerTip[4];
     inverseImageTransform->MultiplyPoint( worldPointerTip, imagePointerTip );
 
-    double pointerBase[4] = {0.0, 0.0, 0.0, 1.0};
+    double pointerBase[4] = { 0.0, 0.0, 0.0, 1.0 };
     double worldPointerBase[4];
     pointerTransform->MultiplyPoint( pointerBase, worldPointerBase );
     double imagePointerBase[4];
     inverseImageTransform->MultiplyPoint( worldPointerBase, imagePointerBase );
 
-    double vectorOrientation[3] = {imagePointerTip[0] - imagePointerBase[0], imagePointerTip[1] - imagePointerBase[1],
-                                   imagePointerTip[2] - imagePointerBase[2]};
+    double vectorOrientation[3] = { imagePointerTip[0] - imagePointerBase[0], imagePointerTip[1] - imagePointerBase[1],
+                                    imagePointerTip[2] - imagePointerBase[2] };
 
     vtkMath::Normalize( vectorOrientation );
     vectorOrientation[0] = std::acos( vectorOrientation[0] ) * 180.0 / vtkMath::Pi();
@@ -559,20 +561,20 @@ void ScrewNavigationWidget::GetSagittalPositionAndOrientation( ImageObject * cur
     center[1]     = ttip[1];
     center[2]     = ttip[0];
 
-    double pointerTip[4] = {m_pointerDirection[0], m_pointerDirection[1], m_pointerDirection[2], 1.0};
+    double pointerTip[4] = { m_pointerDirection[0], m_pointerDirection[1], m_pointerDirection[2], 1.0 };
     double worldPointerTip[4];
     pointerTransform->MultiplyPoint( pointerTip, worldPointerTip );
     double imagePointerTip[4];
     inverseImageTransform->MultiplyPoint( worldPointerTip, imagePointerTip );
 
-    double pointerBase[4] = {0.0, 0.0, 0.0, 1.0};
+    double pointerBase[4] = { 0.0, 0.0, 0.0, 1.0 };
     double worldPointerBase[4];
     pointerTransform->MultiplyPoint( pointerBase, worldPointerBase );
     double imagePointerBase[4];
     inverseImageTransform->MultiplyPoint( worldPointerBase, imagePointerBase );
 
-    double vectorOrientation[3] = {imagePointerTip[0] - imagePointerBase[0], imagePointerTip[1] - imagePointerBase[1],
-                                   imagePointerTip[2] - imagePointerBase[2]};
+    double vectorOrientation[3] = { imagePointerTip[0] - imagePointerBase[0], imagePointerTip[1] - imagePointerBase[1],
+                                    imagePointerTip[2] - imagePointerBase[2] };
 
     vtkMath::Normalize( vectorOrientation );
     vectorOrientation[0] = std::acos( vectorOrientation[0] ) * 180.0 / vtkMath::Pi();
@@ -714,9 +716,9 @@ void ScrewNavigationWidget::UpdatePlannedScrews()
                 }
 
                 // move sagittal planning trajectory
-                double sagPointerPos[3]         = {-pointerPos[2], pointerPos[1], pointerPos[0]};
-                double sagPointerOrientation[3] = {pointerOrientation[0] + 90, pointerOrientation[1] + 90,
-                                                   pointerOrientation[2] + 90};
+                double sagPointerPos[3]         = { -pointerPos[2], pointerPos[1], pointerPos[0] };
+                double sagPointerOrientation[3] = { pointerOrientation[0] + 90, pointerOrientation[1] + 90,
+                                                    pointerOrientation[2] + 90 };
 
                 this->GetSagittalPositionAndOrientation( currentObject, pointerTransform, m_currentSagittalPosition,
                                                          m_currentSagittalOrientation );
@@ -799,7 +801,7 @@ void ScrewNavigationWidget::AddPlannedScrew( double position[3], double orientat
         double normalizedY[3];
         double normalizedZ[3];
         // The Z axis is an arbitrary vector cross X
-        double arbitrary[3] = {10, -10, 5.0};
+        double arbitrary[3] = { 10, -10, 5.0 };
         vtkMath::Cross( orientation, arbitrary, normalizedZ );
         vtkMath::Normalize( normalizedZ );
 
@@ -842,7 +844,7 @@ void ScrewNavigationWidget::AddPlannedScrew( double position[3], double orientat
     coneSource->SetHeight( screwTipSize );
     coneSource->SetDirection( orientation );
     double yoffset       = ( screwLength - screwTipSize ) + screwTipSize / 2.0;
-    double coneOffset[3] = {yoffset * orientation[0], yoffset * orientation[1], yoffset * orientation[2]};
+    double coneOffset[3] = { yoffset * orientation[0], yoffset * orientation[1], yoffset * orientation[2] };
     coneSource->SetCenter( coneOffset );
     coneSource->SetCapping( true );
 
@@ -967,10 +969,10 @@ bool ScrewNavigationWidget::GetPointerDirection( double ( &direction )[3] )
     if( m_pluginInterface )
     {
         IbisAPI * api        = m_pluginInterface->GetIbisAPI();
-        double pointerTip[4] = {m_pointerDirection[0], m_pointerDirection[1], m_pointerDirection[2], 1.0};
+        double pointerTip[4] = { m_pointerDirection[0], m_pointerDirection[1], m_pointerDirection[2], 1.0 };
         double worldPointerTip[4];
         api->GetNavigationPointerObject()->GetWorldTransform()->MultiplyPoint( pointerTip, worldPointerTip );
-        double pointerBase[4] = {0.0, 0.0, 0.0, 1.0};
+        double pointerBase[4] = { 0.0, 0.0, 0.0, 1.0 };
         double worldPointerBase[4];
         api->GetNavigationPointerObject()->GetWorldTransform()->MultiplyPoint( pointerBase, worldPointerBase );
         direction[0] = worldPointerTip[0] - worldPointerBase[0];
@@ -1302,7 +1304,7 @@ void ScrewNavigationWidget::on_openScrewTableButton_clicked()
 
 void ScrewNavigationWidget::on_saveScrewPositionButton_clicked()
 {
-    double pointerOrientation[3] = {0.0, 0.0, 0.0};
+    double pointerOrientation[3] = { 0.0, 0.0, 0.0 };
     if( !this->GetPointerDirection( pointerOrientation ) )
     {
         m_pluginInterface->GetIbisAPI()->Warning(
@@ -1315,7 +1317,7 @@ void ScrewNavigationWidget::on_saveScrewPositionButton_clicked()
     // QString::number(pointerOrientation[1]) + tr(", ") +
     //    QString::number(pointerOrientation[2]) + tr("]");
     // m_pluginInterface->GetIbisAPI()->Warning(tr("Pointer orientation"), message);
-    double pointerPosition[3] = {0.0, 0.0, 0.0};
+    double pointerPosition[3] = { 0.0, 0.0, 0.0 };
     if( m_pluginInterface )
     {
         IbisAPI * api      = m_pluginInterface->GetIbisAPI();

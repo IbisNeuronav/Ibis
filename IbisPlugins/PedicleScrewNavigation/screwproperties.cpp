@@ -1,5 +1,3 @@
-#include <iostream>
-#include <sstream>
 #include "screwproperties.h"
 
 #include <vtkActor.h>
@@ -8,6 +6,9 @@
 #include <vtkPolyData.h>
 #include <vtkPolyDataMapper.h>
 #include <vtkProperty.h>
+
+#include <iostream>
+#include <sstream>
 
 ObjectSerializationMacro( Screw );
 
@@ -242,11 +243,11 @@ void Screw::GetScrewPolyData( double length, double diameter, double tipSize, vt
      *            \/
      *            p3
      * */
-    double p0[3] = {-diameter / 2.0, 0.0, 0.0};
-    double p1[3] = {diameter / 2.0, 0.0, 0.0};
-    double p2[3] = {diameter / 2.0, -length + tipSize, 0.0};
-    double p3[3] = {0.0, -length, 0.0};
-    double p4[3] = {-diameter / 2.0, -length + tipSize, 0.0};
+    double p0[3] = { -diameter / 2.0, 0.0, 0.0 };
+    double p1[3] = { diameter / 2.0, 0.0, 0.0 };
+    double p2[3] = { diameter / 2.0, -length + tipSize, 0.0 };
+    double p3[3] = { 0.0, -length, 0.0 };
+    double p4[3] = { -diameter / 2.0, -length + tipSize, 0.0 };
 
     vtkSmartPointer<vtkPoints> pts = vtkSmartPointer<vtkPoints>::New();
     pts->InsertNextPoint( p0 );

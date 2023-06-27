@@ -1,11 +1,13 @@
 
-#include <QMessageBox>
-#include <QtPlugin>
 #include "gpuvolumereconstructionapitestplugininterface.h"
 
 #include <vtkImageData.h>
 #include <vtkSmartPointer.h>
 #include <vtkTransform.h>
+
+#include <QMessageBox>
+#include <QtPlugin>
+
 #include "gpu_volumereconstruction.h"
 #include "gpu_volumereconstructionplugininterface.h"
 #include "ibisapi.h"

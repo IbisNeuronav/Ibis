@@ -63,9 +63,9 @@ protected:
     int RequestData( vtkInformation *, vtkInformationVector **, vtkInformationVector * ) override;
 
     // Plane specification
-    double Origin[ 3 ];
-    double Point1[ 3 ];
-    double Point2[ 3 ];
+    double Origin[3];
+    double Point1[3];
+    double Point2[3];
 
     struct RangeInfo
     {

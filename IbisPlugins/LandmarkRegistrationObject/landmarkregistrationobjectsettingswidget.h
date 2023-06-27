@@ -15,6 +15,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QStandardItemModel>
 #include <QString>
 #include <QWidget>
+
 #include "landmarkregistrationobject.h"
 
 class Application;

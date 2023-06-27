@@ -17,20 +17,19 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <itkGaussianDerivativeOperator.h>
 #include <itkHistogram.h>
 #include <itkImage.h>
+#include <itkImageFullSampler.h>
+#include <itkImageGridSampler.h>
 #include <itkImageMaskSpatialObject.h>
+#include <itkImageRandomSampler.h>
+#include <itkImageRandomSamplerBase.h>
 #include <itkImageRegionIteratorWithIndex.h>
+#include <itkImageSample.h>
+#include <itkImageSamplerBase.h>
 #include <itkListSample.h>
 #include <itkMatrixOffsetTransformBase.h>
 #include <itkObject.h>
 #include <itkOpenCLUtil.h>
 #include <itkSampleToHistogramFilter.h>
-
-#include <itkImageFullSampler.h>
-#include <itkImageGridSampler.h>
-#include <itkImageRandomSampler.h>
-#include <itkImageRandomSamplerBase.h>
-#include <itkImageSample.h>
-#include <itkImageSamplerBase.h>
 
 namespace itk
 {

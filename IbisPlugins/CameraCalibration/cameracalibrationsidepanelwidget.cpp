@@ -10,12 +10,14 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 // Thanks to Simon Drouin for writing this class
 
+#include "cameracalibrationsidepanelwidget.h"
+
 #include <QDir>
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QProgressDialog>
+
 #include "cameracalibrationplugininterface.h"
-#include "cameracalibrationsidepanelwidget.h"
 #include "cameracalibrator.h"
 #include "cameraobject.h"
 #include "ibisapi.h"

@@ -8,11 +8,12 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
+#include "landmarktransform.h"
+
 #include <vtkDoubleArray.h>
 #include <vtkLandmarkTransform.h>
 #include <vtkMatrix4x4.h>
 #include <vtkPoints.h>
-#include "landmarktransform.h"
 
 LandmarkTransform::LandmarkTransform() { this->Init(); }
 
@@ -118,10 +119,10 @@ bool LandmarkTransform::InternalUpdate()
 
 void LandmarkTransform::UpdateFRE()
 {
-    double in[3]               = {0, 0, 0};
-    double out[3]              = {0, 0, 0};
-    double target[3]           = {0, 0, 0};
-    double error[3]            = {0, 0, 0};
+    double in[3]               = { 0, 0, 0 };
+    double out[3]              = { 0, 0, 0 };
+    double target[3]           = { 0, 0, 0 };
+    double error[3]            = { 0, 0, 0 };
     double error_mag_square    = 0;
     double error_summed_square = 0;
     int n                      = this->SourcePoints->GetNumberOfPoints();

@@ -10,22 +10,23 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 // Thanks to Dante De Nigris for writing this class
 
-#include <vnl/algo/vnl_real_eigensystem.h>
-#include <vnl/algo/vnl_symmetric_eigensystem.h>
-#include <QComboBox>
-#include <QMessageBox>
-#include "gpu_volumereconstructionplugininterface.h"
 #include "gpu_volumereconstructionwidget.h"
 
+#include <itkImageFileWriter.h>
+#include <vnl/algo/vnl_real_eigensystem.h>
+#include <vnl/algo/vnl_symmetric_eigensystem.h>
 #include <vtkImageData.h>
 #include <vtkMatrix4x4.h>
 #include <vtkTransform.h>
+
+#include <QComboBox>
+#include <QMessageBox>
+
+#include "gpu_volumereconstructionplugininterface.h"
+#include "ibisapi.h"
 #include "imageobject.h"
 #include "sceneobject.h"
 #include "usacquisitionobject.h"
-
-#include <itkImageFileWriter.h>
-#include "ibisapi.h"
 
 GPU_VolumeReconstructionWidget::GPU_VolumeReconstructionWidget( QWidget * parent )
     : QWidget( parent ), ui( new Ui::GPU_VolumeReconstructionWidget ), m_pluginInterface( nullptr )
