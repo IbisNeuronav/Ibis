@@ -5,6 +5,8 @@ Ibis was originally developed by [Simon Drouin](http://nist.mni.mcgill.ca/?page_
 
 For instruction on how to get a copy of the code, build it and contribute to the project, please visit [this page](https://github.com/IbisNeuronav/Ibis/wiki/IBIS-Documentation).
 
+Prebuilt Windows binaries can be found [here](https://github.com/IbisNeuronav/Ibis/releases/download/release-3.2.1/Ibis3.2.1-win64-Release.zip) for the latest stable release (recommended) and [here](https://github.com/IbisNeuronav/Ibis/releases/download/latest_dev/ibis-install-windows.zip) for the latest experimental build.
+
 If you use IBIS in your work, please cite the following paper:
 > Drouin S, Kochanowska A, Kersten-Oertel M, Gerard IJ, Zelmann R, De Nigris D, Bériault S, Arbel T, Sirhan D, Sadikot AF, Hall JA,  Sinclair DS, Petrecca K, DelMaestro RF, Collins DL (2016) *IBIS: an OR ready open-source platform for image-guided neurosurgery*. Int J Comput Assist Radiol Surg. doi: 10.1007/s11548-016-1478-0
 
