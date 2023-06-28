@@ -28,6 +28,9 @@ ExternalProject_Add( ${opencv_name}
                -DWITH_ITT:BOOL=OFF
                -DBUILD_opencv_python2:BOOL=FALSE
                -DBUILD_opencv_python3:BOOL=FALSE
+               -DBUILD_opencv_python_bindings_generator:BOOL=FALSE
+               -DBUILD_opencv_python_tests:BOOL=FALSE
+               -DOPENCV_PYTHON_SKIP_DETECTION=ON
                -DBUILD_opencv_apps:BOOL=FALSE
                -DBUILD_JAVA:BOOL=FALSE
                -DBUILD_PACKAGE:BOOL=FALSE

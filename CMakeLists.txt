@@ -106,6 +106,7 @@ endif()
 # Create options to build or not the different dependent projects.
 #==================================================================
 option( IBIS_BUILD_DEFAULT_HARDWARE_MODULE "Build hardware module based on OpenIGTLink and dependencies (OpenIGTLink and OpenIGTLinkIO)" ON )
+option( IBIS_BUILD_ALL_PLUGINS "Build every plugin contained in the IbisPlugins and Extra directories" OFF )
 
 find_package ( OpenCL QUIET )
 include(${CMAKE_COMMON_DIR}/OpenCLMacros.cmake)

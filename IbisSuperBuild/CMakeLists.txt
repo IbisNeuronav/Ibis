@@ -40,6 +40,7 @@ option( IBIS_BUILD_MINIMAL_VTK "Build only the minimal set of VTK modules requir
 if( IBIS_BUILD_ELASTIX )
     option( IBIS_BUILD_MINIMAL_ELASTIX "Build only the minimal set of Elastix modules required by Ibis during the superbuild" ON )
 endif()
+option( IBIS_BUILD_ALL_PLUGINS "Build every plugin contained in the IbisPlugins and Extra directories" OFF )
 
 # Build All External Dependencies except Qt (vtk, Itk, minc, etc.)
 set( vtk_name vtk-${IBIS_VTK_LONG_VERSION} )
@@ -89,4 +90,5 @@ ExternalProject_Add(
                -DOpenIGTLink_DIR:PATH=${IBIS_OPENIGTLINK_DIR}
                -DOpenIGTLinkIO_DIR:PATH=${IBIS_OPENIGTLINKIO_DIR}
                -DIBIS_BUILD_DEFAULT_HARDWARE_MODULE:BOOL=${IBIS_BUILD_IGTL_HARDWARE_SUPPORT}
+               -DIBIS_BUILD_ALL_PLUGINS:BOOL=${IBIS_BUILD_ALL_PLUGINS}
     DEPENDS ${ibis_dependencies} )
