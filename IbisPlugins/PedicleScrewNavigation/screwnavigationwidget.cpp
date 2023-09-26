@@ -11,8 +11,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 // Author: Houssem-Eddine Gueziri
 #include "screwnavigationwidget.h"
 
-#include <Windows.h>
-
 #include <cstdio>
 
 #include "screwtablewidget.h"
