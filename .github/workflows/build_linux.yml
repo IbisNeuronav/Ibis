@@ -1,0 +1,33 @@
+name: Build-Linux
+
+on: [push, pull_request]
+env:
+  BUILD_TYPE: Release
+  ARTIFACT: ibis-install-linux
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: [self-hosted, linux, x64 ]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Configure and build
+        run: | 
+            cmake IbisSuperBuild \
+            -B "${{github.workspace}}/b" \
+            -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} \
+            -DIBIS_BUILD_ELASTIX=TRUE \
+            -DIBIS_BUILD_OPENCV=TRUE \
+            -DIBIS_BUILD_ALL_PLUGINS:BOOL=TRUE
+            cd b
+            make
+
+      - name: Save build artifact
+        uses: actions/upload-artifact@master
+        with:
+          name: ${{ env.ARTIFACT }}
+          path: ${{github.workspace}}/b/Ibis-install
