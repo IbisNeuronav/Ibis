@@ -24,7 +24,7 @@ jobs:
             -DIBIS_BUILD_OPENCV=TRUE \
             -DIBIS_BUILD_ALL_PLUGINS:BOOL=TRUE
             cd b
-            make
+            make -j8
 
       - name: Save build artifact
         uses: actions/upload-artifact@master
