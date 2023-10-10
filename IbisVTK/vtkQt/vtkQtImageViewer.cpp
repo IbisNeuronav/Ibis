@@ -27,11 +27,10 @@ vtkQtImageViewer::vtkQtImageViewer( QWidget * parent ) : QVTKRenderWidget( paren
 
     m_renderer = vtkRenderer::New();
     m_renderer->AddViewProp( m_actor );
-
-    GetRenderWindow()->AddRenderer( m_renderer );
+    renderWindow()->AddRenderer( m_renderer );
 
     vtkInteractorStyleImage * interactorStyle = vtkInteractorStyleImage::New();
-    GetInteractor()->SetInteractorStyle( interactorStyle );
+    interactor()->SetInteractorStyle( interactorStyle );
     interactorStyle->Delete();
 }
 
@@ -60,7 +59,7 @@ void vtkQtImageViewer::RenderFirst()
     cam->SetPosition( scalex, scaley, prevPos[2] );
     cam->SetFocalPoint( scalex, scaley, prevFocal[2] );
 
-    GetRenderWindow()->Render();
+    renderWindow()->Render();
 }
 
 vtkQtImageViewer * vtkQtImageViewer::New() { return new vtkQtImageViewer; }
