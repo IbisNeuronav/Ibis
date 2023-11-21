@@ -3,6 +3,7 @@
 #include <QApplication>
 #include <QDesktopWidget>
 #include <QRect>
+#include <QScreen>
 
 #include "application.h"
 #include "preferencewidget.h"
@@ -47,7 +48,7 @@ const QString IbisPreferences::GetPath( const QString & pathName )
 {
     QMap<QString, QString>::const_iterator it = m_customPaths.find( pathName );
     if( it != m_customPaths.end() ) return it.value();
-    return QString::null;
+    return QString();
 }
 
 bool IbisPreferences::IsPathRegistered( const QString & pathName )
@@ -61,7 +62,7 @@ void IbisPreferences::ShowPreferenceDialog()
 {
     m_prefWidget = new PreferenceWidget;
     m_prefWidget->SetPreferences( this );
-    const QRect screenGeometry = QApplication::desktop()->screenGeometry();
+    const QRect screenGeometry = QGuiApplication::screens().at( 0 )->geometry();
     m_prefWidget->move( screenGeometry.width() / 3, screenGeometry.height() / 3 );
     connect( m_prefWidget, SIGNAL( destroyed() ), this, SLOT( OnPreferenceWidgetClosed() ) );
     Application::GetInstance().ShowFloatingDock( m_prefWidget );

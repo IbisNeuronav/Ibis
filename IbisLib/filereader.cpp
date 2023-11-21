@@ -111,7 +111,7 @@ void FileReader::SetIbisAPI( IbisAPI * api )
     if( m_ibisAPI )
     {
         QString mincDir = m_ibisAPI->GetCustomPath( MINCToolsPathVarName );
-        if( mincDir != QString::null && !mincDir.isEmpty() )
+        if( !mincDir.isNull() && !mincDir.isEmpty() )
         {
             if( mincDir.at( mincDir.count() - 1 ) != '/' ) mincDir.append( "/" );
             m_mincconvert.clear();

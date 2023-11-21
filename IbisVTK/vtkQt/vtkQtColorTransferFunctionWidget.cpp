@@ -155,7 +155,7 @@ void vtkQtColorTransferFunctionWidget::paintEvent( QPaintEvent * event )
     Q_UNUSED( event )
 
     QPainter painter( this );
-    painter.setRenderHint( QPainter::HighQualityAntialiasing );
+    painter.setRenderHint( QPainter::Antialiasing );
     painter.setPen( Qt::NoPen );
 
     // Draw gradient

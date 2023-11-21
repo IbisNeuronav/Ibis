@@ -102,7 +102,7 @@ bool ObjectTreeModel::setData( const QModelIndex & index, const QVariant & value
 
 Qt::ItemFlags ObjectTreeModel::flags( const QModelIndex & index ) const
 {
-    if( !index.isValid() ) return 0;
+    if( !index.isValid() ) return Qt::ItemFlags();
 
     Qt::ItemFlags f    = Qt::ItemIsEnabled | Qt::ItemIsSelectable;
     SceneObject * item = static_cast<SceneObject *>( index.internalPointer() );

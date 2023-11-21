@@ -30,7 +30,7 @@ class TractogramObjectSettingsDialog : public QWidget, public Ui::TractogramObje
     Q_OBJECT
 
 public:
-    TractogramObjectSettingsDialog( QWidget * parent = 0, Qt::WindowFlags fl = 0 );
+    TractogramObjectSettingsDialog( QWidget * parent = 0, Qt::WindowFlags fl = Qt::WindowFlags() );
     virtual ~TractogramObjectSettingsDialog();
 
     void SetTractogramObject( TractogramObject * object );

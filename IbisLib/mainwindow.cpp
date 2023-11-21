@@ -312,7 +312,7 @@ void MainWindow::fileOpenFile()
     OpenFileParams params;
     params.lastVisitedDir       = lastVisitedDir;
     params.defaultParent        = Application::GetSceneManager()->GetSceneRoot();
-    OpenDataFileDialog * dialog = new OpenDataFileDialog( this, nullptr, Application::GetSceneManager(), &params );
+    OpenDataFileDialog * dialog = new OpenDataFileDialog( this, Qt::WindowFlags(), Application::GetSceneManager(), &params );
 
     int result = dialog->exec();
 

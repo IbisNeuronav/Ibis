@@ -15,7 +15,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <vtkRenderer.h>
 
 #include <QMap>
-#include <QTime>
+#include <QElapsedTimer>
 #include <QTimer>
 
 #include "frameratetesterwidget.h"
@@ -29,7 +29,7 @@ FrameRateTesterPluginInterface::FrameRateTesterPluginInterface()
     m_lastNumberOfFrames = 0;
     m_lastPeriod         = 0.0;
     m_currentViewID      = THREED_VIEW_ID;
-    m_time               = new QTime;
+    m_time               = new QElapsedTimer;
     m_accumulatedFrames  = 0;
 }
 

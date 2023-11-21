@@ -27,6 +27,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QLabel>
 #include <QLayout>
 #include <QPushButton>
+#include <QScreen>
 #include <QSettings>
 #include <QSplitter>
 #include <QToolButton>
@@ -234,10 +235,10 @@ void QuadViewWindow::Detach3DView( QWidget * /*parent*/ )
     layout->setMargin( 0 );
     layout->addWidget( m_vtkWidgets[1] );
 
-    int nbScreens = QApplication::desktop()->screenCount();
+    int nbScreens = QGuiApplication::screens().size();
     if( nbScreens > 1 )
     {
-        QRect screenres = QApplication::desktop()->screenGeometry( 1 );
+        QRect screenres = QGuiApplication::screens().at( 1 )->geometry();
         m_detachedWidget->move( QPoint( screenres.x(), screenres.y() ) );
         m_detachedWidget->showFullScreen();
     }
@@ -304,7 +305,7 @@ void QuadViewWindow::OnCursorMoved()
     double cursorPos[3];
     m_sceneManager->GetCursorPosition( cursorPos );
     QString text;
-    text.sprintf( "Cursor: ( %.2f, %.2f, %.2f )\t", cursorPos[0], cursorPos[1], cursorPos[2] );
+    text.asprintf( "Cursor: ( %.2f, %.2f, %.2f )\t", cursorPos[0], cursorPos[1], cursorPos[2] );
     m_cursorPosLabel->setText( text );
 }
 

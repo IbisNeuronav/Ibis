@@ -17,7 +17,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 // class vtkEventQtSlotConnect;
 class QTimer;
-class QTime;
+class QElapsedTimer;
 
 class FrameRateTesterPluginInterface : public ToolPluginInterface
 {
@@ -61,7 +61,7 @@ protected:
 
     int m_numberOfFrames;
     QTimer * m_timer;
-    QTime * m_time;
+    QElapsedTimer * m_time;
 
     int m_lastNumberOfFrames;
     double m_lastPeriod;

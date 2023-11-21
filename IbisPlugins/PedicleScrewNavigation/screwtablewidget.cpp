@@ -88,7 +88,7 @@ void ScrewTableWidget::on_addScrewButton_clicked()
 {
     ScrewProperties screw( ui->lengthSpinBox->value(), ui->diameterSpinBox->value() );
     m_screwList.append( screw );
-    qSort( m_screwList.begin(), m_screwList.end(), this->ScrewComparator );
+    std::sort( m_screwList.begin(), m_screwList.end(), this->ScrewComparator );
     this->UpdateTable();
 }
 
@@ -107,10 +107,10 @@ void ScrewTableWidget::on_closeButton_clicked()
     {
         QByteArray line;
         ScrewProperties screw = m_screwList.at( i );
-        line.append( QString::number( screw.first ) );
-        line.append( tr( "," ) );
-        line.append( QString::number( screw.second ) );
-        line.append( tr( "\n" ) );
+        line.append( QString::number( screw.first ).toUtf8() );
+        line.append( tr( "," ).toUtf8() );
+        line.append( QString::number( screw.second ).toUtf8() );
+        line.append( tr( "\n" ).toUtf8() );
         file.write( line );
     }
 

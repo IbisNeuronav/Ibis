@@ -404,7 +404,7 @@ void UsProbeObject::TakeSnapshot()
     // if (this->GetUseMask())
 
     QString name;
-    name.sprintf( "US Screenshot %03d", m_screenShotIndex );
+    name.asprintf( "US Screenshot %03d", m_screenShotIndex );
 
     ImageObject * newObj = ImageObject::New();
     newObj->SetName( name );

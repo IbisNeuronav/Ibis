@@ -1,11 +1,23 @@
+/*=========================================================================
+Ibis Neuronav
+Copyright (c) Simon Drouin, Anna Kochanowska, Louis Collins.
+All rights reserved.
+See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
+
+     This software is distributed WITHOUT ANY WARRANTY; without even
+     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+     PURPOSE.  See the above copyright notice for more information.
+=========================================================================*/
+// Thanks to Simon Drouin for writing this class
+
 #include "plusserverinterface.h"
 
 #include <vtkObjectFactory.h>
 
 #include <QApplication>
+#include <QElapsedTimer>
 #include <QFileInfo>
 #include <QThread>
-#include <QTime>
 
 #include "logger.h"
 
@@ -68,11 +80,9 @@ bool PlusServerInterface::StartServer( const QString & configFilePath )
 
     // PlusServerLauncher wants at least LOG_LEVEL_INFO to parse status information from the PlusServer executable
     // Un-requested log entries that are captured from the PlusServer executable are parsed and dropped from output
-    QString cmdLine = QString( "\"%1\" --config-file=\"%2\" --verbose=%3" )
-                          .arg( m_plusServerExecutable )
-                          .arg( configFilePath )
-                          .arg( m_serverLogLevel );
-    m_CurrentServerInstance->start( cmdLine );
+    QStringList args = { QString( "--config-file=\"%1\"" ).arg( configFilePath ),
+                         QString( " --verbose=%1" ).arg( m_serverLogLevel ) };
+    m_CurrentServerInstance->start( m_plusServerExecutable, args );
     m_CurrentServerInstance->waitForStarted();
 
     // During waitForFinished an error signal may be emitted, which may delete m_CurrentServerInstance,
@@ -89,7 +99,7 @@ bool PlusServerInterface::StartServer( const QString & configFilePath )
 
     // Wait for the server to be listening or fail
     QThread * thread = QThread::currentThread();
-    QTime timeWaited;
+    QElapsedTimer timeWaited;
     timeWaited.start();
     while( timeWaited.elapsed() < 20000 && m_state == Starting )
     {

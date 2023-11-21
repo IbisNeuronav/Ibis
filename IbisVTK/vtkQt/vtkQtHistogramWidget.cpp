@@ -191,7 +191,7 @@ void vtkQtHistogramWidget::paintEvent( QPaintEvent * event )
     Q_UNUSED( event )
 
     QPainter painter( this );
-    painter.setRenderHint( QPainter::HighQualityAntialiasing );
+    painter.setRenderHint( QPainter::Antialiasing );
 
     // compute dimensions
     int histHeight = height() - m_cursorHeight - m_scalarBarHeight - m_histogramScalarBarSpacing - 2;

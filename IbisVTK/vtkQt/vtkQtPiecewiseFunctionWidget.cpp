@@ -118,7 +118,7 @@ void vtkQtPiecewiseFunctionWidget::leaveEvent( QEvent * event ) {}
 void vtkQtPiecewiseFunctionWidget::paintEvent( QPaintEvent * event )
 {
     QPainter p( this );
-    p.setRenderHint( QPainter::HighQualityAntialiasing );
+    p.setRenderHint( QPainter::Antialiasing );
 
     // Draw background
     QRect backRect( 0, 0, width() - 1, height() - 1 );
