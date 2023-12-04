@@ -115,13 +115,13 @@ GPU_WeightRigidRegistration::GPU_WeightRigidRegistration()
       m_sourceVtkTransform( 0 ),
       m_targetVtkTransform( 0 ),
       m_resultTransform( 0 ),
-      m_itkSourceImage( 0 ),
-      m_itkTargetImage( 0 ),
+      m_itkSourceImage( nullptr ),
+      m_itkTargetImage( nullptr ),
       m_useMask( false ),
       m_orientationNumberOfPixels( 16000 ),
       m_orientationPercentile( 0.8 ),
       m_orientationSelectivity( 2 ),
-      m_targetSpatialObjectMask( 0 ),
+      m_targetSpatialObjectMask( nullptr ),
       m_lambdaMetricBalance( 0.5 ),
       m_orientationSamplingStrategy( OrientationSamplingStrategy::RANDOM ),
       m_registrationMetricToUse( RegistrationMetricToUseType::INTENSITY )
@@ -202,24 +202,24 @@ void GPU_WeightRigidRegistration::runRegistration()
     }
 
     double angleX, angleY, angleZ;
-    angleX   = vcl_asin( M[2][1] );
-    double A = vcl_cos( angleX );
-    if( vcl_fabs( A ) > 0.00005 )
+    angleX   = std::asin( M[2][1] );
+    double A = std::cos( angleX );
+    if( std::fabs( A ) > 0.00005 )
     {
         double x = M[2][2] / A;
         double y = -M[2][0] / A;
-        angleY   = vcl_atan2( y, x );
+        angleY   = std::atan2( y, x );
 
         x      = M[1][1] / A;
         y      = -M[0][1] / A;
-        angleZ = vcl_atan2( y, x );
+        angleZ = std::atan2( y, x );
     }
     else
     {
         angleZ   = 0;
         double x = M[0][0];
         double y = M[1][0];
-        angleY   = vcl_atan2( y, x );
+        angleY   = std::atan2( y, x );
     }
 
     ItkRigidTransformType::ParametersType params = ItkRigidTransformType::ParametersType( 6 );

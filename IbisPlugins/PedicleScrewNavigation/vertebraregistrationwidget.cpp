@@ -627,7 +627,7 @@ bool VertebraRegistrationWidget::Register()
         rigidRegistrator->SetSourceVtkTransform( sourceVtkTransform );
         rigidRegistrator->SetTargetVtkTransform( targetVtkTransform );
 
-        rigidRegistrator->SetTargetMask( 0 );
+        rigidRegistrator->SetTargetMask( nullptr );
 
         if( ctImageObject->GetParent() )
         {

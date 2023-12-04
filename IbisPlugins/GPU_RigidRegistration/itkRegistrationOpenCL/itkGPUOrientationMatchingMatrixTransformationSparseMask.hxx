@@ -498,7 +498,7 @@ void GPUOrientationMatchingMatrixTransformationSparseMask<TFixedImage, TMovingIm
     }
     else
     {
-        typename ImageSamplerType::Pointer imageSampler            = 0;
+        typename ImageSamplerType::Pointer imageSampler            = nullptr;
         typename SampleContainerType::Pointer imageSampleContainer = SampleContainerType::New();
         SampleType imageSample;
         typename FixedImageType::RegionType bufferedRegion = m_FixedImage->GetBufferedRegion();
@@ -640,7 +640,7 @@ void GPUOrientationMatchingMatrixTransformationSparseMask<TFixedImage, TMovingIm
     }
     else
     {
-        typename ImageSamplerType::Pointer imageSampler            = 0;
+        typename ImageSamplerType::Pointer imageSampler            = nullptr;
         typename SampleContainerType::Pointer imageSampleContainer = SampleContainerType::New();
         SampleType imageSample;
         typename FixedImageType::RegionType bufferedRegion = m_FixedImage->GetBufferedRegion();
