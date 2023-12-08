@@ -6,7 +6,7 @@ ExternalProject_Add( ${itk_name}
     STAMP_DIR ${itk_prefix}/stamp
     INSTALL_COMMAND ""
     GIT_REPOSITORY https://github.com/IbisNeuronav/ITK.git
-    GIT_TAG "v${IBIS_ITK_LONG_VERSION}"
+    GIT_TAG "399bffe6b87b127b943386b34e669208334874de"
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=${external_project_dir}/${itk_name}/install
                -DCMAKE_OSX_SYSROOT:PATH=${CMAKE_OSX_SYSROOT}
                -DCMAKE_OSX_DEPLOYMENT_TARGET:STRING=${CMAKE_OSX_DEPLOYMENT_TARGET}
