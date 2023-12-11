@@ -165,7 +165,7 @@ itk::Point<double, 3> VertebraRegistrationWidget::GetImageCenterPoint( IbisItkFl
     IbisItkFloat3ImageType::SizeType imageSize = image->GetLargestPossibleRegion().GetSize();
     IbisItkFloat3ImageType::IndexType centerIndex;
 
-    for( int i = 0; i < image->GetImageDimension(); ++i )
+    for( unsigned int i = 0; i < image->GetImageDimension(); ++i )
     {
         centerIndex[i] = imageSize[i] / 2.0;
     }
@@ -344,7 +344,7 @@ bool VertebraRegistrationWidget::CreateVolumeFromSlices( USAcquisitionObject * u
     unsigned int frameCount                            = 0;
     vtkSmartPointer<vtkMatrix4x4> sliceTransformMatrix = vtkSmartPointer<vtkMatrix4x4>::New();
     vtkSmartPointer<vtkImageData> slice                = vtkSmartPointer<vtkImageData>::New();
-    for( unsigned int i = 0; i < usAcquisitionObject->GetNumberOfSlices(); i++ )
+    for( int i = 0; i < usAcquisitionObject->GetNumberOfSlices(); i++ )
     {
         usAcquisitionObject->GetFrameData( i, slice, sliceTransformMatrix );
         volumeReconstructor->SetFixedSlice( frameCount, slice, sliceTransformMatrix );
@@ -356,7 +356,7 @@ bool VertebraRegistrationWidget::CreateVolumeFromSlices( USAcquisitionObject * u
         if( ( acq->GetObjectID() != usAcquisitionObject->GetObjectID() ) &
             ( acq->GetObjectID() != IbisAPI::InvalidId ) )
         {
-            for( unsigned int i = 0; i < acq->GetNumberOfSlices(); i++ )
+            for( int i = 0; i < acq->GetNumberOfSlices(); i++ )
             {
                 acq->GetFrameData( i, slice, sliceTransformMatrix );
                 volumeReconstructor->SetFixedSlice( frameCount, slice, sliceTransformMatrix );

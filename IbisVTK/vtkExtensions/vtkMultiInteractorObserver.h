@@ -74,7 +74,7 @@ public:
     // vtkMultiInteractorObserver.
     void AddInteractor( vtkRenderWindowInteractor * interactor );
     void RemoveInteractor( vtkRenderWindowInteractor * interactor );
-    int GetNumberOfInteractors();
+    size_t GetNumberOfInteractors();
     vtkRenderWindowInteractor * GetInteractor( unsigned int index );
 
     // Description:

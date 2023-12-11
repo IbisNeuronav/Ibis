@@ -117,7 +117,7 @@ void PointCloudObject::Setup( View * view )
 // Deep Copy of Point Cloud Array
 void PointCloudObject::SetPointCloudArray( vtkPoints * pointCloudArray )
 {
-    for( size_t i = 0; i < pointCloudArray->GetNumberOfPoints(); i++ )
+    for( int i = 0; i < pointCloudArray->GetNumberOfPoints(); i++ )
     {
         m_PointCloudArray->InsertNextPoint( pointCloudArray->GetPoint( i ) );
     }

@@ -52,7 +52,7 @@ void TripleCutPlaneObjectSettingsWidget::UpdateImageSliders()
     }
 
     // Add new widgets
-    for( int i = 0; i < m_cutPlaneObject->GetNumberOfImages(); ++i )
+    for( size_t i = 0; i < m_cutPlaneObject->GetNumberOfImages(); ++i )
     {
         TripleCutPlaneObjectMixerWidget * w = new TripleCutPlaneObjectMixerWidget( ui->volumeContributionGroupBox );
         w->SetTripleCutPlaneObject( m_cutPlaneObject, i );

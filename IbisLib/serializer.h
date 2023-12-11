@@ -444,7 +444,7 @@ bool Serialize( Serializer * serial, const char * attrName, std::vector<T> & val
 {
     if( serial->BeginSection( attrName ) )
     {
-        int numberOfElements = value.size();
+        int numberOfElements = (int)(value.size());
         Serialize( serial, "NumberOfElements", numberOfElements );
         if( serial->IsReader() && resize )
         {

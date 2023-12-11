@@ -329,7 +329,7 @@ void GPUWeightMatchingMatrixTransformationSparseMask<TFixedImage, TMovingImage>:
     m_cpuMovingLocationSamples = (InternalRealType *)malloc( m_Blocks * m_Threads * 4 * sizeof( InternalRealType ) );
     memset( m_cpuMovingLocationSamples, (InternalRealType)0, 4 * m_Blocks * m_Threads * sizeof( InternalRealType ) );
 
-    for( int i = 0; i < m_NumberOfPixels; ++i )
+    for( unsigned int i = 0; i < m_NumberOfPixels; ++i )
     {
         m_cpuMovingSamples[i] = (InternalRealType)cpuMovingBuffer[i];
         for( int d = 0; d < MovingImageDimension; ++d )

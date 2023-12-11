@@ -30,7 +30,7 @@ public:
     vtkGenericParamValues() {}
     void SetParamName( const char * pName ) { m_paramName = pName; }
     const char * GetParamName() { return m_paramName.c_str(); }
-    int GetNumberOfItems() { return m_items.size(); }
+    size_t GetNumberOfItems() { return m_items.size(); }
     const char * GetItemName( int index )
     {
         assert( index < (int)( m_items.size() ) );
@@ -140,12 +140,12 @@ public:
     {
         for( unsigned i = 0; i < m_params.size(); ++i ) m_params[i]->Delete();
     }
-    int GetNumberOfParams() { return m_params.size(); }
+    unsigned int GetNumberOfParams() { return (unsigned int)(m_params.size()); }
     vtkGenericParam * GetParam( int index ) { return m_params[index]; }
     vtkGenericParam * GetParam( const char * name )
     {
         std::string nameStr( name );
-        for( unsigned i = 0; i < m_params.size(); ++i )
+        for( size_t i = 0; i < m_params.size(); ++i )
         {
             if( std::string( m_params[i]->GetParamName() ) == nameStr ) return m_params[i];
         }
@@ -153,7 +153,7 @@ public:
     }
     void GetAllParamsValues( std::vector<vtkGenericParamValues> & allValues )
     {
-        for( int i = 0; i < GetNumberOfParams(); ++i )
+        for( unsigned int i = 0; i < GetNumberOfParams(); ++i )
         {
             vtkGenericParamValues values;
             GetParam( i )->GetParamValues( values );
@@ -162,7 +162,7 @@ public:
     }
     void SetAllParamsValues( std::vector<vtkGenericParamValues> & allValues )
     {
-        for( unsigned i = 0; i < allValues.size(); ++i )
+        for( size_t i = 0; i < allValues.size(); ++i )
         {
             vtkGenericParamValues & vals = allValues[i];
             vtkGenericParam * p          = GetParam( vals.GetParamName() );

@@ -386,7 +386,7 @@ USAcquisitionObject * SequenceIOWidget::ReadAcquisitionData( QString filename, A
         filereader.read( (char *)&allFramesPixelBuffer[0], allFramesPixelBufferSize );
     }
 
-    for( int i = 0; i < props->numberOfFrames; i++ )
+    for( unsigned int i = 0; i < props->numberOfFrames; i++ )
     {
         vtkImageData * image = vtkImageData::New();
         image->SetDimensions( props->imageDimensions[0], props->imageDimensions[1], 1 );

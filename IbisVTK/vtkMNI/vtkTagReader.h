@@ -36,7 +36,7 @@ public:
     vtkMatrix4x4 * GetSavedTransform();
 
     // Get the output of the reader
-    int GetNumberOfVolumes();
+    size_t GetNumberOfVolumes();
     vtkPoints * GetVolume( int volumeIndex );
     std::vector<std::string> & GetPointNames() { return PointNames; }
     std::vector<std::string> & GetVolumeNames() { return VolumeNames; }

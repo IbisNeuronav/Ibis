@@ -22,7 +22,7 @@ AutomaticGui::AutomaticGui( vtkGenericParamInterface * params, QWidget * parent 
 {
     QVBoxLayout * layout = new QVBoxLayout( this );
 
-    for( int paramIndex = 0; paramIndex < m_paramInterface->GetNumberOfParams(); ++paramIndex )
+    for( unsigned int paramIndex = 0; paramIndex < m_paramInterface->GetNumberOfParams(); ++paramIndex )
     {
         vtkGenericParam * p = m_paramInterface->GetParam( paramIndex );
 
