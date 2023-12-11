@@ -89,13 +89,7 @@ void GPUVolumeReconstruction<TImage>::InitializeGPUContext( void )
     m_CommandQueue = (cl_command_queue *)malloc( m_NumberOfDevices * sizeof( cl_command_queue ) );
     for( unsigned int i = 0; i < m_NumberOfDevices; i++ )
     {
-#ifdef __APPLE__
         m_CommandQueue[i] = clCreateCommandQueue( m_Context, m_Devices[i], 0, &errid );
-#elif defined( WIN32 ) || defined( _WIN32 )
-        m_CommandQueue[i] = clCreateCommandQueue( m_Context, m_Devices[i], 0, &errid );
-#else
-        m_CommandQueue[i] = clCreateCommandQueueWithProperties( m_Context, m_Devices[i], 0, &errid );
-#endif
         OpenCLCheckError( errid, __FILE__, __LINE__, ITK_LOCATION );
     }
 
