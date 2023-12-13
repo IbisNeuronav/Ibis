@@ -9,6 +9,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
 // Thanks to Simon Drouin for writing this class
+#define _CRT_SECURE_NO_WARNINGS
 #include "vtkMNIOBJReader.h"
 
 #include <vtkCellArray.h>
