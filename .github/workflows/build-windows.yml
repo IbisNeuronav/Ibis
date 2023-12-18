@@ -19,7 +19,7 @@ jobs:
 
       - name: Configure CMake
         run: cmake IbisSuperBuild 
-            -G "Visual Studio 16 2019" \
+            -G "Visual Studio 17 2022" \
             -A x64 \
             -B ${{github.workspace}}/b \
             -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} \
