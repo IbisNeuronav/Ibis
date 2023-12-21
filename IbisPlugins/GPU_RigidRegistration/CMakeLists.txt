@@ -31,11 +31,17 @@ include(FetchContent)
 #  GIT_REPOSITORY https://github.com/drouin-simon/GPURigidRegistrationLib.git
 #  GIT_TAG fix-build-mac-remove-vtk-mni-from-lib )
 
+set(FETCHCONTENT_BASE_DIR ${IBIS_EXTERNAL_DEPENDENCIES_DIR}/GR CACHE PATH "Directory under which to collect all populated content" FORCE)
+
 FetchContent_Declare(
   GPURigidRegistrationLib
   GIT_REPOSITORY https://github.com/IbisNeuronav/GPURigidRegistrationLib.git
-  GIT_TAG main )
-
+  GIT_TAG main 
+  SOURCE_DIR ${FETCHCONTENT_BASE_DIR}/src
+  BINARY_DIR ${FETCHCONTENT_BASE_DIR}/build
+  SUBBUILD_DIR ${FETCHCONTENT_BASE_DIR}/subbuild
+  )
+  
 # Don't build library's tests
 set( GPURR_BUILD_TEST OFF CACHE BOOL "" FORCE)
 set( GPURR_BUILD_EXECUTABLE OFF CACHE BOOL "" FORCE)
