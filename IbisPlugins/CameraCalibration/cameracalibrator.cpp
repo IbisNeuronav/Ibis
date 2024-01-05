@@ -86,7 +86,7 @@ void CameraCalibrator::ClearCalibrationData()
 {
     m_objectPoints.clear();
     m_imagePoints.clear();
-    for( unsigned i = 0; i < m_cameraImages.size(); ++i )
+    for( size_t i = 0; i < m_cameraImages.size(); ++i )
     {
         m_cameraImages[i]->Delete();
     }
@@ -109,7 +109,7 @@ void WriteMatrix( QString filename, vtkMatrix4x4 * mat )
 void CameraCalibrator::ExportCalibrationData( QString dir, QProgressDialog * progressDlg )
 {
     vtkPNGWriter * writer = vtkPNGWriter::New();
-    for( int i = 0; i < GetNumberOfViews(); ++i )
+    for( size_t i = 0; i < GetNumberOfViews(); ++i )
     {
         // Write tracker matrix
         QString trackerMatrixFileName = dir + QString( "/trackerMatrix_%1.txt" ).arg( i, 4, 10, QLatin1Char( '0' ) );
@@ -425,8 +425,8 @@ void CameraCalibrator::ComputeMeanAndStdDevOfGridCorners( cv::Point3f & meanTL, 
 
     vtkMatrix4x4 * gridToWorld = vtkMatrix4x4::New();
     int n                      = 0;
-    int nbViews                = m_trackingMatrices.size();
-    for( int i = 0; i < nbViews; ++i )
+    size_t nbViews                = m_trackingMatrices.size();
+    for( size_t i = 0; i < nbViews; ++i )
     {
         if( m_viewEnabled[i] )
         {
@@ -581,7 +581,7 @@ void CameraCalibrator::DoExtrinsicCalibration( CameraExtrinsicParams & params )
     targetPts->Delete();
 }
 
-int CameraCalibrator::GetNumberOfViews() { return m_objectPoints.size(); }
+int CameraCalibrator::GetNumberOfViews() { return (int)(m_objectPoints.size()); }
 
 void CameraCalibrator::AccumulateView( std::vector<cv::Point2f> & imagePoints, vtkMatrix4x4 * trackerMatrix )
 {
@@ -591,7 +591,7 @@ void CameraCalibrator::AccumulateView( std::vector<cv::Point2f> & imagePoints, v
     m_accumulatedImagePoints.push_back( imagePoints );
 }
 
-int CameraCalibrator::GetNumberOfAccumulatedViews() { return m_accumulatedTrackingMatrices.size(); }
+int CameraCalibrator::GetNumberOfAccumulatedViews() { return (int)(m_accumulatedTrackingMatrices.size()); }
 
 void CameraCalibrator::ClearAccumulatedViews()
 {
@@ -609,8 +609,8 @@ void CameraCalibrator::AddAccumulatedViews( vtkImageData * im )
 
     // Concatenate image points
     std::vector<cv::Point2f> averagePoints;
-    int nbPoints = m_accumulatedImagePoints[0].size();
-    for( int pt = 0; pt < nbPoints; ++pt )
+    size_t nbPoints = m_accumulatedImagePoints[0].size();
+    for( size_t pt = 0; pt < nbPoints; ++pt )
     {
         cv::Point2f avg( 0.0, 0.0 );
         for( int v = 0; v < m_accumulatedImagePoints.size(); ++v ) avg += m_accumulatedImagePoints[v][pt];
@@ -692,7 +692,7 @@ void ComputeReprojection( vector<Point2f> & imagePoints, vector<Point3f> & world
     double cpa[4];
     double wpa[4];
     vector<Point3f> cameraPoints;
-    for( unsigned i = 0; i < imagePoints.size(); ++i )
+    for( size_t i = 0; i < imagePoints.size(); ++i )
     {
         // transform point in camera space
         Point3f & wp = worldPoints[i];
@@ -705,7 +705,7 @@ void ComputeReprojection( vector<Point2f> & imagePoints, vector<Point3f> & world
     }
 
     // compute reprojection of image points on the plane of the corresponding 3D point
-    for( unsigned i = 0; i < imagePoints.size(); ++i )
+    for( size_t i = 0; i < imagePoints.size(); ++i )
     {
         double dz = -cameraPoints[i].z;  // distance between camera and 3D point plane
 
@@ -744,7 +744,7 @@ void ComputeReprojection( vector<Point2f> & imagePoints, vector<Point3f> & world
     // Flip projection point's x-axis : Has to do with the way OpenCV is projecting that is different from
     // what is done in vtk. This is also affecting the way OpenCV's rotation and translations are converted in
     // vtkMatrix4x4
-    for( unsigned i = 0; i < projectedPoints.size(); ++i ) projectedPoints[i].x = 1. - projectedPoints[i].x;
+    for( size_t i = 0; i < projectedPoints.size(); ++i ) projectedPoints[i].x = 1. - projectedPoints[i].x;
 }
 
 double CameraCalibrator::ComputeCrossValidation( double translationScale, double rotationScale,
@@ -753,7 +753,7 @@ double CameraCalibrator::ComputeCrossValidation( double translationScale, double
 {
     // Compute reprojection error obtained for each of the views when taking all
     // other views to calibrate.
-    int numberOfViews  = this->GetNumberOfViews();
+    size_t numberOfViews  = this->GetNumberOfViews();
     int nbEnabledViews = 0;
 
     vector<double> allReprojErrors;
@@ -767,7 +767,7 @@ double CameraCalibrator::ComputeCrossValidation( double translationScale, double
             // Create a new camera calibrator with all views except the one at xvalIndex
             CameraCalibrator * cal = new CameraCalibrator;
             cal->SetGridProperties( m_gridWidth, m_gridHeight, m_gridCellSize );
-            for( int i = 0; i < numberOfViews; ++i )
+            for( size_t i = 0; i < numberOfViews; ++i )
             {
                 if( i != xvalIndex && m_viewEnabled[i] )
                     cal->AddView( m_cameraImages[i], m_imagePoints[i], m_trackingMatrices[i] );
@@ -895,7 +895,7 @@ void CameraCalibrator::InitGridWorldPoints()
 
 void CameraCalibrator::ClearMatrixArray( std::vector<vtkMatrix4x4 *> & matVec )
 {
-    for( unsigned i = 0; i < matVec.size(); ++i ) matVec[i]->Delete();
+    for( size_t i = 0; i < matVec.size(); ++i ) matVec[i]->Delete();
     matVec.clear();
 }
 

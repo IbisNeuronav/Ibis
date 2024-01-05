@@ -132,7 +132,9 @@ void GPU_VolumeReconstructionWidget::on_startButton_clicked()
     ui->progressBar->repaint();
     ui->userFeedbackLabel->setText( QString( "Processing..(patience is a virtue)" ) );
     ui->userFeedbackLabel->repaint();
-    QApplication::flush();
+    //TODO, is this necessary too?
+    //QApplication::sendPostedEvents();
+    QApplication::processEvents();
 
     unsigned int usSearchRadius =
         ui->usSearchRadiusComboBox->itemData( ui->usSearchRadiusComboBox->currentIndex() ).toInt();

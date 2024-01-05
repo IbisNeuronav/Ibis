@@ -23,7 +23,7 @@ class ImageObjectSettingsDialog : public QWidget, public Ui::ImageObjectSettings
     Q_OBJECT
 
 public:
-    ImageObjectSettingsDialog( QWidget * parent = 0, Qt::WindowFlags fl = 0 );
+    ImageObjectSettingsDialog( QWidget * parent = 0, Qt::WindowFlags fl = Qt::WindowFlags() );
     virtual ~ImageObjectSettingsDialog();
 
     virtual void SetImageObject( ImageObject * obj );

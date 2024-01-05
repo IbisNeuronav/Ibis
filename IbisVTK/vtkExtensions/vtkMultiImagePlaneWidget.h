@@ -138,7 +138,7 @@ public:
 
     // Description:
     // Set the vtkImageData* input for the vtkImageReslice.
-    int AddInput( vtkImageData * in, vtkScalarsToColors * lut, vtkTransform * t, bool canInterpolate );
+    size_t AddInput( vtkImageData * in, vtkScalarsToColors * lut, vtkTransform * t, bool canInterpolate );
     void SetImageHidden( vtkImageData * im, bool hidden );
     void ClearAllInputs();
 

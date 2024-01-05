@@ -138,12 +138,12 @@ int vtkMulti3DWidget::AddRenderer( vtkRenderer * ren, vtkAssembly * assembly )
         this->Assemblies.push_back( assembly );
         this->InternalAddRenderer( ren, assembly );
         this->Modified();
-        return this->Renderers.size() - 1;
+        return static_cast<int>( this->Renderers.size() ) - 1;
     }
     return -1;
 }
 
-int vtkMulti3DWidget::GetNumberOfRenderers() { return this->Renderers.size(); }
+size_t vtkMulti3DWidget::GetNumberOfRenderers() { return this->Renderers.size(); }
 
 vtkRenderer * vtkMulti3DWidget::GetRenderer( int index )
 {

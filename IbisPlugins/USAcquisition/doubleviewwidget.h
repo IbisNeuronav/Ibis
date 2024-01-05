@@ -58,7 +58,7 @@ class DoubleViewWidget : public QWidget
     Q_OBJECT
 
 public:
-    explicit DoubleViewWidget( QWidget * parent = 0, Qt::WindowFlags f = 0 );
+    explicit DoubleViewWidget( QWidget * parent = 0, Qt::WindowFlags f = Qt::WindowFlags() );
     ~DoubleViewWidget();
 
     /** Set pointer to USAcquisitionPluginInterface in order to establish the plugin pipeline and set up default

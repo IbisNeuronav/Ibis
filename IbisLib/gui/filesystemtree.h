@@ -1,7 +1,7 @@
 #ifndef FILESYSTEMTREE_H
 #define FILESYSTEMTREE_H
 
-#include <QDirModel>
+#include <QFileSystemModel>
 #include <QObject>
 #include <QWidget>
 
@@ -28,7 +28,7 @@ private slots:
 
 private:
     Ui::FileSystemTree * ui;
-    QDirModel * m_model;
+    QFileSystemModel * m_model;
     PathForm * m_pathForm;
 };
 

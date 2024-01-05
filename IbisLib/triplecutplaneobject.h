@@ -81,7 +81,7 @@ public:
      */
     ///@{
     /** Get the number of images. */
-    int GetNumberOfImages() { return Images.size(); }
+    size_t GetNumberOfImages() { return Images.size(); }
     /** Get an ImageObject knowing its index. */
     ImageObject * GetImage( int index );
     /** Add an ImageObject knowing its ID. */

@@ -28,7 +28,7 @@ class LandmarkRegistrationObjectWidget : public QWidget
     Q_OBJECT
 
 public:
-    explicit LandmarkRegistrationObjectWidget( QWidget * parent = 0, const char * name = 0, Qt::WindowFlags f = 0 );
+    explicit LandmarkRegistrationObjectWidget( QWidget * parent = 0, const char * name = 0, Qt::WindowFlags f = Qt::WindowFlags() );
     ~LandmarkRegistrationObjectWidget();
 
     void SetLandmarkRegistrationObject( LandmarkRegistrationObject * obj );

@@ -83,7 +83,7 @@ int vtkMultiTextureMapToPlane::RequestData( vtkInformation * vtkNotUsed( request
         sDenom = tDenom = 1.0;
     }
 
-    int nbSteps          = nbVertices * Ranges.size();
+    int nbSteps          = nbVertices * (int)Ranges.size();
     int progressInterval = nbSteps / 20 + 1;
 
     // For each set of tex coords to generate

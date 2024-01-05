@@ -8,6 +8,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
+#define _CRT_SECURE_NO_WARNINGS
 #include "vtkTagReader.h"
 
 #include <vtkPoints.h>
@@ -21,7 +22,7 @@ using namespace std;
 
 vtkTagReader * vtkTagReader::New() { return new vtkTagReader(); }
 
-int vtkTagReader::GetNumberOfVolumes() { return this->Volumes.size(); }
+size_t vtkTagReader::GetNumberOfVolumes() { return this->Volumes.size(); }
 
 vtkPoints * vtkTagReader::GetVolume( int volumeIndex )
 {
@@ -135,7 +136,7 @@ void vtkTagReader::Update()
     }
     if( this->VolumeNames.size() < numberOfVolumes )
     {
-        for( i = this->VolumeNames.size() - 1; i < numberOfVolumes; i++ )
+        for( i = static_cast<unsigned int>( this->VolumeNames.size() ) - 1; i < numberOfVolumes; i++ )
         {
             this->VolumeNames.push_back( "" );
         }
@@ -179,7 +180,7 @@ void vtkTagReader::Update()
             }
 
             // See if the last token is a comment, if yes, discard it
-            int n = tokens.size();
+            unsigned int n = static_cast<unsigned int>( tokens.size() );
             if( tokens[n - 1][0] == '%' ) n -= 1;
             if( tokens[n - 2] == "%TimeStamp" )
             {

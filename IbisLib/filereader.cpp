@@ -8,6 +8,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
+#define _CRT_SECURE_NO_WARNINGS
 #include "filereader.h"
 
 #include <itkImageIOFactory.h>
@@ -111,7 +112,7 @@ void FileReader::SetIbisAPI( IbisAPI * api )
     if( m_ibisAPI )
     {
         QString mincDir = m_ibisAPI->GetCustomPath( MINCToolsPathVarName );
-        if( mincDir != QString::null && !mincDir.isEmpty() )
+        if( !mincDir.isNull() && !mincDir.isEmpty() )
         {
             if( mincDir.at( mincDir.count() - 1 ) != '/' ) mincDir.append( "/" );
             m_mincconvert.clear();
@@ -472,6 +473,7 @@ bool FileReader::OpenItkFile( QList<SceneObject *> & readObjects, QString filena
     }
     catch( itk::ExceptionObject & err )
     {
+        std::cerr << err << std::endl;
         return false;
     }
     // Update progress. simtodo : do something smarter. Itk minc reader doesn't seem to support progress.
@@ -507,6 +509,7 @@ bool FileReader::OpenItkLabelFile( QList<SceneObject *> & readObjects, QString f
     }
     catch( itk::ExceptionObject & err )
     {
+        std::cerr << err << std::endl;
         return false;
     }
     // Update progress. simtodo : do something smarter. Itk minc reader doesn't seem to support progress.
@@ -878,6 +881,7 @@ bool FileReader::GetGrayFrame( QString filename, IbisItkUnsignedChar3ImageType::
     }
     catch( itk::ExceptionObject & err )
     {
+        std::cerr << err << std::endl;
         return false;
     }
 
@@ -915,6 +919,7 @@ bool FileReader::GetRGBFrame( QString filename, IbisRGBImageType::Pointer itkIma
     }
     catch( itk::ExceptionObject & err )
     {
+        std::cerr << err << std::endl;
         return false;
     }
 

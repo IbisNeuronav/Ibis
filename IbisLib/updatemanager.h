@@ -16,7 +16,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QObject>
 
 class QTimer;
-class QTime;
 
 // Description:
 // This is the main clock of Ibis. It is here to trigger
@@ -50,7 +49,6 @@ public slots:
 private:
     QTimer * m_timer;
     int m_timerPeriod;
-    QTime * m_lastUpdateTime;
 };
 
 #endif

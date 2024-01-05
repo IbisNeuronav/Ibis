@@ -70,7 +70,7 @@ public:
     // a prop3D to each renderer. That way, the geometry will be added has a
     // child of the associated Prop3D in each renderer.
     int AddRenderer( vtkRenderer * ren, vtkAssembly * assembly = 0 );
-    int GetNumberOfRenderers();
+    size_t GetNumberOfRenderers();
     vtkRenderer * GetRenderer( int index );
     vtkAssembly * GetAssembly( int index );
     vtkAssembly * GetAssembly( vtkRenderer * ren );

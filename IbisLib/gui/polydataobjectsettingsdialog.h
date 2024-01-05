@@ -24,7 +24,7 @@ class PolyDataObjectSettingsDialog : public QWidget, public Ui::PolyDataObjectSe
     Q_OBJECT
 
 public:
-    PolyDataObjectSettingsDialog( QWidget * parent = 0, Qt::WindowFlags fl = 0 );
+    PolyDataObjectSettingsDialog( QWidget * parent = 0, Qt::WindowFlags fl = Qt::WindowFlags() );
     virtual ~PolyDataObjectSettingsDialog();
 
     void SetPolyDataObject( PolyDataObject * object );

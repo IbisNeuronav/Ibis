@@ -24,7 +24,7 @@ class PointCloudObjectSettingsDialog : public QWidget, public Ui::PointCloudObje
     Q_OBJECT
 
 public:
-    PointCloudObjectSettingsDialog( QWidget * parent = 0, Qt::WindowFlags fl = 0 );
+    PointCloudObjectSettingsDialog( QWidget * parent = 0, Qt::WindowFlags fl = Qt::WindowFlags() );
     virtual ~PointCloudObjectSettingsDialog();
 
     void SetPointCloudObject( PointCloudObject * object );

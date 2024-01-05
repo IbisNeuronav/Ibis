@@ -146,15 +146,15 @@ public:
     SerializerWriter() {}
     ~SerializerWriter() {}
 
-    virtual int IsReader() { return 0; }
+    virtual int IsReader() override { return 0; } 
 
-    virtual bool Start()
+    virtual bool Start() override
     {
         m_currentNode = m_root;
         return true;
     }
 
-    virtual bool Finish()
+    virtual bool Finish() override
     {
         QFile file( m_filename.c_str() );
         if( !file.open( QIODevice::WriteOnly ) ) return false;
@@ -166,16 +166,16 @@ public:
         return true;
     }
 
-    virtual bool BeginSection( const char * attrName )
+    virtual bool BeginSection( const char * attrName ) override
     {
         QDomElement elem = m_document.createElement( attrName );
         m_currentNode    = m_currentNode.appendChild( elem );
         return true;
     }
 
-    virtual void EndSection() { m_currentNode = m_currentNode.parentNode(); }
+    virtual void EndSection() override { m_currentNode = m_currentNode.parentNode(); }
 
-    virtual bool Serialize( const char * attrName, int & value )
+    virtual bool Serialize( const char * attrName, int & value ) override
     {
         QDomElement elem = m_document.createElement( attrName );
         elem.setAttribute( "value", QString::number( value ) );
@@ -183,7 +183,7 @@ public:
         return true;
     }
 
-    virtual bool Serialize( const char * attrName, bool & value )
+    virtual bool Serialize( const char * attrName, bool & value ) override
     {
         QDomElement elem = m_document.createElement( attrName );
         elem.setAttribute( "value", QString::number( value ? 1 : 0 ) );
@@ -191,7 +191,7 @@ public:
         return true;
     }
 
-    virtual bool Serialize( const char * attrName, double & value )
+    virtual bool Serialize( const char * attrName, double & value ) override
     {
         QDomElement elem = m_document.createElement( attrName );
         elem.setAttribute( "value", QString::number( value, 'e', 16 ) );
@@ -199,7 +199,7 @@ public:
         return true;
     }
 
-    virtual bool Serialize( const char * attrName, std::string & value )
+    virtual bool Serialize( const char * attrName, std::string & value ) override
     {
         QDomElement elem = m_document.createElement( attrName );
         elem.setAttribute( "value", value.c_str() );
@@ -207,7 +207,7 @@ public:
         return true;
     }
 
-    virtual bool Serialize( const char * attrName, QString & value )
+    virtual bool Serialize( const char * attrName, QString & value ) override
     {
         QDomElement elem = m_document.createElement( attrName );
         elem.setAttribute( "value", value );
@@ -215,7 +215,7 @@ public:
         return true;
     }
 
-    virtual bool Serialize( const char * attrName, int * value, int nbElements )
+    virtual bool Serialize( const char * attrName, int * value, int nbElements ) override
     {
         QDomElement elem = m_document.createElement( attrName );
         QString text;
@@ -228,7 +228,7 @@ public:
         return true;
     }
 
-    virtual bool Serialize( const char * attrName, double * value, int nbElements )
+    virtual bool Serialize( const char * attrName, double * value, int nbElements ) override
     {
         QDomElement elem = m_document.createElement( attrName );
         QString text;
@@ -253,9 +253,9 @@ public:
     SerializerReader() {}
     ~SerializerReader() {}
 
-    virtual int IsReader() { return 1; }
+    virtual int IsReader() override { return 1; }
 
-    virtual bool Start()
+    virtual bool Start() override
     {
         QFile file( m_filename.c_str() );
 
@@ -278,9 +278,9 @@ public:
         return true;
     }
 
-    virtual bool Finish() { return true; }
+    virtual bool Finish() override { return true; }
 
-    virtual bool BeginSection( const char * attrName )
+    virtual bool BeginSection( const char * attrName ) override
     {
         QDomNode variableNode = m_currentNode.namedItem( attrName );
         if( !variableNode.isNull() )
@@ -291,9 +291,9 @@ public:
         return false;
     }
 
-    virtual void EndSection() { m_currentNode = m_currentNode.parentNode(); }
+    virtual void EndSection() override { m_currentNode = m_currentNode.parentNode(); }
 
-    virtual bool Serialize( const char * attrName, int & value )
+    virtual bool Serialize( const char * attrName, int & value ) override
     {
         QDomNode variableNode = m_currentNode.namedItem( attrName );
         if( !variableNode.isNull() )
@@ -308,7 +308,7 @@ public:
         return false;
     }
 
-    virtual bool Serialize( const char * attrName, bool & value )
+    virtual bool Serialize( const char * attrName, bool & value ) override
     {
         QDomNode variableNode = m_currentNode.namedItem( attrName );
         if( !variableNode.isNull() )
@@ -323,7 +323,7 @@ public:
         return false;
     }
 
-    virtual bool Serialize( const char * attrName, double & value )
+    virtual bool Serialize( const char * attrName, double & value ) override
     {
         QDomNode variableNode = m_currentNode.namedItem( attrName );
         if( !variableNode.isNull() )
@@ -338,7 +338,7 @@ public:
         return false;
     }
 
-    virtual bool Serialize( const char * attrName, std::string & value )
+    virtual bool Serialize( const char * attrName, std::string & value ) override
     {
         QDomNode variableNode = m_currentNode.namedItem( attrName );
         if( !variableNode.isNull() )
@@ -353,7 +353,7 @@ public:
         return false;
     }
 
-    virtual bool Serialize( const char * attrName, QString & value )
+    virtual bool Serialize( const char * attrName, QString & value ) override
     {
         QDomNode variableNode = m_currentNode.namedItem( attrName );
         if( !variableNode.isNull() )
@@ -368,7 +368,7 @@ public:
         return false;
     }
 
-    virtual bool Serialize( const char * attrName, int * value, int nbElements )
+    virtual bool Serialize( const char * attrName, int * value, int nbElements ) override
     {
         QDomNode variableNode = m_currentNode.namedItem( attrName );
         if( !variableNode.isNull() )
@@ -392,7 +392,7 @@ public:
         return false;
     }
 
-    virtual bool Serialize( const char * attrName, double * value, int nbElements )
+    virtual bool Serialize( const char * attrName, double * value, int nbElements ) override
     {
         QDomNode variableNode = m_currentNode.namedItem( attrName );
         if( !variableNode.isNull() )
@@ -444,7 +444,7 @@ bool Serialize( Serializer * serial, const char * attrName, std::vector<T> & val
 {
     if( serial->BeginSection( attrName ) )
     {
-        int numberOfElements = value.size();
+        int numberOfElements = (int)(value.size());
         Serialize( serial, "NumberOfElements", numberOfElements );
         if( serial->IsReader() && resize )
         {

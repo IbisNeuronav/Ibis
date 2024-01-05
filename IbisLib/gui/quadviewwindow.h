@@ -44,7 +44,7 @@ class QuadViewWindow : public QWidget
     Q_OBJECT
 
 public:
-    QuadViewWindow( QWidget * parent = 0, Qt::WindowFlags fl = 0 );
+    QuadViewWindow( QWidget * parent = 0, Qt::WindowFlags fl = Qt::WindowFlags() );
     virtual ~QuadViewWindow();
 
     /**

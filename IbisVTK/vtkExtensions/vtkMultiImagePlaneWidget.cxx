@@ -1117,8 +1117,8 @@ void vtkMultiImagePlaneWidget::PlaceWidget()
     this->Placed = 1;
 }
 
-int vtkMultiImagePlaneWidget::AddInput( vtkImageData * in, vtkScalarsToColors * lut, vtkTransform * t,
-                                        bool canInterpolate )
+size_t vtkMultiImagePlaneWidget::AddInput( vtkImageData * in, vtkScalarsToColors * lut, 
+                                           vtkTransform * t, bool canInterpolate )
 {
     PerVolumeObjects inObjects;
     inObjects.ImageData = in;
@@ -1167,7 +1167,7 @@ int vtkMultiImagePlaneWidget::AddInput( vtkImageData * in, vtkScalarsToColors * 
     inObjects.Texture->SetBlendingMode( vtkTexture::VTK_TEXTURE_BLENDING_MODE_ADD );
     inObjects.Texture->RepeatOff();
 
-    int volIndex = this->Inputs.size();
+    size_t volIndex = this->Inputs.size();
     Inputs.push_back( inObjects );
     this->UpdateTextureUnits();
 

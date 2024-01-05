@@ -89,7 +89,7 @@ void vtkMultiInteractorObserver::RemoveInteractor( vtkRenderWindowInteractor * i
     }
 }
 
-int vtkMultiInteractorObserver::GetNumberOfInteractors() { return this->Interactors.size(); }
+size_t vtkMultiInteractorObserver::GetNumberOfInteractors() { return this->Interactors.size(); }
 
 vtkRenderWindowInteractor * vtkMultiInteractorObserver::GetInteractor( unsigned int index )
 {

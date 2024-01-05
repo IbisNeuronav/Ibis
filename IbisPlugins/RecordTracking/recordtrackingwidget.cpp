@@ -10,6 +10,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 // Thanks to Houssem Gueziri for writing this class
 
+#define _CRT_SECURE_NO_WARNINGS
 #include "recordtrackingwidget.h"
 
 #include <QCheckBox>

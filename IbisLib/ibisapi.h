@@ -98,7 +98,7 @@ class IbisAPI : public QObject
     Q_OBJECT
 
 public:
-    IbisAPI( Application * app );
+    explicit IbisAPI( Application * app );
     ~IbisAPI();
 
     /**

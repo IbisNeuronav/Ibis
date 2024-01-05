@@ -6,9 +6,8 @@ FileSystemTree::FileSystemTree( QWidget * parent ) : QWidget( parent ), ui( new 
 {
     ui->setupUi( this );
     m_pathForm = nullptr;
-    m_model    = new QDirModel( this );
+    m_model    = new QFileSystemModel( this );
     m_model->setReadOnly( true );
-    m_model->setSorting( QDir::DirsFirst | QDir::IgnoreCase | QDir::Name );
 
     QModelIndex index = m_model->index( QDir::homePath() );
 

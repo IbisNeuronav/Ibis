@@ -317,11 +317,11 @@ void IbisHardwareIGSIO::InitPlugin()
 bool IbisHardwareIGSIO::LaunchLocalServer( QString plusConfigFile )
 {
     QString plusServerExec = GetIbisAPI()->GetCustomPath( PlusServerExecutable );
-    if( plusServerExec == QString::null || plusServerExec.isEmpty() )
+    if( plusServerExec.isNull() || plusServerExec.isEmpty() )
     {
         QString message;
-        message = QString( "PlusServer executable path not defined.\n" );
-        message = QString( "Go to Settings/Preferences and set PlusServer executable." );
+        message = QString( "PlusServer executable path not defined.\n"
+                           "Go to Settings/Preferences and set PlusServer executable." );
         QMessageBox::warning( nullptr, "Error", message );
         return false;
     }

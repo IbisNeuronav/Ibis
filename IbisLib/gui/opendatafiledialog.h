@@ -29,7 +29,7 @@ class OpenDataFileDialog : public QDialog
     Q_OBJECT
 
 public:
-    OpenDataFileDialog( QWidget * parent = 0, Qt::WindowFlags fl = 0, SceneManager * man = 0,
+    OpenDataFileDialog( QWidget * parent = 0, Qt::WindowFlags fl = Qt::WindowFlags(), SceneManager * man = 0,
                         OpenFileParams * params = 0 );
     virtual ~OpenDataFileDialog();
 

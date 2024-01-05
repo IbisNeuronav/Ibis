@@ -96,7 +96,7 @@ bool GlslShader::CreateAndCompileShader( unsigned shaderType, unsigned & shaderI
 
     // Create the shader and set its source
     shaderId = glCreateShader( shaderType );
-    glShaderSource( shaderId, memSources.size(), shaderStringPtr, NULL );
+    glShaderSource( shaderId, static_cast<GLsizei>( memSources.size() ), shaderStringPtr, NULL );
 
     delete[] shaderStringPtr;
 

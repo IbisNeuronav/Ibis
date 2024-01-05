@@ -82,8 +82,8 @@ public:
     bool IsAccumulating() { return m_isAccumulating; }
     void StartAccumulating();
     void AccumulateView( vtkImageData * imageVtk, std::vector<cv::Point2f> imagePoints, vtkMatrix4x4 * trackerMatrix );
-    int GetNumberOfAccumulatedViews();
-    int GetNumberOfViewsToAccumulate();
+    size_t GetNumberOfAccumulatedViews();
+    size_t GetNumberOfViewsToAccumulate();
     void CancelAccumulation();
     bool GetOptimizeGridDetection();
     void SetOptimizeGridDetection( bool optimize );
