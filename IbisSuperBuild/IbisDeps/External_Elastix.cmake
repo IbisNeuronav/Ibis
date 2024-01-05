@@ -8,7 +8,7 @@ if( SUPERBUILD_BUILD_MINIMAL_ELASTIX )
         STAMP_DIR ${elastix_prefix}/stamp
         INSTALL_COMMAND ""
         GIT_REPOSITORY "https://github.com/SuperElastix/elastix.git"
-        GIT_TAG ${IBIS_ELASTIX_LONG_VERSION}
+        GIT_TAG "last-itk5.2-support"
         CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=${external_project_dir}/${elastix_name}/install
                 -DCMAKE_OSX_SYSROOT:PATH=${CMAKE_OSX_SYSROOT}
                 -DCMAKE_OSX_DEPLOYMENT_TARGET:STRING=${CMAKE_OSX_DEPLOYMENT_TARGET}
@@ -115,7 +115,7 @@ else()
         STAMP_DIR ${elastix_prefix}/stamp
         INSTALL_COMMAND ""
         GIT_REPOSITORY "https://github.com/SuperElastix/elastix.git"
-        GIT_TAG ${IBIS_ELASTIX_LONG_VERSION}
+        GIT_TAG "last-itk5.2-support"
         CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=${external_project_dir}/${elastix_name}/install
                 -DCMAKE_OSX_SYSROOT:PATH=${CMAKE_OSX_SYSROOT}
                 -DCMAKE_OSX_DEPLOYMENT_TARGET:STRING=${CMAKE_OSX_DEPLOYMENT_TARGET}

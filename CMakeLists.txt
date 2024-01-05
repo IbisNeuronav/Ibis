@@ -1,4 +1,4 @@
-cmake_minimum_required( VERSION 3.5 )
+cmake_minimum_required( VERSION 3.12 )
 
 set( CMAKE_COMMON_DIR ${CMAKE_CURRENT_SOURCE_DIR}/CMakeCommon )
 
@@ -16,8 +16,8 @@ project( ibis )
 include( CMakeDependentOption )
 
 #----------------------------------------
-# Tell the compiler to use c++11 which is required with Qt >= 5.7
-set( CMAKE_CXX_STANDARD 11 )
+# c++17 is the current standard for supported platforms, but c++14 (or even c++11) would likely still work
+set( CMAKE_CXX_STANDARD 17 )
 #----------------------------------------
 
 #==================================================================
