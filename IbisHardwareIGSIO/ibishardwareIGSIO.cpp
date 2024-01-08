@@ -320,8 +320,9 @@ bool IbisHardwareIGSIO::LaunchLocalServer( QString plusConfigFile )
     if( plusServerExec.isNull() || plusServerExec.isEmpty() )
     {
         QString message;
-        message = QString( "PlusServer executable path not defined.\n"
-                           "Go to Settings/Preferences and set PlusServer executable." );
+        message = QString(
+            "PlusServer executable path not defined.\n"
+            "Go to Settings/Preferences and set PlusServer executable." );
         QMessageBox::warning( nullptr, "Error", message );
         return false;
     }

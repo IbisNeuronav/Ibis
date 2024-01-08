@@ -1117,8 +1117,8 @@ void vtkMultiImagePlaneWidget::PlaceWidget()
     this->Placed = 1;
 }
 
-size_t vtkMultiImagePlaneWidget::AddInput( vtkImageData * in, vtkScalarsToColors * lut, 
-                                           vtkTransform * t, bool canInterpolate )
+size_t vtkMultiImagePlaneWidget::AddInput( vtkImageData * in, vtkScalarsToColors * lut, vtkTransform * t,
+                                           bool canInterpolate )
 {
     PerVolumeObjects inObjects;
     inObjects.ImageData = in;

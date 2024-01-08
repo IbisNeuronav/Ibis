@@ -140,7 +140,7 @@ public:
     {
         for( unsigned i = 0; i < m_params.size(); ++i ) m_params[i]->Delete();
     }
-    unsigned int GetNumberOfParams() { return (unsigned int)(m_params.size()); }
+    unsigned int GetNumberOfParams() { return static_cast<unsigned int>( m_params.size() ); }
     vtkGenericParam * GetParam( int index ) { return m_params[index]; }
     vtkGenericParam * GetParam( const char * name )
     {
