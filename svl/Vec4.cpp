@@ -75,7 +75,7 @@ Vec3 proj(const Vec4 &v)
 
 ostream &operator << (ostream &s, const Vec4 &v)
 {
-    Int w = s.width();
+    std::streamsize w = s.width();
 
     return(s << '[' << v[0] << ' ' << setw(w) << v[1] << ' '
         << setw(w) << v[2] << ' ' << setw(w) << v[3] << ']');

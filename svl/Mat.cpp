@@ -496,7 +496,8 @@ Mat oprod(const Vec &a, const Vec &b)
 
 ostream &operator << (ostream &s, const Mat &m)
 {
-    Int i, w = s.width();
+    Int i;
+    std::streamsize w = s.width();
 
     s << '[';
     for (i = 0; i < m.Rows() - 1; i++)
