@@ -275,7 +275,7 @@ Void Mat3::MakeBlock(Real k)
 
 ostream &operator << (ostream &s, const Mat3 &m)
 {
-    Int     w = s.width();
+    std::streamsize w = s.width();
 
     return(s << '[' << m[0] << endl << setw(w) << m[1] << endl << setw(w)
            << m[2] << ']' << endl);

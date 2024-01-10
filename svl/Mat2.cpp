@@ -58,7 +58,7 @@ Mat2 oprod(const Vec2 &a, const Vec2 &b)
 
 ostream &operator << (ostream &s, const Mat2 &m)
 {
-    Int w = s.width();
+    std::streamsize w = s.width();
 
     return(s << '[' << m[0] << endl << setw(w) << m[1] << ']' << endl);
 }

@@ -17,7 +17,7 @@
 
 ostream &operator << (ostream &s, const Vec3 &v)
 {
-    Int w = s.width();
+    std::streamsize w = s.width();
 
     return(s << '[' << v[0] << ' ' << setw(w) << v[1] << ' ' << setw(w) << v[2] << ']');
 }

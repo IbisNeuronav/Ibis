@@ -462,7 +462,8 @@ Vec clamped(const Vec &v)
 
 ostream &operator << (ostream &s, const Vec &v)
 {
-    Int i, w;
+    Int i;
+    std::streamsize w;
 
     s << '[';
 
