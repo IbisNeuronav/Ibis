@@ -393,18 +393,6 @@ void PointsObject::UnselectAllPoints()
     emit ObjectModified();
 }
 
-void PointsObject::ValidateSelectedPoint()
-{
-    if( m_selectedPointIndex == InvalidPointIndex ) return;
-
-    vtkSmartPointer<PointRepresentation> pt = m_pointList.at( m_selectedPointIndex );
-    if( !pt->CheckVisibility() )
-    {
-        m_selectedPointIndex = InvalidPointIndex;
-        emit ObjectModified();
-    }
-}
-
 void PointsObject::MoveCursorToPoint( int index )
 {
     Q_ASSERT( index != InvalidPointIndex && index < m_pointCoordinates->GetNumberOfPoints() );
