@@ -3,7 +3,7 @@ The Intraoperative Brain Imaging System (Ibis) is an open source image-guided ne
 
 Ibis was originally developed by [Simon Drouin](http://nist.mni.mcgill.ca/?page_id=369) and [Anka Kochanowska](http://nist.mni.mcgill.ca/?page_id=663) in the [NeuroImaging and Surgical Technologies lab](http://nist.mni.mcgill.ca) at the [Montreal Neurological Institute](http://www.mcgill.ca/neuro/).
 
-For instruction on how to get a copy of the code, build it and contribute to the project, please visit [this page](https://github.com/IbisNeuronav/Ibis/wiki/IBIS-Documentation).
+For instruction on how to get a copy of the code, build it and contribute to the project, please visit [this page](https://github.com/IbisNeuronav/Ibis/wiki).
 
 Prebuilt Windows binaries can be found [here](https://github.com/IbisNeuronav/Ibis/releases/download/release-3.2.1/Ibis3.2.1-win64-Release.zip) for the latest stable release (recommended), [here](https://github.com/IbisNeuronav/Ibis/releases/download/release-4.0.0/Ibis4.0.0-win64-Release.zip) for the latest experimental release and [here](https://github.com/IbisNeuronav/Ibis/releases/download/latest_dev/ibis-install-windows.zip) for the latest experimental nightly build.
 
