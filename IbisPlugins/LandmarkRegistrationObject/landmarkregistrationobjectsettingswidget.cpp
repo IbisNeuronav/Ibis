@@ -91,7 +91,10 @@ void LandmarkRegistrationObjectSettingsWidget::on_capturePushButton_clicked()
 {
     Q_ASSERT( m_registrationObject );
     int index = ui->pointsTreeView->currentIndex().row();
-    Q_ASSERT( index >= 0 && index < m_registrationObject->GetNumberOfPoints() );
+    if( ! (index >= 0 && index < m_registrationObject->GetNumberOfPoints()) ){
+        std::cerr << "No point selected, nothing was captured." << std::endl;
+        return;
+    }
 
     Q_ASSERT( m_registrationObject->GetManager() );
     PointerObject * pointer = m_registrationObject->GetManager()->GetNavigationPointerObject();
