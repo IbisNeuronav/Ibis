@@ -13,15 +13,14 @@ if( SUPERBUILD_BUILD_MINIMAL_ELASTIX )
                 -DCMAKE_OSX_SYSROOT:PATH=${CMAKE_OSX_SYSROOT}
                 -DCMAKE_OSX_DEPLOYMENT_TARGET:STRING=${CMAKE_OSX_DEPLOYMENT_TARGET}
                 -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
-                -DCMAKE_CXX_FLAGS=-std=c++11
-                -DBUILD_TESTING:BOOL=FALSE
+                -DBUILD_TESTING:BOOL=OFF
                 -DITK_DIR:PATH=${IBIS_ITK_DIR}
-                -DELASTIX_BUILD_EXECUTABLE:BOOL=FALSE
+                -DELASTIX_BUILD_EXECUTABLE:BOOL=OFF
                 # Set what we want:
-                -DUSE_CMAEvolutionStrategy:BOOL=TRUE
-                -DUSE_FullSampler:BOOL=TRUE
-                -DUSE_GridSampler:BOOL=TRUE
-                -DUSE_RandomSampler:BOOL=TRUE
+                -DUSE_CMAEvolutionStrategy:BOOL=ON
+                -DUSE_FullSampler:BOOL=ON
+                -DUSE_GridSampler:BOOL=ON
+                -DUSE_RandomSampler:BOOL=ON
                 # Turn everything else off:
                 -DUSE_AdaptiveStochasticGradientDescent:BOOL=OFF
                 -DUSE_AdvancedAffineTransformElastix:BOOL=OFF
@@ -120,10 +119,9 @@ else()
                 -DCMAKE_OSX_SYSROOT:PATH=${CMAKE_OSX_SYSROOT}
                 -DCMAKE_OSX_DEPLOYMENT_TARGET:STRING=${CMAKE_OSX_DEPLOYMENT_TARGET}
                 -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
-                -DCMAKE_CXX_FLAGS=-std=c++11
-                -DBUILD_TESTING:BOOL=FALSE
+                -DBUILD_TESTING:BOOL=OFF
                 -DITK_DIR:PATH=${IBIS_ITK_DIR}
-                -DELASTIX_BUILD_EXECUTABLE:BOOL=FALSE
-                -DUSE_CMAEvolutionStrategy:BOOL=TRUE
+                -DELASTIX_BUILD_EXECUTABLE:BOOL=OFF
+                -DUSE_CMAEvolutionStrategy:BOOL=ON
         DEPENDS ${itk_name} )
 endif()

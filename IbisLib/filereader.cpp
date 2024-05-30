@@ -855,7 +855,7 @@ int FileReader::GetNumberOfComponents( QString filename )
         else
             return 0;
     }
-    IOBasePointer io = itk::ImageIOFactory::CreateImageIO( fileToRead.toUtf8().data(), itk::ImageIOFactory::ReadMode );
+    IOBasePointer io = itk::ImageIOFactory::CreateImageIO( fileToRead.toUtf8().data(), itk::CommonEnums::IOFileMode::ReadMode );
 
     if( !io ) throw itk::ExceptionObject( "Unsupported image file type" );
 
