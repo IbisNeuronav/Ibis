@@ -20,4 +20,5 @@ PointerAlignment: Middle
 AllowShortLambdasOnASingleLine: Empty
 UseTab: Never
 SpacesInSquareBrackets: false
+IncludeBlocks: Preserve
 ---
