@@ -17,8 +17,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 // .SECTION see also
 // vtkSimpleMapper3D vtkSimpleProp3D
 
-#ifndef __vtkIbisImagePlaneMapper_h
-#define __vtkIbisImagePlaneMapper_h
+#ifndef VTKIBISIMAGEPLANEMAPPER_H
+#define VTKIBISIMAGEPLANEMAPPER_H
 
 #include <vtkSimpleMapper3D.h>
 #include <vtkTimeStamp.h>

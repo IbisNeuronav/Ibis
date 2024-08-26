@@ -8,8 +8,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
-#ifndef __UsAcquisitionSettingsWidget_h_
-#define __UsAcquisitionSettingsWidget_h_
+#ifndef USACQUISITIONSETTINGSWIDGET_H
+#define USACQUISITIONSETTINGSWIDGET_H
 
 #include <QObject>
 #include <QWidget>

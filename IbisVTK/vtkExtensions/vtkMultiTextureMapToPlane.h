@@ -18,8 +18,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 // .SECTION See Also
 //  vtkMultiImagePlaneWidget
 
-#ifndef __vtkMultiTextureMapToPlane_h
-#define __vtkMultiTextureMapToPlane_h
+#ifndef VTKMULTITEXTUREMAPTOPLANE_H
+#define VTKMULTITEXTUREMAPTOPLANE_H
 
 #include <vtkDataSetAlgorithm.h>
 

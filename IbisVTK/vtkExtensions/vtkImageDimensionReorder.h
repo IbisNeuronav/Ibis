@@ -28,8 +28,8 @@
 // The SetInputOrder call tells the class that the input image is in
 // z, y, x order. The filter will always reorder to put it in x,y,z order.
 
-#ifndef __vtkImageDimensionReorder_h
-#define __vtkImageDimensionReorder_h
+#ifndef VTKIMAGEDIMENSIONREORDER_H
+#define VTKIMAGEDIMENSIONREORDER_H
 
 #include "vtkSimpleImageToImageFilter.h"
 

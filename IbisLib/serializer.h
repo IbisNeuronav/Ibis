@@ -8,8 +8,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
-#ifndef __Serializer_h
-#define __Serializer_h
+#ifndef SERIALIZER_H
+#define SERIALIZER_H
 
 #include <QDomDocument>
 #include <QFile>

@@ -8,8 +8,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
-#ifndef __PointRepresentation_h_
-#define __PointRepresentation_h_
+#ifndef POINTREPRESENTATION_H
+#define POINTREPRESENTATION_H
 
 #include <vtkSmartPointer.h>
 

@@ -10,8 +10,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 // Thanks to Dante De Nigris for writing this class
 
-#ifndef __itkGPUOrientationMatchingMatrixTransformationSparseMask_hxx
-#define __itkGPUOrientationMatchingMatrixTransformationSparseMask_hxx
+#ifndef ITKGPUORIENTATIONMATCHINGMATRIXTRANSFORMATIONSPARSEMASK_HXX
+#define ITKGPUORIENTATIONMATCHINGMATRIXTRANSFORMATIONSPARSEMASK_HXX
 
 // uncomment this line to enable output gradient images for debug
 //#define __OUTPUT_GRADIENTS__

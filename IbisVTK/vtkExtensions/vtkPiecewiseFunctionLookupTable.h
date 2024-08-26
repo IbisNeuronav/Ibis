@@ -19,8 +19,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 // .SECTION See Also
 // vtkColorTransferFunction, vtkPiecewiseFunction, vtkLookupTable
 
-#ifndef __vtkPiecewiseFunctionLookupTable_h
-#define __vtkPiecewiseFunctionLookupTable_h
+#ifndef VTKPIECEWISEFUNCTIONLOOKUPTABLE_H
+#define VTKPIECEWISEFUNCTIONLOOKUPTABLE_H
 
 #include <vtkLookupTable.h>
 

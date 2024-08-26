@@ -8,8 +8,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
-#ifndef __version_h_
-#define __version_h_
+#ifndef VERSION_H
+#define VERSION_H
 
 #define IBIS_MAJOR_VERSION ((int)${IBIS_MAJOR_VERSION})
 #define IBIS_MINOR_VERSION ((int)${IBIS_MINOR_VERSION})

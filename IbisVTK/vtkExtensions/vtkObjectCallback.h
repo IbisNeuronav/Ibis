@@ -15,8 +15,8 @@
 // .SECTION See Also
 // vtkCommand vtkCallbackCommand
 
-#ifndef __vtkObjectCallback_h
-#define __vtkObjectCallback_h
+#ifndef VTKOBJECTCALLBACK_H
+#define VTKOBJECTCALLBACK_H
 
 #include "vtkCommand.h"
 

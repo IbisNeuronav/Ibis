@@ -17,8 +17,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 // ( 0, 0 ). The parameters are the radius of the circle and the
 // number of lines used to draw it.
 
-#ifndef __vtkCircleWithCrossSource_h
-#define __vtkCircleWithCrossSource_h
+#ifndef VTKCIRCLEWITHCROSSSOURCE_H
+#define VTKCIRCLEWITHCROSSSOURCE_H
 
 #include <vtkPolyDataAlgorithm.h>
 

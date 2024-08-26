@@ -10,8 +10,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 // Thanks to Simon Drouin for writing this class
 
-#ifndef __vtkMatrix4x4Operators_h_
-#define __vtkMatrix4x4Operators_h_
+#ifndef VTKMATRIX4X4OPERATORS_H
+#define VTKMATRIX4X4OPERATORS_H
 
 #include <vector>
 

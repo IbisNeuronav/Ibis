@@ -8,8 +8,8 @@
     Copyright:      (c) 1995-2001, Andrew Willmott
  */
 
-#ifndef __VL_MATH__
-#define __VL_MATH__
+#ifndef VL_MATH_H
+#define VL_MATH_H
 
 #include <cstdlib>
 

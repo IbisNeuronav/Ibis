@@ -8,8 +8,8 @@
     Copyright:      (c) 1995-2001, Andrew Willmott
 */
 
-#ifndef __SVL_TRANSFORM__
-#define __SVL_TRANSFORM__
+#ifndef SVL_TRANSFORM_H
+#define SVL_TRANSFORM_H
 
 inline Mat2 Rot2(Real theta)
             { Mat2 result; result.MakeRot(theta); return(result); }

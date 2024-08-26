@@ -8,8 +8,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
-#ifndef TAG_GENERATEDSURFACE_H_
-#define TAG_GENERATEDSURFACE_H_
+#ifndef TAG_GENERATEDSURFACE_H
+#define TAG_GENERATEDSURFACE_H
 
 #include <QString>
 #include <QVector>

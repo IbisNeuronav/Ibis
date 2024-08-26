@@ -19,8 +19,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 // .SECTION see also
 // vtkSimpleProp3D
 
-#ifndef __vtkSimpleMapper3D_h
-#define __vtkSimpleMapper3D_h
+#ifndef VTKSIMPLEMAPPER3D_H
+#define VTKSIMPLEMAPPER3D_H
 
 #include <vtkAbstractMapper3D.h>
 

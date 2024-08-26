@@ -10,8 +10,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 // Author: Houssem-Eddine Gueziri
 
-#ifndef __VertebraRegistrationWidget_h_
-#define __VertebraRegistrationWidget_h_
+#ifndef VERTEBRAREGISTRATIONWIDGET_H
+#define VERTEBRAREGISTRATIONWIDGET_H
 
 // Qt includes
 #include <QComboBox>

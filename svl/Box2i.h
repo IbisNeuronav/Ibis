@@ -1,5 +1,5 @@
-#ifndef __Box2i_h_
-#define __Box2i_h_
+#ifndef SVL_BOX2I_H
+#define SVL_BOX2I_H
 
 class Box2i
 {

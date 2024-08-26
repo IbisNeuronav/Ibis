@@ -1,6 +1,6 @@
 
-#ifndef __ApplyTransformToObjectPluginInterface_h_
-#define __ApplyTransformToObjectPluginInterface_h_
+#ifndef APPLYTRANSFORMTOOBJECTPLUGININTERFACE_H
+#define APPLYTRANSFORMTOOBJECTPLUGININTERFACE_H
 
 #include "toolplugininterface.h"
 

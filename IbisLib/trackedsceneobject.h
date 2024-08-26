@@ -1,5 +1,5 @@
-#ifndef __TrackedSceneObject_h_
-#define __TrackedSceneObject_h_
+#ifndef TRACKEDSCENEOBJECT_H
+#define TRACKEDSCENEOBJECT_H
 
 #include <QObject>
 #include <map>

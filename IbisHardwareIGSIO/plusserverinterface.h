@@ -10,8 +10,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 // Thanks to Simon Drouin for writing this class
 
-#ifndef PlusServerInterface_h
-#define PlusServerInterface_h
+#ifndef PLUSSERVERINTERFACE_H
+#define PLUSSERVERINTERFACE_H
 
 #include <vtkObject.h>
 #include <vtkSmartPointer.h>

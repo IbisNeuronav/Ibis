@@ -10,8 +10,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 // Thanks to Dante De Nigris for writing this class
 
-#ifndef __itkGPU3DRigidSimilarityWeightMetric_h__
-#define __itkGPU3DRigidSimilarityWeightMetric_h__
+#ifndef ITKGPU3DRIGIDSIMILARITYWEIGHTMETRIC_H
+#define ITKGPU3DRIGIDSIMILARITYWEIGHTMETRIC_H
 
 #include <itkEuler3DTransform.h>
 #include <itkSingleValuedCostFunction.h>

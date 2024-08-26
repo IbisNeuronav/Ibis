@@ -8,8 +8,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
-#ifndef __GlobalEventHandler_h_
-#define __GlobalEventHandler_h_
+#ifndef GLOBALEVENTHANDLER_H
+#define GLOBALEVENTHANDLER_H
 
 class QKeyEvent;
 

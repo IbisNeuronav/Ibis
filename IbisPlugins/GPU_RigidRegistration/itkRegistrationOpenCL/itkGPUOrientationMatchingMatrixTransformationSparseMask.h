@@ -10,8 +10,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 // Thanks to Dante De Nigris for writing this class
 
-#ifndef __itkGPUOrientationMatchingMatrixTransformationSparseMask_h
-#define __itkGPUOrientationMatchingMatrixTransformationSparseMask_h
+#ifndef ITKGPUORIENTATIONMATCHINGMATRIXTRANSFORMATIONSPARSEMASK_H
+#define ITKGPUORIENTATIONMATCHINGMATRIXTRANSFORMATIONSPARSEMASK_H
 
 #include <itkCovariantVector.h>
 #include <itkGaussianDerivativeOperator.h>

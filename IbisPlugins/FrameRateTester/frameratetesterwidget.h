@@ -10,8 +10,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 // Thanks to Simon Drouin for writing this class
 
-#ifndef __FrameRateTesterWidget_h_
-#define __FrameRateTesterWidget_h_
+#ifndef FRAMERATETESTERWIDGET_H
+#define FRAMERATETESTERWIDGET_H
 
 #include <QWidget>
 

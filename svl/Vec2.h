@@ -8,8 +8,8 @@
     Copyright:      (c) 1995-2001, Andrew Willmott
  */
 
-#ifndef __Vec2__
-#define __Vec2__
+#ifndef SVL_VEC2_H
+#define SVL_VEC2_H
 
 
 // --- Vec2 Class -------------------------------------------------------------

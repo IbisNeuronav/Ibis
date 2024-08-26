@@ -1,6 +1,6 @@
 
-#ifndef __SetPlanesWorldPositionPluginInterface_h_
-#define __SetPlanesWorldPositionPluginInterface_h_
+#ifndef SETPLANESWORLDPOSITIONPLUGININTERFACE_H
+#define SETPLANESWORLDPOSITIONPLUGININTERFACE_H
 
 #include "toolplugininterface.h"
 

@@ -10,8 +10,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 // Thanks to Houssem Gueziri for writing this class
 
-#ifndef __RecordTrackingPluginInterface_h_
-#define __RecordTrackingPluginInterface_h_
+#ifndef RECORDTRACKINGPLUGININTERFACE_H
+#define RECORDTRACKINGPLUGININTERFACE_H
 
 #include "toolplugininterface.h"
 

@@ -19,8 +19,8 @@
 // and the output may or may not be junk.
 // .SECTION See Also
 
-#ifndef __vtkMNIOBJWriter_h
-#define __vtkMNIOBJWriter_h
+#ifndef VTKMNIOBJWRITER_H
+#define VTKMNIOBJWRITER_H
 
 // VTK6 #include "vtkPolyDataSource.h"
 #include <fstream>

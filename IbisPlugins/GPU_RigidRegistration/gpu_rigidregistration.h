@@ -10,8 +10,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 // Adapted from Dante De Nigris GPU Registration plugin
 
-#ifndef __GPU_RigidRegistration_h_
-#define __GPU_RigidRegistration_h_
+#ifndef GPU_RIGIDREGISTRATION_H
+#define GPU_RIGIDREGISTRATION_H
 
 #include <itkAmoebaOptimizer.h>
 #include <itkCMAEvolutionStrategyOptimizer.h>

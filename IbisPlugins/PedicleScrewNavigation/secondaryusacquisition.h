@@ -1,7 +1,7 @@
 // Author: Houssem-Eddine Gueziri
 
-#ifndef __SecondaryUSAcquisition_h_
-#define __SecondaryUSAcquisition_h_
+#ifndef SECONDARYUSACQUISITION_H
+#define SECONDARYUSACQUISITION_H
 
 // Qt includes
 #include <QComboBox>

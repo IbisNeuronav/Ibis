@@ -10,8 +10,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 // Thanks to Simon Drouin for writing this class
 
-#ifndef __FrameRateTesterPluginInterface_h_
-#define __FrameRateTesterPluginInterface_h_
+#ifndef FRAMERATETESTERPLUGININTERFACE_H
+#define FRAMERATETESTERPLUGININTERFACE_H
 
 #include "toolplugininterface.h"
 

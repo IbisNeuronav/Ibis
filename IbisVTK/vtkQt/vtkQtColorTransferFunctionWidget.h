@@ -10,8 +10,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 // Thanks to Simon Drouin for writing this class
 
-#ifndef __vtkQtColorTransferFunctionWidget_h_
-#define __vtkQtColorTransferFunctionWidget_h_
+#ifndef VTKQTCOLORTRANSFERFUNCTIONWIDGET_H
+#define VTKQTCOLORTRANSFERFUNCTIONWIDGET_H
 
 #include <QObject>
 #include <QWidget>

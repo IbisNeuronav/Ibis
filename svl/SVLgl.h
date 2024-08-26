@@ -5,8 +5,8 @@
                 OpenGL.
  */
 
-#ifndef __SVL_GL__
-#define __SVL_GL__
+#ifndef SVL_SVLGL_H
+#define SVL_SVLGL_H
 
 #ifdef VL_FLOAT
 

@@ -8,8 +8,8 @@
     Copyright:      (c) 1995-2001, Andrew Willmott
  */
 
-#ifndef __Vec3__
-#define __Vec3__
+#ifndef SVL_VEC3_H
+#define SVL_VEC3_H
 
 #include "Vec2.h"
 

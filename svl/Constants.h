@@ -8,8 +8,8 @@
     Copyright:  (c) 1999-2001, Andrew Willmott
 */
 
-#ifndef __VLConstants__
-#define __VLConstants__
+#ifndef SVL_CONSTANTS_H
+#define SVL_CONSTANTS_H
 
 #include <cmath>
 

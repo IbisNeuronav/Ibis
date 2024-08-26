@@ -10,8 +10,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 // Author: Houssem-Eddine Gueziri
 
-#ifndef __SCREWNAVIGATIONWIDGET_H__
-#define __SCREWNAVIGATIONWIDGET_H__
+#ifndef SCREWNAVIGATIONWIDGET_H
+#define SCREWNAVIGATIONWIDGET_H
 
 // Qt includes
 #include <QDir>
