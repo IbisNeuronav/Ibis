@@ -149,8 +149,8 @@ void PointsObject::Export()
         if( saveName.isEmpty() ) return;
         if( QFile::exists( saveName ) )
         {
-            int ret = QMessageBox::warning( 0, tr( "Save Points" ), saveName, QMessageBox::Yes | QMessageBox::Default,
-                                            QMessageBox::No | QMessageBox::Escape );
+            int ret = QMessageBox::warning( 0, tr( "Save Points" ), saveName, QMessageBox::Yes | 
+                                            QMessageBox::No, QMessageBox::No );
             if( ret == QMessageBox::No ) return;
         }
         QFileInfo info( saveName );
@@ -171,7 +171,7 @@ void PointsObject::Export()
         writer->Delete();
     }
     else
-        QMessageBox::warning( 0, tr( "Error: " ), tr( "There are no points to save." ), 1, 0 );
+        QMessageBox::warning( 0, tr( "Error: " ), tr( "There are no points to save." ), QMessageBox::Ok );
 }
 
 void PointsObject::Setup( View * view )

@@ -1,7 +1,6 @@
 #include "ibispreferences.h"
 
 #include <QApplication>
-#include <QDesktopWidget>
 #include <QRect>
 #include <QScreen>
 

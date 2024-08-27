@@ -73,10 +73,10 @@ void vtkQtPiecewiseFunctionWidget::mousePressEvent( QMouseEvent * event )
 {
     Q_UNUSED( event )
 
-    m_movingPointIndex = PointIndexFromPixCoord( event->x(), event->y() );
+    m_movingPointIndex = PointIndexFromPixCoord( event->position().x(), event->position().y() );
     if( m_movingPointIndex == -1 ) return;
 
-    SetNodeCoordFromPixCoord( event->x(), event->y(), m_movingPointIndex );
+    SetNodeCoordFromPixCoord( event->position().x(), event->position().y(), m_movingPointIndex );
 
     update();
 }
@@ -85,7 +85,7 @@ void vtkQtPiecewiseFunctionWidget::mouseReleaseEvent( QMouseEvent * event )
 {
     if( m_movingPointIndex == -1 ) return;
 
-    SetNodeCoordFromPixCoord( event->x(), event->y(), m_movingPointIndex );
+    SetNodeCoordFromPixCoord( event->position().x(), event->position().y(), m_movingPointIndex );
 
     m_movingPointIndex = -1;
 
@@ -96,17 +96,17 @@ void vtkQtPiecewiseFunctionWidget::mouseMoveEvent( QMouseEvent * event )
 {
     if( m_movingPointIndex == -1 ) return;
 
-    SetNodeCoordFromPixCoord( event->x(), event->y(), m_movingPointIndex );
+    SetNodeCoordFromPixCoord( event->position().x(), event->position().y(), m_movingPointIndex );
 
     update();
 }
 
 void vtkQtPiecewiseFunctionWidget::mouseDoubleClickEvent( QMouseEvent * event )
 {
-    int index = PointIndexFromPixCoord( event->x(), event->y() );
+    int index = PointIndexFromPixCoord( event->position().x(), event->position().y() );
 
     if( index == -1 )
-        AddPoint( event->x(), event->y() );
+        AddPoint( event->position().x(), event->position().y() );
     else
         RemovePoint( index );
 

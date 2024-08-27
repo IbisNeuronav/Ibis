@@ -1,0 +1,10 @@
+diff a/IbisLib/view.cpp b/IbisLib/view.cpp	(rejected hunks)
+@@ -73,6 +73,8 @@
+     m_backupWindowParent = nullptr;
+     CurrentController    = nullptr;
+ 
++    qRegisterMetaType<vtkObject>("vtkObject");
++
+     connect( &Application::GetInstance(), SIGNAL( IbisClockTick() ), this, SLOT( EnableRendering() ) );
+ }
+ 

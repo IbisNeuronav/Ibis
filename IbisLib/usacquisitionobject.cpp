@@ -591,7 +591,7 @@ bool USAcquisitionObject::LoadFramesFromMINCFile( QStringList & allMINCFiles )
     {
         QString message( tr( "No read permission on file: " ) );
         message.append( allMINCFiles.at( 0 ) );
-        QMessageBox::critical( 0, "Error", message, 1, 0 );
+        QMessageBox::critical( 0, "Error", message, QMessageBox::Ok );
         return false;
     }
     m_componentsNumber = Application::GetInstance().GetNumberOfComponents( allMINCFiles.at( 0 ) );
@@ -653,7 +653,7 @@ bool USAcquisitionObject::LoadGrayFrames( QStringList & allMINCFiles )
             qApp->processEvents();
             if( progress->wasCanceled() )
             {
-                QMessageBox::information( 0, "Importing frames", "Process cancelled", 1, 0 );
+                QMessageBox::information( 0, "Importing frames", "Process cancelled", QMessageBox::Ok );
                 processOK = false;
             }
         }
@@ -719,7 +719,7 @@ bool USAcquisitionObject::LoadRGBFrames( QStringList & allMINCFiles )
             qApp->processEvents();
             if( progress->wasCanceled() )
             {
-                QMessageBox::information( 0, "Importing frames", "Process cancelled", 1, 0 );
+                QMessageBox::information( 0, "Importing frames", "Process cancelled", QMessageBox::Ok );
                 processOK = false;
             }
         }
@@ -760,7 +760,7 @@ bool USAcquisitionObject::LoadFramesFromMINCFile( Serializer * ser )
     if( !QFile::exists( subDirName ) )
     {
         QString accessError = tr( "Directory not found - " ) + subDirName;
-        QMessageBox::warning( 0, tr( "Error: " ), accessError, 1, 0 );
+        QMessageBox::warning( 0, tr( "Error: " ), accessError, QMessageBox::Ok );
         return false;
     }
     QDir dir( subDirName );
@@ -768,7 +768,7 @@ bool USAcquisitionObject::LoadFramesFromMINCFile( Serializer * ser )
     if( allMINCFiles.isEmpty() )
     {
         QString accessError = tr( "No acquisition found in  " ) + subDirName;
-        QMessageBox::warning( 0, tr( "Error: " ), accessError, 1, 0 );
+        QMessageBox::warning( 0, tr( "Error: " ), accessError, QMessageBox::Ok );
         return false;
     }
 
@@ -810,7 +810,7 @@ void USAcquisitionObject::Serialize( Serializer * ser )
         if( !QDir( m_baseDirectory ).exists() )
         {
             QString accessError = tr( "Cannot find acquisition directory: " ) + m_baseDirectory;
-            QMessageBox::warning( 0, tr( "Error: " ), accessError, 1, 0 );
+            QMessageBox::warning( 0, tr( "Error: " ), accessError, QMessageBox::Ok );
             return;
         }
 
@@ -1063,7 +1063,7 @@ void USAcquisitionObject::ExportTrackedVideoBuffer( QString destDir, bool masked
         if( !dirMade )
         {
             QString accessError = tr( "Can't create directory:\n" ) + baseDirName;
-            QMessageBox::warning( 0, tr( "Error: " ), accessError, 1, 0 );
+            QMessageBox::warning( 0, tr( "Error: " ), accessError, QMessageBox::Ok );
             return;
         }
     }
@@ -1079,7 +1079,7 @@ void USAcquisitionObject::ExportTrackedVideoBuffer( QString destDir, bool masked
         {
             QString accessError =
                 tr( "Please select different directory.\nAcquisition data already saved in: " ) + subDirName;
-            QMessageBox::warning( 0, tr( "Error: " ), accessError, 1, 0 );
+            QMessageBox::warning( 0, tr( "Error: " ), accessError, QMessageBox::Ok );
             return;
         }
     }
@@ -1088,7 +1088,7 @@ void USAcquisitionObject::ExportTrackedVideoBuffer( QString destDir, bool masked
     if( !dirMade )
     {
         QString accessError = tr( "Can't create directory:\n" ) + subDirName;
-        QMessageBox::warning( 0, tr( "Error: " ), accessError, 1, 0 );
+        QMessageBox::warning( 0, tr( "Error: " ), accessError, QMessageBox::Ok );
         return;
     }
     bool processOK             = false;
@@ -1105,7 +1105,7 @@ void USAcquisitionObject::ExportTrackedVideoBuffer( QString destDir, bool masked
             calMatString.append( " " );
         }
     }
-    calMatString.replace( calMatString.count() - 1, 1, ";" );
+    calMatString.replace( calMatString.size() - 1, 1, ";" );
 
     if( numberOfFrames > 0 )
     {
@@ -1164,7 +1164,7 @@ void USAcquisitionObject::ExportTrackedVideoBuffer( QString destDir, bool masked
                 qApp->processEvents();
                 if( progress->wasCanceled() )
                 {
-                    QMessageBox::information( 0, tr( "Exporting frames" ), tr( "Process cancelled" ), 1, 0 );
+                    QMessageBox::information( 0, tr( "Exporting frames" ), tr( "Process cancelled" ), QMessageBox::Ok );
                     processOK = false;
                 }
             }
@@ -1218,7 +1218,7 @@ void USAcquisitionObject::ExportTrackedVideoBuffer( QString destDir, bool masked
                 qApp->processEvents();
                 if( progress->wasCanceled() )
                 {
-                    QMessageBox::information( 0, tr( "Exporting frames" ), tr( "Process cancelled" ), 1, 0 );
+                    QMessageBox::information( 0, tr( "Exporting frames" ), tr( "Process cancelled" ), QMessageBox::Ok );
                     processOK = false;
                 }
             }
@@ -1236,7 +1236,7 @@ void USAcquisitionObject::ExportTrackedVideoBuffer( QString destDir, bool masked
         writer->Write();
         writer->Delete();
     }
-    if( !processOK ) QMessageBox::warning( 0, "Error: ", "Exporting frames failed.", 1, 0 );
+    if( !processOK ) QMessageBox::warning( 0, "Error: ", "Exporting frames failed.", QMessageBox::Ok );
 }
 
 bool USAcquisitionObject::Import()

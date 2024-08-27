@@ -192,9 +192,9 @@ void ImageObject::Export()
     if( saveName.isEmpty() ) return;
     if( QFile::exists( saveName ) )
     {
-        int ret =
-            QMessageBox::warning( 0, tr( "Save ImageObject: " ), saveName, QMessageBox::Yes | QMessageBox::Default,
-                                  QMessageBox::No | QMessageBox::Escape );
+        QMessageBox::StandardButton ret =
+            QMessageBox::warning( 0, tr( "Save ImageObject: " ), saveName, QMessageBox::Yes |
+                                  QMessageBox::No, QMessageBox::No );
         if( ret == QMessageBox::No ) return;
     }
 

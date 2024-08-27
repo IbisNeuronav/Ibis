@@ -217,7 +217,7 @@ void LandmarkRegistrationObject::Export()
         if( !info1.isWritable() )
         {
             QString accessError = tr( "No write permission:\n" ) + dirPath;
-            QMessageBox::warning( 0, tr( "Error: " ), accessError, 1, 0 );
+            QMessageBox::warning( 0, tr( "Error: " ), accessError, QMessageBox::Ok );
             return;
         }
         QString filename1( filename );
@@ -620,13 +620,13 @@ bool LandmarkRegistrationObject::ReadTagFile()
         if( !fi.exists() )
         {
             QString accessError = tr( "File does not exist:\n" ) + filename;
-            QMessageBox::warning( 0, tr( "Error: " ), accessError, 1, 0 );
+            QMessageBox::warning( 0, tr( "Error: " ), accessError, QMessageBox::Ok );
             return false;
         }
         if( !fi.isReadable() )
         {
             QString accessError = tr( "No read permission:\n" ) + filename;
-            QMessageBox::warning( 0, tr( "Error: " ), accessError, 1, 0 );
+            QMessageBox::warning( 0, tr( "Error: " ), accessError, QMessageBox::Ok );
             return false;
         }
     }
@@ -638,7 +638,7 @@ bool LandmarkRegistrationObject::ReadTagFile()
     if( src->GetNumberOfPoints() == 0 )
     {
         QString accessError = tr( "File " ) + filename + tr( " contains no points." );
-        QMessageBox::critical( 0, tr( "Error: " ), accessError, 1, 0 );
+        QMessageBox::critical( 0, tr( "Error: " ), accessError, QMessageBox::Ok );
         return false;
     }
     this->SetSourcePoints( src );

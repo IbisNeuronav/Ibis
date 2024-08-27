@@ -80,8 +80,8 @@ void PointCloudObject::Export()
     if( QFile::exists( saveName ) )
     {
         int ret =
-            QMessageBox::warning( 0, tr( "Save PointCloudObject" ), saveName, QMessageBox::Yes | QMessageBox::Default,
-                                  QMessageBox::No | QMessageBox::Escape );
+            QMessageBox::warning( 0, tr( "Save PointCloudObject" ), saveName, QMessageBox::Yes |
+                                  QMessageBox::No,  QMessageBox::No );
         if( ret == QMessageBox::No ) return;
     }
     this->SetFullFileName( saveName );

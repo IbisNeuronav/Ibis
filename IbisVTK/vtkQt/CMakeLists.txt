@@ -13,8 +13,8 @@ SET( IBIS_VTK_QT_HDR_MOC vtkQtImageViewer.h vtkQtMatrixDialog.h )
 set( IBIS_VTK_QT_PLUGIN_HDR_MOC vtkQtHistogramWidget.h vtkQtPiecewiseFunctionWidget.h vtkQtColorTransferFunctionWidget.h )
 
 # moc Qt source file without a ui file
-qt5_wrap_cpp( IBIS_VTK_QT_MOC ${IBIS_VTK_QT_HDR_MOC} )
-qt5_wrap_cpp( IBIS_VTK_QT_PLUGIN_MOC ${IBIS_VTK_QT_PLUGIN_HDR_MOC} )
+qt6_wrap_cpp( IBIS_VTK_QT_MOC ${IBIS_VTK_QT_HDR_MOC} )
+qt6_wrap_cpp( IBIS_VTK_QT_PLUGIN_MOC ${IBIS_VTK_QT_PLUGIN_HDR_MOC} )
 
 #================================
 # Define sources
@@ -51,7 +51,7 @@ include_directories(${QT_QTDESIGNER_INCLUDE_DIR})
 
 set( vtkQtPluginSrc vtkQtPlugin.cpp vtkQtHistogramWidget.cpp vtkQtPiecewiseFunctionWidget.cpp vtkQtColorTransferFunctionWidget.cpp )
 set( vtkQtPluginHdrMoc vtkQtPlugin.h )
-qt5_wrap_cpp( vtkQtPluginSrcMoc ${vtkQtPluginHdrMoc} )
+qt6_wrap_cpp( vtkQtPluginSrcMoc ${vtkQtPluginHdrMoc} )
 
 # add vtkQtPlugin from sources
 #ADD_LIBRARY( vtkQtPlugin SHARED ${vtkQtPluginSrc} ${vtkQtPluginSrcMoc} ${vtkQtPluginHdrMoc} ${IBIS_VTK_QT_PLUGING_HDR_MOC} ${IBIS_VTK_QT_PLUGIN_MOC} )
