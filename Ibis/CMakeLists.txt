@@ -1,8 +1,8 @@
 PROJECT ( IBIS_MAIN )
 
 # define sources
-SET( IBIS_SRC main.cpp commandlinearguments.cpp )
-SET( IBIS_HDR commandlinearguments.h )
+set( IBIS_SRC main.cpp commandlinearguments.cpp )
+set( IBIS_HDR commandlinearguments.h )
 set( exec_name ibis )
 
 # option to turn on vtk warnings
@@ -12,7 +12,7 @@ if( NOT IBIS_ENABLE_VTK_WARNINGS )
 endif()
 
 # moc Qt source file without a ui file
-qt5_wrap_cpp( IBIS_MOC ${IBIS_HDR_MOC} )
+qt6_wrap_cpp( IBIS_MOC ${IBIS_HDR_MOC} )
 
 # make rules to create c++ source from Qt resource files
 
@@ -70,7 +70,7 @@ endif()
 #================================
 # Define executable
 #================================
-SET( SOURCE ${IBIS_HDR} ${IBIS_HDR_MOC} ${IBIS_SRC} ${ImportPluginsSourceFile} ${IBIS_MOC} ${IBIS_SRC_ICNS} ${platform_src} )
+set( SOURCE ${IBIS_HDR} ${IBIS_HDR_MOC} ${IBIS_SRC} ${ImportPluginsSourceFile} ${IBIS_MOC} ${IBIS_SRC_ICNS} ${platform_src} )
 ADD_EXECUTABLE( ${exec_name} ${executable_flags} ${SOURCE} )
 
 if (APPLE)
@@ -90,10 +90,13 @@ if( USE_POINT_GREY_CAMERA )
     set( flycaptureLib flycapture )
 endif()
 
-TARGET_LINK_LIBRARIES( ${exec_name} ${PluginLibs} ${PluginExternalLibs} ${HardwareModulesLibs} ${libsToUse} ${QT_LIBRARIES}
-                                    ${VTK_LIBRARIES} ${MINC4ITK_LIBRARIES} ${ELASTIX_LIBRARIES}
+target_link_libraries( ${exec_name} ${PluginLibs} ${PluginExternalLibs} ${HardwareModulesLibs} ${libsToUse} 
+                                    ${VTK_LIBRARIES} ${MINC4ITK_LIBRARIES} ${ELASTIX_LIBRARIES} 
                                     ${itkLibsToUse} ${OpenCV_LIBS} ${flycaptureLib} svl ${gpuLibs} )
-qt5_use_modules( ${exec_name} ${IbisQtModules} )
+foreach( module IN LISTS IbisQtModules )
+	message( STATUS "Linking against Qt6::${module}" )
+    target_link_libraries( ${exec_name} "Qt6::${module}" )
+endforeach()
 
 vtk_module_autoinit( TARGETS ${exec_name} MODULES ${VTK_LIBRARIES})
 
@@ -117,7 +120,7 @@ endif()
 #================================
 if( APPLE )
    # On mac, we need to run macdeployqt on the installed bundle (should eventually implement a better solution)
-   get_target_property( QMakeLocation Qt5::qmake LOCATION)
+   get_target_property( QMakeLocation Qt6::qmake LOCATION)
    get_filename_component( QtBinLocation ${QMakeLocation} DIRECTORY )
    set( MacDeployQtExec ${QtBinLocation}/macdeployqt )
    set( BuiltExecFullPath ${CMAKE_CURRENT_BINARY_DIR}/${exec_name}.app )
@@ -148,7 +151,7 @@ endif()
 #================================
 set( CPACK_PACKAGE_DESCRIPTION_SUMMARY "Ibis image-guided neurosurgery program and viewer")
 set( CPACK_PACKAGE_NAME ${exec_name} )
-set( CPACK_PACKAGE_CONTACT "Simon Drouin and Anka Kochanowska")
+set( CPACK_PACKAGE_CONTACT "Étienne Léger")
 set( CPACK_PACKAGE_VENDOR "NeuroImaging and Surgical Technologies (NIST) Lab - McConnell Brain Imaging Centre - Montreal Neurological Institute")
 set( CPACK_PACKAGE_VERSION_MAJOR ${IBIS_MAJOR_VERSION})
 set( CPACK_PACKAGE_VERSION_MINOR ${IBIS_MINOR_VERSION})

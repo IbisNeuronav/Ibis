@@ -606,19 +606,6 @@ bool Serialize( Serializer * serial, const char * attrName, QPair<T, R> & value 
     return false;
 }
 
-template <class T, class R>
-bool Serialize( Serializer * serial, const char * attrName, std::pair<T, R> & value )
-{
-    if( serial->BeginSection( attrName ) )
-    {
-        Serialize( serial, "First", value.first );
-        Serialize( serial, "Second", value.second );
-        serial->EndSection();
-        return true;
-    }
-    return false;
-}
-
 template <class K, class V>
 bool Serialize( Serializer * serial, const char * attrName, std::map<K, V> & value )
 {

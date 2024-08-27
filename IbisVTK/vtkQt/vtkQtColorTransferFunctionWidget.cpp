@@ -61,7 +61,7 @@ void vtkQtColorTransferFunctionWidget::mouseMoveEvent( QMouseEvent * event )
     if( m_sliderMoving )
         MouseMove( event->pos().x(), event->pos().y() );
     else
-        UpdateCurrentCursorInformation( event->x(), event->y() );
+        UpdateCurrentCursorInformation( event->position().x(), event->position().y() );
 
     update();
     event->accept();
@@ -75,12 +75,13 @@ void vtkQtColorTransferFunctionWidget::mousePressEvent( QMouseEvent * event )
         return;
     }
 
-    UpdateCurrentCursorInformation( event->x(), event->y() );
+    UpdateCurrentCursorInformation( event->position().x(), event->position().y() );
 
-    if( IsInColorCursorZone( event->x(), event->y() ) || IsInRangeCursorZone( event->x(), event->y() ) )
+    if( IsInColorCursorZone( event->position().x(), event->position().y() ) ||
+        IsInRangeCursorZone( event->position().x(), event->position().y() ) )
     {
         m_sliderMoving = true;
-        MouseMove( event->x(), event->y() );
+        MouseMove( event->position().x(), event->position().y() );
     }
 
     event->accept();
@@ -100,7 +101,7 @@ void vtkQtColorTransferFunctionWidget::mouseReleaseEvent( QMouseEvent * event )
         return;
     }
 
-    MouseMove( event->x(), event->y() );
+    MouseMove( event->position().x(), event->position().y() );
 
     // Stop moving
     m_sliderMoving = false;
@@ -115,11 +116,11 @@ void vtkQtColorTransferFunctionWidget::mouseReleaseEvent( QMouseEvent * event )
 void vtkQtColorTransferFunctionWidget::mouseDoubleClickEvent( QMouseEvent * event )
 {
     // In Color cursor zone, choose a new color for a point
-    if( IsInColorCursorZone( event->x(), event->y() ) )
+    if( IsInColorCursorZone( event->position().x(), event->position().y() ) )
     {
-        int index  = MinDistanceColor( event->x() );
+        int index  = MinDistanceColor( event->position().x() );
         int pixPos = GetColorNodePixPosition( index );
-        if( abs( pixPos - event->x() ) <= m_hotspotRadius )
+        if( abs( pixPos - event->position().x() ) <= m_hotspotRadius )
         {
             // clang-format off
             QColor currentColor = GetColorNodeColor( index );
@@ -135,15 +136,15 @@ void vtkQtColorTransferFunctionWidget::mouseDoubleClickEvent( QMouseEvent * even
     // Anywhere else, remove point if close to one and add one if not
     else
     {
-        int index  = MinDistanceColor( event->x() );
+        int index  = MinDistanceColor( event->position().x() );
         int pixPos = GetColorNodePixPosition( index );
-        if( abs( pixPos - event->x() ) <= m_hotspotRadius )
+        if( abs( pixPos - event->position().x() ) <= m_hotspotRadius )
         {
             m_colorTransferFunction->RemovePoint( GetColorNodeValue( index ) );
         }
         else
         {
-            double value   = widgetPosToSliderValue( event->x() );
+            double value   = widgetPosToSliderValue( event->position().x() );
             double * color = m_colorTransferFunction->GetColor( value );
             m_colorTransferFunction->AddRGBPoint( value, color[0], color[1], color[2] );
         }

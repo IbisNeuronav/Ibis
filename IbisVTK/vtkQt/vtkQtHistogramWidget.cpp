@@ -130,22 +130,22 @@ void vtkQtHistogramWidget::mousePressEvent( QMouseEvent * event )
         return;
     }
 
-    m_currentCursor = MinDistanceCursor( event->x() );
+    m_currentCursor = MinDistanceCursor( event->position().x() );
 
     if( m_currentCursor == 0 )
     {
         m_minSliderMoving = true;
-        setMinSliderValue( event->x() );
+        setMinSliderValue( event->position().x() );
     }
     else if( m_currentCursor == 1 )
     {
         m_maxSliderMoving = true;
-        setMaxSliderValue( event->x() );
+        setMaxSliderValue( event->position().x() );
     }
     else if( m_currentCursor == 2 )
     {
         m_midSliderMoving = true;
-        setMidSliderValue( event->x() );
+        setMidSliderValue( event->position().x() );
     }
 
     event->accept();
@@ -169,11 +169,11 @@ void vtkQtHistogramWidget::mouseReleaseEvent( QMouseEvent * event )
     if( rect().contains( event->pos() ) )
     {
         if( m_minSliderMoving )
-            setMinSliderValue( event->x() );
+            setMinSliderValue( event->position().x() );
         else if( m_maxSliderMoving )
-            setMaxSliderValue( event->x() );
+            setMaxSliderValue( event->position().x() );
         else
-            setMidSliderValue( event->x() );
+            setMidSliderValue( event->position().x() );
     }
 
     // Stop moving

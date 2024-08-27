@@ -91,8 +91,8 @@ topological_sort( allIbisEnabledPlugins "" Dependencies )
 
 # Macro to define each plugin. To be called inside each plugin's CMakeLists.txt
 macro( DefinePlugin PluginSrc PluginHdr PluginHdrMoc PluginUi )
-    qt5_wrap_ui( PluginHdrUi ${PluginUi} )
-    qt5_wrap_cpp( PluginMoc ${PluginHdrMoc} )
+    qt6_wrap_ui( PluginHdrUi ${PluginUi} )
+    qt6_wrap_cpp( PluginMoc ${PluginHdrMoc} )
     set( PluginSources ${PluginSrc} ${PluginHdrMoc} ${PluginUi} ${PluginMoc} ${PluginHdrUi} )
     add_library( ${PluginName} ${PluginSources} )
     target_link_libraries( ${PluginName} vtkExtensions IbisLib ${${PluginName}Dependencies} )

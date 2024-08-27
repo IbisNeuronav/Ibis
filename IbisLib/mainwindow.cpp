@@ -13,7 +13,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QAction>
 #include <QApplication>
 #include <QCloseEvent>
-#include <QDesktopWidget>
 #include <QDir>
 #include <QFileDialog>
 #include <QFileInfo>
@@ -79,7 +78,7 @@ MainWindow::MainWindow( QWidget * parent )
     // Creates a file menu
     // -----------------------------------------
     QMenu * fileMenu = menuBar()->addMenu( "&File" );
-    fileMenu->addAction( tr( "&Open File" ), this, SLOT( fileOpenFile() ), QKeySequence::Open );
+    fileMenu->addAction( tr( "&Open File" ), QKeySequence::Open, this, SLOT( fileOpenFile() ) );
     QMenu * newObjectFileMenu = fileMenu->addMenu( "&New Object" );
     newObjectFileMenu->addAction( tr( "&Point Set" ), this, SLOT( NewPointSet() ) );
     this->CreateNewObjectPluginsUi( newObjectFileMenu );
@@ -89,12 +88,12 @@ MainWindow::MainWindow( QWidget * parent )
     importFileMenu->addAction( tr( "US Acquisition" ), this, SLOT( fileImportUsAcquisition() ) );
     importFileMenu->addAction( tr( "Camera" ), this, SLOT( fileImportCamera() ) );
     fileMenu->addSeparator();
-    fileMenu->addAction( tr( "Save S&cene" ), this, SLOT( fileSaveScene() ), QKeySequence::Save );
+    fileMenu->addAction( tr( "Save S&cene" ), QKeySequence::Save, this, SLOT( fileSaveScene() ) );
     fileMenu->addAction( tr( "Save S&cene As..." ), this, SLOT( fileSaveSceneAs() ) );
-    fileMenu->addAction( tr( "&Load Scene" ), this, SLOT( fileLoadScene() ), QKeySequence( Qt::CTRL + Qt::Key_L ) );
+    fileMenu->addAction( tr( "&Load Scene" ), QKeySequence( Qt::CTRL | Qt::Key_L ), this, SLOT( fileLoadScene() ) );
     fileMenu->addAction( tr( "&New Scene" ), this, SLOT( fileNewScene() ) );
     fileMenu->addSeparator();
-    fileMenu->addAction( tr( "&Exit" ), this, SLOT( close() ), QKeySequence::Quit );
+    fileMenu->addAction( tr( "&Exit" ), QKeySequence::Quit, this, SLOT( close() ) );
 
     connect( fileMenu, SIGNAL( aboutToShow() ), this, SLOT( ModifyFileMenu() ) );
     connect( newObjectFileMenu, SIGNAL( aboutToShow() ), this, SLOT( ModifyNewObjectFileMenu() ) );
@@ -109,7 +108,7 @@ MainWindow::MainWindow( QWidget * parent )
         Application::GetInstance().AddHardwareSettingsMenuEntries( settingsMenu );
     }
     QAction * preferences =
-        settingsMenu->addAction( tr( "&Preferences" ), this, SLOT( Preferences() ), QKeySequence::Preferences );
+        settingsMenu->addAction( tr( "&Preferences" ), QKeySequence::Preferences, this, SLOT( Preferences() ) );
     preferences->setMenuRole( QAction::PreferencesRole );
 
     // -----------------------------------------
@@ -123,19 +122,19 @@ MainWindow::MainWindow( QWidget * parent )
     m_viewZPlaneAction = AddToggleAction( viewMenu, tr( "&Transverse Plane" ), SLOT( ViewZPlaneToggled( bool ) ),
                                           QKeySequence( "Alt+z" ), true );
     m_showAllPlanesAction =
-        viewMenu->addAction( tr( "View All Planes" ), this, SLOT( ViewAllPlanes() ), QKeySequence( "Alt+p" ) );
+        viewMenu->addAction( tr( "View All Planes" ), QKeySequence( "Alt+p" ), this, SLOT( ViewAllPlanes() ) );
     m_hideAllPlanesAction =
-        viewMenu->addAction( tr( "Hide All Planes" ), this, SLOT( HideAllPlanes() ), QKeySequence( "Shift+Alt+p" ) );
+        viewMenu->addAction( tr( "Hide All Planes" ), QKeySequence( "Shift+Alt+p" ), this, SLOT( HideAllPlanes() ) );
     viewMenu->addSeparator();
-    viewMenu->addAction( tr( "&Front" ), this, SLOT( View3DFront() ), QKeySequence( "Shift+Alt+f" ) );
-    viewMenu->addAction( tr( "&Left" ), this, SLOT( View3DLeft() ), QKeySequence( "Shift+Alt+l" ) );
-    viewMenu->addAction( tr( "&Right" ), this, SLOT( View3DRight() ), QKeySequence( "Shift+Alt+r" ) );
-    viewMenu->addAction( tr( "&Back" ), this, SLOT( View3DBack() ), QKeySequence( "Shift+Alt+b" ) );
-    viewMenu->addAction( tr( "&Top" ), this, SLOT( View3DTop() ), QKeySequence( "Shift+Alt+t" ) );
-    viewMenu->addAction( tr( "Botto&m" ), this, SLOT( View3DBottom() ), QKeySequence( "Shift+Alt+m" ) );
+    viewMenu->addAction( tr( "&Front" ), QKeySequence( "Shift+Alt+f" ), this, SLOT( View3DFront() ) );
+    viewMenu->addAction( tr( "&Left" ), QKeySequence( "Shift+Alt+l" ), this, SLOT( View3DLeft() ) );
+    viewMenu->addAction( tr( "&Right" ), QKeySequence( "Shift+Alt+r" ), this, SLOT( View3DRight() ) );
+    viewMenu->addAction( tr( "&Back" ), QKeySequence( "Shift+Alt+b" ), this, SLOT( View3DBack() ) );
+    viewMenu->addAction( tr( "&Top" ), QKeySequence( "Shift+Alt+t" ), this, SLOT( View3DTop() ) );
+    viewMenu->addAction( tr( "Botto&m" ), QKeySequence( "Shift+Alt+m" ), this, SLOT( View3DBottom() ) );
     viewMenu->addSeparator();
-    viewMenu->addAction( tr( "Re&set Planes" ), this, SLOT( ViewResetPlanes() ), QKeySequence( "Shift+Alt+s" ) );
-    viewMenu->addAction( "Full Screen", this, SLOT( ViewFullscreen() ), Qt::CTRL + Qt::Key_F );
+    viewMenu->addAction( tr( "Re&set Planes" ), QKeySequence( "Shift+Alt+s" ), this, SLOT( ViewResetPlanes() ) );
+    viewMenu->addAction( "Full Screen", Qt::CTRL | Qt::Key_F, this, SLOT( ViewFullscreen() ) );
     connect( viewMenu, SIGNAL( aboutToShow() ), this, SLOT( ModifyViewMenu() ) );
 
     // -----------------------------------------
@@ -274,7 +273,7 @@ void MainWindow::CreateNewObjectPluginsUi( QMenu * menu )
 QAction * MainWindow::AddToggleAction( QMenu * menu, const QString & title, const char * member,
                                        const QKeySequence & shortcut, bool checked )
 {
-    QAction * action = menu->addAction( title, this, member, shortcut );
+    QAction * action = menu->addAction( title, shortcut, this, member );
     action->setCheckable( true );
     action->setChecked( checked );
     return action;
@@ -532,9 +531,9 @@ void MainWindow::fileLoadScene()
     bool sceneNotEmpty     = manager->GetNumberOfUserObjects() > 0;
     if( sceneNotEmpty )
     {
-        int ret =
+        QMessageBox::StandardButton ret =
             QMessageBox::warning( this, "Load Scene", tr( "All the objects currently in the scene will be removed." ),
-                                  QMessageBox::Yes | QMessageBox::Default, QMessageBox::No | QMessageBox::Escape );
+                                  QMessageBox::Yes | QMessageBox::No, QMessageBox::No );
         if( ret == QMessageBox::No ) return;
     }
     manager->NewScene();
@@ -563,9 +562,9 @@ void MainWindow::fileNewScene()
     bool sceneNotEmpty     = manager->GetNumberOfUserObjects() > 0;
     if( sceneNotEmpty )
     {
-        int ret =
+        QMessageBox::StandardButton ret =
             QMessageBox::warning( this, "New Scene", tr( "All the objects currently in the scene will be removed." ),
-                                  QMessageBox::Yes | QMessageBox::Default, QMessageBox::No | QMessageBox::Escape );
+                                  QMessageBox::Yes | QMessageBox::No, QMessageBox::No );
         if( ret == QMessageBox::No ) return;
     }
     Application::GetInstance().GetSettings()->WorkingDirectory = QDir::homePath();
@@ -870,7 +869,7 @@ void MainWindow::LoadSettings( QSettings & s )
     const QByteArray geometry = s.value( "geometry", QByteArray() ).toByteArray();
     if( geometry.isEmpty() )
     {
-        const QRect availableGeometry = QApplication::desktop()->availableGeometry( this );
+        const QRect availableGeometry = QApplication::primaryScreen()->geometry();
         int w                         = static_cast<int>( availableGeometry.width() * 0.7 );
         int h                         = static_cast<int>( availableGeometry.height() * 0.6 );
         resize( w, h );

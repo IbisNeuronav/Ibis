@@ -3,7 +3,7 @@ name: Build-Windows
 on: [push, pull_request]
 env:
   BUILD_TYPE: Release
-  QT_VERSION: 5.15.2
+  QT_VERSION: 6.9.0
   ARTIFACT: ibis-install-windows
   RELEASE_TAG: latest_dev
 permissions:
@@ -24,7 +24,7 @@ jobs:
             -B ${{github.workspace}}/b \
             -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} \
             -DCMAKE_CONFIGURATION_TYPES=${{env.BUILD_TYPE}} \
-            -DQt5_DIR=C:/Qt/5.15.2/msvc2019_64/lib/cmake/Qt5 \
+            -DQt6_DIR=C:/Qt/${{env.QT_VERSION}}/msvc2022_64/lib/cmake/Qt6 \
             -DIBIS_BUILD_ELASTIX=TRUE \
             -DIBIS_BUILD_OPENCV=TRUE \
             -DIBIS_BUILD_ALL_PLUGINS:BOOL=TRUE

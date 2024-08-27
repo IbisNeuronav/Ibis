@@ -183,14 +183,14 @@ set( IBISLIB_UI
 
 
 # moc Qt source file without a ui file
-qt5_wrap_cpp( IBISLIB_MOC ${IBISLIB_HDR_MOC} )
+qt6_wrap_cpp( IBISLIB_MOC ${IBISLIB_HDR_MOC} )
 
 # Generate code for .ui files -> ui_xxx.h
-qt5_wrap_ui( IBISLIB_HDR_UI ${IBISLIB_UI} )
+qt6_wrap_ui( IBISLIB_HDR_UI ${IBISLIB_UI} )
 
 # make rules to create c++ source from Qt resource files
 set( IBISLIB_RCC IbisLib.qrc )
-qt5_add_resources( IBISLIB_RCC_SRC ${IBISLIB_RCC})
+qt6_add_resources( IBISLIB_RCC_SRC ${IBISLIB_RCC})
 
 #================================
 # Define output

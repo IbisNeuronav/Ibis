@@ -21,10 +21,10 @@ set( IbisHardwareIgsioHdrMoc ibishardwareIGSIO.h plusserverinterface.h ibishardw
 set( IbisHardwareIgsioUi ibishardwareIGSIOsettingswidget.ui )
 
 # moc Qt source file without a ui file
-qt5_wrap_cpp( IbisHardwareIgsioMoc ${IbisHardwareIgsioHdrMoc} )
+qt6_wrap_cpp( IbisHardwareIgsioMoc ${IbisHardwareIgsioHdrMoc} )
 
 # Generate code for .ui files -> ui_xxx.h
-qt5_wrap_ui( IbisHardwareIgsioUiHdr ${IbisHardwareIgsioUi} )
+qt6_wrap_ui( IbisHardwareIgsioUiHdr ${IbisHardwareIgsioUi} )
 
 #================================
 # Define output

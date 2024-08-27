@@ -28,7 +28,7 @@ include( ${CMAKE_COMMON_DIR}/DependencyVersions.cmake )
 set( IBIS_EXTERNAL_DEPENDENCIES_DIR ${CMAKE_CURRENT_BINARY_DIR}/../IbisDeps CACHE PATH "Path where the external dependencies (itk, vtk, openCV) have been built" )
 
 #==================================================================
-# Look for QT5 (required)
+# Look for QT6 (required)
 #==================================================================
 option( IBIS_USE_QT_MULTIMEDIA "Find and link with the Multimedia module in Qt. This is not required by Ibis but may be used by some plugins." OFF )
 option( IBIS_USE_QT_NETWORK "Find and link with the Network module in Qt. This is not required by Ibis but may be used by some plugins." OFF )
@@ -39,28 +39,18 @@ endif()
 if( IBIS_USE_QT_NETWORK )
     list( APPEND IbisQtModules Network )
 endif()
-if( UNIX AND NOT APPLE )
-    list( APPEND IbisQtModules X11Extras )
-endif()
-find_package( Qt5 COMPONENTS ${IbisQtModules} REQUIRED )
 
-# Qt support by Qt Company: QT 5.1.0 to 5.5.0 support ended.  5.6.0 still supported until March 2019.
-# ibis was never tested with versions 5.6.0, 5.7.0 and 5.8.0. It might work with 5.8.0.
-# it worked with 5.9.3
+find_package( Qt6 COMPONENTS ${IbisQtModules} REQUIRED )
 
-if( Qt5Widgets_FOUND )
-    if( Qt5Widgets_VERSION VERSION_LESS 5.6.0 )
-        message( SEND_ERROR "Qt version 5.5.x or lower is no longer supported.\nCurrently supported Qt version is 5.9 and higher.\nYou are using " ${Qt5Widgets_VERSION} "." )
-    elseif( Qt5Widgets_VERSION VERSION_LESS 5.9.0 )
-        message( SEND_ERROR "Currently supported Qt version is 5.9 and higher.\nYou are using " ${Qt5Widgets_VERSION} ". It may work." )
-    endif()
-else()
-    message( SEND_ERROR "The Qt5Widgets library could not be found!" )
+if( NOT Qt6Widgets_FOUND )
+    message( SEND_ERROR "The Qt6Widgets library could not be found!" )
 endif()
 
-include_directories( ${Qt5Widgets_INCLUDE_DIRS} )
-include_directories( ${Qt5Xml_INCLUDE_DIRS} )
-include_directories( ${Qt5Multimedia_INCLUDE_DIRS} )
+cmake_path(GET Qt6_DIR PARENT_PATH Qt6_root)
+
+include_directories( ${Qt6Widgets_INCLUDE_DIRS} )
+include_directories( ${Qt6Xml_INCLUDE_DIRS} )
+include_directories( ${Qt6Multimedia_INCLUDE_DIRS} )
 
 #==================================================================
 # Look for VTK (required)
@@ -125,7 +115,7 @@ endif()
 
 # define version and build info
 set( IBIS_MAJOR_VERSION 4 )
-set( IBIS_MINOR_VERSION 0 )
+set( IBIS_MINOR_VERSION 1 )
 set( IBIS_PATCH_VERSION 0 )
 set( IBIS_VERSION_QUALIFIER "Dev" )                    # Dev, Alpha, Beta or nothing for official releases
 if( CMAKE_BUILD_TYPE MATCHES "Debug" )
