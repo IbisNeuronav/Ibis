@@ -1,4 +1,6 @@
 set( vtk_prefix ${external_project_dir}/${vtk_name} )
+set( VTKREPO "https://github.com/IbisNeuronav/VTK.git" )
+set( VTKTAG "5f9dcb5e70884f86bd934f2e3b6a45b74ac6e519" )
 
 if( SUPERBUILD_BUILD_MINIMAL_VTK )
 	ExternalProject_Add( ${vtk_name}
@@ -7,8 +9,8 @@ if( SUPERBUILD_BUILD_MINIMAL_VTK )
 		BINARY_DIR ${vtk_prefix}/build
 		STAMP_DIR ${vtk_prefix}/stamp
 		INSTALL_COMMAND ""
-		GIT_REPOSITORY "https://github.com/Kitware/VTK.git"
-		GIT_TAG v${IBIS_VTK_LONG_VERSION}
+		GIT_REPOSITORY ${VTKREPO}
+		GIT_TAG ${VTKTAG}
 		CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=${external_project_dir}/${vtk_name}/install
 				   -DCMAKE_OSX_SYSROOT:PATH=${CMAKE_OSX_SYSROOT}
 				   -DCMAKE_OSX_DEPLOYMENT_TARGET:STRING=${CMAKE_OSX_DEPLOYMENT_TARGET}
@@ -54,8 +56,8 @@ else()
 		BINARY_DIR ${vtk_prefix}/build
 		STAMP_DIR ${vtk_prefix}/stamp
 		INSTALL_COMMAND ""
-		GIT_REPOSITORY "https://github.com/Kitware/VTK.git"
-		GIT_TAG v${IBIS_VTK_LONG_VERSION}
+		GIT_REPOSITORY ${VTKREPO}
+		GIT_TAG ${VTKTAG}
 		CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=${external_project_dir}/${vtk_name}/install
 				   -DCMAKE_OSX_SYSROOT:PATH=${CMAKE_OSX_SYSROOT}
 				   -DCMAKE_OSX_DEPLOYMENT_TARGET:STRING=${CMAKE_OSX_DEPLOYMENT_TARGET}
