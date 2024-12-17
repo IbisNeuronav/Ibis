@@ -10,8 +10,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 // Thanks to Dante De Nigris for writing this class
 
-#ifndef __itkGPUVolumeReconstruction_hxx
-#define __itkGPUVolumeReconstruction_hxx
+#ifndef ITKGPUVOLUMERECONSTRUCTION_HXX
+#define ITKGPUVOLUMERECONSTRUCTION_HXX
 
 #include <itkImageDuplicator.h>
 #include <itkMacro.h>

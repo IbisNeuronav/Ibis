@@ -1,5 +1,5 @@
-#ifndef __vtkQtPlugin_h_
-#define __vtkQtPlugin_h_
+#ifndef VTKQTPLUGIN_H
+#define VTKQTPLUGIN_H
 
 #include <QDesignerCustomWidgetCollectionInterface>
 #include <QDesignerCustomWidgetInterface>

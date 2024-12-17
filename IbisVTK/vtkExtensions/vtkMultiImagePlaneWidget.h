@@ -90,8 +90,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 // vtk3DWidget vtkBoxWidget vtkLineWidget  vtkPlaneWidget vtkPointWidget
 // vtkPolyDataSourceWidget vtkSphereWidget vtkImplicitPlaneWidget
 
-#ifndef __vtkMultiImagePlaneWidget_h
-#define __vtkMultiImagePlaneWidget_h
+#ifndef VTKMULTIIMAGEPLANEWIDGET_H
+#define VTKMULTIIMAGEPLANEWIDGET_H
 
 #include <vtkMatrix4x4.h>
 #include <vtkTexture.h>

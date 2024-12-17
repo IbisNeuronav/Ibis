@@ -8,8 +8,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
-#ifndef __SerializerHelper_h_
-#define __SerializerHelper_h_
+#ifndef SERIALIZERHELPER_H
+#define SERIALIZERHELPER_H
 
 class vtkGenericParamValues;
 class vtkColorTransferFunction;

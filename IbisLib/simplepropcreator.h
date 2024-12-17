@@ -8,8 +8,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
-#ifndef __SimplePropCreator_h_
-#define __SimplePropCreator_h_
+#ifndef SIMPLEPROPCREATOR_H
+#define SIMPLEPROPCREATOR_H
 
 #include <vector>
 

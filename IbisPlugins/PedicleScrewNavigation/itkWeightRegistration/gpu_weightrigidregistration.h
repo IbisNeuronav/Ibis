@@ -10,8 +10,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 // Adapted from Dante De Nigris GPU Registration plugin
 
-#ifndef __GPU_WeightRigidRegistration_h_
-#define __GPU_WeightRigidRegistration_h_
+#ifndef GPU_WEIGHTRIGIDREGISTRATION_H
+#define GPU_WEIGHTRIGIDREGISTRATION_H
 
 #include <itkCMAEvolutionStrategyOptimizer.h>
 #include <itkEuler3DTransform.h>

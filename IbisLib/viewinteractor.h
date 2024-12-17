@@ -1,5 +1,5 @@
-#ifndef __ViewInteractor_h_
-#define __ViewInteractor_h_
+#ifndef VIEWINTERACTOR_H
+#define VIEWINTERACTOR_H
 
 class View;
 

@@ -11,8 +11,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 // .NAME vtkTagWriter - Write vtkPoints into MNI tag files
 // .SECTION Description
 
-#ifndef __vtkTagWriter_h
-#define __vtkTagWriter_h
+#ifndef VTKTAGWRITER_H
+#define VTKTAGWRITER_H
 
 #include <vtkObject.h>
 

@@ -25,8 +25,8 @@
 // .SECTION See Also
 // vtk3DWidget
 
-#ifndef __vtkLineWithHandlesWidget_h
-#define __vtkLineWithHandlesWidget_h
+#ifndef VTKLINEWITHHANDLESWIDGET_H
+#define VTKLINEWITHHANDLESWIDGET_H
 
 #include "vtk3DWidget.h"
 #include "vtkLineSource.h"  // For passing calls to it

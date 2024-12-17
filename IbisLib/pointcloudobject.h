@@ -8,8 +8,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
-#ifndef __PointCloudObject_h_
-#define __PointCloudObject_h_
+#ifndef POINTCLOUDOBJECT_H
+#define POINTCLOUDOBJECT_H
 
 #include <vtkPolyDataMapper.h>
 #include <vtkProperty.h>

@@ -1,5 +1,5 @@
-#ifndef __SCREWTABLEWIDGET_H__
-#define __SCREWTABLEWIDGET_H__
+#ifndef SCREWTABLEWIDGET_H
+#define SCREWTABLEWIDGET_H
 
 #include <QDir>
 #include <QFile>

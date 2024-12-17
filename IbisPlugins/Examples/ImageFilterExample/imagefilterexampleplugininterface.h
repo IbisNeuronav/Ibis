@@ -10,8 +10,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 // Thanks to Simon Drouin for writing this class
 
-#ifndef __ImageFilterExamplePluginInterface_h_
-#define __ImageFilterExamplePluginInterface_h_
+#ifndef IMAGEFILTEREXAMPLEPLUGININTERFACE_H
+#define IMAGEFILTEREXAMPLEPLUGININTERFACE_H
 
 #include "toolplugininterface.h"
 

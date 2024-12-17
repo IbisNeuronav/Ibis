@@ -10,8 +10,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 // Thanks to Simon Drouin for writing this class
 
-#ifndef __StereotacticFrameWidget_h_
-#define __StereotacticFrameWidget_h_
+#ifndef STEREOTACTICFRAMEWIDGET_H
+#define STEREOTACTICFRAMEWIDGET_H
 
 #include <QWidget>
 

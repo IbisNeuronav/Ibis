@@ -10,8 +10,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 // Thanks to Simon Drouin for writing this class
 
-#ifndef __vtkQtPiecewiseFunctionWidget_h_
-#define __vtkQtPiecewiseFunctionWidget_h_
+#ifndef VTKQTPIECEWISEFUNCTIONWIDGET_H
+#define VTKQTPIECEWISEFUNCTIONWIDGET_H
 
 #include <QObject>
 #include <QWidget>

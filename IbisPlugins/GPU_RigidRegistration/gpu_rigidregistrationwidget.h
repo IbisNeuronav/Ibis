@@ -9,8 +9,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
 // Thanks to Dante De Nigris for writing this class
-#ifndef __GPU_RigidRegistrationWidget_h_
-#define __GPU_RigidRegistrationWidget_h_
+#ifndef GPU_RIGIDREGISTRATIONWIDGET_H
+#define GPU_RIGIDREGISTRATIONWIDGET_H
 
 #include <vtkMatrix4x4.h>
 #include <vtkTransform.h>

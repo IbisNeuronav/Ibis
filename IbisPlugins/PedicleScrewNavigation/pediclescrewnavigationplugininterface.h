@@ -10,8 +10,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 // Author: Houssem-Eddine Gueziri
 
-#ifndef __PedicleScrewNavigationPluginInterface_h_
-#define __PedicleScrewNavigationPluginInterface_h_
+#ifndef PEDICLESCREWNAVIGATIONPLUGININTERFACE_H
+#define PEDICLESCREWNAVIGATIONPLUGININTERFACE_H
 
 #include <QObject>
 #include <QWidget>

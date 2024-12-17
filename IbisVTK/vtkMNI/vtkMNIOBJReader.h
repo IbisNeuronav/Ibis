@@ -16,8 +16,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 // files. The output of this source object is polygonal data.
 // .SECTION See Also
 
-#ifndef __vtkMNIOBJReader_h
-#define __vtkMNIOBJReader_h
+#ifndef VTKMNIOBJREADER_H
+#define VTKMNIOBJREADER_H
 
 #include <vtkPolyDataAlgorithm.h>
 #include <vtkSmartPointer.h>

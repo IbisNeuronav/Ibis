@@ -34,8 +34,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 // .SECTION See Also
 // vtkMulti3DWidget vtkMultiImagePlaneWidget
 
-#ifndef __vtkMultiInteractorObserver_h
-#define __vtkMultiInteractorObserver_h
+#ifndef VTKMULTIINTERACTOROBSERVER_H
+#define VTKMULTIINTERACTOROBSERVER_H
 
 #include <vtkObject.h>
 

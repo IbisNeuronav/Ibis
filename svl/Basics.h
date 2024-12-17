@@ -21,8 +21,8 @@
                     VL_NO_TF        - true and false are not predefined.
 */
 
-#ifndef __Basics__
-#define __Basics__
+#ifndef SVL_BASICS_H
+#define SVL_BASICS_H
 
 #include "SVLConfig.h"
 #include <iostream>

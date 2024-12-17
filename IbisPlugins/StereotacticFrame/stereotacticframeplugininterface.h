@@ -10,8 +10,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 // Thanks to Simon Drouin for writing this class
 
-#ifndef __StereotacticFramePluginInterface_h_
-#define __StereotacticFramePluginInterface_h_
+#ifndef STEREOTACTICFRAMEPLUGININTERFACE_H
+#define STEREOTACTICFRAMEPLUGININTERFACE_H
 
 #include <vtkSmartPointer.h>
 

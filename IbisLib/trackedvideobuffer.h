@@ -8,8 +8,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
-#ifndef __TrackedVideoBuffer_h_
-#define __TrackedVideoBuffer_h_
+#ifndef TRACKEDVIDEOBUFFER_H
+#define TRACKEDVIDEOBUFFER_H
 
 #include <vtkSmartPointer.h>
 

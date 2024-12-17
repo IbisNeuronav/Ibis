@@ -1,5 +1,5 @@
-#ifndef __TrackerStatusDialog_h_
-#define __TrackerStatusDialog_h_
+#ifndef TRACKERSTATUSDIALOG_H
+#define TRACKERSTATUSDIALOG_H
 
 #include <QList>
 #include <QObject>

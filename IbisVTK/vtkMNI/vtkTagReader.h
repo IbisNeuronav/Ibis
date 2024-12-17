@@ -11,8 +11,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 // .NAME vtkTagReader - Read MNI tag files into vtkPoints
 // .SECTION Description
 
-#ifndef __vtkTagReader_h
-#define __vtkTagReader_h
+#ifndef VTKTAGREADER_H
+#define VTKTAGREADER_H
 
 #include <vtkAlgorithm.h>
 #include <vtkMatrix4x4.h>

@@ -10,8 +10,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 // Thanks to Simon Drouin for writing this class
 
-#ifndef __USManualCalibrationPluginInterface_h_
-#define __USManualCalibrationPluginInterface_h_
+#ifndef USMANUALCALIBRATIONPLUGININTERFACE_H
+#define USMANUALCALIBRATIONPLUGININTERFACE_H
 
 #include "toolplugininterface.h"
 

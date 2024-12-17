@@ -8,8 +8,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
-#ifndef OBJECTPLUGININTERFACE_h_
-#define OBJECTPLUGININTERFACE_h_
+#ifndef OBJECTPLUGININTERFACE_H
+#define OBJECTPLUGININTERFACE_H
 
 #include <QString>
 
@@ -49,4 +49,4 @@ public:
     virtual bool CanBeActivated() { return true; }
 };
 
-#endif
+#endif //OBJECTPLUGININTERFACE_H

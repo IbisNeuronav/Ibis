@@ -1,5 +1,5 @@
-#ifndef __SettingsWidget_h_
-#define __SettingsWidget_h_
+#ifndef IBISHARDWAREIGSIOSETTINGSWIDGET_H
+#define IBISHARDWAREIGSIOSETTINGSWIDGET_H
 
 #include <QWidget>
 

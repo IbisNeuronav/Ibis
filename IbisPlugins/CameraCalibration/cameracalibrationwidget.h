@@ -10,8 +10,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 // Thanks to Simon Drouin for writing this class
 
-#ifndef __CameraCalibrationWidget_h_
-#define __CameraCalibrationWidget_h_
+#ifndef CAMERACALIBRATIONWIDGET_H
+#define CAMERACALIBRATIONWIDGET_H
 
 #include <QWidget>
 

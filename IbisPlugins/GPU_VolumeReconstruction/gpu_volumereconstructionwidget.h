@@ -10,8 +10,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 // Thanks to Dante De Nigris for writing this class
 
-#ifndef __GPU_VolumeReconstructionWidget_h_
-#define __GPU_VolumeReconstructionWidget_h_
+#ifndef GPU_VOLUMERECONSTRUCTIONWIDGET_H
+#define GPU_VOLUMERECONSTRUCTIONWIDGET_H
 #include <vtkSmartPointer.h>
 
 #include <QWidget>

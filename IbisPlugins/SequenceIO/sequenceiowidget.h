@@ -1,7 +1,7 @@
 // Thanks to Houssem Gueziri for writing this class
 
-#ifndef __SequenceIOWidget_h_
-#define __SequenceIOWidget_h_
+#ifndef SEQUENCEIOWIDGET_H
+#define SEQUENCEIOWIDGET_H
 
 #include <vtkTransform.h>
 #include <vtkXFMReader.h>

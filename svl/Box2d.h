@@ -1,5 +1,5 @@
-#ifndef __Box2d_h_
-#define __Box2d_h_
+#ifndef SVL_BOX2D_H
+#define SVL_BOX2D_H
 
 class Box2d
 {

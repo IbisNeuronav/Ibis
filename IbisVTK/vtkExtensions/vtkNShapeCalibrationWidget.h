@@ -19,8 +19,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 // .SECTION See Also
 // vtk3DWidget
 
-#ifndef __vtkNShapeCalibrationWidget_h
-#define __vtkNShapeCalibrationWidget_h
+#ifndef VTKNSHAPECALIBRATIONWIDGET_H
+#define VTKNSHAPECALIBRATIONWIDGET_H
 
 #include <vtk3DWidget.h>
 #include <vtkLineSource.h>  // For passing calls to it

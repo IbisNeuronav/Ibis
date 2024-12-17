@@ -8,8 +8,8 @@
     Copyright:      (c) 1995-2001, Andrew Willmott
  */
 
-#ifndef __Mat2__
-#define __Mat2__
+#ifndef SVL_MAT2_H
+#define SVL_MAT2_H
 
 #include "Vec2.h"
 

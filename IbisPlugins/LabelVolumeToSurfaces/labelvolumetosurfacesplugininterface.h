@@ -10,8 +10,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 // Thanks to Simon Drouin for writing this class
 
-#ifndef __LabelVolumeToSurfacesPluginInterface_h_
-#define __LabelVolumeToSurfacesPluginInterface_h_
+#ifndef LABELVOLUMETOSURFACESPLUGININTERFACE_H
+#define LABELVOLUMETOSURFACESPLUGININTERFACE_H
 
 #include "generatorplugininterface.h"
 #include "serializer.h"

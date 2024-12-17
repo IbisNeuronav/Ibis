@@ -10,8 +10,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 // Thanks to Simon Drouin for writing this class
 
-#ifndef __USManualCalibrationWidget_h_
-#define __USManualCalibrationWidget_h_
+#ifndef USMANUALCALIBRATIONWIDGET_H
+#define USMANUALCALIBRATIONWIDGET_H
 
 #include <QWidget>
 

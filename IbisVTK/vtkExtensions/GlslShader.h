@@ -10,8 +10,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 // Thanks to Simon Drouin for writing this class
 
-#ifndef __GlslShader_h_
-#define __GlslShader_h_
+#ifndef GLSLSHADER_H
+#define GLSLSHADER_H
 
 #include <vtkObject.h>
 

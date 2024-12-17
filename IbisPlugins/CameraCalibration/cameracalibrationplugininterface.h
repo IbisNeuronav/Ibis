@@ -10,8 +10,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 // Thanks to Simon Drouin for writing this class
 
-#ifndef __CameraCalibrationPluginInterface_h_
-#define __CameraCalibrationPluginInterface_h_
+#ifndef CAMERACALIBRATIONPLUGININTERFACE_H
+#define CAMERACALIBRATIONPLUGININTERFACE_H
 
 #include "SVL.h"
 #include "opencv2/opencv.hpp"

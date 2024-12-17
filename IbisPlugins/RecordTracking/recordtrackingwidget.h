@@ -10,8 +10,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 // Thanks to Houssem Gueziri for writing this class
 
-#ifndef __RecordTrackingWidget_h_
-#define __RecordTrackingWidget_h_
+#ifndef RECORDTRACKINGWIDGET_H
+#define RECORDTRACKINGWIDGET_H
 
 #include <vtkTransform.h>
 

@@ -21,8 +21,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 // .SECTION See Also
 // vtkImagePlaneWidget2
 
-#ifndef __vtkMulti3DWidget_h
-#define __vtkMulti3DWidget_h
+#ifndef VTKMULTI3DWIDGET_H
+#define VTKMULTI3DWIDGET_H
 
 #include <vtkSmartPointer.h>
 

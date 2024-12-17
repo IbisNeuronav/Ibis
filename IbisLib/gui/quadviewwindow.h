@@ -8,8 +8,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
      the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
      PURPOSE.  See the above copyright notice for more information.
 =========================================================================*/
-#ifndef __QuadViewWindow_h_
-#define __QuadViewWindow_h_
+#ifndef QUADVIEWWINDOW_H
+#define QUADVIEWWINDOW_H
 
 #include <QVTKRenderWidget.h>
 

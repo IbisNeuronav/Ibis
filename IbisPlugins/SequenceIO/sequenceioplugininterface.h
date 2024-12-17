@@ -1,7 +1,7 @@
 // Thanks to Houssem Gueziri for writing this class
 
-#ifndef __SequenceIOPluginInterface_h_
-#define __SequenceIOPluginInterface_h_
+#ifndef SEQUENCEIOPLUGININTERFACE_H
+#define SEQUENCEIOPLUGININTERFACE_H
 
 #include "toolplugininterface.h"
 

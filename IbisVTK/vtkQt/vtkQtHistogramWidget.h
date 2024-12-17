@@ -10,8 +10,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 // Thanks to Simon Drouin for writing this class
 
-#ifndef __vtkQtHistogramWidget_h_
-#define __vtkQtHistogramWidget_h_
+#ifndef VTKQTHISTOGRAMWIDGET_H
+#define VTKQTHISTOGRAMWIDGET_H
 
 #include <QWidget>
 

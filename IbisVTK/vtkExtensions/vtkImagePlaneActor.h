@@ -20,8 +20,8 @@
 // Create an actor containing a 2D plane texture
 // mapped with the input image. Input image should be 2D.
 
-#ifndef __vtkImagePlaneActor_h
-#define __vtkImagePlaneActor_h
+#ifndef VTKIMAGEPLANEACTOR_H
+#define VTKIMAGEPLANEACTOR_H
 
 #include "vtkOpenGLActor.h"
 

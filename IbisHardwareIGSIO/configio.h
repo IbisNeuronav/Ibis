@@ -1,5 +1,5 @@
-#ifndef __ConfigIO_h_
-#define __ConfigIO_h_
+#ifndef CONFIGIO_H
+#define CONFIGIO_H
 
 #include <QList>
 #include <QMap>

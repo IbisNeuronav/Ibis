@@ -10,8 +10,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 // Thanks to Dante De Nigris for writing this class
 
-#ifndef __GPUVolumeReconstructionAPITestPluginInterface_h_
-#define __GPUVolumeReconstructionAPITestPluginInterface_h_
+#ifndef GPUVOLUMERECONSTRUCTIONAPITESTPLUGININTERFACE_H
+#define GPUVOLUMERECONSTRUCTIONAPITESTPLUGININTERFACE_H
 
 #include "toolplugininterface.h"
 

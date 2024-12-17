@@ -10,8 +10,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 // Thanks to Simon Drouin for writing this class
 
-#ifndef __vtkGenericParam_h_
-#define __vtkGenericParam_h_
+#ifndef VTKGENERICPARAM_H
+#define VTKGENERICPARAM_H
 
 #include <assert.h>
 #include <vtkObject.h>

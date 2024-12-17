@@ -1,5 +1,5 @@
-#ifndef __SCREWPROPERTIES_H__
-#define __SCREWPROPERTIES_H__
+#ifndef SCREWPROPERTIES_H
+#define SCREWPROPERTIES_H
 
 #include <vtkSmartPointer.h>
 

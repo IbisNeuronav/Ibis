@@ -10,8 +10,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 =========================================================================*/
 // Thanks to Simon Drouin for writing this class
 
-#ifndef __ImageFilterExampleWidget_h_
-#define __ImageFilterExampleWidget_h_
+#ifndef IMAGEFILTEREXAMPLEWIDGET_H
+#define IMAGEFILTEREXAMPLEWIDGET_H
 
 #include <QWidget>
 
