@@ -32,11 +32,11 @@ public:
     LandmarkRegistrationObject();
     virtual ~LandmarkRegistrationObject();
 
-    virtual void CreateSettingsWidgets( QWidget * parent, QVector<QWidget *> * widgets );
-    virtual void Export();
-    virtual bool IsExportable() { return true; }
-    virtual void Serialize( Serializer * ser );
-    virtual void PostSceneRead();
+    virtual void CreateSettingsWidgets( QWidget * parent, QVector<QWidget *> * widgets ) override;
+    virtual void Export() override;
+    virtual bool IsExportable() override { return true; }
+    virtual void Serialize( Serializer * ser ) override;
+    virtual void PostSceneRead() override;
 
     bool ReadTagFile();
 
@@ -77,13 +77,13 @@ protected slots:
 
 protected:
     // SceneObject protected overloads
-    virtual void ObjectAddedToScene();
+    virtual void ObjectAddedToScene() override;
     virtual void ObjectAboutToBeRemovedFromScene() override;
 
-    virtual void InternalPostSceneRead();
-    virtual void Hide();
-    virtual void Show();
-    virtual void SetHiddenChildren( SceneObject * parent, bool hide );
+    virtual void InternalPostSceneRead() override;
+    virtual void Hide() override;
+    virtual void Show() override;
+    virtual void SetHiddenChildren( SceneObject * parent, bool hide ) override;
 
     void WriteTagFile( const QString & filename, bool saveEnabledOnly = false );
     void WriteXFMFile( const QString & filename );

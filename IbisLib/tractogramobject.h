@@ -43,7 +43,7 @@ protected:
     vtkSmartPointer<vtkPassThrough> m_tubeSwitch;
     bool tube_enabled;
 
-    void UpdatePipeline();
+    void UpdatePipeline() override;
 
 private:
     void GenerateLocalColoring();

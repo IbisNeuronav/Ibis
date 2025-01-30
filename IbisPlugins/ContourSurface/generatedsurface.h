@@ -36,7 +36,7 @@ public:
 
     virtual bool GenerateSurface();
 
-    virtual void CreateSettingsWidgets( QWidget * parent, QVector<QWidget *> * widgets );
+    virtual void CreateSettingsWidgets( QWidget * parent, QVector<QWidget *> * widgets ) override;
     SurfaceSettingsWidget * CreateSurfaceSettingsWidget( QWidget * parent );
     void UpdateSettingsWidget();
     void SetPluginInterface( ContourSurfacePluginInterface * interf );
