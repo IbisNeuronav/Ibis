@@ -16,6 +16,7 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <vtkRenderer.h>
 #include <vtkTransform.h>
 
+#include <QMessageBox>
 #include <QProgressDialog>
 #include <QSettings>
 #include <QTime>
@@ -128,6 +129,12 @@ void CameraCalibrationPluginInterface::StartCalibrationWidget( bool on )
     Q_ASSERT( IsCalibrationWidgetOn() != on );
     if( on )
     {
+        Q_ASSERT( HasValidCamera() );
+        if( GetCurrentCameraObject()->GetVideoOutput()->GetDataDimension() == 0 ){
+            QMessageBox::warning( 0, "Warning", "Cannot calibrate the camera. No camera image present. Make sure the hardware configuration parameters are correct and the device is connected." );
+            emit CameraCalibrationWidgetClosedSignal();
+            return;
+        }
         m_cameraCalibrationWidget = new CameraCalibrationWidget;
         m_cameraCalibrationWidget->setAttribute( Qt::WA_DeleteOnClose );
         m_cameraCalibrationWidget->SetPluginInterface( this );
@@ -170,7 +177,7 @@ void CameraCalibrationPluginInterface::SetCurrentCameraObjectId( int id )
     emit PluginModified();
 }
 
-bool CameraCalibrationPluginInterface::HasValidCamera() { return ( GetCurrentCameraObject() != 0 ); }
+bool CameraCalibrationPluginInterface::HasValidCamera() { return ( GetCurrentCameraObject() != nullptr ); }
 
 CameraObject * CameraCalibrationPluginInterface::GetCurrentCameraObject()
 {
