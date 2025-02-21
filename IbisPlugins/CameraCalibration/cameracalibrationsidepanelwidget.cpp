@@ -57,7 +57,6 @@ void CameraCalibrationSidePanelWidget::UpdateUi()
     ui->currentCameraComboBox->clear();
     QList<CameraObject *> allCams;
     m_pluginInterface->GetIbisAPI()->GetAllCameraObjects( allCams );
-    int nbValidCams = 0;
     for( int i = 0; i < allCams.size(); ++i )
     {
         ui->currentCameraComboBox->addItem( allCams[i]->GetName(), QVariant( allCams[i]->GetObjectID() ) );

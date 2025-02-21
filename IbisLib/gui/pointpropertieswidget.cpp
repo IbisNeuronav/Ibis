@@ -132,7 +132,6 @@ void PointPropertiesWidget::on_showDistanceCheckBox_toggled( bool show )
 {
     Q_ASSERT( m_points );
     SceneManager * manager = m_points->GetManager();
-    vtkRenderer * renderer = manager->GetViewRenderer( manager->GetMain3DViewID() );
     m_points->EnableComputeDistance( show );
     manager->EmitShowGenericLabel( show );
     if( show )

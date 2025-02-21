@@ -24,11 +24,11 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 
 ObjectTreeWidget::ObjectTreeWidget( QWidget * parent )
     : QWidget( parent ),
-      ui( new Ui::ObjectTreeWidget ),
+      m_currentObjectSettingsWidget( 0 ),
       m_sceneManager( 0 ),
       m_treeModel( 0 ),
       m_workingOnSelection( false ),
-      m_currentObjectSettingsWidget( 0 )
+      ui( new Ui::ObjectTreeWidget )
 {
     ui->setupUi( this );
 

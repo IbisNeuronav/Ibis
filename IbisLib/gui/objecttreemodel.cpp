@@ -141,9 +141,6 @@ QModelIndex ObjectTreeModel::index( int row, int column, const QModelIndex & par
 
 QModelIndex ObjectTreeModel::parent( const QModelIndex & index ) const
 {
-    int row    = index.row();
-    int column = index.column();
-
     if( !index.isValid() ) return QModelIndex();
 
     SceneObject * childItem  = static_cast<SceneObject *>( index.internalPointer() );

@@ -74,7 +74,6 @@ SET( IBISLIB_SRC
                      gui/exportacquisitiondialog.cpp
                      gui/usmasksettingswidget.cpp
                      gui/transformeditwidget.cpp
-                     gui/automaticgui.cpp
                      gui/usprobeobjectsettingswidget.cpp
                      gui/pointerobjectsettingsdialog.cpp
                      gui/cameraobjectsettingswidget.cpp
@@ -147,7 +146,6 @@ SET( IBISLIB_HDR_MOC
                          gui/exportacquisitiondialog.h
                          gui/usmasksettingswidget.h
                          gui/transformeditwidget.h
-                         gui/automaticgui.h
                          gui/pointerobjectsettingsdialog.h
                          gui/cameraobjectsettingswidget.h
                          gui/triplecutplaneobjectsettingswidget.h

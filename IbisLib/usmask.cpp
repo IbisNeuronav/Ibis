@@ -143,7 +143,7 @@ void USMask::SetMaskOrigin( double orig[2] )
     this->BuildMask();
 }
 
-void USMask::SetMaskCrop( double crop[] )
+void USMask::SetMaskCrop( double crop[2] )
 {
     m_maskCrop[0] = crop[0];
     m_maskCrop[1] = crop[1];

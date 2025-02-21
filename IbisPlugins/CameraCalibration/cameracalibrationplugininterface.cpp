@@ -159,7 +159,6 @@ void CameraCalibrationPluginInterface::GetAllValidCamerasFromScene( QList<Camera
 {
     QList<CameraObject *> allCams;
     GetIbisAPI()->GetAllCameraObjects( allCams );
-    int nbValidCams          = 0;
     bool needTrackableCamera = !GetIbisAPI()->IsViewerOnly();
     for( int i = 0; i < allCams.size(); ++i )
     {
