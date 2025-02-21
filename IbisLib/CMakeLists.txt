@@ -48,7 +48,6 @@ SET( IBISLIB_SRC
                      trackedvideobuffer.cpp
                      toolplugininterface.cpp
                      lookuptablemanager.cpp
-                     linesfactory.cpp
                      simplepropcreator.cpp
                      ibismath.cpp
                      ibisplugin.cpp
@@ -94,7 +93,6 @@ SET( IBISLIB_HDR
                      objectplugininterface.h
                      globalobjectplugininterface.h
                      generatorplugininterface.h
-                     linesfactory.h
                      simplepropcreator.h
                      ibismath.h
                      ibisitkvtkconverter.h
