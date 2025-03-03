@@ -27,6 +27,7 @@ ExternalProject_Add( ${opencv_name}
                -DWITH_GSTREAMER:BOOL=OFF
                -DWITH_GTK:BOOL=OFF
                -DWITH_ITT:BOOL=OFF
+               -DWITH_ZLIB_NG=ON
                -DBUILD_opencv_python2:BOOL=OFF
                -DBUILD_opencv_python3:BOOL=OFF
                -DBUILD_opencv_python_bindings_generator:BOOL=OFF
