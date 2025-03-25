@@ -1,0 +1,35 @@
+name: Upload_Linux_Release
+
+on:
+  workflow_run:
+    workflows: [ Build_Linux, Build_Windows ]
+    branches: [ master ]
+    types: [ completed ]
+env:
+    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    RELEASE_TAG: latest_dev
+    
+permissions:
+  actions: read
+  contents: write
+
+jobs:
+  upload_linux_release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ahmadnassri/action-workflow-run-wait@v1.4.4
+        with:
+          timeout: 30000000
+      - uses: dawidd6/action-download-artifact@v9
+        with:
+          github_token: ${{secrets.GITHUB_TOKEN}}
+          workflow: build_linux.yml
+          workflow_conclusion: success
+          branch: master
+          event: push
+          name: ibis-install-linux
+          skip_unpack: true
+      - run:
+          gh release upload ${{ env.RELEASE_TAG }} ibis-install-linux.zip
