@@ -1,8 +1,8 @@
-name: Upload_Linux_Release
+name: Upload-Linux-Release
 
 on:
   workflow_run:
-    workflows: [ Build_Linux, Build_Windows ]
+    workflows: [ Build-Linux, Build-Windows ]
     branches: [ master ]
     types: [ completed ]
 env:
