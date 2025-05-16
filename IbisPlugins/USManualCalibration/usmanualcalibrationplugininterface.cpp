@@ -80,7 +80,7 @@ QWidget * USManualCalibrationPluginInterface::CreateFloatingWidget()
     if( m_usProbeObjectId == IbisAPI::InvalidId )
     {
         QString message( "No valid probe detected." );
-        QMessageBox::critical( 0, "Error", message, 1, 0 );
+        QMessageBox::critical( 0, "Error", message, QMessageBox::Ok );
         return 0;
     }
 

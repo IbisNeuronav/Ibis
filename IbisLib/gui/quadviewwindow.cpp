@@ -224,15 +224,13 @@ void QuadViewWindow::AddBottomWidget( QWidget * w )
 
 void QuadViewWindow::RemoveBottomWidget( QWidget * w ) { w->close(); }
 
-#include <QDesktopWidget>
-
 void QuadViewWindow::Detach3DView( QWidget * /*parent*/ )
 {
     Q_ASSERT( !m_detachedWidget );
 
     m_detachedWidget     = new QWidget();
     QVBoxLayout * layout = new QVBoxLayout( m_detachedWidget );
-    layout->setMargin( 0 );
+    layout->setContentsMargins( 0, 0, 0, 0 );
     layout->addWidget( m_vtkWidgets[1] );
 
     int nbScreens = QGuiApplication::screens().size();

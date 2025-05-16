@@ -3,6 +3,7 @@ name: Build-Linux
 on: [push, pull_request]
 env:
   BUILD_TYPE: Release
+  QT_VERSION: 6.9.0
   ARTIFACT: ibis-install-linux
 permissions:
   contents: write
@@ -20,6 +21,7 @@ jobs:
             cmake IbisSuperBuild \
             -B "${{github.workspace}}/b" \
             -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} \
+            -DQt6_DIR=/opt/Qt/${{env.QT_VERSION}}/gcc_64/lib/cmake/Qt6 \
             -DIBIS_BUILD_ELASTIX=TRUE \
             -DIBIS_BUILD_OPENCV=TRUE \
             -DIBIS_BUILD_ALL_PLUGINS:BOOL=TRUE

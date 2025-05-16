@@ -46,11 +46,11 @@ vtkQtMatrixDialog::vtkQtMatrixDialog( bool readOnly, QWidget * parent )
 
     MatrixDialogLayout = new QVBoxLayout( this );
     MatrixDialogLayout->setSpacing( 6 );
-    MatrixDialogLayout->setMargin( 11 );
+    MatrixDialogLayout->setContentsMargins( 11, 11, 11, 11 );
 
     gridBox = new QGridLayout;
     gridBox->setSpacing( 12 );
-    gridBox->setMargin( 2 );
+    gridBox->setContentsMargins( 2, 2, 2, 2 );
 
     // Create the text boxes for every matrix entry
     for( int i = 0; i < 4; i++ )
@@ -74,7 +74,7 @@ vtkQtMatrixDialog::vtkQtMatrixDialog( bool readOnly, QWidget * parent )
 
     Layout3 = new QHBoxLayout;
     Layout3->setSpacing( 6 );
-    Layout3->setMargin( 0 );
+    Layout3->setContentsMargins( 0, 0, 0, 0 );
 
     m_identityButton = new QPushButton( this );
     m_identityButton->setObjectName( "m_identityButton" );

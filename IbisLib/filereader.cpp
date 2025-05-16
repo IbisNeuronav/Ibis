@@ -114,7 +114,7 @@ void FileReader::SetIbisAPI( IbisAPI * api )
         QString mincDir = m_ibisAPI->GetCustomPath( MINCToolsPathVarName );
         if( !mincDir.isNull() && !mincDir.isEmpty() )
         {
-            if( mincDir.at( mincDir.count() - 1 ) != '/' ) mincDir.append( "/" );
+            if( mincDir.at( mincDir.size() - 1 ) != '/' ) mincDir.append( "/" );
             m_mincconvert.clear();
             m_mincconvert.append( mincDir );
             m_mincconvert.append( "mincconvert" );
@@ -183,7 +183,7 @@ bool FileReader::ConvertMINC1toMINC2( QString & inputileName, QString & outputil
         tmp.append( inputileName + " is of MINC1 type and needs to be converted to MINC2.\n" +
                     "Tool mincconvert was not found in standard paths on your file system.\n" +
                     "Please convert using command: \nmincconvert -2 <input> <output>" );
-        QMessageBox::critical( 0, "Error", tmp, 1, 0 );
+        QMessageBox::critical( 0, "Error", tmp, QMessageBox::Ok );
         return false;
     }
     QString dirname( QDir::homePath() );
@@ -247,7 +247,7 @@ bool FileReader::ConvertMINC1toMINC2( QString & inputileName, QString & outputil
                 QString tmp( "File " );
                 tmp.append( inputileName + " is an acquired frame of MINC1 type and needs to be converted to MINC2.\n" +
                             "Tool minccalc was not found in standard paths on your file system.\n" );
-                QMessageBox::critical( 0, "Error", tmp, 1, 0 );
+                QMessageBox::critical( 0, "Error", tmp, QMessageBox::Ok );
                 return false;
             }
         }
@@ -346,7 +346,7 @@ bool FileReader::OpenFile( QList<SceneObject *> & readObjects, QString filename,
                 QString tmp( "File " );
                 tmp.append( filename + " is  of MINC1 type and needs to be converted to MINC2.\n" +
                             "Open Settings/Preferences and set path to the directory containing MINC tools.\n" );
-                QMessageBox::critical( 0, "Error", tmp, 1, 0 );
+                QMessageBox::critical( 0, "Error", tmp, QMessageBox::Ok );
                 return false;
             }
             if( this->ConvertMINC1toMINC2( filename, fileMINC2, true ) )
@@ -847,7 +847,7 @@ int FileReader::GetNumberOfComponents( QString filename )
             QString tmp( "File " );
             tmp.append( filename + " is an acquired frame of MINC1 type and needs to be converted to MINC2.\n" +
                         "Open Settings/Preferences and set path to the directory containing MINC tools.\n" );
-            QMessageBox::critical( 0, "Error", tmp, 1, 0 );
+            QMessageBox::critical( 0, "Error", tmp, QMessageBox::Ok );
             return 0;
         }
         if( this->ConvertMINC1toMINC2( filename, fileMINC2, true ) )

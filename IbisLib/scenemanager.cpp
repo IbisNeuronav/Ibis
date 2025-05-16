@@ -265,7 +265,7 @@ void SceneManager::LoadScene( QString & fileName, bool interactive )
         reader.Finish();
         QString message = "SaveScene version from file (" + reader.GetVersionFromFile() +
                           ") is more recent than supported (" + this->SupportedSceneSaveVersion + ")\n";
-        QMessageBox::warning( nullptr, "Error", message, 1, 0 );
+        QMessageBox::warning( nullptr, "Error", message, QMessageBox::Ok );
         SetRenderingEnabled( true );
         this->LoadingScene = false;
         return;
@@ -274,7 +274,7 @@ void SceneManager::LoadScene( QString & fileName, bool interactive )
     {
         QString message =
             "This scene version is older than 6.0. This is not supported anymore. Scene may not be restored.\n";
-        QMessageBox::warning( nullptr, "Error", message, 1, 0 );
+        QMessageBox::warning( nullptr, "Error", message, QMessageBox::Ok );
         SetRenderingEnabled( true );
         this->LoadingScene = false;
         return;
@@ -1469,7 +1469,7 @@ void SceneManager::ObjectReader( Serializer * ser, bool interactive )
                 obj->Serialize( ser );
                 QString msg( "Incomplete data, ignoring object:  " );
                 msg.append( obj->GetName() );
-                QMessageBox::warning( nullptr, "Error", msg, 1, 0 );
+                QMessageBox::warning( nullptr, "Error", msg, QMessageBox::Ok );
                 obj->Delete();
             }
             else if( QString::compare( className, QString( "SceneObject" ), Qt::CaseSensitive ) ==

@@ -79,7 +79,7 @@ public:
     /** Set cursor color. */
     void SetCursorColor( const QColor & c );
     /** Set cursor color. */
-    void SetCursorColor( double[3] );
+    void SetCursorColor( float[3] );
     /** Get cursor color. */
     QColor GetCursorColor();
     /** Set background color of all views, 3D included. */

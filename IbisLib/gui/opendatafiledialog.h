@@ -15,7 +15,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QObject>
 #include <QString>
 
-class QStringList;
 class OpenFileParams;
 class SceneManager;
 

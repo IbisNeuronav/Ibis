@@ -48,7 +48,7 @@ void PathForm::PathLineEditChanged()
         QString tmp( "File/Directory:\n" );
         tmp.append( ui->pathLineEdit->text() );
         tmp.append( "\ndoes not exist. Please enter a valid path." );
-        QMessageBox::critical( 0, "Error", tmp, 1, 0 );
+        QMessageBox::critical( 0, "Error", tmp, QMessageBox::Ok );
         ui->pathLineEdit->setText( "" );
     }
     emit PathChanged( ui->label->text(), ui->pathLineEdit->text() );

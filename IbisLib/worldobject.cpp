@@ -74,7 +74,7 @@ void WorldObject::SetCursorColor( const QColor & c )
     this->GetManager()->SetCursorColor( c );
 }
 
-void WorldObject::SetCursorColor( double color[3] )
+void WorldObject::SetCursorColor( float color[3] )
 {
     Q_ASSERT( this->GetManager() );
     QColor col( (int)( color[0] * 255 ), (int)( color[1] * 255 ), (int)( color[2] * 255 ) );

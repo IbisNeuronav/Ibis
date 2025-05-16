@@ -1,4 +1,5 @@
 set( openigtlinkio_prefix ${external_project_dir}/${openigtlinkio_name} )
+cmake_path(GET Qt6_DIR PARENT_PATH Qt6_root)
 ExternalProject_Add( ${openigtlinkio_name}
   PREFIX ${openigtlinkio_prefix}
   SOURCE_DIR ${openigtlinkio_prefix}/src
@@ -6,7 +7,7 @@ ExternalProject_Add( ${openigtlinkio_name}
   STAMP_DIR ${openigtlinkio_prefix}/stamp
   INSTALL_COMMAND ""
   GIT_REPOSITORY "https://github.com/IbisNeuronav/OpenIGTLinkIO.git"
-  GIT_TAG use_OIGTL_unmerged_fixes
+  GIT_TAG  CompileQt6
   CMAKE_ARGS -DCMAKE_OSX_SYSROOT:PATH=${CMAKE_OSX_SYSROOT}
              -DCMAKE_OSX_DEPLOYMENT_TARGET:STRING=${CMAKE_OSX_DEPLOYMENT_TARGET}
              -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
@@ -17,7 +18,10 @@ ExternalProject_Add( ${openigtlinkio_name}
              -DVTK_DIR:PATH=${IBIS_VTK_DIR}
              -DOpenIGTLink_DIR:PATH=${IBIS_OPENIGTLINK_DIR}
              -DIGTLIO_USE_GUI:BOOL=ON
-             -DIGTLIO_QT_VERSION:STRING=5
-             -DQt5_DIR:PATH=${Qt5_DIR}
+             -DIGTLIO_QT_VERSION:STRING=6
+             -DQt6_DIR:PATH=${Qt6_DIR}
+             -DQt6CoreTools_DIR:PATH=${Qt6_root}/Qt6CoreTools
+             -DQt6GuiTools_DIR:PATH=${Qt6_root}/Qt6GuiTools
+             -DQt6QmlTools_DIR:PATH=${Qt6_root}/Qt6QmlTools
   INSTALL_COMMAND ""
   DEPENDS ${vtk_name} ${openigtlink_name} )

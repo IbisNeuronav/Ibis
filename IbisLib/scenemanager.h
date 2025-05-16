@@ -20,7 +20,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include <QObject>
 #include <QProgressDialog>
 #include <QString>
-#include <QStringList>
 #include <algorithm>
 #include <vector>
 
@@ -30,7 +29,6 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "view.h"
 
 class QWidget;
-class QStringList;
 class TripleCutPlaneObject;
 class TrackedSceneObject;
 class WorldObject;

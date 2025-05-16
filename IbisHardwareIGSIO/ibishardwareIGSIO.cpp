@@ -41,6 +41,8 @@ See Copyright.txt or http://ibisneuronav.org/Copyright.html for details.
 #include "qIGTLIOLogicController.h"
 #include "usprobeobject.h"
 
+#undef SendMessage
+
 const double IbisHardwareIGSIO::MaxTimeBetweenTransformSamples = 0.2;
 const QString IbisHardwareIGSIO::PlusServerExecutable          = "PlusServerExecutable";
 

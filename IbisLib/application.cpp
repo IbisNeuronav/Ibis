@@ -71,7 +71,7 @@ void ApplicationSettings::LoadSettings( QSettings & settings )
     ViewBackgroundColor.setGreen( settings.value( "ViewBackgroundColor_g", 50 ).toInt() );
     ViewBackgroundColor.setBlue( settings.value( "ViewBackgroundColor_b", 50 ).toInt() );
     // then 3D view, if not found in settings, set the same as 2D.
-    double bgColor[3];
+    float bgColor[3];
     ViewBackgroundColor.getRgbF( &bgColor[0], &bgColor[1], &bgColor[2] );
     View3DBackgroundColor.setRed( settings.value( "View3DBackgroundColor_r", int( bgColor[0] * 255 ) ).toInt() );
     View3DBackgroundColor.setGreen( settings.value( "View3DBackgroundColor_g", int( bgColor[1] * 255 ) ).toInt() );
@@ -221,14 +221,17 @@ Application::~Application()
 
 void Application::ApplyApplicationSettings()
 {
-    double bgColor[3];
+    float bgColor[3] = {0., 0., 0.};
     m_settings.ViewBackgroundColor.getRgbF( &bgColor[0], &bgColor[1], &bgColor[2] );
-    m_sceneManager->SetViewBackgroundColor( bgColor );
-    m_settings.View3DBackgroundColor.getRgbF( &bgColor[0], &bgColor[1], &bgColor[2] );
-    m_sceneManager->SetView3DBackgroundColor( bgColor );
+    double bgColord[3] = { bgColor[0], bgColor[1], bgColor[2] };
+    m_sceneManager->SetViewBackgroundColor( bgColord );
+    float bg3DColor[3] = {0., 0., 0.};
+    m_settings.View3DBackgroundColor.getRgbF( &bg3DColor[0], &bg3DColor[1], &bg3DColor[2] );
+    double bg3DColord[3] = { bg3DColor[0], bg3DColor[1], bg3DColor[2] };
+    m_sceneManager->SetView3DBackgroundColor( bg3DColord );
     m_sceneManager->Set3DCameraViewAngle( m_settings.CameraViewAngle3D );
 
-    double cursorColor[3];
+    float cursorColor[3] = {0., 0., 0.};
     m_settings.CutPlanesCursorColor.getRgbF( &cursorColor[0], &cursorColor[1], &cursorColor[2] );
     WorldObject * world = WorldObject::SafeDownCast( m_sceneManager->GetSceneRoot() );
     world->SetCursorColor( cursorColor );
@@ -445,7 +448,7 @@ void Application::OpenFiles( OpenFileParams * params, bool addToScene )
         {
             QString message( "No read permission on file: " );
             message.append( cur.fileName );
-            QMessageBox::critical( nullptr, "Error", message, 1, 0 );
+            QMessageBox::critical( nullptr, "Error", message, QMessageBox::Ok );
             return;
         }
         if( m_fileReader->IsMINC1( cur.fileName.toUtf8().data() ) )
@@ -557,7 +560,7 @@ bool Application::GetPointsFromTagFile( QString fileName, PointsObject * pts1, P
     {
         QString message( "No read permission on file: " );
         message.append( fileName );
-        QMessageBox::critical( nullptr, "Error", message, 1, 0 );
+        QMessageBox::critical( nullptr, "Error", message, QMessageBox::Ok );
         return false;
     }
     bool ok = m_fileReader->GetPointsDataFromTagFile( fileName, pts1, pts2 );
@@ -1014,7 +1017,7 @@ int Application::GetNumberOfComponents( QString filename )
     {
         QString message( "No read permission on file: " );
         message.append( filename );
-        QMessageBox::critical( nullptr, "Error", message, 1, 0 );
+        QMessageBox::critical( nullptr, "Error", message, QMessageBox::Ok );
         return false;
     }
     int n = m_fileReader->GetNumberOfComponents( filename );
@@ -1031,7 +1034,7 @@ bool Application::GetGrayFrame( QString filename, IbisItkUnsignedChar3ImageType:
     {
         QString message( "No read permission on file: " );
         message.append( filename );
-        QMessageBox::critical( nullptr, "Error", message, 1, 0 );
+        QMessageBox::critical( nullptr, "Error", message, QMessageBox::Ok );
         return false;
     }
     bool ok = m_fileReader->GetGrayFrame( filename, itkImage );
@@ -1049,7 +1052,7 @@ bool Application::GetRGBFrame( QString filename, IbisRGBImageType::Pointer itkIm
     {
         QString message( "No read permission on file: " );
         message.append( filename );
-        QMessageBox::critical( nullptr, "Error", message, 1, 0 );
+        QMessageBox::critical( nullptr, "Error", message, QMessageBox::Ok );
         return false;
     }
     bool ok = m_fileReader->GetRGBFrame( filename, itkImage );

@@ -23,8 +23,10 @@ else()
     message( STATUS "Building with configuration: ${CMAKE_BUILD_TYPE}" )
 endif()
 
-# Find Qt5
-find_package( Qt5 COMPONENTS Widgets REQUIRED )
+# Find Qt6
+find_package( Qt6 COMPONENTS Widgets REQUIRED )
+
+cmake_path(GET Qt6_DIR PARENT_PATH Qt6_root)
 
 # Find out version numbers of dependencies
 include( ${CMAKE_CURRENT_SOURCE_DIR}/../CMakeCommon/DependencyVersions.cmake )
@@ -82,7 +84,9 @@ ExternalProject_Add(
                -DCMAKE_CONFIGURATION_TYPES:STRING=${CMAKE_CONFIGURATION_TYPES}
                -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
                -DCMAKE_CONFIGURATION_TYPES:STRING=${CMAKE_CONFIGURATION_TYPES}
-               -DQt5_DIR:PATH=${Qt5_DIR}
+               -DQt6_DIR:PATH=${Qt6_DIR}
+               -DQt6CoreTools_DIR:PATH=${Qt6_root}/Qt6CoreTools
+               -DQt6GuiTools_DIR:PATH=${Qt6_root}/Qt6GuiTools
                -DVTK_DIR:PATH=${IBIS_VTK_DIR}
                -DITK_DIR:PATH=${IBIS_ITK_DIR}
                -DElastix_DIR:PATH=${IBIS_ELASTIX_DIR}
