@@ -32,4 +32,4 @@ jobs:
           name: ibis-install-linux
           skip_unpack: true
       - run:
-          gh release upload ${{ env.RELEASE_TAG }} ibis-install-linux.zip
+          gh release upload ${{ env.RELEASE_TAG }} ibis-install-linux.zip --clobber
