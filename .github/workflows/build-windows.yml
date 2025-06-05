@@ -33,21 +33,21 @@ jobs:
         run: cmake --build ${{github.workspace}}/b --config ${{env.BUILD_TYPE}} -j2
 
       - name: Save build artifact
-        uses: actions/upload-artifact@master
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ env.ARTIFACT }}
           path: ${{github.workspace}}/b/Ibis/Ibis/${{env.BUILD_TYPE}}
           
-      # When updating master, create realease
+      # When updating main, create realease
       - name: Zip build and tag
-        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         working-directory: ${{github.workspace}}
         run:  |
               7z a ${{ env.ARTIFACT }}.zip ${{github.workspace}}/b/Ibis/Ibis/${{env.BUILD_TYPE}} -r
               git tag -f ${{ env.RELEASE_TAG }}
               git push -f origin ${{ env.RELEASE_TAG }}
       - name: Update GitHub release
-        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: ncipollo/release-action@v1
         with:
           tag: ${{ env.RELEASE_TAG }}
@@ -55,7 +55,7 @@ jobs:
           artifacts: ${{ env.ARTIFACT }}.zip
           allowUpdates: true
           artifactErrorsFailBuild: true
-          commit: master
+          commit: main
           # makeLatest: true
           prerelease: true
           replacesArtifacts: true

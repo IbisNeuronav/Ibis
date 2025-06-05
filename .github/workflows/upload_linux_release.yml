@@ -3,7 +3,7 @@ name: Upload-Linux-Release
 on:
   workflow_run:
     workflows: [ Build-Linux, Build-Windows ]
-    branches: [ master ]
+    branches: [ main ]
     types: [ completed ]
 env:
     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -18,16 +18,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - uses: ahmadnassri/action-workflow-run-wait@v1.4.4
         with:
           timeout: 30000000
-      - uses: dawidd6/action-download-artifact@v9
+      - uses: dawidd6/action-download-artifact@v10
         with:
           github_token: ${{secrets.GITHUB_TOKEN}}
           workflow: build_linux.yml
           workflow_conclusion: success
-          branch: master
+          branch: main
           event: push
           name: ibis-install-linux
           skip_unpack: true
