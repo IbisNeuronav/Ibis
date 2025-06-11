@@ -4,16 +4,16 @@ project( ${project_name} )
 
 set( external_project_dir ${CMAKE_CURRENT_BINARY_DIR} )
 
+# Get and build OpenCV
+if( IBIS_BUILD_OPENCV )
+    include( External_OpenCV.cmake )
+endif()
+
 # Get and build vtk
 include( External_VTK.cmake )
 
 # Get and build itk
 include( External_ITK.cmake )
-
-# Get and build OpenCV
-if( IBIS_BUILD_OPENCV )
-    include( External_OpenCV.cmake )
-endif()
 
 # Get and build elastix
 if( IBIS_BUILD_ELASTIX )

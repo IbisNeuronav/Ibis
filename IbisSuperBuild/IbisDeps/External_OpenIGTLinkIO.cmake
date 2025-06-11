@@ -23,5 +23,4 @@ ExternalProject_Add( ${openigtlinkio_name}
              -DQt6CoreTools_DIR:PATH=${Qt6_root}/Qt6CoreTools
              -DQt6GuiTools_DIR:PATH=${Qt6_root}/Qt6GuiTools
              -DQt6QmlTools_DIR:PATH=${Qt6_root}/Qt6QmlTools
-  INSTALL_COMMAND ""
   DEPENDS ${vtk_name} ${openigtlink_name} )

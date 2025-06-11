@@ -112,8 +112,6 @@ public:
     typedef itk::Vector<InternalRealType, 1> MeasurementVectorType;
     typedef itk::Statistics::ListSample<MeasurementVectorType> FixedGradientMagnitudeSampleType;
 
-    typedef itk::Statistics::ListSample<itk::Vector<unsigned int, 1> > IdxSampleType;
-
     typedef itk::Statistics::Histogram<float, itk::Statistics::DenseFrequencyContainer2> HistogramType;
 
     typedef itk::Statistics::SampleToHistogramFilter<FixedGradientMagnitudeSampleType, HistogramType>

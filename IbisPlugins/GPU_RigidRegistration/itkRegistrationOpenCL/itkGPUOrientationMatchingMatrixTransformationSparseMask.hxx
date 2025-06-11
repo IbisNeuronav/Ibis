@@ -450,7 +450,6 @@ void GPUOrientationMatchingMatrixTransformationSparseMask<TFixedImage, TMovingIm
     if( m_Debug ) std::cerr << "Fixed Image Gradient GPU Kernel took:\t" << clockGPUKernel.GetMean() << std::endl;
 
     FixedGradientMagnitudeSampleType::Pointer sample = FixedGradientMagnitudeSampleType::New();
-    IdxSampleType::Pointer maskIdxSample             = IdxSampleType::New();
 
     itk::TimeProbe clock;
     clock.Start();
@@ -485,7 +484,6 @@ void GPUOrientationMatchingMatrixTransformationSparseMask<TFixedImage, TMovingIm
                 if( imageIterator.Get() > 0 )
                 {
                     sample->PushBack( tempSample );
-                    maskIdxSample->PushBack( idx );
                 }
             }
         }
@@ -546,7 +544,6 @@ void GPUOrientationMatchingMatrixTransformationSparseMask<TFixedImage, TMovingIm
                     ( m_ComputeMask && ( cpuFixedGradientBuffer[idx * 4 + 3] > (InternalRealType)0.0 ) ) )
                 {
                     sample->PushBack( tempSample );
-                    maskIdxSample->PushBack( idx );
                 }
             }
         }

@@ -381,8 +381,8 @@ IbisItkFloat3ImageType::PointType VertebraRegistrationWidget::GetCenterOfGravity
     FixedImageCalculatorType::Pointer fixedCalculator = FixedImageCalculatorType::New();
     fixedCalculator->SetImage( itkImage );
     fixedCalculator->Compute();
-
-    IbisItkFloat3ImageType::PointType center = fixedCalculator->GetCenterOfGravity();
+    itk::Vector<double, 3> centerVec         = fixedCalculator->GetCenterOfGravity();
+    IbisItkFloat3ImageType::PointType center = itk::MakePoint( centerVec[0], centerVec[1], centerVec[2] );
     return center;
 }
 

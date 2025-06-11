@@ -192,8 +192,9 @@ bool IbisItkVtkConverter::ConvertVtkImageToItkImage( IbisItkFloat3ImageType::Poi
 
     for( int i = 0; i < 3; i++ ) origin[i] = mincStartPoint[i];
     itkOrigin = dirCosine * origin;
+    const double origin_array[3] = { itkOrigin[0], itkOrigin[1], itkOrigin[2] };
     itkOutputImage->SetSpacing( step );
-    itkOutputImage->SetOrigin( itkOrigin );
+    itkOutputImage->SetOrigin( origin_array );
     itkOutputImage->SetDirection( dirCosine );
     itkOutputImage->Allocate();
     float * itkImageBuffer = itkOutputImage->GetBufferPointer();
@@ -251,8 +252,9 @@ bool IbisItkVtkConverter::ConvertVtkImageToItkImage( IbisRGBImageType::Pointer i
 
     for( int i = 0; i < 3; i++ ) origin[i] = mincStartPoint[i];
     itkOrigin = dirCosine * origin;
+    const double origin_array[3] = { itkOrigin[0], itkOrigin[1], itkOrigin[2] };
     itkOutputImage->SetSpacing( step );
-    itkOutputImage->SetOrigin( itkOrigin );
+    itkOutputImage->SetOrigin( origin_array );
     itkOutputImage->SetDirection( dirCosine );
 
     itkOutputImage->Allocate();
@@ -311,8 +313,9 @@ bool IbisItkVtkConverter::ConvertVtkImageToItkImage( IbisItkUnsignedChar3ImageTy
 
     for( int i = 0; i < 3; i++ ) origin[i] = mincStartPoint[i];
     itkOrigin = dirCosine * origin;
+    const double origin_array[3] = { itkOrigin[0], itkOrigin[1], itkOrigin[2] };
     itkOutputImage->SetSpacing( step );
-    itkOutputImage->SetOrigin( itkOrigin );
+    itkOutputImage->SetOrigin( origin_array );
     itkOutputImage->SetDirection( dirCosine );
     itkOutputImage->Allocate();
     unsigned char * itkImageBuffer = itkOutputImage->GetBufferPointer();
