@@ -2,7 +2,7 @@ set( vtk_prefix ${external_project_dir}/${vtk_name} )
 set( VTKREPO "https://github.com/IbisNeuronav/VTK.git" )
 set( VTKTAG "v931" )
 
-if( SUPERBUILD_BUILD_MINIMAL_VTK )
+if( IBIS_BUILD_MINIMAL_VTK )
 	ExternalProject_Add( ${vtk_name}
 		PREFIX ${vtk_prefix}
 		SOURCE_DIR ${vtk_prefix}/src
