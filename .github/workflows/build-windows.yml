@@ -3,7 +3,7 @@ name: Build-Windows
 on: [push, pull_request]
 env:
   BUILD_TYPE: Release
-  QT_VERSION: 6.9.0
+  QT_VERSION: 6.9.1
   ARTIFACT: ibis-install-windows
   RELEASE_TAG: latest_dev
 permissions:
