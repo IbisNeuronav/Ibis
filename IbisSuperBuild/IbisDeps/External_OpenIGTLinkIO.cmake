@@ -7,7 +7,7 @@ ExternalProject_Add( ${openigtlinkio_name}
   STAMP_DIR ${openigtlinkio_prefix}/stamp
   INSTALL_COMMAND ""
   GIT_REPOSITORY "https://github.com/IbisNeuronav/OpenIGTLinkIO.git"
-  GIT_TAG  CompileQt6
+  GIT_TAG  master
   CMAKE_ARGS -DCMAKE_OSX_SYSROOT:PATH=${CMAKE_OSX_SYSROOT}
              -DCMAKE_OSX_DEPLOYMENT_TARGET:STRING=${CMAKE_OSX_DEPLOYMENT_TARGET}
              -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
