@@ -1,5 +1,5 @@
 set( itk_prefix ${external_project_dir}/${itk_name} )
-if( ${IBIS_USE_OPENCV} )
+if( ${IBIS_BUILD_OPENCV} )
     set( zlib_lib_name "" )
     if( WIN32 )
         set( zlib_lib_debug_name "DEBUG/zlibstatic.lib" )
